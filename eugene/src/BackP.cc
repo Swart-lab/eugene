@@ -115,19 +115,19 @@ Prediction* BackPoint :: BackTrace ()
 
   return pred;
 }
-
 // ----------------------------------------------------------------
 // Returns the best BackPoint. If the SwitchType matches the mask
 // given, then the BackPoint MUST BE at least len nuc. far from pos
+// else it must be at least len2 nuc. far
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost)
+BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost, int len2)
 {
   BackPoint *It = this->Next;
   double add = 0.0;
 
   do {
     add += It->Additional;
-    if ((It->StartPos <= pos-len) || !(It->SwitchType & mask) || (It->StartPos < 0)) {
+    if ((It->StartPos <= pos-len) || ( (!(It->SwitchType & mask))&& (It->StartPos <= pos-len2)) || (It->StartPos < 0)) {
       *cost = add+It->Cost;
       return It;
     }
@@ -137,7 +137,6 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *c
   *cost = NINFINITY;
   return NULL;
 }
-
 // ----------------------------------------------------------------
 // Returns the best BackPoint and the BackPoint is at least len
 // nuc. far from pos

@@ -42,7 +42,7 @@ class BackPoint
     void Dump();
     Prediction* BackTrace();
     inline void Update(double cost) {  Next->Additional += cost; };
-    BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost);
+    BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost, int len2 = 0);
     BackPoint *StrictBestUsable(int pos, int len,REAL *cost);
     void Zap();
   };

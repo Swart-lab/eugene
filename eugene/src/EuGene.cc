@@ -310,8 +310,11 @@ int main  (int argc, char * argv [])
       NormalizingPath += maxi;
 
       // Calcul des meilleures opening edges
-      for(k=0; k<18; k++)
-	PrevBP[k] = LBP[k%12]->BestUsable(i, SwitchMask[k], minL[k], &PBest[k]);
+      for(k=0; k<12; k++)
+	PrevBP[k] = LBP[k]->BestUsable(i, SwitchMask[k], minL[k], &PBest[k]);
+      // ici cas des exons terminaux F et initiaux R
+      for(k=12; k<18; k++)
+	PrevBP[k] = LBP[k%12]->BestUsable(i, SwitchMask[k], minL[k], &PBest[k],minL[k%12]);
       
       // intergenic: longueur min depend du sens
       // -> -> ou <- <-   MinFlow
