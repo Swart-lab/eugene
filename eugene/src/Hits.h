@@ -45,14 +45,17 @@ class  Hits
  public:
   Hits ();
   Hits  (char* name, int length, char strand,int deb,int fin,int ldeb,int lfin);
-
+  Hits* Hits::ReadFromFile(FILE* ESTFile,int * NumEST);
+  
   ~Hits ();
 
   char *Name;
   char Strand;
   int Length;
   int NGaps;
-    
+  int Start;
+  char Rejected;
+
   Block *Match;
   Hits *Next;
 };
