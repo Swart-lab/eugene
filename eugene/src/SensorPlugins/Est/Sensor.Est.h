@@ -19,6 +19,7 @@ class SensorEst : public Sensor
   int NumEST;
   double estP, utrP;
   double DonorThreshold;
+  double spliceBoost;
   int    estM, utrM;
   int N;
   
