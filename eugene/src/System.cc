@@ -95,4 +95,6 @@ void GetStrDate (char* d)
   strcpy(d,ctime(&t));
   sscanf(d, "%*s %s %s %*s %s", m,j,a);
   strcpy(d,j);strcat(d,m);strcat(d,a);
+
+  delete [] m; delete [] j; delete [] a;
 }
