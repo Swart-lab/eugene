@@ -89,6 +89,7 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   char tempname[FILENAME_MAX+1];
   int nmax;
   int contigbeg;
+  char *tmpdir = new char[FILENAME_MAX+1];
 
   TblastxNumber = new int*[6];
   TblastxScore = new double*[6];
@@ -104,9 +105,12 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     }
   }
 
+
+  strcpy(tmpdir, PAR.getC("eugene_dir"));
+  strcat(tmpdir, MODELS_DIR);
   strcpy(tempname,PAR.getC("Homology.protmatname"));
   // Lecture de la matrice proteique ("BLOSUM62" par defaut)
-  protmatfile=FileOpen(PAR.getC("EuGene.PluginsDir"), tempname, "rt");
+  protmatfile=FileOpen(tmpdir, tempname, "rt");
   if (protmatfile == NULL) {
     fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname);
     exit (2);
@@ -202,6 +206,8 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
       }
     }
   }
+
+  delete [] tmpdir;
 }
 
 // ----------------------

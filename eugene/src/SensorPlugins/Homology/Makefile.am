@@ -17,12 +17,13 @@
 # Contents: compilation of the Homology directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Homology.so
+noinst_PROGRAMS = Sensor.Homology.so
 Sensor_Homology_so_SOURCES = Sensor.Homology.cc Sensor.Homology.h
-Sensor_Homology_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_Homology_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~
