@@ -60,7 +60,6 @@ void SensorPepSignal :: ReadPepSignalStarts(char *name, int Len)
   int len = 0;
   int i,pos,end =0;
   double force;
-  char localisation[100]; // not used
 
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "Cannot open start file %s\n", name);
@@ -69,10 +68,10 @@ void SensorPepSignal :: ReadPepSignalStarts(char *name, int Len)
 
   len =1;
   while (!end) {
-    i = fscanf(fp,"%d %s %lf %s\n", &pos, type, &force,localisation);
+    i = fscanf(fp,"%d %s %lf %*s\n", &pos, type, &force);
     len ++;
     if (i == EOF) {end = 1; break;}
-    if (i < 4) {end =2; break;}
+    if (i < 3) {end =2; break;}
 
     if (strcmp(type,"start") == 0) {
       vPosF.push_back(pos-1);
