@@ -48,6 +48,8 @@ SensorEst :: SensorEst (int n) : Sensor(n)
   HitTable = NULL;
   estP = PAR.getD("Est.estP");
   estM = PAR.getI("Est.estM");
+  utrP = PAR.getD("Est.utrP");
+  utrM = PAR.getI("Est.utrM");
 }
 
 // ----------------------
@@ -105,6 +107,9 @@ void SensorEst :: Init (DNASeq *X)
       vESTMatch.push_back ( ESTMatch[i] );
     }
   delete [] ESTMatch;
+
+  //for(int jj=0;jj<(int)vPos.size();jj++)
+  //printf("vPos[%d]:%d\tvESTM[%d]:%d\n",jj,vPos[jj]+1,jj,vESTMatch[jj]);
 }
 
 // -----------------------
@@ -112,71 +117,108 @@ void SensorEst :: Init (DNASeq *X)
 // -----------------------
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
+  unsigned char cESTMatch = 0; // current ESTMatch
+  
   if((index != 0                &&  vPos[index-1] >= pos) ||
      (index < (int)vPos.size()  &&  vPos[index]   <  pos))
     {
       iter = lower_bound(vPos.begin(), vPos.end(), pos);
       if(*iter == pos) {
+	cESTMatch = vESTMatch[iter-vPos.begin()];
 	for(int i=0; i<3; i++)              // Exon F
 	  // Si on a un Gap EST ou si l'on connait le sens du match EST
-	  if ((vESTMatch[iter-vPos.begin()] & Gap) || 
-	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
-	       !(vESTMatch[iter-vPos.begin()] & HitForward)))
+	  if ((cESTMatch & Gap) || 
+	      ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
 	    d->contents[i] += estP;
 	
 	for(int i=3; i<6; i++)              // Exon R
 	  // Si on a un Gap EST ou si l'on connait le sens du match EST
-	  if ((vESTMatch[iter-vPos.begin()] & Gap) ||
-	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
-	       !(vESTMatch[iter-vPos.begin()] & HitReverse)))
+	  if ((cESTMatch & Gap) ||
+	      ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
 	    d->contents[i] += estP;
 	
 	// Si on a un Hit EST ou si l'on connait le sens du match EST
-	if((vESTMatch[iter-vPos.begin()] & Hit) ||
-	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
-	    !(vESTMatch[iter-vPos.begin()] & GapForward)))
-	  d->contents[6] += estP;       // IntronF
+	if((cESTMatch & Hit) ||
+	   ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
+	  d->contents[DATA::IntronF] += estP;
 	
 	// Si on a un Hit EST ou si l'on connait le sens du match EST
-	if((vESTMatch[iter-vPos.begin()] & Hit) ||
-	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
-	    !(vESTMatch[iter-vPos.begin()] & GapReverse)))
-	  d->contents[7] += estP;       // IntronR
+	if((cESTMatch & Hit) ||
+	   ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
+	  d->contents[DATA::IntronR] += estP;
 	
-	d->contents[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
+	d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
 	
-	d->ESTMATCH_TMP = vESTMatch[iter-vPos.begin()];  // WARNING : EST -> on est dans intron
+	d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
 	index = iter-vPos.begin() + 1;
       }
       else index = iter-vPos.begin();
     }
-  else if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
-    for(int i=0; i<3; i++)              // Exon F
-      // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((vESTMatch[index] & Gap) || 
-	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitForward)))
-	d->contents[i] += estP;
-    
-    for(int i=3; i<6; i++)              // Exon R
-      // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((vESTMatch[index] & Gap) ||
-	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitReverse)))
-	d->contents[i] += estP;
-    
-    // Si on a un Hit EST ou si l'on connait le sens du match EST
-    if((vESTMatch[index] & Hit) ||
-       ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapForward)))
-      d->contents[6] += estP;       // IntronF
-    
-    // Si on a un Hit EST ou si l'on connait le sens du match EST
-    if((vESTMatch[index] & Hit) ||
-       ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapReverse)))
-      d->contents[7] += estP;       // IntronR
-    
-    d->contents[8] += ((vESTMatch[index] & (Gap|Hit)) != 0)*estP;  //InterG
-    
-    d->ESTMATCH_TMP = vESTMatch[index];  // WARNING : EST -> on est dans intron
-    index++;
+  else
+    if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
+      cESTMatch = vESTMatch[index];
+      for(int i=0; i<3; i++)              // Exon F
+	// Si on a un Gap EST ou si l'on connait le sens du match EST
+	if ((cESTMatch & Gap) || 
+	    ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
+	  d->contents[i] += estP;
+      
+      for(int i=3; i<6; i++)              // Exon R
+	// Si on a un Gap EST ou si l'on connait le sens du match EST
+	if ((cESTMatch & Gap) ||
+	    ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
+	  d->contents[i] += estP;
+      
+      // Si on a un Hit EST ou si l'on connait le sens du match EST
+      if((cESTMatch & Hit) ||
+	 ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
+	d->contents[DATA::IntronF] += estP;
+      
+      // Si on a un Hit EST ou si l'on connait le sens du match EST
+      if((cESTMatch & Hit) ||
+	 ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
+	d->contents[DATA::IntronR] += estP;
+      
+      d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
+      
+      d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
+      index++;
+    }
+
+  // Pour que les UTR soient supportés par un EST
+  if ( cESTMatch == 0  &&  (int)vPos.size() != 0) {
+    // Left
+    for (int k=1; k<=utrM; k++) {
+      iter = lower_bound(vPos.begin(), vPos.end(), pos+k);
+      if(*iter == pos+k) {
+	cESTMatch = vESTMatch[iter-vPos.begin()];
+	// If only Margin (-> EST extremities) then penalize all utr tracks
+	if((cESTMatch & Margin) && !(cESTMatch & Gap) && !(cESTMatch & Hit))
+	  {
+	    d->contents[DATA::UTR5F] += log(utrP);
+	    d->contents[DATA::UTR5R] += log(utrP);
+	    d->contents[DATA::UTR3F] += log(utrP);
+	    d->contents[DATA::UTR3R] += log(utrP);
+	    break;
+	  }
+      }
+    }
+    // Right
+    for (int k=utrM; k>0; k--) {
+      iter = lower_bound(vPos.begin(), vPos.end(), pos-k);
+      if(*iter == pos-k) {
+	cESTMatch = vESTMatch[iter-vPos.begin()];
+	// If only Margin (-> EST extremities) then penalize all utr tracks
+	if((cESTMatch & Margin) && !(cESTMatch & Gap) && !(cESTMatch & Hit))
+	  {
+	    d->contents[DATA::UTR5F] += log(utrP);
+	    d->contents[DATA::UTR5R] += log(utrP);
+	    d->contents[DATA::UTR3F] += log(utrP);
+	    d->contents[DATA::UTR3R] += log(utrP);
+	    break;
+	  }
+      }
+    }
   }
 }
 
@@ -230,7 +272,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
         
     // Look for each match in the current Hit
     ThisBlock = ThisEST->Match;
-
+   
     // First Step: tries to determine strand
     while (ThisBlock) {
       // si ona un gap ?
@@ -266,7 +308,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	WorstSpliceR = Min(WorstSpliceR,AccR);
       }
       ThisBlock = ThisBlock->Next;
-      }
+    }
 
     //    printf("Extreme splices: %e %e\n",WorstSpliceF,WorstSpliceR);
 
@@ -401,7 +443,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	    else
 	      ESTMatch[i] |= TheStrand << HitToMLeft;
 	  
-	  for (i = ThisBlock->Prev->End+1; i < ThisBlock->Start-1; i++)
+	  for (i = ThisBlock->Prev->End+1; i <= ThisBlock->Start-1; i++)
 	    if (ESTMatch[i] & Gap)
 	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToGap));
 	    else
@@ -459,7 +501,6 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   
   if (!PAR.getI("Est.PostProcess")) return;
 
-
   qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
   
   // Reset static in EST Support
@@ -483,8 +524,9 @@ void SensorEst :: PostAnalyse(Prediction *pred)
     if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
     if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
     
-    if ((state <= ExonR3 && stateNext >= InterGen5) || // fin de gene
-	(i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
+    // Si fin de gene ou fin seq gene en cours
+    if ((state <= ExonR3 && stateNext >= InterGen5) ||
+	(i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {
       ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
       GStart = TStart = GEnd = TEnd = -1;
     }
@@ -523,14 +565,15 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
   if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
   
   //si l'iteration precendete a atteint l'extremite 
-  if (EstIndex >= Size) EstIndex = Size-1;
-    // on rembobine....
+  if (EstIndex >= Size) EstIndex = Max(0,Size-1);
+
+  // on rembobine....
   while ((EstIndex > 0) && (HitTable[EstIndex]->End > Tdebut))
     EstIndex--;
+
+  if (EstIndex >= 0  &&  HitTable[EstIndex]->End < Tdebut) EstIndex++;
   
-  if (HitTable[EstIndex]->End < Tdebut) EstIndex++;
-  
-  while (EstIndex < Size) {
+  while (EstIndex >=0  &&  EstIndex < Size) {
     // le dernier transcrit exploitable est passe
     if (HitTable[EstIndex]->Start > Tfin) break;
     
@@ -558,11 +601,12 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	state = pred->getStateForPos(i+1);
 	if (((state > ExonR3) && (state <= InterGen5)) || state == InterGen3)
 	  ConsistentEST = 0;
-      } 
+      }
       ThisBlock = ThisBlock->Next;
     }
-    printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",HitTable[EstIndex]->Name,
-	   HitTable[EstIndex]->Start+1,ESTEnd+1,
+    printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",
+	   HitTable[EstIndex]->Name,
+	   HitTable[EstIndex]->Start+1,HitTable[EstIndex]->End+1,
 	   HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
     
     if (HitTable[EstIndex]->Rejected) printf("Filtered ");
