@@ -7,12 +7,21 @@
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define MAX(x, y) (((x) < (y)) ? (y) : (x))
 
-inline FILE *FileOpen(const char *filename, const char *mode)
+inline FILE *FileOpen(const char *defdir, const char *filename, const char *mode)
 {
   FILE  *fp;
+  char buffer[FILENAME_MAX];
   
-  if  (!(fp = fopen (filename, mode))) {
-    fprintf (stderr, "ERROR:  Could not open file  %s \n", filename);
+  if ((fp = fopen(filename, mode)))
+    return fp;
+  
+  if (defdir) {
+    strcat(strcat(strcpy(buffer, defdir), "/"), filename);
+    fp = fopen (buffer, mode);
+  }
+  
+  if  (!fp) {
+    fprintf (stderr, "ERROR:  Could not open file %s \n", filename);
     exit (1);
   }  
   return  fp;
