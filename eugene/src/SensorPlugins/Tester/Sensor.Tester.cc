@@ -35,7 +35,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 {
   Todo = PAR.getC("Tester.Make");
 
-  type = Type_Unknown;
+  type = Type_None;
         
   if (Todo == "SPSN") {
     DATA Data;
@@ -74,7 +74,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
       for(int j=0; j<DATA::LastSigType; j++) Data.sig[j].Clear();
       sensor->GiveInfo(X,i,&Data);
 
-      if (sensor->type == Type_Start) {
+      if (sensor->type & Type_Start) {
 	dF = Data.sig[DATA::Start].weight[Signal::Forward];
 	dR = Data.sig[DATA::Start].weight[Signal::Reverse];
 	is_posF = ( X->IsEStart(i,1) != 0 );
@@ -94,7 +94,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	  if (is_annotF) NbNonCanonicalAnnotated += 1; if (is_annotR) NbNonCanonicalAnnotated += 1;
 	}
 
-      } else if (sensor->type == Type_Stop) {
+      } else if (sensor->type & Type_Stop) {
 	dF = Data.sig[DATA::Stop].weight[Signal::Forward];
 	dR = Data.sig[DATA::Stop].weight[Signal::Reverse];
 	is_posF = ( X->IsStop(i-3,1) != 0 );
@@ -114,7 +114,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	  if (is_annotF) NbNonCanonicalAnnotated += 1; if (is_annotR) NbNonCanonicalAnnotated += 1;
 	}
 
-      } else if (sensor->type == Type_Splice) {
+      } else if (sensor->type & (Type_Acc|Type_Don)) {
 	dF = Data.sig[DATA::Acc].weight[Signal::Forward];
 	dR = Data.sig[DATA::Acc].weight[Signal::Reverse];
 	dFdon = Data.sig[DATA::Don].weight[Signal::Forward];
@@ -289,8 +289,6 @@ void SensorTester :: Plot(DNASeq *X)
 void SensorTester :: PostAnalyse(Prediction *pred)
 {
 }
-
-
 
 // -----------------
 //  Read coord file
@@ -484,7 +482,7 @@ void SensorTester :: AnalyzeSPSN(void)
   bool is_don;
   std::ofstream f, facc, fdon;
 
-  if (SensorType == Type_Splice) {
+  if (SensorType & (Type_Acc |Type_Don)) {
     nbj = 4; // 4 columns for acc/don, F/R (Scores, IsAPositons, IsAnnotateds)
     nbl = 2; // 2 cumns for acc/don (TP,FP,TN,FN,Nb)
   } else {
@@ -535,7 +533,7 @@ void SensorTester :: AnalyzeSPSN(void)
 
   // output specificity and sensibility 
   f.open((SensorName + ".SpSn").c_str(), std::ios::out);
-  if (SensorType == Type_Splice) {
+  if (SensorType & (Type_Acc|Type_Don)) {
     facc.open((SensorName + ".Acc").c_str(), std::ios::out);
     fdon.open((SensorName + ".Don").c_str(), std::ios::out);
   }
@@ -543,7 +541,7 @@ void SensorTester :: AnalyzeSPSN(void)
   std::cout << "Thres.\t\tNb\tTP\tFP\tTN\tFN\tSpec.\tSens.\n";
   for (n=0; n<(int)Thresholds.size(); n++) {
     nb = Nb[n][0]; tp = TP[n][0]; fn = FN[n][0]; fp = FP[n][0]; tn = TN[n][0];
-    if (SensorType == Type_Splice) 
+    if (SensorType & (Type_Acc|Type_Don)) 
       {nb += Nb[n][1]; tp += TP[n][1]; fn += FN[n][1]; fp += FP[n][1]; tn += TN[n][1];}
     sn = 100* (tp/(tp+fn));
     sp = 100* (tp/(tp+fp));
@@ -554,7 +552,7 @@ void SensorTester :: AnalyzeSPSN(void)
       f <<sp<<"\t"<<sn<<"\n";
   }
 
-  if (SensorType == Type_Splice) {
+  if (SensorType & (Type_Acc|Type_Don)) {
     std::cout << "\nThres.\t\tNbacc\tTPacc\tFPacc\tTNacc\tFNacc\tSpec.\tSens.\n";
     for (n=0; n<(int)Thresholds.size(); n++) {
       sn = 100* (TP[n][0]/(double)(TP[n][0]+FN[n][0]));
@@ -578,7 +576,7 @@ void SensorTester :: AnalyzeSPSN(void)
   }
 
   f.close();
-  if (SensorType == Type_Splice) {
+  if (SensorType & (Type_Acc|Type_Don)) {
     facc.close();
     fdon.close();
   }
