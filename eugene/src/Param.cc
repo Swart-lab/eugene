@@ -156,14 +156,17 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["Output.Prefix"] = optarg;
       break;
       
-    case 'p':           /* print opt: short/long/detailed   */
+    case 'p':           /* -p print opt: s -> short, l -> long, d -> detailed
+                                         h -> html,  H -> HTML(EuGeneHom)
+                                         g -> GFF,   a -> araset  */
       m["Output.format"] = optarg;
-      //if ((optarg[0] == 'h') &&  getI("Output.graph") == 0) {
-      //m["Output.graph"] = "TRUE"; // HTML output means graphical output 
-      //m["grnameArg"]    = "0";
-      //}
+      if ((optarg[0] == 'h') && getI("Output.graph") == 0) {
+	m["Output.graph"] = "TRUE"; // HTML output means graphical output 
+	m["grnameArg"]    = "0";
+      }
       if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
-	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a'))
+	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a') &&
+          (optarg[0] != 'H'))
 	errflag++;
       break;
       
