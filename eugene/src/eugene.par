@@ -278,6 +278,7 @@ Tester.Make		SPSN	# SPSN, TEST
 Tester.Sensor		EuStop
 Tester.Sensor.Instance	0
 Tester.SPSN.MinNumbers	100     # greater than 0
+Tester.SPSN.Eval        STOP    # START, STOP, SPLICE
 #
 #################################################################
 ################# SENSORS CONFIGURATION PARAMETERS ##############
@@ -289,7 +290,7 @@ Sensor.ATGpr.use	0
 Sensor.EuStop.use	1
 Sensor.FrameShift.use	0
 Sensor.GSplicer.use	0
-Sensor.SMachine.use	1
+Sensor.SMachine.use	0
 Sensor.NG2.use		0
 Sensor.NStart.use	1
 Sensor.PatConst.use	0
@@ -311,7 +312,7 @@ Sensor.Repeat.use	0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
-Sensor.IfElse.use	0
+Sensor.IfElse.use	1
 Sensor.Riken.use	0
 Sensor.User.use		0
 #
