@@ -185,7 +185,6 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
     else {
       d->contents[j] +=
 	( log(  ModeleProt->usi2real(ModeleProt->proba(peptid,order))/NBRECODONS[Probacodon->mot2indice(codon, 3,0) -21] ) ) / 3 ;
-//	( log(  ModeleProt->proba(peptid,order)/NBRECODONS[Probacodon->mot2indice(codon, 3,0) -21] ) ) / 3 ;
     }
   }
 
