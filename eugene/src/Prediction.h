@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <vector>
+#include <algorithm>
 #include "Const.h"
 extern "C"{
 #include "../GDIF/gdIF.h"
@@ -10,7 +11,7 @@ extern "C"{
 
 /*************************************************************
  **                        Prediction                       **
- *************************************************************/
+ ************************************************************/
 class Prediction
 {
  private:
@@ -22,17 +23,22 @@ class Prediction
  public:
   Prediction  ();
   ~Prediction ();
-  void add           (int, signed char);
-  void print         ();
-  void setPos        (int, int);
-  char getNextState  (int); 
-  char getStateForPos(int);
-  char getState      (int i) { return vState[i]; }
-  int  getPos        (int i) { return vPos[i];   }
-  int  size          ()      { return nb;        } 
-  void plotPred      ();
-  void resetPred     ();
-  int  nbExon        (int);
+  void  add           (int, signed char);
+  void  print         ();
+  void  setPos        (int, int);
+  char  getNextState  (int); 
+  char  getStateForPos(int);
+  char  getState      (int i) { return vState[i]; }
+  int   getPos        (int i) { return vPos[i];   }
+  int   size          ()      { return nb;        } 
+  void  plotPred      ();
+  void  resetPred     ();
+  int   nbExon        (int);
+  void  reversePred   ();
+  char* isStart       (int);
+  char* isStop        (int);
+  char* isDon         (int);
+  char* isAcc         (int);
 };
 
 // Les etats

@@ -95,12 +95,19 @@ void Prediction :: resetPred ()
 // ------------------------
 int Prediction :: nbExon (int geneNumber)
 {
-  int i = (int)vPos.size()-1;
-  int nb = 0;
-  
-  while(vState[i] >= InterGen5)
-      i--;
-  
+  int i     = (int)vPos.size()-1;
+  int nb    = 0;
+  int nbUtr = 0;    // Pb UTR :
+                    //  - seq.1.1.0 Utr5 - ...  Gene 1
+                    //  - seq.1.2.0 Utr5 + ...  Gene 2
+  while(vState[i] >= InterGen5) {
+    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3R)
+      nbUtr++;
+    if (nbUtr > 1)
+      break;
+    i--;
+  }
+
   for(int j=1; j<geneNumber; j++) {
     while(vState[i] <= InterGen5)
       i--;
@@ -113,4 +120,75 @@ int Prediction :: nbExon (int geneNumber)
     i--;
   }
   return nb;
+}
+
+// ----------------
+//  reverse.
+// ----------------
+void Prediction :: reversePred()
+{
+  reverse(vState.begin(), vState.end());
+  reverse(vPos.begin(),   vPos.end());
+}
+
+// ------------------------
+//  isStart.
+// ------------------------
+char* Prediction :: isStart(int p)
+{
+  char pState = getStateForPos (p-1);
+  char state  = getStateForPos (p);
+  char nState = getStateForPos (p+1);
+
+  if(state <= ExonF3  &&  pState >= InterGen5)
+    return "True";
+  if(state >= ExonR1  &&  state <= ExonR3  &&  nState >= InterGen5)
+    return "True";
+  return "False";
+}
+
+// ------------------------
+//  isStop.
+// ------------------------
+char* Prediction :: isStop(int p)
+{
+  char pState = getStateForPos (p-1);
+  char state  = getStateForPos (p);
+  char nState = getStateForPos (p+1);
+
+  if(state <= ExonF3  &&  nState >= InterGen5)
+    return "True";
+  if(state >= ExonR1  &&  state <= ExonR3  &&  pState >= InterGen5)
+    return "True";
+  return "False";
+}
+
+// ------------------------
+//  isDon.
+// ------------------------
+char* Prediction :: isDon(int p)
+{
+  char state  = getStateForPos (p);
+  char nState = getStateForPos (p+1);
+  
+  if(state <= ExonF3  &&  nState == IntronF1)
+    return "True";
+  if(nState >= ExonR1  &&  nState <= ExonR3  &&  state == IntronR1)
+    return "True";
+  return "False";
+}
+
+// ------------------------
+//  isAcc.
+// ------------------------
+char* Prediction :: isAcc(int p)
+{
+  char pState = getStateForPos (p);
+  char state  = getStateForPos (p+1);
+  
+  if(state <= ExonF3  &&  pState == IntronF1)
+    return "True";
+  if(pState >= ExonR1  &&  pState <= ExonR3  &&  state == IntronR1)
+    return "True";
+  return "False";
 }
