@@ -92,7 +92,7 @@ void MasterSensor :: InitMaster (DNASeq *X)
       strcpy(c, msList[i]->Name); 
       strcat(c, ".use");
       for (j=0; j<PAR.getI(c); j++)
-	LoadSensor( msList[i], j );
+	LoadSensor( msList[i], j, "" );
     }
 
     IsInitialized = true;
@@ -110,7 +110,7 @@ void MasterSensor :: InitMaster (DNASeq *X)
 // load the sensor s  if no yet done (j is just for print)
 // return index of sensor in dllList
 // ------------------------
-int MasterSensor :: LoadSensor (UseSensor* s, int j)
+int MasterSensor :: LoadSensor (UseSensor* s, int j, char *stdErr)
 {
   bool is_loaded = false;
   int dll_index = 0;
@@ -124,6 +124,7 @@ int MasterSensor :: LoadSensor (UseSensor* s, int j)
     }
 
   if (!is_loaded) {
+    fprintf(stderr, "%s", stdErr);
     soList.push_back ( PluginsDir + s->Name + ".so" );
     useList.push_back ( ((string) s->Name) + ".use" );
     LoadedSensorsList.push_back( s );
