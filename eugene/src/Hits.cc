@@ -115,7 +115,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
   char   *HitId, *PHitId;
   int    deb, fin, phase, Pphase, HSPDeb, HSPFin, poids, read;
   double evalue, Pevalue;
-  char   A[128], B[128];
+  char   A[512], B[512];
   Block *ThisBlock = NULL;
   Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
   const int MaxHitLen = 15000;
@@ -180,7 +180,8 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
 	}
       }
     }
-  if (read != EOF) fprintf(stderr,"Incorrect similarity file !\n");
+  if (read != EOF) 
+    fprintf(stderr,"\nIncorrect similarity file after seq. %s\n",HitId);
 
   return AllHit;
 }
