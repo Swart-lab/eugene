@@ -57,7 +57,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   m["fstname"] = "\000";        // no default input
 
-  while ((carg = getopt(argc, argv, "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
+  while ((carg = getopt(argc, argv, "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:Z")) != -1) {
     switch (carg) {
       
     case 'D':           /* Definition of any parameter */
@@ -241,6 +241,11 @@ void Parameters :: ReadArg(int argc, char * argv[])
       }
       break;
 
+    case 'Z':           // parameters optimization
+      m["ParaOptimization.Use"] = "TRUE";
+      if (optarg) m["ParaOptimization.TrueCoordFile"] = optarg;
+      break;
+
     case '?':           /* bad option                       */
       errflag++;
     }
@@ -255,7 +260,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
     fprintf(stderr, "\nUsage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
 	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
 	    "              [-g {graphArg}] [-G] [-u start] [-v end] [-l len] [-c olap]\n"
-	    "              [-x xres] [-y yres] FASTA files\n");
+	    "              [-x xres] [-y yres] [-Z coord] FASTA files\n");
     exit(1);
   }
 }
@@ -417,6 +422,16 @@ void Parameters :: set (const char *key, const char *value)
   m[key] = value;
 }
 
+void Parameters :: setD (const char *key, double n)
+{
+  char *buffer = new char[FILENAME_MAX+1];
+  sprintf (buffer, "%10f",n);
+  m[key] = buffer;
+}
+
+
+
+
 // ------------------------
 //  Default destructor.
 // ------------------------
@@ -425,3 +440,61 @@ Parameters :: ~Parameters ()
   m.clear();
 }
 
+// ----------------------------------------------------------
+// WriteParam: write a new parameter file, named <para_file>.<date>.OPTI.par,
+//             modifying the value of parameters in para_name
+//             with the new value in para_val
+// BEWARE: the comments after a parameter value change are not kept
+//         in case of no comment the result of strchr(line,'#') was: (null).
+// Evaluation: the name of the written parameter file 
+// -----------------------------------------------------------
+string Parameters::WriteParam (const char* para_file, vector<string> para_name, 
+		     vector<double> para_val)
+{
+  FILE   *fp, *fp_opti;
+  char line[MAX_LINE], new_line[MAX_LINE];
+  char key[MAX_LINE], val[MAX_LINE];
+  char filename[FILENAME_MAX+1];
+  unsigned int i;
+  bool find_para;
+
+  strcpy(filename, para_file);
+  strcat(filename, ".par");
+  fp = FileOpen(EugDir, BaseName(filename),"r");
+
+  strcpy(filename, para_file);
+  strcat(filename, ".");
+  strcat(filename, GetStrDate() );
+  strcat(filename, ".OPTI");
+  strcat(filename, ".par");
+  fp_opti = FileOpen(EugDir, BaseName(filename),"w");
+  
+  while(fgets (line, MAX_LINE, fp) != NULL) {
+    find_para = false;
+    if (line[0] != '#') 
+      if (sscanf(line, "%s %s", key, val)==2) 
+	for (i=0; i<para_name.size(); i++) 
+	  if ( para_name[i] == (string) key ) {
+	    find_para = true;
+	    sprintf(new_line,"%s\t%f\n", key, para_val[i]);
+	    i = para_name.size();
+	  }
+    if (!find_para)
+      new_line = line;
+    fprintf(fp_opti,"%s",new_line);
+  }
+
+  fclose(fp);
+  fclose(fp_opti);
+
+  return (string) filename;
+}
+
+
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+void Parameters::ResetIter(void)
+{
+  iter = m.begin();
+}

@@ -2,11 +2,13 @@
 #define  PARAM_H_INCLUDED
 
 #include <map>
+#include <vector>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include <string>
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -17,12 +19,15 @@
 #else
 #include "getopt.h"
 #endif
+
+
+
 #include "Const.h"
 #include "System.h"
 
-const char VERSION[FILENAME_MAX+1]     = "1.60";
-const char VERSION_DATE[FILENAME_MAX+1]     = "190903";
-const char VERSION_PAR[FILENAME_MAX+1]     = "111003";
+const char VERSION[FILENAME_MAX+1]     = "1.64";
+const char VERSION_DATE[FILENAME_MAX+1]     = "291003";
+const char VERSION_PAR[FILENAME_MAX+1]     = "291003";
 extern char   *optarg;   
 extern int     optind;
 
@@ -55,6 +60,11 @@ class Parameters
   int    getI (char *key, int index = 0);
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
+  void   setD (const char *key, double n);
+  string WriteParam (const char* para_file, vector<string> para_name, 
+		       vector<double> para_val);
+
+  void ResetIter(void);
 };
 
 #endif
