@@ -22,7 +22,7 @@ set test 0
 
 
 # Run EuGene
-catch {eval exec $EUGENE -Z test test > tmp%stdout}
+catch {eval exec $EUGENE_DIR/$EUGENE -Z test test > tmp%stdout}
 
 # Checking the output
 set test [diff $OUTPUT_DIR/$FILE_REF(Optimization) tmp%stdout]
