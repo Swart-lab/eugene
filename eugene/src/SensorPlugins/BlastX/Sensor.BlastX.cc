@@ -57,9 +57,54 @@ int HitsCompareSup(const void *A, const void *B)
 // ----------------------
 SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 {
+  int i,k;
+  char   tempname[FILENAME_MAX+1];
+  FILE * fblast;
+
+  ppNumber      = PAR.getI("BlastX.PPNumber",N);
+  minIn         = PAR.getI("BlastX.minIn");
+  levels  = PAR.getC("BlastX.levels",  N);  
   type     = Type_Content;
   HitTable = NULL;
   N        = n;
+
+  Hits   *AllProt = NULL;
+  NumProt = 0;
+  
+  fprintf(stderr,"Reading BlastX data, level...");
+  fflush(stderr);
+  
+  for( k=0; k<(int)strlen(levels); k++ ) {
+    // for each level given in arg: 
+    // e.g. with -b09 : 1st: level 0 (k=0), 2nd: level 9 (k=1)
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".blast");
+    i = strlen(tempname);
+    tempname[i]   = levels[k];
+    tempname[i+1] = 0;
+    // check the corresponding .blastN file (N=level given in arg)
+    fblast = FileOpen(NULL,tempname, "r");
+    if (fblast == NULL) {
+      fprintf(stderr, "BlastX error : unable to open file %s\n",tempname);
+      exit(1);
+    }
+    
+    AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20);
+    fprintf(stderr,"%c ",levels[k]);
+    fflush(stderr);
+    
+    fclose(fblast);       
+  }
+  fprintf(stderr,"done\n");
+  
+  
+  Hits *ThisProt = AllProt;
+  HitTable = new Hits *[NumProt+1];
+  for (i=0;  i<NumProt;  i++, ThisProt=ThisProt->Next)
+    HitTable[i] = ThisProt;
+  
+  //for (i=0;  i<NumProt;  i++)
+  //printf("Name:%s\tLevel:%d\n", HitTable[i]->Name,HitTable[i]->Level);
 }
 
 // ----------------------
@@ -80,31 +125,16 @@ SensorBlastX :: ~SensorBlastX ()
 // ----------------------
 void SensorBlastX :: Init (DNASeq *X)
 {
-  int i, j, k;
+  int i, j;
   int Len = X->SeqLen;
   const int LevelColor[3] = {6,7,8}; 
-  FILE *fblast;
-  int   deb, fin, phase, ProtDeb, ProtFin, PProtFin, level;
-  float score;
-  int   Pfin = 0, Pphase = 0;
-  char  A[128],   B[128];
-  char  *ProtId,  *PProtId, *tmp, *levels;
-  double GlobalScore;
-  double PGlobalScore = 0;
-  const int MaxHitLen = 15000;
-  char   tempname[FILENAME_MAX+1];
-
-  // For postprocess 2
-  Hits   *AllProt = NULL;
-  NumProt = 0;
-
+  int   level,levelidx,Pphase;
+  double GlobalScore,PGlobalScore;
+ 
   vPos.clear();
   vPMatch.clear();
   vPMLevel.clear();
   vPMPhase.clear();
-
-  if(HitTable != NULL) delete [] HitTable;
-  HitTable = NULL;
 
   keyBXLevel[0] = PAR.getD("BlastX.level0*", N);
   keyBXLevel[1] = PAR.getD("BlastX.level1*", N);
@@ -117,115 +147,74 @@ void SensorBlastX :: Init (DNASeq *X)
   keyBXLevel[8] = PAR.getD("BlastX.level8*", N);
   keyBXLevel[9] = PAR.getD("BlastX.level9*", N);
   blastxM       = PAR.getI("BlastX.blastxM*",N);
-  ppNumber      = PAR.getI("BlastX.PPNumber",N);
-  minIn         = PAR.getI("BlastX.minIn");
-  levels        = PAR.getC("BlastX.levels",  N);
   ProtMatch      = new double[Len+1];
   ProtMatchLevel = new double[Len+1];
   ProtMatchPhase = new int[Len+1];
+
   for (i=0; i<= Len; i++) {
     ProtMatch[i]      = 0.0;
     ProtMatchLevel[i] = 0.0;
     ProtMatchPhase[i] = 0;
   }
 
-  fprintf(stderr,"Reading Blastx data, level...");
-  fflush(stderr);
-  for( k=0; k<(int)strlen(levels); k++ ) {
-    // for each level given in arg: 
-    // e.g. with -b09 : 1st: level 0 (k=0), 2nd: level 9 (k=1)
-    strcpy(tempname,PAR.getC("fstname"));
-    strcat(tempname,".blast");
-    i = strlen(tempname);
-    tempname[i]   = levels[k];
-    tempname[i+1] = 0;
-    // check the corresponding .blastN file (N=level given in arg)
-    fblast = FileOpen(NULL,tempname, "r");
-    if (fblast == NULL) {
-      fprintf(stderr, "BlastX error : unable to open file %s\n",tempname);
-      exit(1);
-    }
- 
-    level    = (levels[k] - '0');
-    A[0]     = B[0]= 0;
-    ProtId   = A;
-    PProtId  = B;
-    PProtFin = -10000;
+  for (i=0;  i<NumProt;  i++) {
 
-    // For postprocess 2
-    AllProt = AllProt->ReadFromFile(fblast, &NumProt, level, 20);
-    fseek(fblast, 0, SEEK_SET);
+    Block *MyHSP = HitTable[i]->Match;
+    level = HitTable[i]->Level;
+    levelidx = rindex(levels,'0'+level)-levels;
 
-    // Read the blast file
-    while (fscanf(fblast,"%d %d %f %*s %d %s %d %d\n", &deb, &fin, &score,
-		  &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
-      // for each HSP
-      if (abs(fin-deb) > MaxHitLen) {
-	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",
-		ProtId);
-	continue;
-      }
-
-      j       = Min(deb,fin);
-      fin     = Max(deb,fin);
-      deb     = j;
-      j       = Min(ProtDeb,ProtFin);
-      ProtFin = Max(ProtDeb,ProtFin);
-      ProtDeb = j;
-
-      if (phase < 0) {
-	j       = ProtDeb;
-	ProtDeb = ProtFin;
-	ProtFin = j;
-      }
-      GlobalScore = ((double)score) / ((double)abs(fin-deb));
-
-      // GAPS -> INTRONS ; the "intron" consideration between 2 HSP requires:
-      // 1: same prot ID
-      // 2: close prot boundaries (blastxM param)
-      // 3: same nucleotidic strand...
-      if ( (strcmp(ProtId,PProtId) == 0) && 
-	   (abs(PProtFin-ProtDeb) <= (blastxM)) && (phase*Pphase > 0) ) {
+    while (MyHSP != NULL) {
+      
+      GlobalScore = (double)(MyHSP->Score) / (double)abs(MyHSP->End-MyHSP->Start);
+      
+      // GAPS -> INTRONS ; the "intron" consideration between 2 HSP
+      // requires close prot boundaries (blastxM param)
+      if ( MyHSP->Prev &&
+	   (abs(MyHSP->Prev->LEnd-MyHSP->LStart) <= blastxM )) {
+	
 	// INTRON
-	if ((deb-Pfin) >= minIn) {
-	  for(i = Pfin; i < Pfin+(minIn)/2; i++) {
+	if ((MyHSP->Start-MyHSP->Prev->End) >= minIn) {
+
+	  for(j = MyHSP->Prev->End+1; j < MyHSP->Prev->End+1+(minIn)/2; j++) {
 	    // begining of the intron only, during a short region
 	    // the score depends on the adjacent exon
-	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {
-	      if (keyBXLevel[level] > ProtMatchLevel[i]) {
-		ProtMatchLevel[i]= keyBXLevel[level];
-		ProtMatch[i]= -PGlobalScore;
-		ProtMatchPhase[i]=0;
+	    if (keyBXLevel[level] >= ProtMatchLevel[j]) {
+	      if (keyBXLevel[level] > ProtMatchLevel[j]) {
+		ProtMatchLevel[j]= keyBXLevel[level];
+		ProtMatch[j]= -PGlobalScore;
+		ProtMatchPhase[j]=0;
 	      }
 	      else {
-		if (PGlobalScore >= fabs(ProtMatch[i])){
-		  ProtMatch[i]= -PGlobalScore;
-		  ProtMatchPhase[i]= 0;
+		if (PGlobalScore >= fabs(ProtMatch[j])){
+		  ProtMatch[j]= -PGlobalScore;
+		  ProtMatchPhase[j]= 0;
 		}
 	      }
 	    }
 	  }
-	  for (i = deb - minIn/2; i<deb; i++) {
+
+	  for (j = MyHSP->Start+1 - minIn/2; j < MyHSP->Start+1; j++) {
 	    // ...and the end of the intron
-	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {
-	      if (keyBXLevel[level] > fabs(ProtMatchLevel[i])) {
-		ProtMatchLevel[i]= keyBXLevel[level];
-		ProtMatch[i]= -GlobalScore;
-		ProtMatchPhase[i]=0;
+	    if (keyBXLevel[level] >= ProtMatchLevel[j]) {
+	      if (keyBXLevel[level] > fabs(ProtMatchLevel[j])) {
+		ProtMatchLevel[j]= keyBXLevel[level];
+		ProtMatch[j]= -GlobalScore;
+		ProtMatchPhase[j]=0;
 	      }
 	      else
-		if (GlobalScore >= fabs(ProtMatch[i])) {
-		  ProtMatch[i]= -GlobalScore;
-		  ProtMatchPhase[i]= 0;
+		if (GlobalScore >= fabs(ProtMatch[j])) {
+		  ProtMatch[j]= -GlobalScore;
+		  ProtMatchPhase[j]= 0;
 		}
 	    }
-	    //	j=((phase < 0)?-4:4);
-	    //	PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+	    //	;
+	    //	PlotBarI(i,((phase < 0)?-4:4),0.6+(level/8.0),1,LevelColor[level]);
 	  }
 	}
-	if (PAR.getI("Output.graph") && k <3) {
-	  PlotLine(Pfin,deb,Pphase,phase,0.6+(k/8.0),0.6+(k/8.0),
-		   LevelColor[k]);
+
+	if (PAR.getI("Output.graph") && levelidx <3) {
+	  PlotLine(MyHSP->Prev->End,MyHSP->Start,Pphase,MyHSP->Phase,
+		   0.6+(levelidx/8.0),0.6+(levelidx/8.0),LevelColor[levelidx]);
 	  //for(i=Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
 	  //   j=((phase < 0)?-4:4);
 	  //   PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
@@ -233,40 +222,32 @@ void SensorBlastX :: Init (DNASeq *X)
 	}
       }
 
-      PGlobalScore = GlobalScore;
-      Pfin = fin;
-      tmp  = PProtId;
-      PProtId  = ProtId;
-      ProtId   = tmp;
-      PProtFin = ProtFin;
-      Pphase   = phase;
-
-      phase = ph06(phase);
-
       // HITS -> CODING
-      if (PAR.getI("Output.graph") && k<3) {
-	for (i = deb-1; i < fin; i++) {
-	  PlotBarI(i,PhaseAdapt(phase),0.6+(k/8.0),1,LevelColor[k]);
+      if (PAR.getI("Output.graph") && levelidx<3) {
+	for (j = MyHSP->Start-1; j < MyHSP->End; j++) {
+	  PlotBarI(j,MyHSP->Phase,
+		   0.6+(levelidx/8.0),1,LevelColor[levelidx]);
 	}
       }
-
-      for (i = deb-1; i < fin; i++)
-	if (keyBXLevel[level] >= ProtMatchLevel[i])
-	  if (keyBXLevel[level] > ProtMatchLevel[i]) {
-	    ProtMatchLevel[i] = keyBXLevel[level];
-	    ProtMatch[i]= GlobalScore;
-	    ProtMatchPhase[i]= PhaseAdapt(phase);
+      
+      for (j = MyHSP->Start; j < MyHSP->End+1; j++)
+	if (keyBXLevel[level] >= ProtMatchLevel[j])
+	  if (keyBXLevel[level] > ProtMatchLevel[j]) {
+	    ProtMatchLevel[j] = keyBXLevel[level];
+	    ProtMatch[j]= GlobalScore;
+	    ProtMatchPhase[j]= MyHSP->Phase;
 	  }
 	  else
-	    if (GlobalScore >= fabs(ProtMatch[i])){ 
-	      ProtMatch[i] = GlobalScore;
-	      ProtMatchPhase[i]= PhaseAdapt(phase);
+	    if (GlobalScore >= fabs(ProtMatch[j])){ 
+	      ProtMatch[j] = GlobalScore;
+	      ProtMatchPhase[j]= MyHSP->Phase;
 	    }
+
+
+      PGlobalScore = GlobalScore;
+      Pphase = MyHSP->Phase;
+      MyHSP = MyHSP->Next;
     }
-    fprintf(stderr,"%d ",level);
-    fflush(stderr);
-    
-    fclose(fblast);       
   }
 
   for (i = 0; i<= Len; i++)
@@ -281,18 +262,7 @@ void SensorBlastX :: Init (DNASeq *X)
   delete [] ProtMatchLevel;
   delete [] ProtMatchPhase;
 
-  fprintf(stderr,"done\n");
-
   index = 0;
-
-  // For postprocess 2
-  Hits *ThisProt = AllProt;
-  HitTable = new Hits *[NumProt+1];
-  for (i=0;  i<NumProt;  i++, ThisProt=ThisProt->Next)
-    HitTable[i] = ThisProt;
-
-  //for (i=0;  i<NumProt;  i++)
-  //printf("Name:%s\tLevel:%d\n", HitTable[i]->Name,HitTable[i]->Level);
 }
 
 // --------------------------
@@ -340,16 +310,6 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 	  d->contents[i] += -vPMatch[index]*vPMLevel[index];
       index++;
     }
-}
-
-// -----------------------------------------------
-//  Convertit les phases 1 2 3 -1 -2 -3 0 en 0-6.
-// -----------------------------------------------
-char SensorBlastX :: ph06(char p)
-{
-  if (p == 0) return 6;
-  else if (p > 0) return (p-1);
-  else return 2-p;   
 }
 
 // ----------------------------
@@ -635,6 +595,6 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
     }
     if(index != -1) break;
   }
-  delete Sup;
+  delete [] Sup;
   return supported;
 }
