@@ -17,14 +17,17 @@ class SensorMarkovIMM : public Sensor
   // for a given instance, IMMatrix_index allows to know in lists which matrice 
   // and relative information to consider
   static std::vector < std::vector <BString_Array*> > IMMatrixList;  
-  static std::vector <double> minGCList;
-  static std::vector <double> maxGCList;
-  static std::vector <bool>   UseM0asIGList;
+  static std::vector <std::string> matrixNameList;
+  static std::vector <int> refCount;
   const static int  MODEL_LEN = 9;
   const static int  SIMPLE_MODEL_LEN = 6;
   const static int  ALPHABET_SIZE = 4;
   int IMMatrix_index;
-  
+  double minGC;
+  double maxGC;
+  int maxOrder;
+  bool UseM0asIG;
+
 
  public:
   SensorMarkovIMM         (int n, DNASeq *X);
@@ -39,8 +42,7 @@ extern "C" SensorMarkovIMM * builder0( int n, DNASeq *X) { return new SensorMark
 
 // reserve memory for static variables
 std::vector < std::vector <BString_Array*> > SensorMarkovIMM::IMMatrixList;
-std::vector <double>                         SensorMarkovIMM::minGCList;
-std::vector <double>                         SensorMarkovIMM::maxGCList;
-std::vector <bool>                           SensorMarkovIMM::UseM0asIGList;
+std::vector <std::string>                    SensorMarkovIMM::matrixNameList;
+std::vector <int>                            SensorMarkovIMM::refCount;
 
 #endif

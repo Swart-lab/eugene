@@ -61,40 +61,36 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
 {
   FILE *fp;
   int i;
-  bool UseM0asIG;
-  double minGC = 0;
-  double maxGC = 0;
   std::vector<BString_Array*> IMMatrix;
+  std::string matrixName;
   bool is_initialised = false;
   
   type = Type_Content;
 
+
   UseM0asIG = (PAR.getI("MarkovIMM.useM0asIG",GetNumber()) != 0);
   
+  maxOrder = PAR.getI("MarkovIMM.maxOrder",GetNumber());  
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
 
-  // Look if the matrice(s) are yet loaded
-  // BEWARE just look if a yet loaded matrice have the same minGC and maxGC
-  // DON'T prevent overlapped intervals
+  matrixName = PAR.getC("MarkovIMM.matname",GetNumber());
+
+  // Look if the same matrice has already been loaded
+  // The name of the matrix is considered as enough to define it.
   for (unsigned int k=0; k<IMMatrixList.size(); k++) 
-    if (minGC == minGCList[k])
-      if (maxGC == maxGCList[k]) {
-	IMMatrix_index = k;
-	is_initialised = true;
-      } else {
-	fprintf(stderr, "Mismatch in GC bounds of IMM matrices.\n");
-	exit(2);
-      }
+    if (matrixName == matrixNameList[k]) {
+      refCount[k]++;
+      IMMatrix_index = k;
+      is_initialised = true;
+      k = IMMatrixList.size();
+    }
 
   if (!is_initialised) { 
     IMMatrix_index = IMMatrixList.size();
-    minGCList.push_back(minGC);
-    maxGCList.push_back(maxGC);
-    UseM0asIGList.push_back(UseM0asIG);
 
-    for (i=0; i<7; i++) IMMatrix.push_back(NULL);  // update a local variable, 
-                                                   // copied in the list when initialized
+    // update a local variable, copied in the list when initialized
+    for (i=0; i<7; i++) IMMatrix.push_back(NULL); 
 
     if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
       fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
@@ -119,7 +115,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     // le modele intronique est utilise pour les UTR
     IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
     if (IMMatrix[6]->Read(fp)) {
-      fprintf(stderr,"- No UTR model found, using introns model. ");
+      fprintf(stderr,"- No UTR model found, using intronic model. ");
       delete IMMatrix[6];
       IMMatrix[6] = IMMatrix[3];
       IMMatrix[5] = IMMatrix[3];
@@ -127,7 +123,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
       fprintf(stderr," 6");
       IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
       if (IMMatrix[5]->Read(fp)) {
-	fprintf(stderr,"- No second UTR model found, using intron model. ");
+	fprintf(stderr,"- No second UTR model found, using intronic model. ");
 	delete IMMatrix[5];
 	IMMatrix[5] = IMMatrix[3];
       } else fprintf(stderr," 7");
@@ -136,22 +132,28 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     fclose(fp);
 
     IMMatrixList.push_back( IMMatrix );
+    matrixNameList.push_back(matrixName);
+    refCount.push_back(1);
   }
 }
-
 
 // ----------------------
 //  Default destructor.
 // ----------------------
 SensorMarkovIMM :: ~SensorMarkovIMM ()
 {
-  for (unsigned int k=0; k<IMMatrixList.size(); k++) {
-  // free remaining used memory
-  if (IMMatrixList[k][5] != IMMatrixList[k][3]) delete  IMMatrixList[k][5];
-  if (IMMatrixList[k][6] != IMMatrixList[k][3]) delete  IMMatrixList[k][6];
+
+  // If nobody uses the Matrix model, delete
+  if (--refCount[IMMatrix_index] == 0){
+    
+    if (IMMatrixList[IMMatrix_index][5] != IMMatrixList[IMMatrix_index][3]) 
+      delete  IMMatrixList[IMMatrix_index][5];
+
+    if (IMMatrixList[IMMatrix_index][6] != IMMatrixList[IMMatrix_index][3]) 
+      delete  IMMatrixList[IMMatrix_index][6];
   
-  for  (int i = 0;  i < 5;  i ++)
-    delete  IMMatrixList[k][i];
+    for  (int i = 0;  i < 5;  i ++)
+      delete  IMMatrixList[IMMatrix_index][i];
   }
 }
 
@@ -168,60 +170,55 @@ void SensorMarkovIMM :: Init (DNASeq *X)
 // ----------------------------
 void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
-  int  Rev,FModelLen;
+  int  Rev,rModelLen,fModelLen;
   int  indexF, indexR;
   std::vector<BString_Array*> IMMatrix; // to locally store the used IMMatrix
-  double minGC, maxGC;                  // to locally store the GC%interval
-  bool UseM0asIG;                       // to locally store the used IG model
 
   IMMatrix = IMMatrixList[IMMatrix_index];
-  minGC = minGCList[IMMatrix_index]; 
-  maxGC = maxGCList[IMMatrix_index]; 
-  UseM0asIG = UseM0asIGList[IMMatrix_index]; 
 
   // If the model is not in its GC% area, simply do nothing
   if ((X->Markov0[BitG] + X->Markov0[BitC]) <= minGC ||
       (X->Markov0[BitG] + X->Markov0[BitC]) > maxGC)
     return;
 
-  // else if the current nuc. is unknow, again do nothing.
+  // else if the current nuc. is unknown, again do nothing.
   if ((*X)[pos] == 'n') 
     return;
 
   // Compute possible maximum order
   Rev = X->SeqLen - pos;
-  FModelLen = Min(pos+1,MODEL_LEN);
+  fModelLen = Min(maxOrder+1,Min(Rev,MODEL_LEN));
+  rModelLen = Min(maxOrder+1,Min(pos+1,MODEL_LEN));
   
   // and indexes in the IMMatrix models
-  indexF = (*IMMatrix[0]).AntiString_To_Sub(X,pos,Min(Rev,MODEL_LEN));
-  indexR = (*IMMatrix[0]).String_To_Sub(X,pos-FModelLen+1,FModelLen);
+  indexF = (*IMMatrix[0]).AntiString_To_Sub(X,pos,fModelLen);
+  indexR = (*IMMatrix[0]).String_To_Sub(X,pos-rModelLen+1,rModelLen);
 
   // Exons F
-  d->contents[0] += log((double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0);
-  d->contents[1] += log((double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0);
-  d->contents[2] += log((double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0);
-    
+  d->contents[DATA::ExonF1] += log((double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0);
+  d->contents[DATA::ExonF2] += log((double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0);
+  d->contents[DATA::ExonF3] += log((double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0);
+  
   // Exons R
-  d->contents[3] += log((double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0);
-  d->contents[4] += log((double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0);
-  d->contents[5] += log((double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0);
+  d->contents[DATA::ExonR1] += log((double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0);
+  d->contents[DATA::ExonR2] += log((double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0);
+  d->contents[DATA::ExonR3] += log((double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0);
   
   // Introns F/R
-  d->contents[6] += log((double)(*IMMatrix[3])[indexF]/65535.0);
-  d->contents[7] += log((double)(*IMMatrix[3])[indexR]/65535.0);
-    
+  d->contents[DATA::IntronF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
+  d->contents[DATA::IntronR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
+  
   // InterG
-  d->contents[8] += (UseM0asIG ?
-		     log(X->GC_AT(pos))
-		     : log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0));
-    
+  d->contents[DATA::InterG] += (UseM0asIG ? log(X->GC_AT(pos)) :
+				log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0));
+  
   // UTR 5' F/R
-  d->contents[9] += log((double)(*IMMatrix[6])[indexF]/65535.0);
-  d->contents[10] += log((double)(*IMMatrix[6])[indexR]/65535.0);
-      
+  d->contents[DATA::UTR5F] += log((double)(*IMMatrix[6])[indexF]/65535.0);
+  d->contents[DATA::UTR5R] += log((double)(*IMMatrix[6])[indexR]/65535.0);
+  
   // UTR 3' F/R
-  d->contents[11] += log((double)(*IMMatrix[5])[indexF]/65535.0);
-  d->contents[12] += log((double)(*IMMatrix[5])[indexR]/65535.0);
+  d->contents[DATA::UTR3F] += log((double)(*IMMatrix[5])[indexF]/65535.0);
+  d->contents[DATA::UTR3R] += log((double)(*IMMatrix[5])[indexR]/65535.0);
   
   return;
 }
