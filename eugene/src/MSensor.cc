@@ -8,11 +8,8 @@ std::vector <std::string>   MasterSensor::LoadedSensorsList;
 std::vector <std::string>   MasterSensor::MSSensorsList;
 std::vector <SensorLoader*> MasterSensor::dllList;
 
-
 inline bool Prior(const UseSensor *A, const UseSensor *B)
 { return(A->Priority < B->Priority); }
-
-
 
 /*************************************************************
  **                        UseSensor                        **
@@ -97,12 +94,14 @@ void MasterSensor :: InitMaster (DNASeq *X)
   for (i=0; i<MSSensorsList.size(); i++) {
     use_name = MSSensorsList[i] + ".use";
     strcpy(c, use_name.c_str()); // to avoid passing a const as argument to PAR.getI
-    for (j=0; j<PAR.getI(c); j++) 
-      theSensors.push_back( MakeSensor( MSSensorsList[i].c_str(),j, X) );
+    if (PAR.probeKey(c))
+      for (j=0; j<PAR.getI(c); j++){
+	theSensors.push_back( MakeSensor( MSSensorsList[i].c_str(),j, X) );
+	theSensors.back()->Init(X);
+      }
   }
   delete [] c;
 }
-
 
 // ------------------------
 // Create an instance of a sensor and load the .so before if necessary
