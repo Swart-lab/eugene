@@ -69,6 +69,7 @@ Hits :: Hits  ()
 {
   Length = 0;
   Strand = 0;
+  NGaps = 0;
   Name = NULL;
   Match = NULL;
   Next = NULL;
@@ -85,6 +86,7 @@ Hits :: Hits  (char* name, int length, char strand, int deb,int fin,int ldeb,int
   Strand = strand;
   Length = length;
   Match = new Block(deb,fin,ldeb,lfin);
+  NGaps = 0;
   Next = NULL;
 }
 

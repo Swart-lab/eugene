@@ -51,7 +51,8 @@ class  Hits
   char *Name;
   char Strand;
   int Length;
-  
+  int NGaps;
+    
   Block *Match;
   Hits *Next;
 };
