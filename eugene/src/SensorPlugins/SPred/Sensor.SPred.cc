@@ -1,12 +1,6 @@
 #include "Sensor.SPred.h"
 #define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 
-
-
-
-
-
-
 /*************************************************************
  **                     SensorSplicePredictor               **
  *************************************************************/
@@ -82,7 +76,8 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
   FILE *fp;
   char buf[FILENAME_MAX];
   double strength,add;
-  int i = 0, j, k;
+  int i = 1, j, k;
+  int prevkA = -1, prevkD = -1;
   
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
@@ -100,20 +95,25 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
     j += sscanf(buf+45,"%lf",&add);
     j += sscanf(buf+52,"%lf",&add);
         
-    if (j < 4) {
-      fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
-      exit(2);
-    }
-        
+    // erreur: on a pas tout lu ou ca ne croit pas
+    if ((j < 4) || ((buf[0] == 'D') && (k <= prevkD)) || ((k <= prevkA)))
+      {
+ 	fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
+ 	exit(2);
+      }
+  
     if (buf[0] == 'D' && strength != 0.0) {
+      prevkD = k;
       vPosDonF.push_back( k-1 );
       vValDonF.push_back( pow(strength, donB)*donP );
     }
     else
       if (strength != 0.0) {
+	prevkA = k;
 	vPosAccF.push_back( k );
 	vValAccF.push_back( pow(strength, accB)*accP );
       }
+    i++;
   }
   
   if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");
@@ -128,8 +128,9 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
   FILE *fp;
   char buf[FILENAME_MAX];
   double strength,add;
-  int i = 0, j, k;
-  
+  int i = 1, j, k;
+  int prevkA = INT_MAX, prevkD = INT_MAX;
+
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
     exit(2);
@@ -146,20 +147,24 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
     j += sscanf(buf+45,"%lf",&add);
     j += sscanf(buf+52,"%lf",&add);
         
-    if (j < 4) {
-      fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
+    // on ne lit pas tout on ca l'index position ne decroit pas
+    if ((j < 4) || (buf[0] == 'D' && k >= prevkD) || (k >= prevkA)) {
+      fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
       exit(2);
     }
           
     if (buf[0] == 'D' && strength != 0.0) {
+      prevkD = k;
       vPosDonR.push_back( k );
       vValDonR.push_back( pow(strength, donB)*donP );
     }
     else
       if (strength != 0.0) {
+	prevkA = k;
 	vPosAccR.push_back( k-1 );
 	vValAccR.push_back( pow(strength, accB)*accP);
       }
+    i++;
   }
   
   if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");
@@ -173,7 +178,8 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
 {
   bool update = false;
 
-  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
+  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; 
+  // update indexes on vectors
   PositionGiveInfo = pos;
 
   // Accepteur Forward
