@@ -400,7 +400,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      break;
 	      
 	    case UTR3F: // UTR 3' F
-	      nbGene++;
+	      if (stateNext != IntronU3F) nbGene++;
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
 				"  <font face=\"monospace\">Utr3</font></td>\n"
@@ -425,7 +425,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      break;
 	      
 	    case UTR5R: // UTR5' R
-	      nbGene++;
+	      if (stateNext != IntronU5R) nbGene++;
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
 				"  <font face=\"monospace\">Utr5</font></td>\n"
