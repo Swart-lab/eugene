@@ -13,12 +13,12 @@ class SensorUser : public Sensor
  private:
 
  public:
-  SensorUser  ();
+  SensorUser  (int);
   ~SensorUser ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorUser * builder0( void ) {  return new SensorUser;}
+extern "C" SensorUser * builder0( int n ) {  return new SensorUser(n);}
 
 #endif

@@ -6,8 +6,9 @@
 // ----------------------
 //  Default constructor.
 // ----------------------
-Sensor :: Sensor ()
+Sensor :: Sensor (int n)
 {
+  instanceNumber = n;
   type = Type_Unknown;
 }
 

@@ -9,7 +9,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorNStart :: SensorNStart ()
+SensorNStart :: SensorNStart (int n) : Sensor(n)
 {
   *Start = NULL;
 

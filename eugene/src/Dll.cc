@@ -11,7 +11,7 @@ SensorLoader :: SensorLoader(const char *fname, const char *builder=0)
   builder_func=0;
 
   if( LastError()==0 && h) {
-    builder_func = (Sensor *(*)())dlsym( h, builder ? builder : "builder0" );
+    builder_func = (Sensor *(*)(int))dlsym( h, builder ? builder : "builder0" );
     err=dlerror();
   }
 }
@@ -23,7 +23,7 @@ SensorLoader :: ~SensorLoader()
     dlclose(h);
 }
 
-Sensor* SensorLoader :: MakeSensor()
+Sensor* SensorLoader :: MakeSensor(int n)
 {
-  return (* builder_func)();
+  return (* builder_func)(n);
 }

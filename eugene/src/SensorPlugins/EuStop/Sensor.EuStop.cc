@@ -6,7 +6,7 @@
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorEuStop :: SensorEuStop ()
+SensorEuStop :: SensorEuStop (int n) : Sensor(n)
 {
   *Stop = NULL;
 }

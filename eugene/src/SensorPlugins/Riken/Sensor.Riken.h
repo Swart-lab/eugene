@@ -40,12 +40,12 @@ class SensorRiken : public Sensor
   int RAFL_A_Traiter;           // Index du RIKEN en cours
 
  public:
-  SensorRiken   ();
+  SensorRiken   (int);
   ~SensorRiken  ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorRiken * builder0( void ) {  return new SensorRiken;}
+extern "C" SensorRiken * builder0( int n ) {  return new SensorRiken(n);}
 
 #endif

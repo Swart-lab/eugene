@@ -12,12 +12,12 @@ class SensorRepeat : public Sensor
   unsigned char *ForcedIG;
 
  public:
-  SensorRepeat  ();
+  SensorRepeat  (int);
   ~SensorRepeat ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorRepeat * builder0( void ) { return new SensorRepeat;}
+extern "C" SensorRepeat * builder0( int n ) { return new SensorRepeat(n);}
 
 #endif

@@ -12,12 +12,12 @@ class SensorEuStop : public Sensor
   REAL *Stop[2];
 
  public:
-  SensorEuStop  ();
+  SensorEuStop  (int);
   virtual ~SensorEuStop ();
   virtual void Init     (DNASeq *);
   virtual void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorEuStop * builder0() {  return new SensorEuStop; }
+extern "C" SensorEuStop * builder0(int n) {  return new SensorEuStop(n); }
 
 #endif

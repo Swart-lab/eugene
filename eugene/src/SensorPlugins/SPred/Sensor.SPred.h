@@ -16,12 +16,12 @@ class SensorSPred : public Sensor
   void ReadSPred(char[FILENAME_MAX+1], int, int);
 
  public:
-  SensorSPred   ();
+  SensorSPred   (int);
   ~SensorSPred  ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorSPred * builder0( void ) {  return new SensorSPred;}
+extern "C" SensorSPred * builder0( int n ) {  return new SensorSPred(n);}
 
 #endif

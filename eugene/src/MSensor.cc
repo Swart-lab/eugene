@@ -97,8 +97,7 @@ void MasterSensor :: InitMaster ()
       dllList[nbSensors] = new SensorLoader ( soList[i] );
       if(!dllList[nbSensors]->LastError()) {
 	fprintf(stderr,"Loading %s, %d\n",msList[i]->Name,j);
-	theSensors.push_back( dllList[nbSensors]->MakeSensor());
-	theSensors.back()->instanceNumber = j;
+	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
       }
       else fprintf(stderr,"WARNING: ingored plugin (invalid or not found) : %s\n",soList[i]);
       nbSensors++;

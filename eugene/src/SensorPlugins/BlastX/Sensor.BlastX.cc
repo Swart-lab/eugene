@@ -15,7 +15,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorBlastX :: SensorBlastX ()
+SensorBlastX :: SensorBlastX (int n) : Sensor(n)
 {
   ProtMatch = NULL;
 

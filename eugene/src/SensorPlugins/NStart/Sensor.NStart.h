@@ -15,12 +15,12 @@ class SensorNStart : public Sensor
   void ReadNStart (char[FILENAME_MAX+1], int, int);
 
  public:
-  SensorNStart   ();
+  SensorNStart   (int);
   ~SensorNStart  ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorNStart* builder0( void ) { return new SensorNStart;}
+extern "C" SensorNStart* builder0( int n ) { return new SensorNStart(n);}
 
 #endif

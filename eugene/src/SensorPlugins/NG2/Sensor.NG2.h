@@ -16,13 +16,13 @@ class SensorNG2 : public Sensor
   void ReadNG2(char[FILENAME_MAX+1], int, int);
 
  public:
-  SensorNG2  ();
+  SensorNG2  (int);
   ~SensorNG2 ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorNG2 * builder0( void ) {  return new SensorNG2;}
+extern "C" SensorNG2 * builder0( int n ) {  return new SensorNG2(n);}
 
 
 #endif

@@ -9,7 +9,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorRepeat :: SensorRepeat ()
+SensorRepeat :: SensorRepeat (int n) : Sensor(n)
 {
   ForcedIG = NULL;
 }

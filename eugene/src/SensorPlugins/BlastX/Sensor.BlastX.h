@@ -19,11 +19,11 @@ class SensorBlastX : public Sensor
   char ph06       (char);
 
  public:
-  SensorBlastX  ();
+  SensorBlastX  (int);
   ~SensorBlastX ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-extern "C" SensorBlastX * builder0( void ) {  return new SensorBlastX;}
+extern "C" SensorBlastX * builder0( int n ) {  return new SensorBlastX(n);}
 #endif

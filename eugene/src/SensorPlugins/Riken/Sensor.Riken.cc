@@ -28,7 +28,7 @@ RAFLgene :: ~RAFLgene () {}
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorRiken :: SensorRiken ()
+SensorRiken :: SensorRiken (int n) : Sensor(n)
 {
 }
 

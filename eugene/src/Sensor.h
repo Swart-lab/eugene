@@ -22,17 +22,18 @@ extern "C" {
 class Sensor
 {
  private:
+  int instanceNumber;
   
  public:
-  int instanceNumber;
   TYPE_SENSOR type;
   
-  Sensor  ();
+  Sensor  (int);
   virtual ~Sensor ();
   virtual void Init     (DNASeq *) = 0;
   virtual void GiveInfo (DNASeq *, int, DATA *) = 0;
   void CheckStart   (DNASeq *, REAL **);
   void CheckSplices (DNASeq *, REAL **, REAL **);
+  int GetNumber() { return instanceNumber; }
 };
 
 #endif

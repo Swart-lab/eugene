@@ -27,7 +27,7 @@ int HitsCompare(const void *A, const void *B)
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorEst :: SensorEst ()
+SensorEst :: SensorEst (int n) : Sensor(n)
 {
   ESTMatch = NULL;
   HitTable = NULL;

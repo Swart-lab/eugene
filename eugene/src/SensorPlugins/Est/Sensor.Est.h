@@ -16,13 +16,13 @@ class SensorEst : public Sensor
   double estP, estM;
 
  public:
-  SensorEst  ();
+  SensorEst  (int);
   ~SensorEst ();
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
 };
 
-extern "C" SensorEst * builder0( void ) { return new SensorEst;}
+extern "C" SensorEst * builder0( int n ) { return new SensorEst(n);}
 
 #endif
