@@ -13,13 +13,12 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
   int  estopt    = PAR.getI("Sensor.Est.use");
   
   if (printopt0 == 'd') {
-    MS.ResetIterator();
     for(int i=0; i<Data_Len ; i++) {
       MS.GetInfoAt   (X, i, &Data);
       MS.PrintDataAt (X, i, &Data);
     }
   }
-
+  
   else if ((printopt0 == 'l') || (printopt0 == 'h') ||
 	   (printopt0 == 'g') || (printopt0 == 'a')) {
     int nbGene  = 1;
@@ -76,7 +75,10 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       pos   = pred->getPos(i);
       if(i != 0)
 	stateNext = pred->getState(i-1);
-	      
+      
+      if(pos == 0)
+	continue;
+ 
       if (estopt)
        	CheckConsistency(posBack, pos, state, &cons, &incons, X);
       
