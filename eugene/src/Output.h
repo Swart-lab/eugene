@@ -194,33 +194,27 @@ else {
   
   Intergenic = 0;
   decalage = ((argc == optind+1) ? offset : offset*(sequence-optind));
-  //  printf("\n %s \n",argv[sequence]);
   
   // Kludge = an intergenic state is forced at the end
-  Choice[Data_Len+1] = 12;
+  //  Choice[Data_Len+1] = 12;
  
   for (j = 0; j < 6; j++)
     Starts[j] = (IsPhaseOn(Choice[0],j) ? 0 : -1);
-  
-  for (i=1; i<= Data_Len; i++)   {
+
+  for (i = 0; i <= Data_Len; i++)   {
     if (Choice[i+1] != Choice[i]) {
       Intergenic = (Choice[i+1] >= 12);
       
-      for (j = 0; j<6; j++)  {
+      for (j = 0; j < 6; j++)  {
+	
 	if (IsPhaseOn(Choice[i+1],j) != IsPhaseOn(Choice[i],j)) {
+	  
 	  if (Starts[j] != -1)    {
-	    if (Starts[j] == 0) {
-	      if (j < 3)
-		printf("%d %d ",decalage+1, decalage+i);
-	      else
-		printf("%d %d ",decalage+1, decalage+i);
-	    }
-	    else {
-	      if (j < 3)
-		printf("%d %d ", decalage+Starts[j]+1, decalage+i);
-	      else
-		printf("%d %d ", decalage+Starts[j]+1, decalage+i);
-	    }
+	    if (Starts[j] == 0) 
+	      printf("%d %d ",decalage+1, decalage+i);
+	    else 
+	      printf("%d %d ", decalage+Starts[j]+1, decalage+i);
+
 	    Starts[j] = -1;
 	  }
 	  else
