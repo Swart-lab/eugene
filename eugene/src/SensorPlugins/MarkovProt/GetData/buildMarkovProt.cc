@@ -19,10 +19,9 @@
 #include "../../../EuGene/DNASeq.cc"
 
 int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
-//char* DBfile     = "/www/db/sp";                 // infile (on maladeta)
-//char* MATRIXfile = "swissprot.ordre2.usi.bin";  // outfile
-char* DBfile     = "/Annotation/ExternalData/SwissProt/sprot.fas"; //(database infile on MAUBIE)
-char* MATRIXfile = "SwissProt_rel41.order2.usi.bin";  // outfile
+char* DBfile     = "/Annotation/Z_Sylvain/sprot_rel41_noFragm.fasta";  // DB infile
+char* MATRIXfile = "SwissProt41.noFragm.mininfo1000.order2.usi.bin";  // outfile matrix
+int OCCURENCE_MINI =1000;
 
 int main()
 {
@@ -32,7 +31,6 @@ int main()
   COUNT.initialisation();
   TabChaine<ChainePROT21,unsigned short int> MOD(ORDREMAX,new ChainePROT21);
   MOD.initialisation();
-  //  TabChaine<ChainePROT21,double> MOD (ORDREMAX,new ChainePROT21);
 
   //----------------------------------------------------------------//
   // READ the PROTEIC DBfile file (multifasta, e.g. SwissProt)
@@ -53,15 +51,15 @@ int main()
 
   //----------------------------------------------------------------//
   // ADD 1 pseudocount to each word occurence (to avoid null probs)
-  fprintf(stderr," - adding pseudocounts...");
-  COUNT.pseudocount(1);
-  fprintf(stderr,"done\n");
+  //fprintf(stderr," - adding pseudocounts...");
+  //  COUNT.pseudocount(1);
+  // fprintf(stderr,"done\n");
   COUNT.affichage(0);  //(verbose, displays the counts)
 
   //----------------------------------------------------------------//
   // COMPUTE PROBS (store results in matrix MOD)
   fprintf(stderr," - computing probs...");
-  MOD.compte2probas(COUNT);
+  MOD.compte2probas(COUNT,OCCURENCE_MINI);
   fprintf(stderr,"done\n");
   MOD.affichage(0);  //(verbose, displays the probs)
 
