@@ -12,15 +12,19 @@
 \maketitle
 
 Je me place dans le cas du graphe $G=(S,A)$ d'EuG\`ene qui est form\'e
-d'une s\'erie de pistes parall\`eles. Je noterai $s_{ik}$ et $s'_{ik}$ le
-$i$\`em sommet de la piste $k$. Les poids des ar\^etes entre les sommets
-de la position $i$ et de la position $i+1$ et des pistes $k$ et $k'$
-respectivement est not\'e $w_{ikk'}$ (\'egal \`a $+\infty$si il n'y a pas
-d'ar\^ete dans le graphe).
+d'une s\'erie de pistes parall\`eles. Je noterai $s_{ik}$ le $i$\`em sommet
+de la piste $k$. Les poids des ar\^etes entre les sommets de la position
+$i$ et de la position $i+1$ et des pistes $k$ et $k'$ respectivement
+est not\'e $w_{ikk'}$ (\'egal \`a $+\infty$si il n'y a pas d'ar\^ete dans le
+graphe). La nature des arcs entre les positions $i,i+1$ et $i+1,i+2$
+est diff\'erente (ar\^ete de contenu et de signaux respectivement) mais
+nous n\'egligerons ce d\'etail. 
 
+\begin{figure}
 \begin{center}
   \includegraphics[width=\textwidth]{graph}
 \end{center}
+\end{figure}
 
 Si l'on se contente de calculer le plus court chemin qui va de la
 source au puits, il est obtenu simplement par une r\'ecurrence. On note
@@ -33,8 +37,8 @@ aux $i$\`eme sommets (initialement vrai pour $i=0$). On peut calculer la
 valeur de $SP[]$ pour les sommets \`a la position $i+1$ par une simple
 r\'ecurrence:
 
-\[SP[s_{i+1,k}] = \min_l \{ SP[s_{i,l}+w{ikl}\}\]
-\[\pi[s_{i+1,k}] = arg\min_l \{ SP[s_{i,l}+w{ikl}\}\]
+\[SP[s_{i+1,k}] = \min_l \{ SP[s_{i,l}+w_{ikl}\}\]
+\[\pi[s_{i+1,k}] = arg\min_l \{ SP[s_{i,l}+w_{ikl}\}\]
 
 qui consiste \`a dire que le plus court chemin pour aller au sommet
 $s_{i+1,k}$ est obtenu en allant \`a un sommet qui pr\'ec\`ede par un plus
