@@ -1,4 +1,3 @@
--------------------------------------------------------------------
 Loading sequence...SEQ14AC002535G4G5, 7972 bases read, GC Proportion = 38.0%
 Loading Sensor.NG2............0
 Loading Sensor.Est............0
@@ -9,7 +8,7 @@ Reading cDNA hits............18 sequences read
    [AI100480]: inconsistent hit [4201-4301]
 A total of 3/18 sequences rejected
 Optimal path length = 45.3453
--------------------------------------------------------------------
+---------------------------------------------------------------------
    pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del
      1 t 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || -inf -inf -inf -inf -inf -inf -inf -inf || -inf -inf -inf -inf -inf -inf -inf -inf || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
      2 t 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || -inf -inf -inf -inf -inf -inf -inf -inf || -inf -inf -inf -inf -inf -inf -inf -inf || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
