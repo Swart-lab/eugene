@@ -35,10 +35,10 @@ if {$action=="Test"} {
 }
 
 ############################################################################
-set AllSensorsList {ATGpr BlastX Est EuStop FrameShift GFF GSplicer Homology IfElse \
-		     MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst Repeat  \
-		     Riken SPred SpliceWAM \
-		     StartWAM Transcript User GCPlot Plotter Tester}
+set AllSensorsList {ATGpr AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
+		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
+		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
+		    Tester Transcript User}
 
 
 ############################################################################
