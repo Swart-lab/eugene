@@ -36,7 +36,7 @@ The simplest way to compile this package is:
 
   2. Type `make' to compile the package.
 
-  3. Type 'CREATE_LINKS' to create several links needed.
+  3. Type './CREATE_LINKS' to create several links needed.
 
   4. Optionally, type `make check' to run any self-tests that come with
      the package.
@@ -65,6 +65,14 @@ this:
 
 Or on systems that have the `env' program, you can do it like this:
      env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
+
+As an example, eugene can be compiled on MacOS-X if the libgd library is
+installed (for example using fink). Using a CSH shell, you can set the
+LD and CPP flags as follows before doing the ./configure:
+
+	setenv LDFLAGS  -L/sw/lib
+	setenv CPPFLAGS -I/sw/include
+	./configure
 
 Compiling For Multiple Architectures
 ====================================
