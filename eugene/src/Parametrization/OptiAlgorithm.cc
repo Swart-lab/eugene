@@ -65,14 +65,14 @@ OptiAlgorithm::OptiAlgorithm(void)
 
 //-------------------------------------------------------
 // return a string with maximum 6 signs
-// if more than 5 letters returns: the 2 first letters + '..' + the 2 last
+// if more than 6 letters returns: the 2 first letters + '..' + the 2 last
 //-------------------------------------------------------
 string OptiAlgorithm::ReduceName(string s)
 {
   string ss, s0, s1, sn2, sn1;
   int n = s.length();
   
-  if (n > 5) {
+  if (n > 6) {
    s0 = s[0]; s1 = s[1]; sn2 = s[n-2]; sn1 = s[n-1];
    ss = s0 + s1 + ".."+ sn2 + sn1;
  } else
