@@ -90,8 +90,10 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
   estM = PAR.getI("Est.estM",N);
   utrM = PAR.getI("Est.utrM",N);
   ppNumber       = PAR.getI("Est.PPNumber",N);
-  stepid         = PAR.getI("Output.stepid");
-  DonorThreshold = PAR.getD("Est.StrongDonor");
+  stepid         = PAR.getI("Output.stepid",N);
+  MinDangling = PAR.getI("Est.MinDangling",N);
+  MaxIntron =  PAR.getI("Est.MaxIntron",N);
+  DonorThreshold = PAR.getD("Est.StrongDonor",N);
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
   index = 0;
@@ -333,10 +335,40 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
         
     // Look for each match in the current Hit
     ThisBlock = ThisEST->Match;
-   
-    // First Step: tries to determine strand
+
+    // First hit: delete short dangling
+    if ((ThisBlock->Next != NULL) && 
+	((abs(ThisBlock->Start - ThisBlock->End) <= MinDangling) ||
+	 (abs(ThisBlock->End - ThisBlock->Next->Start) >= MaxIntron))) {
+      ThisEST->Match = ThisBlock->Next;
+      ThisBlock->Next->Prev = NULL;
+      fprintf(stderr,
+	      "   [%s]: Suspicious dangling match removed [%d-%d]\n",
+	      ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+      ThisBlock->Next = NULL;
+      delete ThisBlock;
+      ThisEST->NGaps--;
+      ThisBlock = ThisEST->Match;
+    }
+
+    // First Step: tries to determine strandedness
     while (ThisBlock) {
-      // si ona un gap ?
+
+      // Last block: delete short dangling
+      if ((ThisBlock->Next == NULL) && (ThisBlock->Prev != NULL) &&
+	  ((abs(ThisBlock->Start-ThisBlock->End) <= MinDangling) ||
+	   (abs(ThisBlock->Start-ThisBlock->Prev->End) >= MaxIntron))) {
+	ThisBlock->Prev->Next = NULL;
+	fprintf(stderr,
+		"   [%s]: Suspicious dangling match removed [%d-%d]\n",
+		ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+	delete  ThisBlock;
+	ThisBlock = NULL;
+	ThisEST->NGaps--;
+	break;
+      }
+	
+      // si on a un gap ?
       if ((ThisBlock->Prev != NULL) && 
 	  abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
 	DonF = NINFINITY;
@@ -344,6 +376,8 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	AccF = NINFINITY;
 	AccR = NINFINITY;
 	
+	//	printf("[%d %d]\n",ThisBlock->Start,ThisBlock->End);
+
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
 	  MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
@@ -448,17 +482,14 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       
       ThisBlock = ThisEST->Match;
       while (ThisBlock) {
-	for (i = ThisBlock->Start; i<= ThisBlock->End; i++) {
-	  if (TheStrand & HitForward) PlotBarI(i, 4,0.9,1,7);
-	  if (TheStrand & HitReverse) PlotBarI(i,-4,0.9,1,7);
-	}
+
+	if (TheStrand & HitForward) PlotESTHit(ThisBlock->Start,ThisBlock->End,1,1);
+	if (TheStrand & HitReverse) PlotESTHit(ThisBlock->Start,ThisBlock->End,-1,1);
 	
 	if (PAR.getI("Output.graph") && (ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
-	  if (TheStrand & HitForward) 
-	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.9,0.9,7);
-	  if (TheStrand & HitReverse) 
-	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.9,0.9,7);
+	  if (TheStrand & HitForward) PlotESTGap(ThisBlock->Prev->End,ThisBlock->Start,1,1);
+	  if (TheStrand & HitReverse) PlotESTGap(ThisBlock->Prev->End,ThisBlock->Start,-1,1);
 	}
 	ThisBlock = ThisBlock->Next;
       }
@@ -502,6 +533,11 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	    ESTMatch[i] |= TheStrand << HitToMRight;
 #endif
 	
+	if (PAR.getI("Output.graph")) {
+	  if (TheStrand & HitForward) PlotESTHit(ThisBlock->Start,ThisBlock->End,1,0);
+	  if (TheStrand & HitReverse) PlotESTHit(ThisBlock->Start,ThisBlock->End,-1,0);
+	}
+
 	if ((ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  
@@ -527,26 +563,15 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 
 	  
 	  if (PAR.getI("Output.graph")) {
-	    if (TheStrand & HitForward) 
-	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.6,0.6,2);
-	    if (TheStrand & HitReverse) 
-	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.6,0.6,2);
+	    if (TheStrand & HitForward) PlotESTGap(ThisBlock->Prev->End,ThisBlock->Start,1,0);
+	    if (TheStrand & HitReverse) PlotESTGap(ThisBlock->Prev->End,ThisBlock->Start,-1,0);
 	  }
-	  
 	}
 	ThisBlock = ThisBlock->Next;
       }
     }
   }
   
-  if (PAR.getI("Output.graph"))
-    for (i = 0; i < X->SeqLen; i++) {
-      if (ESTMatch[i] & HitForward) 
-	PlotBarI(i, 4,0.6,1,2);
-      if (ESTMatch[i] & HitReverse) 
-	PlotBarI(i, -4,0.6,1,2);
-    }
-
   if (Rejected)
     fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,*NumEST);
   return HitTable;

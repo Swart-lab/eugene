@@ -43,6 +43,9 @@ class SensorEst : public Sensor
   int    ppNumber;
   int    stepid;
   int    N;
+
+  int MinDangling;
+  int MaxIntron;
   
   Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);
   void   ESTSupport (Prediction *pred,   int Tdebut,      int Tfin,
