@@ -12,10 +12,10 @@ extern Parameters PAR;
 // ----------------------
 SensorNG2 :: SensorNG2 (int n) : Sensor(n)
 {
-  accB = PAR.getD("NG2.accB");
-  accP = PAR.getD("NG2.accP");
-  donB = PAR.getD("NG2.donB");
-  donP = PAR.getD("NG2.donP");
+  accB = PAR.getD("NG2.accB",GetNumber());
+  accP = PAR.getD("NG2.accP",GetNumber());
+  donB = PAR.getD("NG2.donB",GetNumber());
+  donP = PAR.getD("NG2.donP",GetNumber());
 }
 
 // ----------------------
