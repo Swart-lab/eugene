@@ -236,7 +236,7 @@ void SensorBlastX :: ResetIter ()
 void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int i;
-  if( index <= (int)vPos.size()  &&  vPos[index] == pos ) {
+  if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
     for(i=0; i<6; i++)       //exons
       if(vPMatch[index] < 0 || 
 	 ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))

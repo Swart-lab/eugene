@@ -60,12 +60,12 @@ void SensorEuStop :: ResetIter ()
 // -----------------------
 void SensorEuStop :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if( iterF <= (int)vPosF.size()  &&  vPosF[iterF] == pos ) {
+  if( iterF < (int)vPosF.size()  &&  vPosF[iterF] == pos ) {
     d->Stop[0] += vValF[iterF];
     iterF++;
   }
 
-  if( iterR <= (int)vPosR.size()  &&  vPosR[iterR] == pos ) {
+  if( iterR < (int)vPosR.size()  &&  vPosR[iterR] == pos ) {
     d->Stop[1] += vValR[iterR];
     iterR++;
   }
