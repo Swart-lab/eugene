@@ -21,12 +21,12 @@ f sensors, that does not test the graph, and just test the stdout output) is def
 \subsection{Units tests}
 These tests test separetly each sensor. Using one sensor after the other (except for Est that requires also NG2 and for IfElse that uses NG2 and SPred), the detailed text outputs (-pd argument) are compared with a diff command (files are too long to use the spawn command) to a reference file.\\
 A small file of araset is used for the test: seq14ac002535g4g5.tfa (8 Kb).\\
-Theses tests are implemented in the EuGeneTk/Test/TestSuite/Units.exp file.\\
+Theses tests are implemented in the eugene/Test/TestSuite/Units.exp file.\\
 
 \subsection{Functional tests}
 These tests test valid groups of sensors. Five tests described in the table on the following page are performed. \\
 The textual output (except the 2 first lines due to version reference in them) is compare with a spawn command to a reference file and the graph generated is also compared to a reference file using there the diff command.  
-Theses tests are implemented in the EuGeneTk/Test/TestSuite/Functionals.exp file.
+Theses tests are implemented in the eugene/Test/TestSuite/Functionals.exp file.
 
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|} \hline \hline
@@ -81,38 +81,25 @@ The Big test checks the predictions done on the chr1\_2002.tfa\_22540000-2304000
 
 
 \section{How to run tests}
-It is first necessary to adapt the context of EuGeneTk/EuGene directory:
-\begin{enumerate}
-\item create a link named EuGeneTest toward EuGeneAS:\\
-         {\sf ln -s EuGeneAS EuGeneTest}
-\item copy the parameter file in EuGeneTest.par:\\ 
-         {\sf cp EuGeneAS.par EuGeneTest.par}
-\item add the following lines in EuGeneTest.par (needed to test separately each sensor):\\
-{\sf NG2.accP[0] 0.903\\ 
-NG2.accB[0] 5.585\\ 
-NG2.donP[0] 0.980\\ 
-NG2.donB[0] 27.670\\ 
-SPred.accP[0] 0.987\\ 
-SPred.accB[0] 3.850\\ 
-SPred.donP[0] 0.929\\ 
-SPred.donB[0] 10.800}
-\item update the EuGene.PluginsDir parameter with the absolute path (EuGeneTest will be called from the EuGeneTk/Test/config directory).
-\end{enumerate}
-\vspace{0.5cm}
+It is first necessary to create a link named eugeneTest toward eugene:\\
+         {\sf ln -s eugene eugeneTest}\\
+\\
 The 'check' target of Makefile lauches all the tests: {\sf make check}.\\
 To specify only some tests, is it possible to use the Makefile TEST variable set with DejaGnu runtest arguments.\\
 For example, to specify only 2 tests, type: \\
 {\sf make check TEST='Units.exp Functionals.exp'} \\
 or to forget a test, type: \\
 {\sf make check TEST='--ignore ``Units.exp'''}\\
-\vspace{0.5cm}
-If a test has failed, it is possible to examine difference between the coresponding reference file (in EuGeneTk/Test/Outputs directory) and the file obtained during test (in EuGeneTk/Test/TestTrace directory).
+\\
+If a test has failed, it is possible to examine difference between the coresponding
+ reference file (in eugene/Test/Outputs directory) and the file obtained during test 
+ (in eugene/Test/TestTrace directory).
 For example, if the EuStop test has failed, type: \\
 {\sf tkdiff -i ../Test/Outputs/Output\_EuStop ../Test/TestTrace/Output\_EuStop}\\
 The -i argument allows to ignore case letter difference (see last section that details Linux and SUN OS difference).
 
 \section{Test software sources organization}
-All the test files are under the EuGeneTk/Test directory.
+All the test files are under the eugene/Test directory.
 This directory contains 5 directories:
 \begin{itemize}
 \item {\bf Sequences}: contains all the sequences and the related information,
@@ -148,6 +135,9 @@ With SUN OS:
 In September 2004, some test results are differents depending on the used g++ compiler.\\
 Output\_BlastX have a false 5130 line with g++ 2.95 and a true one with g++ 3.3 and higher.\\
 In Output\_AraSeq, the value of the optimum path is slightly different with those 2 compilers.\\
+\\
+Due to the complete autoconfiscation of the software and the preparation of the diffusion as a debian package, the root of files is named eugene instead of EuGeneTk, the executable is called eugene instead of EuGeneAS, and it is no more necessary to create a EuGeneTest.par file to test the sofware.\\
+
 
 \end{document}
 
