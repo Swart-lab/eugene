@@ -80,17 +80,17 @@ void SensorBlastX :: Init (DNASeq *X)
   fprintf(stderr,"Reading Blastx data, level... ");
   fflush(stderr);
   
-  for( k=0; k<(int)strlen(PAR.getC("blastArg")); k++ ) {
+  for( k=0; k<(int)strlen(PAR.getC("BlastX.levels")); k++ ) {
     strcpy(tempname,PAR.getC("fstname"));
     strcat(tempname,".blast");
     i = strlen(tempname);
-    tempname[i]   = PAR.getC("blastArg")[k] - 1;
+    tempname[i]   = PAR.getC("BlastX.levels")[k] - 1;
     tempname[i+1] = 0;
 
     fblast = FileOpen(NULL,tempname, "r");
     if (fblast == NULL) continue;
     
-    level      = (PAR.getC("blastArg")[k] - '0') - 1;
+    level      = (PAR.getC("BlastX.levels")[k] - '0') - 1;
     A[0]     = B[0]= 0;
     ProtId   = A;
     PProtId  = B;
@@ -161,7 +161,7 @@ void SensorBlastX :: Init (DNASeq *X)
 	    //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 	  }
 	}
-	if (PAR.getI("graph") && level<3) {
+	if (PAR.getI("Output.graph") && level<3) {
 	  PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),
 		   LevelColor[level]);
 	  // for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
@@ -182,7 +182,7 @@ void SensorBlastX :: Init (DNASeq *X)
       phase = ph06(phase);
       
       // HITS -> CODANT
-      if (PAR.getI("graph") && level<3) {
+      if (PAR.getI("Output.graph") && level<3) {
 	for (i = deb-1; i < fin; i++) {
 	  PlotBarI(i,PhaseAdapt(phase),0.6+(level/8.0),1,LevelColor[level]);
 	}
