@@ -49,9 +49,13 @@ SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
     NbNtAfterAG = PAR.getI("SpliceWAM.NbNtAfterAG");
     AcceptorSiteLength= NbNtBeforeAG + 2 + NbNtAfterAG;
     
-    strcpy(donmodelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcpy(donmodelfilename,PAR.getC("eugene_dir"));
+    strcat(donmodelfilename,MODELS_DIR);
+    strcat(donmodelfilename,"/");
     strcat(donmodelfilename,PAR.getC("SpliceWAM.donmodelfilename"));
-    strcpy(accmodelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcpy(accmodelfilename,PAR.getC("eugene_dir"));
+    strcat(accmodelfilename,MODELS_DIR);
+    strcat(accmodelfilename,"/");
     strcat(accmodelfilename,PAR.getC("SpliceWAM.accmodelfilename"));
     
     DonWAModel= new WAM(MarkovianOrder, DonorSiteLength,"ACGT", donmodelfilename);

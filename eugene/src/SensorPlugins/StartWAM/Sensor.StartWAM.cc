@@ -40,7 +40,9 @@ SensorStartWAM :: SensorStartWAM (int n, DNASeq *X) : Sensor(n)
     NbNtBeforeATG = PAR.getI("StartWAM.NbNtBeforeATG");
     NbNtAfterATG = PAR.getI("StartWAM.NbNtAfterATG");
     MotifLength= NbNtBeforeATG + 3 + NbNtAfterATG;
-    strcpy(modelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcpy(modelfilename,PAR.getC("eugene_dir"));
+    strcat(modelfilename,MODELS_DIR);
+    strcat(modelfilename,"/");
     strcat(modelfilename,PAR.getC("StartWAM.modelfilename"));
     PlotScoreIncrease= 7.0;
 

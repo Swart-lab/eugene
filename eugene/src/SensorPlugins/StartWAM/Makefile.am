@@ -17,11 +17,12 @@
 # Contents: compilation of the StartWAM directory
 # ------------------------------------------------------------------
 
-AM_CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.StartWAM.so
+noinst_PROGRAMS = Sensor.StartWAM.so
 Sensor_StartWAM_so_SOURCES = Sensor.StartWAM.cc Sensor.StartWAM.h 
-Sensor_StartWAM_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_StartWAM_so_LDFLAGS = $(sensors_ldflags) 
 
 CLEANFILES = *~

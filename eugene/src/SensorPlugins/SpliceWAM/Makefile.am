@@ -17,12 +17,13 @@
 # Contents: compilation of the SpliceWAM directory
 # ------------------------------------------------------------------
 
-AM_CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.SpliceWAM.so
+noinst_PROGRAMS = Sensor.SpliceWAM.so
 Sensor_SpliceWAM_so_SOURCES = Sensor.SpliceWAM.cc Sensor.SpliceWAM.h 
-Sensor_SpliceWAM_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_SpliceWAM_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~
