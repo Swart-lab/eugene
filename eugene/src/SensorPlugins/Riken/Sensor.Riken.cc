@@ -221,3 +221,10 @@ void SensorRiken :: Plot(DNASeq *TheSeq)
     PlotLine(RAFL[j]->fin-HLen,RAFL[j]->fin, 0, 0, 1.0, 1.0, 2-RAFL[j]->sens);
   }
 }
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorRiken :: PostAnalyse(Prediction *pred)
+{
+}

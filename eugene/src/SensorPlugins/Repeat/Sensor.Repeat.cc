@@ -114,3 +114,10 @@ void SensorRepeat :: Plot(DNASeq *TheSeq)
     for (j = vDeb[i]; j<= vFin[i]; j++)
       PlotBarI(j,0,0.25,2,6);
 }
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorRepeat :: PostAnalyse(Prediction *pred)
+{
+}
