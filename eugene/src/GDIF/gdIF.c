@@ -12,7 +12,7 @@
 #include <string.h>
 #endif
 
-#define REAL float
+#define REAL double
 
 #define LMargin 20
 #define RMargin 20
