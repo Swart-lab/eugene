@@ -547,7 +547,7 @@ We now descrive each plugin, its behavior and parameters.
 
 \section{Optimization of Plugins parameters}
 
-The value of some numerical plugins parameters (specified in the parameter file) migth be optimized on a reference set of sequences (with their related information) for which genes positions are known. The idea is to adapt the values of parameters to increase as much as possible the prediction of genes and exons. The figure \ref{fig:ParaOptimization} details the general functioning of the software with input and ouput files.\\
+The value of some numerical plugins parameters (specified in the parameter file with a name finishing with an '*') migth be optimized on a reference set of sequences (with their related information) for which genes positions are known. The idea is to adapt the values of parameters to increase as much as possible the prediction of genes and exons. The figure \ref{fig:ParaOptimization} details the general functioning of the software with input and ouput files.\\
 
 \begin{figure}[htbp]
   \begin{center}
@@ -580,15 +580,15 @@ ParaOptimization.Trace         TRUE
 #
 ParaOptimization.NbParameter   3
 #
-ParaOptimization.Para.Name[0]   NStart.startP
+ParaOptimization.Para.Name[0]   NStart.startP*
 ParaOptimization.Para.Min[0]    0.001
 ParaOptimization.Para.Max[0]    15      
 #
-ParaOptimization.Para.Name[1]   NStart.startB
+ParaOptimization.Para.Name[1]   NStart.startB*
 ParaOptimization.Para.Min[1]    0.001
 ParaOptimization.Para.Max[1]    15      
 #
-ParaOptimization.Para.Name[2]   EuStop.stopP
+ParaOptimization.Para.Name[2]   EuStop.stopP*
 ParaOptimization.Para.Min[2]    0
 ParaOptimization.Para.Max[2]    6       
 #
