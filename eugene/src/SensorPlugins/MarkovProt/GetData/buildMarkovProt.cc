@@ -12,13 +12,14 @@
 #include <math.h>
 #include <string.h>
 #include "../../0_SensorTk/markov.h"
+#include "../../0_SensorTk/markov.cc"
 #include "../../../EuGene/System.h"
 #include "../../../EuGene/System.cc"
 #include "../../../EuGene/DNASeq.h"
 #include "../../../EuGene/DNASeq.cc"
 
 int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
-char* DBfile     = "/www/db/sp";                 // infile
+char* DBfile     = "/www/db/sp";                 // infile (on maladeta)
 char* MATRIXfile = "swissprot.ordre2.usi.bin";  // outfile
 
 int main()
@@ -53,14 +54,14 @@ int main()
   fprintf(stderr," - adding pseudocounts...");
   COUNT.pseudocount(1);
   fprintf(stderr,"done\n");
-  //  COUNT.affichage(0);
+  //  COUNT.affichage(0);  (verbose, displays the counts)
 
   //----------------------------------------------------------------//
   // COMPUTE PROBS (store results in matrix MOD)
   fprintf(stderr," - computing probs...");
   MOD.compte2probas(COUNT);
   fprintf(stderr,"done\n");
-  //  MOD.affichage(0);
+  //  MOD.affichage(0);  (verbose, displays the probs)
 
   //----------------------------------------------------------------//
   // SAVE data in the matrix file
