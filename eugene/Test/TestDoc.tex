@@ -1,0 +1,114 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[pdftex]{graphicx}
+\usepackage{times}
+
+\newcommand{\EuGenie}{\textsc{EuG\`ene}}
+
+
+\begin{document}
+\setlength{\parindent}{0pt}
+
+\title{Projet \EuGenie: Tests description}
+\maketitle
+
+\section{Implemented tests}
+
+\subsection{Units tests}
+These tests test separetly each sensor. Using one sensor after the other (except for Est that requires also NG2 and for IfElse that uses NG2 and SPred), the detailed text outputs (-pd argument) are compared with a diff command (files are too long to use the spawn command) to a reference file.\\
+A small file of araset is used for the test: seq14ac002535g4g5.tfa (8 Kb).\\
+Theses tests are implemented in the EuGeneTk/Test/TestSuite/Units.exp file.\\
+
+\subsection{Functional tests}
+These tests test valid groups of sensors. Five tests described in the table on the following page are performed. \\
+The textual output (except the 2 first lines due to version reference in them) is compare with a spawn command to a reference file and the graph generated is also compared to a reference file using there the diff command.  
+Theses tests are implemented in the EuGeneTk/Test/TestSuite/Functionals.exp file.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|} \hline \hline
+{\bf Functional Tests}& {\bf SeqAra}& {\bf SeqHom}& {\bf SeqDoc}& {\bf SeqRest}& {\bf SeqBig}\\ \hline \hline
+
+{\bf Sequences}& & & & &\\ \hline \hline
+seq25... (15 Kb)            & x &   &   & x &  \\
+(araset)                 &   &   &   &   &  \\ \hline 
+exSeqHom.fasta (3 Kb)    &   & x &   &   &  \\ 
+(EugeneHom)              &   &   &   &   &  \\ \hline 
+SYNO\_ARATH.fasta (4 Kb) &   &   & x &   &  \\ 
+(documentation)          &   &   &   &   &  \\ \hline 
+chr1... (508 Kb)            &   &   &   &   & x\\ 
+(bug)                    &   &   &   &   &  \\ \hline \hline 
+
+{\bf Sensors}& & & & &\\ \hline \hline
+MarkovIMM      &       x        &                   &     x    &   & x\\ \hline
+MarkovConst    &                &                   &          & x & \\ \hline
+MarkovProt     &                &        x          &          &   & \\ \hline
+EuStop         &       x        &        x          &     x    & x & x\\ \hline
+NStart         &       x        &                   &     x    &   & x\\ \hline
+StartConst     &                &                   &          & x & \\ \hline
+StartWAM       &                &        x          &          &   & \\ \hline
+NG2            & used by IfElse &                   &          &   & used by IfElse\\  \hline
+SPred          & used by IfElse &                   &          &   & used by IfElse\\  \hline
+GSplicer       &       x        &                   &          &   & x\\ \hline
+SpliceConst    &                &                   &          & x & \\ \hline
+SpliceWAM      &                &        x          &          &   & \\ \hline
+Est            &       x        &                   &          &   & x\\  \hline
+Riken          &                &                   &          & x & \\ \hline
+BlastX         &       x        &                   &          &   & x\\  \hline
+Homology       &                &        x          &          &   & \\ \hline
+FrameShift     &                &                   &    x     &   & \\ \hline
+Transcript     &                &        x          &    x     &   & \\ \hline
+Repeat         &                &                   &          & x & \\ \hline
+User           &                &        x          &    x     &   & \\ \hline
+GFF            &                &        x          &          &   & \\ \hline
+IfElse         &       x        &                   &    x     &   & x\\ \hline \hline
+
+{\bf Arguments}& & & & &\\ \hline \hline
+E, B           &       x        &                   &          &   &\\ \hline 
+g              &       x        &        x          &    x     & x & x\\ \hline
+\end{tabular}
+\end{center}
+\vspace{0.5cm}
+
+
+\subsection{Araset test}
+This test compares only the predictions (no check of optimal path length) realized on all the sequence of the araset set: /Annotation/Arabidopsis/araset/Genes.\\
+The sensors used are MarkovIMM, EuStop, NStart, IfElse, GSplicer, Est, BlastX.\\
+
+
+\section{How to run tests}
+The 'check' target of Makefile lauches all the tests: {\sf make check}.\\
+To specify only some tests, is it possible to use the Makefile TEST variable set with DejaGnu runtest arguments.\\
+For example, to specify only 2 tests, type: \\
+{\sf make check TEST='Units.exp Functionals.exp'} \\
+or to forget a test, type: \\
+{\sf make check TEST='--ignore ``Units.exp'''}
+
+
+\section{Test software sources organization}
+All the test files are under the EuGeneTk/Test directory.
+This directory contains 5 directories:
+\begin{itemize}
+\item {\bf Sequences}: contains all the sequences and the related information,
+\item {\bf Outputs}: contains all the generated reference files,
+\item {\bf config} (name imposed by DejaGnu): contains the scripts for generating reference files (GenerateOutputs.tcl), for common procedures and variables, for Dejagnu runtest initialisation (default.exp),
+\item {\bf TestSuite}: contains the tests scripts (expect language),
+\item {\bf TestTrace}: contains the DejaGnu test trace (files .sum and .log) and the files generated by tests that have failed, in order to be able to analyze the differences encountred.
+\end{itemize}
+
+\section{How to add others tests}
+\begin{enumerate}
+\item Describe the test in the Test/config/TestVar.tcl file\\
+To add an other unit test for a new sensor: just complete the AllSensorsList variable.\\
+To add a functional test: add the name in the FunctionalTestList variable and initialize the different variables indexed with the test name (see an existing test).\\
+To add a different test: define required variables.\\
+\item Update Test/config/GenerateOutputs.tcl to generate the corresponding reference files\\
+To add an other unit or functional test: if 'simple' case, nothing to do else need to adapt or write code.
+To add a different test: need to write adapted code.
+\item Run Test/config/GenerateOutputs.tcl
+\end{enumerate}
+
+\end{document}
+
+
+
+

@@ -1,0 +1,52 @@
+#============================================================================
+#=             Copyright (c) 2002 by INRA. All rights reserved.             
+#=                 Redistribution is not permitted without                  
+#=                 the express written permission of INRA.                 
+#=                     Mail : tschiex@toulouse.inra.fr                     
+#=-------------------------------------------------------------------------
+#= File         : EuGeneTk/Test/TestSuite/Units.exp
+#= Description  : Unit test script test each sensor separately
+#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
+#===========================================================================
+
+
+foreach TEST $AllSensorsList {
+
+    # Run EuGene
+    if {$TEST != "Est"} {
+	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
+	    -D Sensor.${TEST}.use=TRUE 2> stderr > stdout
+    } else {
+	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
+	    -D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE 2> stderr > stdout
+    }
+    
+    set out [open stdout {RDONLY}]
+    set err [open stderr {RDONLY}]
+    set std [open $TEST w+]
+    
+    # Copy stderr and stdout in the reference file
+    set f [read -nonewline $err]
+    puts $std $f
+    set f [read -nonewline $out]
+    puts $std $f
+
+    close $out
+    close $err
+    close $std
+
+    exec rm stderr stdout
+
+    # Remove the first lines related to version number
+    RemoveFirstLines $TEST
+
+    set test [diff $OUTPUT_DIR/Output_${TEST} $TEST]
+    if {$test == 1} {
+	pass "${TEST}"
+	exec rm $TEST
+    } else {
+	fail "${TEST}"
+	exec mv $TEST $TRACE_DIR/Output_${TEST}
+    }
+
+}

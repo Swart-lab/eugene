@@ -1,0 +1,28 @@
+#============================================================================
+#=             Copyright (c) 2002 by INRA. All rights reserved.             
+#=                 Redistribution is not permitted without                  
+#=                 the express written permission of INRA.                 
+#=                     Mail : tschiex@toulouse.inra.fr                     
+#=-------------------------------------------------------------------------
+#= File         : EuGeneTk/Test/config/default.exp
+#= Description  : First file executed by runtest
+#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
+#===========================================================================
+
+############################# Environment variables ##########################
+set action "Test"
+set timeout 1000 ;# DejaGnu variable, time out if no response for spawn
+source ../Test/config/TestVar.tcl
+source ../Test/config/TestProc.tcl
+##############################################################################
+
+# Init parameters values
+InitParameterFile ${EUGENE}.par $AllSensorsList
+
+# Remove all EuGene trace files 
+# but not DejaGnu trace files that are yet the current ones
+foreach f [exec ls ${TRACE_DIR}] {
+    if {![string match *.sum $f] && ![string match *.log $f]} {
+	exec rm ${TRACE_DIR}/$f
+    }
+}

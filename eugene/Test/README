@@ -1,0 +1,52 @@
+#============================================================================
+#=             Copyright (c) 2002 by INRA. All rights reserved.             
+#=                 Redistribution is not permitted without                  
+#=                 the express written permission of INRA.                 
+#=                     Mail : tschiex@toulouse.inra.fr                     
+#=-------------------------------------------------------------------------
+#= File         : EuGeneTk/Test/README
+#= Description  : Description of the directories contents
+#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex    
+#= Creation     : July 2003   
+#===========================================================================
+
+
+########################## Directory structure ########################
+
+                               
+                                   Test
+                                . . . . .
+                              .  .  .  .  .
+                            .   .   .   .   .
+                          .    .    .    .    .
+                       .      .     .     .     .
+                     .       .      .      .      .
+                   .        .       .       .       .
+               Sequences TestTrace config Outputs TestSuite
+
+
+
+->Test
+	-README (Description of the directories contents)
+
+->Sequences
+This directory contains the sequences and the related informations used for the different tests. For example :
+	-seq14ac002535g4g5.tfa.* (Files used for units tests)
+
+->TestTrace
+This directory contains the output files of the command runtest (DejaGnu) and the outputs of tests (EuGene Outputs) when they fail.
+
+->config (compulsory name by DejaGnu)
+This directory contains all the scripts
+	-GenerateOutputs.tcl (Generates the reference files)
+	-Default.exp (First file executed by runtest)
+	-TestVar.tcl (Contains all the environment variables)
+	-TestProc.tcl (Contains procedures called by GenerateOutputs.tcl and the files in TestSuite directory)
+
+->Outputs
+This directory contains the reference files of EuGene outputs. 
+For functional tests Reference files (Output_<name>) are in test format (some caracters are added) and use for test. In order to be able to compare directely EuGene outputs when tests fail, files with the extension '_std' store the EuGene output.
+
+->TestSuite
+This directory contains the test scripts. For example :
+	- Units.exp (unit tests)

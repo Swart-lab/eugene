@@ -1,0 +1,38 @@
+Loading Sensor.Transcript.....0.
+Loading Sensor.StartWAM.......0.
+Loading WAM models...  0 1 2 3 4 5 6 7 8 ... done.
+Loading Sensor.EuStop.........0.
+Loading Sensor.Homology.......0.
+Loading Sensor.MarkovProt.....0.
+Loading MarkovProt model...done.
+Loading Sensor.SpliceWAM......0.
+Loading WAM models...  0 1 2 3 4 5 6 7 8 ... done.
+Loading WAM models...  0 1 2 3 4 ... done.
+Loading Sensor.User...........0.
+Loading Sensor.GFF............0.
+-------------------------------------------------------------------.
+Loading sequence...GHU53701, 2626 bases read, GC Proportion = 40.3%.
+Loading protmat file.........done.
+Reading tblastx data.........done.
+Loading user data............done.
+Reading GFF file.............done.
+Optimal path length = 1875.398482.
+.
+    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
+.
+exSeq.1.1.0	Utr5    \+        340     359       20     NA      NA      NA      NA     0.0  .
+exSeq.1.1.1	Init    \+        360     393       34     \+1      \+3     359     394     0.0  .
+exSeq.1.1.2	Intr    \+        596     732      137     \+2      \+1     595     733     0.0  .
+exSeq.1.1.3	Intr    \+        830     876       47     \+1      \+2     829     877     0.0  .
+exSeq.1.1.4	Intr    \+        961    1286      326     \+3      \+2     960    1287     0.0  .
+exSeq.1.1.5	Intr    \+       1396    1478       83     \+2      \+3    1395    1479     0.0  .
+exSeq.1.1.6	Intr    \+       1573    1648       76     \+1      \+1    1572    1649     0.0  .
+exSeq.1.1.7	Intr    \+       1757    1818       62     \+2      \+1    1756    1819     0.0  .
+exSeq.1.1.8	Intr    \+       1962    2057       96     \+1      \+3    1961    2058     0.0  .
+exSeq.1.1.9	Intr    \+       2145    2306      162     \+1      \+3    2144    2307     0.0  .
+exSeq.1.1.10	Term    \+       2491    2607      117     \+1      \+1    2490    2608     0.0  .
+exSeq.1.1.0	Utr3    \+       2608    2626       19     NA      NA      NA      NA     0.0  .
+.
+Dumping images \("./exSeqHom.---.png"\)...done.
+-------------------------------------------------------------------.
+

@@ -1,0 +1,65 @@
+#============================================================================
+#=             Copyright (c) 2002 by INRA. All rights reserved.             
+#=                 Redistribution is not permitted without                  
+#=                 the express written permission of INRA.                 
+#=                     Mail : tschiex@toulouse.inra.fr                     
+#=-------------------------------------------------------------------------
+#= File         : EuGeneTk/Test/TestSuite/Functional.exp
+#= Description  : Functional tests scripts
+#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
+#===========================================================================
+
+
+foreach TEST $FunctionalTestList {
+    foreach seq $SEQ($TEST) {
+	# Local variables 
+	set test_std 0
+	set test_png 0
+
+	# Preparation of the parameter file with the correct sensors
+	foreach sensor $SensorsList($TEST) {set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
+	ModifyParaValue ${EUGENE}.par  NewValue${TEST}
+
+	# Open reference file
+	set f [open $OUTPUT_DIR/$FILE_REF($TEST) {RDONLY}]
+	set reference [read -nonewline $f]
+	close $f
+
+	# Get the sequence length
+	set l [GetSeqLength $SEQ_DIR/$seq]
+
+	# Run EuGene
+	eval spawn $EUGENE_DIR/$EUGENE $SEQ_DIR/$seq $OPTIONS($TEST) -l $l
+
+	# Checking the output
+	match_max 10000
+	expect {
+	    -re $reference {set test_std 1}
+	    -re timeout {fail "$TEST (timeout)"}
+	}
+
+	# Checking the graphical output
+	set test_png [diff $OUTPUT_DIR/$FILE_REF($TEST).000.png $IMG($TEST)]
+
+	# No regression if the 2 tests are passed
+	if {$test_std==1 && $test_png==1} {
+	    pass "${TEST}"
+	    exec rm $IMG($TEST)
+	} else {
+	    fail "${TEST}"
+	    if {$test_std==0} {
+		eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$seq $OPTIONS($TEST) \
+		    >& $TRACE_DIR/$FILE_REF($TEST)_std
+		# Remove the first lines related to version number
+		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
+	    }
+	    if {$test_png != 1} {
+		exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).000.png
+	    }
+	    catch {exec rm $IMG($TEST)}
+	}
+
+	# Restore initial parameters values
+	InitParameterFile ${EUGENE}.par $AllSensorsList
+    }
+}
