@@ -187,6 +187,15 @@ void MasterSensor :: ResetType ()
     theSensors[i]->type = Type_Unknown;
 }
 
+// --------------------------
+//  Post analyse the sensors.
+// --------------------------
+void MasterSensor :: PostAnalyse (Prediction *pred)
+{
+  for(int i=0; i<(int)theSensors.size(); i++)
+    theSensors[i]->PostAnalyse(pred);
+}
+
 // -------------------------
 //  Destroy the sensors.
 // -------------------------

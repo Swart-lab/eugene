@@ -57,6 +57,7 @@ class MasterSensor
   void GetInfoAt    (DNASeq *, int, DATA *);
   void PrintDataAt  (DNASeq *X, int, DATA *);
   int  GetInfoSpAt  (TYPE_SENSOR, DNASeq *, int, DATA *);
+  void PostAnalyse  (Prediction *);
   void ResetSensors ();
 };
 
