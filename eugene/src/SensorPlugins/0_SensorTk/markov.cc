@@ -427,9 +427,11 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
 	  }
 	}
 	else{
-	  if (alphabet->operator[](Ch) == alphabet->taille) fprintf (stderr, "Unexpected character `%c\' fonction fichier2seq-> sequence %s rejetee\n", Ch,seqname);
-	  Sequence=NULL;
-	  return 2;
+	  if (alphabet->operator[](Ch) == alphabet->taille) {
+	    fprintf (stderr, "Unexpected character `%c\' fonction fichier2seq-> sequence %s rejetee\n", Ch,seqname);
+	    Sequence=NULL;
+	    return 2;
+	  }
 	}
       }
       Sequence [Len++] = Ch;
