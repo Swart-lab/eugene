@@ -110,6 +110,10 @@ template<class CHAINE, typename T> class TabChaine
   //  void seq2compte(char* seq, int debut, int fin, int parcodon=0);
   //  void seq2compte(char* seq, int debut, int fin, int phase,
   //                  int parcodon=0); A faire...
+  // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
+  int fichier2compte (FILE *fp, int parcodon=0);
+  // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
+  int fichier2compte (FILE *fp, int debut, int fin, int parcodon=0);
   // sauvegarde; ATTENTION! uniquement pour <double>
   void sauve2fichier (FILE *fp);
   // lecture d'un fichier contenant un modele sauvegarde
