@@ -70,7 +70,6 @@ foreach sensor $AllSensorsList {
 		-D Sensor.${sensor}.use=TRUE -D Sensor.NG2.use=TRUE \
 		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
 	} else {
-	    catch {exec rm test.EuStop.gff}
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-D Sensor.${sensor}.use=TRUE $SEQ_DIR/exSeqHom.fasta  \
 		2> tmp%stderr > tmp%stdout
@@ -104,19 +103,6 @@ foreach sensor $AllSensorsList {
 	    exec cp tmp%GenerateOutputs $OUTPUT_DIR/Output_${sensor}
 	} else {
 	    exec cp tmp%GenerateOutputs $OUTPUT_DIR/Output_${sensor}.new
-	}
-    }
-    
-    if {$sensor == "Tester"} {
-	if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${sensor}.gff]} {
-	    exec cp test.EuStop.gff $OUTPUT_DIR/Output_${sensor}.gff
-	} elseif {[catch {exec diff test.EuStop.gff $OUTPUT_DIR/Output_${sensor}.gff}]} {
-	    AskReplace $OUTPUT_DIR/Output_${sensor}.gff
-	    if {[gets stdin] == "Y"} {
-		eval exec cp test.EuStop.gff $OUTPUT_DIR/Output_${sensor}.gff
-	    } else {
-		eval exec cp test.EuStop.gff $OUTPUT_DIR/Output_${sensor}.gff.new
-	    }
 	}
     }
 

@@ -241,8 +241,10 @@ set NewValue1(Plotter.GC\[0\])	 1
 set NewValue1(Plotter.GC3\[0\])	 1 
 set NewValue1(Plotter.A|T/A+T\[0\])	 0 
 ##### Sensor Tester #####
-set NewValue1(Tester.Test.0)		EuStop
-set NewValue1(Tester.Param.idx.0)	0
+set NewValue1(Tester.Make)		SPSN
+set NewValue1(Tester.Sensor)		EuStop
+set NewValue1(Tester.Sensor.Instance)	0
+set NewValue1(Tester.SPSN.MinNumbers)	100
 #
 # No sensor used
 foreach sensor $SensorsList {set NewValue1(Sensor.${sensor}.use) FALSE}
