@@ -14,6 +14,8 @@ SensorNStart :: SensorNStart (int n) : Sensor(n)
 {
   startP = PAR.getD("NStart.startP");
   startB = PAR.getD("NStart.startB");
+
+  PositionGiveInfo = -1;
 }
 
 // ----------------------
@@ -125,43 +127,38 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
 // ------------------------
 void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
+  bool update = false;
+
+  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
+  PositionGiveInfo = pos;
+  
   // Start Forward
-  if((indexF != 0                 &&  vPosF[indexF-1] >= pos) ||
-     (indexF < (int)vPosF.size()  &&  vPosF[indexF]   <  pos))
-    {
-      iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[iter-vPosF.begin()]);
-	d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[iter-vPosF.begin()]);
-	indexF = iter-vPosF.begin() + 1;
-      }
-      else indexF = iter-vPosF.begin();
-    }
-  else if(indexF < (int)vPosF.size()  &&  vPosF[indexF] == pos)
-    {
+  if(!vPosF.empty()) {
+    if (update) 
+      indexF = lower_bound(vPosF.begin(), vPosF.end(), pos)-vPosF.begin();
+    
+    if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
       d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[indexF]);
       d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[indexF]);
       indexF++;
     }
+  }
   
   // Start Reverse
-  if((indexR < (int)vPosR.size()  &&  vPosR[indexR+1] >= pos) ||
-     (indexR > -1                 &&  vPosR[indexR]   <  pos))
-    {
-      iter = lower_bound(vPosR.begin(), vPosR.end(), pos, std::greater<int>());
-      if(*iter == pos) { 
-	d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[iter-vPosR.begin()]);
-	d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[iter-vPosR.begin()]);
-	indexR = iter-vPosR.begin();
-      }
-      else indexR = iter-vPosR.begin() - 1;
+  if (!vPosR.empty()) {
+    if (update) { 
+      indexR = lower_bound(vPosR.begin(), vPosR.end(), pos, std::greater<int>())-vPosR.begin();
+      if (indexR==(int)vPosR.size()) indexR--; // if pos is before first site, then point first site
+      if (vPosR[indexR]<pos) indexR = -1; // if pos is after last site, then do not point
     }
-  else if(indexR > -1  &&  vPosR[indexR] == pos)
-    {
+
+    if((indexR!=-1) && (indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
       d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[indexR]);
       d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[indexR]);
       indexR--;
     }
+  }
+
 }
 
 // ----------------------------

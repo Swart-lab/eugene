@@ -9,9 +9,11 @@
 class SensorNG2 : public Sensor
 {
  private:
+  int PositionGiveInfo;
+
   std::vector<int>  vPosAccF, vPosAccR, vPosDonF, vPosDonR;
   std::vector<REAL> vValAccF, vValAccR, vValDonF, vValDonR;
-  std::vector<int>::iterator iter;
+
   int iAccF, iAccR, iDonF, iDonR;
   double accB, accP, donB, donP;
   

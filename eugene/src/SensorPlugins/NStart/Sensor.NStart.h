@@ -9,9 +9,11 @@
 class SensorNStart : public Sensor
 {
  private:
+  int PositionGiveInfo;
+
   std::vector<int>  vPosF, vPosR;
   std::vector<REAL> vValF, vValR;
-  std::vector<int>::iterator iter;
+
   int indexF, indexR;
   double startP, startB;
   

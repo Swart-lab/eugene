@@ -1,6 +1,12 @@
 #include "Sensor.SPred.h"
 #define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 
+
+
+
+
+
+
 /*************************************************************
  **                     SensorSplicePredictor               **
  *************************************************************/
@@ -16,6 +22,8 @@ SensorSPred :: SensorSPred (int n) : Sensor(n)
   accB = PAR.getD("SPred.accB",GetNumber());
   donP = PAR.getD("SPred.donP",GetNumber());
   donB = PAR.getD("SPred.donB",GetNumber());
+
+  PositionGiveInfo = -1;
 }
 
 // ----------------------
@@ -163,81 +171,65 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
 // ------------------------
 void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
 {
+  bool update = false;
+
+  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
+  PositionGiveInfo = pos;
+
   // Accepteur Forward
-  if((iAccF != 0                    &&  vPosAccF[iAccF-1] >= pos) ||
-     (iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF]   <  pos))
-    {
-      iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iter-vPosAccF.begin()]);
-	d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iter-vPosAccF.begin()]);
-	iAccF = iter-vPosAccF.begin() + 1;
-      }
-      else iAccF = iter-vPosAccF.begin();
-    }
-  else if(iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF] == pos)
-    {
+  if(!vPosAccF.empty()) {
+    if (update) 
+      iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
+    
+    if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iAccF]);
       d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iAccF]);
       iAccF++;
     }
+  }
   
   // Accepteur Reverse
-  if((iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR+1] >= pos) ||
-     (iAccR > -1                    &&  vPosAccR[iAccR]   <  pos))
-    {
-      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, std::greater<int>());
-      if(*iter == pos) {
-	d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iter-vPosAccR.begin()]);
-	d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iter-vPosAccR.begin()]);
-	iAccR = iter-vPosAccR.begin();
-      }
-      else iAccR = iter-vPosAccR.begin() - 1;
+  if (!vPosAccR.empty()) {
+    if (update) { 
+      iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, std::greater<int>())-vPosAccR.begin();
+      if (iAccR==(int)vPosAccR.size()) iAccR--; // if pos is before first site, then point first site
+      if (vPosAccR[iAccR]<pos) iAccR = -1; // if pos is after last site, then do not point
     }
-  else if(iAccR > -1  &&  vPosAccR[iAccR] == pos)
-    {
+
+    if((iAccR!=-1) && (iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iAccR]);
       d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iAccR]);
       iAccR--;
     }
-  
+  }
+
   // Donneur Forward
-  if((iDonF != 0                    &&  vPosDonF[iDonF-1] >= pos) ||
-     (iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF]   <  pos))
-    {
-      iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iter-vPosDonF.begin()]);
-	d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iter-vPosDonF.begin()]);
-	iDonF = iter-vPosDonF.begin() + 1;
-      }
-      else iDonF = iter-vPosDonF.begin();
-    }
-  else if(iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF] == pos)
-    {
+  if(!vPosDonF.empty()) {
+    if (update) 
+      iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
+
+    if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
       d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iDonF]);
       d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iDonF]);
       iDonF++;
     }
+  }
   
   // Donneur Reverse
-  if((iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR+1] >= pos) ||
-     (iDonR > -1                    &&  vPosDonR[iDonR]   <  pos))
-    {
-      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, std::greater<int>());
-      if(*iter == pos) {
-	d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iter-vPosDonR.begin()]);
-	d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iter-vPosDonR.begin()]);
-	iDonR = iter-vPosDonR.begin();
-      }
-      else iDonR = iter-vPosDonR.begin() - 1;
+  if(!vPosDonR.empty()) {
+    if (update) {
+      iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, std::greater<int>())-vPosDonR.begin();
+      if (iDonR==(int)vPosDonR.size()) iDonR--;  // if pos is before first site, then point first site
+      if (vPosDonR[iDonR]<pos) iDonR = -1; // if pos is after last site, then do not point
     }
-  else if(iDonR > -1  &&  vPosDonR[iDonR] == pos)
-    {
+
+    if((iDonR!=-1) && (vPosDonR[iDonR] == pos)) {
       d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
       d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
       iDonR--;
     }
+  }
+
 }
 
 // ----------------------------

@@ -27,6 +27,8 @@ SensorGSplicer :: SensorGSplicer (int n) : Sensor(n)
   penAcc  = PAR.getD("GSplicer.penAcc", GetNumber());
   coefDon = PAR.getD("GSplicer.coefDon",GetNumber());
   penDon  = PAR.getD("GSplicer.penDon", GetNumber());
+  
+  PositionGiveInfo = -1;
 }
 
 // ----------------------
@@ -130,89 +132,54 @@ void SensorGSplicer :: ReadGSplicer(char name[FILENAME_MAX+1], int SeqLen)
 // ------------------------
 void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
+  bool update = false;
+
+  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
+  PositionGiveInfo = pos;
+
   // Accepteur Forward
-  if((iAccF != 0                    &&  vPosAccF[iAccF-1] >= pos) ||
-     (iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF]   <  pos))
-    {
-      iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Acc].weight[Signal::Forward] +=
-	  (vValAccF[iter-vPosAccF.begin()] * coefAcc) - penAcc;
-	//d->sig[DATA::Acc].weight[Signal::ForwardNo] += ...
-	iAccF = iter-vPosAccF.begin() + 1;
-      }
-      else iAccF = iter-vPosAccF.begin();
-    }
-  else if(iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF] == pos)
-    {
-      d->sig[DATA::Acc].weight[Signal::Forward] +=
-	(vValAccF[iAccF] * coefAcc) - penAcc;
-      //d->sig[DATA::Acc].weight[Signal::ForwardNo] += ...
+  if(!vPosAccF.empty()) {
+    if (update) 
+      iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
+    
+    if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
+      d->sig[DATA::Acc].weight[Signal::Forward] += (vValAccF[iAccF]*coefAcc) - penAcc;
       iAccF++;
     }
-  
+  }
+
   // Accepteur Reverse
-  if((iAccR != 0                    &&  vPosAccR[iAccR-1] >= pos) ||
-     (iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR]   <  pos))
-    {
-      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Acc].weight[Signal::Reverse] +=
-	  (vValAccR[iter-vPosAccR.begin()] * coefAcc) - penAcc;
-	//d->sig[DATA::Acc].weight[Signal::ReverseNo] += ...
-	iAccR = iter-vPosAccR.begin() + 1;
-      }
-      else iAccR = iter-vPosAccR.begin();
-    }
-  else if(iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR] == pos)
-    {
-      d->sig[DATA::Acc].weight[Signal::Reverse] += 
-	(vValAccR[iAccR] * coefAcc) - penAcc;
-      //d->sig[DATA::Acc].weight[Signal::ReverseNo] += ...
+  if(!vPosAccR.empty()) {
+    if (update) 
+      iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos)-vPosAccR.begin();
+    
+    if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
+      d->sig[DATA::Acc].weight[Signal::Reverse] += (vValAccR[iAccR]*coefAcc) - penAcc;
       iAccR++;
     }
-  
+  }
+ 
   // Donneur Forward
-  if((iDonF != 0                    &&  vPosDonF[iDonF-1] >= pos) ||
-     (iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF]   <  pos))
-    {
-      iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Don].weight[Signal::Forward] +=
-	  (vValDonF[iter-vPosDonF.begin()] * coefDon) - penDon;
-	//d->sig[DATA::Don].weight[Signal::ForwardNo] += ...
-	iDonF = iter-vPosDonF.begin() + 1;
-      }
-      else iDonF = iter-vPosDonF.begin();
-    }
-  else if(iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF] == pos)
-    {
-      d->sig[DATA::Don].weight[Signal::Forward] +=
-	(vValDonF[iDonF] * coefDon) - penDon;
-      //d->sig[DATA::Don].weight[Signal::ForwardNo] += ...
+  if(!vPosDonF.empty()) {
+    if (update) 
+      iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
+
+    if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
+      d->sig[DATA::Don].weight[Signal::Forward] += (vValDonF[iDonF]*coefDon) - penDon;
       iDonF++;
     }
-  
+  }
+    
   // Donneur Reverse
-  if((iDonR != 0                    &&  vPosDonR[iDonR-1] >= pos) ||
-     (iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR]   <  pos))
-    {
-      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos);
-      if(*iter == pos) {
-	d->sig[DATA::Don].weight[Signal::Reverse] += 
-	  (vValDonR[iter-vPosDonR.begin()] * coefDon) - penDon;
-	//d->sig[DATA::Don].weight[Signal::ReverseNo] += ...
-	iDonR = iter-vPosDonR.begin() + 1;
-      }
-      else iDonR = iter-vPosDonR.begin();
-    }
-  else if(iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR] == pos)
-    {
-      d->sig[DATA::Don].weight[Signal::Reverse] +=
-	(vValDonR[iDonR] * coefDon) - penDon;
-      //d->sig[DATA::Don].weight[Signal::ReverseNo] += ...
+  if(!vPosDonR.empty()) {
+    if (update) 
+      iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos)-vPosDonR.begin();
+
+    if ((iDonR<(int)vPosDonR.size()) && (vPosDonR[iDonR] == pos)) {
+      d->sig[DATA::Don].weight[Signal::Reverse] += (vValDonR[iDonR]*coefDon) - penDon;
       iDonR++;
     }
+  }
 }
 
 // ----------------------------
