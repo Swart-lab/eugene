@@ -165,7 +165,7 @@ double ParaOptimization::ParaEvaluate (void)
       }
       fclose(fp);
       system("rm -f tmp%evaluation");
-      cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " tmp%predictions  -ps -o300 > tmp%evaluation";
+      cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " tmp%predictions  -ps -o1 > tmp%evaluation";
       system(cmde.c_str());
 
       feval.open("tmp%evaluation",std::ios::in);
