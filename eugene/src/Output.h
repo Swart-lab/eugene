@@ -6,7 +6,7 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
-
+#include <sstream>
 #include "MSensor.h"
 #include "Param.h"
 #include "DNASeq.h"
@@ -16,6 +16,15 @@
 
 void Output (DNASeq *, MasterSensor *, Prediction *, int sequence, 
 	     int argc, char * argv[], FILE* f);
+
+// -ph print on stdout the begin of the HTML output
+void StartHTML();
+
+// -ph print on stdout the end of the HTML output
+void EndHTML();
+
+// Convertion int en string
+string to_string(int);
 
 // Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
 int PhaseAdapt(char);
