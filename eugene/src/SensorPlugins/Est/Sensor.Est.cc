@@ -74,7 +74,13 @@ void SensorEst :: Init (DNASeq *X)
   FILE *fEST;
   char tempname[FILENAME_MAX+1];
   int  i;
- 
+
+  vPos.clear();
+  vESTMatch.clear();
+  if(HitTable != NULL) {
+    delete HitTable[NumEST];
+    delete HitTable;
+  }
   HitTable = NULL;
 
   estP = PAR.getD("Est.estP*",N);
@@ -83,18 +89,8 @@ void SensorEst :: Init (DNASeq *X)
   utrM = PAR.getI("Est.utrM",N);
   DonorThreshold = PAR.getD("Est.StrongDonor*");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
-
   
   index = 0;
-
-  vPos.clear();
-  vESTMatch.clear();
-
-  if(HitTable != NULL) {
-    delete HitTable[NumEST];
-    delete HitTable;
-  }
-  HitTable = NULL;
  
   ESTMatch = new unsigned char[X->SeqLen+1];
   for (i = 0; i <= X->SeqLen; i++)
