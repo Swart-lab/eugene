@@ -95,6 +95,7 @@ set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
 ##### Output control ######
+set NewValue1(Output.truncate)		5
 set NewValue1(Output.graph)		FALSE	
 set NewValue1(Output.resx)		900
 set NewValue1(Output.resy)		400
