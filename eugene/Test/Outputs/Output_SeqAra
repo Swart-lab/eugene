@@ -16,7 +16,10 @@ Reading splice site file (Splice Predictor)...forward, reverse done
 Reading start file (NetStart).................forward, reverse done
 Reading cDNA hits............13 sequences read
    [AV547209]: no matching splice site
-A total of 1/13 sequences rejected
+   [W43583]: Gapless EST with strong donor [1363-1814]
+   [AV541414]: Gapless EST with strong donor [1409-1807]
+   [AV565933]: Gapless EST with strong donor [1510-1854]
+A total of 4/13 sequences rejected
 Reading Blastx data, level...0 done
 Optimal path length = 20236.0075
 
@@ -25,7 +28,7 @@ Optimal path length = 20236.0075
 
 Dumping images ("./seq25ab005234g10g11.test.---.png")...done
 -------------------------------------------------------------------
-seq25.1.1.0	Utr5    +          1    2918     2918     NA      NA      NA      NA    55.26 
+seq25.1.1.0	Utr5    +          1    2918     2918     NA      NA      NA      NA    52.26 
 seq25.1.1.1	Init    +       2919    2942       24     +1      +3    2918    2943     0.0  
 seq25.1.1.2	Intr    +       6068    6116       49     +1      +2    6067    6117     0.0  
 seq25.1.1.3	Intr    +       8356    8471      116     +2      +3    8355    8472    69.0  
@@ -39,9 +42,9 @@ seq25.1.1.10	Term    +      12088   12900      813     +1      +1   12087   1290
 seq25.1.1.0	Utr3    +      12901   14900     2000     NA      NA      NA      NA    11.0  
 cDNA  AV559654         261    1280      606      4 introns    Support
 cDNA  AV520544        1053    1774      593      1 introns    Support
-cDNA  W43583          1363    1814      450      0 introns    Support
-cDNA  AV541414        1409    1807      399      0 introns    Support
-cDNA  AV565933        1510    1854      345      0 introns    Support
+cDNA  W43583          1363    1814      450      0 introns    Filtered 
+cDNA  AV541414        1409    1807      399      0 introns    Filtered 
+cDNA  AV565933        1510    1854      345      0 introns    Filtered 
 cDNA  F13935          2111    2632      351      2 introns    Support
 cDNA  F14031          2111    2632      351      2 introns    Support
 cDNA  AI998547        2149    2861      458      3 introns    Support
@@ -51,5 +54,5 @@ cDNA  AI996648       12739   13099      362      0 introns    Support
 cDNA  AA713204       12760   13114      359      0 introns    Support
 cDNA  AV547209       14087   14781      505      2 introns    Filtered 
       CDS             2919   12900     9982     supported on 162 bases
-      Gene               1   14900    14900     supported on 2721 bases
+      Gene               1   14900    14900     supported on 2641 bases
       CDS (prot.)     2919   12900     9982     supported on 1509/1929 coding.
