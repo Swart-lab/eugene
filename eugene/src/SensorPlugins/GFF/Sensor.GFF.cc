@@ -70,7 +70,7 @@ extern Parameters PAR;
 // ----------------------
 SensorGFF :: SensorGFF (int n, DNASeq *X) : Sensor(n)
 {
-  type = Type_Multiple;
+  type = Type_None;
 }
 
 // ----------------------
