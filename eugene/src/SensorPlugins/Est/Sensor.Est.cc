@@ -69,46 +69,21 @@ int HitsCompareSup(const void *A, const void *B)
 // ----------------------
 SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 {
-  type     = Type_Content;
-  HitTable = NULL;
-  N        = n;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorEst :: ~SensorEst ()
-{
-  vPos.clear();
-  vESTMatch.clear();
-  if(HitTable != NULL) delete [] HitTable;
-  HitTable = NULL;
-}
-
-// --------------------------------
-//  Init est.
-//  Exploiting spliced alignements
-//  against EST and complete cDNA.
-// --------------------------------
-void SensorEst :: Init (DNASeq *X)
-{
   FILE *fEST;
   char tempname[FILENAME_MAX+1];
   int  i;
+
+  type     = Type_Content;
+  HitTable = NULL;
+  N        = n;
  
   vPos.clear();
   vESTMatch.clear();
   
-  if(HitTable != NULL) delete [] HitTable;
-  HitTable = NULL;
-
-  estP = PAR.getD("Est.estP*",N);
   estM = PAR.getI("Est.estM",N);
-  utrP = PAR.getD("Est.utrP*",N);
   utrM = PAR.getI("Est.utrM",N);
   ppNumber       = PAR.getI("Est.PPNumber",N);
-  spliceBoost    = PAR.getD("Est.SpliceBoost*",N);
-  DonorThreshold = PAR.getD("Est.StrongDonor*");
+  DonorThreshold = PAR.getD("Est.StrongDonor");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
   index = 0;
@@ -130,7 +105,30 @@ void SensorEst :: Init (DNASeq *X)
       vESTMatch.push_back ( ESTMatch[i] );
     }
   delete [] ESTMatch;
+}
 
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorEst :: ~SensorEst ()
+{
+  vPos.clear();
+  vESTMatch.clear();
+
+  if(HitTable != NULL) delete [] HitTable;
+  HitTable = NULL;
+}
+
+// --------------------------------
+//  Init est.
+//  Exploiting spliced alignements
+//  against EST and complete cDNA.
+// --------------------------------
+void SensorEst :: Init (DNASeq *X)
+{
+  estP = PAR.getD("Est.estP*",N);
+  utrP = PAR.getD("Est.utrP*",N);
+  spliceBoost    = PAR.getD("Est.SpliceBoost*",N);
   //for(int jj=0;jj<(int)vPos.size();jj++)
   //printf("vPos[%d]:%d\tvESTM[%d]:%d\n",jj,vPos[jj]+1,jj,vESTMatch[jj]);
 }
@@ -745,12 +743,13 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   int from = 0, to = 0, ESTEnd = 0;
   int state;
   std::vector <int> vSupEstI;  // index des transcrits supportant la pred
-  Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sort by % support
 
   if (pred == NULL) {
     EstIndex = 0;
     return;
   }
+
+  Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sort by % support
   
   /***********************************************************************/
   /** Objectif : obtenir un vecteur contenant les index des transcripts **/
@@ -914,7 +913,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
     }
   }
   vSupEstI.clear();
-  if(TMPHitTable != NULL) delete [] TMPHitTable;
+
+  if (TMPHitTable != NULL) delete [] TMPHitTable;
   TMPHitTable = NULL;
   return;
 }
