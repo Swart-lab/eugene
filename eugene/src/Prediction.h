@@ -44,5 +44,6 @@ enum Tracks {
   InterGen5 = 12, InterGen3 = 17,
   UTR5F = 13, UTR5R = 15,
   UTR3F = 14, UTR3R = 16};
+const short int State2Phase[18] = {1,2,3,-1,-2,-3,4,4,4,-4,-4,-4,0,0,0,0,0,0};
 
 #endif

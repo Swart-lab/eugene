@@ -71,10 +71,9 @@ void Prediction :: setPos (int i, int newPos)
 void Prediction :: plotPred ()
 {
   const int PredWidth = 2;
-  const short int State2Phase[18] = {1,2,3,-1,-2,-3,4,4,4,-4,-4,-4,0,0,0,0,0,0};
   int SeqLen = vPos[0] - 1;
   index = 0;
-  
+
   for (int i=0; i<SeqLen; i++)
     PlotBarI(i, State2Phase[getNextState(i)], 0.4, PredWidth,
 	     1+((getNextState(i)==12) || (getNextState(i)==17))*3);
