@@ -28,7 +28,7 @@ if (printopt == 'd')
       printf("%6d %c%c ", offset+1+i, Filter(tolower(Data[i])),
 	     Filter(tolower(Complement(Data[i]))));
       
-      PrintPhase(Choice[i]);
+      PrintPhase(Choice[i+1]);
       
       for (j = 0 ; j < 8 ; j++)
 	printf(" %.2f", Score[j]);
@@ -106,79 +106,72 @@ else if (printopt == 'l')
     }
   
   // Kludge = a non existing choice to force exon termination
-  Choice[Data_Len] = 127;
-
-  // Kludge = Single gene whose length is less than MinLength  are
-  // simply omitted in the long display. Thay are still there in short/detailed
-  // output
-  
-  const int MinLength = 240;
+  Choice[Data_Len+1] = 127;
+  Choice[0] = 127;
   
   for (i=1; i<= Data_Len; i++)
     {
-      if (Choice[i] != Choice[i-1])
+      if (Choice[i+1] != Choice[i])
 	// something happens
 	{
-	  if (Choice[i-1] < 6)
+	  if (Choice[i] < 6)
 	    {
-	      forward = (Choice[i-1] < 3);
+	      forward = (Choice[i] < 3);
 	      
-	      init = ((forward  && Choice[Starts[Choice[i-1]]-1] == 12) || (!forward && Choice[i] == 12));
-	      term = ((!forward  && Choice[Starts[Choice[i-1]]-1] == 12) || (forward && Choice[i] == 12));
+	      init = ((forward  && Choice[Starts[Choice[i]]] == 12) || (!forward && Choice[i+1] == 12));
+	      term = ((!forward  && Choice[Starts[Choice[i]]] == 12) || (forward && Choice[i+1] == 12));
 
 	      if (forward)
 		{
-		  Lend = offset+Starts[Choice[i-1]]+1;
-		  Rend = offset+i+(3*(Choice[i] == 12));
+		  Lend = offset+Starts[Choice[i]]+1;
+		  Rend = offset+i+(3*(Choice[i+1] == 12));
 		  Don = Lend-1;
 		  Acc = Rend+1;
 		}
 	      else
 		{
-		  Lend = offset+Starts[Choice[i-1]]+1-(3*(Choice[Starts[Choice[i-1]]-1] == 12));
+		  Lend = offset+Starts[Choice[i]]+1-(3*(Choice[Starts[Choice[i]]] == 12));
 		  Rend = offset+i;
 		  Acc = Lend-1;
 		  Don = Rend+1;
 		}
 
-	      if (!(init && term && (Rend-Lend+1 < MinLength)))
+	      printf("%s ",seqn);
+	      
+	      if (init && term) printf("Sngl");
+	      else if (init) printf("Init");
+	      else if (term) printf("Term");
+	      else printf ("Intr");
+	      
+	      printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
+	      printf("     %4d  ", Rend-Lend+1);
+	      
+	      if (init)
+		printf("   %+2d", ((forward) ? 1: -1));
+	      else
 		{
-		  printf("%s ",seqn);
+		  Phase = ((forward) ?
+			   PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
+			   -PhaseAdapt(Choice[i+1]-9));
 		  
-		  if (init && term) printf("Sngl");
-		  else if (init) printf("Init");
-		  else if (term) printf("Term");
-		  else printf ("Intr");
-		  
-		  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
-		  printf("     %4d  ", Rend-Lend+1);
-		  
-		  if (init)
-		    printf("   %+2d", ((forward) ? 1: -1));
-		  else
-		    {
-		      Phase = ((forward) ?
-			       PhaseAdapt(Choice[Starts[Choice[i-1]]-1]-6) :
-			       -PhaseAdapt(Choice[i]-9));
-		      
-		      if (abs(Phase) <= 3)
-			printf("   %+2d",Phase);
-		      else printf(" Unk.",Phase);
-		    }
-		  printf("      %+2d",PhaseAdapt(Choice[i-1]));
-		  printf(" %7d %7d   1.0", Don,Acc);
-		  
-		  /*
-		    if (Choice[i] < 6) printf(" FS ");
-		    if ((Starts[Choice[i-1]] == 0) || (Choice[i] == 127))
-		    printf(" P");
-		  */
-		  printf("\n");
-		  Starts[Choice[i-1]] = -1;
+		  if (abs(Phase) <= 3)
+		    printf("   %+2d",Phase);
+		  else printf(" Unk.");
 		}
+	      printf("      %+2d",PhaseAdapt(Choice[i]));
+	      printf(" %7d %7d   1.0", Don,Acc);
+		  
+	      /*
+		if (Choice[i+1] < 6) printf(" FS ");
+		if ((Starts[Choice[i]] == 0) || (Choice[i+1] == 127))
+		printf(" P");
+	      */
+	      printf("\n");
+	      Starts[Choice[i]] = -1;
 	    }
-	  if (Choice[i] < 6)
-	    Starts[Choice[i]] = i;
+	  
+	  if (Choice[i+1] < 6)
+	    Starts[Choice[i+1]] = i;
 	}
     }
   printf("\n");
@@ -193,20 +186,20 @@ else
   //  printf("\n %s \n",argv[sequence]);
   
   // Kludge = an intergenic state is forced at the end
-  Choice[Data_Len] = 12;
+  Choice[Data_Len+1] = 12;
  
-  for (j=0; j<6; j++)
+  for (j = 0; j < 6; j++)
     Starts[j] = (IsPhaseOn(Choice[0],j) ? 0 : -1);
    
   for (i=1; i<= Data_Len; i++)
     {
-      if (Choice[i] != Choice[i-1])
+      if (Choice[i+1] != Choice[i])
 	{
-	  Intergenic = (Choice[i] == 12);
+	  Intergenic = (Choice[i+1] == 12);
 	   
 	  for (j = 0; j<6; j++)
 	    {
-	      if (IsPhaseOn(Choice[i],j) != IsPhaseOn(Choice[i-1],j))
+	      if (IsPhaseOn(Choice[i+1],j) != IsPhaseOn(Choice[i],j))
 		{
 		  if (Starts[j] != -1)
 		    {
