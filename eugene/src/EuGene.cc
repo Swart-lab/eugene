@@ -107,11 +107,11 @@ int main  (int argc, char * argv [])
   PAR.initParam(argc, argv);
   
   // Objectif -> limiter le nombre d'appel à la map de PAR
-  ExPrior    = PAR.getD("ExonPrior");
-  InPrior    = PAR.getD("IntronPrior");
-  IGPrior    = PAR.getD("InterPrior"); 
-  FivePrior  = PAR.getD("FivePrimePrior");
-  ThreePrior = PAR.getD("ThreePrimePrior");
+  ExPrior    = PAR.getD("EuGene.ExonPrior");
+  InPrior    = PAR.getD("EuGene.IntronPrior");
+  IGPrior    = PAR.getD("EuGene.InterPrior"); 
+  FivePrior  = PAR.getD("EuGene.FivePrimePrior");
+  ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
   minL[0]  = PAR.getI("EuGene.minL0");
   minL[1]  = PAR.getI("EuGene.minL1");
   minL[2]  = PAR.getI("EuGene.minL2");
@@ -138,7 +138,7 @@ int main  (int argc, char * argv [])
   transStartP = PAR.getD("EuGene.transStartP");
   transStopP  = PAR.getD("EuGene.transStopP");
   stopP       = PAR.getD("EuGene.stopP");
-  graph = PAR.getI("graph");
+  graph = PAR.getI("Output.graph");
   
   MS.InitMaster();
   
@@ -184,17 +184,15 @@ int main  (int argc, char * argv [])
     // Preparation sortie graphique + Scores
     // ---------------------------------------------------------------------------
     if (graph) {
-      int gto       = PAR.getI("gto");
-      int gtoSave   = PAR.getI("gtoSave");
-      int gfrom     = PAR.getI("gfrom");
-      int gfromSave = PAR.getI("gfromSave");
-      int glen      = PAR.getI("glen");
+      int gto       = PAR.getI("Output.gto");
+      int gfrom     = PAR.getI("Output.gfrom");
+      int glen      = PAR.getI("Output.glen");
 
       // Récupération du nom du fichier d'origine
       grnameFile = BaseName(PAR.getC("fstname"));
       
       // Construction du nom de sortie (*.png)
-      strcpy(grname, PAR.getC("outputname"));
+      strcpy(grname, PAR.getC("Output.Prefix"));
       strcat(grname, grnameFile);
       *rindex(grname, '.') = 0;             // on enleve l'extension (.fasta typ.)
       if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'argument
@@ -207,14 +205,8 @@ int main  (int argc, char * argv [])
       if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
 	gto = Data_Len;
       
-      if (gfromSave != -1) {
+      if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
 	sprintf(grname+strlen(grname), ".%d", gfrom);
-	if (gtoSave == -1)
-	  sprintf(grname+strlen(grname), "-%d", Data_Len);
-      }
-      if (gtoSave != -1) {
-	if (gfromSave == -1)
-	  sprintf(grname+strlen(grname), ".%d", 1);
 	sprintf(grname+strlen(grname), "-%d", gto);
       }
       
@@ -224,33 +216,8 @@ int main  (int argc, char * argv [])
       if (glen < 0)
 	glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
       
-      InitPNG(PAR.getI("resx"), PAR.getI("resy"), PAR.getI("offset"),
-	      gfrom, gto, PAR.getI("golap"), glen, grname);
-      
-      if(gtoSave == -1 && gfromSave == -1) {    // Si pas d'option -u et -v
-	gto   = -1;
-	gfrom = -1; 
-	glen  = -1;
-      }
-      else {
-	if(gfromSave != -1 && gtoSave != -1) {  // Si option -u && -v
-	  gto   = gtoSave;
-	  gfrom = gfromSave;
-	  glen  = -1;
-	}
-	else {
-	  if(gfromSave != -1) {           // Si option -u
-	    gto   = -1;
-	    gfrom = gfromSave;
-	    glen  = -1;
-	  }
-	  else {                          // Si option -v
-	    gto   = gtoSave;
-	    gfrom = -1;
-	    glen  = -1;
-	  }
-	}
-      }
+      InitPNG(PAR.getI("Output.resx"), PAR.getI("Output.resy"), PAR.getI("Output.offset"),
+	      gfrom, gto, PAR.getI("Output.golap"), glen, grname);
     }
     
     OpenDoor();
@@ -586,7 +553,7 @@ int main  (int argc, char * argv [])
       // On reste 5' direct. On ne prend pas le Start eventuel.
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
-      if (!PAR.getI("estopt") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
+      if (!PAR.getI("Sensor.Est.use") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
 	LBP[UTR5F]->Update(log(1.0-Data.Start[0]));
 #endif
       
@@ -668,7 +635,7 @@ int main  (int argc, char * argv [])
       // On reste 5' reverse
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
-      if (!PAR.getI("estopt") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
+      if (!PAR.getI("Sensor.Est.use") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
 	LBP[UTR5R]->Update(log(1.0-Data.Start[1]));
 #endif
       
