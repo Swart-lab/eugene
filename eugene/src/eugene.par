@@ -74,6 +74,16 @@ ATGpr.startB*		?
 IfElse.SensorIf		NG2
 IfElse.SensorElse	SPred
 #
+# SpliceMachine parameters #####
+#
+SMachine.cmd            "/homes/thomas/Annotation/SpliceMachine/splicemachine.pl "
+SMachine.accP*          0.903
+SMachine.accB*          5.585
+SMachine.donP*          0.980
+SMachine.donB*          27.670
+SMachine.startP*                0.052
+SMachine.startB*                0.308
+#
 # NetGene2 parameters #####
 #
 NG2.accP*[1]	0.903
@@ -256,6 +266,7 @@ Sensor.ATGpr.use	FALSE
 Sensor.StartWAM.use	FALSE
 #
 # SPLICES SENSORS:
+Sensor.SMachine.use     FALSE
 Sensor.NG2.use		FALSE
 Sensor.SPred.use	FALSE
 Sensor.GSplicer.use	FALSE
@@ -293,9 +304,10 @@ Sensor.Homology 	1	#
 Sensor.EuStop		1	#
 Sensor.NStart		1	#
 Sensor.ATGpr		1	#
-Sensor.StartWAM		1	#
+Sensor.StartWAM	1	#
 Sensor.IfElse		1	#
 Sensor.NG2		1	#
+Sensor.SMachine		1	#
 Sensor.SPred		1	#
 Sensor.GSplicer		1	#
 Sensor.SpliceWAM	1       #
