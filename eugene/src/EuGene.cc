@@ -262,8 +262,8 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 #define PICOMP(C,S,B,O) if (C && ISPOSSIBLE(S,B)) {\
 	BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B];\
 	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
-#define PICOMPEN(C,S,B,O,P) if (C && ISPOSSIBLE(S,B)) {		\
-	BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+P;\
+#define PICOMPEN(C,S,B,O,P) if (C && ISPOSSIBLE(S,B)) {\
+      BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+(P);		\
 	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
 #define INSERTANDPAYTHESLOPE(P,C)					\
     LBP[P].InsertNew(best, nuc, maxi,PrevBP[best]);\
@@ -411,7 +411,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       maxi = NINFINITY;
       
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-      PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
+      PICOMPEN(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3),((((Data_Len-nuc) % 3) == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
       // Not AfterG
       PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
       // Not AfterA
@@ -504,7 +504,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       maxi = NINFINITY;
       
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-      PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
+      PICOMPEN(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3),((((Data_Len-nuc) % 3) == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
       // Not AfterG
       PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
       // Not AfterA
@@ -699,11 +699,11 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       // - on quitte un Init ou un Intr
       // no spliceable stop: 
       if (!(((StartStop & DNASeq::StopAfterT) && k == 1) ||
-	    ((StartStop & (DNASeq::StopAfterTG|DNASeq::StopAfterTA)) && k == 2)))
-	{
-	  PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
-	  PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
-	}
+			((StartStop & (DNASeq::StopAfterTG|DNASeq::StopAfterTA)) && k == 2)))
+	  {
+		  PICOMPEN(true,Don,Forward, InitF1+((nuc-k+3) % 3),(k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+		  PICOMPEN(true,Don,Forward, IntrF1+((nuc-k+3) % 3),(k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+	  }
       // On reste intronique
       LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
       
