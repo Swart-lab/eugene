@@ -24,7 +24,7 @@ class ParaOptimization {
 
  public:
   std::vector <OptiAlgorithm*> Algorithms;
-  int                     AlgoIndex;       // index of running algorithm
+  int                          AlgoIndex;     // index of running algorithm
 
   ~ParaOptimization(void);
   void ParaOptimize (int argc, char* argv[]);
@@ -33,12 +33,12 @@ class ParaOptimization {
  private:
   std::vector <MasterSensor*>  MSensors;
   std::vector <DNASeq*>        Sequences;
-  std::vector<std::string>          SeqNames;
+  std::vector<std::string>     SeqNames;
   std::string                  TrueCoordFile;
   std::string                  ExecutableName; // first part of parameter file
-  bool                    IsTest;         // if true then test mode: 
-                                          // do not read sequences and related info
-                                          // evaluate para with the method NormalLaw
+  bool                         IsTest;         // if true then test mode: 
+                                      // do not read sequences and related info
+                                      // evaluate para with the method NormalLaw
 
   void Init(int argc, char* argv[]);
   double NormalLaw(double x);

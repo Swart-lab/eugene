@@ -27,15 +27,15 @@ typedef enum RELATION CLUSTER_RELATION;
 class OptiAlgorithm {
 
  public:
-  std::vector <double> Para;  
+  std::vector <double>      Para;  
   std::vector <std::string> ParaName;
-  std::vector <double> ParaMax;
-  std::vector <double> ParaMin; 
-  std::vector <int> ParaCluster;
+  std::vector <double>      ParaMax;
+  std::vector <double>      ParaMin; 
+  std::vector <int>         ParaCluster;
   std::vector < std::vector <int> > ParaClusters;
-  std::vector <CLUSTER_RELATION> ParaClusterRelations;
-  int NbParaCluster;
-  bool IsTracing;
+  std::vector <CLUSTER_RELATION>    ParaClusterRelations;
+  int     NbParaCluster;
+  bool    IsTracing;
   Random* Rand;
 
   OptiAlgorithm(void);
