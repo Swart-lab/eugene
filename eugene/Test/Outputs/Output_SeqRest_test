@@ -8,10 +8,10 @@ Reading splice site file \(Splice Predictor\)...forward, reverse done.
 Loading Sensor.MarkovIMM......done.
 Reading IMM... 1 2 3 4 5 6 7 ...done.
 Loading Sensor.PatConst.......done.
-Loading Sensor.Riken..........done.
-Reading RAFL gene............2 RAFL EST pairs read, fusion fsdf-fsdf...resulting 1.
 Loading Sensor.Repeat.........done.
 Reading Intergenic regions....done.
+Loading Sensor.Riken..........done.
+Reading RAFL gene............2 RAFL EST pairs read, fusion fsdf-fsdf...resulting 1.
 Optimal path length = 19792.4432.
 .
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
