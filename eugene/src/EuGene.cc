@@ -60,7 +60,7 @@ Parameters       PAR;
 ParaOptimization OPTIM;
 
 // -------------------------------------------------------------------------
-// Predict a gene
+// Predict genes
 // -------------------------------------------------------------------------
 Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
@@ -105,6 +105,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   LBP[IntronR2].LoadPenalty(PAR.getC("EuGene.IntronDist"));
   LBP[IntronR3].LoadPenalty(PAR.getC("EuGene.IntronDist"));
   
+  LBP[IntronF2T].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+  LBP[IntronF3TG].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+  LBP[IntronF3TA].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+  LBP[IntronR2AG].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+  LBP[IntronR3G].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+  LBP[IntronR3A].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+
   LBP[SnglF1].LoadPenalty(PAR.getC("EuGene.SnglExDist"));
   LBP[SnglF2].LoadPenalty(PAR.getC("EuGene.SnglExDist"));
   LBP[SnglF3].LoadPenalty(PAR.getC("EuGene.SnglExDist"));
@@ -166,6 +173,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   LBP[IntronR2].Update(log(InPrior/6.0)/2.0);
   LBP[IntronR3].Update(log(InPrior/6.0)/2.0);
   
+  LBP[IntronF2T].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronF3TG].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronF3TA].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR2AG].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR3G].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR3A].Update(log(InPrior/6.0)/2.0);
+
   // Sngl 
   LBP[SnglF1].Update(log(ExPrior/6.0)/2.0);
   LBP[SnglF2].Update(log(ExPrior/6.0)/2.0);
@@ -207,6 +221,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   LBP[IntronU3F].Update(log(IntronFivePrior/2.0)/2.0);
   LBP[IntronU3R].Update(log(IntronFivePrior/2.0)/2.0);
 
+
   // --------------------------------------------------------------------------
   // Demarrage de la programmation dynamique
   // --------------------------------------------------------------------------
@@ -214,6 +229,10 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
     // recuperation des infos
     MSensor->GetInfoAt(TheSeq, nuc, &Data);
+
+    // Get information on possible spliced stops
+    int StopStop = TheSeq->IsStopStop(nuc);
+    int StartStop = TheSeq->IsStartStop(nuc);
     
     // normalisation des couts 
     maxi = -NINFINITY;
@@ -245,24 +264,38 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       PrevBP[k] = NULL;
       PBest[k] = NINFINITY;
     }
-    
-    // Exons F (de tous poils)
+
+    // Exons F (No splice)
     for (k = 0; k <= 3; k++) {
       if ((nuc % 3 == k) && ISPOSSIBLE(Start,Forward))             INEED(UTR5F);
-      if (ISPOSSIBLE(Acc,Forward))                                 INEED(IntronF1+((nuc-k+3)%3));
       if (ISPOSSIBLE(Ins,Forward)) { 	                           INEED(InitF1+(k+2)%3);
 								   INEED(IntrF1+(k+2)%3);
       								   INEED(TermF1+(k+2)%3); }
       if (ISPOSSIBLE(Del,Forward)) {	                           INEED(InitF1+(k+1)%3);
       								   INEED(IntrF1+(k+1)%3);
-      								   INEED(TermF1+(k+1)%3);
-      }
+      								   INEED(TermF1+(k+1)%3); }
     }
 
-    // Exons R  (de tout poil)
+    // Exons F  (splicing, with and without spliced stops)
+    if (ISPOSSIBLE(Acc,Forward)) {
+      if (!(StopStop & DNASeq::StopAfterT))
+	INEED(IntronF2T);
+      
+      if (!(StopStop & DNASeq::StopAfterTG))
+	INEED(IntronF3TG);
+   
+      if (!(StopStop & DNASeq::StopAfterTA)) 
+	INEED(IntronF3TA);
+      
+      // No spliced stops
+      INEED(IntronF1+(nuc%3));
+      INEED(IntronF1+((nuc+1)%3));
+      INEED(IntronF1+((nuc+2)%3));
+    }
+
+    // Exons R  (No Splice)
     for (k = 3; k <= 6; k++) {
       if (((Data_Len-nuc) % 3 == k-3) && ISPOSSIBLE(Stop,Reverse)) INEED(UTR3R);
-      if (ISPOSSIBLE(Don,Reverse))				   INEED(IntronR1+((Data_Len-nuc-k) % 3));
       if (ISPOSSIBLE(Ins,Reverse)) {				   INEED(InitR1+(k+2)%3);
 								   INEED(IntrR1+(k+2)%3);
 							  	   INEED(TermR1+(k+2)%3); }
@@ -270,14 +303,37 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 								   INEED(IntrR1+(k+1)%3);
 								   INEED(TermR1+(k+1)%3); }
     }
+  
+    // Exons R (splicing, with and without spliced stops)
+    if (ISPOSSIBLE(Don,Reverse)) {
+      if (!(StartStop & DNASeq::StopAfterG))
+	INEED(IntronR3G);
+      
+      if (!(StartStop & DNASeq::StopAfterA))
+	INEED(IntronR3A);
+   
+      if (!(StartStop & DNASeq::StopAfterAG)) 
+	INEED(IntronR2AG);
 
-    // Introns F et R
-    for (k = 0; k <= 3; k++) {
-      if (ISPOSSIBLE(Don,Forward)) {				   INEED(InitF1+((nuc-k+3) % 3));
-								   INEED(IntrF1+((nuc-k+3) % 3)); }
-      if (ISPOSSIBLE(Acc,Reverse)) {				   INEED(IntrR1+((Data_Len-nuc-k) % 3));
-      								   INEED(TermR1+((Data_Len-nuc-k) % 3)); }
+      // No spliced stops
+      INEED(IntronR1+((Data_Len-nuc) % 3));
+      INEED(IntronR1+((Data_Len-nuc+2) % 3));
+      INEED(IntronR1+((Data_Len-nuc+1) % 3));
     }
+
+    // Introns F et R (with no spliceable stops)
+    if (ISPOSSIBLE(Don,Forward)) 
+      for (k=0; k<3; k++) {	
+	INEED(InitF1+((nuc-k+3) % 3));
+	INEED(IntrF1+((nuc-k+3) % 3)); 
+      }
+
+    if (ISPOSSIBLE(Acc,Reverse)) 
+      for (k=0; k<3; k++) {
+      INEED(IntrR1+((Data_Len-nuc-k+3) % 3));
+      INEED(TermR1+((Data_Len-nuc-k+3) % 3));
+      }
+
     
     // Intergenique
     if (ISPOSSIBLE(tStart,Reverse))     			   INEED(UTR5R);
@@ -339,8 +395,15 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     for (k = 3; k<6; k++) {
       maxi = NINFINITY;
       
-      // - on recommence a coder (Donneur) Ca vient d'un intron
+      // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
+      // Not AfterG
+      PICOMP(!(StartStop & DNASeq::StopAfterG) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3G);
+      // Not AfterA
+      PICOMP(!(StartStop & DNASeq::StopAfterA) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3A);
+      // Not AfterAG
+      PICOMP(!(StartStop & DNASeq::StopAfterAG) && (((Data_Len-nuc-k) % 3) == 1),Don,Reverse,IntronR2AG);
+
       // Il y a une insertion (frameshift)
       PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
       // Il y a une deletion (frameshift)
@@ -397,9 +460,15 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
       maxi = NINFINITY;     
-      
-      // On recommence a coder (Accepteur). Ca vient d'un intron
+
+      // On recommence a coder (Accepteur). Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Acc,Forward,IntronF1+((nuc-k+3) % 3));
+      // Not AfterT
+      PICOMP(!(StopStop & DNASeq::StopAfterT) && (((nuc-k+3) % 3) == 1),Acc,Forward,IntronF2T);
+      // Not AfterTG
+      PICOMP(!(StopStop & DNASeq::StopAfterTG) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TG);
+      // Not AfterTA
+      PICOMP(!(StopStop & DNASeq::StopAfterTA) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TA);
       // Il y a une insertion (frameshift). Saut de nucléotide ignore.
       PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
       // Il y a une deletion (frameshift)
@@ -419,9 +488,15 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     for (k = 3; k<6; k++) {
       maxi = NINFINITY;
       
-      // - on recommence a coder (Donneur) Ca vient d'un intron
+      // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
-      // Il y a une insertion (frameshift)
+      // Not AfterG
+      PICOMP(!(StartStop & DNASeq::StopAfterG) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3G);
+      // Not AfterA
+      PICOMP(!(StartStop & DNASeq::StopAfterA) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3A);
+      // Not AfterAG
+      PICOMP(!(StartStop & DNASeq::StopAfterAG) && (((Data_Len-nuc-k) % 3) == 1),Don,Reverse,IntronR2AG);
+        // Il y a une insertion (frameshift)
       PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
       // Il y a une deletion (frameshift)
       PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
@@ -440,6 +515,12 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       
       // On recommence a coder (Accepteur). Ca vient d'un intron
       PICOMP(true,Acc,Forward,IntronF1+((nuc-k+3) % 3));
+      // Not AfterT
+      PICOMP(!(StopStop & 1) && (((nuc-k+3) % 3) == 1),Acc,Forward,IntronF2T);
+      // Not AfterTG
+      PICOMP(!(StopStop & 2) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TG);
+      // Not AfterTA
+      PICOMP(!(StopStop & 4) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TA);
       // Il y a une insertion (frameshift). Saut de nucléotide ignore.
       PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
       // Il y a une deletion (frameshift)
@@ -601,14 +682,63 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       maxi = NINFINITY;
       
       // - on quitte un Init ou un Intr
-      PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
-      PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
-      
+      // no spliceable stop: 
+      if (!(((StartStop & DNASeq::StopAfterT) && k == 1) ||
+	    ((StartStop & (DNASeq::StopAfterTG|DNASeq::StopAfterTA)) && k == 2)))
+	{
+	  PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
+	  PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
+	}
       // On reste intronique
       LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
       
       INSERTANDPAYTHESLOPE(IntronF1+k,DATA::IntronF);
     }
+    // ----------------------------------------------------------------
+    // ----------------- Introns forward speciaux ---------------------
+    // ----------------------------------------------------------------
+    //
+    // --- Intron Phase 1 précédé par T (GA|AA|AG)
+    //
+    maxi = NINFINITY;
+    k = 1;
+    if (StartStop & DNASeq::StopAfterT) {
+      // - on quitte un Init ou un Intr
+      PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
+      PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERTANDPAYTHESLOPE(IntronF2T,DATA::IntronF);
+
+    //
+    // --- Intron Phase 2 précédé par TG|A
+    //
+    maxi = NINFINITY;
+    k = 2;
+    if (StartStop & DNASeq::StopAfterTG) {
+      // - on quitte un Init ou un Intr
+      PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
+      PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERTANDPAYTHESLOPE(IntronF3TG,DATA::IntronF);
+
+    //
+    // --- Intron Phase 2 précédé par TA(A|G)
+    //
+    maxi = NINFINITY;
+    k = 2;
+    if (StartStop & DNASeq::StopAfterTA) {
+      // - on quitte un Init ou un Intr
+      PICOMP(true,Don,Forward, InitF1+((nuc-k+3) % 3));
+      PICOMP(true,Don,Forward, IntrF1+((nuc-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERTANDPAYTHESLOPE(IntronF3TA,DATA::IntronF);
+
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
@@ -616,14 +746,61 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       maxi = NINFINITY;
       
       // On quitte un Intr ou un Term reverse
-      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-nuc-k) % 3));
-      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-nuc-k) % 3));
-
+      // no spliceable stop: 
+      if (!(((StopStop & (DNASeq::StopAfterG|DNASeq::StopAfterA)) && k == 2) ||
+	    ((StopStop & DNASeq::StopAfterAG) && k == 1)))  {
+	PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-nuc-k) % 3));
+	PICOMP(true,Acc,Reverse, TermR1+((Data_Len-nuc-k) % 3));
+      }
       // On reste intronique
       LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
       INSERTANDPAYTHESLOPE(IntronR1+k,DATA::IntronR);
     }
+    // ----------------------------------------------------------------
+    // ----------------- Introns reverse speciaux ---------------------
+    // ----------------------------------------------------------------
+    //
+    // --- Intron Phase 1 précédé par G (AT)
+    //
+    maxi = NINFINITY;
+    k = 2;
+    if (StopStop & DNASeq::StopAfterG) {
+      // - on quitte un Intr ou un Term
+      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-nuc-k) % 3));
+      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-nuc-k) % 3));
+    }
+    // On reste intronique
+    LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+    INSERTANDPAYTHESLOPE(IntronR3G,DATA::IntronR);
+
+    //
+    // --- Intron Phase 1 précédé par A (GT|AT)
+    //
+    maxi = NINFINITY;
+    k = 2;
+    if (StopStop & DNASeq::StopAfterA) {
+      // - on quitte un Intr ou un Term
+      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-nuc-k) % 3));
+      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-nuc-k) % 3));
+    }
+    // On reste intronique
+    LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+    INSERTANDPAYTHESLOPE(IntronR3A,DATA::IntronR);
+
+    //
+    // --- Intron Phase 2 précédé par AG, AA ou GA (T)
+    //
+    maxi = NINFINITY;
+    k = 1;
+    if (StopStop & DNASeq::StopAfterAG) {
+      // - on quitte un Intr ou un Term
+      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-nuc-k) % 3));
+      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-nuc-k) % 3));
+    }
+    // On reste intronique
+    LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+    INSERTANDPAYTHESLOPE(IntronR2AG,DATA::IntronR);
   }
   
   LBP[InitF1].Update(log(ExPrior/6.0)/2.0);
@@ -639,6 +816,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   LBP[IntronR1].Update(log(InPrior/6.0)/2.0);
   LBP[IntronR2].Update(log(InPrior/6.0)/2.0);
   LBP[IntronR3].Update(log(InPrior/6.0)/2.0);
+
+  LBP[IntronF2T].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronF3TG].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronF3TA].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR3G].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR3A].Update(log(InPrior/6.0)/2.0);
+  LBP[IntronR2AG].Update(log(InPrior/6.0)/2.0);
 
   LBP[SnglF1].Update(log(ExPrior/6.0)/2.0);
   LBP[SnglF2].Update(log(ExPrior/6.0)/2.0);
@@ -683,10 +867,10 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   }
   
   // Dump the Paths
-//   for  (i = 0;  i < NbTracks;  i ++) {
-//     printf("Piste %d\n",i);
-//     LBP[i].Dump();
-//   }
+  //   for  (i = 0;  i < NbTracks;  i ++) {
+  //     printf("Piste %d\n",i);
+  //     LBP[i].Dump();
+  //   }
 
   // Backtrace in the graph
   maxi = PBest[0];
