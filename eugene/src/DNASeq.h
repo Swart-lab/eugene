@@ -40,9 +40,8 @@ class  DNASeq
 
  public:
   DNASeq ();
-  DNASeq  (char* data);
   DNASeq (int size);
-  DNASeq (FILE *);
+  DNASeq (char* filename);
 
   ~DNASeq ();
 

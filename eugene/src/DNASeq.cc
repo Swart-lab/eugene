@@ -80,23 +80,6 @@ DNASeq :: DNASeq  ()
   Sequence = NULL;
 }
 
-// ---------------------------------------------------------------------
-//  Construct from a char*
-// ---------------------------------------------------------------------
-DNASeq :: DNASeq  (char* data)
-{
-  int i;
-  
-  SeqLen = strlen(data);
-  Sequence = (unsigned short int *) Safe_malloc (SeqLen * sizeof(unsigned short int));
-  Size = SeqLen;
-
-  for (i = 0; i < SeqLen; i++)
-    Sequence[i] =  Nuc2Code(data[i]);
-
-  UpdateMarkov();
-
-}
 // ---------------------------------------------------------------------     
 //  Construct a  DNASeq  of size L
 // ---------------------------------------------------------------------
@@ -113,11 +96,12 @@ DNASeq :: DNASeq(int L)
   for  (i = 0;  i < L;  i ++)  Sequence [i] = 0;
 }
 // ---------------------------------------------------------------------
-// Construct a DNASeq from file and store it into Sequence, Allocate
-// memory as needed. Assumes FASTA firts. If no > is found assumes raw
-// DNA every unknown DNA char is replaced by N
+// Construct a DNASeq from a filename and store the contents of the
+// file into Sequence, Allocate memory as needed. Assumes FASTA
+// firts. If no > is found assumes raw DNA every unknown DNA char is
+// replaced by N
 // ---------------------------------------------------------------------
-DNASeq :: DNASeq (FILE * fp)
+DNASeq :: DNASeq (char *filename)
 {
   const unsigned int  INCR_SIZE = 10000;
   const unsigned int  INIT_SIZE = 10000;
@@ -125,50 +109,54 @@ DNASeq :: DNASeq (FILE * fp)
   char  *P, Line [MAX_LINE];
   int  Len;
   int  Ch;
+  FILE   *fp;  
+
+  fp = (*filename ? FileOpen (NULL, filename, "r") : stdin);
+  
+  if (fp == NULL) {
+    fprintf(stderr, "Cannot open fasta file %s\n", filename);
+    exit(3);
+  }
 
   // reach the ">"
   while  ((Ch = fgetc (fp)) != EOF && Ch != '>')
     ;
   
-  if  (Ch != EOF) 
-    {
-      fgets (Line, MAX_LINE, fp);
-      Len = strlen (Line);
-      assert (Line [Len - 1] == '\n');
-      P = strtok (Line, " \t\n");
-      if  (P != NULL)
-	{
-	  Len = strlen (P);
-	  Name = (char *)Safe_malloc(sizeof(char)*(Len+1));
-	  strcpy (Name, P);
-	}
-    }
-  else
-    {
-      // Assume the file is not FASTA but RAW DNA - will not work on stdin
-      rewind(fp);
-    }
-
+  if  (Ch != EOF) {
+    fgets (Line, MAX_LINE, fp);
+    Len = strlen (Line);
+    assert (Line [Len - 1] == '\n');
+    P = strtok (Line, " \t\n");
+    if (!P) P = BaseName(filename);
+    Len = strlen (P);
+    Name = (char *)Safe_malloc(sizeof(char)*(Len+1));
+    strcpy (Name, P);
+  }
+  else {
+    // Assume the file is not FASTA but RAW DNA - will not work on stdin
+    rewind(fp);
+  }
+  
   Sequence = (unsigned short int *) Safe_malloc (INIT_SIZE * sizeof(unsigned short int));
   Size = INIT_SIZE;
   
   Len = 0;
-  while  ((Ch = fgetc (fp)) != EOF && Ch != '>')
-    {
-      if (isspace (Ch))
-	continue;
-      
-      if  (Len >= Size)
-	{
-	  Size += INCR_SIZE;
-	  Sequence = (unsigned short int *) Safe_realloc (Sequence, sizeof(unsigned short int)*Size);
-	}
-      Sequence [Len++] = Nuc2Code (Ch);
+  while  ((Ch = fgetc (fp)) != EOF && Ch != '>') {
+    if (isspace (Ch))
+      continue;
+    
+    if  (Len >= Size) {
+      Size += INCR_SIZE;
+      Sequence = (unsigned short int *) Safe_realloc (Sequence, sizeof(unsigned short int)*Size);
     }
+    Sequence [Len++] = Nuc2Code (Ch);
+  }
   SeqLen = Len;
-
+  
   UpdateMarkov();
 
+  if (fp != stdin) fclose(fp);
+  
   return;
 }
 
