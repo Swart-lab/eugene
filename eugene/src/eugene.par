@@ -108,7 +108,7 @@ MarkovIMM.maxGC[0]	100
 #
 ##### Markov proteic model parameters #####
 #
-MarkovProt.matname[0]	swissprot.maxorder2.bin
+MarkovProt.matname[0]	SwP41.noFragm.mininfo1.order2.bin
 MarkovProt.minGC[0]	0
 MarkovProt.maxGC[0]	100
 MarkovProt.maxorder     2
