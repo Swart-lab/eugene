@@ -12,7 +12,7 @@ class SensorNStart : public Sensor
   std::vector<int>  vPosF, vPosR;
   std::vector<REAL> vValF, vValR;
   std::vector<int>::iterator iter;
-  int iterF, iterR;
+  int indexF, indexR;
   double startP, startB;
   
   void ReadNStartF (char[FILENAME_MAX+1], int);
@@ -22,9 +22,7 @@ class SensorNStart : public Sensor
   SensorNStart   (int);
   virtual ~SensorNStart   ();
   virtual void Init       (DNASeq *);
-  virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void GiveInfoAt (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
   virtual void PostAnalyse(Prediction *);
 };

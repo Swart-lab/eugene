@@ -19,9 +19,7 @@ class SensorHomology : public Sensor
   SensorHomology (int);
   virtual ~SensorHomology ();
   virtual void Init       (DNASeq *);
-  virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void GiveInfoAt (DNASeq *, int, DATA *);
   REAL tblastxupdate (int hitnb, REAL hitscore, double pen, double base);
   int  PhaseAdapt (char);
   char ph06       (char);

@@ -60,49 +60,48 @@ void SensorRepeat :: Init (DNASeq *X)
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorRepeat :: ResetIter ()
-{
-  index = 0;
-}
-
 // --------------------------
 //  GiveInfo Content Repeat.
 // --------------------------
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  // si le bloc courant est depasse, il faut avancer !
-  if (index < (int)vDeb.size()  && vFin[index] < pos) index++;
+  // if((index!=0               && vDeb[index-1]>pos) ||
+//      (index<(int)vFin.size() && vDeb[index+1]<pos))
+//     {
+//       iter = lower_bound(v.begin(), vPosF.end(), pos);
+//       if(*iter == pos)
+// 	d->Stop[0] += vValF[iter-vPosF.begin()];
+//       indexF = 0;
+//     }
+//   else
+//     { 
+//       // si le bloc courant est depasse, il faut avancer !
+//       if (index < (int)vDeb.size()  && vFin[index] < pos) index++;
+      
+//       // est on dedans ?
+//       if (index < (int)vDeb.size()  &&  vDeb[index] <= pos && vFin[index] >= pos) {
+// 	// penaliser !
+// 	for(int i=0; i<6; i++)   // Exon(6)
+// 	  d->ContentScore[i] += exonPenalty;
+// 	for(int i=7; i<8; i++)   // Intron (2)
+// 	  d->ContentScore[i] += intronPenalty; 
+// 	for(int i=9; i<13; i++)  // UTR (4)
+// 	  d->ContentScore[i] += UTRPenalty; 
+//       }
+//     }
 
-  // est on dedans ?
-  if (index < (int)vDeb.size()  &&  vDeb[index] <= pos && vFin[index] >= pos) {
-    // penaliser !
-    for(int i=0; i<6; i++)   // Exon(6)
-      d->ContentScore[i] += exonPenalty;
-    for(int i=7; i<8; i++)   // Intron (2)
-      d->ContentScore[i] += intronPenalty; 
-    for(int i=9; i<13; i++)   // UTR (4)
-      d->ContentScore[i] += UTRPenalty; 
-  }
- }
-
-// ----------------------------
-//  GiveInfoAt Content Repeat.
-// ----------------------------
-void SensorRepeat :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  iter = lower_bound(vFin.begin(), vFin.end(), pos);
-  if (vDeb[iter-vFin.begin()] <= pos) {
-    for(int i=0; i<6; i++)   // Exon(6)
-      d->ContentScore[i] += exonPenalty;
-    for(int i=7; i<8; i++)   // Intron (2)
-      d->ContentScore[i] += intronPenalty; 
-    for(int i=9; i<13; i++)  // UTR (4)
-      d->ContentScore[i] += UTRPenalty; 
-  }
+  ///////GiveInfoA t
+ //  iter = lower_bound(vFin.begin(), vFin.end(), pos);
+//   if (vDeb[iter-vFin.begin()] <= pos) {
+//     for(int i=0; i<6; i++)   // Exon(6)
+//       d->ContentScore[i] += exonPenalty;
+//     for(int i=7; i<8; i++)   // Intron (2)
+//       d->ContentScore[i] += intronPenalty; 
+//     for(int i=9; i<13; i++)  // UTR (4)
+//       d->ContentScore[i] += UTRPenalty; 
+//   }
 }
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------

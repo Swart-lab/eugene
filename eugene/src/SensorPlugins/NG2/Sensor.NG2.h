@@ -12,7 +12,7 @@ class SensorNG2 : public Sensor
   std::vector<int>  vPosAccF, vPosAccR, vPosDonF, vPosDonR;
   std::vector<REAL> vValAccF, vValAccR, vValDonF, vValDonR;
   std::vector<int>::iterator iter;
-  int iterAccF, iterAccR, iterDonF, iterDonR;
+  int iAccF, iAccR, iDonF, iDonR;
   double accB, accP, donB, donP;
   
   void ReadNG2F(char[FILENAME_MAX+1], int);
@@ -22,9 +22,7 @@ class SensorNG2 : public Sensor
   SensorNG2  (int);
   virtual ~SensorNG2      ();
   virtual void Init       (DNASeq *);
-  virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void GiveInfoAt (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
   virtual void PostAnalyse(Prediction *);
 };

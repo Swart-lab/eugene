@@ -40,56 +40,26 @@ void SensorMarkovConst :: Init (DNASeq *X)
 }
 
 // -----------------------
-//  ResetIter.
-// -----------------------
-void SensorMarkovConst :: ResetIter ()
-{
-}
-
-// -----------------------
 //  GiveInfo Content Markov.
 // -----------------------
 void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-//  for(int i=0;i<13;i++)
-//    d->ContentScore[i] += log(value);
-  if ((X->Markov0[BitG] + X->Markov0[BitC]) > minGC &&
-      (X->Markov0[BitG] + X->Markov0[BitC]) <= maxGC)
-    {
-      for(int i=0;i<6;i++)
-	d->ContentScore[i] += log(value) + log(transCodant); //Exon
-	
-	d->ContentScore[6] += log(value)  + log(transIntron); //IntronF
-	d->ContentScore[7] += log(value)  + log(transIntron); //IntronR
-	d->ContentScore[8] += log(value)  + log(transInter);  //InterG
-	d->ContentScore[9] += log(value)  + log(transUTR5);   //UTR5'F
-	d->ContentScore[10]+= log(value) + log(transUTR5);   //UTR5'R
-	d->ContentScore[11]+= log(value) + log(transUTR3);   //UTR3'F
-	d->ContentScore[12]+= log(value) + log(transUTR3);   //UTR3'R
-    }
-}
-
-// -------------------------
-//  GiveInfoAt Content Markov.
-// -------------------------
-void SensorMarkovConst :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-//  for(int i=0;i<13;i++)
-//    d->ContentScore[i] += log(value);
+  //  for(int i=0;i<13;i++)
+  //    d->ContentScore[i] += log(value);
 
   if ((X->Markov0[BitG] + X->Markov0[BitC]) > minGC &&
       (X->Markov0[BitG] + X->Markov0[BitC]) <= maxGC)
     {
       for(int i=0;i<6;i++)
 	d->ContentScore[i] += log(value) + log(transCodant); //Exon
-	
-	d->ContentScore[6] += log(value)  + log(transIntron); //IntronF
-	d->ContentScore[7] += log(value)  + log(transIntron); //IntronR
-	d->ContentScore[8] += log(value)  + log(transInter);  //InterG
-	d->ContentScore[9] += log(value)  + log(transUTR5);   //UTR5'F
-	d->ContentScore[10]+= log(value) + log(transUTR5);   //UTR5'R
-	d->ContentScore[11]+= log(value) + log(transUTR3);   //UTR3'F
-	d->ContentScore[12]+= log(value) + log(transUTR3);   //UTR3'R
+      
+      d->ContentScore[6] += log(value) + log(transIntron); //IntronF
+      d->ContentScore[7] += log(value) + log(transIntron); //IntronR
+      d->ContentScore[8] += log(value) + log(transInter);  //InterG
+      d->ContentScore[9] += log(value) + log(transUTR5);   //UTR5'F
+      d->ContentScore[10]+= log(value) + log(transUTR5);   //UTR5'R
+      d->ContentScore[11]+= log(value) + log(transUTR3);   //UTR3'F
+      d->ContentScore[12]+= log(value) + log(transUTR3);   //UTR3'R
     }
 }
 
@@ -173,7 +143,7 @@ void SensorMarkovConst :: Plot(DNASeq *TheSeq)
     }
 
     if (i+window/2 < TheSeq->SeqLen) {
-      GiveInfoAt(TheSeq,i+window/2,&data);
+      GiveInfo(TheSeq,i+window/2,&data);
       for (j = 0 ; j < 9 ; j++) 
 	NScore[j] += Score[j];
     }

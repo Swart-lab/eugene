@@ -19,9 +19,7 @@ class SensorIfElse : public Sensor
   SensorIfElse  (int);
   virtual ~SensorIfElse   ();
   virtual void Init       (DNASeq *);
-  virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void GiveInfoAt (DNASeq *, int, DATA *);
   virtual void Plot(DNASeq *);
   virtual void PostAnalyse(Prediction *);
 };

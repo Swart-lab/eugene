@@ -32,9 +32,7 @@ class Sensor
   Sensor  (int);
   virtual ~Sensor ();
   virtual void Init       (DNASeq *) = 0;
-  virtual void ResetIter  () = 0;
   virtual void GiveInfo   (DNASeq *, int, DATA *) = 0;
-  virtual void GiveInfoAt (DNASeq *, int, DATA *) = 0;
   virtual void Plot       (DNASeq *) = 0;
   virtual void PostAnalyse(Prediction *) = 0;
   void CheckStart   (DNASeq *, vector<int>, vector<int>);

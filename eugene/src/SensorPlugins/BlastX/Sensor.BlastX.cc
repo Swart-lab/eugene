@@ -222,58 +222,50 @@ void SensorBlastX :: Init (DNASeq *X)
   fprintf(stderr,"done\n");
 }
 
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorBlastX :: ResetIter ()
-{
-  index = 0;
-}
-
 // --------------------------
 //  GiveInfo Content BlastX.
 // --------------------------
 void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int i;
-  if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
-    for(i=0; i<6; i++)       //exons
-      if(vPMatch[index] < 0 || 
-	 ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
-	d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
-    
-    for(i=8; i<13; i++)      //inter & UTRs
-      if(vPMatch[index] != 0)
-	d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
-    
-    for(i=6; i<8; i++)       //introns
-      if(vPMatch[index] > 0)
-	d->ContentScore[i] += -vPMatch[index]*vPMLevel[index];
-    index++;
-  }
-}
-
-// ----------------------------
-//  GiveInfoAt Content BlastX.
-// ----------------------------
-void SensorBlastX :: GiveInfoAt(DNASeq *X, int pos, DATA *d)
-{
-  int i;
-  iter = find(vPos.begin(), vPos.end(), pos);
-  if(iter != vPos.end()) {
-    for(i=0; i<6; i++)       //exons
-      if(vPMatch[iter-vPos.begin()] < 0 || 
-	 ((vPMatch[iter-vPos.begin()] > 0) && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
-	d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
-    
-    for(i=8; i<13; i++)      //inter & UTRs
-      if(vPMatch[iter-vPos.begin()] != 0)
-	d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
-    
-    for(i=6; i<8; i++)       //introns
-      if(vPMatch[iter-vPos.begin()] > 0)
-	d->ContentScore[i] += -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
-  }
+  
+  if((index != 0                &&  vPos[index-1] >= pos) ||
+     (index < (int)vPos.size()  &&  vPos[index]   <  pos))
+    {
+      iter = lower_bound(vPos.begin(), vPos.end(), pos);
+      if(*iter == pos) {
+	for(i=0; i<6; i++)       //exons
+	  if(vPMatch[iter-vPos.begin()] < 0 ||
+	     ((vPMatch[iter-vPos.begin()] > 0) && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
+	    d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+	
+	for(i=8; i<13; i++)      //inter & UTRs
+	  if(vPMatch[iter-vPos.begin()] != 0)
+	    d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+	
+	for(i=6; i<8; i++)       //introns
+	  if(vPMatch[iter-vPos.begin()] > 0)
+	    d->ContentScore[i] += -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
+	index = iter-vPos.begin() + 1;
+      }
+      else index = iter-vPos.begin();
+    }
+  else if( index < (int)vPos.size()  &&  vPos[index] == pos )
+    {
+      for(i=0; i<6; i++)       //exons
+	if(vPMatch[index] < 0 || 
+	   ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
+	  d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+      
+      for(i=8; i<13; i++)      //inter & UTRs
+	if(vPMatch[index] != 0)
+	  d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+      
+      for(i=6; i<8; i++)       //introns
+	if(vPMatch[index] > 0)
+	  d->ContentScore[i] += -vPMatch[index]*vPMLevel[index];
+      index++;
+    }
 }
 
 // -----------------------------------------------

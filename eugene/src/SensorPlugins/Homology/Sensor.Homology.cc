@@ -59,9 +59,9 @@ void SensorHomology :: Init (DNASeq *X)
 {
   int i, j;
   int Len = X->SeqLen;
-
+  
   type = Type_Content;
-
+  
   FILE *ftblastx;
   FILE *protmatfile;
   int deb,fin,phase,ProtDeb,ProtFin,sens,score=0;
@@ -74,7 +74,7 @@ void SensorHomology :: Init (DNASeq *X)
   paire[2]='\0';
   ProtMat* PROTMAT;
   char tempname[FILENAME_MAX+1];
-
+  
   TblastxNumber = new int*[6];
   TblastxScore = new REAL*[6];
   for (j = 0; j < 6; j++) {
@@ -85,7 +85,7 @@ void SensorHomology :: Init (DNASeq *X)
       TblastxScore[j][i]=0.0;
     }
   }
-
+  
   strcpy(tempname,PAR.getC("Homology.protmatname"));
   // Lecture de la matrice proteique ("BLOSUM62" par defaut)
   protmatfile=FileOpen(NULL, tempname, "rt");
@@ -96,9 +96,9 @@ void SensorHomology :: Init (DNASeq *X)
   fprintf(stderr,"Loading protmat file.........");
   fichier2protmat(protmatfile , PROTMAT);
   fclose(protmatfile);
-//   PROTMAT->affichage(2);
+  //   PROTMAT->affichage(2);
   fprintf(stderr,"done\n");
-
+  
   fprintf(stderr,"Reading tblastx data.........");
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
@@ -107,7 +107,7 @@ void SensorHomology :: Init (DNASeq *X)
   if (ftblastx == NULL) {
     fprintf (stderr,"\ncannot open tblastx file %s\n",tempname); exit (2);
   }
-
+  
   while (!feof(ftblastx)) {
     if (fscanf(ftblastx,"%d %d %f %*s %d %*s %d %d",
 	       &deb, &fin, &bits, &phase, &ProtDeb,&ProtFin) != 6){
@@ -130,7 +130,7 @@ void SensorHomology :: Init (DNASeq *X)
       ProtFin = j;
     }
     phase = ph06(phase);
-
+    
     tampon=fgetc(ftblastx); // lecture de la suite (sequence hit subject)
     while (isspace(tampon)) tampon=fgetc(ftblastx); // en cas de plsrs separateurs avant la derniere colonne
     for (i = deb-1; i < fin; i++)  {
@@ -149,26 +149,19 @@ void SensorHomology :: Init (DNASeq *X)
       GlobalBits=((REAL)bits)/((REAL)abs(fin-deb));
       TblastxNumber[phase][i]++;
       TblastxScore[phase][i]= ( (TblastxScore[phase][i]==0) ? score : Max ( (int)TblastxScore[phase][i],score)) ;
-//      TblastxScore[phase][i]= Max (TblastxScore[phase][i],GlobalBits);
+      //      TblastxScore[phase][i]= Max (TblastxScore[phase][i],GlobalBits);
     }
   }
   fclose(ftblastx);
   fprintf(stderr,"done\n");
-//	for(i=1495;i>1445;i-=3){
-//	for (i=1440;i<1500;i+=3) {
-//	  printf("i:%d  %c %c %c  %c %c %c\n",i,X->AA(i  ,1), X->AA(i+1,1), X->AA(i+2,1), X->AA(i  ,-1), X->AA(i+1,-1), X->AA(i+2,-1) );
-//	}
-	
-	//	  printf("i:%d  %c %c %c   %c\n",i,X->AA(i,-1),X->AA(i-1,-1),X->AA(i-2,-1),X->AA(i-3,-1)) ;
-
+  //	for(i=1495;i>1445;i-=3){
+  //	for (i=1440;i<1500;i+=3) {
+  //	  printf("i:%d  %c %c %c  %c %c %c\n",i,X->AA(i  ,1), X->AA(i+1,1), X->AA(i+2,1), X->AA(i  ,-1), X->AA(i+1,-1), X->AA(i+2,-1) );
+  //	}
+  
+  //	  printf("i:%d  %c %c %c   %c\n",i,X->AA(i,-1),X->AA(i-1,-1),X->AA(i-2,-1),X->AA(i-3,-1)) ;
+  
   if (PAR.getI("Output.graph")) Plot(X);
-}
-
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorHomology :: ResetIter ()
-{
 }
 
 // --------------------------
@@ -182,17 +175,7 @@ void SensorHomology :: GiveInfo(DNASeq *X, int pos, DATA *d)
       d->ContentScore[k] += tblastxupdate(TblastxNumber[k][pos],TblastxScore[k][pos],TblastxP,TblastxB);
   }
 }
-// --------------------------
-//  GiveInfoAt Content TBlastX.
-// --------------------------
-void SensorHomology :: GiveInfoAt(DNASeq *X, int pos, DATA *d)
-{
-  int k;
-  for (k = 0; k<6; k++) {
-    if (TblastxNumber[k][pos]>0)
-      d->ContentScore[k] += tblastxupdate(TblastxNumber[k][pos],TblastxScore[k][pos],TblastxP,TblastxB);
-  }
-}
+
 // -----------------------------------------------
 //  Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0.
 // -----------------------------------------------
@@ -227,16 +210,17 @@ void SensorHomology :: Plot(DNASeq *X)
     }
   }
 }
+
 // --------------------------
 //  Affichage des TBlastX.
 // --------------------------
 void SensorHomology :: PlotAt(int pos)
 {
-//  if (PAR.getI("Output.graph")) {
+  //  if (PAR.getI("Output.graph")) {
   for(int j=0;j<6;j++) {
     if (TblastxNumber[j][pos]>0) {
-  //	  PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos]/2 , 8- (int)(1.7*TblastxScore[j][pos]) );
-//  	    PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 6);//8- (int)(1.7*TblastxScore[j][pos]) );
+      //	  PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos]/2 , 8- (int)(1.7*TblastxScore[j][pos]) );
+      //  	    PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 6);//8- (int)(1.7*TblastxScore[j][pos]) );
       PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,(int)TblastxScore[j][pos]/3)) : 3 ) );
     }
   }

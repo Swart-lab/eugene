@@ -108,19 +108,49 @@ void SensorEst :: Init (DNASeq *X)
 }
 
 // -----------------------
-//  ResetIter.
-// -----------------------
-void SensorEst :: ResetIter ()
-{
-  index = 0;
-}
-
-// -----------------------
 //  GiveInfo signal est.
 // -----------------------
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
+  if((index != 0                &&  vPos[index-1] >= pos) ||
+     (index < (int)vPos.size()  &&  vPos[index]   <  pos))
+    {
+      iter = lower_bound(vPos.begin(), vPos.end(), pos);
+      if(*iter == pos) {
+	for(int i=0; i<3; i++)              // Exon F
+	  // Si on a un Gap EST ou si l'on connait le sens du match EST
+	  if ((vESTMatch[iter-vPos.begin()] & Gap) || 
+	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
+	       !(vESTMatch[iter-vPos.begin()] & HitForward)))
+	    d->ContentScore[i] += estP;
+	
+	for(int i=3; i<6; i++)              // Exon R
+	  // Si on a un Gap EST ou si l'on connait le sens du match EST
+	  if ((vESTMatch[iter-vPos.begin()] & Gap) ||
+	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
+	       !(vESTMatch[iter-vPos.begin()] & HitReverse)))
+	    d->ContentScore[i] += estP;
+	
+	// Si on a un Hit EST ou si l'on connait le sens du match EST
+	if((vESTMatch[iter-vPos.begin()] & Hit) ||
+	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
+	    !(vESTMatch[iter-vPos.begin()] & GapForward)))
+	  d->ContentScore[6] += estP;       // IntronF
+	
+	// Si on a un Hit EST ou si l'on connait le sens du match EST
+	if((vESTMatch[iter-vPos.begin()] & Hit) ||
+	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
+	    !(vESTMatch[iter-vPos.begin()] & GapReverse)))
+	  d->ContentScore[7] += estP;       // IntronR
+	
+	d->ContentScore[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
+	
+	d->ESTMATCH_TMP = vESTMatch[iter-vPos.begin()];  // WARNING : EST -> on est dans intron
+	index = iter-vPos.begin() + 1;
+      }
+      else index = iter-vPos.begin();
+    }
+  else if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
     for(int i=0; i<3; i++)              // Exon F
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if ((vESTMatch[index] & Gap) || 
@@ -147,45 +177,6 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     
     d->ESTMATCH_TMP = vESTMatch[index];  // WARNING : EST -> on est dans intron
     index++;
-  }
-}
-
-// -------------------------
-//  GiveInfoAt signal est.
-// -------------------------
-void SensorEst :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  iter = find(vPos.begin(), vPos.end(), pos);
-  if(iter != vPos.end()) {
-    for(int i=0; i<3; i++)              // Exon F
-      // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((vESTMatch[iter-vPos.begin()] & Gap) || 
-	  ((vESTMatch[iter-vPos.begin()] & Hit) &&
-	   !(vESTMatch[iter-vPos.begin()] & HitForward)))
-	d->ContentScore[i] += estP;
-    
-    for(int i=3; i<6; i++)              // Exon R
-      // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((vESTMatch[iter-vPos.begin()] & Gap) ||
-	  ((vESTMatch[iter-vPos.begin()] & Hit) &&
-	   !(vESTMatch[iter-vPos.begin()] & HitReverse)))
-	d->ContentScore[i] += estP;
-    
-    // Si on a un Hit EST ou si l'on connait le sens du match EST
-    if((vESTMatch[iter-vPos.begin()] & Hit) ||
-       ((vESTMatch[iter-vPos.begin()] & Gap) &&
-	!(vESTMatch[iter-vPos.begin()] & GapForward)))
-      d->ContentScore[6] += estP;       // IntronF
-    
-    // Si on a un Hit EST ou si l'on connait le sens du match EST
-    if((vESTMatch[iter-vPos.begin()] & Hit) ||
-       ((vESTMatch[iter-vPos.begin()] & Gap) &&
-	!(vESTMatch[iter-vPos.begin()] & GapReverse)))
-      d->ContentScore[7] += estP;       // IntronR
-    
-    d->ContentScore[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
-    
-    d->ESTMATCH_TMP = vESTMatch[iter-vPos.begin()];  // WARNING : EST -> on est dans intron
   }
 }
 
@@ -276,13 +267,11 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       }
       ThisBlock = ThisBlock->Next;
       }
-    
+
     // Tous les blocs ont ete traites
     if (WorstSpliceF == 0.0) TheStrand &= (~HitForward);
     if (WorstSpliceR == 0.0) TheStrand &= (~HitReverse);
-
-    //    printf("Strand %d\n",TheStrand);
-
+    
     // next iteration on the same EST
     ThisBlock = ThisEST->Match;
     while (TheStrand && ThisBlock) {

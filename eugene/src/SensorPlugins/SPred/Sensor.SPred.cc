@@ -38,7 +38,7 @@ void SensorSPred :: Init (DNASeq *X)
 
   type = Type_Splice;
 
-  iterAccF = iterAccR = iterDonF = iterDonR = 0;
+  iAccF = iDonF = 0;
   
   vPosAccF.clear();  vPosAccR.clear();
   vPosDonF.clear();  vPosDonR.clear();
@@ -61,6 +61,9 @@ void SensorSPred :: Init (DNASeq *X)
   CheckSplices(X, vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 
   if (PAR.getI("Output.graph")) Plot(X);
+  
+  iAccR = (int)vPosAccR.size() - 1;
+  iDonR = (int)vPosDonR.size() - 1;
 }
 
 // -------------------------------------
@@ -155,60 +158,78 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
   fclose(fp);
 }
 
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorSPred :: ResetIter ()
-{
-  iterAccF = iterAccR = iterDonF = iterDonR = 0;
-}
-
 // ------------------------
 //  GiveInfo signal SPred.
 // ------------------------
 void SensorSPred :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  int i;
-  if( iterAccF < (int)vPosAccF.size()  &&  vPosAccF[iterAccF] == pos ) {
-    d->Acc[0] = vValAccF[iterAccF];
-    iterAccF++;
-  }
-  i = (int)vPosAccR.size();
-  if( abs(iterAccR) < i  &&  vPosAccR[iterAccR + i-1] == pos ) {
-    d->Acc[1] = vValAccR[iterAccR + i-1];
-    iterAccR--;
-  }
-  if( iterDonF < (int)vPosDonF.size()  &&  vPosDonF[iterDonF] == pos ) {
-    d->Don[0] = vValDonF[iterDonF];
-    iterDonF++;
-  }
-  i = (int)vPosDonR.size();
-  if( abs(iterDonR) < i  &&  vPosDonR[iterDonR + i-1] == pos ) {
-    d->Don[1] = vValDonR[iterDonR + i-1];
-    iterDonR--;
-  }
-}
-
-// --------------------------
-//  GiveInfoAt signal SPred.
-// --------------------------
-void SensorSPred :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
-  if(*iter == pos)
-    d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
+  // Accepteur Forward
+  if((iAccF != 0                    &&  vPosAccF[iAccF-1] >= pos) ||
+     (iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF]   <  pos))
+    {
+      iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
+      if(*iter == pos) {
+	d->Acc[0] += vValAccF[iter-vPosAccF.begin()];
+	iAccF = iter-vPosAccF.begin() + 1;
+      }
+      else iAccF = iter-vPosAccF.begin();
+    }
+  else if(iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF] == pos)
+    {
+      d->Acc[0] = vValAccF[iAccF];
+      iAccF++;
+    }
   
-  iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, greater<int>());
-  if(*iter == pos)
-    d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
+  // Accepteur Reverse
+  if((iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR+1] >= pos) ||
+     (iAccR > -1                    &&  vPosAccR[iAccR]   <  pos))
+    {
+      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, greater<int>());
+      if(*iter == pos) {
+	d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
+	iAccR = iter-vPosAccR.begin();
+      }
+      else iAccR = iter-vPosAccR.begin() - 1;
+    }
+  else if(iAccR > -1  &&  vPosAccR[iAccR] == pos)
+    {
+      d->Acc[1] = vValAccR[iAccR];
+      iAccR--;
+    }
   
-  iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
-  if(*iter == pos)
-    d->Don[0] = vValDonF[iter-vPosDonF.begin()];
+  // Donneur Forward
+  if((iDonF != 0                    &&  vPosDonF[iDonF-1] >= pos) ||
+     (iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF]   <  pos))
+    {
+      iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
+      if(*iter == pos) {
+	d->Don[0] += vValDonF[iter-vPosDonF.begin()];
+	iDonF = iter-vPosDonF.begin() + 1;
+      }
+      else iDonF = iter-vPosDonF.begin();
+    }
+  else if(iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF] == pos)
+    {
+      d->Don[0] = vValDonF[iDonF];
+      iDonF++;
+    }
   
-  iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, greater<int>());
-  if(*iter == pos)
-    d->Don[1] = vValDonR[iter-vPosDonR.begin()];
+  // Donneur Reverse
+  if((iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR+1] >= pos) ||
+     (iDonR > -1                    &&  vPosDonR[iDonR]   <  pos))
+    {
+      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, greater<int>());
+      if(*iter == pos) {
+	d->Don[1] = vValDonR[iter-vPosDonR.begin()];
+	iDonR = iter-vPosDonR.begin();
+      }
+      else iDonR = iter-vPosDonR.begin() - 1;
+    }
+  else if(iDonR > -1  &&  vPosDonR[iDonR] == pos)
+    {
+      d->Don[1] = vValDonR[iDonR];
+      iDonR--;
+    }
 }
 
 // ----------------------------

@@ -45,13 +45,6 @@ void SensorUser :: Init (DNASeq *X)
 }
 
 // -----------------------
-//  ResetIter.
-// -----------------------
-void SensorUser :: ResetIter ()
-{
-}
-
-// -----------------------
 //  GiveInfo signal user.
 // -----------------------
 void SensorUser :: GiveInfo (DNASeq *X, int pos, DATA *d)
@@ -61,14 +54,6 @@ void SensorUser :: GiveInfo (DNASeq *X, int pos, DATA *d)
   
   UserInfoList = ContentsUser;
   Util(pos, UserInfoList, d);
-}
-
-// -------------------------
-//  GiveInfoAt signal user.
-// -------------------------
-void SensorUser :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  GiveInfo(X, pos, d);
 }
 
 // ----------------------------

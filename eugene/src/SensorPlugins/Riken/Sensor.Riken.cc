@@ -71,11 +71,10 @@ void SensorRiken :: Init (DNASeq *X)
     tmp->deb = Min(beg3, Min(end3, Min(beg5, end5)));
     tmp->fin = Max(beg3, Max(end3, Max(beg5, end5)));
     strcpy(tmp->ID, name);
-
+    
     tmp->sens = (((beg5+end5) < (beg3+end3)) ? 1 : -1);
     // si le gene est trop court, on ne peut pas connaitre le sens !
     if (abs((beg5+end5) - (beg3+end3)) <100) tmp->sens = 0;
-    
     RAFLtmp.push_back(tmp);
   }
   fclose(fRAFL);
@@ -86,7 +85,7 @@ void SensorRiken :: Init (DNASeq *X)
   fprintf(stderr, "%d RAFL EST pairs read, ", RAFLtmp.size());
 
   sort(RAFLtmp.begin(), RAFLtmp.end(), Before);
-
+  
   for (j=0; j<(int)RAFLtmp.size()-1; j++) {
     if (RAFLtmp[j]->fin - RAFLtmp[j+1]->deb >= 60) { // grand overlap
       fprintf(stderr, "fusion...");
@@ -120,13 +119,6 @@ void SensorRiken :: Init (DNASeq *X)
   if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
 
   if (PAR.getI("Output.graph")) Plot(X);
-}
-
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorRiken :: ResetIter ()
-{
 }
 
 // -------------------------
@@ -200,13 +192,6 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
   }
 }
 
-// ---------------------------
-//  GiveInfoAt Content Riken.
-// ---------------------------
-void SensorRiken :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  GiveInfo(X, pos, d);
-}
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------

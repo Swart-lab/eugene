@@ -36,7 +36,7 @@ void SensorNStart :: Init (DNASeq *X)
 
   type = Type_Start;
   
-  iterR = iterF = 0;
+  indexR = 0;
   
   vPosF.clear();
   vValF.clear();
@@ -59,6 +59,8 @@ void SensorNStart :: Init (DNASeq *X)
   CheckStart(X, vPosF, vPosR);
 
   if (PAR.getI("Output.graph")) Plot(X);
+
+  indexF = (int)vPosR.size() - 1;
 }
 
 // --------------------------
@@ -118,43 +120,44 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
   fclose(fp);
 }
 
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorNStart :: ResetIter ()
-{
-  iterF = iterR = 0;
-}
-
 // ------------------------
 //  GiveInfo signal start.
 // ------------------------
 void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  int i;
-  if( iterF < (int)vPosF.size() && vPosF[iterF] == pos ) {
-    d->Start[0] += vValF[iterF];
-    iterF++;
-  }
-  i = (int)vPosR.size();
-  if( abs(iterR) < i  &&  vPosR[iterR + i-1] == pos ) {
-    d->Start[1] += vValR[iterR + i-1];
-    iterR--;
-  }
-}
-
-// --------------------------
-//  GiveInfoAt signal start.
-// --------------------------
-void SensorNStart :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
-  if(*iter == pos)
-    d->Start[0] += vValF[iter-vPosF.begin()];
+  // Start Forward
+  if((indexF != 0                 &&  vPosF[indexF-1] >= pos) ||
+     (indexF < (int)vPosF.size()  &&  vPosF[indexF]   <  pos))
+    {
+      iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
+      if(*iter == pos) {
+	d->Start[0] += vValF[iter-vPosF.begin()];
+	indexF = iter-vPosF.begin() + 1;
+      }
+      else indexF = iter-vPosF.begin();
+    }
+  else if(indexF < (int)vPosF.size()  &&  vPosF[indexF] == pos)
+    {
+      d->Start[0] += vValF[indexF];
+      indexF++;
+    }
   
-  iter = lower_bound(vPosR.begin(), vPosR.end(), pos, greater<int>());
-  if(*iter == pos)
-    d->Start[1] += vValR[iter-vPosR.begin()];
+  // Start Reverse
+  if((indexR < (int)vPosR.size()  &&  vPosR[indexR+1] >= pos) ||
+     (indexR > -1                 &&  vPosR[indexR]   <  pos))
+    {
+      iter = lower_bound(vPosR.begin(), vPosR.end(), pos, greater<int>());
+      if(*iter == pos) { 
+	d->Start[1] += vValR[iter-vPosR.begin()];
+      indexR = iter-vPosR.begin();
+      }
+      else indexR = iter-vPosR.begin() - 1;
+    }
+  else if(indexR > -1  &&  vPosR[indexR] == pos)
+    {
+      d->Start[1] += vValR[indexR];
+      indexR--;
+    }
 }
 
 // ----------------------------

@@ -30,7 +30,7 @@ void SensorEuStop :: Init (DNASeq *X)
 {
   type = Type_Stop;
   
-  iterR = iterF = 0;
+  indexR = indexF = 0;
   
   vPosF.clear();
   vValF.clear();
@@ -52,41 +52,41 @@ void SensorEuStop :: Init (DNASeq *X)
 }
 
 // -----------------------
-//  ResetIter.
-// -----------------------
-void SensorEuStop :: ResetIter ()
-{
-  iterF = iterR = 0;
-}
-
-// -----------------------
 //  GiveInfo signal stop.
 // -----------------------
 void SensorEuStop :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if( iterF < (int)vPosF.size()  &&  vPosF[iterF] == pos ) {
-    d->Stop[0] += vValF[iterF];
-    iterF++;
-  }
+  if((indexF != 0                 &&  vPosF[indexF-1] >= pos) ||
+     (indexF < (int)vPosF.size()  &&  vPosF[indexF]   <  pos))
+    {
+      iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
+      if(*iter == pos) {
+	d->Stop[0] += vValF[iter-vPosF.begin()];
+	indexF = iter-vPosF.begin() + 1;
+      }
+      else indexF = iter-vPosF.begin();
+    }
+  else if( indexF < (int)vPosF.size()  &&  vPosF[indexF] == pos )
+    {
+      d->Stop[0] += vValF[indexF];
+      indexF++;
+    }
 
-  if( iterR < (int)vPosR.size()  &&  vPosR[iterR] == pos ) {
-    d->Stop[1] += vValR[iterR];
-    iterR++;
-  }
-}
-
-// -------------------------
-//  GiveInfoAt signal stop.
-// -------------------------
-void SensorEuStop :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
-  if(*iter == pos)
-    d->Stop[0] += vValF[iter-vPosF.begin()];
-  
-  iter = lower_bound(vPosR.begin(), vPosR.end(), pos);
-  if(*iter == pos)
-    d->Stop[1] += vValR[iter-vPosR.begin()];
+  if((indexR != 0                 &&  vPosR[indexR-1] >= pos) ||
+     (indexR < (int)vPosR.size()  &&  vPosR[indexR]   <  pos))
+    {
+      iter = lower_bound(vPosR.begin(), vPosR.end(), pos);
+      if(*iter == pos) {
+	d->Stop[1] += vValR[iter-vPosR.begin()];
+	indexR = iter-vPosR.begin() + 1;
+      }
+      else indexR = iter-vPosR.begin();
+    }
+  else if( indexR < (int)vPosR.size()  &&  vPosR[indexR] == pos )
+    {
+      d->Stop[1] += vValR[indexR];
+      indexR++;
+    }
 }
 
 // ----------------------------
