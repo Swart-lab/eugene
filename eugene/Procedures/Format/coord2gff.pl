@@ -11,6 +11,11 @@ $usage .= "\n";
 $usage .= "Usage: $0 [input coord file]\n";
 $usage .= "\n";
 
+$Init="E.Init";
+$Intr="E.Intr";
+$Term="E.Term";
+$Single="E.Single";
+
 if ($#ARGV != 0) {
   die "$usage";
 }
@@ -28,7 +33,7 @@ while (<COORD>){
       $name="$coordfile".".$ngene";
     }
     else {
-      $name= ( ("$name" eq "$coord[0]") ? "$coord[0]".".$ngene" : $coord[0] );
+      $name= "$coord[0]".".$ngene";
       shift(@coord);
     }
 
@@ -36,9 +41,21 @@ while (<COORD>){
     $coord =~ s/-//;
     foreach (@coord) { s/-// }
     for ($i=0;$i<$#coord;$i++) {
-#      $coord[$i] =~ s/\-//;
-#      $coord[$i+1] =~ s/\-//;
-      print "$name\t$0\texon\t$coord[$i]\t$coord[$i+1]\t\t.\t$strand\t.\n";
+      if ($#coord==2) {
+	$feature="$Single";
+      }
+      elsif ( ($i==0) || ($i==$#coord-1)) {
+	if ($i==0) {
+	  $feature= ( ($strand eq '+') ? "$Init" : "$Term" );
+	}
+	else {
+	  $feature= ( ($strand eq '+') ? "$Term" : "$Init" );
+	}
+      }
+      else {
+	$feature= "$Intr";
+      }
+      print "$name\t$0\t$feature\t$coord[$i]\t$coord[$i+1]\t\t.\t$strand\t.\n";
     }
   }
 }
