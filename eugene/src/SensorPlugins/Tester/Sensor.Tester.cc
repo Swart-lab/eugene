@@ -135,7 +135,8 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
   // E.Term, E.Sngl
 
   FILE *fpCoord;
-  int i;
+  char line[MAX_LINE];
+  int  i;
   char *feature = new char[FILENAME_MAX];
   int  start,  end;
   char strand, frame;
@@ -146,80 +147,79 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
     exit(2);
   }
   int j=0;
-  while (1) {
-    j++;
-    i = fscanf(fpCoord,"%*s %*s %s %d %d %*s %c %c",
-	       feature, &start, &end, &strand, &frame);
-    if (i < 5) {
-      if (i==-1) {
-	if(j==1)
-	  fprintf(stderr,"WARNING: empty gff file !...");
-      }
-      else {
-	fprintf(stderr, "\nError in gff file %s, line %d.\n", name, j);
-	exit(2);
-      }
-    }
-    else {
-      if (j==1) {
-	gene->add(start-1, InterGen5);
-	if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0)
-	  gene->add(end, UTR5F);
-	else if (strcmp(feature, "E.Init") == 0)
-	  gene->add(end, ExonF1);
-	else if (strcmp(feature, "E.Term") == 0)
-	  gene->add(end, ExonR1);
-	else if (strcmp(feature, "E.Sngl") == 0)
-	  if (strand == '+') gene->add(end, ExonF1);
-	  else               gene->add(end, ExonR1);
+  while(fgets (line, MAX_LINE, fpCoord) != NULL) {
+    if (line[0] != '#') {
+      j++;
+      i = sscanf(line,"%*s %*s %s %d %d %*s %c %c",
+		 feature, &start, &end, &strand, &frame);
+      if (i < 5) {
+	if (i==-1) {
+	  if(j==1)
+	    fprintf(stderr,"WARNING: empty gff file !...");
+	}
 	else {
-	  fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
-	  fprintf(stderr, " WARNING :\n"
-		  "   - Complete genes only in gff file.\n"
-		  "   - Feature must be UTR5, UTR3, E.Init,"
-		  " E.Intr, E.Term or E.Sngl.\n");
+	  fprintf(stderr, "\nError in gff file %s, line %d.\n", name, j);
 	  exit(2);
 	}
       }
-      else {
-	if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0)
-	  gene->add(end, UTR5F);
-	else if (strcmp(feature,"E.Init") == 0)
-	  if (strand == '+') gene->add(end, ExonF1);
-	  else {
-	    gene->add(start-1, IntronR1);
-	    gene->add(end, ExonR1);
-	  }
-	else if (strcmp(feature,"E.Term") == 0)
-	  if (strand == '-') gene->add(end, ExonR1);
-	  else {
-	    gene->add(start-1, IntronF1);
+      else if (strcmp(feature,"Intron") != 0) {
+	if (j==1) {
+	  gene->add(start-1, InterGen5);
+	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0)
+	    gene->add(end, UTR5F);
+	  else if (strcmp(feature, "E.Init") == 0)
 	    gene->add(end, ExonF1);
-	  }
-	else if (strcmp(feature,"E.Sngl") == 0)
-	  if (strand == '+') gene->add(end, ExonF1);
-	  else               gene->add(end, ExonR1); 
-	else if (strcmp(feature,"E.Intr") == 0) {
-	  if (strand == '+') {
-	    gene->add(start-1, IntronF1);
-	    gene->add(end, ExonF1);
-	  }
-	  else {
-	    gene->add(start-1, IntronR1);
+	  else if (strcmp(feature, "E.Term") == 0)
 	    gene->add(end, ExonR1);
+	  else if (strcmp(feature, "E.Sngl") == 0)
+	    if (strand == '+') gene->add(end, ExonF1);
+	    else               gene->add(end, ExonR1);
+	  else {
+	    fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
+	    fprintf(stderr, " WARNING :\n"
+		    "   - Complete genes only in gff file.\n"
+		    "   - Feature must be UTR5, UTR3, E.Init,"
+		    " E.Intr, E.Term or E.Sngl.\n");
+	    exit(2);
 	  }
 	}
 	else {
-	  fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
-	  fprintf(stderr, " %s : unknown feature (UTR5, UTR3, E.Init,"
-		  " E.Intr, E.Term or E.Sngl).\n",feature);
-	  exit(2);
+	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0)
+	    gene->add(end, UTR5F);
+	  else if (strcmp(feature,"E.Init") == 0)
+	    if (strand == '+') gene->add(end, ExonF1);
+	    else {
+	      gene->add(start-1, IntronR1);
+	      gene->add(end, ExonR1);
+	    }
+	  else if (strcmp(feature,"E.Term") == 0)
+	    if (strand == '-') gene->add(end, ExonR1);
+	    else {
+	      gene->add(start-1, IntronF1);
+	      gene->add(end, ExonF1);
+	    }
+	  else if (strcmp(feature,"E.Sngl") == 0)
+	    if (strand == '+') gene->add(end, ExonF1);
+	    else               gene->add(end, ExonR1); 
+	  else if (strcmp(feature,"E.Intr") == 0) {
+	    if (strand == '+') {
+	      gene->add(start-1, IntronF1);
+	      gene->add(end, ExonF1);
+	    }
+	    else {
+	      gene->add(start-1, IntronR1);
+	      gene->add(end, ExonR1);
+	    }
+	  }
+	  else {
+	    fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
+	    fprintf(stderr, " %s : unknown feature (UTR5, UTR3, E.Init,"
+		    " E.Intr, E.Term or E.Sngl).\n",feature);
+	    exit(2);
+	  }
 	}
       }
     }
-    char c = fgetc(fpCoord);
-    while (c != '\n' && c != EOF) c=fgetc(fpCoord);
-    if (fgetc(fpCoord) == EOF) break;
   }
   fclose(fpCoord);
 
@@ -264,7 +264,7 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	if (!strcmp(truthState, "ExonR") || !strcmp(truthState, "IntronR"))
 	tf = "False";
 	
-	fprintf(fp[i],"%7.7s\t%7.7s\t%7s\t%7d\t      ."
+	fprintf(fp[i],"%s\t%7.7s\t%7s\t%7d\t      ."
 		"\t%7.2f\t      +\t      .\t%7s\t%7s\n",
 		seqName, source[i], predSigType, pos,
 		Data.sig[j].weight[Signal::Forward],
@@ -278,7 +278,7 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	if (!strcmp(truthState, "ExonF") || !strcmp(truthState, "IntronF"))
 	tf = "False";
 
-	fprintf(fp[i],"%7.7s\t%7.7s\t%7s\t%7d\t      ."
+	fprintf(fp[i],"%s\t%7.7s\t%7s\t%7d\t      ."
 		"\t%7.2f\t      -\t      .\t%7s\t%7s\n",
 		seqName, source[i], predSigType, pos,
 		Data.sig[j].weight[Signal::Reverse],
