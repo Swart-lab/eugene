@@ -34,4 +34,11 @@ class Sensor
   void CheckSplices (DNASeq *, REAL **, REAL **);
 };
 
+class SensorFactory
+{
+ public:
+  SensorFactory() { }
+  virtual ~SensorFactory() { }
+  virtual Sensor * CreateSensor() = 0;
+};
 #endif
