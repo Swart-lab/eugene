@@ -77,7 +77,7 @@ void SensorBlastX :: Init (DNASeq *X)
     ProtMatchPhase[i] = 0;
   }
 
-  fprintf(stderr,"Reading Blastx data, level... ");
+  fprintf(stderr,"Reading Blastx data, level...");
   fflush(stderr);
   
   for( k=0; k<(int)strlen(PAR.getC("BlastX.levels")); k++ ) {
@@ -296,4 +296,11 @@ char SensorBlastX :: ph06(char p)
   if (p == 0) return 6;
   else if (p > 0) return (p-1);
   else return 2-p;   
+}
+
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorBlastX :: Plot(DNASeq *X)
+{
 }

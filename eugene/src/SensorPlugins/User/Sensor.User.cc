@@ -32,7 +32,7 @@ void SensorUser :: Init (DNASeq *X)
 
   type = Type_Multiple;
 
-  fprintf(stderr,"Loading user data...");
+  fprintf(stderr,"Loading user data............");
   
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".user");
@@ -69,4 +69,11 @@ void SensorUser :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorUser :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   GiveInfo(X, pos, d);
+}
+
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorUser :: Plot(DNASeq *X)
+{
 }
