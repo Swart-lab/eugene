@@ -393,12 +393,13 @@ int Genetic::MakeClusters (void)
   max=(double)(nopt)/(double)(nb_clusters) ;
   if ((max>0.85)&&(minmaxfactor<100.0)) {
     minmaxfactor *= 1.05;
-    std::cout << "Higher minmaxfactor= " << minmaxfactor <<std::endl;
+    std::cout << "Increase minmaxfactor= " << minmaxfactor ;
   }
   if ((max<0.75)&&(minmaxfactor>1.0)) {    
     minmaxfactor *= 0.95;
-    std::cout << "Lower  minmaxfactor= " << minmaxfactor <<std::endl;
+    std::cout << "Reduce minmaxfactor= " << minmaxfactor ;
   }
+  std::cout <<std::endl;
 
   return nb_clusters;
 }
