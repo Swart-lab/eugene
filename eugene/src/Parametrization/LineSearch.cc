@@ -78,10 +78,22 @@ void LineSearch :: Optimize(bool is_chaining)
   double FitOptPrec = 0;
   unsigned int i; int c;
   std::string warning_message;
+  const double semi_interval_reduction_coef = 0.10; // +/- 10% of previous min-max interval
 
-  // if chains another algo then takes the optimum found as initial point
-  if (is_chaining)
+  // if it chains another algo then takes the optimum found as initial point
+  // and adapt intervals
+  if (is_chaining) {
+    double para_interval;
     Para = OPTIM.Algorithms[OPTIM.AlgoIndex-1]->Para;
+    for (i=0; i<Para.size(); i++) {
+      para_interval = (ParaMax[i] - ParaMin[i]) * semi_interval_reduction_coef;
+      ParaMin[i] = max(ParaMin[i], Para[i] - para_interval);
+      ParaMax[i] = min(ParaMax[i], Para[i] + para_interval);
+      ParaMinInter[i] = ParaMin[i];
+      ParaMaxInter[i] = ParaMax[i];
+    }
+  }
+
 
   // Display parametrization of the algorithm
   std::cout <<std::endl << "---------------------------------------------------------------"<<std::endl;
