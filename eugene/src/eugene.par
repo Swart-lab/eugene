@@ -1,8 +1,9 @@
 #
-# Edité pour EuGeneAS 1.58 (280803)
+# Edité pour EuGeneAS 1.60 (190903)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	28_08_03        # Parameter file version (date)
+EuGene.versionPAR	190903        # Parameter file version (date)
+EuGene.organism		Arabidopsis
 EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
 #
 ##### Minimum lengths #####
@@ -28,14 +29,6 @@ EuGene.ThreePrimePrior	0.07
 #EuGene.InterPrior	1.0
 #EuGene.FivePrimePrior	1.0
 #EuGene.ThreePrimePrior	1.0
-#
-##### States penalties #####
-#
-EuGene.transCodant	1.0
-EuGene.transIntron	1.0
-EuGene.transUTR5	0.999
-EuGene.transUTR3	0.999
-EuGene.transInter	1.0
 #
 ##### Output control ######
 #
@@ -170,9 +163,15 @@ SpliceConst.donP	1e-9
 SpliceConst.donPNo	0
 StartConst.startP	2.897949
 StartConst.startPNo	0
-MarkovConst.val		0.25
-MarkovConst.minGC[0]	0
+#
+##### State penalties (exp length distributions) #####
+MarkovConst.minGC[0]	-1
 MarkovConst.maxGC[0]	100
+MarkovConst.Coding	1.0
+MarkovConst.Intron	1.0
+MarkovConst.UTR5	0.999
+MarkovConst.UTR3	0.999
+MarkovConst.Inter	1.0
 #
 ##### Sensor SpliceWAM #####
 #
@@ -225,7 +224,7 @@ Sensor.IfElse.use		TRUE
 Sensor.MarkovIMM.use		TRUE
 #Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	FALSE
-Sensor.MarkovConst.use	FALSE
+Sensor.MarkovConst.use	TRUE
 #
 # SIMILARITIES:
 Sensor.Est.use		FALSE
