@@ -134,7 +134,7 @@ double ParaOptimization::ParaEvaluate (void)
 
   double fitness = 0;
   unsigned int i;
-  std::string cmde;
+  std::string cmde, fic_pred, fic_eval;
   std::ifstream feval;
   double spg, sng, spe, sne;
   Prediction* pred;
@@ -155,8 +155,9 @@ double ParaOptimization::ParaEvaluate (void)
 	MSensors[i]->InitSensors(Sequences[i]);
       }
 
-      system("rm -f tmp%predictions");
-      fp = fopen("tmp%predictions","w");
+      fic_pred = "tmp%pred%" + ExecutableName;
+      cmde = "rm -f " + fic_pred; system(cmde.c_str());
+      fp = fopen(fic_pred.c_str(),"w");
       for (i=0; i<Sequences.size(); i++) {
 	PAR.set("fstname", SeqNames[i].c_str());
 	pred = Predict(Sequences[i], MSensors[i]);  
@@ -164,11 +165,12 @@ double ParaOptimization::ParaEvaluate (void)
 	if (i!=Sequences.size()-1) fprintf(fp,"\n");
       }
       fclose(fp);
-      system("rm -f tmp%evaluation");
-      cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " tmp%predictions  -ps -o1 > tmp%evaluation";
-      system(cmde.c_str());
+      fic_eval = "tmp%eval%" + ExecutableName;
+      cmde = "rm -f " + fic_eval; system(cmde.c_str());
+      cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " " +
+	 fic_pred + " -ps -o1 > " + fic_eval; system(cmde.c_str());
 
-      feval.open("tmp%evaluation",std::ios::in);
+      feval.open(fic_eval.c_str(), std::ios::in);
       feval >> spg >> sng >> spe >> sne;
       feval.close(); 
 
