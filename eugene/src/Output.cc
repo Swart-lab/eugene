@@ -3,311 +3,241 @@
 extern Parameters   PAR;
 extern MasterSensor MS;
 
-void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
+void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 {
-  int i, j;
-   DATA Data;
-  int Data_Len = X->SeqLen;
+  int  i;
+  DATA Data;
+  int  Data_Len  = X->SeqLen;
   char printopt0 = PAR.getC("Output.format")[0];
   int  offset    = PAR.getI("Output.offset");
   int  estopt    = PAR.getI("Sensor.Est.use");
+  
+  if (printopt0 == 'd') {
+    MS.ResetIterator();
+    for(int i=0; i<Data_Len ; i++) {
+      MS.GetInfoAt   (X, i, &Data);
+      MS.PrintDataAt (X, i, &Data);
+    }
+  }
 
-  if (printopt0 == 'd')
-    {
-      printf("#  pos FR Pr  SF  SR  sF  sF  sR  sR  DF   DR   AF   AR\n");
+  else if ((printopt0 == 'l') || (printopt0 == 'h') || (printopt0 == 'g')) {
+    int cons = 0, incons = 0;
+    int TStart = 0, GStart = 0, GEnd = 0;
+    int forward,init,term,Lend,Rend,Phase;
+    int Don,Acc;
+    char seqn[6] = "";
+    char *position;
+    int stateBack = 0, state, stateNext = 0;
+    int posBack   = 0, pos,   posNext   = 0;
+
+    //if (estopt) {    
+    //qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+    // reset static in EST Support
+    //if (PAR.estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
+    //}
+
+    if (printopt0 == 'h') {
+      printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
+      printf("<center><listing>\n");
+      printf("\n    Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+    }
+
+    fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+    
+    if (printopt0 == 'g' && sequence == optind)
+      printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+    
+    //position = strstr(argv[sequence],"/seq");
+    position = BaseName(argv[sequence]);
+    if (position  == NULL)
+      strcpy(seqn,"     ");
+    else {
+      *rindex(position,'.') = 0; // on enleve l'extension (.fasta)
+      strncpy(seqn,position,5);
+      if(strlen(seqn) < 5 && printopt0 != 'g')
+	for(i=strlen(seqn); i<5; i++)
+	  strcat(seqn, " ");
+      seqn[5] = '\0';
+    }
+       
+    for(i=pred->size()-1; i!=-1; i--) {
+      if(i != pred->size()-1) {
+	stateBack = pred->getState(i+1);
+	posBack   = pred->getPos(i+1);
+      }
+      state = pred->getState(i);
+      pos   = pred->getPos(i);
+      if(i != 0) {
+	stateNext = pred->getState(i-1);
+	posNext   = pred->getPos(i-1);
+      }
       
-      for  (i = 0 ; i < Data_Len ; i++) {
+      if (estopt)
+       	CheckConsistency(posBack, pos, state, &cons, &incons, X);
+      // Demarrage exon extreme. Noter pour verif EST
+      if ((stateNext == UTR5F) || (stateNext == UTR3R)) TStart = pos;
+      if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
+      if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
+      
+      // An exon is finishing
+      if (state <= ExonR3) {
+	// strand ?
+	forward = (state < 3);
+	
+	// first or last exon ?
+	init = ((forward  && stateBack >= InterGen5) ||
+		(!forward && stateNext >= InterGen5));
 
-	  printf("%6d %c%c ", offset+1+i, (*X)[i],(*X)(i));
+	term = ((!forward && stateBack >=InterGen5) ||
+		(forward  && stateNext >= InterGen5));
+	
+	Lend = offset+posBack+1;
+	Rend = offset+pos;
+	
+	if (forward) {
+	  Don = Lend-1;
+	  Acc = Rend+1;
+	}
+	else {
+	  Acc = Lend-1;
+	  Don = Rend+1;
+	}
+	
+	printf("%s",seqn);
+	
+	if (printopt0 == 'g') printf("\tEuGene\t");
+	else printf(" ");
+	
+	if (init && term) printf("Sngl");
+	else if (init) printf("Init");
+	else if (term) printf("Term");
+	else printf ("Intr");
+	
+	if (printopt0 == 'g')
+	  printf("\t%d\t%d\t0\t%c\t%d\n",
+		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state)));
+	else {
+	  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
+	  printf("     %4d  ", Rend-Lend+1);
 	  
-	  PrintPhase(Choice[i+1]);
+	  if (init)
+	    printf("   %+2d", ((forward) ? 1: -1));
+	  else {
+	    Phase = ((forward) ?
+		     PhaseAdapt(stateBack-6) :
+		     -PhaseAdapt(stateNext-9));
+	    
+	    if (abs(Phase) <= 3)
+	      printf("   %+2d",Phase);
+	    else printf(" Unk.");
+	  }
+	  printf("      %+2d",PhaseAdapt(state));
+	  printf(" %7d %7d ", Don,Acc);
+	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
+		 100.0*(double)incons/(Rend-Lend+1));
+	}
+      }
+      else if ((state >= UTR5F) && (state <= UTR3R)) {
+	
+	printf("%s",seqn);
+	
+	if (printopt0 == 'g') printf("\tEuGene\t");
+	else printf(" ");
+	
+	switch (state) {
+	case 13: // UTR5' F
+	  if (printopt0 == 'g')
+	    printf("Utr5\t%d\t%d\t0\t+\t.\n",
+		   offset+posBack+1, offset+pos);
+	  else printf("Utr5    +");
+	  break;
 	  
-	  MS.GetInfoSpAt(Type_Stop, X, i+1, &Data);
-	  if (Data.Stop[0])
-	    printf(" %2d ", ((i+1)%3)+1);
-	  else
-	    printf("  - ");
+	case 14: // UTR 3' F
+	  if (printopt0 == 'g')
+	    printf("Utr3\t%d\t%d\t0\t+\t.\n",
+		   offset+posBack+1, offset+pos);
+	  else printf("Utr3    +");
+	  break;
 	  
-	  MS.GetInfoAt(X, i, &Data);
-	  if (Data.Stop[1])
-	    printf(" %2d ", -((Data_Len-i)%3)-1);
-	  else
-	    printf("  - ");
+	case 15: // UTR5' R
+	  if (printopt0 == 'g')
+	    printf("Utr5\t%d\t%d\t0\t-\t.\n",
+		   offset+posBack+1, offset+pos);
+	  else printf("Utr5    -");
+	  break;
 	  
-	  if (Data.Start[0] > 0.0)
-	    printf(" %2d %4.1f",1+(i%3), Data.Start[0]);
-	  else
-	    printf("  -   - ");
-	  
-	  MS.GetInfoSpAt(Type_Start, X, i+1, &Data);
-	  if (Data.Start[1] > 0.0)
-	    printf(" %2d %4.1f",-((Data_Len-i-1)%3)-1,Data.Start[1]);
-	  else
-	    printf("  -   - ");
-	  
-	  MS.GetInfoSpAt(Type_Splice, X, i, &Data);
-	  if (Data.Don[0] > 0.0)
-	    printf(" %4.1f",log(Data.Don[0]));
-	  else
-	    printf("  -  ");
-	  
-	  MS.GetInfoSpAt(Type_Splice, X, i+1, &Data);
-	  if (Data.Don[1] > 0.0)
-	    printf(" %4.1f",log(Data.Don[1]));
-	  else
-	    printf("  -  ");
-	  
-	  MS.GetInfoSpAt(Type_Splice, X, i, &Data);
-	  if (Data.Acc[0] > 0.0)
-	    printf(" %4.1f",log(Data.Acc[0]));
-	  else
-	    printf("  -  ");
-	  
-	  MS.GetInfoSpAt(Type_Splice, X, i+1, &Data);    
-	  if (Data.Acc[1] > 0.0)
-	    printf(" %4.1f",log(Data.Acc[1]));
-	  else
-	    printf("  -  ");
-	  
+	case 16:// UTR 3' R
+	  if (printopt0 == 'g')
+	    printf("Utr3\t%d\t%d\t0\t-\t.\n",
+		   offset+posBack+1, offset+pos);
+	  else printf("Utr3    -");
+	  break;
+	}
+	
+	if(printopt0 != 'g') {
+	  printf("    %7d %7d", offset+posBack+1, offset+pos);
+	  printf("     %4d  ",  pos - (posBack+1) +1);
+	  printf("   NA      NA      NA      NA ");
+	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/((offset+pos) - (offset+posBack+1)+1),
+		 100.0*(double)incons/((offset+pos) - (offset+posBack+1)+1));
+	}
+     	//if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
+	//if (estopt && PAR.estanal) {
+	//  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
+	//  GStart = TStart = GEnd = -1;
+	//}
+      }
+    }
+    
+    if (printopt0 != 'g')  printf("\n");
+    
+    if (printopt0 == 'h')   {
+      //position = BaseName(argv[sequence]);
+      position = argv[sequence];
+      
+      printf("</listing></center>\n");
+      printf("<a href=%s.trace>Trace</a><br>",position);
+      printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",position,position);
+      printf("<a href=%s.splices>NetGene2 F</a> <a href=%s.splicesR>NetGene2 R</a><br>",position,position);
+      printf("<a href=%s.spliceP>SplicePred F</a> <a href=%s.splicePR>SplicePred R</a><br>",position,position);
+      printf("<a href=%s.est>Sim4</a><br>",position);
+      printf("<a href=%s.blastx0.html>BlastX SP</a><br>",position);
+      printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",position);
+      printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",position);
+      
+      OutputHTMLFileNames();
+      printf("</body></html>\n");
+    }
+  }
+  
+  else {
+    int decalage;
+    int line = 0;
+    int state, posBack = 0, pos;
+    
+    decalage = ((argc == optind+1) ? offset : offset*(sequence-optind));
+    
+    for(i=pred->size()-1; i!=-1; i--) {
+      if(i != pred->size()-1)
+	posBack   = pred->getPos(i+1);
+      state = pred->getState(i);
+      pos   = pred->getPos(i);
+      
+      if (state <= ExonR3) {
+	printf("%d %d ",decalage+posBack+1, decalage+pos);
+	line = 0;
+      }
+      else if(i != pred->size()-1 && state == InterGen5 || state == InterGen3)
+	{
+	  line = 1;
 	  printf("\n");
 	}
     }
-  else if ((printopt0 == 'l') || (printopt0 == 'h') ||
-	   (printopt0 == 'g'))
-    {
-      int Starts[18];
-      int cons = 0,incons = 0;
-      int TStart = 0, GStart = 0, GEnd = 0;
-      int forward,init,term,Lend,Rend,Phase;
-      int Don,Acc;
-      char seqn[6] = "";
-      char *pos;
-      
-      //if (estopt) {    
-      //qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
-      // reset static in EST Support
-      //if (PAR.estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
-      //}
-      
-      if (printopt0 == 'h')
-	{
-	  printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
-	  printf("<center><listing>\n");
-	  printf("\n    Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
-	}
-
-      // Starting condition: 0  = started,  -1 = nothing started yet
-      for (j = 0; j<18; j++)
-	Starts[j] = ((Choice[0] == j) ? 0 : -1);
-      
-      fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
-      
-      if (printopt0 == 'g' && sequence == optind)
-	printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
-      
-      //  pos = strstr(argv[sequence],"/seq");
-      pos = BaseName(argv[sequence]);
-      if (pos  == NULL)
-	strcpy(seqn,"     ");
-      else {
-	*rindex(pos,'.') = 0; // on enleve l'extension (.fasta)
-	strncpy(seqn,pos,5);
-	if(strlen(seqn) < 5 && printopt0 != 'g')
-	  for(i=strlen(seqn); i<5; i++)
-	    strcat(seqn, " ");
-	seqn[5] = '\0';
-      }
-      
-      // Kludge = a non existing choice to force exon termination
-      if ((Choice[Data_Len] != InterGen5) && (Choice[Data_Len] != InterGen3))
-	Choice[Data_Len+1] = InterGen5;
-      //  Choice[0] = 120;
-      
-      for (i=0; i <= Data_Len; i++) {
-	if (Choice[i+1] != Choice[i]) {
-	  // something happens
-	  
-	  if (estopt)
-	    //CheckConsistency(Starts[Choice[i]],i,Choice[i],ESTMatch,&cons,&incons);
-	    CheckConsistency2(Starts[Choice[i]], i, Choice[i], &cons, &incons, X);
-	  
-	  // demarrage exon extreme. Noter pour verif EST
-	  if ((Choice[i+1] == UTR5F) || (Choice[i+1] == UTR3R)) TStart = i;
-	  if ((Choice[i]   == UTR5F) || (Choice[i]   == UTR3R)) GStart = i;
-	  if ((Choice[i+1] == UTR3F) || (Choice[i+1] == UTR5R)) GEnd   = i-1;
-	  
-	  // An exon is finishing
-	  if (Choice[i] <= ExonR3) {
-	    // strand ?
-	    forward = (Choice[i] < 3);
-	    
-	    // first or last exon ?
-	    init = ((forward  && Choice[Starts[Choice[i]]] >= InterGen5) || 
-		    (!forward && Choice[i+1] >= InterGen5));
-	    
-	    term = ((!forward  && Choice[Starts[Choice[i]]] >=InterGen5) || 
-		(forward && Choice[i+1] >= InterGen5));
-	    
-	    Lend = offset+Starts[Choice[i]]+1;
-	    Rend = offset+i;
-	    
-	    if (forward) {
-	      Don = Lend-1;
-	      Acc = Rend+1;
-	    }
-	    else {
-	      Acc = Lend-1;
-	      Don = Rend+1;
-	    }
-	    
-	    printf("%s",seqn);
-	    
-	    if (printopt0 == 'g') printf("\tEuGene\t");
-	    else printf(" ");
-	    
-	    if (init && term) printf("Sngl");
-	    else if (init) printf("Init");
-	    else if (term) printf("Term");
-	    else printf ("Intr");
-	    
-	    if (printopt0 == 'g')
-	      printf("\t%d\t%d\t0\t%c\t%d\n",
-		     Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(Choice[i])));
-	    else {	      
-	      printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
-	      printf("     %4d  ", Rend-Lend+1);
-	      
-	      if (init)
-		printf("   %+2d", ((forward) ? 1: -1));
-	      else {
-		Phase = ((forward) ?
-			 PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
-			 -PhaseAdapt(Choice[i+1]-9));
-		
-		if (abs(Phase) <= 3)
-		  printf("   %+2d",Phase);
-		else printf(" Unk.");
-	      }
-	      printf("      %+2d",PhaseAdapt(Choice[i]));
-	      printf(" %7d %7d ", Don,Acc);
-	      printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
-		     100.0*(double)incons/(Rend-Lend+1));
-	      Starts[Choice[i]] = -1;
-	    }
-	  }
-	  else if ((Choice[i] >= UTR5F) && (Choice[i] <= UTR3R)) {
-	    
-	    printf("%s",seqn);
-	    
-	    if (printopt0 == 'g') printf("\tEuGene\t");
-	    else printf(" ");
-	    
-	    switch (Choice[i]) {
-	    case 13: // UTR5' F
-	      if (printopt0 == 'g')
-		printf("Utr5\t%d\t%d\t0\t+\t.\n",
-		       offset+Starts[Choice[i]]+1, offset+i);
-	      else printf("Utr5    +");
-	      break;
-	      
-	    case 14: // UTR 3' F
-	      if (printopt0 == 'g')
-		printf("Utr3\t%d\t%d\t0\t+\t.\n",
-		       offset+Starts[Choice[i]]+1, offset+i);
-	      else printf("Utr3    +");
-	      break;
-	      
-	    case 15: // UTR5' R
-	      if (printopt0 == 'g')
-		printf("Utr5\t%d\t%d\t0\t-\t.\n",
-		       offset+Starts[Choice[i]]+1, offset+i);
-	      else printf("Utr5    -");
-	      break;
-	      
-	    case 16:// UTR 3' R
-	      if (printopt0 == 'g')
-		printf("Utr3\t%d\t%d\t0\t-\t.\n",
-		       offset+Starts[Choice[i]]+1, offset+i);
-	      else printf("Utr3    -");
-	      break;
-	    }
-	    
-	    if(printopt0 != 'g') {
-	      printf("    %7d %7d", offset+Starts[Choice[i]]+1, offset+i);
-	      printf("     %4d  ", i-Starts[Choice[i]]);
-	      printf("   NA      NA      NA      NA ");
-	      printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(i-Starts[Choice[i]]),
-		     100.0*(double)incons/(i-Starts[Choice[i]]));
-	    }
-	    Starts[Choice[i]] = -1;
-	  }
-	  
-	  //if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
-	  //if (estopt && PAR.estanal) {
-	  //  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
-	  //  GStart = TStart = GEnd = -1;
-	  //}
-	  
-	  Starts[Choice[i+1]] = i;
-	}
-      }
-      if (printopt0 != 'g')  printf("\n");
-      
-      if (printopt0 == 'h')   {
-	//pos = BaseName(argv[sequence]);
-	pos = argv[sequence];
-	
-	printf("</listing></center>\n");
-	printf("<a href=%s.trace>Trace</a><br>",pos);
-	printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",pos,pos);
-	printf("<a href=%s.splices>NetGene2 F</a> <a href=%s.splicesR>NetGene2 R</a><br>",pos,pos);
-	printf("<a href=%s.spliceP>SplicePred F</a> <a href=%s.splicePR>SplicePred R</a><br>",pos,pos);
-	printf("<a href=%s.est>Sim4</a><br>",pos);
-	printf("<a href=%s.blastx0.html>BlastX SP</a><br>",pos);
-	printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",pos);
-	printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",pos);
-    
-	OutputHTMLFileNames();
-	printf("</body></html>\n");
-      }
-    }
-  else {
-    int Starts[18];
-    int Intergenic,decalage;
-    
-    Intergenic = 0;
-    decalage = ((argc == optind+1) ? offset : offset*(sequence-optind));
-    
-    // Kludge = an intergenic state is forced at the end
-    //  Choice[Data_Len+1] = 12;
-    
-    for (j = 0; j<18; j++)
-      Starts[j] = ((Choice[0] == j) ? 0 : -1);
-    
-    for (i = 0; i <= Data_Len; i++)   {
-      if (Choice[i+1] != Choice[i]) {
-	Intergenic = (Choice[i+1] >= 12);
-	
-	for (j = 0; j < 6; j++)  {
-	  
-	  if (IsPhaseOn(Choice[i+1],j) != IsPhaseOn(Choice[i],j)) {
-	    
-	    if (Starts[j] != -1)    {
-	      if (Starts[j] == 0) 
-		printf("%d %d ",decalage+1, decalage+i);
-	      else 
-		printf("%d %d ", decalage+Starts[j]+1, decalage+i);
-	      
-	      Starts[j] = -1;
-	    }
-	    else
-	      Starts[j] = i;
-	  }
-	}
-	if (Intergenic) printf("\n");
-      }
-    }
-  } 
+    if(line)
+      printf("\n");
+    else
+      printf("\n\n");
+  }
 }
 
 //--------------------------------------------------
@@ -455,64 +385,11 @@ void DumpSignals(int Len, REAL** Donor, REAL **Acceptor,REAL** Stop, REAL **Star
 // Verif coherence EST: calcul le nombre de nuc. coherents et
 // incoherents avec les match est
 // debut/fin/etat: debut et fin de la seq. dont l'etat est etat
-// Match: resume des hits EST
-// cons/incons: retour des valeurs
-// -------------------------------------------------------------------------
-void CheckConsistency(int debut, int fin, int etat, 
-		      unsigned char *Match, int * cons, int* incons)
-{
-  int i, con = 0, inc = 0;
-  
-  // les valeurs qui sont coherentes avec chaque etat
-  const unsigned char Consistent[18] = {
-    HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
-    HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
-    GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
-    GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
-    0,
-    HitForward|MForward|GapForward, HitForward|MForward|GapForward,
-    HitReverse|MReverse|GapReverse, HitReverse|MReverse|GapReverse,
-    0
-  };
-  
-  const unsigned char MaskConsistent[18] = {
-    Hit|Margin,    Hit|Margin,    Hit|Margin,    
-    Hit|Margin,    Hit|Margin,    Hit|Margin,    
-    Gap|Margin,    Gap|Margin,    Gap|Margin,
-    Gap|Margin,    Gap|Margin,    Gap|Margin,
-    0,
-    Margin|Hit|Gap,    Margin|Hit|Gap,
-    Margin|Hit|Gap,    Margin|Hit|Gap,
-    0
-  };
-
-  if (debut == -1) debut = 0;
-  
-  for (i = debut; i <fin; i++) {
-    // y a t'il de l'info
-    if (Match[i]) {
-      // y a t'il une info incoherente avec l'etat
-      if (Match[i] & ~MaskConsistent[etat]) 
-	inc++;
-      else if (Match[i] & Consistent[etat]) 
-	con++;
-      else 
-	inc++;
-    }
-  }
-  *cons = con;
-  *incons = inc;
-}
-
-// -------------------------------------------------------------------------
-// Verif coherence EST: calcul le nombre de nuc. coherents et
-// incoherents avec les match est
-// debut/fin/etat: debut et fin de la seq. dont l'etat est etat
 // cons/incons: retour des valeurs
 // WARNING : A modifier, utilise ESTMATCH_TMP (Cf struct DATA) !!!!!!!!!!!!
 // -------------------------------------------------------------------------
-void CheckConsistency2(int debut, int fin, int etat, 
-		       int * cons, int* incons, DNASeq *X)
+void CheckConsistency(int debut, int fin, int etat, 
+		      int * cons, int* incons, DNASeq *X)
 {
   int i, con = 0, inc = 0;
   DATA dTMP;
