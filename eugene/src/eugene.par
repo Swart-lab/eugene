@@ -1,9 +1,12 @@
 #
 # Edité pour EuGeneAS 1.49 (161002)
 #
-EuGene.key		HVGNNJUDTJDQDF	# Clef
-EuGene.versionPAR	16_10_02	# Version du fichier .par (date)
-EuGene.frameshift	-9999.0		# Penalite de frameshift 
+EuGene.key		HVGNNJUDTJDQDF	# Software key 
+EuGene.versionPAR	16_10_02	# Parameter file version (date)
+EuGene.frameshift	-9999.0		# Frameshift penalty 
+#
+# Minimum lengths
+#
 EuGene.minEx		3
 EuGene.minIn		50
 EuGene.minSg		150
@@ -12,14 +15,21 @@ EuGene.minConv		0
 EuGene.minDiv		100
 EuGene.min5Prime	20
 EuGene.min3Prime	20
+#
 EuGene.stopP		4.155
 EuGene.transStartP	4.155
 EuGene.transStopP	4.155
+#
+# Priors
+#
 EuGene.ExonPrior	0.33		# Prior on the initial states
 EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
+#
+# Output control
+#
 Output.graph		FALSE		# don't produce a graphical output
 Output.resx		900
 Output.resy		400
@@ -32,16 +42,27 @@ Output.format		l
 Output.offset		0
 Output.normopt		1
 Output.Prefix		./
+#
+# NetStart parameters
+#
 NStart.startP	0.052
 NStart.startB	0.308
+#
+# NetGene2 parameters
+#
 NG2.accP	0.903
 NG2.accB	5.585
 NG2.donP	0.980
 NG2.donB	27.670
+#
+# SplicePredictor parameters
+#
 SPred.accP	0.987
 SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
+#
+# Interpolated Markov models parameters
 Markov.matname[0]	default.mat 
 Markov.minGC[0]		0
 Markov.maxGC[0]		50
@@ -53,9 +74,15 @@ Markov.transIntron	1.0
 Markov.transUTR5	0.999
 Markov.transUTR3	0.999
 Markov.transInter	1.0
+#
+# Est sensor parameters
+#
 Est.PostProcess		FALSE
 Est.estP	-0.2
 Est.estM	6
+#
+# Proteic similarity sensor parameters
+#
 BlastX.levels	123
 BlastX.level0	0.2
 BlastX.level1	0.0
@@ -65,6 +92,15 @@ BlastX.level4	0.0
 BlastX.level5	0.0
 BlastX.level6	0.0
 BlastX.level7	0.0
+#
+# Repeat sensor parameters
+#
+Repeat.UTRPenalty	0.0
+Repeat.IntronPenalty	0.1
+Repeat.ExonPenalty	1.0
+#
+# Sensors activation 
+#
 Sensor.EuStop.use	TRUE
 Sensor.NStart.use	TRUE
 Sensor.NG2.use		TRUE
@@ -76,6 +112,9 @@ Sensor.Repeat.use	FALSE
 Sensor.Riken.use	FALSE
 Sensor.Est.use		FALSE
 Sensor.User.use		FALSE
+#
+# Sensor priorities
+#
 Sensor.EuStop	1		#
 Sensor.NStart	1		# Sensor.Name Priority
 Sensor.NG2	1		#
