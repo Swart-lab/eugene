@@ -65,11 +65,12 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   }
   
   if (printopt0 == 'd') {
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R  IU5F IU5FR FW: tSta  tSto  Sta  Sto  Acc  Don  Ins  Del REV tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noF tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del\n");
     for(int i=0; i<Data_Len ; i++) {
-      ms->GetInfoAt   (X, i, &Data);      ms->PrintDataAt (X, i, &Data);
+      ms->GetInfoAt   (X, i, &Data);      
+      ms->PrintDataAt (X, i, &Data);
     }
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R  IU5F IU5FR FW: tSta  tSto  Sta  Sto  Acc  Don  Ins  Del REV tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noF tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noR tSta  tSto  Sta  Sto  Acc  Don  Ins  Del\n");
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del\n");
   } else 
     if ((printopt0 == 'l') || (printopt0 == 'a') || (printopt0 == 'g') ||
 	(printopt0 == 'h') || (printopt0 == 'H')) { 
