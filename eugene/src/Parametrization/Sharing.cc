@@ -50,7 +50,7 @@ void Sharing::Share (void)
 	  else 
 	    t2 = t1/0.0000001 ;
 	  if (t2>=1.0) 
-	    {std::cerr <<"ERROR: bad Dmax in Sharing.cc."<<std::endl; exit(100);}	  
+	    std::cerr <<"Warning: bad Dmax in Sharing.cc."<<std::endl; 
 	  else {
 	    t3 = ((double) algo->Clusters[algo->Population[i]->NoCluster]->NbChrom)
 	      *(1-t2*t2*t2);
