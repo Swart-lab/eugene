@@ -101,9 +101,12 @@ MarkovIMM.matname[0]	Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
 MarkovIMM.useM0asIG	0
+MarkovIMM.maxOrder	8
 #MarkovIMM.matname[1]	Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
+#MarkovIMM.useM0asIG[1]	0
+#MarkovIMM.maxOrder[1]	8
 #
 ##### Markov proteic model parameters #####
 #
