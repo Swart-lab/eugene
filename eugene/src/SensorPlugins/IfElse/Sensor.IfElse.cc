@@ -18,12 +18,12 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
 
   strcpy(sensorName, pluginsDir);
   strcat(sensorName, "Sensor.");
-  strcat(sensorName, PAR.getC("IfElse.SensorIf"));
+  strcat(sensorName, PAR.getC("IfElse.SensorIf",n));
   strcat(sensorName, ".so");
   sensorLIf =  new SensorLoader (sensorName);
   if (!sensorLIf->LastError()) {
-    fprintf(stderr," -If  : Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf"),0);
-    sensorIf = sensorLIf->MakeSensor(0);
+    fprintf(stderr," -If  : Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf",n),n+1);
+    sensorIf = sensorLIf->MakeSensor(n+1);
   }
   else {
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -33,12 +33,12 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
   
   strcpy(sensorName, pluginsDir);
   strcat(sensorName, "Sensor.");
-  strcat(sensorName, PAR.getC("IfElse.SensorElse") );
+  strcat(sensorName, PAR.getC("IfElse.SensorElse",n) );
   strcat(sensorName, ".so");
   sensorLElse = new SensorLoader (sensorName);
   if (!sensorLElse->LastError()) {
-    fprintf(stderr," -Else: Sensor.%s\t%d\n",PAR.getC("IfElse.SensorElse"),0);
-    sensorElse = sensorLElse->MakeSensor(0);
+    fprintf(stderr," -Else: Sensor.%s\t%d\n",PAR.getC("IfElse.SensorElse",n),n+1);
+    sensorElse = sensorLElse->MakeSensor(n+1);
   }
   else { 
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
