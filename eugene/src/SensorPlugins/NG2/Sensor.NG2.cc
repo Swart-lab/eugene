@@ -183,18 +183,18 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorNG2 :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   iter = find(vPosAccF.begin(), vPosAccF.end(), pos);
-  if(iter != vPosAccF.end())
+  if(iter != vPosAccF.end() && d->Acc[0] == 0.0)
     d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
 
   iter = find(vPosAccR.begin(), vPosAccR.end(), pos);
-  if(iter != vPosAccR.end())
+  if(iter != vPosAccR.end() && d->Acc[1] == 0.0)
     d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
 
   iter = find(vPosDonF.begin(), vPosDonF.end(), pos);
-  if(iter != vPosDonF.end())
+  if(iter != vPosDonF.end() && d->Don[0] == 0.0)
     d->Don[0] = vValDonF[iter-vPosDonF.begin()];
 
   iter = find(vPosDonR.begin(), vPosDonR.end(), pos);
-  if(iter != vPosDonR.end())
+  if(iter != vPosDonR.end() && d->Don[0] == 0.0)
     d->Don[1] = vValDonR[iter-vPosDonR.begin()];
 }
