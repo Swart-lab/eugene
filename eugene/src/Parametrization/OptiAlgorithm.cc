@@ -53,7 +53,9 @@ OptiAlgorithm::OptiAlgorithm(void)
     ParaCluster.push_back( c );
     ParaClusters[c].push_back( i );
   }
-
+  for (int i=0; i<n; i++) 
+    if ( ParaName[i][ParaName[i].size()-1] != '*' )
+      {cerr <<"ERROR: Parameters to optimize must have a name finishing by '*'."<<endl; exit(100);}
 
   // Set numerical precision for displayed values
   cout.setf(ios::showpoint);
