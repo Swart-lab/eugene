@@ -5,6 +5,12 @@
 #include <gdfontmb.h>
 #include <gdfontl.h>
 #include <gdfontg.h>
+#ifdef __sun
+#include <strings.h>
+#endif
+#ifdef __linux__
+#include <string.h>
+#endif
 
 #define REAL double
 
@@ -131,7 +137,7 @@ void SaveClosePNG(struct Image *image, int num)
 
   gdImageInterlace(image->im, 1);
   strcpy(TName,FName);
-  sprintf(str,".%d",num);
+  sprintf(str,".%03d",num);
   strcat(TName,str);
 #if GIF
   strcat(TName,".gif");
@@ -190,4 +196,29 @@ void ClosePNG()
 
   for (i=0; i< NbIm; i++)
     SaveClosePNG(&images[i],i);
+}
+
+void OutputHTMLFileNames()
+{
+  int i;
+  char str[12];
+  char *basename;
+
+  printf("<center>\n");
+  basename = rindex(FName,'/');
+  if (basename == NULL) basename = FName;
+  else basename++;
+  
+  for (i=0; i< NbIm; i++) {
+    strcpy(TName,basename);
+    sprintf(str,".%03d",i);
+    strcat(TName,str);
+#if GIF
+    strcat(TName,".gif");
+#else
+    strcat(TName,".png");
+#endif
+    printf("<img src=%s>\n",TName);
+  }
+  printf("</center>\n");
 }
