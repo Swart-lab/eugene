@@ -59,7 +59,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     if (position  == NULL)
       strcpy(seqn,"     ");
     else {
-      *rindex(position,'.') = 0; // on enleve l'extension (.fasta)
+      if (char * suffix = rindex(position,'.')) *suffix = 0; // on enleve l'extension (.fasta)
       strncpy(seqn,position,5);
       if(strlen(seqn) < 5 && printopt0 != 'g')
 	for(i=strlen(seqn); i<5; i++)
@@ -315,10 +315,9 @@ void CheckConsistency(int debut, int fin, int etat,
   if (debut == -1) debut = 0;
   
   for (i = debut; i <fin; i++) {
-    
     MS.GetInfoSpAt(Type_Content, X, i, &dTMP);
-    
-    // y a t'il de l'info
+
+    // y a t'l de l'info
     if (dTMP.ESTMATCH_TMP) {
       // y a t'il une info incoherente avec l'etat
       if (dTMP.ESTMATCH_TMP & ~MaskConsistent[etat]) 
