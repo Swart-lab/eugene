@@ -60,7 +60,7 @@ LineSearch::LineSearch (void) : OptiAlgorithm()
     
   for (unsigned int i=0; i< Para.size(); i++) {
     step = (ParaMaxInter[i] - ParaMinInter[i]) / DivInter;
-    ParaStep.push_back( (step > ParaMinStep[i]) ? step : ParaMinStep[i]);
+    ParaStep.push_back( Max(step, ParaMinStep[i]) );
   }
   
   Rand = new Random(PAR.getC("LineSearch.Seed"));
@@ -103,6 +103,8 @@ void LineSearch :: Optimize(bool is_chaining)
       ParaMax[i] = Min(ParaMax[i], Para[i] + para_interval);
       ParaMinInter[i] = ParaMin[i];
       ParaMaxInter[i] = ParaMax[i];
+      ParaLInter[i] = ParaMaxInter[i] - ParaMinInter[i];
+      ParaStep[i] = Max((ParaMaxInter[i] - ParaMinInter[i]) / DivInter, ParaMinStep[i]);
     }
   }
 
@@ -285,15 +287,15 @@ void LineSearch :: ReduceSearch(void) {
   for (unsigned int i=0; i<Para.size(); i++) {
     // Reduce interval if possible
     ParaLInter[i] *= Alpha;
-    marge = ParaLInter[i]/2;    
+    marge = ParaLInter[i]/2.;    
     if (ParaLInter[i] > ParaMinStep[i]) {
-      ParaMinInter[i] = ((ParaMin[i]>(Para[i] - marge)) ? ParaMin[i] : (Para[i]-marge));
-      ParaMaxInter[i] = ((ParaMax[i]<(Para[i] + marge)) ? ParaMax[i] : (Para[i]+marge));
+      ParaMinInter[i] = Max(ParaMin[i],Para[i] - marge);
+      ParaMaxInter[i] = Min(ParaMax[i],Para[i] + marge);
     }
     // Update the step to explore the interval
 
     step = (ParaMaxInter[i] - ParaMinInter[i]) / DivInter;
-    ParaStep[i] = ( (step > ParaMinStep[i]) ? step : ParaMinStep[i] );
+    ParaStep[i] = Max(step, ParaMinStep[i]);
   }
 }
 
