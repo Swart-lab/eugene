@@ -13,12 +13,12 @@
 
 \parskip 5pt plus 3pt minus 2pt 
 
-\newcommand{\EuGenie}{\textsc{EuGène}}
+\newcommand{\EuGenie}{\textsc{EuG-bène}}-A
 % comment one of the above line to hide or not the developpers documentation
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Philipe Bardou, Marie-Josée Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex\\Biometry and AI Dept.\\ INRA Toulouse\\France}
+\author{Philipe Bardou, Marie-Jos-bée Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex\\Biometry and AI Dept.\\ INRA Toulouse\\France}-A
 
 \title{\EuGenie: an open gene finder for eukaryotes}
 
@@ -47,14 +47,14 @@ the paths to the executables).
 
 \begin{Verbatim}[fontsize=\scriptsize]
 > ./getsites4eugene.pl Sequences/SYNO_ARATH.fasta 
-started on sam déc 7 13:44:35 CET 2002
+started on sam d-béc 7 13:44:35 CET 2002-A
 
 processing Sequences/SYNO_ARATH.fasta
 
 NetStart [2*1 request(s)]: F1..R1..done
 NetGene2 [1   request(s)]: 1..FR..done
 SplicePredictor: done
-finished on sam déc 7 13:47:14 CET 2002
+finished on sam d-béc 7 13:47:14 CET 2002-A
 \end{Verbatim}
 
 The script creates the files that contains information about the
@@ -233,24 +233,19 @@ EXECUTION_TRACE6
 
 Other plugins are described in the reference section of this document.
 
-
-
-
-
-
 \newpage
 \chapter{Reference documentation}
 
-To be executed, \EuGenie\ needs at least one file: this is the so-called 
-parameter file.  \EuGenie\ behavior
-is entirely controlled by a set of parameters whose default values are
-available in this file. These default values can be altered by
-editing this file or for some values through flags in the command line (such as
-\texttt{-d}, see below). Command line flags override any value in the
-parameter file. The name of the parameter file that \EuGenie\ seeks is
-obtained by adding the suffix ``\texttt{.par}'' to the name of the
-\EuGenie\ command itself.  As it is distributed, \EuGenie\ command's
-name is \texttt{eugene} and accordingly the parameter file is
+To be executed, \EuGenie\ needs at least one file: this is the
+so-called parameter file.  \EuGenie\ behavior is entirely controlled
+by a set of parameters whose default values are available in this
+file. These default values can be altered by editing this file or for
+some values through flags in the command line (such as \texttt{-d},
+see below). Command line flags override any value in the parameter
+file. The name of the parameter file that \EuGenie\ seeks is obtained
+by adding the suffix ``\texttt{.par}'' to the name of the \EuGenie\ 
+command itself.  As it is distributed, \EuGenie\ command's name is
+\texttt{eugene} and accordingly the parameter file is
 \texttt{eugene.par}. If at some point you want to use several
 different parameter files, you can simply use symbolic links to the
 \texttt{eugene} binary executable. Using a symbolic link, with a
@@ -328,15 +323,22 @@ sensitive. The definition order is not important.
   priors by setting all the non intergenic priors to $0.0$. This
   forces \EuGenie\ to start and and its prediction in intergenic mode.
   
-\item \texttt{EuGene.transCodant}, \texttt{EuGene.transIntron},
-  \texttt{EuGene.transUTR5}, \texttt{EuGene.transUTR3},
-  \texttt{EuGene.transInter}: by default, \EuGenie\ implicit
-  distribution on the length of all regions is a flat distribution.
-  These parameters allows to use a distribution similar to the
-  exponential implicit distribution in basic (non semi-Markovian) HMM.
-  This distribution is actually truncated by the minimum lemgth
-  constraints.
+\item \texttt{EuGene.InitExDist}, \texttt{EuGene.IntrExDist},
+  \texttt{EuGene.TermExDist}, \texttt{EuGene.SnglExDist},
+  \texttt{EuGene.IntronDist}, \texttt{EuGene.InterDist},
+  \texttt{EuGene.5PrimeDist}, \texttt{EuGene.3PrimeDist}: \EuGenie\ 
+  can use explicit penalty distributions on the length of the elements
+  predicted. This can be an initial exon, and intermediary exon, a
+  terminal exon, a single exon gene, an intron an intergenic region, a
+  5' UTR region or a 3' UTR region. Each parameter specifies the
+  filename of an explicit penalty distribution file. %TBD
   
+\item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
+  predicting genes containing in-frame spliced STOPs. This is
+  basically set to an infinite value in order to avoid prediction
+  containing spliced STOPs but setting this to 0.0 can be useful for
+  pseudo-gene prediction\ldots
+
 \item \texttt{Output.truncate}: in the text output, each gene element
   predicted if prefixed by the FASTA sequence id (or the filename if
   no FASTA id is available). This is truncated to the number of
@@ -408,7 +410,6 @@ sensitive. The definition order is not important.
 \end{itemize}
 
 
-
 \section{Plugins}
 \label{plug}
 
@@ -418,23 +419,42 @@ every plugin loaded by \EuGenie\ must be written in C++ and be a
 subclass of the Sensor class. This class provides essentially four
 methods:
 \begin{itemize}
+\item creator: when instanciated, a plugin receives an instance number
+  (specified in the parameter file) and a DNA sequence (instance of
+  the \texttt{DNASeq} class). The instance number allows to load
+  several identical plugins using different parameters. A plugin with
+  a parameter \texttt{X} and instance number \texttt{n} will fetch
+  parameter \texttt{X[n]} in the parameter file. On instanciation, the
+  plugin should load all data needed to handle the sequence. If the
+  plugin depends on optimizable parameters (parameter whose name is
+  followed by a \texttt{*}), then the final configuration that may
+  depend on these parameters must be postponed in the \texttt{Init}
+  method. 
+  
 \item \texttt{Init}: receives as argument the sequence to process (an
-  instance of the \texttt{DNASeq} class) and initializes the plugin by
-  loading the information needed.
+  instance of the \texttt{DNASeq} class) and performs the extra
+  initializations that depends on optimizable parameter values
+  (parameter whose name is followed by a \texttt{*}).
+  
 \item \texttt{GiveInfo}: receives as argument the sequence to process
   (an instance of the \texttt{DNASeq} class), a position on the
   sequence and a \texttt{Data} instance. The \texttt{Data}
   data-structure can receive predictions on all signals and contents
   scores know to \EuGenie.
+
 \item \texttt{Plot}: receives as argument the sequence to process (an
   instance of the \texttt{DNASeq} class) and plots all the predictions
   made by the sensor.
+
 \item \texttt{PostAnalyse}: receives as argument the prediction of
   \EuGenie\ and may check it agains its own prediction and report
   support or inconsistencies.
 \end{itemize}
 
-The \texttt{Plot} and \texttt{PostAnalyse} methods are usually empty.
+The \texttt{Plot} and \texttt{PostAnalyse} methods are often empty.
+The \texttt{Init} is usually limited to the reloading of optimizable
+parameters (see the source of the \texttt{Est} or \texttt{BlastX}
+plugins for exceptions).
 
 \subsection{Loading plugins}
 
@@ -539,12 +559,18 @@ We now descrive each plugin, its behavior and parameters.
 \input {Doc_Tester.tex}
 
 
-
-
-
 \section{Optimization of Plugins parameters}
 
-The value of some numerical plugins parameters (specified in the parameter file with a name finishing with an '*') migth be optimized on a reference set of sequences (with their related information) for which genes positions are known. The idea is to adapt the values of parameters to increase as much as possible the prediction of genes and exons. The figure \ref{fig:ParaOptimization} details the general functioning of the software with input and ouput files.\\
+
+
+
+The value of some numerical plugins parameters (specified in the
+parameter file with a name finishing with an '*') migth be optimized
+on a reference set of sequences (with their related information) for
+which genes positions are known. The idea is to adapt the values of
+parameters to increase as much as possible the prediction of genes and
+exons. The figure \ref{fig:ParaOptimization} details the general
+functioning of the software with input and ouput files.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -554,13 +580,29 @@ The value of some numerical plugins parameters (specified in the parameter file 
   \label{fig:ParaOptimization}
 \end{figure}
 
-The optimization can be lauched with the \texttt{-Z} argument \index{CmdFlags}{[parameters optimization] Z} on the command line or with the \texttt{ParaOptimization.Use} parameter set to \texttt{TRUE}.\\
-After updating the parameter file eugene.par (which sensors to use, ...), the software is lauched with the usual command line specifying in argument the sequences to consider. At the end, the software creates a new parameter file called \texttt{eugene.<date>.OPTI.par} (for example, \texttt{eugene.30Sep2003.OPTI.par}) with the new value for the optimized parameters.\\
-For parameters optimization, the inputs to be specified in the parameter file are:
+
+The optimization can be lauched with the \texttt{-Z} argument
+\index{CmdFlags}{[parameters optimization] Z} on the command line or
+with the \texttt{ParaOptimization.Use} parameter set to \texttt{TRUE}.
+
+
+After updating the parameter file eugene.par (which sensors to
+use,...), the software is lauched with the usual command line
+specifying in argument the sequences to consider. At the end, the
+software creates a new parameter file called
+\texttt{eugene.<date>.OPTI.par} (for example,
+\texttt{eugene.30Sep2003.OPTI.par}) with the new value for the
+optimized parameters.
+
+For parameters optimization, the inputs to be specified in the
+parameter file are:
 \begin{itemize}
 \item the parameters to optimize with their value domain,
-\item the optimization algorithm to use: genetic algorithm, Line Search, genetic algorithm and Line Search,
-\item the parameters of the optimization algorithm, and for the Line Search algorithm complementary information on the parameters to optimize (initial value, step of discretization, ...),
+\item the optimization algorithm to use: genetic algorithm, Line
+  Search, genetic algorithm and Line Search,
+\item the parameters of the optimization algorithm, and for the Line
+  Search algorithm complementary information on the parameters to
+  optimize (initial value, step of discretization, ...),
 \item a file with the coordinates of genes for the sequences set.
 \end{itemize}
 
@@ -795,11 +837,7 @@ where
   \EuGenie\ from predicting frameshifts (the default).
 \end{itemize}
 
-
-
 \printindex{CmdFlags}{Index of command line flags for sensors}
-
-
 
 
 For more information, have a look to
