@@ -104,14 +104,14 @@ else if ((printopt == 'l') || (printopt == 'h') || (printopt == 'g'))
       printf("\n      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
     }
 
-  if (printopt == 'g')
-    printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
-
   // Starting condition: 0  = started,  -1 = nothing started yet
   for (j = 0; j<18; j++)
     Starts[j] = ((Choice[0] == j) ? 0 : -1);
 
   fprintf(stderr,"\nSeq        Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
+
+  if (printopt == 'g' && sequence == optind)
+    printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
 
   //  pos = strstr(argv[sequence],"/seq");
   pos = BaseName(argv[sequence]);
@@ -119,9 +119,9 @@ else if ((printopt == 'l') || (printopt == 'h') || (printopt == 'g'))
     strcpy(seqn,"          ");
   else {
     *rindex(pos,'.') = 0; // on enleve l'extension (.fasta)
-    strncpy(seqn,pos,10);
-    if(strlen(seqn) < 10 && printopt != 'g')
-      for(i=strlen(seqn); i<10; i++)
+    strncpy(seqn,pos,7);
+    if(strlen(seqn) < 7 && printopt != 'g')
+      for(i=strlen(seqn); i<7; i++)
 	seqn[i] = ' ';
     seqn[strlen(seqn)] = '\0';
   }
@@ -178,7 +178,8 @@ else if ((printopt == 'l') || (printopt == 'h') || (printopt == 'g'))
 	else printf ("Intr");
 
 	if (printopt == 'g')
-	  printf("\t%d\t%d\t0\t%c\t%d\n",Lend,Rend,((forward) ? '+' : '-'),PhaseAdapt(Choice[i]));
+	  printf("\t%d\t%d\t0\t%c\t%d\n",
+		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(Choice[i])));
        	else {	      
 	  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
 	  printf("     %4d  ", Rend-Lend+1);
@@ -253,7 +254,8 @@ else if ((printopt == 'l') || (printopt == 'h') || (printopt == 'g'))
       Starts[Choice[i+1]] = i;
     }
   }
-  printf("\n");
+  if (printopt != 'g')  printf("\n");
+
   if (printopt == 'h')   {
     //pos = BaseName(argv[sequence]);
     pos = argv[sequence];
