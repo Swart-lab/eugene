@@ -70,23 +70,23 @@
 // ------------------ Globals ---------------------
 // Les Hits EST
 
-const char HitForward    = 0x1;
-const char MLeftForward  = 0x2;
-const char GapForward    = 0x4;
-const char MRightForward = 0x8; 
+const unsigned char HitForward    = 0x1;
+const unsigned char MLeftForward  = 0x2;
+const unsigned char GapForward    = 0x4;
+const unsigned char MRightForward = 0x8; 
 
-const char HitReverse    = 0x10;
-const char MLeftReverse  = 0x20;
-const char GapReverse    = 0x40;
-const char MRightReverse = 0x80; 
+const unsigned char HitReverse    = 0x10;
+const unsigned char MLeftReverse  = 0x20;
+const unsigned char GapReverse    = 0x40;
+const unsigned char MRightReverse = 0x80; 
 
-const char Hit           = HitForward    | HitReverse;
-const char MLeft         = MLeftForward  | MLeftReverse;
-const char Gap           = GapForward    | GapReverse;
-const char MRight        = MRightForward | MRightReverse;
-const char Margin        = MRight        | MLeft;
+const unsigned char Hit           = HitForward    | HitReverse;
+const unsigned char MLeft         = MLeftForward  | MLeftReverse;
+const unsigned char Gap           = GapForward    | GapReverse;
+const unsigned char MRight        = MRightForward | MRightReverse;
+const unsigned char Margin        = MRight        | MLeft;
 
-const char NotAHit       = MLeft | MRight | Gap;
+const  unsigned char NotAHit       = MLeft | MRight | Gap;
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
@@ -308,6 +308,7 @@ int main  (int argc, char * argv [])
       exit(2);
     }
   fprintf(stderr,"done\n");
+  fclose(fp);
 
  // remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
 
@@ -457,6 +458,7 @@ int main  (int argc, char * argv [])
     fflush(stderr);
   }
   fprintf(stderr,"done\n");
+  fclose(fp);
 
   int sequence;
   for (sequence = optind; sequence < argc ; sequence++) {
@@ -688,7 +690,7 @@ int main  (int argc, char * argv [])
 	exit(2);
       }
   
-  /* Blastn against EST */
+  /* Exploiting spliced alignements against EST and complete cDNA */
 
   if (estopt)
     {
@@ -715,7 +717,7 @@ int main  (int argc, char * argv [])
 	   if (strcmp(EstId,PEstId) != 0)
 	     {
 	       NumEST++;
-	       OneEST = new Hits(EstId,poids,brin,deb,fin,EstDeb,EstFin);
+	       OneEST = new Hits(EstId,poids,brin,deb-1,fin-1,EstDeb,EstFin);
 	       ThisBlock = OneEST->Match;
 	       tmp = PEstId;
 	       PEstId = EstId;
@@ -731,7 +733,7 @@ int main  (int argc, char * argv [])
 	     }
 	   else
 	     {
-	       ThisBlock->AddBlockAfter(deb,fin,EstDeb,EstFin);
+	       ThisBlock->AddBlockAfter(deb-1,fin-1,EstDeb,EstFin);
 	       ThisBlock = ThisBlock->Next;
 	     }
 	 }
@@ -742,53 +744,88 @@ int main  (int argc, char * argv [])
        ThisEST = AllEST;
        
        while (ThisEST) {
-	 int Inc = 0;
+	 int Inc;
+	 REAL WorstSpliceF, WorstSpliceR;
+	 REAL DonF,AccF,DonR,AccR;
+
+	 Inc = 0;
+	 WorstSpliceF = WorstSpliceR = 1.0;
 
 	 ThisBlock = ThisEST->Match;
 
 	 while (ThisBlock && !Inc)
 	   {
-	     for (i = ThisBlock->Start-1+EstM; !Inc && i < ThisBlock->End-EstM; i++)
+	     for (i = ThisBlock->Start+EstM; !Inc && i <= ThisBlock->End-EstM; i++)
 	       if (Inconsistent(ESTMatch[i] | (HitForward << (ThisEST->Strand*4)))) {
 		 fprintf(stderr,"   Warning: cDNA inconsistent hit on %s [%d-%d], rejected\n",
-			ThisEST->Name,ThisBlock->Start,ThisBlock->End);
+			ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
 		 Inc = 1;
 	       }
 	     
 	     // si on a un gap
-	     if ((ThisBlock->Prev != NULL) && abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6)
-	       for (i = ThisBlock->Prev->End-1+EstM; !Inc && i < ThisBlock->Start-EstM; i++) 
+	     if ((ThisBlock->Prev != NULL) && abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
+	       
+	       for (i = ThisBlock->Prev->End+1+EstM; !Inc && i < ThisBlock->Start-EstM; i++) 
 		 if (Inconsistent(ESTMatch[i] | (GapForward << (ThisEST->Strand*4)))) {
 		   fprintf(stderr,"   Warning: cDNA inconsistent gap on %s [%d-%d], rejected\n",
-			  ThisEST->Name,ThisBlock->Prev->End,ThisBlock->Start);
+			   ThisEST->Name,ThisBlock->Prev->End+2,ThisBlock->Start);
 		   Inc = 1;
 		 }
+	       
+	       DonF = 0.0;
+	       DonR = 0.0;
+	       AccF = 0.0;
+	       AccR = 0.0;
+	       
+	       for (j = -EstM; j <= EstM; j++) {
+		 k = Min(Data_Len,Max(0,ThisBlock->Prev->End+j+1));
+		 DonF = Max(DonF, Don[0][k]);
+		 AccR = Max(AccR,Acc[1][k]);
 
+		 k =Min(Data_Len,Max(0,ThisBlock->Start+j));
+		 DonR = Max(DonR,Don[1][k]);
+		 AccF = Max(AccF, Acc[0][k]);
+	       }
+	       //	       printf("F %f %f R %f %f\n", DonF, AccF,AccR, DonR);
+	       WorstSpliceF = Min(WorstSpliceF,DonF);
+	       WorstSpliceF = Min(WorstSpliceF,AccF);
+	       WorstSpliceR = Min(WorstSpliceR,DonR);
+	       WorstSpliceR = Min(WorstSpliceR,AccR);
+	     }
+	     
 	     ThisBlock = ThisBlock->Next;
 	   }
+	 
+	 if ((WorstSpliceF == 0.0) && (WorstSpliceR == 0.0)) {
+	   fprintf(stderr, "   Warning: no matching splice site found for %s, rejected\n",ThisEST->Name);
+	   Inc =2;
+	 }
 
 	 if (Inc) Rejected++;
-
-	 if (!Inc) {
+	 else {
 	   ThisBlock = ThisEST->Match;
 	   
 	   while (ThisBlock) {
-	     for (i = ThisBlock->Start-1+EstM; i < ThisBlock->End-EstM; i++)
+
+	     for (i = ThisBlock->Start; i <= ThisBlock->End; i++)
 	       ESTMatch[i] |= (HitForward << (ThisEST->Strand*4));
 
-	     if ((ThisBlock->Prev != NULL) && abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
+	     if ((ThisBlock->Prev != NULL) && 
+		 abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	       
-	       for (i = ThisBlock->Prev->End-EstM; i < ThisBlock->Prev->End-1+EstM; i++) 
+	       for (i = Max(0,ThisBlock->Prev->End+1-EstM); 
+		    i < Min(Data_Len, ThisBlock->Prev->End+1+EstM); i++) 
 		 ESTMatch[i] |= (MLeftForward << (ThisEST->Strand*4));
 	       
-	       for (i = ThisBlock->Prev->End-1+EstM; i < ThisBlock->Start-EstM; i++)
-	       ESTMatch[i] |= (GapForward << (ThisEST->Strand*4));
+	       for (i = ThisBlock->Prev->End+1; i < ThisBlock->Start-1; i++)
+		 ESTMatch[i] |= (GapForward << (ThisEST->Strand*4));
 
-	       for (i = ThisBlock->Start-EstM; i < ThisBlock->Start-1+EstM; i++)
+	       for (i =  Max(0,ThisBlock->Start-1-EstM);
+		    i <  Min(Data_Len, ThisBlock->Start-1+EstM); i++)
 		 ESTMatch[i] |= (MRightForward << (ThisEST->Strand*4));
 
-	       if (graph) PlotLine(ThisBlock->Prev->End-1+EstM,
-				   ThisBlock->Start-EstM,
+	       if (graph) PlotLine(ThisBlock->Prev->End,
+				   ThisBlock->Start,
 				   4-(ThisEST->Strand*8),
 				   4-(ThisEST->Strand*8),0.8,0.8,2);
 
@@ -799,7 +836,7 @@ int main  (int argc, char * argv [])
 	 ThisEST = ThisEST->Next;
        }
 
-       for (i=0; i < Data_Len; i++) {
+       for (i = 0; i < Data_Len; i++) {
 	 if (graph && (ESTMatch[i] & HitForward)) PlotBarI(i, 4,0.6,1,2);
 	 if (graph && (ESTMatch[i] & HitReverse)) PlotBarI(i, -4,0.6,1,2);
        }
@@ -940,7 +977,8 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i])+((ESTMatch[i] & Gap) != 0)*EstP);
+      LBP[k]->Update(log(BaseScore[k][i])+
+		     ((ESTMatch[i] & Gap) != 0)*EstP);
     }
     // ----------------------------------------------------------------
     // ------------------------- Exons en reverse ---------------------
@@ -988,7 +1026,8 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i]) + ((ESTMatch[i] & Gap) != 0)*EstP);
+      LBP[k]->Update(log(BaseScore[k][i]) + 
+		     ((ESTMatch[i] & Gap ) != 0)*EstP);
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
@@ -1161,7 +1200,8 @@ int main  (int argc, char * argv [])
  
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[6+k]->Update(log(BaseScore[6][i])+((ESTMatch[i] & Hit) != 0)*EstP);
+      LBP[6+k]->Update(log(BaseScore[6][i]) +
+		       ((ESTMatch[i] & Hit ) != 0)*EstP);
     }
       
     // ----------------------------------------------------------------
@@ -1189,7 +1229,8 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[9+k]->Update(log(BaseScore[7][i])+((ESTMatch[i] & Hit) != 0)*EstP);
+      LBP[9+k]->Update(log(BaseScore[7][i])+
+		       ((ESTMatch[i] & Hit) != 0)*EstP);
     }
   }
 
@@ -1267,7 +1308,7 @@ int main  (int argc, char * argv [])
 
   delete Choice;
 
-  for  (i = 0;  i < 9;  i ++) delete BaseScore[i];
+  for  (i = 0;  i < 11;  i ++) delete [] BaseScore[i];
   }
 
   // free remaining used memory
