@@ -14,8 +14,10 @@ WAM :: WAM ()
   MarkovianOrder=0;
   MotifLength=0;
   Alphabet = new Chaine("ACGT");
-  TPMOD = new TabChaine<Chaine,unsigned short int>[MotifLength](MarkovianOrder,Alphabet);
-  FPMOD = new TabChaine<Chaine,unsigned short int>[MotifLength](MarkovianOrder,Alphabet);
+  for (int i=0; i<MotifLength; i++) {
+    TPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+    FPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+  }
 }
 
 // --------------------------------------------//
@@ -32,8 +34,10 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
   MarkovianOrder=order;
   MotifLength=length;
   Alphabet = new Chaine(alphabet);
-  TPMOD = new TabChaine<Chaine,unsigned short int>[MotifLength](MarkovianOrder,Alphabet);
-  FPMOD = new TabChaine<Chaine,unsigned short int>[MotifLength](MarkovianOrder,Alphabet);
+  for (int i=0; i<MotifLength; i++) {
+    TPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+    FPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+  }
 
   prefixnamelength= strlen(prefixfilename);
   strcpy(TPfile,prefixfilename);
@@ -57,7 +61,7 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
       fprintf (stderr, "ERROR:  in WAM.cc : could not open file %s \n", filename);
       exit (1);
     }
-    if (TPMOD[i].chargefichier(fp)) {
+    if (TPMOD[i]->chargefichier(fp)) {
       fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
@@ -72,7 +76,7 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
       fprintf (stderr, "ERROR:  in WAM.cc : could not open file %s \n", filename);
       exit (1);
     }
-    if (FPMOD[i].chargefichier(fp)) {
+    if (FPMOD[i]->chargefichier(fp)) {
       fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
@@ -89,8 +93,10 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
 WAM :: ~WAM ()
 {
   delete Alphabet;
-  delete [] TPMOD;
-  delete [] FPMOD;
+  for (unsigned int i=0; i<TPMOD.size(); i++) {
+    delete TPMOD[i];
+    delete FPMOD[i];
+  }
 }
 
 double WAM :: ScoreTheMotif (char* motif) 
@@ -114,8 +120,8 @@ double WAM :: ScoreTheMotif (char* motif)
     if (outofalphabet == 0) {
       // likelihood ratio: log ( proba(nt with true model)/proba(nt with false model) )
       score += 
-	log (TPMOD[i].usi2real(TPMOD[i].proba(word,MarkovianOrder)))  -
-	log (FPMOD[i].usi2real(FPMOD[i].proba(word,MarkovianOrder)))  ;
+	log (TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)))  -
+	log (FPMOD[i]->usi2real(FPMOD[i]->proba(word,MarkovianOrder)))  ;
     }
     outofalphabet=0; 
   }

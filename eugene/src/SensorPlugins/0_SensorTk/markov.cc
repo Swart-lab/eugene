@@ -467,26 +467,6 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
   return  1;
 }
 
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon)
-{
-  char* Sequence=NULL;
-  while (fichier2seq(fp,Sequence)) {
-    seq2compte(Sequence,parcodon);
-    free(Sequence);
-    Sequence=NULL;
-  };
-}
-
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
-{
-  char* Sequence=NULL;
-  while (fichier2seq(fp,Sequence)) {
-    seq2compte(Sequence,debut,fin,parcodon);
-    free(Sequence);
-    Sequence=NULL;
-  };
-}
-
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: sauve2fichier (FILE *fp)
 {
   int    i;

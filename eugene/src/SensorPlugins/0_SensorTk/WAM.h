@@ -1,7 +1,9 @@
 #ifndef WAM_INCLUDED
 #define WAM_INCLUDED
-//#include "../../EuGene/Sensor.h"
-#include "./markov.h"
+
+#include <vector>
+
+#include "markov.h"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
@@ -21,8 +23,10 @@ class WAM
   int MarkovianOrder;
   int MotifLength;
   Chaine* Alphabet;
-  TabChaine<Chaine, unsigned short int>* TPMOD; // two tab. of markovian models
-  TabChaine<Chaine, unsigned short int>* FPMOD;
+
+  // two vectors of markovian models  
+  std::vector<TabChaine<Chaine, unsigned short int>*> TPMOD; 
+  std::vector<TabChaine<Chaine, unsigned short int>*> FPMOD;
 
  public:
   WAM();
