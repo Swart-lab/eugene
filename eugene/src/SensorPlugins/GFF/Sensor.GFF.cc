@@ -38,7 +38,7 @@ void GFFObject :: Print ()
 // -------------------------
 void GFFObject :: PrintHeader ()
 {
-  printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+  printf("#S.Name\tSource\tFeature\tStart\tEnd\tScore\tStrand\tFrame\n");
 }
 
 // -------------------------
@@ -106,7 +106,8 @@ void SensorGFF :: Init (DNASeq *X)
 void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
 {
   FILE *fp;
-  int i;
+  char line[MAX_LINE];
+  int  i;
   char *feature = (char *)malloc(FILENAME_MAX*sizeof(char));;
   int  start, end;
   char strand, frame;
@@ -117,27 +118,26 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
   }
   
   int j=0;
-  while (1) {
-    j++;
-    i = fscanf(fp,"%*s %*s %s %d %d %*s %c %c",
-	       feature, &start, &end, &strand, &frame);
-    if (i < 5) {
-      if (i==-1) {
-	if(j==1)
-	  fprintf(stderr,"WARNING: empty GFF file !...");
+  while(fgets (line, MAX_LINE, fp) != NULL) {
+    if (line[0] != '#') {
+      j++;
+      i = sscanf(line,"%*s %*s %s %d %d %*s %c %c",
+		 feature, &start, &end, &strand, &frame);
+      if (i < 5) {
+	if (i==-1) {
+	  if(j==1)
+	    fprintf(stderr,"WARNING: empty GFF file !...");
+	}
+	else {
+	  fprintf(stderr, "Error in GFF file %s, line %d.\n", name, j);
+	  exit(2);
+	}
       }
       else {
-	fprintf(stderr, "Error in GFF file %s, line %d.\n", name, j);
-	exit(2);
+	if (frame != '.')
+	  gffList.push_back(new GFFObject(feature, start, end, strand, frame));
       }
     }
-    else {
-      if (frame != '.')
-	gffList.push_back(new GFFObject(feature, start, end, strand, frame));
-    }
-    char c = fgetc(fp);
-    while (c != '\n' && c != EOF) c=fgetc(fp);
-    if (fgetc(fp) == EOF) break;
   }
   fclose(fp);
 }
