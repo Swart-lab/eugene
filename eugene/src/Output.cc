@@ -6,52 +6,21 @@ extern MasterSensor MS;
 void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 {
   int i, j;
-  double Score [9], NScore[9];
-  DATA Data;
+   DATA Data;
   int Data_Len = X->SeqLen;
   char printopt0 = PAR.getC("Output.format")[0];
   int  offset    = PAR.getI("Output.offset");
   int  estopt    = PAR.getI("Sensor.Est.use");
-  int  normopt   = PAR.getI("Output.normopt");
-  int window = PAR.getI("Output.window")*2+1;
 
   if (printopt0 == 'd')
     {
-      for (j = 0 ; j < 8 ; j++)
-	NScore [j] = 1.0;
+      printf("#  pos FR Pr  SF  SR  sF  sF  sR  sR  DF   DR   AF   AR\n");
       
-      for (i = 0; i < window/2; i++) {
-	MS.GetInfoSpAt(Type_Content, X, i, &Data);
-	for (j = 0 ; j < 8 ; j++)
-	  NScore [j] += Data.ContentScore[j];
-      }
-      
-      printf("#  pos FR Pr  Ph 1 Ph 2 Ph 3 Ph-1 Ph-2 Ph-3 IntF IntR SF  SR  sF  sF  sR  sR  DF   DR   AF   AR\n");
-      
-      for  (i = 0 ; i < Data_Len ; i++)
-	{
-	  if (i-window/2 > 0) {
-	    MS.GetInfoSpAt(Type_Content, X, i-1-window/2, &Data);
-	    for (j = 0 ; j < 8 ; j++)
-	      NScore [j] -= Data.ContentScore[j];
-	  }
-	  
-	  if (i+window/2 < Data_Len) {
-	    MS.GetInfoSpAt(Type_Content, X, i+window/2, &Data);
-	    for (j = 0 ; j < 8 ; j++)
-	      NScore [j] += Data.ContentScore[j];
-	  }
-	  
-	  for (j = 0 ; j < 8 ; j++) Score[j] = NScore[j];
+      for  (i = 0 ; i < Data_Len ; i++) {
 
-	  AmplifyScore(Score,normopt);
-	  
 	  printf("%6d %c%c ", offset+1+i, (*X)[i],(*X)(i));
 	  
 	  PrintPhase(Choice[i+1]);
-	  
-	  for (j = 0 ; j < 8 ; j++)
-	    printf(" %.2f", Score[j]);
 	  
 	  MS.GetInfoSpAt(Type_Stop, X, i+1, &Data);
 	  if (Data.Stop[0])
