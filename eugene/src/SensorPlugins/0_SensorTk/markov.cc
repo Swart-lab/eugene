@@ -325,7 +325,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
 {
   int i,j;
   if ( (seq!=NULL)&&(strlen(seq)>lgrmax)) {
-    for(i=0; i<lgrmax-1 ;i++) { //debut
+    for(i=0; i<lgrmax-1 ;i++) { // begining of the seq (before the order)
       for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
     }
     
@@ -341,12 +341,15 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
 {
   int i,j;
   if ((seq!=NULL)&&(strlen(seq)>lgrmax)) {
-    for(i=debut; i< debut+lgrmax-1 ;i++) { //debut
+    for (i=debut; ((i<lgrmax-1)&&(i<=fin))  ; i++) {  
+      // the amount context is not sufficient for the order
+      // this case should not happen
       for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
     }
-    for(i= (debut+lgrmax-1) ; i< fin ; i++) {
+    for(i= ((debut >= lgrmax-1)? debut : lgrmax-1); i<= fin ; i++) {
       for(j=0;j<lgrmax;j++) {
 	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
+	//	fprintf(stdout,"incremente2 %d\n",mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
     }
   }
