@@ -53,14 +53,16 @@ void InitImg(struct Image *image, int n)
   image->im = gdImageCreate(rx+LMargin+RMargin,ry+TMargin+BMargin);
   
   Col[0] = gdImageColorAllocate(image->im, 255, 255, 255); /* white */
-  Col[1] = gdImageColorAllocate(image->im, 255, 0, 0);     /* red */
-  Col[2] = gdImageColorAllocate(image->im, 0, 0, 255);     /* blue */
-  Col[3] = gdImageColorAllocate(image->im, 0, 0, 0);       /* black */
-  Col[4] = gdImageColorAllocate(image->im, 255, 0, 255);  /* violet  */
-  Col[5] = gdImageColorAllocate(image->im, 120, 255, 210);  /* vert pale  */
-  Col[6] = gdImageColorAllocate(image->im, 180, 180, 180);  /* gris 1 */
-  Col[7] = gdImageColorAllocate(image->im, 200, 200, 200);  /* gris 2 */
-  Col[8] = gdImageColorAllocate(image->im, 220, 220, 220);  /* gris 3 */
+  Col[1] = gdImageColorAllocate(image->im, 255,   0,   0); /* red */
+  Col[2] = gdImageColorAllocate(image->im,   0,   0, 255); /* blue */
+  Col[3] = gdImageColorAllocate(image->im,   0,   0,   0); /* black */
+  Col[4] = gdImageColorAllocate(image->im, 255,   0, 255); /* violet  */
+  Col[5] = gdImageColorAllocate(image->im, 120, 255, 210); /* vert pale  */
+  Col[6] = gdImageColorAllocate(image->im, 180, 180, 180); /* gris 1 */
+  Col[7] = gdImageColorAllocate(image->im, 200, 200, 200); /* gris 2 */
+  Col[8] = gdImageColorAllocate(image->im, 220, 220, 220); /* gris 3 */
+  Col[9] = gdImageColorAllocate(image->im, 255, 165,   0); /* orange */
+  Col[10]= gdImageColorAllocate(image->im, 244, 164,  96); /* sandybrown */
   
   gdImageColorTransparent(image->im, Col[0]);
   
