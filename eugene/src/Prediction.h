@@ -48,6 +48,7 @@ class Prediction
   double OptimalPath;
 
   void  add           (int, signed char);
+  void  poptill       (int);
   void  print         ();
   void  setPos        (int, int);
   char  getNextState  (int); 

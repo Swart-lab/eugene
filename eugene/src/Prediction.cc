@@ -51,6 +51,19 @@ void Prediction :: add (int pos, signed char state)
 }
 
 // ------------------------
+//  add.
+// ------------------------
+void Prediction :: poptill (int pos)
+{
+
+  while (vPos.back() < pos) {
+    vPos.pop_back();
+    vState.pop_back();
+    nb--;
+  }
+}
+
+// ------------------------
 //  print prediction.
 // ------------------------
 void Prediction :: print ()
