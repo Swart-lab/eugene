@@ -12,10 +12,10 @@ extern Parameters PAR;
 // ----------------------
 SensorSPred :: SensorSPred (int n) : Sensor(n)
 {
-  accP = PAR.getD("SPred.accP");
-  accB = PAR.getD("SPred.accB");
-  donP = PAR.getD("SPred.donP");
-  donB = PAR.getD("SPred.donB");
+  accP = PAR.getD("SPred.accP",GetNumber());
+  accB = PAR.getD("SPred.accB",GetNumber());
+  donP = PAR.getD("SPred.donP",GetNumber());
+  donB = PAR.getD("SPred.donB",GetNumber());
 }
 
 // ----------------------
