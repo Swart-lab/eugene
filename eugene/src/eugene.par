@@ -256,11 +256,8 @@ Sensor.Homology.use	FALSE
 Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
-<<<<<<< EuGeneAS.par
 Sensor.GCPlot.use		TRUE
-=======
-Sensor.Plotter.use	TRUE
->>>>>>> 1.38
+Sensor.Plotter.use	FALSE
 #
 # TEST
 Sensor.Tester.use	FALSE
