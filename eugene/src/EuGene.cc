@@ -87,26 +87,66 @@ Parameters   PAR;
 // -------------------------------------------------------------------------
 int main  (int argc, char * argv [])
 {
-  int              i, j, k;
-  FILE             *fp;
-  char             *grnameFile = NULL; 
-  DATA		   Data;
-  DNASeq           *TheSeq;
+  int    i, j, k;
+  FILE   *fp;
+  char   *grnameFile = NULL;
+  char   grname[FILENAME_MAX+1];
+  DATA	 Data;
+  DNASeq *TheSeq;
   int    Data_Len;
+  double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior;
+  double transStartP, transStopP, stopP;
+  int    minL[18], minDiv, minFlow, minConv, min5, min3;
+  int    graph;
   const unsigned char SwitchMask[18] = 
     {SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
      SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
      SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop};
-  
+ 
   // Lecture de la ligne d'arg et du fichier .par
-  PAR.InitParam(argc, argv);
+  PAR.initParam(argc, argv);
+  
+  // Objectif -> limiter le nombre d'appel à la map de PAR
+  ExPrior    = PAR.getD("ExonPrior");
+  InPrior    = PAR.getD("IntronPrior");
+  IGPrior    = PAR.getD("InterPrior"); 
+  FivePrior  = PAR.getD("FivePrimePrior");
+  ThreePrior = PAR.getD("ThreePrimePrior");
+  minL[0]  = PAR.getI("eugene.minL0");
+  minL[1]  = PAR.getI("eugene.minL1");
+  minL[2]  = PAR.getI("eugene.minL2");
+  minL[3]  = PAR.getI("eugene.minL3");
+  minL[4]  = PAR.getI("eugene.minL4");
+  minL[5]  = PAR.getI("eugene.minL5");
+  minL[6]  = PAR.getI("eugene.minL6");
+  minL[7]  = PAR.getI("eugene.minL7");
+  minL[8]  = PAR.getI("eugene.minL8");
+  minL[9]  = PAR.getI("eugene.minL9");
+  minL[10] = PAR.getI("eugene.minL10");
+  minL[11] = PAR.getI("eugene.minL11");
+  minL[12] = PAR.getI("eugene.minL12");
+  minL[13] = PAR.getI("eugene.minL13");
+  minL[14] = PAR.getI("eugene.minL14");
+  minL[15] = PAR.getI("eugene.minL15");
+  minL[16] = PAR.getI("eugene.minL16");
+  minL[17] = PAR.getI("eugene.minL17");
+  minDiv  = PAR.getI("eugene.minDiv");
+  minFlow = PAR.getI("eugene.minFlow");
+  minConv = PAR.getI("eugene.minConv");
+  min5    = PAR.getI("eugene.min5Prime");
+  min3    = PAR.getI("eugene.min3Prime");
+  transStartP = PAR.getD("eugene.transStartP");
+  transStopP  = PAR.getD("eugene.transStopP");
+  stopP       = PAR.getD("eugene.stopP");
+  graph = PAR.getI("graph");
 
   MS.InitMaster();
   
-  ReadKey(PAR.clef,"EUGENEAT");
-
+  ReadKey(PAR.getC("eugene.key"), "EUGENEAT");
+  
   // any Frameshift prob below -1000.0 means "not possible"
-  if (PAR.FsP <= -1000.0) PAR.FsP = NINFINITY;
+  if (PAR.getD("eugene.frameshift") <= -1000.0)
+    PAR.set("eugene.frameshift", "NINFINITY");
 
   // ---------------------------------------------------------------------------  
   // Lecture de la sequence
@@ -114,13 +154,13 @@ int main  (int argc, char * argv [])
   int sequence;
   for (sequence = optind; sequence < argc ; sequence++) {
     
-    (void) strcpy(PAR.fstname, argv[sequence]);
-   
+    PAR.set("fstname", argv[sequence]);
+
     // read fasta file
-    fp = (*PAR.fstname ? FileOpen (NULL,PAR.fstname, "r") : stdin);
+    fp = (*PAR.getC("fstname") ? FileOpen (NULL,PAR.getC("fstname"), "r") : stdin);
     
     if (fp == NULL) {
-      fprintf(stderr, "cannot open fasta file %s\n", PAR.fstname);
+      fprintf(stderr, "cannot open fasta file %s\n", PAR.getC("fstname"));
       exit(3);
     }
     
@@ -142,65 +182,71 @@ int main  (int argc, char * argv [])
     // ---------------------------------------------------------------------------
     // Preparation sortie graphique + Scores
     // ---------------------------------------------------------------------------
-    if (PAR.graph) {
+    if (graph) {
+      int gto       = PAR.getI("gto");
+      int gtoSave   = PAR.getI("gtoSave");
+      int gfrom     = PAR.getI("gfrom");
+      int gfromSave = PAR.getI("gfromSave");
+      int glen      = PAR.getI("glen");
+
       // Récupération du nom du fichier d'origine
-      grnameFile = BaseName(PAR.fstname);
+      grnameFile = BaseName(PAR.getC("fstname"));
       
       // Construction du nom de sortie (*.png)
-      strcpy(PAR.grname,PAR.outputname);
-      strcat(PAR.grname,grnameFile);
-      *rindex(PAR.grname,'.') = 0;   // on enleve l'extension (.fasta typ.)
-      if(PAR.grnameArg[0] != 0) {    // -p h sans -g ou -g NO pas d'argument
-	strcat(PAR.grname,".");
-	strcat(PAR.grname,PAR.grnameArg);
+      strcpy(grname, PAR.getC("outputname"));
+      strcat(grname, grnameFile);
+      *rindex(grname, '.') = 0;             // on enleve l'extension (.fasta typ.)
+      if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'argument
+	strcat(grname,".");
+        strcat(grname,PAR.getC("grnameArg"));
+      }
+
+      if ((gfrom <= 0)|| (gfrom >= Data_Len))
+	gfrom = 1;
+      if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
+	gto = Data_Len;
+      
+      if (gfromSave != -1) {
+	sprintf(grname+strlen(grname), ".%d", gfrom);
+	if (gtoSave == -1)
+	  sprintf(grname+strlen(grname), "-%d", Data_Len);
+      }
+      if (gtoSave != -1) {
+	if (gfromSave == -1)
+	  sprintf(grname+strlen(grname), ".%d", 1);
+	sprintf(grname+strlen(grname), "-%d", gto);
       }
       
-      if ((PAR.gfrom <= 0)|| (PAR.gfrom >= Data_Len))
-	PAR.gfrom = 1;
-      if ((PAR.gto <= 0)  || (PAR.gto <= PAR.gfrom) || (PAR.gto > Data_Len))
-	PAR.gto = Data_Len;
+      gfrom--;
+      gto--;
       
-      if (PAR.gfromSave != -1) {
-	sprintf(PAR.grname+strlen(PAR.grname), ".%d", PAR.gfrom);
-	if (PAR.gtoSave == -1)
-	  sprintf(PAR.grname+strlen(PAR.grname), "-%d", Data_Len);
-      }
-      if (PAR.gtoSave != -1) {
-	if (PAR.gfromSave == -1)
-	  sprintf(PAR.grname+strlen(PAR.grname), ".%d", 1);
-	sprintf(PAR.grname+strlen(PAR.grname), "-%d", PAR.gto);
-      }
+      if (glen < 0)
+	glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
       
-      PAR.gfrom--;
-      PAR.gto--;
+      InitPNG(PAR.getI("resx"), PAR.getI("resy"), PAR.getI("offset"),
+	      gfrom, gto, PAR.getI("golap"), glen, grname);
       
-      if (PAR.glen < 0)
-	PAR.glen = ((PAR.gto-PAR.gfrom+1 <= 6000) ? PAR.gto-PAR.gfrom+1 : 6000);
-      
-      InitPNG(PAR.resx, PAR.resy,  PAR.offset, PAR.gfrom,
-	      PAR.gto,  PAR.golap, PAR.glen,   PAR.grname);
-      
-      if(PAR.gtoSave == -1 && PAR.gfromSave == -1) {    // Si pas d'option -u et -v
-	PAR.gto   = -1;
-	PAR.gfrom = -1; 
-	PAR.glen  = -1;
+      if(gtoSave == -1 && gfromSave == -1) {    // Si pas d'option -u et -v
+	gto   = -1;
+	gfrom = -1; 
+	glen  = -1;
       }
       else {
-	if(PAR.gfromSave != -1 && PAR.gtoSave != -1) {  // Si option -u && -v
-	  PAR.gto   = PAR.gtoSave;
-	  PAR.gfrom = PAR.gfromSave;
-	  PAR.glen  = -1;
+	if(gfromSave != -1 && gtoSave != -1) {  // Si option -u && -v
+	  gto   = gtoSave;
+	  gfrom = gfromSave;
+	  glen  = -1;
 	}
 	else {
-	  if(PAR.gfromSave != -1) {           // Si option -u
-	    PAR.gto   = -1;
-	    PAR.gfrom = PAR.gfromSave;
-	    PAR.glen  = -1;
+	  if(gfromSave != -1) {           // Si option -u
+	    gto   = -1;
+	    gfrom = gfromSave;
+	    glen  = -1;
 	  }
-	  else {                               // Si option -v
-	    PAR.gto   = PAR.gtoSave;
-	    PAR.gfrom = -1;
-	    PAR.glen  = -1;
+	  else {                          // Si option -v
+	    gto   = gtoSave;
+	    gfrom = -1;
+	    glen  = -1;
 	  }
 	}
       }
@@ -217,7 +263,7 @@ int main  (int argc, char * argv [])
       }
     
     MS.InitSensors(TheSeq);
-               
+
     // ---------------------------------------------------------------------------
     // Data allocation for the shortest path with length constraints
     // algorithm
@@ -267,33 +313,33 @@ int main  (int argc, char * argv [])
     // Couts initiaux  
     // ---------------------------------------------------------------------------
     // Codant
-    LBP[ExonF1]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonF2]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonF3]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR1]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR2]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR3]->Update(log(PAR.ExonPrior/6.0)/2.0);
+    LBP[ExonF1]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonF2]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonF3]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR1]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR2]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR3]->Update(log(ExPrior/6.0)/2.0);
     
     // Intron
-    LBP[IntronF1]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronF2]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronF3]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR1]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR2]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR3]->Update(log(PAR.IntronPrior/6.0)/2.0);
+    LBP[IntronF1]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronF2]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronF3]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR1]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR2]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR3]->Update(log(InPrior/6.0)/2.0);
     
     // Intergenique 
-    LBP[InterGen5]->Update(log(PAR.InterPrior)/2.0); // ameliorations sur 5' reverse
-    LBP[InterGen3]->Update(log(PAR.InterPrior)/2.0); // ameliorations sur 3' direct
+    LBP[InterGen5]->Update(log(IGPrior)/2.0); // ameliorations sur 5' reverse
+    LBP[InterGen3]->Update(log(IGPrior)/2.0); // ameliorations sur 3' direct
     
     // UTR 5' et 3'
-    LBP[UTR5F]->Update(log(PAR.FivePrimePrior /2.0)/2.0);
-    LBP[UTR3F]->Update(log(PAR.ThreePrimePrior/2.0)/2.0);  
-    LBP[UTR5R]->Update(log(PAR.FivePrimePrior /2.0)/2.0);
-    LBP[UTR3R]->Update(log(PAR.ThreePrimePrior/2.0)/2.0);
+    LBP[UTR5F]->Update(log(FivePrior /2.0)/2.0);
+    LBP[UTR3F]->Update(log(ThreePrior/2.0)/2.0);  
+    LBP[UTR5R]->Update(log(FivePrior /2.0)/2.0);
+    LBP[UTR3R]->Update(log(ThreePrior/2.0)/2.0);
     
-
     MS.GetInfoAt(TheSeq, 0, &Data);
+    
     for (i = 0; i <= Data_Len; i++) {
 
       maxi = -NINFINITY;
@@ -307,9 +353,15 @@ int main  (int argc, char * argv [])
       NormalizingPath += maxi;
 
       // Calcul des meilleures opening edges
-      for (k = 0 ; k < 18; k++) 
-	PrevBP[k] = LBP[k%12]->BestUsable(i,SwitchMask[k],PAR.MinLength[k],&PBest[k]);
-      
+      for(int l=0; l<12; l++)
+	PrevBP[l] = LBP[l]->BestUsable(i, SwitchMask[l], minL[l], &PBest[l]);
+      PrevBP[12]= LBP[0]->BestUsable (i, SwitchMask[12], minL[12], &PBest[12]);
+      PrevBP[13]= LBP[1]->BestUsable (i, SwitchMask[13], minL[13], &PBest[13]);
+      PrevBP[14]= LBP[2]->BestUsable (i, SwitchMask[14], minL[14], &PBest[14]);
+      PrevBP[15]= LBP[3]->BestUsable (i, SwitchMask[15], minL[15], &PBest[15]);
+      PrevBP[16]= LBP[4]->BestUsable (i, SwitchMask[16], minL[16], &PBest[16]);
+      PrevBP[17]= LBP[5]->BestUsable (i, SwitchMask[17], minL[17], &PBest[17]);
+
       // UTR 5' et 3' direct
       PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[19]);
       PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[20]);
@@ -322,12 +374,20 @@ int main  (int argc, char * argv [])
       // -> -> ou <- <-   MinFlow
       // -> <-            MinConv
       // <- ->            MinDiv
-      PrevBP[23] = LBP[InterGen5]->StrictBestUsable(i,PAR.MinDiv,&PBest[23]);
-      PrevBP[24] = LBP[InterGen5]->StrictBestUsable(i,PAR.MinFlow,&PBest[24]);
+      PrevBP[23] = LBP[InterGen5]->StrictBestUsable(i, minDiv,  &PBest[23]);
+      PrevBP[24] = LBP[InterGen5]->StrictBestUsable(i, minFlow, &PBest[24]);
       
-      PrevBP[18] = LBP[InterGen3]->StrictBestUsable(i,PAR.MinFlow,&PBest[18]);
-      PrevBP[25] = LBP[InterGen3]->StrictBestUsable(i,PAR.MinConv,&PBest[25]);
-          
+      PrevBP[18] = LBP[InterGen3]->StrictBestUsable(i, minFlow, &PBest[18]);
+      PrevBP[25] = LBP[InterGen3]->StrictBestUsable(i, minConv, &PBest[25]);
+      
+      // UTR 5' et 3' direct
+      PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i, min5, &PBest[19]);
+      PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i, min3, &PBest[20]);
+      
+      // UTR 5' et 3' reverse
+      PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i, min5, &PBest[21]);
+      PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i, min3, &PBest[22]);
+      
       // ----------------------------------------------------------------
       // ------------------ Exons en forward ----------------------------
       // ----------------------------------------------------------------
@@ -424,7 +484,7 @@ int main  (int argc, char * argv [])
 	// On commence a coder (Stop)
 	// Ca vient d'une UTR 3' reverse
 	if (((Data_Len-i) % 3 == k-3) && Data.Stop[1]) {
-	  BestU = PBest[22]-PAR.StopP;
+	  BestU = PBest[22] - stopP;
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
 	    maxi = BestU;
@@ -467,7 +527,7 @@ int main  (int argc, char * argv [])
 	  LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
 	LBP[k]->Update(Data.ContentScore[k]);
       }
-
+      
       // ----------------------------------------------------------------
       // ------------------------ Intergenique --------------------------
       // ----------------------------------------------------------------
@@ -488,7 +548,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 5' reverse
-      BestU = PBest[21]-PAR.TransStartP;
+      BestU = PBest[21] - transStartP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -501,7 +561,7 @@ int main  (int argc, char * argv [])
 	LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
       LBP[InterGen5]->Update(Data.ContentScore[8]);
-                  
+      
       // ----------------------------------------------------------------
       // Puis les 3' forward => LBP[InterGen3]
       // ----------------------------------------------------------------
@@ -516,7 +576,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 3' direct
-      BestU = PBest[20]-PAR.TransStopP;
+      BestU = PBest[20] - transStopP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -529,7 +589,7 @@ int main  (int argc, char * argv [])
 	LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
       LBP[InterGen3]->Update(Data.ContentScore[8]);
-            
+      
       // ----------------------------------------------------------------
       // ---------------------- UTR 5' direct ---------------------------
       // ----------------------------------------------------------------
@@ -539,7 +599,7 @@ int main  (int argc, char * argv [])
       // On reste 5' direct. On ne prend pas le Start eventuel.
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
-      if (!PAR.estopt || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
+      if (!PAR.getI("estopt") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
 	LBP[UTR5F]->Update(log(1.0-Data.Start[0]));
 #endif
       
@@ -559,7 +619,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[23]-PAR.TransStartP;
+      BestU = PBest[23] - transStartP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -569,7 +629,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[18]-PAR.TransStartP;
+      BestU = PBest[18] - transStartP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -581,7 +641,7 @@ int main  (int argc, char * argv [])
       if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
       LBP[UTR5F]->Update(Data.ContentScore[9]);
-
+      
       // ----------------------------------------------------------------
       // ---------------------- UTR 3' direct ---------------------------
       // ----------------------------------------------------------------
@@ -598,7 +658,7 @@ int main  (int argc, char * argv [])
       // Ca vient d'un exon direct + STOP
       for (k = 0; k < 3; k++) {
 	if ((i % 3 == k) && Data.Stop[0]) {
-	  BestU = PBest[k+12]-PAR.StopP;
+	  BestU = PBest[k+12] - stopP;
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
 	    maxi = BestU;
@@ -621,7 +681,7 @@ int main  (int argc, char * argv [])
       // On reste 5' reverse
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
-      if (!PAR.estopt || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
+      if (!PAR.getI("estopt") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
 	LBP[UTR5R]->Update(log(1.0-Data.Start[1]));
 #endif
       
@@ -674,7 +734,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[24]-PAR.TransStopP;
+      BestU = PBest[24] - transStopP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -684,7 +744,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[25]-PAR.TransStopP;
+      BestU = PBest[25] - transStopP;
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -763,38 +823,39 @@ int main  (int argc, char * argv [])
 	
 	LBP[9+k]->Update(Data.ContentScore[7]);
       }
-      if (PAR.graph)
+      
+      if (graph)
 	PlotSignalsF(i, Data.Stop, Data.Start, Data.Acc, Data.Don);
       if (i+1 <= Data_Len) {
 	MS.GetInfoAt(TheSeq, i+1, &Data);
-	if (PAR.graph)
+	if (graph)
 	  PlotSignalsR(Data_Len, i, Data.Stop, Data.Start, Data.Acc, Data.Don);
       }
     }
     
-    LBP[ExonF1]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonF2]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonF3]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR1]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR2]->Update(log(PAR.ExonPrior/6.0)/2.0);
-    LBP[ExonR3]->Update(log(PAR.ExonPrior/6.0)/2.0);
+    LBP[ExonF1]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonF2]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonF3]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR1]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR2]->Update(log(ExPrior/6.0)/2.0);
+    LBP[ExonR3]->Update(log(ExPrior/6.0)/2.0);
 
-    LBP[IntronF1]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronF2]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronF3]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR1]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR2]->Update(log(PAR.IntronPrior/6.0)/2.0);
-    LBP[IntronR3]->Update(log(PAR.IntronPrior/6.0)/2.0);
+    LBP[IntronF1]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronF2]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronF3]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR1]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR2]->Update(log(InPrior/6.0)/2.0);
+    LBP[IntronR3]->Update(log(InPrior/6.0)/2.0);
     
     // Intergenique 
-    LBP[InterGen5]->Update(log(PAR.InterPrior)/2.0); 
-    LBP[InterGen3]->Update(log(PAR.InterPrior)/2.0); 
+    LBP[InterGen5]->Update(log(IGPrior)/2.0); 
+    LBP[InterGen3]->Update(log(IGPrior)/2.0); 
     
     // UTR 5' et 3'
-    LBP[UTR5F]->Update(log(PAR.FivePrimePrior /2.0)/2.0);
-    LBP[UTR3F]->Update(log(PAR.ThreePrimePrior/2.0)/2.0);  
-    LBP[UTR5R]->Update(log(PAR.FivePrimePrior /2.0)/2.0);
-    LBP[UTR3R]->Update(log(PAR.ThreePrimePrior/2.0)/2.0);
+    LBP[UTR5F]->Update(log(FivePrior /2.0)/2.0);
+    LBP[UTR3F]->Update(log(ThreePrior/2.0)/2.0);  
+    LBP[UTR5R]->Update(log(FivePrior /2.0)/2.0);
+    LBP[UTR3R]->Update(log(ThreePrior/2.0)/2.0);
     
     for (i = 0; i < 18; i++) {
       PrevBP[i] = LBP[i]->BestUsable(Data_Len+1,SwitchAny,0,&BestU);    
@@ -827,20 +888,20 @@ int main  (int argc, char * argv [])
     if (maxi == NINFINITY)
       fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
     
-    if (PAR.graph)
+    if (graph)
       PlotPredictions(Data_Len, Choice);
     
     Output(TheSeq, Choice, sequence, argc, argv);
 
     // Free used memory
-    if (PAR.graph) {
-      fprintf(stderr,"Dumping images (\"%s.---.png\")...",PAR.grname);
+    if (graph) {
+      fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
       fflush(stderr);
       ClosePNG();
       fprintf(stderr, "done\n\n");
     }
     delete TheSeq;
-       
+    
     delete [] Choice;
     MS.ResetType();
   } // fin de traitement de chaque séquence....
