@@ -68,7 +68,7 @@ void SensorBlastX :: Init (DNASeq *X)
   keyBXLevel[8] = PAR.getD("BlastX.level8*",N);
   keyBXLevel[9] = PAR.getD("BlastX.level9*",N);
   blastxM = PAR.getI("BlastX.blastxM*",N);
-  minIn = PAR.getI("EuGene.minIn");
+  minIn = PAR.getI("BlastX.minIn");
   ProtMatch      = new double[Len+1];
   ProtMatchLevel = new double[Len+1];
   ProtMatchPhase = new int[Len+1];

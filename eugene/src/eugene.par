@@ -163,6 +163,7 @@ BlastX.level7*	0.0
 BlastX.level8*	0.0
 BlastX.level9*	0.0
 BlastX.blastxM*	10	
+BlastX.minIn 50
 #
 ##### Repeat sensor parameters #####
 #
