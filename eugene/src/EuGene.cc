@@ -77,29 +77,53 @@
 MasterSensor MS;
 Parameters   PAR;
 
+
 // -------------------------------------------------------------------------
-//            MAIN
+// Predict a gene
 // -------------------------------------------------------------------------
-int main  (int argc, char * argv [])
+Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
+    // ---------------------------------------------------------------------------
+    // Data allocation for the shortest path with length constraints
+    // algorithm
+    // ---------------------------------------------------------------------------
+    // 0  codant 1
+    // 1  codant 2
+    // 2  codant 3
+    // 3  codant -1
+    // 4  codant -2
+    // 5  codant -3
+    // 6  Intron frame 0
+    // 7  Intron frame 1
+    // 8  Intron frame 2
+    // 9  Intron frame 0
+    // 10 Intron frame 1
+    // 11 Intron frame 2  
+    // 12 Intrgenique
+    // 13 UTR 5' direct
+    // 14 UTR 3' direct
+    // 15 UTR 5' reverse
+    // 16 UTR 3' reverse
+    // 17 Intergenique
+    // ---------------------------------------------------------------------------
+
   int    i, j, k;
-  FILE   *fp;
-  char   *grnameFile = NULL;
-  char   grname[FILENAME_MAX+1];
-  DATA	 Data;
-  DNASeq *TheSeq;
-  int    Data_Len;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior;
   int    minL[18], minDiv, minFlow, minConv, min5, min3;
-  int    graph;
   const unsigned char SwitchMask[18] = 
     {SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
      SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
      SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop};
- 
-  // Lecture de la ligne d'arg et du fichier .par
-  PAR.initParam(argc, argv);
-  
+  int    Data_Len;
+  DATA	 Data;
+
+    Prediction *pred;
+    BackPoint  *LBP[18];
+    REAL BestU;
+    double NormalizingPath = 0.0;
+    signed   char best   = 0;
+    unsigned char Switch = 0;
+
   // Objectif -> limiter le nombre d'appel à la map de PAR
   ExPrior    = PAR.getD("EuGene.ExonPrior");
   InPrior    = PAR.getD("EuGene.IntronPrior");
@@ -129,126 +153,9 @@ int main  (int argc, char * argv [])
   minConv = PAR.getI("EuGene.minConv");
   min5    = PAR.getI("EuGene.min5Prime");
   min3    = PAR.getI("EuGene.min3Prime");
-  graph = PAR.getI("Output.graph");
-  
-  MS.InitMaster();
-  
-  ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
-  
-  // ---------------------------------------------------------------------------  
-  // Lecture de la sequence
-  // ---------------------------------------------------------------------------  
-  int sequence;
-  for (sequence = optind; sequence < argc ; sequence++) {
-    
-    PAR.set("fstname", argv[sequence]);
 
-    // read fasta file
-    fp = (*PAR.getC("fstname") ? FileOpen (NULL,PAR.getC("fstname"), "r") : stdin);
-    
-    if (fp == NULL) {
-      fprintf(stderr, "cannot open fasta file %s\n", PAR.getC("fstname"));
-      exit(3);
-    }
-    
-    fprintf(stderr,"-----------------------------------");
-    fprintf(stderr,"--------------------------------\nLoading sequence...");
-    fflush(stderr);
-    
-    TheSeq = new DNASeq(fp);
-    
-    if (fp != stdin) fclose(fp);
-    
-    Data_Len = TheSeq->SeqLen;
-    
-    fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, Data_Len);
-    
-    fprintf (stderr,"GC Proportion = %.1f%%\n", 
-	     (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
-    
-        
-    // ---------------------------------------------------------------------------
-    // Preparation sortie graphique + Scores
-    // ---------------------------------------------------------------------------
-    if (graph) {
-      int gto       = PAR.getI("Output.gto");
-      int gfrom     = PAR.getI("Output.gfrom");
-      int glen      = PAR.getI("Output.glen");
-
-      // Récupération du nom du fichier d'origine
-      grnameFile = BaseName(PAR.getC("fstname"));
-      
-      // Construction du nom de sortie (*.png)
-      strcpy(grname, PAR.getC("Output.Prefix"));
-      strcat(grname, grnameFile);
-      *rindex(grname, '.') = 0;             // on enleve l'extension (.fasta typ.)
-      if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'argument
-	strcat(grname,".");
-        strcat(grname,PAR.getC("grnameArg"));
-      }
-
-      if ((gfrom <= 0)|| (gfrom >= Data_Len))
-	gfrom = 1;
-      if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
-	gto = Data_Len;
-      
-      if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
-	sprintf(grname+strlen(grname), ".%d", gfrom);
-	sprintf(grname+strlen(grname), "-%d", gto);
-      }
-      
-      gfrom--;
-      gto--;
-      
-      if (glen < 0)
-	glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
-      
-      InitPNG(PAR.getI("Output.resx"), PAR.getI("Output.resy"), PAR.getI("Output.offset"),
-	      gfrom, gto, PAR.getI("Output.golap"), glen, grname);
-    }
-    
-    OpenDoor();
-    
-    if (!PorteOuverte && Data_Len > 6000) 
-      {
-	printf("Valid license key not found ! The software is therefore limited to 6kb long\n");
-	printf("sequences. Please contact Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
-	printf("license key.\n");
-	exit(2);
-      }
-    
-    MS.InitSensors(TheSeq);
-
-    // ---------------------------------------------------------------------------
-    // Data allocation for the shortest path with length constraints
-    // algorithm
-    // ---------------------------------------------------------------------------
-    // 0  codant 1
-    // 1  codant 2
-    // 2  codant 3
-    // 3  codant -1
-    // 4  codant -2
-    // 5  codant -3
-    // 6  Intron frame 0
-    // 7  Intron frame 1
-    // 8  Intron frame 2
-    // 9  Intron frame 0
-    // 10 Intron frame 1
-    // 11 Intron frame 2  
-    // 12 Intrgenique
-    // 13 UTR 5' direct
-    // 14 UTR 3' direct
-    // 15 UTR 5' reverse
-    // 16 UTR 3' reverse
-    // 17 Intergenique
-    // ---------------------------------------------------------------------------
-    Prediction *pred;
-    BackPoint  *LBP[18];
-    REAL BestU;
-    double NormalizingPath = 0.0;
-    signed   char best   = 0;
-    unsigned char Switch = 0;
-    
+     Data_Len = TheSeq->SeqLen;
+   
     for (i = 0; i < 18; i++) {
       LBP[i] = new BackPoint(i, -1,0.0);
       LBP[i]->Next = LBP[i];
@@ -292,7 +199,7 @@ int main  (int argc, char * argv [])
     
     for (i = 0; i <= Data_Len; i++) {
 
-    MS.GetInfoAt(TheSeq, i, &Data);
+    MSensor->GetInfoAt(TheSeq, i, &Data);
       
       maxi = -NINFINITY;
       for (k = 0 ; k < 18; k++) {
@@ -830,17 +737,139 @@ int main  (int argc, char * argv [])
         
     pred = LBP[j]->BackTrace();
         
+    pred->OptimalPath = maxi+NormalizingPath;
+    // Sanity check ! A feasible path has not been found ?
+    if (isnan(pred->OptimalPath) || pred->OptimalPath == NINFINITY)
+      fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
+
+    // clean memory
     for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
     
+return pred;
+}
+
+// -------------------------------------------------------------------------
+// Read a fasta file
+// -------------------------------------------------------------------------
+DNASeq* ReadSequence (char* sequence_name)
+{
+  FILE   *fp;
+  DNASeq *TheSeq;
+
+    fp = (*sequence_name ? FileOpen (NULL, sequence_name, "r") : stdin);
+    
+    if (fp == NULL) {
+      fprintf(stderr, "Cannot open fasta file %s\n", sequence_name);
+      exit(3);
+    }
+    
+    fprintf(stderr,"-----------------------------------");
+    fprintf(stderr,"--------------------------------\nLoading sequence...");
+    fflush(stderr);
+    
+    TheSeq = new DNASeq(fp);
+    
+    if (fp != stdin) fclose(fp);
+    
+    fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, TheSeq->SeqLen);
+    
+    fprintf (stderr,"GC Proportion = %.1f%%\n", 
+	     (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
+
+    return TheSeq;
+}
+
+
+// -------------------------------------------------------------------------
+//            MAIN
+// -------------------------------------------------------------------------
+int main  (int argc, char * argv [])
+{
+  DNASeq *TheSeq;
+  int    Data_Len;
+  Prediction *pred;
+  char   *grnameFile = NULL;
+  char   grname[FILENAME_MAX+1];
+  int    graph, gto, gfrom, glen;
+  
+  // Lecture de la ligne d'arg et du fichier .par
+  PAR.initParam(argc, argv);
+  // Objectif : limiter les appels à la MAP
+  graph = PAR.getI("Output.graph");
+  gto       = PAR.getI("Output.gto");
+  gfrom     = PAR.getI("Output.gfrom");
+  glen      = PAR.getI("Output.glen");
+  
+  MS.InitMaster();
+  
+  ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
+  
+  int sequence;
+  for (sequence = optind; sequence < argc ; sequence++) {
+    
+    PAR.set("fstname", argv[sequence]);
+    // ---------------------------------------------------------------------------
+    // Lecture de la sequence    
+    // ---------------------------------------------------------------------------  
+    TheSeq = ReadSequence( PAR.getC("fstname") );
+    Data_Len = TheSeq->SeqLen;
+    
+    
+    // ---------------------------------------------------------------------------
+    // Preparation sortie graphique + Scores
+    // ---------------------------------------------------------------------------  
+    if (graph) {
+      // Récupération du nom du fichier d'origine
+      grnameFile = BaseName(PAR.getC("fstname"));
+      
+      // Construction du nom de sortie (*.png)
+      strcpy(grname, PAR.getC("Output.Prefix"));
+      strcat(grname, grnameFile);
+      *rindex(grname, '.') = 0;             // on enleve l'extension (.fasta typ.)
+      if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'argument
+	strcat(grname,".");
+        strcat(grname,PAR.getC("grnameArg"));
+      }
+
+      if ((gfrom <= 0)|| (gfrom >= Data_Len))
+	gfrom = 1;
+      if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
+	gto = Data_Len;
+      
+      if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
+	sprintf(grname+strlen(grname), ".%d", gfrom);
+	sprintf(grname+strlen(grname), "-%d", gto);
+      }
+      
+      gfrom--;
+      gto--;
+      
+      if (glen < 0)
+	glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
+      
+      InitPNG(PAR.getI("Output.resx"), PAR.getI("Output.resy"), PAR.getI("Output.offset"),
+	      gfrom, gto, PAR.getI("Output.golap"), glen, grname);
+    }
+    
+    OpenDoor();
+    
+    if (!PorteOuverte && Data_Len > 6000) 
+      {
+	printf("Valid license key not found ! The software is therefore limited to 6kb long\n");
+	printf("sequences. Please contact Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
+	printf("license key.\n");
+	exit(2);
+      }
+    
+    MS.InitSensors(TheSeq);
+
+    pred = Predict(TheSeq, &MS);
+
     if (!PorteOuverte && Data_Len > 6000) 
       exit(2);
     
-    fprintf(stderr,"Optimal path length = %.4f\n",-maxi-NormalizingPath);
-    
-    // Sanity check ! A feasible path has not been found ?
-    if (isnan(maxi+NormalizingPath) || maxi+NormalizingPath == NINFINITY)
-      fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
-    
+    fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
+
     if (graph)
       pred->plotPred();
     
@@ -857,7 +886,6 @@ int main  (int argc, char * argv [])
 
     delete TheSeq;
     pred->resetPred();
-    //    MS.ResetType();
 
   }// fin de traitement de chaque séquence....
  

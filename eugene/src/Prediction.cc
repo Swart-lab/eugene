@@ -7,6 +7,7 @@ Prediction :: Prediction ()
 {
   index = 0;
   nb = 0;
+  OptimalPath = 0;
 }
 
 // ------------------------
@@ -86,6 +87,7 @@ void Prediction :: resetPred ()
 {
   index = 0;
   nb = 0;
+  OptimalPath = 0;
   vPos.clear();
   vState.clear();
 }

@@ -23,6 +23,9 @@ class Prediction
  public:
   Prediction  ();
   ~Prediction ();
+
+  double OptimalPath;
+
   void  add           (int, signed char);
   void  print         ();
   void  setPos        (int, int);
