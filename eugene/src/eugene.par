@@ -1,8 +1,8 @@
 #
-# Edité pour EuGeneAS 1.55 (250403)
+# Edité pour EuGeneAS 1.57 (220803)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	25_04_03        # Parameter file version (date)
+EuGene.versionPAR	22_08_03        # Parameter file version (date)
 EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
 #
 ##### Minimum lengths #####
