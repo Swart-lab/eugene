@@ -68,7 +68,7 @@ int GetIArg(char *arg, int *value, int dft)
     int varg;
     int ok;
 
-    ok = (sscanf(arg, "%d", &varg) == 1) && (varg > 0);
+    ok = (sscanf(arg, "%d", &varg) == 1) && (varg >= 0);
 
     *value = (ok ? varg : dft);
  
