@@ -516,7 +516,9 @@ int main  (int argc, char * argv [])
 
   EugDir = getenv("EUGENEDIR");
 
-  fp = FileOpen(EugDir,"EuGene.par","r");
+  strcpy(tempname,argv[0]);
+  strcat(tempname,".par");
+  fp = FileOpen(EugDir,BaseName(tempname),"r");
 
   fprintf(stderr,"EuGene rel. %s\n",VERSION);
   fprintf(stderr,"Loading parameters file...");
