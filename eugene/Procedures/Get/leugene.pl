@@ -17,7 +17,7 @@
 # ------------------------------------------------------------------
 # File:     leugene.pl
 # Contents: if needed, lauch local NetStart, NetGene2, SplicePredictor 
-# and EuGene on sequences files
+# and eugene on sequences files
 # ------------------------------------------------------------------
 
 use HTTP::Request::Common qw(POST);
@@ -27,14 +27,14 @@ use LWP::UserAgent;
 
  This program takes as parameter a nucleic acid sequence file in FASTA
  format or a folder containing such files (*.tfa *.fasta). Extra parameters
- are consider as EuGene additional parameters.
+ are consider as eugene additional parameters.
  For each sequence, launch local NetStart, NetGene2, SplicePredictor
  and if only the EUGENEDIR environment is defined (ending with '/'), 
- lauch EuGeneAS with HTML output.
+ lauch eugene with HTML output.
 
- Beware, if you want EuGeneAS to take into account EST or Blast
+ Beware, if you want eugene to take into account EST or Blast
  results, the files have to be present (correctly named).
- Note that used paths correspond to the maubie PC (therefor
+ Note that used paths correspond to the sources organization (therefor
  need to be updated fot others configurations).
 
 =cut
@@ -274,7 +274,7 @@ sub flat2fasta ( $ $ $ $ )
   }
 
 #------------------------------------------------------------
-# Call preprocessing for a sequence and launch EuGeneAS
+# Call preprocessing for a sequence and launch eugene
 sub eugene( $ @ )
   {
     local($file, @params) = @_;
@@ -284,7 +284,7 @@ sub eugene( $ @ )
     &getsites($file);
     if (exists($ENV{'EUGENEDIR'}))
       {
-	$cmd = sprintf("$ENV{'EUGENEDIR'}EuGeneAS -ph %s -g $file > $file.html 2> $file.trace", join(' ',@params));
+	$cmd = sprintf("$ENV{'EUGENEDIR'}eugene -ph %s -g $file > $file.html 2> $file.trace", join(' ',@params));
 	system($cmd);
       }
   }
@@ -297,7 +297,7 @@ if (!exists($ENV{'EUGENEDIR'}))
   {
     system('echo "########################################################"');
     system('echo "WARNING: Only preprocessing of sequence(s) will be realized,"');
-    system('echo "EuGeneAs will not be launched because"');
+    system('echo "eugene will not be launched because"');
     system('echo "the EUGENEDIR environment variable is not set."');
     system('echo "########################################################"');
   }
@@ -332,7 +332,7 @@ if (!exists($ENV{'EUGENEDIR'}))
   {
     system('echo "########################################################"');
     system('echo "WARNING: Only preprocessing of sequence(s) was realized,"');
-    system('echo "EuGeneAs was not launched because"');
+    system('echo "eugene was not launched because"');
     system('echo "the EUGENEDIR environment variable is not set."');
     system('echo "########################################################"');
   }
