@@ -108,12 +108,11 @@ void SensorGFF :: Init (DNASeq *X)
 	fprintf(stderr, "cannot open GFF file %s\n", "statSeqs.txt");
 	exit(2);
       }
+      if(strlen(gffList[0]->name) > 7)
+	fprintf(ppfile,"SeqName\t\tE/I\tNb\tLmin\tLmax\tGCmin\tGCmax\tV_GC\n");
+      else
+	fprintf(ppfile,"SeqName\tE/I\tNb\tLmin\tLmax\tGCmin\tGCmax\tV_GC\n");
     }
-    if(strlen(gffList[0]->name) > 7)
-      fprintf(ppfile,"SeqName\t\tE/I\tNb\tLmin\tLmax\tGCmin\tGCmax\tV_GC\n");
-    else
-      fprintf(ppfile,"SeqName\tE/I\tNb\tLmin\tLmax\tGCmin\tGCmax\tV_GC\n");
-    
     IsInitialized = true;
   }
 
