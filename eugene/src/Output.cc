@@ -14,6 +14,11 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   char printopt0 = PAR.getC("Output.format")[0]; 
   int  offset    = PAR.getI("Output.offset");
   int  estopt    = PAR.getI("Sensor.Est.use");
+  int  trunclen  = PAR.getI("Output.truncate");
+  char nameformat[20];
+
+  if (trunclen) sprintf(nameformat,"%%.%ds",trunclen);
+  else strcpy(nameformat,"%s");
 
   if (printopt0 == 'h') {
     if (sequence == optind) {   // -ph && first seq
@@ -75,7 +80,6 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
       int cons = 0, incons = 0;
       int forward,init,term,Lend,Rend,Phase;
       int Don,Acc;
-      char seqn[6]   = "";
       char *position = "";
       int stateBack = 0, state, stateNext = 0;
       int posBack   = 0, pos;
@@ -149,23 +153,6 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	}
       }
       
-      // position = strstr(argv[sequence],"/seq");
-      if (f==stdout) {
-	position = BaseName(argv[sequence]);
-	if (position  == NULL)
-	  strcpy(seqn,"     ");
-	else {
-	  // on enleve l'extension (.fasta)
-	  if (char * suffix = rindex(position,'.')) *suffix = 0;
-	  strncpy(seqn,position,5);
-	  if(strlen(seqn) < 5 && printopt0 != 'g')
-	    for(i=strlen(seqn); i<5; i++)
-	      strcat(seqn, " ");
-	  seqn[5] = '\0';
-	}
-      } else 
-	  strcpy(seqn,"OPTIM");
-      
       if (printopt0 == 'H') {
 	i=pred->size()-1;
 	if (i == 0)
@@ -238,15 +225,17 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	  }
 	  else
 	    if(printopt0 == 'g' || printopt0 == 'a')
-	      printf("%s",seqn);
+	      fprintf(f,nameformat,X->Name);
 	    else
 	      if(printopt0 == 'H') {
 		lc++;
 		printf("   <TR class=A%d align=center>\n"
 		       "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
 	      }
-	      else
-		fprintf(f,"%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
+	      else {
+		fprintf(f,nameformat,X->Name);
+		fprintf(f,".%d.%d",nbGene,nbExon);
+	      }
 	  
 	  if (printopt0 == 'g') 
 	    printf("\tEuGene\t");
@@ -367,16 +356,18 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	    }
 	    else
 	      if(printopt0 == 'g' || printopt0 == 'a')
-		printf("%s",seqn);
+		fprintf(f,nameformat,X->Name);
 	      else
 		if(printopt0 == 'H') {
 		  lc++;
 		  printf("   <TR class=A%d align=center>\n"
 			 "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
 		}
-		else
-		  fprintf(f,"%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
-	    
+		else {
+		  fprintf(f,nameformat,X->Name);
+		  fprintf(f,".%d.%d",nbGene,nbExon);
+		}
+
 	    if (printopt0 == 'g') printf("\tEuGene\t");
 	    else if (printopt0 == 'a') printf(" ");
 	    else if (printopt0 != 'H' && printopt0 != 'h') fprintf(f,"\t");
