@@ -56,8 +56,9 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorGFF :: SensorGFF (int n) : Sensor(n)
+SensorGFF :: SensorGFF (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Multiple;
 }
 
 // ----------------------
@@ -75,9 +76,6 @@ SensorGFF :: ~SensorGFF ()
 void SensorGFF :: Init (DNASeq *X)
 {
   char tempname[FILENAME_MAX+1];
-
-  // Type initialisation
-  type = Type_Multiple;
   
   // Clear the data structure
   gffList.clear();

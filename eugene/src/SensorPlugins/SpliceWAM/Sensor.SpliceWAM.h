@@ -32,7 +32,7 @@ class SensorSpliceWAM : public Sensor
   WAM* AccWAModel;
 
  public:
-  SensorSpliceWAM  (int);
+  SensorSpliceWAM  (int n, DNASeq *X);
   virtual ~SensorSpliceWAM   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -40,6 +40,6 @@ class SensorSpliceWAM : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorSpliceWAM * builder0(int n) {  return new SensorSpliceWAM(n); }
+extern "C" SensorSpliceWAM * builder0(int n, DNASeq *X) {  return new SensorSpliceWAM(n, X); }
 
 #endif

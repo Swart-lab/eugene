@@ -10,38 +10,11 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorNStart :: SensorNStart (int n) : Sensor(n)
-{
-  startP = PAR.getD("NStart.startP");
-  startB = PAR.getD("NStart.startB");
-
-  PositionGiveInfo = -1;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorNStart :: ~SensorNStart ()
-{
-  vPosF.clear();
-  vValF.clear();
-  vPosR.clear();
-  vValR.clear();
-}
-
-// ----------------------
-//  Init start.
-// ----------------------
-void SensorNStart :: Init (DNASeq *X)
+SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
 
   type = Type_Start;
-  
-  vPosF.clear();
-  vValF.clear();
-  vPosR.clear();
-  vValR.clear();
   
   fprintf(stderr, "Reading start file (NetStart).................");
   fflush(stderr);
@@ -61,9 +34,30 @@ void SensorNStart :: Init (DNASeq *X)
   // vectors for reverse are put in the increasing order
   reverse(vPosR.begin(), vPosR.end()); 
   reverse(vValR.begin(), vValR.end()); 
+}
+
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorNStart :: ~SensorNStart ()
+{
+  vPosF.clear();
+  vValF.clear();
+  vPosR.clear();
+  vValR.clear();
+}
+
+// ----------------------
+//  Init start.
+// ----------------------
+void SensorNStart :: Init (DNASeq *X)
+{
+  startP = PAR.getD("NStart.startP*");
+  startB = PAR.getD("NStart.startB*");
 
   indexR = indexF = 0;
-
+  PositionGiveInfo = -1;
+  
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
@@ -89,7 +83,7 @@ void SensorNStart :: ReadNStartF (char name[FILENAME_MAX+1], int Len)
       exit(2);
     }
     vPosF.push_back( j-1 );
-    vValF.push_back( pow(force, startB)*(exp(-startP)) );
+    vValF.push_back( force );
   }
   if (j == -1) fprintf(stderr,"WARNING: empty NetStart file !\n");
   fclose(fp);
@@ -118,11 +112,13 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
     }
     j = Len-j+2;
     vPosR.push_back( j-1 );
-    vValR.push_back( pow(force, startB)*(exp(-startP)) );
+    vValR.push_back( force );
   }
   if (j == -1) fprintf(stderr,"WARNING: empty NetStart file !\n");
   fclose(fp);
 }
+
+
 
 // ------------------------
 //  GiveInfo signal start.
@@ -130,6 +126,7 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
 void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
+  double f;
 
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
   PositionGiveInfo = pos;
@@ -140,8 +137,9 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexF = lower_bound(vPosF.begin(), vPosF.end(), pos)-vPosF.begin();
     
     if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
-      d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[indexF]);
-      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[indexF]);
+      f = pow(vValF[indexF], startB)*(exp(-startP));
+      d->sig[DATA::Start].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-f);
       indexF++;
     }
   }
@@ -152,8 +150,9 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexR = lower_bound(vPosR.begin(), vPosR.end(), pos)-vPosR.begin();
 
     if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
-      d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[indexR]);
-      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[indexR]);
+      f = pow(vValR[indexR], startB)*(exp(-startP));
+      d->sig[DATA::Start].weight[Signal::Reverse] += log(f);
+      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-f);
       indexR++;
     }
   }
@@ -165,11 +164,17 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorNStart :: Plot(DNASeq *X)
 {
-  for (int i =0; i < (int)vPosF.size(); i++)
-    PlotBarF(vPosF[i],(vPosF[i]%3)+1,0.5,NORM(log(vValF[i]),4.0),2);
+  double f;
 
-  for (int i =0; i < (int)vPosR.size(); i++)
-    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i])%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
+  for (int i =0; i < (int)vPosF.size(); i++) {
+    f = pow(vValF[i], startB)*(exp(-startP));
+    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),4.0), 2);
+  }
+
+  for (int i =0; i < (int)vPosR.size(); i++) {
+    f = pow(vValR[i], startB)*(exp(-startP));
+    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),4.0), 2);
+  }
 }
 
 // ------------------

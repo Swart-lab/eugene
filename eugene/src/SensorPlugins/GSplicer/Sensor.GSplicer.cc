@@ -21,14 +21,22 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorGSplicer :: SensorGSplicer (int n) : Sensor(n)
+SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
 {
-  coefAcc = PAR.getD("GSplicer.coefAcc",GetNumber());
-  penAcc  = PAR.getD("GSplicer.penAcc", GetNumber());
-  coefDon = PAR.getD("GSplicer.coefDon",GetNumber());
-  penDon  = PAR.getD("GSplicer.penDon", GetNumber());
+  char tempname[FILENAME_MAX+1];
+
+  type = Type_Splice;
+
+  fprintf(stderr, "Reading splice site file (GeneSplicer)........");
+  fflush(stderr);
+  strcpy(tempname,PAR.getC("fstname"));
+  strcat(tempname,".Gsplicer");
+  fprintf(stderr,"forward, reverse ");
+  fflush(stderr);
+  ReadGSplicer(tempname, X->SeqLen);
+  fprintf(stderr,"done\n");
   
-  PositionGiveInfo = -1;
+  CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 }
 
 // ----------------------
@@ -48,31 +56,15 @@ SensorGSplicer :: ~SensorGSplicer ()
 // ----------------------
 void SensorGSplicer :: Init (DNASeq *X)
 {
-  char tempname[FILENAME_MAX+1];
-
-  // Type initialisation
-  type = Type_Splice;
+  coefAcc = PAR.getD("GSplicer.coefAcc*",GetNumber());
+  penAcc  = PAR.getD("GSplicer.penAcc*", GetNumber());
+  coefDon = PAR.getD("GSplicer.coefDon*",GetNumber());
+  penDon  = PAR.getD("GSplicer.penDon*", GetNumber());
 
   iAccF = iDonF = 0;
   iAccR = iDonR = 0;
+  PositionGiveInfo = -1;
 
-  // Clear the data structures 
-  vPosAccF.clear();  vPosAccR.clear();
-  vPosDonF.clear();  vPosDonR.clear();
-  vValAccF.clear();  vValAccR.clear();
-  vValDonF.clear();  vValDonR.clear();
-
-  fprintf(stderr, "Reading splice site file (GeneSplicer)........");
-  fflush(stderr);
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".Gsplicer");
-  fprintf(stderr,"forward, reverse ");
-  fflush(stderr);
-  ReadGSplicer(tempname, X->SeqLen);
-  fprintf(stderr,"done\n");
-  
-  CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
-  
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
@@ -161,7 +153,7 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
  
   // Donneur Forward
   if(!vPosDonF.empty()) {
-    if (update) 
+    if (update)
       iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
 
     if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
@@ -180,6 +172,7 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iDonR++;
     }
   }
+
 }
 
 // ----------------------------

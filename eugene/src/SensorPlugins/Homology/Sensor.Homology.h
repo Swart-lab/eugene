@@ -18,7 +18,7 @@ class SensorHomology : public Sensor
   double TblastxB;
 
  public:
-  SensorHomology (int);
+  SensorHomology (int n, DNASeq *X);
   virtual ~SensorHomology ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -32,7 +32,7 @@ class SensorHomology : public Sensor
 
 };
 
-extern "C" SensorHomology * builder0( int n ) {  return new SensorHomology(n);}
+extern "C" SensorHomology * builder0( int n, DNASeq *X) {  return new SensorHomology(n, X);}
 
 #endif
 

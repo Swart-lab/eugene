@@ -10,39 +10,11 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorSPred :: SensorSPred (int n) : Sensor(n)
-{
-  accP = PAR.getD("SPred.accP",GetNumber());
-  accB = PAR.getD("SPred.accB",GetNumber());
-  donP = PAR.getD("SPred.donP",GetNumber());
-  donB = PAR.getD("SPred.donB",GetNumber());
-  PositionGiveInfo = -1;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorSPred :: ~SensorSPred ()
-{
-  vPosAccF.clear();  vPosAccR.clear();
-  vPosDonF.clear();  vPosDonR.clear();
-  vValAccF.clear();  vValAccR.clear();
-  vValDonF.clear();  vValDonR.clear();
-}
-
-// ----------------------
-//  Init SPred.
-// ----------------------
-void SensorSPred :: Init (DNASeq *X)
+SensorSPred :: SensorSPred (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
 
   type = Type_Splice;
-  
-  vPosAccF.clear();  vPosAccR.clear();
-  vPosDonF.clear();  vPosDonR.clear();
-  vValAccF.clear();  vValAccR.clear();
-  vValDonF.clear();  vValDonR.clear();
   
   fprintf(stderr, "Reading splice site file (Splice Predictor)...");  
   fflush(stderr);
@@ -64,8 +36,31 @@ void SensorSPred :: Init (DNASeq *X)
   reverse(vValAccR.begin(), vValAccR.end());
   reverse(vPosDonR.begin(), vPosDonR.end());
   reverse(vValDonR.begin(), vValDonR.end());
+}
+
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorSPred :: ~SensorSPred ()
+{
+  vPosAccF.clear();  vPosAccR.clear();
+  vPosDonF.clear();  vPosDonR.clear();
+  vValAccF.clear();  vValAccR.clear();
+  vValDonF.clear();  vValDonR.clear();
+}
+
+// ----------------------
+//  Init SPred.
+// ----------------------
+void SensorSPred :: Init (DNASeq *X)
+{
+  accP = PAR.getD("SPred.accP*",GetNumber());
+  accB = PAR.getD("SPred.accB*",GetNumber());
+  donP = PAR.getD("SPred.donP*",GetNumber());
+  donB = PAR.getD("SPred.donB*",GetNumber());
 
   iAccF = iDonF = iAccR = iDonR = 0;
+  PositionGiveInfo = -1;
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -108,7 +103,7 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
 
     // erreur: on a pas tout lu ou ca ne croit pas
       if ((j < 4) || ((type[0] == 'D') && (k < prevkD)) || ((k < prevkA)))      {
-	//	fprintf(stderr,"%d %c %d %d %d\n",j,type[0],k,prevkD,prevkA);
+	// fprintf(stderr,"%d %c %d %d %d\n",j,type[0],k,prevkD,prevkA);
  	fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
  	exit(2);
       }
@@ -116,12 +111,12 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
       if (type[0] == 'D' && strength != 0.0 && k>prevkD) {
 	prevkD = k;
 	vPosDonF.push_back( k-1 );
-	vValDonF.push_back( pow(strength, donB)*donP );
+	vValDonF.push_back( strength );
       }  else
 	if (strength != 0.0 && k > prevkA)  {
 	  prevkA = k;
 	  vPosAccF.push_back( k );
-	  vValAccF.push_back( pow(strength, accB)*accP );
+	  vValAccF.push_back( strength );
 	}
       i++;
   }
@@ -176,12 +171,12 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
       if (type[0] == 'D') {
 	prevkD = k;
 	vPosDonR.push_back( k );
-	vValDonR.push_back( pow(strength, donB)*donP );
+	vValDonR.push_back( strength );
       }
       else {
 	prevkA = k;
 	vPosAccR.push_back( k-1 );
-	vValAccR.push_back( pow(strength, accB)*accP);
+	vValAccR.push_back( strength );
       }
     i++;
   }
@@ -190,12 +185,14 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
   fclose(fp);
 }
 
+
 // ------------------------
 //  GiveInfo signal SPred.
 // ------------------------
 void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
 {
   bool update = false;
+  double f;
 
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; 
   PositionGiveInfo = pos;
@@ -206,8 +203,9 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
       iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
     
     if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
-      d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iAccF]);
-      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iAccF]);
+      f = pow(vValAccF[iAccF], accB) * accP;
+      d->sig[DATA::Acc].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-f);
       iAccF++;
     }
   }
@@ -218,8 +216,9 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
       iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos)-vPosAccR.begin();
 
     if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
-      d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iAccR]);
-      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iAccR]);
+      f = pow(vValAccR[iAccR], accB) * accP;
+      d->sig[DATA::Acc].weight[Signal::Reverse] += log(f);
+      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-f);
       iAccR++;
     }
   }
@@ -230,8 +229,9 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
       iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
 
     if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
-      d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iDonF]);
-      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iDonF]);
+      f = pow(vValDonF[iDonF], donB) * donP;
+      d->sig[DATA::Don].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-f);
       iDonF++;
     }
   }
@@ -242,30 +242,42 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
       iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos)-vPosDonR.begin();
 
     if((iDonR<(int)vPosDonR.size()) && (vPosDonR[iDonR] == pos)) {
-      d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
-      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
+      f = pow(vValDonR[iDonR], donB) * donP;
+      d->sig[DATA::Don].weight[Signal::Reverse] += log(f);
+      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-f);
       iDonR++;
     }
   }
 
 }
 
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
 void SensorSPred :: Plot(DNASeq *X)
 {
-  for (int i =0; i < (int)vPosAccF.size(); i++)
-    PlotBarF(vPosAccF[i],4,0.5,NORM(log(vValAccF[i]),20.0),4);
-  
-  for (int i =0; i < (int)vPosDonF.size(); i++)
-    PlotBarF(vPosDonF[i],4,0.5,NORM(log(vValDonF[i]),20.0),11);
-  
-  for (int i =0; i < (int)vPosAccR.size(); i++)
-    PlotBarF(vPosAccR[i],-4,0.5, NORM(log(vValAccR[i]),20.0),4);
+  double f;
 
-  for (int i =0; i < (int)vPosDonR.size(); i++)
-    PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),11);
+  for (int i =0; i < (int)vPosAccF.size(); i++) {
+    f = pow(vValAccF[i], accB) * accP;
+    PlotBarF(vPosAccF[i], 4, 0.5, NORM(log(f),20.0), 4);
+  }
+  
+  for (int i =0; i < (int)vPosDonF.size(); i++) {
+    f = pow(vValDonF[i], donB) * donP;
+    PlotBarF(vPosDonF[i], 4, 0.5, NORM(log(f),20.0), 11);
+  }
+  
+  for (int i =0; i < (int)vPosAccR.size(); i++) {
+    f = pow(vValAccR[i], accB) * accP;
+    PlotBarF(vPosAccR[i], -4, 0.5, NORM(log(f),20.0), 4);
+  }
+ 
+  for (int i =0; i < (int)vPosDonR.size(); i++) {
+    f = pow(vValDonR[i], donB) * donP;
+    PlotBarF(vPosDonR[i], -4, 0.5, NORM(log(f),20.0), 11);
+  }
 }
 
 // ------------------

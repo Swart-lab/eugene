@@ -21,8 +21,10 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorPlotter :: SensorPlotter (int n) : Sensor(n)
+SensorPlotter :: SensorPlotter (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Multiple;
+
   // Save parameters to limit the map access number
   window  = PAR.getI("Output.window");
   plotGC  = PAR.getI("Plotter.GC");
@@ -42,9 +44,6 @@ SensorPlotter :: ~SensorPlotter ()
 // ----------------------
 void SensorPlotter :: Init (DNASeq *X)
 {
-  // Type initialisation
-  type = Type_Multiple;
-
   if (PAR.getI("Output.graph")) Plot(X);
 }
 

@@ -21,7 +21,7 @@ class SensorNG2 : public Sensor
   void ReadNG2R(char[FILENAME_MAX+1], int);
 
  public:
-  SensorNG2  (int);
+  SensorNG2  (int n, DNASeq *X);
   virtual ~SensorNG2      ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
@@ -29,7 +29,7 @@ class SensorNG2 : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorNG2 * builder0( int n ) {  return new SensorNG2(n);}
+extern "C" SensorNG2 * builder0( int n, DNASeq *X) {  return new SensorNG2(n, X);}
 
 
 #endif

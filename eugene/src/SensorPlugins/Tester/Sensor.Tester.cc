@@ -20,8 +20,10 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorTester :: SensorTester (int n) : Sensor(n)
+SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Unknown;
+  
   char * sensorName = new char[FILENAME_MAX+1];
   char * paramKey   = new char[FILENAME_MAX+1];
   char * pluginsDir;
@@ -55,7 +57,7 @@ SensorTester :: SensorTester (int n) : Sensor(n)
     int nbIdx = PAR.getI(paramKey);
     if (!sensorL[i]->LastError()) {
     fprintf(stderr," -Test.%d : Sensor.%.5s\t%d\n",i,source[i],nbIdx);
-    sensor[i] = sensorL[i]->MakeSensor(nbIdx);
+    sensor[i] = sensorL[i]->MakeSensor(nbIdx, X);
     }
     else {
       fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -81,26 +83,7 @@ SensorTester :: SensorTester (int n) : Sensor(n)
       exit(2);
     }
   }
-}
 
-// --------------------
-//  Default destructor
-// --------------------
-SensorTester :: ~SensorTester ()
-{
-  for(int i=0; i<nbTest; i++) {
-    delete sensorL[i];
-    fclose(fp[i]);
-  }
-}
-
-// -------------------
-//  Init from new seq
-// -------------------
-void SensorTester :: Init (DNASeq *X)
-{
-  type = Type_Unknown;
-  
   fprintf(stderr,"Test");
   for(int i=0; i<nbTest; i++)
     fprintf(stderr," %s",source[i]);
@@ -121,6 +104,24 @@ void SensorTester :: Init (DNASeq *X)
   // Sequence name
   strcpy(seqName, BaseName(PAR.getC("fstname")));
   if (char * suffix = rindex(seqName,'.')) *suffix = 0;
+}
+
+// --------------------
+//  Default destructor
+// --------------------
+SensorTester :: ~SensorTester ()
+{
+  for(int i=0; i<nbTest; i++) {
+    delete sensorL[i];
+    fclose(fp[i]);
+  }
+}
+
+// -------------------
+//  Init from new seq
+// -------------------
+void SensorTester :: Init (DNASeq *X)
+{
 }
 
 // -----------------

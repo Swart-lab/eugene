@@ -32,7 +32,7 @@ class SensorGFF : public Sensor
   void ReadGFF(char[FILENAME_MAX+1]);
   
  public:
-  SensorGFF          (int);
+  SensorGFF          (int n, DNASeq *X);
   virtual ~SensorGFF ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
@@ -40,6 +40,6 @@ class SensorGFF : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorGFF* builder0( int n ) { return new SensorGFF(n);}
+extern "C" SensorGFF* builder0( int n, DNASeq *X) { return new SensorGFF(n, X);}
 
 #endif

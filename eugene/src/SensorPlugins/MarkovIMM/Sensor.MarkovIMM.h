@@ -10,14 +10,16 @@
 class SensorMarkovIMM : public Sensor
 {
  private:
-  BString_Array *IMMatrix[7];
-  double minGC,maxGC;
+  static BString_Array *IMMatrix[7];
+  static double minGC;
+  static double maxGC;
+  static bool IsInitialized;
   const static int  MODEL_LEN = 9;
   const static int  SIMPLE_MODEL_LEN = 6;
   const static int  ALPHABET_SIZE = 4;
 
  public:
-  SensorMarkovIMM  (int);
+  SensorMarkovIMM  (int n, DNASeq *X);
   virtual ~SensorMarkovIMM   ();
   virtual void Init       (DNASeq *);
   virtual void ResetIter  ();
@@ -27,6 +29,14 @@ class SensorMarkovIMM : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorMarkovIMM * builder0( int n ) { return new SensorMarkovIMM(n);}
+extern "C" SensorMarkovIMM * builder0( int n, DNASeq *X) { return new SensorMarkovIMM(n, X);}
+
+
+
+BString_Array* SensorMarkovIMM::IMMatrix[7];
+double SensorMarkovIMM::minGC;
+double SensorMarkovIMM::maxGC;
+bool SensorMarkovIMM::IsInitialized = false;
+
 
 #endif

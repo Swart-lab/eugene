@@ -9,10 +9,12 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorIfElse :: SensorIfElse (int n) : Sensor(n)
+SensorIfElse :: SensorIfElse (int n, DNASeq *X) : Sensor(n)
 {
   char * sensorName = new char[FILENAME_MAX+1];
   char * pluginsDir;
+
+  type = Type_Multiple;
 
   pluginsDir = PAR.getC("EuGene.PluginsDir");
 
@@ -23,7 +25,7 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
   sensorLIf =  new SensorLoader (sensorName);
   if (!sensorLIf->LastError()) {
     fprintf(stderr," -If  : Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf",n),n+1);
-    sensorIf = sensorLIf->MakeSensor(n+1);
+    sensorIf = sensorLIf->MakeSensor(n+1, X);
   }
   else {
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -38,7 +40,7 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
   sensorLElse = new SensorLoader (sensorName);
   if (!sensorLElse->LastError()) {
     fprintf(stderr," -Else: Sensor.%s\t%d\n",PAR.getC("IfElse.SensorElse",n),n+1);
-    sensorElse = sensorLElse->MakeSensor(n+1);
+    sensorElse = sensorLElse->MakeSensor(n+1, X);
   }
   else { 
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -61,7 +63,6 @@ SensorIfElse :: ~SensorIfElse ()
 // ----------------------
 void SensorIfElse :: Init (DNASeq *X)
 {
-  type = Type_Multiple;
   sensorIf->Init(X);
   sensorElse->Init(X);
 }

@@ -17,14 +17,14 @@ class SensorGCPlot : public Sensor
   double Zoom3;
 
  public:
-  SensorGCPlot          (int);
+  SensorGCPlot          (int n, DNASeq *X);
   virtual ~SensorGCPlot ();
-  virtual void Init       (DNASeq *);
+  virtual void Init       (DNASeq *X);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorGCPlot* builder0( int n ) { return new SensorGCPlot(n);}
+extern "C" SensorGCPlot* builder0( int n, DNASeq *X) { return new SensorGCPlot(n, X);}
 
 #endif

@@ -8,8 +8,9 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorEuStop :: SensorEuStop (int n) : Sensor(n)
+SensorEuStop :: SensorEuStop (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Stop;
 }
 
 // ----------------------
@@ -24,8 +25,7 @@ SensorEuStop :: ~SensorEuStop ()
 // ----------------------
 void SensorEuStop :: Init (DNASeq *X)
 {
-  type = Type_Stop;
-  stopP = PAR.getD("EuStop.stopP");
+  stopP = PAR.getD("EuStop.stopP*");
   
   if (PAR.getI("Output.graph")) Plot(X);
 }

@@ -20,7 +20,7 @@ class SensorRepeat : public Sensor
   double exonPenalty;
 
  public:
-  SensorRepeat  (int);
+  SensorRepeat  (int n, DNASeq *X);
   virtual ~SensorRepeat   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -28,6 +28,6 @@ class SensorRepeat : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorRepeat * builder0( int n ) { return new SensorRepeat(n);}
+extern "C" SensorRepeat * builder0( int n, DNASeq *X) { return new SensorRepeat(n, X);}
 
 #endif

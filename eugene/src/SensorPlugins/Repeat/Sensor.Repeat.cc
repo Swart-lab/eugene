@@ -9,25 +9,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorRepeat :: SensorRepeat (int n) : Sensor(n)
-{
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorRepeat :: ~SensorRepeat ()
-{
-  vDeb.clear();
-  vFin.clear();
-
-  PositionGiveInfo = -1;
-}
-
-// ----------------------
-//  Init Repeat.
-// ----------------------
-void SensorRepeat :: Init (DNASeq *X)
+SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
   FILE* ncfile;
@@ -35,15 +17,6 @@ void SensorRepeat :: Init (DNASeq *X)
 
   type = Type_Content;
 
-  index = 0;
-
-  vDeb.clear();
-  vFin.clear();
-
-  UTRPenalty = PAR.getD("Repeat.UTRPenalty");
-  intronPenalty = PAR.getD("Repeat.IntronPenalty");
-  exonPenalty = PAR.getD("Repeat.ExonPenalty");
-  
   fprintf(stderr,"Reading Intergenic regions...");
   fflush(stderr);
   
@@ -59,6 +32,29 @@ void SensorRepeat :: Init (DNASeq *X)
   }
 
   fprintf(stderr,"done\n");
+}
+
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorRepeat :: ~SensorRepeat ()
+{
+  vDeb.clear();
+  vFin.clear();
+}
+
+// ----------------------
+//  Init Repeat.
+// ----------------------
+void SensorRepeat :: Init (DNASeq *X)
+{
+  UTRPenalty = PAR.getD("Repeat.UTRPenalty*");
+  intronPenalty = PAR.getD("Repeat.IntronPenalty*");
+  exonPenalty = PAR.getD("Repeat.ExonPenalty*");
+  
+  index = 0;
+  PositionGiveInfo = -1;
+
   if (PAR.getI("Output.graph")) Plot(X);
 }
 

@@ -6,6 +6,8 @@
 
 extern Parameters PAR;
 
+
+
 bool Before(const RAFLgene A, const RAFLgene B)
 { return (A.deb < B.deb); };
 
@@ -22,56 +24,38 @@ RAFLgene :: RAFLgene () { deb = fin = sens = 0; ID[0] = '0'; }
 // ----------------------
 RAFLgene :: ~RAFLgene () {}
 
+
+
 // ****************
 // * Sensor Riken *
 // ****************
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorRiken :: SensorRiken (int n) : Sensor(n)
-{
-  StrandRespect=PAR.getI("Riken.StrandRespect");
-  MAX_RIKEN_LENGTH=PAR.getI("Riken.Max_riken_length"); // default = 60000;
-  MAX_RIKEN_EST_LENGTH=PAR.getI("Riken.Max_riken_est_length"); //default  = 3000;
-  MIN_RIKEN_LENGTH=PAR.getI("Riken.Min_riken_length"); //default  = 120; // 2* riken overlap (60)
-  MIN_RIKEN_EST_LENGTH=PAR.getI("Riken.Min_riken_est_length"); //default  = 10;
-  MAX_OVERLAP = PAR.getI("Riken.Max_overlap"); //default  = 60
-  MIN_EST_DIFF = PAR.getI("Riken.Min_est_diff"); //def=100
-  RAFLPenalty=PAR.getD("Riken.RAFLPenalty"); //default  = -120;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorRiken :: ~SensorRiken ()
-{
-  RAFL.clear();
-}
-
-// ----------------------
-//  Init Riken.
-// ----------------------
 //
 // ------------->> WARNING: VIRER CE RAFL_A_TRAITER ! << -------------------
 // (pour le -pd entre autres)
-
-void SensorRiken :: Init (DNASeq *X)
+SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)
 {
-  RAFLpos = RAFLindex = 0;
-  RAFL_A_Traiter = TRUE;
   FILE *fRAFL;
   int i, j;
   int beg5, end5;
   int beg3, end3;
   char name[FILENAME_MAX+1];
   char tempname[FILENAME_MAX+1];
+  RAFLgene tmp;
+  std::vector <RAFLgene> RAFLtmp;
 
   type = Type_Content;
- 
-  RAFLgene tmp;
 
-  std::vector <RAFLgene> RAFLtmp;
-  
+  StrandRespect = PAR.getI("Riken.StrandRespect");
+  MAX_RIKEN_LENGTH = PAR.getI("Riken.Max_riken_length"); // default = 60000;
+  MAX_RIKEN_EST_LENGTH = PAR.getI("Riken.Max_riken_est_length"); //default  = 3000;
+  MIN_RIKEN_LENGTH = PAR.getI("Riken.Min_riken_length"); //default  = 120; // 2* riken overlap (60)
+  MIN_RIKEN_EST_LENGTH = PAR.getI("Riken.Min_riken_est_length"); //default  = 10;
+  MAX_OVERLAP = PAR.getI("Riken.Max_overlap"); //default  = 60
+  MIN_EST_DIFF = PAR.getI("Riken.Min_est_diff"); //def=100
+
   fprintf(stderr, "Reading RAFL gene............");
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
@@ -84,14 +68,14 @@ void SensorRiken :: Init (DNASeq *X)
     strcpy(tmp.ID, name);
     tmp.sens = (((beg5+end5) <= (beg3+end3)) ? 1 : -1);
     if (StrandRespect==0) tmp.sens=0;
-
+    
     // si le gene est trop court, on ne peut pas connaitre le sens !
     if ( (StrandRespect) && (abs((beg5+end5) - (beg3+end3)) < MIN_EST_DIFF) ) {
       tmp.sens = 0;
       fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s has no significative orientation\n",
 	      name);
     }
-
+    
     if (abs(tmp.deb-tmp.fin) > MAX_RIKEN_LENGTH) {
       fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s rejected, too long transcript (%d kb)\n",
 	      name, abs(tmp.deb-tmp.fin)/1000);
@@ -130,79 +114,99 @@ void SensorRiken :: Init (DNASeq *X)
     
     RAFLtmp.push_back(tmp);
   }
-
+  
   if (j != EOF) {
     fprintf(stderr, "Incorrect RAFL file\n");
     exit(2);
   }
-
+  
   fclose(fRAFL);
   fprintf(stderr, "%d RAFL EST pairs read, ", RAFLtmp.size());
-
+  
   sort(RAFLtmp.begin(), RAFLtmp.end(), Before);
-
+  
   int RAFLindice=0;
   int RAFLtmpindice=0;
-
+  RAFL_A_Traiter = TRUE;
+  
   //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFLtmp.size(); RAFLtmpindice++) {
   //     fprintf(stderr, "\nRAFLtmp[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFLtmp[RAFLtmpindice].deb,RAFLtmp[RAFLtmpindice].fin,RAFLtmp[RAFLtmpindice].sens,RAFLtmp[RAFLtmpindice].ID);
   //  }
-
-    if ((int)RAFLtmp.size()>0) RAFL.push_back(RAFLtmp[RAFLtmpindice]); // on retient le premier
-
-    for (RAFLtmpindice=1; RAFLtmpindice<(int)RAFLtmp.size(); RAFLtmpindice++) { 
-      // on analyse chaque tmp que l'on compare avec le dernier rafl retenu
   
-      if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb < -3) { // pas d'overlap
-	RAFL.push_back(RAFLtmp[RAFLtmpindice]);
-	RAFLindice++;
-	continue; // tt va bien, on passe au tmp suivant
-      }
-      if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb >= MAX_OVERLAP) { // cas de grand overlap
-	fprintf(stderr,"fusion %s-%s...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
-	if ((RAFL[RAFLindice].sens!=0) && 
-	     (RAFLtmp[RAFLtmpindice].sens!=0) && 
-	     (RAFL[RAFLindice].sens!=RAFLtmp[RAFLtmpindice].sens) &&
-	     (RAFL[RAFLindice].sens!=2) ) { // orientations contraires
-	  fprintf(stderr, "\nWARNING: RAFL data inconsistent : contig containing rikens in different orientations (%s and %s)\n",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
-	  RAFL[RAFLindice].sens = 2;
-	}
-	// grand overlap, fusion des deux riken (meme gene)
-	RAFL[RAFLindice].deb = Min( RAFL[RAFLindice].deb , RAFLtmp[RAFLtmpindice].deb );
-	RAFL[RAFLindice].fin = Max( RAFL[RAFLindice].fin , RAFLtmp[RAFLtmpindice].fin );
-	if (RAFL[RAFLindice].sens==0) 
-	  RAFL[RAFLindice].sens = RAFLtmp[RAFLtmpindice].sens;
-	continue;
-      }
-
-      
-      else { // little overlap, real overlapping genes
-	int const HALF_HOLE_SIZE = 3;
-
-	fprintf(stderr,"%s-%s overlapping...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
-	RAFL[RAFLindice].fin = ((RAFLtmp[RAFLtmpindice].deb+RAFL[RAFLindice].fin)/2)-HALF_HOLE_SIZE;
-	i=RAFLtmpindice; // on raccourcit le debut de tous les petits chevauchant:
-
-	while ( (i<(int)RAFLtmp.size()) && (RAFL[RAFLindice].fin >= RAFLtmp[i].deb-2*HALF_HOLE_SIZE) ) {
-	  RAFLtmp[i].deb= RAFL[RAFLindice].fin+2*HALF_HOLE_SIZE;
-	  i++;
-	}
-
-	RAFL.push_back(RAFLtmp[RAFLtmpindice]);
-	RAFLindice++;
-	continue;
-      }
+  if ((int)RAFLtmp.size()>0) RAFL.push_back(RAFLtmp[RAFLtmpindice]); // on retient le premier
+  
+  for (RAFLtmpindice=1; RAFLtmpindice<(int)RAFLtmp.size(); RAFLtmpindice++) { 
+      // on analyse chaque tmp que l'on compare avec le dernier rafl retenu
+    
+    if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb < -3) { // pas d'overlap
+      RAFL.push_back(RAFLtmp[RAFLtmpindice]);
+      RAFLindice++;
+      continue; // tt va bien, on passe au tmp suivant
     }
+    if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb >= MAX_OVERLAP) { // cas de grand overlap
+      fprintf(stderr,"fusion %s-%s...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
+      if ((RAFL[RAFLindice].sens!=0) && 
+	  (RAFLtmp[RAFLtmpindice].sens!=0) && 
+	  (RAFL[RAFLindice].sens!=RAFLtmp[RAFLtmpindice].sens) &&
+	  (RAFL[RAFLindice].sens!=2) ) { // orientations contraires
+	fprintf(stderr, "\nWARNING: RAFL data inconsistent : contig containing rikens in different orientations (%s and %s)\n",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
+	RAFL[RAFLindice].sens = 2;
+      }
+      // grand overlap, fusion des deux riken (meme gene)
+      RAFL[RAFLindice].deb = Min( RAFL[RAFLindice].deb , RAFLtmp[RAFLtmpindice].deb );
+      RAFL[RAFLindice].fin = Max( RAFL[RAFLindice].fin , RAFLtmp[RAFLtmpindice].fin );
+      if (RAFL[RAFLindice].sens==0) 
+	RAFL[RAFLindice].sens = RAFLtmp[RAFLtmpindice].sens;
+      continue;
+    
+    } else { 
+      // little overlap, real overlapping genes
+      int const HALF_HOLE_SIZE = 3;
+      
+      fprintf(stderr,"%s-%s overlapping...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
+      RAFL[RAFLindice].fin = ((RAFLtmp[RAFLtmpindice].deb+RAFL[RAFLindice].fin)/2)-HALF_HOLE_SIZE;
+      i=RAFLtmpindice; // on raccourcit le debut de tous les petits chevauchant:
+      
+      while ( (i<(int)RAFLtmp.size()) && (RAFL[RAFLindice].fin >= RAFLtmp[i].deb-2*HALF_HOLE_SIZE) ) {
+	RAFLtmp[i].deb= RAFL[RAFLindice].fin+2*HALF_HOLE_SIZE;
+	i++;
+      }
+      
+      RAFL.push_back(RAFLtmp[RAFLtmpindice]);
+      RAFLindice++;
+      continue;
+    }
+  }
+  
+  fprintf(stderr,"resulting %d\n",RAFL.size());
+  fflush(stderr);
+  if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
+  RAFL_A_Traiter_Remenber = RAFL_A_Traiter;
 
-    fprintf(stderr,"resulting %d\n",RAFL.size());
-    fflush(stderr);
-    if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
+  //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFL.size(); RAFLtmpindice++) {
+  //       fprintf(stderr, "\nRAFL[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFL[RAFLtmpindice].deb,RAFL[RAFLtmpindice].fin,RAFL[RAFLtmpindice].sens,RAFL[RAFLtmpindice].ID);
+  //     }
+}
 
- //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFL.size(); RAFLtmpindice++) {
-//       fprintf(stderr, "\nRAFL[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFL[RAFLtmpindice].deb,RAFL[RAFLtmpindice].fin,RAFL[RAFLtmpindice].sens,RAFL[RAFLtmpindice].ID);
-//     }
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorRiken :: ~SensorRiken ()
+{
+  RAFL.clear();
+}
 
-    if (PAR.getI("Output.graph")) Plot(X);
+// ----------------------
+//  Init Riken.
+// ----------------------
+void SensorRiken :: Init (DNASeq *X)
+{
+  RAFLPenalty = PAR.getD("Riken.RAFLPenalty*"); //default  = -120;
+  RAFL_A_Traiter = RAFL_A_Traiter_Remenber;
+
+  RAFLpos = RAFLindex = 0;
+
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // -------------------------

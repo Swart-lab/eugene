@@ -10,8 +10,9 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorFrameShift :: SensorFrameShift (int n) : Sensor(n)
+SensorFrameShift :: SensorFrameShift (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Start;
 }
 
 // ----------------------
@@ -26,9 +27,9 @@ SensorFrameShift :: ~SensorFrameShift ()
 // ----------------------
 void SensorFrameShift :: Init (DNASeq *X)
 {
-  type = Type_Start;
-  insProb = -(PAR.getD("FrameShift.Ins"));
-  delProb = -(PAR.getD("FrameShift.Del"));
+  insProb = -(PAR.getD("FrameShift.Ins*"));
+  delProb = -(PAR.getD("FrameShift.Del*"));
+
   if (PAR.getI("Output.graph")) Plot(X);
 }
 

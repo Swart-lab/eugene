@@ -56,37 +56,48 @@ void AmplifyScore(double Score [], unsigned int normopt)
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorMarkovProt :: SensorMarkovProt (int n) : Sensor(n)
+SensorMarkovProt :: SensorMarkovProt (int n, DNASeq *X) : Sensor(n)
 {
   FILE *fp;
 
-  minGC = PAR.getD("MarkovProt.minGC",GetNumber())/100;
-  maxGC = PAR.getD("MarkovProt.maxGC",GetNumber())/100;
+  type = Type_Content;
 
-  maxorder = PAR.getI("MarkovProt.maxorder");
-  order    = PAR.getI("MarkovProt.order");
+  if (!IsInitialized) {
+    minGC = PAR.getD("MarkovProt.minGC",GetNumber())/100;
+    maxGC = PAR.getD("MarkovProt.maxGC",GetNumber())/100;
+    
+    maxorder = PAR.getI("MarkovProt.maxorder");
+    order    = PAR.getI("MarkovProt.order");
+    
+    if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir"), PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
+      fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
+      exit(2);
+    }
+    
+    fprintf(stderr,"Loading MarkovProt model...");
+    fflush(stderr);
+    ModeleProt= new TabChaine<ChainePROT21,unsigned short int> (maxorder,new ChainePROT21);
+    //  ModeleProt= new TabChaine<ChainePROT21,double> (maxorder,new ChainePROT21);
+    // load the coding model
+    if ( ModeleProt->chargefichier(fp) ) {
+      fprintf(stderr,"Proteic Model unreadable in %s. Aborting (be sure that maxorder and the matrix max. order correspond).\n",PAR.getC("matname"));
+      exit(1);
+    }
+    fclose(fp);
+    
+    ProbacodonGeneral = new TabChaine<ChaineADN,double> (2,new ChaineADN);
+    // initialisation is in Init, because DNASeq X is needed
+    
+    fprintf(stderr,"done\n");
+    fflush(stderr);
 
-  if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir"), PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
-    fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
-    exit(2);
+    IsInitialized = true;
   }
 
-  fprintf(stderr,"Loading MarkovProt model...");
-  fflush(stderr);
-  ModeleProt= new TabChaine<ChainePROT21,unsigned short int> (maxorder,new ChainePROT21);
-//  ModeleProt= new TabChaine<ChainePROT21,double> (maxorder,new ChainePROT21);
-  // load the coding model
-  if ( ModeleProt->chargefichier(fp) ) {
-    fprintf(stderr,"Proteic Model unreadable in %s. Aborting (be sure that maxorder and the matrix max. order correspond).\n",PAR.getC("matname"));
-    exit(1);
-  }
-  fclose(fp);
-
-  Probacodon = new TabChaine<ChaineADN,double> (2,new ChaineADN);
-  // initialisation is in Init, because DNASeq X is needed
-
-  fprintf(stderr,"done\n");
-  fflush(stderr);
+  // for the moment, the GC rate is computed on the entire sequence
+  GCrate = (X->Markov0[BitG] + X->Markov0[BitC]);
+  Probacodon = ProbacodonGeneral;
+  Probacodon->initialisation(GCrate);
 }
 
 // ----------------------
@@ -103,14 +114,7 @@ SensorMarkovProt :: ~SensorMarkovProt ()
 // ----------------------
 void SensorMarkovProt :: Init (DNASeq *X)
 {
-  type = Type_Content;
-
-  // for the moment, the GC rate is computed on the entire sequence
-  GCrate = (X->Markov0[BitG] + X->Markov0[BitC]);
-  Probacodon->initialisation(GCrate);
-
-  if(PAR.getI("Output.graph"))
-    Plot(X);
+  if(PAR.getI("Output.graph")) Plot(X);
 }
 
 // -----------------------

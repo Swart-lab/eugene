@@ -9,7 +9,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorGCPlot :: SensorGCPlot (int n) : Sensor(n)
+SensorGCPlot :: SensorGCPlot (int n, DNASeq *X) : Sensor(n)
 {
   Color = PAR.getI("GCPlot.Color");
   Window = PAR.getI("GCPlot.Smooth");
@@ -32,6 +32,7 @@ void SensorGCPlot :: Init (DNASeq *X)
 {
   char *tmp = PAR.getC("GCPlot.Up");
   int len = strlen(tmp);
+
   Up = 0;
   for (int i =0; i<len;i++)
     Up |= X->Nuc2Code(tmp[i]);
@@ -42,8 +43,7 @@ void SensorGCPlot :: Init (DNASeq *X)
   for (int i =0; i<len;i++)
     Over |= X->Nuc2Code(tmp[i]);
 
-  if(PAR.getI("Output.graph"))
-    Plot(X);
+  if(PAR.getI("Output.graph"))  Plot(X);
 }
 
 // ------------------------

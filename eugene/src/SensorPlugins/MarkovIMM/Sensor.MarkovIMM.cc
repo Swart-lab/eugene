@@ -56,52 +56,58 @@ void AmplifyScore(double Score [], unsigned int normopt)
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
+SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
 {
   FILE *fp;
   int i;
   
-  minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
-  maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
+  type = Type_Content;
   
-  if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
-    fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
-    exit(2);
-  }
-  
-  fprintf(stderr,"Loading IMM...");
-  fflush(stderr);
-  
-  // On essaie d'abord de charger les 5 modeles fondamentaux (3 ex/int/interG)
-  for  (i = 0;  i < 5;  i ++) {
-    IMMatrix[i] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-    if (IMMatrix[i]->Read(fp)) {
-      fprintf(stderr,"Model %d unreadable in %s. Aborting.\n",i+1,PAR.getC("MarkovIMM.matname"));
-      exit(1);
-    } 
-    fprintf(stderr,"%d ",i+1);
+  if (!IsInitialized) {
+    minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
+    maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
+    
+    if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
+      fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
+      exit(2);
+    }
+    
+    fprintf(stderr,"Loading IMM...");
     fflush(stderr);
-  }
-
-  // On essaie ensuite de lire un 6eme modele. Si cela echoue,
-  // le modele intronique est utilise pour les UTR
-  IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-  if (IMMatrix[6]->Read(fp)) {
-    fprintf(stderr,"- No UTR model found, using introns model. ");
-    delete IMMatrix[6];
-    IMMatrix[6] = IMMatrix[3];
-    IMMatrix[5] = IMMatrix[3];
-  } else {
-    fprintf(stderr,"6 ");
-    IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-    if (IMMatrix[5]->Read(fp)) {
-      fprintf(stderr,"- No second UTR model found, using intron model. ");
-      delete IMMatrix[5];
+    
+    // On essaie d'abord de charger les 5 modeles fondamentaux (3 ex/int/interG)
+    for  (i = 0;  i < 5;  i ++) {
+      IMMatrix[i] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+      if (IMMatrix[i]->Read(fp)) {
+	fprintf(stderr,"Model %d unreadable in %s. Aborting.\n",i+1,PAR.getC("MarkovIMM.matname"));
+	exit(1);
+      } 
+      fprintf(stderr,"%d ",i+1);
+      fflush(stderr);
+    }
+    
+    // On essaie ensuite de lire un 6eme modele. Si cela echoue,
+    // le modele intronique est utilise pour les UTR
+    IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+    if (IMMatrix[6]->Read(fp)) {
+      fprintf(stderr,"- No UTR model found, using introns model. ");
+      delete IMMatrix[6];
+      IMMatrix[6] = IMMatrix[3];
       IMMatrix[5] = IMMatrix[3];
-    } else fprintf(stderr,"7 ");
-  }  
-  fprintf(stderr,"done\n");
-  fclose(fp);
+    } else {
+      fprintf(stderr,"6 ");
+      IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+      if (IMMatrix[5]->Read(fp)) {
+	fprintf(stderr,"- No second UTR model found, using intron model. ");
+	delete IMMatrix[5];
+	IMMatrix[5] = IMMatrix[3];
+      } else fprintf(stderr,"7 ");
+    }  
+    fprintf(stderr,"done\n");
+    fclose(fp);
+
+    IsInitialized = true;
+  }
 }
 
 // ----------------------
@@ -122,10 +128,7 @@ SensorMarkovIMM :: ~SensorMarkovIMM ()
 // ----------------------
 void SensorMarkovIMM :: Init (DNASeq *X)
 {
-  type = Type_Content;
-  
-  if(PAR.getI("Output.graph"))
-    Plot(X);
+  if(PAR.getI("Output.graph")) Plot(X);
 }
 
 // -----------------------
@@ -141,7 +144,7 @@ void SensorMarkovIMM :: ResetIter ()
 void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int  Rev,FModelLen;
-  int indexF,indexR;
+  int  indexF, indexR;
 
   // If the model is not in its GC% area, simply do nothing
   if ((X->Markov0[BitG] + X->Markov0[BitC]) <= minGC ||

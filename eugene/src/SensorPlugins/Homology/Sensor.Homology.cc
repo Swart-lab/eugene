@@ -48,36 +48,12 @@ int SensorHomology :: hitsmaxnumber (int position, int frame, int maxlen) {
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorHomology :: SensorHomology(int n) : Sensor(n)
+SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
 {
-  TblastxP= PAR.getD("Homology.TblastxP");
-  TblastxB= PAR.getD("Homology.TblastxB");
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorHomology :: ~SensorHomology ()
-{
-  for(int i=0;i<6;i++){
-    delete TblastxNumber[i];
-    delete TblastxScore[i];
-    delete TblastxGlobalScore[i];
-  }
-  delete [] TblastxNumber;
-  delete [] TblastxScore;
-  delete [] TblastxGlobalScore;
-}
-// ----------------------
-//  Init Homol.
-// ----------------------
-void SensorHomology :: Init (DNASeq *X)
-{
-  int i, j;
-  int Len = X->SeqLen;
-  
   type = Type_Content;
-  
+
+  int i, j;
+  int Len = X->SeqLen; 
   FILE *ftblastx;
   FILE *protmatfile;
   int deb,fin,phase,ProtDeb,ProtFin,sens;
@@ -132,7 +108,7 @@ void SensorHomology :: Init (DNASeq *X)
   if (ftblastx == NULL) {
     fprintf (stderr,"\ncannot open tblastx file %s\n",tempname); exit (2);
   }
-
+  
   while (!feof(ftblastx)) {
     if (fscanf(ftblastx,"%d %d %lf %*s %d %*s %d %d",
 	       &deb, &fin, &bits, &phase, &ProtDeb, &ProtFin) != 6) {
@@ -147,12 +123,12 @@ void SensorHomology :: Init (DNASeq *X)
     }
     sens= ( (phase < 0) ? -1 : 1 );
     phase = ph06(phase);
-
+    
     j=deb;
     deb= Min (deb,fin);
     fin= Max (j,fin);
     GlobalBits=((REAL)bits)/((REAL)abs(fin-deb));
-
+    
     tampon=fgetc(ftblastx); // lecture de la suite (sequence hit subject)
     while (isspace(tampon)) tampon=fgetc(ftblastx); // en cas de plsrs separateurs avant la derniere colonne
     for (i = deb-1; i < fin; i++)  {
@@ -166,25 +142,25 @@ void SensorHomology :: Init (DNASeq *X)
 	paire[1]=tampon;
 	paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
 	score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
-//		      printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
+	//  printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
       }
       TblastxNumber[phase][i] ++;
-
+      
       TblastxScore[phase][i]  += score;
 
-//	if (GlobalBits>TblastxGlobalScore[phase][i]) {
-//	  TblastxGlobalScore[phase][i] = GlobalBits;
-//	  TblastxScore[phase][i]= score;
-//	}
-
-//	TblastxScore[phase][i]= ( (TblastxScore[phase][i]==0) ? score : Max ( (int)TblastxScore[phase][i],score)) ;
-      //      TblastxScore[phase][i]= Max (TblastxScore[phase][i],GlobalBits);
+      // if (GlobalBits>TblastxGlobalScore[phase][i]) {
+      //    TblastxGlobalScore[phase][i] = GlobalBits;
+      //    TblastxScore[phase][i]= score;
+      // }
+      
+      // TblastxScore[phase][i]= ( (TblastxScore[phase][i]==0) ? score : Max ( (int)TblastxScore[phase][i],score));
+      // TblastxScore[phase][i]= Max (TblastxScore[phase][i],GlobalBits);
     }
   }
   fclose(ftblastx);
   fprintf(stderr,"done\n");
 
-// weighting by the ratio of hits number.
+  // weighting by the ratio of hits number.
   for (j=0; j<6 ;j++) {
     contigbeg=1;
     nmax=0;
@@ -202,6 +178,29 @@ void SensorHomology :: Init (DNASeq *X)
       }
     }
   }
+}
+
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorHomology :: ~SensorHomology ()
+{
+  for(int i=0;i<6;i++){
+    delete TblastxNumber[i];
+    delete TblastxScore[i];
+    delete TblastxGlobalScore[i];
+  }
+  delete [] TblastxNumber;
+  delete [] TblastxScore;
+  delete [] TblastxGlobalScore;
+}
+// ----------------------
+//  Init Homol.
+// ----------------------
+void SensorHomology :: Init (DNASeq *X)
+{
+  TblastxP= PAR.getD("Homology.TblastxP*");
+  TblastxB= PAR.getD("Homology.TblastxB*");
 
   if (PAR.getI("Output.graph")) Plot(X);
 }

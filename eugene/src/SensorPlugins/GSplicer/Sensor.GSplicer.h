@@ -33,14 +33,14 @@ class SensorGSplicer : public Sensor
   double Norm(double, double);
 
  public:
-  SensorGSplicer          (int);
+  SensorGSplicer          (int n, DNASeq *X);
   virtual ~SensorGSplicer ();
-  virtual void Init       (DNASeq *);
+  virtual void Init       (DNASeq *X);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorGSplicer* builder0( int n ) { return new SensorGSplicer(n);}
+extern "C" SensorGSplicer* builder0( int n, DNASeq *X) { return new SensorGSplicer(n, X);}
 
 #endif

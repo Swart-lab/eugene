@@ -21,7 +21,7 @@ class SensorNStart : public Sensor
   void ReadNStartR (char[FILENAME_MAX+1], int);
 
  public:
-  SensorNStart   (int);
+  SensorNStart   (int n, DNASeq *X);
   virtual ~SensorNStart   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
@@ -29,6 +29,6 @@ class SensorNStart : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorNStart* builder0( int n ) { return new SensorNStart(n);}
+extern "C" SensorNStart* builder0( int n, DNASeq *X) { return new SensorNStart(n, X);}
 
 #endif

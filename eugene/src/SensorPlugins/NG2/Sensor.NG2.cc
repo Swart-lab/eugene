@@ -10,41 +10,12 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorNG2 :: SensorNG2 (int n) : Sensor(n)
-{
-  accB = PAR.getD("NG2.accB",GetNumber());
-  accP = PAR.getD("NG2.accP",GetNumber());
-  donB = PAR.getD("NG2.donB",GetNumber());
-  donP = PAR.getD("NG2.donP",GetNumber());
-
-  PositionGiveInfo = -1;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorNG2 :: ~SensorNG2 ()
-{
-  vPosAccF.clear();  vPosAccR.clear();
-  vPosDonF.clear();  vPosDonR.clear();
-  vValAccF.clear();  vValAccR.clear();
-  vValDonF.clear();  vValDonR.clear();
-}
-
-// ----------------------
-//  Init NG2.
-// ----------------------
-void SensorNG2 :: Init (DNASeq *X)
+SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
 
   type = Type_Splice;
-  
-  vPosAccF.clear();  vPosAccR.clear();
-  vPosDonF.clear();  vPosDonR.clear();
-  vValAccF.clear();  vValAccR.clear();
-  vValDonF.clear();  vValDonR.clear();
-  
+    
   fprintf(stderr, "Reading splice site file (NetGene2)...........");  
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
@@ -65,8 +36,31 @@ void SensorNG2 :: Init (DNASeq *X)
   reverse(vValAccR.begin(), vValAccR.end());
   reverse(vPosDonR.begin(), vPosDonR.end());
   reverse(vValDonR.begin(), vValDonR.end());
-  
+}
+
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorNG2 :: ~SensorNG2 ()
+{
+  vPosAccF.clear();  vPosAccR.clear();
+  vPosDonF.clear();  vPosDonR.clear();
+  vValAccF.clear();  vValAccR.clear();
+  vValDonF.clear();  vValDonR.clear();
+}
+
+// ----------------------
+//  Init NG2.
+// ----------------------
+void SensorNG2 :: Init (DNASeq *X)
+{
+  accB = PAR.getD("NG2.accB*",GetNumber());
+  accP = PAR.getD("NG2.accP*",GetNumber());
+  donB = PAR.getD("NG2.donB*",GetNumber());
+  donP = PAR.getD("NG2.donP*",GetNumber());
+
   iAccF = iDonF = iAccR = iDonR = 0;
+  PositionGiveInfo = -1;
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -103,11 +97,11 @@ void SensorNG2 :: ReadNG2F(char name[FILENAME_MAX+1], int SeqLen)
     
     if( atof(sacc) != 0.0 ) {
       vPosAccF.push_back( i+1 );
-      vValAccF.push_back( pow(atof(sacc),  accB)*accP);
+      vValAccF.push_back( atof(sacc) );
     }
     if( atof(sdon) != 0.0 ) {
       vPosDonF.push_back( i );
-      vValDonF.push_back( pow(atof(sdon),  donB)*donP);
+      vValDonF.push_back( atof(sdon) );
     }
   }
   fclose(fp);
@@ -144,11 +138,11 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
 
     if( atof(sacc) != 0.0 ) {
       vPosAccR.push_back( k-1 );
-      vValAccR.push_back( pow(atof(sacc),  accB)*accP);
+      vValAccR.push_back( atof(sacc));
     }
     if( atof(sdon) != 0.0 ) {
       vPosDonR.push_back( k );
-      vValDonR.push_back( pow(atof(sdon),  donB)*donP);
+      vValDonR.push_back( atof(sdon));
     }
     k--;
   }
@@ -156,11 +150,12 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
 }
 
 // ------------------------
-//  GiveInfo signal NG2.
+//  GiveInfo signal NG2.   pow(atof(sdon),  donB)*donP
 // ------------------------
 void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
+  double f;
 
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
   PositionGiveInfo = pos;
@@ -171,8 +166,9 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
     
     if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
-      d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iAccF]);
-      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iAccF]);
+      f = pow( vValAccF[iAccF], accB) * accP;
+      d->sig[DATA::Acc].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-f);
       iAccF++;
     }
   }
@@ -183,8 +179,9 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos)-vPosAccR.begin();
 
     if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
-      d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iAccR]);
-      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iAccR]);
+      f = pow( vValAccR[iAccR], accB) * accP;
+      d->sig[DATA::Acc].weight[Signal::Reverse] += log(f);
+      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-f);
       iAccR++;
     }
   }
@@ -195,8 +192,9 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
 
     if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
-      d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iDonF]);
-      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iDonF]);
+      f = pow( vValDonF[iDonF], donB) * donP;
+      d->sig[DATA::Don].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-f);
       iDonF++;
     }
   }
@@ -207,8 +205,9 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos)-vPosDonR.begin();
 
     if((iDonR<(int)vPosDonR.size()) && (vPosDonR[iDonR] == pos)) {
-      d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
-      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
+      f = pow( vValDonR[iDonR], donB) * donP;
+      d->sig[DATA::Don].weight[Signal::Reverse] += log(f);
+      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-f);
       iDonR++;
     }
   }
@@ -220,17 +219,27 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorNG2 :: Plot(DNASeq *X)
 {
-  for (int i =0; i < (int)vPosAccF.size(); i++)
-    PlotBarF(vPosAccF[i],4,0.5,NORM(log(vValAccF[i]),20.0),4);
-  
-  for (int i =0; i < (int)vPosDonF.size(); i++)
-    PlotBarF(vPosDonF[i],4,0.5,NORM(log(vValDonF[i]),20.0),11);
-  
-  for (int i =0; i < (int)vPosAccR.size(); i++)
-    PlotBarF(vPosAccR[i],-4,0.5, NORM(log(vValAccR[i]),20.0),4);
+  double f;
 
-  for (int i =0; i < (int)vPosDonR.size(); i++)
-    PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),11);
+  for (int i =0; i < (int)vPosAccF.size(); i++) {
+    f = pow(vValAccF[i], accB) * accP;
+    PlotBarF(vPosAccF[i], 4, 0.5, NORM(log(f),20.0), 4);
+  }
+  
+  for (int i =0; i < (int)vPosDonF.size(); i++) {
+    f = pow( vValDonF[i], donB) * donP;
+    PlotBarF(vPosDonF[i], 4, 0.5, NORM(log(f),20.0), 11);
+  }
+  
+  for (int i =0; i < (int)vPosAccR.size(); i++) {
+    f = pow( vValAccR[i], accB) * accP;
+    PlotBarF(vPosAccR[i], -4, 0.5, NORM(log(f),20.0), 4);
+  }
+
+  for (int i =0; i < (int)vPosDonR.size(); i++) {
+    f = pow( vValDonR[i], donB) * donP;
+    PlotBarF(vPosDonR[i], -4, 0.5, NORM(log(f),20.0), 11);
+  }
 }
 
 // ------------------

@@ -16,7 +16,7 @@ class SensorIfElse : public Sensor
   Sensor *sensorElse;
 
  public:
-  SensorIfElse  (int);
+  SensorIfElse  (int n, DNASeq *X);
   virtual ~SensorIfElse   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -24,6 +24,6 @@ class SensorIfElse : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorIfElse * builder0(int n) {  return new SensorIfElse(n); }
+extern "C" SensorIfElse * builder0(int n, DNASeq *X) {  return new SensorIfElse(n, X); }
 
 #endif

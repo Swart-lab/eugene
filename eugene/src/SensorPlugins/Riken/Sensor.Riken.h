@@ -37,6 +37,7 @@ class SensorRiken : public Sensor
   int RAFLpos;                  // Position par rapport a un gene RAFL
   int RAFLindex;                // Index du RIKEN en cours
   int RAFL_A_Traiter;           // Index du RIKEN en cours
+  int RAFL_A_Traiter_Remenber;
   int StrandRespect;
   int MIN_EST_DIFF; // default = 100;
   int MAX_OVERLAP; // default = 60;
@@ -47,7 +48,7 @@ class SensorRiken : public Sensor
   REAL RAFLPenalty; // default  = -120;
 
  public:
-  SensorRiken   (int);
+  SensorRiken   (int n, DNASeq *X);
   virtual ~SensorRiken    ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -55,6 +56,6 @@ class SensorRiken : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorRiken * builder0( int n ) {  return new SensorRiken(n);}
+extern "C" SensorRiken * builder0( int n, DNASeq *X) {  return new SensorRiken(n, X);}
 
 #endif

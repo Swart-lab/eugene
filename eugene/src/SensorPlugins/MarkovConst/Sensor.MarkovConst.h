@@ -13,7 +13,7 @@ class SensorMarkovConst : public Sensor
   double minGC,maxGC;
 
  public:
-  SensorMarkovConst  (int);
+  SensorMarkovConst  (int n, DNASeq *X);
   virtual ~SensorMarkovConst   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -21,6 +21,6 @@ class SensorMarkovConst : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorMarkovConst * builder0(int n) {  return new SensorMarkovConst(n); }
+extern "C" SensorMarkovConst * builder0(int n, DNASeq *X) {  return new SensorMarkovConst(n, X); }
 
 #endif

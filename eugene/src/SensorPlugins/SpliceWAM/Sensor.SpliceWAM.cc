@@ -24,7 +24,7 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorSpliceWAM :: SensorSpliceWAM (int n) : Sensor(n)
+SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
 {
   type = Type_Splice;
 

@@ -34,7 +34,7 @@ class SensorStartWAM : public Sensor
   inline double NormalizePlot (double x, double n);  // normalization for the plot
 
  public:
-  SensorStartWAM  (int);
+  SensorStartWAM  (int n, DNASeq *X);
   virtual ~SensorStartWAM   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -42,6 +42,6 @@ class SensorStartWAM : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorStartWAM * builder0(int n) {  return new SensorStartWAM(n); }
+extern "C" SensorStartWAM * builder0(int n, DNASeq *X) {  return new SensorStartWAM(n, X); }
 
 #endif

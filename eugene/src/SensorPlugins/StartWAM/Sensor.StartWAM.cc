@@ -22,7 +22,7 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorStartWAM :: SensorStartWAM (int n) : Sensor(n)
+SensorStartWAM :: SensorStartWAM (int n, DNASeq *X) : Sensor(n)
 {
   type = Type_Start;
 
@@ -37,7 +37,7 @@ SensorStartWAM :: SensorStartWAM (int n) : Sensor(n)
   strcat(modelfilename,PAR.getC("StartWAM.modelfilename"));
   PlotScoreIncrease= 7.0;
 
-  WAModel= new WAM(MarkovianOrder, MotifLength,"ACGT", modelfilename);
+  WAModel = new WAM(MarkovianOrder, MotifLength,"ACGT", modelfilename);
 }
 
 // ----------------------

@@ -12,16 +12,20 @@
 class SensorMarkovProt : public Sensor
 {
  private:
-  int maxorder, order;
-//  char[4] type;
-//  TabChaine<ChainePROT21,double>* ModeleProt;
-  TabChaine<ChainePROT21,unsigned short>* ModeleProt; 
+  static int maxorder;
+  static int order;
+  //  char[4] type;
+  //  TabChaine<ChainePROT21,double>* ModeleProt;
+  static   TabChaine<ChainePROT21,unsigned short>* ModeleProt; 
+  static   TabChaine<ChaineADN,double>* ProbacodonGeneral;
   TabChaine<ChaineADN,double>* Probacodon;
   double GCrate;
-  double minGC,maxGC;
+  static double minGC;
+  static double maxGC;
+  static bool IsInitialized;
 
  public:
-  SensorMarkovProt  (int);
+  SensorMarkovProt  (int n, DNASeq *X);
   virtual ~SensorMarkovProt   ();
   virtual void Init       (DNASeq *);
   virtual void ResetIter  ();
@@ -31,6 +35,14 @@ class SensorMarkovProt : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorMarkovProt * builder0( int n ) { return new SensorMarkovProt(n);}
+extern "C" SensorMarkovProt * builder0( int n, DNASeq *X) { return new SensorMarkovProt(n, X);}
+
+int SensorMarkovProt::maxorder;
+int SensorMarkovProt::order;
+TabChaine<ChainePROT21,unsigned short>* SensorMarkovProt::ModeleProt; 
+TabChaine<ChaineADN,double>* SensorMarkovProt::ProbacodonGeneral;
+double SensorMarkovProt::minGC;
+double SensorMarkovProt::maxGC;
+bool SensorMarkovProt::IsInitialized = false;
 
 #endif

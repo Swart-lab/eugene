@@ -21,7 +21,7 @@ class SensorSPred : public Sensor
   void ReadSPredR(char[FILENAME_MAX+1], int);
   
  public:
-  SensorSPred   (int);
+  SensorSPred   (int n, DNASeq *X);
   virtual ~SensorSPred    ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
@@ -29,6 +29,6 @@ class SensorSPred : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorSPred * builder0( int n ) {  return new SensorSPred(n);}
+extern "C" SensorSPred * builder0( int n, DNASeq *X) {  return new SensorSPred(n, X);}
 
 #endif

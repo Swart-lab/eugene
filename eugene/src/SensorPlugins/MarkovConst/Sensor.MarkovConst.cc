@@ -9,16 +9,9 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorMarkovConst :: SensorMarkovConst (int n) : Sensor(n)
+SensorMarkovConst :: SensorMarkovConst (int n, DNASeq *X) : Sensor(n)
 {
-  transCodant = PAR.getD("MarkovConst.Coding"); //Exon
-  transIntron = PAR.getD("MarkovConst.Intron"); //IntronF
-  transInter  = PAR.getD("MarkovConst.Inter");  //InterG
-  transUTR5   = PAR.getD("MarkovConst.UTR5");   //UTR5
-  transUTR3   = PAR.getD("MarkovConst.UTR3");   //UTR3
-
-  minGC = PAR.getD("MarkovConst.minGC",GetNumber());
-  maxGC = PAR.getD("MarkovConst.maxGC",GetNumber());
+  type = Type_Content;
 }
 
 // ----------------------
@@ -33,7 +26,14 @@ SensorMarkovConst :: ~SensorMarkovConst ()
 // ----------------------
 void SensorMarkovConst :: Init (DNASeq *X)
 {
-  type = Type_Content;
+  transCodant = PAR.getD("MarkovConst.Coding*"); //Exon
+  transIntron = PAR.getD("MarkovConst.Intron*"); //IntronF
+  transInter  = PAR.getD("MarkovConst.Inter*");  //InterG
+  transUTR5   = PAR.getD("MarkovConst.UTR5*");   //UTR5
+  transUTR3   = PAR.getD("MarkovConst.UTR3*");   //UTR3
+
+  minGC = PAR.getD("MarkovConst.minGC",GetNumber());
+  maxGC = PAR.getD("MarkovConst.maxGC",GetNumber());
 }
 
 // -----------------------
