@@ -300,7 +300,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   // on trie les hits sur le nombre de gaps et la
   // longueur. L'idee est d'eliminer les epissages partiels et de
   // favoriser la longueur de toute facon.
-  
+
   Hits **HitTable = new Hits *[*NumEST+1];
   for (i = 0, ThisEST = AllEST; i < *NumEST; i++, ThisEST = ThisEST->Next)
     HitTable[i] = ThisEST;
@@ -629,7 +629,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
     EstIndex = 0;
     return;
   }
-  
+
   Sup = new unsigned char[Tfin-Tdebut+1]; 
   
   for (i=0; i <= Tfin-Tdebut; i++)
@@ -820,8 +820,10 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
     
   for(i=pred->size()-1; i!=-1; i--) {
     state = pred->getState(i);
-    start = pred->getPos(i+1) + 1;
-    end   = pred->getPos(i);
+    end   = pred->getPos(i); 
+    if(i != pred->size()-1) start = pred->getPos(i+1) + 1;
+    else                    start = 1;
+
     if(end >= Tdebut-1  &&  end <= Tfin+1)
       {
 	len      = 0;
@@ -865,27 +867,27 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	    qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
 
 	    // On affiche les ppNumber premiers hits supportant
-	    for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+	    for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
 	      printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
 	    printf("\n");
 	  }
 	}
       }	
   }
-  
+ 
   /***********************************************************************/
   /* Objectif : Analyser la CDS et le gene predit -> supportée ?         */
   /***********************************************************************/
   for(int i=0; i<2; i++) {
     if(i==0) { start = debut;  end = fin;  strcpy(fea, "CDS");  }
     else     { start = Tdebut; end = Tfin; strcpy(fea, "Gene"); }
-
+    
     if (end >= start) {
       len = 0;
       if((int)vSupEstI.size() > 0)
 	// Longueur totale supportée par les transcrits
 	len = LenSup(HitTable, vSupEstI, -1, start, end);
-      
+     
       if(len > 0) {
 	printf("%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
 	       NumGene, fea, start+1, end+1, len, strand);
@@ -903,11 +905,11 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	for (int k=0; k<NumEST; k++)
 	  TMPHitTable[k] = HitTable[k];
 	qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
-	
+
 	// On affiche les ppNumber premiers hits supportant
-	for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)   
+	for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
 	  printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
-	printf("\n");
+       	printf("\n");
       }
     }
   }

@@ -500,8 +500,10 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
     
   for(i=pred->size()-1; i!=-1; i--) {
     state = pred->getState(i);
-    start = pred->getPos(i+1) + 1;
     end   = pred->getPos(i);
+    if(i != pred->size()-1) start = pred->getPos(i+1) + 1;
+    else                    start = 1;
+     
     if(end > debut  &&  end <= fin+1)
       {
 	len      = 0;
@@ -543,7 +545,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
 	    qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
 	   
 	    // On affiche les ppNumber premiers hits supportant
-	    for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+	    for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
 	      printf("%s(%d,%d) ", TMPHitTable[j]->Name,
 		     TMPHitTable[j]->Support, TMPHitTable[j]->Level);
 	    printf("\n");
@@ -583,7 +585,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
       qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
     
       // On affiche les ppNumber premiers hits supportant
-      for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)   
+      for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0; j++)   
 	printf("%s(%d,%d) ", TMPHitTable[j]->Name,
 	       TMPHitTable[j]->Support, TMPHitTable[j]->Level);
       printf("\n");
