@@ -3,7 +3,7 @@
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
 EuGene.versionPAR	10_01_03        # Parameter file version (date)
-EuGene.PluginsDir               ./PLUGINS/          # the plugins directory
+EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
 #
 ##### Minimum lengths #####
 #
@@ -92,16 +92,16 @@ SPred.donB	10.800
 #
 ##### Interpolated Markov Models parameters #####
 #
-MarkovIMM.matname[0]	PLUGINS/Ara2UTR.mat
+MarkovIMM.matname[0]	Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
-#MarkovIMM.matname[1]	PLUGINS/Ara2UTR.mat
+#MarkovIMM.matname[1]	Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
 #
 ##### Markov proteic model parameters #####
 #
-MarkovProt.matname[0]	PLUGINS/swissprot.maxorder2.bin
+MarkovProt.matname[0]	swissprot.maxorder2.bin
 MarkovProt.minGC[0]	0
 MarkovProt.maxGC[0]	100
 MarkovProt.maxorder     2
@@ -136,7 +136,7 @@ Repeat.ExonPenalty	1.0
 #
 Homology.TblastxP 	0
 Homology.TblastxB 	0.0595
-Homology.protmatname	PLUGINS/BLOSUM80
+Homology.protmatname	BLOSUM80
 #
 ##### Sensors with uniform penalties #####
 #
@@ -152,10 +152,10 @@ MarkovConst.maxGC[0]	100
 #
 ##### Sensor SplicePlantWAM #####
 #
-SplicePlantWAM.TPdonfile	PLUGINS/WAM.ARA.DON.L9.TP.
-SplicePlantWAM.FPdonfile	PLUGINS/WAM.ARA.DON.L9.FP.
-SplicePlantWAM.TPaccfile	PLUGINS/WAM.ARA.ACC.L7.TP.
-SplicePlantWAM.FPaccfile	PLUGINS/WAM.ARA.ACC.L7.FP.
+SplicePlantWAM.TPdonfile	WAM.ARA.DON.L9.TP.
+SplicePlantWAM.FPdonfile	WAM.ARA.DON.L9.FP.
+SplicePlantWAM.TPaccfile	WAM.ARA.ACC.L7.TP.
+SplicePlantWAM.FPaccfile	WAM.ARA.ACC.L7.FP.
 SplicePlantWAM.beforedon	3
 SplicePlantWAM.afterdon		4
 SplicePlantWAM.beforeacc	2
@@ -166,8 +166,8 @@ SplicePlantWAM.pen		7.5877
 #
 ##### Sensor StartWAM #####
 #
-StartWAM.TPstartfile	PLUGINS/WAM.ARA.START9.
-StartWAM.FPstartfile	PLUGINS/WAM.ARA.START9.FP.
+StartWAM.TPstartfile	WAM.ARA.START9.
+StartWAM.FPstartfile	WAM.ARA.START9.FP.
 StartWAM.beforestart	3
 StartWAM.afterstart	3
 StartWAM.order		1
