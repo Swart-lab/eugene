@@ -77,7 +77,7 @@ if (printopt == 'd')
 }
 else if ((printopt == 'l') || (printopt == 'h'))
 {
-  int Starts[6];
+  int Starts[18];
   int forward,init,term,Lend,Rend,Phase;
   int Don,Acc;
   char seqn[6];
@@ -90,10 +90,9 @@ else if ((printopt == 'l') || (printopt == 'h'))
       printf("\n      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
     }
   
-  // Starting condition: 0  = the exon is only partial
-  //                     -1 = nothing started yet
-  for (j = 0; j<6; j++)
-    Starts[j] = (IsPhaseOn(Choice[0],j) ? 0 : -1);
+  // Starting condition: 0  = started,  -1 = nothing started yet
+  for (j = 0; j<18; j++)
+    Starts[j] = ((Choice[0] == j) ? 0 : -1);
 
   /*
   fprintf(stderr,"\n Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
@@ -113,15 +112,18 @@ else if ((printopt == 'l') || (printopt == 'h'))
     }
   
   // Kludge = a non existing choice to force exon termination
-  //  Choice[Data_Len+1] = 120;
+  Choice[Data_Len+1] = 120;
   //  Choice[0] = 120;
   
   for (i=0; i <= Data_Len; i++) {
     if (Choice[i+1] != Choice[i]) {
       // something happens
+      // An exon is finishing
       if (Choice[i] < 6) {
+	// strand ?
 	forward = (Choice[i] < 3);
 	
+	// first or last exon ?
 	init = ((forward  && Choice[Starts[Choice[i]]] >= 12) || (!forward && Choice[i+1] >= 12));
 	term = ((!forward  && Choice[Starts[Choice[i]]] >= 12) || (forward && Choice[i+1] >= 12));
 	
@@ -164,10 +166,36 @@ else if ((printopt == 'l') || (printopt == 'h'))
 	
 	printf("\n");
 	Starts[Choice[i]] = -1;
+      } 
+      else if ((Choice[i] >= 13) && (Choice[i] <= 16)) {
+
+	printf("%s ",seqn);
+
+	switch (Choice[i]) {
+	case 13: // UTR5' F
+	  printf("Utr5    +");
+	  break;
+
+	case 14: // UTR 3' F
+	  printf("Utr3    +");
+	  break;
+
+	case 15: // UTR5' R
+	  printf("Utr5    -");
+	  break;
+
+	case 16:// UTR 3' R
+	  printf("Utr3    -");
+	  break;
+	}
+
+	printf("    %7d %7d", offset+Starts[Choice[i]]+1,offset+i);
+	printf("     %4d  ", i-Starts[Choice[i]]);
+	printf("   NA      NA      NA      NA   1.0\n");
+	Starts[Choice[i]] = -1;
       }
-      
-      if (Choice[i+1] < 6)
-	Starts[Choice[i+1]] = i;
+
+      Starts[Choice[i+1]] = i;
     }
   }
   printf("\n");
@@ -189,7 +217,7 @@ else if ((printopt == 'l') || (printopt == 'h'))
   }
 }
 else {
-  int Starts[6];
+  int Starts[18];
   int Intergenic,decalage;
   
   Intergenic = 0;
@@ -198,8 +226,8 @@ else {
   // Kludge = an intergenic state is forced at the end
   //  Choice[Data_Len+1] = 12;
  
-  for (j = 0; j < 6; j++)
-    Starts[j] = (IsPhaseOn(Choice[0],j) ? 0 : -1);
+  for (j = 0; j<18; j++)
+    Starts[j] = ((Choice[0] == j) ? 0 : -1);
 
   for (i = 0; i <= Data_Len; i++)   {
     if (Choice[i+1] != Choice[i]) {
