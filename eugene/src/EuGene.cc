@@ -291,7 +291,7 @@ int main  (int argc, char * argv [])
     char *Choice;
     BackPoint *LBP[18];
     REAL BestU;
-    REAL NormalizingPath = 0.0;
+    double NormalizingPath = 0.0;
     signed   char best   = 0;
     unsigned char Switch = 0;
     
@@ -306,7 +306,7 @@ int main  (int argc, char * argv [])
     
     // Les PrevBP sont des pointeurs sur les "opening edges"
     // Les PBest correspondent au cout du chemin correspondant
-    REAL  maxi, PBest[26];
+    double  maxi, PBest[26];
     BackPoint *PrevBP[26];
     int source = 0;
     
@@ -872,7 +872,7 @@ int main  (int argc, char * argv [])
     fprintf(stderr,"Optimal path length = %#f\n",-maxi-NormalizingPath);
     
     // Sanity check ! A feasible path has not been found ?
-    if (maxi == NINFINITY)
+  if (isnan(maxi+NormalizingPath) || maxi+NormalizingPath == NINFINITY)
       fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
     
     if (graph)
