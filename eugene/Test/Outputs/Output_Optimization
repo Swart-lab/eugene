@@ -120,10 +120,12 @@ Seed: 1
 Trace: TRUE
 
 NbParameter: 5	NbCluster: 3
-Param: 	para1	para2	para3	para4	para5	
-Init: 	0.4412	0.4698	0.5760	0.5760	0.4843	
-Min: 	0.0000	0.0000	0.0000	0.0000	0.0000	
-Max: 	1.0000	1.0000	1.0000	1.0000	1.0000	
+Param  : 	para1	para2	para3	para4	para5	
+Init   : 	0.4412	0.4698	0.5760	0.5760	0.4843	
+Min    : 	0.0000	0.0000	0.0000	0.0000	0.0000	
+Max    : 	1.0000	1.0000	1.0000	1.0000	1.0000	
+MinInit: 	0.0000	0.0000	0.0000	0.0000	0.0000	
+MaxInit: 	1.0000	1.0000	1.0000	1.0000	1.0000	
 MinStep: 	0.0100	0.0100	0.0100	0.0100	0.0100	
 
 Cluster[0]: 	para1* para2*    LINKED
