@@ -28,17 +28,17 @@ if (printopt == 'd')
       printf("%6d %c%c ", offset+1+i, (*TheSeq)[i],(*TheSeq)(i));
       
       PrintPhase(Choice[i+1]);
-      
+
       for (j = 0 ; j < 8 ; j++)
 	printf(" %.2f", Score[j]);
       
-      if (Stop[0][i])
-	printf(" %2d ", (i%3)+1);
+      if (Stop[0][i+1])
+	printf(" %2d ", ((i+1)%3)+1);
       else
 	printf("  - ");
       
-      if (Stop[1][i+1])
-	printf(" %2d ", -((Data_Len-i-1)%3)-1);
+      if (Stop[1][i])
+	printf(" %2d ", -((Data_Len-i)%3)-1);
       else
 	printf("  - ");
       
@@ -113,82 +113,87 @@ else if ((printopt == 'l') || (printopt == 'h'))
     }
   
   // Kludge = a non existing choice to force exon termination
-  Choice[Data_Len+1] = 127;
-  Choice[0] = 127;
+  //  Choice[Data_Len+1] = 120;
+  //  Choice[0] = 120;
   
-  for (i=1; i<= Data_Len; i++)
-    {
-      if (Choice[i+1] != Choice[i])
-	// something happens
-	{
-	  if (Choice[i] < 6)
-	    {
-	      forward = (Choice[i] < 3);
-	      
-	      init = ((forward  && Choice[Starts[Choice[i]]] >= 12) || (!forward && Choice[i+1] >= 12));
-	      term = ((!forward  && Choice[Starts[Choice[i]]] >= 12) || (forward && Choice[i+1] >= 12));
-
-	      if (forward)
-		{
-		  Lend = offset+Starts[Choice[i]]+1;
-		  Rend = offset+i+(3*(Choice[i+1] >= 12));
-		  Don = Lend-1;
-		  Acc = Rend+1;
-		}
-	      else
-		{
-		  Lend = offset+Starts[Choice[i]]+1-(3*(Choice[Starts[Choice[i]]] >= 12));
-		  Rend = offset+i;
-		  Acc = Lend-1;
-		  Don = Rend+1;
-		}
-
-	      printf("%s ",seqn);
-	      
-	      if (init && term) printf("Sngl");
-	      else if (init) printf("Init");
-	      else if (term) printf("Term");
-	      else printf ("Intr");
-	      
-	      printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
-	      printf("     %4d  ", Rend-Lend+1);
-	      
-	      if (init)
-		printf("   %+2d", ((forward) ? 1: -1));
-	      else
-		{
-		  Phase = ((forward) ?
-			   PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
-			   -PhaseAdapt(Choice[i+1]-9));
-		  
-		  if (abs(Phase) <= 3)
-		    printf("   %+2d",Phase);
-		  else printf(" Unk.");
-		}
-	      printf("      %+2d",PhaseAdapt(Choice[i]));
-	      printf(" %7d %7d   1.0", Don,Acc);
-		  
-	      printf("\n");
-	      Starts[Choice[i]] = -1;
-	    }
-	  
-	  if (Choice[i+1] < 6)
-	    Starts[Choice[i+1]] = i;
+  for (i=0; i <= Data_Len; i++) {
+    if (Choice[i+1] != Choice[i]) {
+      // something happens
+      if (Choice[i] < 6) {
+	forward = (Choice[i] < 3);
+	
+	init = ((forward  && Choice[Starts[Choice[i]]] >= 12) || (!forward && Choice[i+1] >= 12));
+	term = ((!forward  && Choice[Starts[Choice[i]]] >= 12) || (forward && Choice[i+1] >= 12));
+	
+	if (forward) {
+	  Lend = offset+Starts[Choice[i]]+1;
+	  Rend = offset+i;
+	  Don = Lend-1;
+	  Acc = Rend+1;
 	}
+	else {
+	  Lend = offset+Starts[Choice[i]]+1;
+	  Rend = offset+i;
+	  Acc = Lend-1;
+	  Don = Rend+1;
+	}
+
+	printf("%s ",seqn);
+	
+	if (init && term) printf("Sngl");
+	else if (init) printf("Init");
+	else if (term) printf("Term");
+	else printf ("Intr");
+	      
+	printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
+	printf("     %4d  ", Rend-Lend+1);
+	
+	if (init)
+	  printf("   %+2d", ((forward) ? 1: -1));
+	else {
+	  Phase = ((forward) ?
+		   PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
+		   -PhaseAdapt(Choice[i+1]-9));
+		  
+	  if (abs(Phase) <= 3)
+	    printf("   %+2d",Phase);
+	  else printf(" Unk.");
+	}
+	printf("      %+2d",PhaseAdapt(Choice[i]));
+	printf(" %7d %7d   1.0", Don,Acc);
+	
+	printf("\n");
+	Starts[Choice[i]] = -1;
+      }
+      
+      if (Choice[i+1] < 6)
+	Starts[Choice[i+1]] = i;
     }
+  }
   printf("\n");
-  if (printopt == 'h')
-    {
-      printf("</listing></center>\n");
-      OutputHTMLFileNames();
-      printf("</body></html>\n");
-    }
+  if (printopt == 'h')   {
+    pos = rindex(argv[sequence],'/');
+    if (pos == NULL) pos = argv[sequence];
+    else pos++;
+
+    printf("</listing></center>\n");
+    printf("<a href=%s.trace>Trace</a><br>",pos);
+    printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",pos,pos);
+    printf("<a href=%s.splices>NetGene2 F</a> <a href=%s.splicesR>NetGene2 R</a><br>",pos,pos);
+    printf("<a href=%s.spliceP>SplicePred F</a> <a href=%s.splicePR>SplicePred R</a><br>",pos,pos);
+    printf("<a href=%s.est>Sim4</a><br>",pos);
+    printf("<a href=%s.blastx0.html>BlastX SP</a><br>",pos);
+    printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",pos);
+    printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",pos);
+    
+    OutputHTMLFileNames();
+    printf("</body></html>\n");
+  }
 }
-else
-{
+else {
   int Starts[6];
   int Intergenic,decalage;
-   
+  
   Intergenic = 0;
   decalage = ((argc == optind+1) ? offset : offset*(sequence-optind));
   //  printf("\n %s \n",argv[sequence]);
@@ -198,41 +203,33 @@ else
  
   for (j = 0; j < 6; j++)
     Starts[j] = (IsPhaseOn(Choice[0],j) ? 0 : -1);
-   
-  for (i=1; i<= Data_Len; i++)
-    {
-      if (Choice[i+1] != Choice[i])
-	{
-	  Intergenic = (Choice[i+1] >= 12);
-	   
-	  for (j = 0; j<6; j++)
-	    {
-	      if (IsPhaseOn(Choice[i+1],j) != IsPhaseOn(Choice[i],j))
-		{
-		  if (Starts[j] != -1)
-		    {
-		      if (Starts[j] == 0)
-			{
-			  if (j < 3)
-			    printf("%d %d ",decalage+1, decalage+i+(3*Intergenic));
-			  else
-			    printf("%d %d ",decalage+1, decalage+i+1);
-			}
-		      else
-			{
-			  if (j < 3)
-			    printf("%d %d ", decalage+Starts[j]+1, decalage+i+(3*Intergenic));
-			  else
-			    printf("%d %d ", decalage+Starts[j]-1, decalage+i+1);
-			}
-		      Starts[j] = -1;
-		    }
-		  else
-		    Starts[j] = i;
-		}
+  
+  for (i=1; i<= Data_Len; i++)   {
+    if (Choice[i+1] != Choice[i]) {
+      Intergenic = (Choice[i+1] >= 12);
+      
+      for (j = 0; j<6; j++)  {
+	if (IsPhaseOn(Choice[i+1],j) != IsPhaseOn(Choice[i],j)) {
+	  if (Starts[j] != -1)    {
+	    if (Starts[j] == 0) {
+	      if (j < 3)
+		printf("%d %d ",decalage+1, decalage+i);
+	      else
+		printf("%d %d ",decalage+1, decalage+i);
 	    }
-	  if (Intergenic)
-	    printf("\n");
+	    else {
+	      if (j < 3)
+		printf("%d %d ", decalage+Starts[j]+1, decalage+i);
+	      else
+		printf("%d %d ", decalage+Starts[j]+1, decalage+i);
+	    }
+	    Starts[j] = -1;
+	  }
+	  else
+	    Starts[j] = i;
 	}
+      }
+      if (Intergenic) printf("\n");
     }
+  }
 }
