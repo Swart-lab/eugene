@@ -87,8 +87,8 @@ void LineSearch :: Optimize(bool is_chaining)
     Para = OPTIM.Algorithms[OPTIM.AlgoIndex-1]->Para;
     for (i=0; i<Para.size(); i++) {
       para_interval = (ParaMax[i] - ParaMin[i]) * semi_interval_reduction_coef;
-      ParaMin[i] = (ParaMin[i] > Para[i] - para_interval) ? ParaMin[i] : Para[i] - para_interval;
-      ParaMax[i] = (ParaMax[i] < Para[i] + para_interval) ? ParaMax[i] : Para[i] + para_interval;
+      ParaMin[i] = Max(ParaMin[i], Para[i] - para_interval);
+      ParaMax[i] = Min(ParaMax[i], Para[i] + para_interval);
       ParaMinInter[i] = ParaMin[i];
       ParaMaxInter[i] = ParaMax[i];
     }
