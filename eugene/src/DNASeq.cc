@@ -149,7 +149,7 @@ DNASeq :: DNASeq (FILE * fp)
       rewind(fp);
     }
 
-  Sequence = (unsigned short int *)Safe_malloc(sizeof(unsigned short int)*INIT_SIZE);
+  Sequence = new unsigned short int[INIT_SIZE];
   Size = INIT_SIZE;
   
   Len = 0;
@@ -177,7 +177,8 @@ DNASeq :: DNASeq (FILE * fp)
 // ---------------------------------------------------------------------
 DNASeq :: ~ DNASeq  ()
 {
-  free(Sequence);
+  delete Sequence;
+  delete Name;
 }
 
 // ---------------------------------------------------------------------
