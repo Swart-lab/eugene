@@ -23,6 +23,7 @@
 #include "Genetic/Genetic.h"
 
 extern Parameters PAR;
+extern MasterSensor*    MS;
 
 extern Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor);
 
@@ -34,7 +35,7 @@ ParaOptimization::~ParaOptimization(void)
 {
   unsigned int i;
   // delete created instances 
-  for (i=0; i<Algorithms.size(); i++) delete Algorithms[i];
+  //  for (i=0; i<Algorithms.size(); i++) delete Algorithms[i]; does not work
   for (i=0; i<Sequences.size(); i++) delete Sequences[i];
   for (i=0; i<MSensors.size(); i++) delete MSensors[i];
 }
@@ -109,7 +110,13 @@ void ParaOptimization::Init(int argc, char * argv [])
     }
     cout << "done (" << Sequences.size() << " sequence(s))" << endl;
   
-    // Update the master sensors list: TO UPDATE
+    // Update the master sensors list
+    for (sequence=0; sequence<(int)Sequences.size(); sequence++) {
+      PAR.set("fstname", SeqNames[sequence].c_str());
+      MSensors.push_back(new MasterSensor);
+      MS = MSensors[sequence];
+      MSensors[sequence]->InitMaster(Sequences[sequence]);
+    }
   }
 }
 
@@ -137,13 +144,10 @@ double ParaOptimization::ParaEvaluate (void)
       for (i=0; i<Algorithms[AlgoIndex]->ParaName.size(); i++) 
 	PAR.setD(Algorithms[AlgoIndex]->ParaName[i].c_str(), Algorithms[AlgoIndex]->Para[i]);
 
-      // TO UPDATE (just init of sensors) when sensors will be changed
-      for (i=0; i<MSensors.size(); i++) delete MSensors[i];
-      MSensors.clear();
+      // update sensors
       for (i=0; i<Sequences.size(); i++) {
 	PAR.set("fstname", SeqNames[i].c_str());
-	MSensors.push_back(new MasterSensor);
-	MSensors[i]->InitMaster();
+	MS = MSensors[i]; 
 	MSensors[i]->InitSensors(Sequences[i]);
       }
 
