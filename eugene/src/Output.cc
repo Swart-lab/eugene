@@ -14,6 +14,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   int  offset    = PAR.getI("Output.offset");
   int  estopt    = PAR.getI("Sensor.Est.use");
   int  trunclen  = PAR.getI("Output.truncate");
+  int  stepid    = PAR.getI("Output.stepid");
   char nameformat[20];
 
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
@@ -232,7 +233,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      }
 	      else {
 		fprintf(f,nameformat,X->Name);
-		fprintf(f,".%d.%d",nbGene,nbExon);
+		fprintf(f,".%d.%d",(((nbGene-1)*stepid)+1),nbExon);
 	      }
 	  
 	  if (printopt0 == 'g') 
@@ -367,7 +368,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		}
 		else {
 		  fprintf(f,nameformat,X->Name);
-		  fprintf(f,".%d.%d",nbGene,nbExon);
+		  fprintf(f,".%d.%d",(((nbGene-1)*stepid)+1),nbExon);
 		}
 
 	    if (printopt0 == 'g') printf("\tEuGene\t");

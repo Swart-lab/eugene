@@ -65,6 +65,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   type     = Type_Content;
   HitTable = NULL;
   ppNumber = PAR.getI("BlastX.PPNumber",N);
+  stepid   = PAR.getI("Output.stepid");
   minIn    = PAR.getI("BlastX.minIn");
   levels   = PAR.getC("BlastX.levels",  N);  
  
@@ -490,7 +491,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
 	  
 	  if(len > 0) {
 	    printf("%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-		   NumGene, numF, fea, start, end, len, strand);
+		   (((NumGene-1)*stepid)+1),numF,fea,start,end,len,strand);
 	    printf("%d\t", (int)((float)len/(end-start+1)*100));
 	    
 	    for (int k=0;  k<NumProt;  k++)
@@ -531,7 +532,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
     
     if(len > 0) {
       printf("%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-	     NumGene, fea, start, end, len, strand);
+	     (((NumGene-1)*stepid)+1), fea, start, end, len, strand);
       printf("%d\t", (int)((float)len/codingNuc*100));
       for (int k=0;  k<NumProt;  k++)
 	HitTable[k]->Support = 0;

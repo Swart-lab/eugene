@@ -34,6 +34,7 @@ class SensorEst : public Sensor
   double spliceBoost;
   int    estM, utrM;
   int    ppNumber;
+  int    stepid;
   int    N;
   
   Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);

@@ -83,6 +83,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
   estM = PAR.getI("Est.estM",N);
   utrM = PAR.getI("Est.utrM",N);
   ppNumber       = PAR.getI("Est.PPNumber",N);
+  stepid         = PAR.getI("Output.stepid");
   DonorThreshold = PAR.getD("Est.StrongDonor");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
@@ -851,7 +852,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	  
 	  if(len > 0) {
 	    printf("%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-		   NumGene, numF, fea, start, end, len, strand);
+		   (((NumGene-1)*stepid)+1),numF,fea,start,end,len,strand);
 	    printf("%d\t", (int)((float)len/(end-start+1)*100));
 	    
 	    for (int k=0;  k<NumEST;  k++)
@@ -891,7 +892,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
      
       if(len > 0) {
 	printf("%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-	       NumGene, fea, start+1, end+1, len, strand);
+	       (((NumGene-1)*stepid)+1), fea, start+1, end+1, len, strand);
 	printf("%d\t", (int)((float)len/(end-start+1)*100));
 	
 	for (int k=0;  k<NumEST;  k++)

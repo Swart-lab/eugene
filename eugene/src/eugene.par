@@ -32,6 +32,7 @@ EuGene.ThreePrimePrior	0.07
 ##### Output control ######
 #
 Output.truncate		5
+Output.stepid		1
 Output.graph		FALSE		# Don't produce a graphical output
 Output.resx		900
 Output.resy		400
