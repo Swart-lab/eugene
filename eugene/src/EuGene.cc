@@ -661,7 +661,7 @@ int main  (int argc, char * argv [])
 	   int tmp = 0;
 	   for (j = 0; j < Data_Len; j++) { 
 	     if (InterBlast[j]) {
-	       BaseScore[8][j] = (BaseScore[8][j]*100.0)/(200.0);
+	       BaseScore[8][j] = (BaseScore[8][j]*100.0)/(100.0);
 	       if (!tmp) {
 		 printf("%d-",j);
 		 tmp = 1;
@@ -782,13 +782,15 @@ int main  (int argc, char * argv [])
 		 ESTMatch[i] |= (MLeftForward << (ThisEST->Strand*4));
 	       
 	       for (i = ThisBlock->Prev->End-1+EstM; i < ThisBlock->Start-EstM; i++)
-	       ESTMatch[i] |= (GapForward << (brin*4));
+	       ESTMatch[i] |= (GapForward << (ThisEST->Strand*4));
 
 	       for (i = ThisBlock->Start-EstM; i < ThisBlock->Start-1+EstM; i++)
-		 ESTMatch[i] |= (MRightForward << (brin*4));
+		 ESTMatch[i] |= (MRightForward << (ThisEST->Strand*4));
 
 	       if (graph) PlotLine(ThisBlock->Prev->End-1+EstM,
-				   ThisBlock->Start-EstM,4-(brin*8),4-(brin*8),0.8,0.8,2);
+				   ThisBlock->Start-EstM,
+				   4-(ThisEST->Strand*8),
+				   4-(ThisEST->Strand*8),0.8,0.8,2);
 
 	     }
 	     ThisBlock = ThisBlock->Next;
@@ -963,7 +965,7 @@ int main  (int argc, char * argv [])
       // On commence a coder (Stop)
       // Ca vient d'une UTR 3' reverse
 
-      if (((Data_Len-i) % 3 == k-3) && Stop[1][i] && !(ESTMatch[i] & Margin)) {
+      if (((Data_Len-i) % 3 == k-3) && Stop[1][i]) {
 	BestU = PBest[22]-StopP;
 	if (BestU > maxi) {
 	  maxi = BestU;
@@ -1023,7 +1025,7 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[12]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[12]->Update(log(BaseScore[8][i]));
+    LBP[12]->Update(log(BaseScore[8][i])+((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
@@ -1040,16 +1042,14 @@ int main  (int argc, char * argv [])
     }
 
     // On vient de l'intergenique
-    if (!(ESTMatch[i] & Margin)) {
-      BestU = PBest[18]-TransStartP;
-      if (BestU > maxi) {
-	maxi = BestU;
-	best = 18;
-	source = 12;
-	Switch = SwitchTransStart;
-      }
+    BestU = PBest[18]-TransStartP;
+    if (BestU > maxi) {
+      maxi = BestU;
+      best = 18;
+      source = 12;
+      Switch = SwitchTransStart;
     }
-    
+        
     if (best != -1) LBP[13]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
     LBP[13]->Update(log(BaseScore[8][i]));
@@ -1067,7 +1067,7 @@ int main  (int argc, char * argv [])
     }
     // Ca vient d'un exon direct + STOP
     for (k = 0; k < 3; k++) {
-      if ((i % 3 == k) && Stop[0][i] && !(ESTMatch[i] & Margin)) {
+      if ((i % 3 == k) && Stop[0][i]) {
 	BestU = PBest[k+12]-StopP;
 	if (BestU > maxi) {
 	  maxi = BestU;
@@ -1125,16 +1125,14 @@ int main  (int argc, char * argv [])
     }
 
     // On demarre depuis l'intergenique
-    if (!(ESTMatch[i] & Margin)) {
-      BestU = PBest[18]-TransStopP;
-      if (BestU > maxi) {
-	maxi = BestU;
-	best = 18;
-	source = 12;
-	Switch = SwitchTransStop;
-      }
+    BestU = PBest[18]-TransStopP;
+    if (BestU > maxi) {
+      maxi = BestU;
+      best = 18;
+      source = 12;
+      Switch = SwitchTransStop;
     }
-   
+       
     if (best != -1) LBP[16]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
     LBP[16]->Update(log(BaseScore[10][i]));
