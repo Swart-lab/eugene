@@ -20,13 +20,14 @@ class SensorEst : public Sensor
   double estP, utrP;
   double DonorThreshold;
   int    estM, utrM;
+  int N;
   
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
   void   ESTSupport  (Prediction *pred, int Tdebut, int Tfin,
 		      int debut,int fin,  Hits **HitTable, int Size);
 
  public:
-  SensorEst  (int);
+  SensorEst  (int n, DNASeq *X);
   virtual ~SensorEst      ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -34,6 +35,6 @@ class SensorEst : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorEst * builder0( int n ) { return new SensorEst(n);}
+extern "C" SensorEst * builder0( int n, DNASeq *X) { return new SensorEst(n, X);}
 
 #endif

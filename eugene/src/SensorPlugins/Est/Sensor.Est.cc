@@ -7,7 +7,7 @@
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
-extern MasterSensor MS;
+extern MasterSensor *MS;
 extern Parameters   PAR;
 
 int HitsCompare(const void *A, const void *B)
@@ -43,16 +43,11 @@ int HitsCompareLex(const void *A, const void *B)
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorEst :: SensorEst (int n) : Sensor(n)
+SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 {
-  HitTable = NULL;
+  type = Type_Content;
 
-  estP = PAR.getD("Est.estP",n);
-  estM = PAR.getI("Est.estM",n);
-  utrP = PAR.getD("Est.utrP",n);
-  utrM = PAR.getI("Est.utrM",n);
-  DonorThreshold = PAR.getD("Est.StrongDonor");
-  DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
+  N = n;
 }
 
 // ----------------------
@@ -80,7 +75,15 @@ void SensorEst :: Init (DNASeq *X)
   char tempname[FILENAME_MAX+1];
   int  i;
  
-  type = Type_Content;
+  HitTable = NULL;
+
+  estP = PAR.getD("Est.estP*",N);
+  estM = PAR.getI("Est.estM",N);
+  utrP = PAR.getD("Est.utrP*",N);
+  utrM = PAR.getI("Est.utrM",N);
+  DonorThreshold = PAR.getD("Est.StrongDonor*");
+  DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
+
   
   index = 0;
 
@@ -286,14 +289,15 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
-	  MS.GetInfoSpAt(Type_Splice, X, k, &dTmp);
+	  MS->GetInfoSpAt(Type_Splice, X, k, &dTmp);
+
 	  DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
 		     dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
 	  AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]-
 		     dTmp.sig[DATA::Acc].weight[Signal::ReverseNo]);
 	  
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
-	  if(MS.GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
+	  if(MS->GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
 	    DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
 		       dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
 	    AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
@@ -357,7 +361,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       
       // calcul des sites d'epissage internes a l'exon
       for (i = ThisBlock->Start+EstM+1; !Inc && i <= ThisBlock->End-EstM-1; i++) {
-	MS.GetInfoSpAt(Type_Splice, X, i, &dTmp);
+	MS->GetInfoSpAt(Type_Splice, X, i, &dTmp);
 	DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
 		   dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
 	DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
