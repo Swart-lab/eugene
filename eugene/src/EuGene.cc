@@ -27,6 +27,8 @@
 // Fri Mar 29 22:17:29 2002: kludge: les penalites de start sont ignorees des UTR
 //                             si l'on a est dans un intron UTR d'apres les hits EST
 
+// Mon May 13 09:52:35 2002: PAYFORIGNORE flag: indique si on paye
+//                              quand on ne prend pas un aiguillage.
 // TODO:
 // supprimer Choice
 // remettre Frameshifts
@@ -38,7 +40,7 @@
 // non single.
 
 #define  VERSION "1.2 (030502)"
-
+#define PAYTOIGNORE 1
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -65,6 +67,8 @@
 #include <strings.h>
 #endif
 #include "Const.h"
+#include "structure.h"
+#include "yacc.tab.h"
 
 //#include "dmalloc.h"
 //#include "dmallocc.cc"
@@ -134,7 +138,7 @@ const  unsigned char NotAHit       = Margin | Gap;
 
 double Score [9],NScore[9];
 int Data_Len;
-int normopt,blastopt,estopt,estanal,ncopt,raflopt;
+int normopt,blastopt,estopt,estanal,ncopt,raflopt,userinfo;
 int window, offset,graph,resx,resy;
 int    gfrom,gto,golap,glen;
 
@@ -733,11 +737,16 @@ int main  (int argc, char * argv [])
 {
   int              i, j, k, carg, errflag;
   FILE             *fp;
-  REAL             *BaseScore[11],*Start[2] ;
+  REAL             BaseScore[13],*Start[2] ;
   REAL             *Don[2],*Acc[2];
-  unsigned char    *Stop[2];
+  REAL    *Stop[2];
   unsigned char    *ESTMatch;
-  BString_Array    *IMMatrix[6];
+
+  REAL             *ProtMatch;
+  REAL             *ProtMatchLevel;
+  int              *ProtMatchPhase;
+
+  BString_Array    *IMMatrix[7];
   char             clef[20];
   DNASeq           *TheSeq;
   char             printopt;
@@ -782,6 +791,7 @@ int main  (int argc, char * argv [])
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
   estanal = FALSE;             // don't try to analyze EST support
+  userinfo = FALSE;         // shall we read a user info file
   raflopt = FALSE;            // don't try to read a est.rafl file
   blastopt = -1;              // don't try to read a blast file
   ncopt = FALSE;                   //don't try to read a non coding input
@@ -832,7 +842,7 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "REdrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
             
@@ -932,6 +942,10 @@ int main  (int argc, char * argv [])
       estanal = TRUE;
       break;
       
+    case 'U':
+      userinfo = TRUE;
+      break;
+
     case 'd':           /* -d  use cDNA blastn results      */
       estopt = TRUE;
       break; 
@@ -964,9 +978,11 @@ int main  (int argc, char * argv [])
     fprintf(stderr, "              [-v end] [-l len] [-c olap] [-x xres] [-y yres] FASTA files\n");
     exit(1);
   }
-  
-  // open matrix
-    
+
+  // ---------------------------------------------------------------------------  
+  // Lecture des modeles de Markov
+  // ---------------------------------------------------------------------------  
+
   if (! (fp = FileOpen(EugDir,matname,  "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n",  matname);
     exit(2);
@@ -986,20 +1002,30 @@ int main  (int argc, char * argv [])
     fprintf(stderr,"%d ",i+1);
     fflush(stderr);
   }
-  // On essaie ensuite de lire un 6eme modele UTR3'. Si cela echoue,
-  // le modele interG est utilise pour l'UTR 3'
+  // On essaie ensuite de lire un 6eme modele. Si cela echoue,
+  // le modele interG est utilise pour les UTR
 
-    IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-    if (IMMatrix[i]->Read(fp)) {
-      fprintf(stderr,"- No 3'UTR model found, using intergenic model. ");
-      delete IMMatrix[5];
-      IMMatrix[5] = IMMatrix[4];
-    } else
+    IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+    if (IMMatrix[6]->Read(fp)) {
+      fprintf(stderr,"- No UTR model found, using introns model. ");
+      delete IMMatrix[6];
+      IMMatrix[6] = IMMatrix[3];
+      IMMatrix[5] = IMMatrix[3];
+    } else {
       fprintf(stderr,"6 ");
+      IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+      if (IMMatrix[5]->Read(fp)) {
+	fprintf(stderr,"- No second UTR model found, using intron model. ");
+	delete IMMatrix[5];
+	IMMatrix[5] = IMMatrix[3];
+      } else fprintf(stderr,"7 ");
+    }
 
   fprintf(stderr,"done\n");
   fclose(fp);
-
+  // ---------------------------------------------------------------------------  
+  // Lecture de la sequence
+  // ---------------------------------------------------------------------------  
   int sequence;
   for (sequence = optind; sequence < argc ; sequence++) {
       
@@ -1028,15 +1054,28 @@ int main  (int argc, char * argv [])
   fprintf (stderr,"GC Proportion = %.1f%%\n", 
 	   (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
 
-  for (i = 0;  i < 11;  i ++)
-    BaseScore[i] = new REAL[Data_Len+1];
+  // ---------------------------------------------------------------------------  
+  // Allocation signaux
+  // ---------------------------------------------------------------------------  
  
-  Stop[0] = new unsigned char[Data_Len+1];
-  Stop[1] = new unsigned char[Data_Len+1];
+  Stop[0] = new REAL[Data_Len+1];
+  Stop[1] = new REAL[Data_Len+1];
 
   ESTMatch = new unsigned char[Data_Len+1];
+  ProtMatch = new REAL[Data_Len+1];
+  ProtMatchLevel = new REAL[Data_Len+1];
+  ProtMatchPhase = new int[Data_Len+1];
+  
+  for (i = 0; i<= Data_Len; i++) {
+    ESTMatch[i] = 0;
+    ProtMatch[i] = 0.0;
+    ProtMatchLevel[i] = 0.0;
+    ProtMatchPhase[i]=0;
+  }
 
-  for (i = 0; i<= Data_Len; i++) ESTMatch[i] = 0;
+  // ---------------------------------------------------------------------------
+  //Acquisition des signaux
+  // ---------------------------------------------------------------------------
 
   Start[0] = new REAL[Data_Len+1];
   Start[1] = new REAL[Data_Len+1];
@@ -1072,6 +1111,25 @@ int main  (int argc, char * argv [])
 
   Read_Splice(fstname,-1,Data_Len, Acc[1], Don[1],AccP,AccB,DonP,DonB);
   fprintf(stderr," reverse done\n");
+  // ---------------------------------------------------------------------------
+  // Lecture donnees user
+  // ---------------------------------------------------------------------------
+  if (userinfo) {
+    for (i = 0; i < 13; i++) Weights[i] = BaseScore+i;
+    Weights[13] = Start[0];    Weights[14] = Start[1];
+    Weights[15] = Stop[0];    Weights[16] = Stop[1];
+    Weights[17] = Acc[0];    Weights[18] = Acc[1];
+    Weights[19] = Don[0];    Weights[20] = Don[1];
+    fprintf(stderr,"Loading user data...");
+
+    strcpy(tempname,fstname);
+    strcat(tempname,".user");
+    Utilisateur(tempname);   //prise en compte de donnees utilisateur
+    fprintf(stderr,"done\n");
+  }
+  // ---------------------------------------------------------------------------
+  // Preparation sortie graphique + Scores
+  // ---------------------------------------------------------------------------
 
   if (graph) {
     if (grname[0] == 0) {
@@ -1091,20 +1149,9 @@ int main  (int argc, char * argv [])
     if (glen < 0) glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
     
     InitPNG(resx,resy,offset,gfrom,gto,golap,glen,grname);
+    PlotScore(TheSeq,IMMatrix,window,normopt);
   }
     
-  // Precompute all probabilities
-  
-  fprintf(stderr, "Computing coding probabilities...");  
-  fflush(stderr);
-  
-  Fill_Score(TheSeq,IMMatrix,BaseScore);
-
-  for (j = 0;  j < 11;  j ++)
-    BaseScore[j][Data_Len] = 1.0;
-
-  fprintf(stderr,"done\n");
-
   OpenDoor();
 
   if (!PorteOuverte && Data_Len > 6000) 
@@ -1115,9 +1162,10 @@ int main  (int argc, char * argv [])
       
       exit(2);
     }
-  
-  /* Exploiting spliced alignements against EST and complete cDNA */
 
+  // ---------------------------------------------------------------------------
+  /* Exploiting spliced alignements against EST and complete cDNA */
+  // ---------------------------------------------------------------------------
   if (estopt) {
     FILE *fEST;
     strcpy(tempname,fstname);
@@ -1128,6 +1176,9 @@ int main  (int argc, char * argv [])
     fclose(fEST);
   }
 
+  // ---------------------------------------------------------------------------
+  // Lecture des RIKEN
+  // ---------------------------------------------------------------------------
   if (raflopt) {
     FILE *fRAFL;
     int beg5,end5;
@@ -1154,10 +1205,12 @@ int main  (int argc, char * argv [])
     fflush(stderr);
     if (RAFL.size() < 1) raflopt=FALSE;
   }
+  // index du RIKEN en cours
+  int RAFLindex = 0;
 
-  if (graph) PlotScore(Data_Len,window,normopt,BaseScore);
-
+  // ---------------------------------------------------------------------------
   // Analysing NC input
+  // ---------------------------------------------------------------------------
   if (ncopt) {
     FILE* ncfile;
     int deb,fin;
@@ -1179,27 +1232,27 @@ int main  (int argc, char * argv [])
     }
   }
 
+  // ---------------------------------------------------------------------------
   // Blastx against protein databases 1st simple version, we simply
   // enhance coding probability according to phase Dangerous (NR
   // contains translation of frameshifted sequences) another
   // possibility would be too forbid introns/intergenic states
   // 3 levels of confidence may be used.
- 
-
+  // ---------------------------------------------------------------------------
   const int LevelColor[3] = {6,7,8}; 
   if (blastopt > 0)
     {
       FILE *fblast;
-       int deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
+       int overlap,MaxOverlap,deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
        char A[128],B[128];
        char *ProtId, *PProtId,*tmp;
-       REAL BScore;
-       REAL *BlastScore[6];
-       unsigned char *InterBlast;
+       REAL GlobalScore;
+       REAL PGlobalScore;
+       MaxOverlap=10; 
 
        fprintf(stderr,"Reading Blastx data, level... ");
        fflush(stderr);
-       
+
        for( level = blastopt; level >= 0; level--)
 	 {
 	   if (blastopt&(1<<level)){
@@ -1208,24 +1261,15 @@ int main  (int argc, char * argv [])
 	     i = strlen(tempname);
 	     tempname[i] = '0'+level;
 	     tempname[i+1] = 0;
-	     
+
 	     fblast = FileOpen(NULL,tempname, "r");
-	     
 	     if (fblast == NULL) continue;
-	     
-	     for (i = 0; i < 6; i++)  {
-	       BlastScore[i] = new REAL[Data_Len];
-	       for (j=0; j<Data_Len; j++) BlastScore[i][j] = 0.0;
-	     }
-	     
-	     InterBlast  = new unsigned char[Data_Len];
-	     for (j = 0; j < Data_Len; j++) InterBlast[j] = 0;
-	     
+
 	     A[0] = B[0]= 0;
 	     ProtId = A;
 	     PProtId = B;
 	     PProtFin = -10000;
-	     
+
 	     while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
 			   &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
 	       if (phase < 0) {
@@ -1236,13 +1280,63 @@ int main  (int argc, char * argv [])
 		 ProtDeb = ProtFin;
 		 ProtFin = j;
 	       }
-	       
-	       if ((strcmp(ProtId,PProtId) == 0) && (abs(PProtFin-ProtDeb) <= 8)) {
-		 // blastx tends to enlarge local hits, we do not reduce gap width (no margin).
-		 for (i = Pfin; i < deb; i++) InterBlast[i] = level+1;
-		 if (graph) PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
+	       GlobalScore=((REAL)score)/((REAL)abs(fin-deb));
+
+	       overlap=0;
+// Reconstruction GAPS -> INTRONS
+	       if ( (strcmp(ProtId,PProtId) == 0) &&  (abs(PProtFin-ProtDeb)<= (MaxOverlap)) ){
+// Detection d'un INTRON
+		 overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
+// overlap >0 : hits chevauchants, overlap <0 : hits espaces
+		 if ((deb-Pfin+overlap) >= MinLength[8] ){
+// Le tableau des introns est rempli prudemment: uniquement les bordures, et sans serrer pres de l'exon.
+		   for (i= Pfin-(overlap<0)*overlap ; i< Pfin+MinLength[8]-abs(overlap) ; i++){
+// debut de l'intron seulement... (dont le score est fonction de l'exon precedent)
+		     if (BlastS[level] >= ProtMatchLevel[i]){
+		       if (BlastS[level] > ProtMatchLevel[i]){
+			 ProtMatchLevel[i]= BlastS[level];
+			 ProtMatch[i]= -PGlobalScore;
+			 ProtMatchPhase[i]=0;
+		       }
+		       else{
+			 if (PGlobalScore > fabs(ProtMatch[i])){
+			   ProtMatch[i]= -PGlobalScore;
+			   ProtMatchPhase[i]= 0;
+			 }
+		       }
+		     }
+		     j=((phase < 0)?-4:4);
+		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+		   }
+		   for (i = deb-MinLength[8]+abs(overlap) ; i < deb+(overlap<0)*overlap ; i++){
+// ...et fin de l'intron (score est fonction de l'exon actuel)
+		     if (BlastS[level] >= ProtMatchLevel[i]){
+		       if (BlastS[level] > fabs(ProtMatchLevel[i])){
+			 ProtMatchLevel[i]= BlastS[level];
+			 ProtMatch[i]= -GlobalScore;
+			 ProtMatchPhase[i]=0;
+		       }
+		       else{
+			 if (PGlobalScore > fabs(ProtMatch[i])){
+			   ProtMatch[i]= -GlobalScore;
+			   ProtMatchPhase[i]= 0;
+			 }
+		       }
+		     }
+		     j=((phase < 0)?-4:4);
+		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+		   }
+		 }
+		 if (graph) {
+		   PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
+//		   for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
+//		     j=((phase < 0)?-4:4);
+//		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+//		   }
+		 }
 	       }
 	       
+	       PGlobalScore=GlobalScore;
 	       Pfin = fin;
 	       tmp = PProtId;
 	       PProtId = ProtId;
@@ -1251,55 +1345,42 @@ int main  (int argc, char * argv [])
 	       PPhase = phase;
 	       
 	       phase = ph06(phase);
-	       BScore = ((REAL)score)/((REAL)abs(fin-deb));
+	       
+// HITS -> CODANT
+	       if (graph) {
+		 for (i = deb-1; i < fin; i++){
+		   PlotBarI(i,PhaseAdapt(phase),0.6+(level/8.0),1,LevelColor[level]);
+		 }
+	       }
 	       
 	       for (i = deb-1; i < fin; i++)  {
-		 if (BScore > BlastScore[phase][i]) 
-		   BlastScore[phase][i] = BScore;
+		 if (BlastS[level] >= ProtMatchLevel[i]){
+		   if (BlastS[level] > ProtMatchLevel[i]){
+		     ProtMatchLevel[i] = BlastS[level];
+		     ProtMatch[i]= GlobalScore;
+		     ProtMatchPhase[i]= PhaseAdapt(phase);
+		   }
+		   else{
+		     if (GlobalScore > fabs(ProtMatch[i])){ 
+		       ProtMatch[i] = GlobalScore;
+		       ProtMatchPhase[i]= PhaseAdapt(phase);
+		     }
+		   }
+		 }
 	       }
 	     }
-
 	     fprintf(stderr,"%d ",level);
 	     fflush(stderr);
-	     
-	     for (i = 0; i < 6; i++)  {
-	       for (j = 0; j < Data_Len; j++)  {
-		 BaseScore[i][j] = 
-		   ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS[level]))/
-		   (100.0+(BlastScore[i][j]*BlastS[level]));
-		 if (graph && (BlastScore[i][j] > 0.0)) 
-		   PlotBarI(j,PhaseAdapt(i),0.6+(level/8.0),1,LevelColor[level]);
-	       }
-	       delete BlastScore[i];
-	     }
-	     
-	   /*       
-	   // Parametre implicite !!!!!
-	   int tmp = 0;
-	   for (j = 0; j < Data_Len; j++) { 
-	     if (InterBlast[j]) {
-	       BaseScore[8][j] = (BaseScore[8][j]*100.0)/(100.0);
-	       if (!tmp) {
-		 printf("%d-",j);
-		 tmp = 1;
-	       }
-	     }
-	     else if (tmp) {
-	       tmp = 0;
-	       printf("%d\n",j-1);
-	     }
-	   }
-	   */
-	     delete InterBlast;
-	     
+
 	     fclose(fblast);       
 	   }
 	 }
        fprintf(stderr," done\n");
     }
-
-  // Data allocation for the shortest path with length constraints algorithm
-  //
+  // ---------------------------------------------------------------------------
+  // Data allocation for the shortest path with length constraints
+  // algorithm
+  // ---------------------------------------------------------------------------
   // 0  codant 1
   // 1  codant 2
   // 2  codant 3
@@ -1318,6 +1399,7 @@ int main  (int argc, char * argv [])
   // 15 UTR 5' reverse
   // 16 UTR 3' reverse
   // 17 Intergenique
+  // ---------------------------------------------------------------------------
 
   char *Choice;
   BackPoint *LBP[18];
@@ -1334,7 +1416,16 @@ int main  (int argc, char * argv [])
     LBP[i]->Prev = LBP[i];
   }
 
+  // Les PrevBP sont des pointeurs sur les "opening edges"
+  // Les PBest correspondent au cout du chemin correspondant
+
+  REAL  maxi, PBest[26];
+  BackPoint *PrevBP[26];
+  int source;
   
+  // ---------------------------------------------------------------------------
+  // Couts initiaux  
+  // ---------------------------------------------------------------------------
   // Codant
   LBP[ExonF1]->Update(log(ExonPrior/6.0)/2.0);
   LBP[ExonF2]->Update(log(ExonPrior/6.0)/2.0);
@@ -1361,18 +1452,20 @@ int main  (int argc, char * argv [])
   LBP[UTR5R]->Update(log(FivePrimePrior/2.0)/2.0);
   LBP[UTR3R]->Update(log(ThreePrimePrior/2.0)/2.0);
 
-  // Les PrevBP sont des pointeurs sur les "opening edges"
-  // Les PBest correspondent au cout du chemin correspondant
-
-  REAL  maxi, PBest[26];
-  BackPoint *PrevBP[26];
-  int source;
-  int RAFLindex = 0;
+  u = ru;
 
   for (i = 0; i <= Data_Len; i++) {
-    
-    // Calcul des meilleures opening edges
 
+    // compute coding... probabilities
+    Fill_Score(TheSeq,IMMatrix,i,BaseScore);
+
+    //application des regles utilisateur pour i
+    if (userinfo) {
+      Util(i,u);
+      for (k = 13; k<21; k++) Weights[k] += 1;
+    }
+
+    // Calcul des meilleures opening edges
     PrevBP[0] = LBP[0]->BestUsable(i,SwitchMask[0],MinLength[0],&PBest[0]);
     PrevBP[1] = LBP[1]->BestUsable(i,SwitchMask[1],MinLength[1],&PBest[1]);
     PrevBP[2] = LBP[2]->BestUsable(i,SwitchMask[2],MinLength[2],&PBest[2]);
@@ -1397,10 +1490,11 @@ int main  (int argc, char * argv [])
     PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,MinFivePrime,&PBest[21]);
     PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,MinThreePrime,&PBest[22]);
 
+    // ---------------------------------------------------------------------------
     // Calcul de la position par rapport aux genes RAFL (Riken Ara.Full-Length)
     // valeurs de RAFLpos:
     // 0-> en dehors, 1-> frontiere(intergenique obligatoire), 2-> dedans(penalisation IG)
-
+    // ---------------------------------------------------------------------------
     if (raflopt){
       if ( i > RAFL[RAFLindex].fin){ // si on depasse le RAFL, on prend l'eventuel prochain
 	(RAFLindex+1 < RAFL.size()) ? RAFLindex++ : raflopt=FALSE ;
@@ -1422,9 +1516,10 @@ int main  (int argc, char * argv [])
       // S'il y  a un STOP en phase on ne peut continuer
       if ((i % 3 == k) && Stop[0][i]) 
 	LBP[k]->Update(DontCrossStop); 
+#ifdef PAYTOIGNORE      
       else // on ne prend pas le donneur
 	LBP[k]->Update(log(1.0-Don[0][i]));
-      
+#endif
       LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
@@ -1437,6 +1532,9 @@ int main  (int argc, char * argv [])
 
       if ((i % 3 == k) && Start[0][i] != 0.0) {
 	BestU = PBest[19]+log(Start[0][i]);
+#ifndef PAYTOIGNORE
+	BestU -= log(1.0-Start[0][i]);
+#endif 
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
@@ -1450,6 +1548,9 @@ int main  (int argc, char * argv [])
       // Ca vient d'un intron
 
       BestU = PBest[6+((i-k+3) % 3)]+log(Acc[0][i]);
+#ifndef PAYTOIGNORE
+      BestU -= log(1.0-Acc[0][i]);
+#endif
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -1460,12 +1561,15 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i])+log(4));
+      LBP[k]->Update(log(BaseScore[k])+log(4));
 
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if ((ESTMatch[i] & Gap) ||
       	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitForward)))
       	LBP[k]->Update(EstP);
+
+      if((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
+	LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
@@ -1484,9 +1588,10 @@ int main  (int argc, char * argv [])
       // On continue sauf si l'on rencontre un autre STOP
       if (((Data_Len-i) % 3 == k-3) && Stop[1][i]) 
 	LBP[k]->Update(DontCrossStop);
+#ifdef PAYTOIGNORE      
       else // sinon on ne prend pas le donneur 
 	LBP[k]->Update(log(1.0-Don[1][i]));
-
+#endif
       
       LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
       // Un test tordu pour casser le cou aux NaN
@@ -1513,6 +1618,9 @@ int main  (int argc, char * argv [])
       // Ca vient d'un intron
 
       BestU = PBest[9+((Data_Len-i-k) % 3)]+log(Don[1][i]);
+#ifndef PAYTOIGNORE
+      BestU -= log(1.0-Don[1][i]);
+#endif
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -1523,12 +1631,15 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i])+log(4)) ;
+      LBP[k]->Update(log(BaseScore[k])+log(4)) ;
 
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if ((ESTMatch[i] & Gap) ||
       	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitReverse)))
       	LBP[k]->Update(EstP);
+
+     if((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
+	LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
@@ -1570,8 +1681,12 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen5]->Update(log(BaseScore[8][i])+log(4));
+    LBP[InterGen5]->Update(log(BaseScore[8])+log(4));
+    //    LBP[InterGen5]->Update(log(TheSeq->GC_AT(i))+log(4));
     LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+
+   if(ProtMatch[i]!=0)
+      LBP[InterGen5]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
       if (RAFLpos==2) LBP[InterGen5]->Update(RAFLPenalty);
@@ -1604,8 +1719,12 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen3]->Update(log(BaseScore[8][i])+log(4));
+    LBP[InterGen3]->Update(log(BaseScore[8])+log(4));
+    //LBP[InterGen3]->Update(log(TheSeq->GC_AT(i))+log(4));
     LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+
+    if(ProtMatch[i]!=0)
+      LBP[InterGen3]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
       if (RAFLpos==2) LBP[InterGen3]->Update(RAFLPenalty);
@@ -1616,11 +1735,13 @@ int main  (int argc, char * argv [])
     // ----------------------------------------------------------------
     maxi = NINFINITY;
     
+#ifdef PAYTOIGNORE      
     // On reste 5' direct. On ne prend pas le Start eventuel.
     //  Kludge: si on a un EST qui nous dit que l'on est dans un
     //  intron, on oublie
     if ((ESTMatch[i] & Gap) == 0)
       LBP[UTR5F]->Update(log(1.0-Start[0][i]));
+#endif
 
     LBP[UTR5F]->BestUsable(i,SwitchAny,0,&BestU);
     // Un test tordu pour casser le cou aux NaN
@@ -1659,8 +1780,13 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5F]->Update(log(BaseScore[8][i])+log(3.999));
- 
+    //    LBP[UTR5F]->Update(log(BaseScore[8])+log(3.999));
+    //    LBP[UTR5F]->Update(log(TheSeq->GC_AT(i))+log(3.999));
+    LBP[UTR5F]->Update(log(BaseScore[9])+log(3.999));
+
+   if(ProtMatch[i]!=0)
+      LBP[UTR5F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
+
     if (raflopt){
       if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[UTR5F]->Update(RAFLPenalty);
     }
@@ -1691,7 +1817,13 @@ int main  (int argc, char * argv [])
     
     if (best != -1) LBP[UTR3F]->InsertNew(best %12,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR3F]->Update(log(BaseScore[9][i])+log(4));
+    //    LBP[UTR3F]->Update(log(BaseScore[9])+log(4));
+    //    LBP[UTR3F]->Update(log(BaseScore[8])+log(4));
+    LBP[UTR3F]->Update(log(BaseScore[11])+log(4));
+    //    LBP[UTR3F]->Update(log(TheSeq->GC_AT(i))+log(4));
+
+   if(ProtMatch[i]!=0)
+      LBP[UTR3F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
       if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[UTR3F]->Update(RAFLPenalty);
@@ -1702,12 +1834,13 @@ int main  (int argc, char * argv [])
     // ----------------------------------------------------------------
     maxi = NINFINITY;
     
+#ifdef PAYTOIGNORE      
     // On reste 5' reverse
     //  Kludge: si on a un EST qui nous dit que l'on est dans un
     //  intron, on oublie
     if ((ESTMatch[i] & Gap) == 0)
       LBP[UTR5R]->Update(log(1.0-Start[1][i]));
-
+#endif
 
     LBP[UTR5R]->BestUsable(i,SwitchAny,0,&BestU);
     // Un test tordu pour casser le cou aux NaN
@@ -1720,6 +1853,9 @@ int main  (int argc, char * argv [])
     for (k = 3; k < 6; k++) {
       if (((Data_Len-i) % 3 == k-3) && Start[1][i] != 0.0) {
 	BestU = PBest[k+12]+log(Start[1][i]);
+#ifndef PAYTOIGNORE
+	BestU -= log(1.0-Start[1][i]);
+#endif
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
@@ -1731,7 +1867,12 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5R]->Update(log(BaseScore[8][i])+log(3.999));
+    //    LBP[UTR5R]->Update(log(BaseScore[8])+log(3.999));
+    //    LBP[UTR5R]->Update(log(TheSeq->GC_AT(i))+log(3.999));
+    LBP[UTR5R]->Update(log(BaseScore[10])+log(3.999));
+
+    if(ProtMatch[i]!=0)
+      LBP[UTR5R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
       if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) LBP[UTR5R]->Update(RAFLPenalty);
@@ -1779,7 +1920,13 @@ int main  (int argc, char * argv [])
          
     if (best != -1) LBP[UTR3R]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
-    LBP[UTR3R]->Update(log(BaseScore[10][i])+log(4));
+    //    LBP[UTR3R]->Update(log(BaseScore[10])+log(4));
+    //    LBP[UTR3R]->Update(log(BaseScore[8])+log(4));
+    LBP[UTR3R]->Update(log(BaseScore[12])+log(4));
+    //    LBP[UTR3R]->Update(log(TheSeq->GC_AT(i))+log(4));
+
+    if(ProtMatch[i]!=0)
+      LBP[UTR3R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
       if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) LBP[UTR3R]->Update(RAFLPenalty);
@@ -1793,7 +1940,9 @@ int main  (int argc, char * argv [])
       maxi = NINFINITY;
 
       // On reste intronique
+#ifdef PAYTOIGNORE      
       LBP[6+k]->Update(log(1.0-Acc[0][i]));
+#endif
       LBP[6+k]->BestUsable(i,SwitchAny,0,&BestU);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
@@ -1802,6 +1951,9 @@ int main  (int argc, char * argv [])
       }
       // - on quitte un exon
       BestU = PBest[((i-k+3) % 3)]+log(Don[0][i]);
+#ifndef PAYTOIGNORE
+      BestU -= log(1.0-Don[0][i]);
+#endif
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -1811,7 +1963,7 @@ int main  (int argc, char * argv [])
  
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[6+k]->Update(log(BaseScore[6][i])+log(4));
+      LBP[6+k]->Update(log(BaseScore[6])+log(4));
 
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
@@ -1821,6 +1973,9 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[6+k]->Update(IGPenalty);
+
+      if(ProtMatch[i]>0)
+	LBP[6+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
 	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[6+k]->Update(RAFLPenalty);
@@ -1835,7 +1990,9 @@ int main  (int argc, char * argv [])
       maxi = NINFINITY;
       
       // On reste intronique
+#ifdef PAYTOIGNORE      
       LBP[9+k]->Update(log(1.0-Acc[1][i]));
+#endif
       LBP[9+k]->BestUsable(i,SwitchAny,0,&BestU);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
@@ -1845,6 +2002,9 @@ int main  (int argc, char * argv [])
 
       // On quitte un exon
       BestU = PBest[3+((Data_Len-i-k) % 3)]+log(Acc[1][i]);
+#ifndef PAYTOIGNORE
+      BestU -= log(1.0-Acc[1][i]);
+#endif
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -1854,7 +2014,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[9+k]->Update(log(BaseScore[7][i])+log(4));
+      LBP[9+k]->Update(log(BaseScore[7])+log(4));
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
       if ((ESTMatch[i] & Hit) ||
@@ -1863,6 +2023,9 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[9+k]->Update(IGPenalty);
+
+      if(ProtMatch[i]>0)
+	LBP[9+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
 	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) 
@@ -1921,7 +2084,7 @@ int main  (int argc, char * argv [])
   if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
   
-  fprintf(stderr,"Optimal path length = %#f\n",maxi+log(0.25)*(Data_Len+1));
+  fprintf(stderr,"Optimal path length = %#f\n",maxi-log(4)*(Data_Len+1));
 
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
 
@@ -1943,7 +2106,11 @@ int main  (int argc, char * argv [])
   delete [] Stop[1];
 
   delete [] ESTMatch;
-  
+
+  delete [] ProtMatch;
+  delete [] ProtMatchLevel;
+  delete [] ProtMatchPhase;
+
   delete [] Start[0];
   delete [] Start[1];
 
@@ -1954,12 +2121,11 @@ int main  (int argc, char * argv [])
   delete [] Acc[1];
 
    delete [] Choice;
-
-  for  (i = 0;  i < 11;  i ++) delete [] BaseScore[i];
   }
 
   // free remaining used memory
-  if (IMMatrix[5] != IMMatrix[4]) delete  IMMatrix[5];
+  if (IMMatrix[5] != IMMatrix[3]) delete  IMMatrix[5];
+  if (IMMatrix[6] != IMMatrix[3]) delete  IMMatrix[6];
 
   for  (i = 0;  i < 5;  i ++)
     delete  IMMatrix[i];
