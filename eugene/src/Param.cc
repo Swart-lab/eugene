@@ -323,6 +323,28 @@ int Parameters :: count(char *key)
 }
 
 // ------------------------
+//  test if a parameter is 
+//  defined w/o issuing a warning
+// ------------------------
+bool Parameters::probeKey(char *key, int index){
+
+  if (!index) return m.count(key);
+
+  int len = strlen(key);
+  char *altkey = new char[len+10];
+
+  strcpy(altkey,key);
+  key = altkey+len;
+  sprintf(key,"[%d]",index);
+
+  if (m.count(altkey)) {
+    delete [] altkey; 
+    return true;
+  }
+  return false;
+}
+
+// ------------------------
 //  getChar param.
 // ------------------------
 char* Parameters :: getC(char *key, int index)

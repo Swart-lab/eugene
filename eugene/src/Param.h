@@ -56,6 +56,7 @@ class Parameters
   ~Parameters ();
   void   initParam (int, char *[]);
   int    count(char *key);
+  bool   probeKey(char *key, int index = 0);
   char*  getC (char *key, int index = 0);
   double getD (char *key, int index = 0);
   int    getI (char *key, int index = 0);
