@@ -111,7 +111,7 @@ void Chromosome::Evaluate(void)
   Genetic* algo = (Genetic*) OPTIM.Algorithms[OPTIM.AlgoIndex];
   
   algo->Par = data->P;
-  for (int k=0; k<algo->Para.size(); k++) algo->Para[k] = algo->Par[algo->ParaPar[k]];
+  for (unsigned int k=0; k<algo->Para.size(); k++) algo->Para[k] = algo->Par[algo->ParaPar[k]];
   RawFitness = OPTIM.ParaEvaluate();
 
   IsEvaluated = true;

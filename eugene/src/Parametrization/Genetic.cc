@@ -71,9 +71,9 @@ Genetic::Genetic (void) : OptiAlgorithm()
   vector <bool> FirstEltCluster;
   bool is_to_consider;
 
-  for (i=0; i<ParaClusters.size(); i++) FirstEltCluster.push_back( true );
+  for (i=0; i<(int)ParaClusters.size(); i++) FirstEltCluster.push_back( true );
 
-  for (i=0; i<ParaName.size(); i++) {
+  for (i=0; i<(int)ParaName.size(); i++) {
     Para.push_back( 0 );
 
     is_to_consider = false;
@@ -84,7 +84,7 @@ Genetic::Genetic (void) : OptiAlgorithm()
       } else {
 	// just update the index of the first elt of the cluster which the parameter belongs
 	l = 0;
-	for (q=0; q<ParCluster.size(); q++) 
+	for (q=0; q<(int)ParCluster.size(); q++) 
 	  if (ParaCluster[i] == ParCluster[q]) 
 	    {l = q; q = ParCluster.size();}
 	ParaPar.push_back( l );
@@ -257,7 +257,7 @@ void Genetic::Optimize(bool is_chaining)
 
   // Put the best optimum of the runs in Para
   Par = ParOpti; BestFitness = FitnessOpti;
-  for (int q=0; q<Para.size(); q++) Para[q] = Par[ParaPar[q]];
+  for (unsigned int q=0; q<Para.size(); q++) Para[q] = Par[ParaPar[q]];
   if (run>0) {
     cout <<endl<< "---------------------------------------------------------------"<<endl;
     cout <<"Best optimum for the runs"<<endl;
@@ -310,7 +310,7 @@ void Genetic::EvalPopulation (void)
 //-------------------------------------------------------
 int Genetic::MakeClusters (void)
 {
-  int i,j,cl;
+  int i,j,cl = 0;
   double d,distance, dmin, dmax, sumd, nb_moy, max;
   int nopt, nb_dist, nb_clusters;
   bool cont;
