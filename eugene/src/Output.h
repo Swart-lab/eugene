@@ -81,7 +81,7 @@ if (printopt == 'd')
       printf("\n");
     }
 }
-else if ((printopt == 'l') || (printopt == 'h'))
+else if ((printopt == 'l') || (printopt == 'h') || (printopt == 'g'))
 {
   int Starts[18];
   int cons =0,incons = 0;
@@ -97,30 +97,34 @@ else if ((printopt == 'l') || (printopt == 'h'))
     if (estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
   }
 
-
   if (printopt == 'h')
     {
       printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
       printf("<center><listing>\n");
       printf("\n      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
     }
-  
+
+  if (printopt == 'g')
+    printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+
   // Starting condition: 0  = started,  -1 = nothing started yet
   for (j = 0; j<18; j++)
     Starts[j] = ((Choice[0] == j) ? 0 : -1);
 
-  fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
+  fprintf(stderr,"\nSeq        Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
 
-  
-  pos = strstr(argv[sequence],"/seq");
+  //  pos = strstr(argv[sequence],"/seq");
+  pos = BaseName(argv[sequence]);
   if (pos  == NULL)
-    strcpy(seqn,"     ");
-  else
-    {
-      pos++;
-      strncpy(seqn,pos,5);
-      seqn[5] = '\0';
-    }
+    strcpy(seqn,"          ");
+  else {
+    *rindex(pos,'.') = 0; // on enleve l'extension (.fasta)
+    strncpy(seqn,pos,10);
+    if(strlen(seqn) < 10 && printopt != 'g')
+      for(i=strlen(seqn); i<10; i++)
+	seqn[i] = ' ';
+    seqn[strlen(seqn)] = '\0';
+  }
   
   // Kludge = a non existing choice to force exon termination
   if ((Choice[Data_Len] != InterGen5) && (Choice[Data_Len] != InterGen3))
@@ -163,60 +167,80 @@ else if ((printopt == 'l') || (printopt == 'h'))
 	  Don = Rend+1;
 	}
 
-	printf("%s ",seqn);
+	printf("%s",seqn);
+	
+	if (printopt == 'g') printf("\tEuGene\t");
+       	else printf(" ");
 	
 	if (init && term) printf("Sngl");
 	else if (init) printf("Init");
 	else if (term) printf("Term");
 	else printf ("Intr");
-	      
-	printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
-	printf("     %4d  ", Rend-Lend+1);
+
+	if (printopt == 'g')
+	  printf("\t%d\t%d\t0\t%c\t%d\n",Lend,Rend,((forward) ? '+' : '-'),PhaseAdapt(Choice[i]));
+       	else {	      
+	  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
+	  printf("     %4d  ", Rend-Lend+1);
 	
-	if (init)
-	  printf("   %+2d", ((forward) ? 1: -1));
-	else {
-	  Phase = ((forward) ?
-		   PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
-		   -PhaseAdapt(Choice[i+1]-9));
-		  
-	  if (abs(Phase) <= 3)
-	    printf("   %+2d",Phase);
-	  else printf(" Unk.");
+	  if (init)
+	    printf("   %+2d", ((forward) ? 1: -1));
+	  else {
+	    Phase = ((forward) ?
+		     PhaseAdapt(Choice[Starts[Choice[i]]]-6) :
+		     -PhaseAdapt(Choice[i+1]-9));
+	    
+	    if (abs(Phase) <= 3)
+	      printf("   %+2d",Phase);
+	    else printf(" Unk.");
+	  }
+	  printf("      %+2d",PhaseAdapt(Choice[i]));
+	  printf(" %7d %7d ", Don,Acc);
+	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
+		 100.0*(double)incons/(Rend-Lend+1));
+	  Starts[Choice[i]] = -1;
 	}
-	printf("      %+2d",PhaseAdapt(Choice[i]));
-	printf(" %7d %7d ", Don,Acc);
-	printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
-	       100.0*(double)incons/(Rend-Lend+1));
-	Starts[Choice[i]] = -1;
-      } 
+      }
       else if ((Choice[i] >= UTR5F) && (Choice[i] <= UTR3R)) {
 
-	printf("%s ",seqn);
-
+	printf("%s",seqn);
+	
+	if (printopt == 'g') printf("\tEuGene\t");
+       	else printf(" ");
+	
 	switch (Choice[i]) {
 	case 13: // UTR5' F
-	  printf("Utr5    +");
+	  if (printopt == 'g')
+	    printf("Utr5\t%d\t%d\t0\t+\t.\n", offset+Starts[Choice[i]]+1, offset+i);
+	  else printf("Utr5    +");
 	  break;
-
+	  
 	case 14: // UTR 3' F
-	  printf("Utr3    +");
+	  if (printopt == 'g')
+	    printf("Utr3\t%d\t%d\t0\t+\t.\n", offset+Starts[Choice[i]]+1, offset+i);
+	  else printf("Utr3    +");
 	  break;
-
+	  
 	case 15: // UTR5' R
-	  printf("Utr5    -");
+	  if (printopt == 'g')
+	    printf("Utr5\t%d\t%d\t0\t-\t.\n", offset+Starts[Choice[i]]+1, offset+i);
+	  else printf("Utr5    -");
 	  break;
-
+	  
 	case 16:// UTR 3' R
-	  printf("Utr3    -");
+	  if (printopt == 'g')
+	    printf("Utr3\t%d\t%d\t0\t-\t.\n", offset+Starts[Choice[i]]+1, offset+i);
+	  else printf("Utr3    -");
 	  break;
 	}
-
-	printf("    %7d %7d", offset+Starts[Choice[i]]+1,offset+i);
-	printf("     %4d  ", i-Starts[Choice[i]]);
-	printf("   NA      NA      NA      NA ");
-	printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(i-Starts[Choice[i]]),
-	       100.0*(double)incons/(i-Starts[Choice[i]]));
+	
+	if(printopt != 'g') {
+	  printf("    %7d %7d", offset+Starts[Choice[i]]+1,offset+i);
+	  printf("     %4d  ", i-Starts[Choice[i]]);
+	  printf("   NA      NA      NA      NA ");
+	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(i-Starts[Choice[i]]),
+		 100.0*(double)incons/(i-Starts[Choice[i]]));
+	}
 	Starts[Choice[i]] = -1;
       }
 
@@ -231,8 +255,9 @@ else if ((printopt == 'l') || (printopt == 'h'))
   }
   printf("\n");
   if (printopt == 'h')   {
-    pos = BaseName(argv[sequence]);
-
+    //pos = BaseName(argv[sequence]);
+    pos = argv[sequence];
+  
     printf("</listing></center>\n");
     printf("<a href=%s.trace>Trace</a><br>",pos);
     printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",pos,pos);
