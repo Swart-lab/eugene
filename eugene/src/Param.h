@@ -31,11 +31,14 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
+// MacOS-X has getopt() defined is stdlib and the library in the libSystem
+#ifndef __APPLE__
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #else
 #ifndef HAVE_GETOPT
 #include "getopt.h"
+#endif
 #endif
 #endif
 
