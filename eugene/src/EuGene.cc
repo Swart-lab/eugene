@@ -302,7 +302,7 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
   // longueur. L'idee est d'eliminer les epissages partiels et de
   // favoriser la longueur de toute facon.
   
-  Hits **HitTable = new (Hits *)[NumEST];
+  Hits **HitTable = new Hits *[NumEST];
   
   for (i = 0, ThisEST = AllEST; i < NumEST; i++, ThisEST = ThisEST->Next)
     HitTable[i] = ThisEST;
@@ -613,8 +613,10 @@ int main  (int argc, char * argv [])
     
     case 'p':           /* print opt: short/long/detailed   */
       printopt = optarg[0];
-      if (printopt == 'h') graph = TRUE; // HTML output means graphical output 
-
+      if ((printopt == 'h') &&  graph == FALSE) {
+	graph = TRUE; // HTML output means graphical output 
+	grname[0] = 0;
+      }
       if ((printopt != 's') && (printopt != 'l') && 
 	  (printopt != 'd')&& (printopt != 'h'))
 	errflag++;
