@@ -95,7 +95,7 @@ int main  (int argc, char * argv [])
   DNASeq *TheSeq;
   int    Data_Len;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior;
-  double transStartP, transStopP, stopP;
+  double transStartP, transStopP, stopP, FsP;
   int    minL[18], minDiv, minFlow, minConv, min5, min3;
   int    graph;
   const unsigned char SwitchMask[18] = 
@@ -139,7 +139,7 @@ int main  (int argc, char * argv [])
   transStopP  = PAR.getD("eugene.transStopP");
   stopP       = PAR.getD("eugene.stopP");
   graph = PAR.getI("graph");
-
+  
   MS.InitMaster();
   
   ReadKey(PAR.getC("eugene.key"), "EUGENEAT");
@@ -147,7 +147,8 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (PAR.getD("eugene.frameshift") <= -1000.0)
     PAR.set("eugene.frameshift", "NINFINITY");
-
+  FsP = PAR.getD("eugene.frameshift");
+  
   // ---------------------------------------------------------------------------  
   // Lecture de la sequence
   // ---------------------------------------------------------------------------  
@@ -353,23 +354,9 @@ int main  (int argc, char * argv [])
       NormalizingPath += maxi;
 
       // Calcul des meilleures opening edges
-      for(int l=0; l<12; l++)
-	PrevBP[l] = LBP[l]->BestUsable(i, SwitchMask[l], minL[l], &PBest[l]);
-      PrevBP[12]= LBP[0]->BestUsable (i, SwitchMask[12], minL[12], &PBest[12]);
-      PrevBP[13]= LBP[1]->BestUsable (i, SwitchMask[13], minL[13], &PBest[13]);
-      PrevBP[14]= LBP[2]->BestUsable (i, SwitchMask[14], minL[14], &PBest[14]);
-      PrevBP[15]= LBP[3]->BestUsable (i, SwitchMask[15], minL[15], &PBest[15]);
-      PrevBP[16]= LBP[4]->BestUsable (i, SwitchMask[16], minL[16], &PBest[16]);
-      PrevBP[17]= LBP[5]->BestUsable (i, SwitchMask[17], minL[17], &PBest[17]);
-
-      // UTR 5' et 3' direct
-      PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[19]);
-      PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[20]);
-
-      // UTR 5' et 3' reverse
-      PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[21]);
-      PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[22]);
-
+      for(k=0; k<18; k++)
+	PrevBP[k] = LBP[k%12]->BestUsable(i, SwitchMask[k], minL[k], &PBest[k]);
+      
       // intergenic: longueur min depend du sens
       // -> -> ou <- <-   MinFlow
       // -> <-            MinConv
@@ -440,7 +427,7 @@ int main  (int argc, char * argv [])
 	
 	// Il y a une insertion (frameshift). Pour l'instant, on ne
 	// prend pas en compte le saut de nucléotide.
-	BestU = PBest[(k+2)%3]+PAR.FsP;
+	BestU = PBest[(k+2)%3] + FsP;
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+2)%3;
@@ -448,7 +435,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[(k+1)%3]+PAR.FsP;
+	BestU = PBest[(k+1)%3] + FsP;
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+1)%3;
@@ -508,15 +495,15 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une insertion (frameshift)
-	BestU = PBest[3+(k+2)%3]+PAR.FsP;
+	BestU = PBest[3+(k+2)%3] + FsP;
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
-	  best = 3+ (k+2)%3;
+	  best = 3+(k+2)%3;
 	  Switch = SwitchIns;
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[3+(k+1)%3]+PAR.FsP;
+	BestU = PBest[3+(k+1)%3] + FsP;
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 3+(k+1)%3;
