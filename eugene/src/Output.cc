@@ -9,15 +9,19 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
   double Score [9], NScore[9];
   DATA Data;
   int Data_Len = X->SeqLen;
+  char printopt0 = PAR.getC("printopt")[0];
+  int  offset    = PAR.getI("offset");
+  int  estopt    = PAR.getI("estopt");
+  int  normopt   = PAR.getI("normopt");
 
-  if (PAR.printopt == 'd')
+  if (printopt0 == 'd')
     {
       for (j = 0 ; j < 8 ; j++)
 	NScore [j] = 1.0;
       
-      PAR.window = ((PAR.window/2)*2)+1;
+      PAR.set("window", PAR.intToChar(((PAR.getI("window")/2)*2)+1));
   
-      for (i = 0; i < PAR.window/2; i++) {
+      for (i = 0; i < PAR.getI("window")/2; i++) {
 	MS.GetInfoSpAt(Type_Content, X, i, &Data);
 	for (j = 0 ; j < 8 ; j++)
 	  NScore [j] += Data.ContentScore[j];
@@ -27,23 +31,23 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
       
       for  (i = 0 ; i < Data_Len ; i++)
 	{
-	  if (i-PAR.window/2 > 0) {
-	    MS.GetInfoSpAt(Type_Content, X, i-1-PAR.window/2, &Data);
+	  if (i-PAR.getI("window")/2 > 0) {
+	    MS.GetInfoSpAt(Type_Content, X, i-1-PAR.getI("window")/2, &Data);
 	    for (j = 0 ; j < 8 ; j++)
 	      NScore [j] -= Data.ContentScore[j];
 	  }
 	  
-	  if (i+PAR.window/2 < Data_Len) {
-	    MS.GetInfoSpAt(Type_Content, X, i+PAR.window/2, &Data);
+	  if (i+PAR.getI("window")/2 < Data_Len) {
+	    MS.GetInfoSpAt(Type_Content, X, i+PAR.getI("window")/2, &Data);
 	    for (j = 0 ; j < 8 ; j++)
 	      NScore [j] += Data.ContentScore[j];
 	  }
 	  
 	  for (j = 0 ; j < 8 ; j++) Score[j] = NScore[j];
 
-	  AmplifyScore(Score,PAR.normopt);
+	  AmplifyScore(Score,normopt);
 	  
-	  printf("%6d %c%c ", PAR.offset+1+i, (*X)[i],(*X)(i));
+	  printf("%6d %c%c ", offset+1+i, (*X)[i],(*X)(i));
 	  
 	  PrintPhase(Choice[i+1]);
 	  
@@ -100,23 +104,24 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	  printf("\n");
 	}
     }
-  else if ((PAR.printopt == 'l') || (PAR.printopt == 'h') || (PAR.printopt == 'g'))
+  else if ((printopt0 == 'l') || (printopt0 == 'h') ||
+	   (printopt0 == 'g'))
     {
       int Starts[18];
       int cons = 0,incons = 0;
       int TStart = 0, GStart = 0, GEnd = 0;
       int forward,init,term,Lend,Rend,Phase;
       int Don,Acc;
-      char seqn[6];
+      char seqn[6] = "";
       char *pos;
       
-      //if (PAR.estopt) {    
+      //if (estopt) {    
       //qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
       // reset static in EST Support
       //if (PAR.estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
       //}
       
-      if (PAR.printopt == 'h')
+      if (printopt0 == 'h')
 	{
 	  printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
 	  printf("<center><listing>\n");
@@ -129,7 +134,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
       
       fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
       
-      if (PAR.printopt == 'g' && sequence == optind)
+      if (printopt0 == 'g' && sequence == optind)
 	printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
       
       //  pos = strstr(argv[sequence],"/seq");
@@ -139,7 +144,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
       else {
 	*rindex(pos,'.') = 0; // on enleve l'extension (.fasta)
 	strncpy(seqn,pos,5);
-	if(strlen(seqn) < 5 && PAR.printopt != 'g')
+	if(strlen(seqn) < 5 && printopt0 != 'g')
 	  for(i=strlen(seqn); i<5; i++)
 	    strcat(seqn, " ");
 	seqn[5] = '\0';
@@ -154,13 +159,13 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	if (Choice[i+1] != Choice[i]) {
 	  // something happens
 	  
-	  if (PAR.estopt)
+	  if (estopt)
 	    //CheckConsistency(Starts[Choice[i]],i,Choice[i],ESTMatch,&cons,&incons);
 	    CheckConsistency2(Starts[Choice[i]], i, Choice[i], &cons, &incons, X);
 	  
 	  // demarrage exon extreme. Noter pour verif EST
 	  if ((Choice[i+1] == UTR5F) || (Choice[i+1] == UTR3R)) TStart = i;
-	  if ((Choice[i] == UTR5F)   || (Choice[i] == UTR3R))   GStart = i;
+	  if ((Choice[i]   == UTR5F) || (Choice[i]   == UTR3R)) GStart = i;
 	  if ((Choice[i+1] == UTR3F) || (Choice[i+1] == UTR5R)) GEnd   = i-1;
 	  
 	  // An exon is finishing
@@ -175,8 +180,8 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	    term = ((!forward  && Choice[Starts[Choice[i]]] >=InterGen5) || 
 		(forward && Choice[i+1] >= InterGen5));
 	    
-	    Lend = PAR.offset+Starts[Choice[i]]+1;
-	    Rend = PAR.offset+i;
+	    Lend = offset+Starts[Choice[i]]+1;
+	    Rend = offset+i;
 	    
 	    if (forward) {
 	      Don = Lend-1;
@@ -189,7 +194,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	    
 	    printf("%s",seqn);
 	    
-	    if (PAR.printopt == 'g') printf("\tEuGene\t");
+	    if (printopt0 == 'g') printf("\tEuGene\t");
 	    else printf(" ");
 	    
 	    if (init && term) printf("Sngl");
@@ -197,7 +202,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	    else if (term) printf("Term");
 	    else printf ("Intr");
 	    
-	    if (PAR.printopt == 'g')
+	    if (printopt0 == 'g')
 	      printf("\t%d\t%d\t0\t%c\t%d\n",
 		     Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(Choice[i])));
 	    else {	      
@@ -226,41 +231,41 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	    
 	    printf("%s",seqn);
 	    
-	    if (PAR.printopt == 'g') printf("\tEuGene\t");
+	    if (printopt0 == 'g') printf("\tEuGene\t");
 	    else printf(" ");
 	    
 	    switch (Choice[i]) {
 	    case 13: // UTR5' F
-	      if (PAR.printopt == 'g')
+	      if (printopt0 == 'g')
 		printf("Utr5\t%d\t%d\t0\t+\t.\n",
-		       PAR.offset+Starts[Choice[i]]+1, PAR.offset+i);
+		       offset+Starts[Choice[i]]+1, offset+i);
 	      else printf("Utr5    +");
 	      break;
 	      
 	    case 14: // UTR 3' F
-	      if (PAR.printopt == 'g')
+	      if (printopt0 == 'g')
 		printf("Utr3\t%d\t%d\t0\t+\t.\n",
-		       PAR.offset+Starts[Choice[i]]+1, PAR.offset+i);
+		       offset+Starts[Choice[i]]+1, offset+i);
 	      else printf("Utr3    +");
 	      break;
 	      
 	    case 15: // UTR5' R
-	      if (PAR.printopt == 'g')
+	      if (printopt0 == 'g')
 		printf("Utr5\t%d\t%d\t0\t-\t.\n",
-		       PAR.offset+Starts[Choice[i]]+1, PAR.offset+i);
+		       offset+Starts[Choice[i]]+1, offset+i);
 	      else printf("Utr5    -");
 	      break;
 	      
 	    case 16:// UTR 3' R
-	      if (PAR.printopt == 'g')
+	      if (printopt0 == 'g')
 		printf("Utr3\t%d\t%d\t0\t-\t.\n",
-		       PAR.offset+Starts[Choice[i]]+1, PAR.offset+i);
+		       offset+Starts[Choice[i]]+1, offset+i);
 	      else printf("Utr3    -");
 	      break;
 	    }
 	    
-	    if(PAR.printopt != 'g') {
-	      printf("    %7d %7d", PAR.offset+Starts[Choice[i]]+1, PAR.offset+i);
+	    if(printopt0 != 'g') {
+	      printf("    %7d %7d", offset+Starts[Choice[i]]+1, offset+i);
 	      printf("     %4d  ", i-Starts[Choice[i]]);
 	      printf("   NA      NA      NA      NA ");
 	      printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(i-Starts[Choice[i]]),
@@ -270,7 +275,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	  }
 	  
 	  //if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
-	  //if (PAR.estopt && PAR.estanal) {
+	  //if (estopt && PAR.estanal) {
 	  //  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
 	  //  GStart = TStart = GEnd = -1;
 	  //}
@@ -278,9 +283,9 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	  Starts[Choice[i+1]] = i;
 	}
       }
-      if (PAR.printopt != 'g')  printf("\n");
+      if (printopt0 != 'g')  printf("\n");
       
-      if (PAR.printopt == 'h')   {
+      if (printopt0 == 'h')   {
 	//pos = BaseName(argv[sequence]);
 	pos = argv[sequence];
 	
@@ -303,7 +308,7 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
     int Intergenic,decalage;
     
     Intergenic = 0;
-    decalage = ((argc == optind+1) ? PAR.offset : PAR.offset*(sequence-optind));
+    decalage = ((argc == optind+1) ? offset : offset*(sequence-optind));
     
     // Kludge = an intergenic state is forced at the end
     //  Choice[Data_Len+1] = 12;
