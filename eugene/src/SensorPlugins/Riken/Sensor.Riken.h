@@ -41,9 +41,11 @@ class SensorRiken : public Sensor
 
  public:
   SensorRiken   (int);
-  ~SensorRiken  ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorRiken    ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorRiken * builder0( int n ) {  return new SensorRiken(n);}

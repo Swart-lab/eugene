@@ -131,10 +131,17 @@ void SensorRiken :: Init (DNASeq *X)
   if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
 }
 
+// -----------------------
+//  ResetIter.
+// -----------------------
+void SensorRiken :: ResetIter ()
+{
+}
+
 // -------------------------
 //  GiveInfo Content Riken.
 // -------------------------
-void SensorRiken :: GiveInfo(DNASeq *X, int pos, DATA *d)
+void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   // Calcul de la position par rapport aux genes RAFL (Riken Ara.Full-Length)
   // valeurs de RAFLpos:
@@ -200,4 +207,11 @@ void SensorRiken :: GiveInfo(DNASeq *X, int pos, DATA *d)
     if ( (RAFLpos == 1) || ((RAFL[RAFLindex]->sens == 1) && (RAFLpos >= 1) ) )
       d->ContentScore[12]+= RAFLPenalty;     //UTR3'R
   }
+}
+
+// ---------------------------
+//  GiveInfoAt Content Riken.
+// ---------------------------
+void SensorRiken :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
+{
 }
