@@ -289,7 +289,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
-	  MS->GetInfoSpAt(Type_Splice, X, k, &dTmp);
+	  MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
 
 	  DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
 		     dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
@@ -297,7 +297,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 		     dTmp.sig[DATA::Acc].weight[Signal::ReverseNo]);
 	  
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
-	  if(MS->GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
+	  if(MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp)) {
 	    DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
 		       dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
 	    AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
@@ -361,7 +361,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       
       // calcul des sites d'epissage internes a l'exon
       for (i = ThisBlock->Start+EstM+1; !Inc && i <= ThisBlock->End-EstM-1; i++) {
-	MS->GetInfoSpAt(Type_Splice, X, i, &dTmp);
+	MS->GetInfoSpAt(Type_Acc|Type_Don, X, i, &dTmp);
 	DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
 		   dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
 	DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
@@ -599,7 +599,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	
 	for (i = from; i <= to; i++) {
 	  state = pred->getStateForPos(i+1);
-	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3)
+	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3 )
 	    ConsistentEST = 0;
 	}
       }      
