@@ -163,29 +163,28 @@ MarkovConst.val		0.25
 MarkovConst.minGC[0]	0
 MarkovConst.maxGC[0]	100
 #
-##### Sensor SplicePlantWAM #####
+##### Sensor SpliceWAM #####
 #
-SplicePlantWAM.TPdonfile	WAM.ARA.DON.L9.TP.
-SplicePlantWAM.FPdonfile	WAM.ARA.DON.L9.FP.
-SplicePlantWAM.TPaccfile	WAM.ARA.ACC.L7.TP.
-SplicePlantWAM.FPaccfile	WAM.ARA.ACC.L7.FP.
-SplicePlantWAM.beforedon	3
-SplicePlantWAM.afterdon		4
-SplicePlantWAM.beforeacc	2
-SplicePlantWAM.afteracc		3
-SplicePlantWAM.order		1
-SplicePlantWAM.coef		2.9004
-SplicePlantWAM.pen		7.5877
+SpliceWAM.MarkovianOrder	1
+SpliceWAM.donmodelfilename	WAM/WAM.ARA.DON.L9
+SpliceWAM.NbNtBeforeGT	3
+SpliceWAM.NbNtAfterGT	4
+SpliceWAM.DonScaleCoef	2.9004
+SpliceWAM.DonScalePenalty	-7.5877
+SpliceWAM.accmodelfilename	WAM/WAM.ARA.ACC.L7
+SpliceWAM.NbNtBeforeAG	2
+SpliceWAM.NbNtAfterAG	3
+SpliceWAM.AccScaleCoef	2.9004
+SpliceWAM.AccScalePenalty	-7.5877
 #
 ##### Sensor StartWAM #####
 #
-StartWAM.TPstartfile	WAM.ARA.START9.
-StartWAM.FPstartfile	WAM.ARA.START9.FP.
-StartWAM.beforestart	3
-StartWAM.afterstart	3
-StartWAM.order		1
-StartWAM.coef		0.1594
-StartWAM.pen		3.1439
+StartWAM.modelfilename	WAM/WAM.ARA.START9
+StartWAM.NbNtBeforeATG	3
+StartWAM.NbNtAfterATG	3
+StartWAM.MarkovianOrder	1
+StartWAM.ScaleCoef	0.1594
+StartWAM.ScalePenalty	-3.1439
 #
 ##### Sensor Tester #####
 #
@@ -207,7 +206,7 @@ Sensor.StartWAM.use	FALSE
 Sensor.NG2.use		FALSE
 Sensor.SPred.use	FALSE
 Sensor.GSplicer.use	FALSE
-Sensor.SplicePlantWAM.use FALSE
+Sensor.SpliceWAM.use 	FALSE
 Sensor.SpliceConst.use	FALSE
 Sensor.IfElse.use		TRUE
 #
@@ -244,7 +243,7 @@ Sensor.NG2		1	#
 Sensor.SPred		1	#
 Sensor.GSplicer		1	#
 Sensor.SpliceConst	1	#
-Sensor.SplicePlantWAM   1       #
+Sensor.SpliceWAM   1       #
 Sensor.MarkovIMM	1	#
 Sensor.MarkovProt	1	#
 Sensor.MarkovConst	1	#
