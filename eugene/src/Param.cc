@@ -308,10 +308,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
 // ------------------------
 void Parameters :: ShowUsage (void)
 {
-  fprintf(stderr, "\nUsage: EuGene [-A] [-b levels] [-B] [-c olap]  [-d]  [-D<parameter>=<value>] [-E] [-f]\n"
-	  "              [-g graph_name]  [-G]  [-h] [-l len] [-m matrix] [-M matrix] [-n 0|1|2]]\n"
-	  "              [-o offset]  [-O]  [-p a|d|g|h|H|l|s]  [-r]  [-R]  [-s]  [-t] [-u start]\n"
-	  "              [-v end]  [-w window]  [-x xres]  [-y yres]  [-Z coord]      FASTA files\n");
+  fprintf(stderr, "\nUsage: EuGene [-A params] [-b levels] [-B] [-c olap] [-d] [-D<parameter>=<value>] \n"
+	  "           [-E] [-f] [-g graph_name] [-G] [-h] [-l len] [-m matrix] [-M matrix] [-n 0|1|2]]\n"
+	  "           [-o offset] [-O] [-p a|d|g|h|H|l|s] [-r] [-R] [-s] [-t matrix] [-u start]\n"
+	  "           [-v end] [-w window] [-x xres] [-y yres] [-Z coord]     FASTA files\n");
   fprintf(stderr, "---------------------------------------------------------------------\n");
   exit(1);
 }
