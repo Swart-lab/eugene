@@ -112,7 +112,9 @@ extern int      optind;
 #include "SpliceNP.h"
 #endif
 #endif
+extern "C"{
 #include "../GDIF/gdIF.h"
+}
 #include "clef.h"
 
 // Les longueurs. 
