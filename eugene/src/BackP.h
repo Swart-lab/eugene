@@ -27,7 +27,7 @@ class BackPoint
     void BackTrace(char *Choix);
     void Update(double cost);
     BackPoint *BestUsable(int pos, unsigned char mask, int len,double *cost);
-    BackPoint *StrictBestUsable(int pos, unsigned char mask, int len,double *cost);
+    BackPoint *StrictBestUsable(int pos, int len,double *cost);
     void Zap();
     
     char State;
@@ -121,13 +121,13 @@ void BackPoint :: BackTrace (char *Choix)
   char etat;
   
   pos = It->StartPos;
-  etat = It->State;
+  etat = (It->State >= 12 ? 12 : It->State);
   It  = It->Origin;
   
   do {
     for (i = pos; i > It->StartPos; i--) Choix[i] = etat;
     pos = It->StartPos;
-    etat = It->State;
+    etat = (It->State >= 12 ? 12 : It->State);
     It = It->Origin;
   }  while (It != NULL);
 }
@@ -163,17 +163,17 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, double 
 }
 
 // ----------------------------------------------------------------
-// Returns the best BackPoint such that the SwitchType matches the
-// mask and the BackPoint is at least len nuc. far from pos
+// Returns the best BackPoint and the BackPoint is at least len
+// nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: StrictBestUsable(int pos, unsigned char mask, int len, double *cost)
+BackPoint *BackPoint :: StrictBestUsable(int pos, int len, double *cost)
 {
   BackPoint *It = this->Next;
   double add = 0.0;
 
   do {
     add += It->Additional;
-    if (((It->StartPos < pos-len) && (It->SwitchType & mask)) || (It->StartPos < 0)) {
+    if ((It->StartPos < pos-len) || (It->StartPos < 0)) {
       *cost = add+It->Cost;
       return It;
     }
