@@ -66,6 +66,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
 
   int    j, k;
+  int MinCDSLen;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior,IntronFivePrior;
   double SplicedStopPen;
   //  double PredictTime = cpuTime();
@@ -86,6 +87,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   FivePrior  = PAR.getD("EuGene.FivePrimePrior");
   ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
   IntronFivePrior = InPrior;
+  MinCDSLen = PAR.getI("Output.MinCDSLen");
 
   Data_Len = TheSeq->SeqLen;
   
@@ -890,7 +892,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     }
   }
 
-  pred = LBP[j].BackTrace();
+  pred = LBP[j].BackTrace(MinCDSLen);
   
   pred->OptimalPath = maxi+NormalizingPath;
   // Sanity check ! A feasible path has not been found ?
