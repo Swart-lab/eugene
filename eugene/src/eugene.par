@@ -395,10 +395,10 @@ Genetic.Seed 4
 #
 #
 ######### LINESEARCH ###########################################
-LineSearch.NbMaxCycle 1
-LineSearch.NbMinCycle 1
+LineSearch.NbMaxCycle 10
+LineSearch.NbMinCycle 2
 LineSearch.NbMaxStab 2
-LineSearch.DivInter 10
+LineSearch.DivInter 4
 LineSearch.Alpha 0.6
 LineSearch.EvolutionMini 0.001
 LineSearch.Seed 1
