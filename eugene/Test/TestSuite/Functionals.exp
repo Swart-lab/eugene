@@ -11,17 +11,22 @@
 
 
 foreach TEST $FunctionalTestList {
+
+    # To follow execution
+    puts "Performing $TEST functional test"
+
     foreach seq $SEQ($TEST) {
 	# Local variables 
 	set test_std 0
 	set test_png 0
 
 	# Preparation of the parameter file with the correct sensors
-	foreach sensor $SensorsList($TEST) {set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
+	foreach sensor $SensorsList($TEST) \
+	    {set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
 	ModifyParaValue ${EUGENE}.par  NewValue${TEST}
 
 	# Open reference file
-	set f [open $OUTPUT_DIR/$FILE_REF($TEST) {RDONLY}]
+	set f [open $OUTPUT_DIR/$FILE_REF($TEST)_test {RDONLY}]
 	set reference [read -nonewline $f]
 	close $f
 
@@ -29,7 +34,7 @@ foreach TEST $FunctionalTestList {
 	set l [GetSeqLength $SEQ_DIR/$seq]
 
 	# Run EuGene
-	eval spawn $EUGENE_DIR/$EUGENE $SEQ_DIR/$seq $OPTIONS($TEST) -l $l
+	eval spawn $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$seq
 
 	# Checking the output
 	match_max 10000
@@ -39,7 +44,7 @@ foreach TEST $FunctionalTestList {
 	}
 
 	# Checking the graphical output
-	set test_png [diff $OUTPUT_DIR/$FILE_REF($TEST).000.png $IMG($TEST)]
+	set test_png [diff $OUTPUT_DIR/$FILE_REF($TEST).png $IMG($TEST)]
 
 	# No regression if the 2 tests are passed
 	if {$test_std==1 && $test_png==1} {
@@ -47,14 +52,14 @@ foreach TEST $FunctionalTestList {
 	    exec rm $IMG($TEST)
 	} else {
 	    fail "${TEST}"
-	    if {$test_std==0} {
-		eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$seq $OPTIONS($TEST) \
-		    >& $TRACE_DIR/$FILE_REF($TEST)_std
+	    if {$test_std == 0} {
+		eval exec $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l \
+		    $SEQ_DIR/$seq >& $TRACE_DIR/$FILE_REF($TEST)
 		# Remove the first lines related to version number
 		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
 	    }
-	    if {$test_png != 1} {
-		exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).000.png
+	    if {$test_png == 0} {
+		exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).png
 	    }
 	    catch {exec rm $IMG($TEST)}
 	}

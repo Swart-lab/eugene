@@ -12,18 +12,23 @@
 
 foreach TEST $AllSensorsList {
 
+    # To follow execution
+    puts "Performing $TEST unit test"
+
     # Run EuGene
     if {$TEST != "Est"} {
-	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=TRUE 2> stderr > stdout
+	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	    -D Sensor.${TEST}.use=TRUE $SEQ_DIR/$SEQ(Sensor) \
+	2> tmp%stderr > tmp%stdout
     } else {
-	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE 2> stderr > stdout
+	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	    -D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE \
+	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
     }
     
-    set out [open stdout {RDONLY}]
-    set err [open stderr {RDONLY}]
-    set std [open $TEST w+]
+    set out [open tmp%stdout {RDONLY}]
+    set err [open tmp%stderr {RDONLY}]
+    set std [open tmp%$TEST w+]
     
     # Copy stderr and stdout in the reference file
     set f [read -nonewline $err]
@@ -35,18 +40,25 @@ foreach TEST $AllSensorsList {
     close $err
     close $std
 
-    exec rm stderr stdout
+    exec rm tmp%stderr tmp%stdout
 
     # Remove the first lines related to version number
-    RemoveFirstLines $TEST
+    RemoveFirstLines tmp%$TEST
 
-    set test [diff $OUTPUT_DIR/Output_${TEST} $TEST]
-    if {$test == 1} {
+    # Compare ingnoring the case of letters (Linux inf/SUN Inf)
+    if {[file exists tmp%testdiff] == 1} {
+	exec rm tmp%testdiff
+    }
+    catch {exec diff -i $OUTPUT_DIR/Output_${TEST} tmp%$TEST > tmp%testdiff }
+    set t [open tmp%testdiff {RDONLY}]
+    set difference [read $t]
+    close $t
+    if {$difference == ""} {
 	pass "${TEST}"
-	exec rm $TEST
+	exec rm tmp%$TEST
     } else {
 	fail "${TEST}"
-	exec mv $TEST $TRACE_DIR/Output_${TEST}
+	exec mv tmp%$TEST $TRACE_DIR/Output_${TEST}
     }
 
 }
