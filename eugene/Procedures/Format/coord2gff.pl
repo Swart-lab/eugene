@@ -41,7 +41,7 @@ while (<COORD>){
     $coord =~ s/-//;
     foreach (@coord) { s/-// }
     for ($i=0;$i<$#coord;$i+=2) {
-      if ($#coord==2) {
+      if ($#coord==1) {
 	$feature="$Single";
       }
       elsif ( ($i==0) || ($i==$#coord-1)) {
