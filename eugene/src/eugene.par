@@ -2,9 +2,9 @@
 # Edité pour EuGeneAS 1.64 (291003)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	291003        # Parameter file version (date)
+EuGene.versionPAR	291003          # Parameter file version (date)
 EuGene.organism		Arabidopsis
-EuGene.PluginsDir	/home/cros/EuGeneTk_OPTI/EuGene/PLUGINS/      # The plugins directory
+EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
 ##### Minimum lengths #####
 #
