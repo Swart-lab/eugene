@@ -17,12 +17,20 @@
 # Contents: compilation of the root directory
 # ------------------------------------------------------------------
 
+if LINUX_OS
+export sensors_ldflags = -shared
+export eugene_CXXFLAGS = -rdynamic
+endif
 
-export eugene_CXXFLAGS = -O6 -funroll-loops -fomit-frame-pointer \
-                           -fPIC -frtti -Wall -pipe -rdynamic
+if SOLARIS_OS
+export sensors_ldflags = -shared
+export eugene_CXXFLAGS = 
+endif
 
-
- 
+if MACOS_OS
+export sensors_ldflags = -bundle -flat_namespace -undefined suppres
+export eugene_CXXFLAGS = 
+endif
 
 EXTRA_DIST = reconf configure  config/* CREATE_LINKS \
 	     doc/EuGeneDoc.pdf doc/Sequences/SYNO_ARATH.fasta* \
