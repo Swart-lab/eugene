@@ -9,6 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
+#include <iostream>
 #include <unistd.h>
 #include <math.h>
 
@@ -20,7 +21,7 @@
 // if the argument seed is "ALEA" then use time and pid to compute the seed,
 // else use the integer defined in seed
 //-------------------------------------------------------
-Random::Random(string seed)
+Random::Random(std::string seed)
 {
   Seed = seed;
   int s = atoi(seed.c_str());
@@ -49,9 +50,11 @@ int Random::RandBoundedInt (int bound)
   int n;
   if (IsInitialized)
     n = random()% bound;
-  else
-    {cerr <<"ERROR: Call to Random::RandBoundedInt method without having initialized the generator."
-	  <<endl; exit(100);}
+  else {
+    std::cerr <<"ERROR: Call to Random::RandBoundedInt method without having initialized the generator."
+	      <<std::endl; 
+    exit(100);
+  }
 
     return n;
 }

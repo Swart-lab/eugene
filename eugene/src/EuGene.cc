@@ -803,7 +803,7 @@ int main  (int argc, char * argv [])
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
 
-  if ((string) PAR.getC("ParaOptimization.Use") ==  "TRUE") 
+  if ((std::string) PAR.getC("ParaOptimization.Use") ==  "TRUE") 
     OPTIM.ParaOptimize(argc, argv);
   else 
     {

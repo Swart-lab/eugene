@@ -9,7 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
+#include <iostream>
 #include <fstream>
 
 #include "ParaOptimization.h"
@@ -46,7 +46,7 @@ ParaOptimization::~ParaOptimization(void)
 //-------------------------------------------------------
 void ParaOptimization::ParaOptimize (int argc, char * argv [])
 { 
-  string filename;
+  std::string filename;
   OptiAlgorithm* algo;
   bool is_chaining = false;
 
@@ -63,7 +63,7 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
   // Write new parameters file
   algo = Algorithms.back();
   filename = PAR.WriteParam( ExecutableName.c_str(), algo->ParaName, algo->Para);
-  cerr <<endl << "A new parameter file " << filename << " is written." << endl;
+  std::cerr <<std::endl << "A new parameter file " << filename << " is written." << std::endl;
 }
 
 
@@ -73,10 +73,10 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
 void ParaOptimization::Init(int argc, char * argv [])
 {
   FILE   *fp;
-  string algo_name;
+  std::string algo_name;
 
   ExecutableName = argv[0];
-  IsTest = (((string) PAR.getC("ParaOptimization.Test") == "TRUE") ? true : false);
+  IsTest = (((std::string) PAR.getC("ParaOptimization.Test") == "TRUE") ? true : false);
   // Inhibit graphic mode
   PAR.set("Output.graph", "FALSE");
 
@@ -91,24 +91,28 @@ void ParaOptimization::Init(int argc, char * argv [])
       if (algo_name == "GENETIC+LINESEARCH") {
 	Algorithms.push_back( new Genetic() );
 	Algorithms.push_back( new LineSearch() );
-      } else 
-	{cerr <<"ERROR: Bad optimization algorithm "<<algo_name<<" in the parameter file"<<endl; exit(100);}
+      } else {
+	std::cerr <<"ERROR: Bad optimization algorithm "<<algo_name<<" in the parameter file"<<std::endl;
+	exit(100);
+      }
 
   if (!IsTest) {
     int sequence;
     TrueCoordFile = PAR.getC("ParaOptimization.TrueCoordFile");
 
     // Update the sequences list
-    cout << "Loading sequence(s) file(s) ...";
+    std::cout << "Loading sequence(s) file(s) ...";
     for (sequence = optind; sequence < argc ; sequence++) {
       fp = (*argv[sequence] ? FileOpen (NULL, argv[sequence], "r") : stdin);    
-      if (fp == NULL)
-	{cerr <<"ERROR: Cannot open fasta file "<<argv[sequence]<<endl; exit(100);}        
+      if (fp == NULL) {
+	std::cerr <<"ERROR: Cannot open fasta file "<<argv[sequence]<<std::endl; 
+	exit(100);
+      }        
       Sequences.push_back( new DNASeq(fp) );    
       if (fp != stdin) fclose(fp);
       SeqNames.push_back(argv[sequence]);
     }
-    cout << "done (" << Sequences.size() << " sequence(s))" << endl;
+    std::cout << "done (" << Sequences.size() << " sequence(s))" << std::endl;
   
     // Update the master sensors list
     for (sequence=0; sequence<(int)Sequences.size(); sequence++) {
@@ -130,8 +134,8 @@ double ParaOptimization::ParaEvaluate (void)
 
   double fitness = 0;
   unsigned int i;
-  string cmde;
-  ifstream feval;
+  std::string cmde;
+  std::ifstream feval;
   double spg, sng, spe, sne;
   Prediction* pred;
   char* c = "sequence"; char ** cc = &c;
@@ -164,7 +168,7 @@ double ParaOptimization::ParaEvaluate (void)
       cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " tmp%predictions  -ps -o300 > tmp%evaluation";
       system(cmde.c_str());
 
-      feval.open("tmp%evaluation",ios::in);
+      feval.open("tmp%evaluation",std::ios::in);
       feval >> spg >> sng >> spe >> sne;
       feval.close(); 
 

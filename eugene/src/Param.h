@@ -9,7 +9,6 @@
 #endif
 
 #include <string>
-using namespace std;
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -62,8 +61,8 @@ class Parameters
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
   void   setD (const char *key, double n);
-  string WriteParam (const char* para_file, vector<string> para_name, 
-		       vector<double> para_val);
+  std::string WriteParam (const char* para_file, std::vector<std::string> para_name, 
+			  std::vector<double> para_val);
 
   void ResetIter(void);
 };

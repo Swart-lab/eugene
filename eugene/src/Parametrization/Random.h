@@ -19,9 +19,9 @@
 class Random {
 
  public:
-  string Seed;
+  std::string Seed;
 
-  Random(string seed);
+  Random(std::string seed);
   Random(void);
   int RandBoundedInt (int bound);
   double RandUniform(void);

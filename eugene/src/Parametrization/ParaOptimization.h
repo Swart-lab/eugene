@@ -20,12 +20,10 @@
 #include "../EuGene/MSensor.h"
 #include "../EuGene/DNASeq.h"
 
-
-
 class ParaOptimization {
 
  public:
-  vector <OptiAlgorithm*> Algorithms;
+  std::vector <OptiAlgorithm*> Algorithms;
   int                     AlgoIndex;       // index of running algorithm
 
   ~ParaOptimization(void);
@@ -33,11 +31,11 @@ class ParaOptimization {
   double ParaEvaluate (void);  
 
  private:
-  vector <MasterSensor*>  MSensors;
-  vector <DNASeq*>        Sequences;
-  vector<string>          SeqNames;
-  string                  TrueCoordFile;
-  string                  ExecutableName; // first part of parameter file
+  std::vector <MasterSensor*>  MSensors;
+  std::vector <DNASeq*>        Sequences;
+  std::vector<std::string>          SeqNames;
+  std::string                  TrueCoordFile;
+  std::string                  ExecutableName; // first part of parameter file
   bool                    IsTest;         // if true then test mode: 
                                           // do not read sequences and related info
                                           // evaluate para with the method NormalLaw

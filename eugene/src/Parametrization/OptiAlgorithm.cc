@@ -9,7 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
+#include <iostream>
 #include <iomanip>
 
 
@@ -26,22 +26,24 @@ extern Parameters PAR;
 OptiAlgorithm::OptiAlgorithm(void)
 {
   int n, c;
-  string relation;
-  vector <int> v;
+  std::string relation;
+  std::vector <int> v;
 
-  IsTracing = ( (((string) PAR.getC("ParaOptimization.Trace")) == "TRUE") ? true : false );
+  IsTracing = ( (((std::string) PAR.getC("ParaOptimization.Trace")) == "TRUE") ? true : false );
 
   NbParaCluster = PAR.getI("ParaOptimization.NbCluster");
   for (int i = 0; i < NbParaCluster; i++) {
     ParaClusters.push_back( v );
-    relation = (string) PAR.getC("ParaOptimization.Cluster", i);
+    relation = (std::string) PAR.getC("ParaOptimization.Cluster", i);
     if (relation == "IDENTICAL")
       ParaClusterRelations.push_back(IDENTICAL); 
     else
       if (relation == "LINKED")
 	ParaClusterRelations.push_back(LINKED); 
-      else 
-	{cerr <<"ERROR: Bad cluster relation "<<relation<<"  in the parameter file."<<endl; exit(100);}
+      else 	{
+	std::cerr <<"ERROR: Bad cluster relation "<<relation<<"  in the parameter file."<<std::endl; 
+	exit(100);
+      }
   }
 
   n = PAR.getI("ParaOptimization.NbParameter");
@@ -54,22 +56,24 @@ OptiAlgorithm::OptiAlgorithm(void)
     ParaClusters[c].push_back( i );
   }
   for (int i=0; i<n; i++) 
-    if ( ParaName[i][ParaName[i].size()-1] != '*' )
-      {cerr <<"ERROR: Parameters to optimize must have a name finishing by '*'."<<endl; exit(100);}
+    if ( ParaName[i][ParaName[i].size()-1] != '*' ) {
+      std::cerr <<"ERROR: Parameters to optimize must have a name finishing by '*'."<<std::endl;
+      exit(100);
+    }
 
   // Set numerical precision for displayed values
-  cout.setf(ios::showpoint);
-  cout << setiosflags (ios::fixed);
-  cout.precision(4);
+  std::cout.setf(std::ios::showpoint);
+  std::cout << setiosflags (std::ios::fixed);
+  std::cout.precision(4);
 }
 
 //-------------------------------------------------------
 // return a string with maximum 6 signs
 // if more than 6 letters returns: the 2 first letters + '..' + the 2 last
 //-------------------------------------------------------
-string OptiAlgorithm::ReduceName(string s)
+std::string OptiAlgorithm::ReduceName(std::string s)
 {
-  string ss, s0, s1, sn2, sn1;
+  std::string ss, s0, s1, sn2, sn1;
   int n = s.length();
   
   if (n > 6) {

@@ -448,8 +448,8 @@ Parameters :: ~Parameters ()
 //         in case of no comment the result of strchr(line,'#') was: (null).
 // Evaluation: the name of the written parameter file 
 // -----------------------------------------------------------
-string Parameters::WriteParam (const char* para_file, vector<string> para_name, 
-		     vector<double> para_val)
+std::string Parameters::WriteParam (const char* para_file, std::vector<std::string> para_name, 
+				    std::vector<double> para_val)
 {
   FILE   *fp, *fp_opti;
   char line[MAX_LINE], new_line[MAX_LINE];
@@ -476,20 +476,20 @@ string Parameters::WriteParam (const char* para_file, vector<string> para_name,
     if (line[0] != '#') 
       if (sscanf(line, "%s %s", key, val)==2) 
 	for (i=0; i<para_name.size(); i++) 
-	  if ( para_name[i] == (string) key ) {
+	  if ( para_name[i] == (std::string) key ) {
 	    find_para = true;
 	    sprintf(new_line,"%s\t%f\n", key, para_val[i]);
 	    i = para_name.size();
 	  }
     if (!find_para)
-      new_line = line;
+      for (int i=0; i<MAX_LINE; i++) new_line[i] = line[i];
     fprintf(fp_opti,"%s",new_line);
   }
 
   fclose(fp);
   fclose(fp_opti);
 
-  return (string) filename;
+  return (std::string) filename;
 }
 
 
