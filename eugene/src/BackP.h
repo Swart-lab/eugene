@@ -8,6 +8,7 @@
 // plus cher).
 
 #include "Const.h"
+#include "Prediction.h"
 
 const unsigned char SwitchStart      = 0x1;
 const unsigned char SwitchStop       = 0x2;
@@ -15,8 +16,8 @@ const unsigned char SwitchAcc        = 0x4;
 const unsigned char SwitchDon        = 0x8;
 const unsigned char SwitchTransStart = 0x10;
 const unsigned char SwitchTransStop  = 0x20;
-const unsigned char SwitchIns = 0x40;
-const unsigned char SwitchDel  = 0x80;
+const unsigned char SwitchIns        = 0x40;
+const unsigned char SwitchDel        = 0x80;
 const unsigned char SwitchAny        = 0xFF; 
 
 class BackPoint
@@ -39,7 +40,7 @@ class BackPoint
     void InsertNew(char state, unsigned char Switch,int pos, double cost,BackPoint *Or);
     void Print();
     void Dump();
-    void BackTrace(char *Choix);
+    Prediction* BackTrace();
     inline void Update(double cost) {  Next->Additional += cost; };
     BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost);
     BackPoint *StrictBestUsable(int pos, int len,REAL *cost);

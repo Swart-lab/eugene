@@ -38,6 +38,7 @@ BackPoint :: BackPoint  (char state, int pos, double cost)
   Additional = 0.0;
   Next = Prev = Origin = NULL;
 }
+
 // ----------------------------------------------------------------
 //  Default destructor.
 // ----------------------------------------------------------------
@@ -46,6 +47,7 @@ BackPoint :: ~BackPoint  ()
   Prev->Next = Next;
   Next->Prev = Prev;
 }
+
 // ----------------------------------------------------------------
 // Insert  a new backpoint
 // ----------------------------------------------------------------
@@ -64,6 +66,7 @@ void BackPoint :: InsertNew(char state, unsigned char Switch, int pos,
     this->Next = It;
   }
 }
+
 // ----------------------------------------------------------------
 // Prints the BackPoint contents
 // ----------------------------------------------------------------
@@ -89,26 +92,29 @@ void BackPoint :: Dump ()
 }
 
 // ----------------------------------------------------------------
-// BackTrace along a BackPoint and store the parsing in Choix
+// BackTrace along a BackPoint and build a prediction object
 // ----------------------------------------------------------------
-void BackPoint :: BackTrace (char *Choix)
+Prediction* BackPoint :: BackTrace ()
 {
-  BackPoint* It = this->Next;
-  int pos,i;
+  Prediction *pred = new Prediction();
+  BackPoint  *It   = this->Next;
+  int  pos;
   char etat;
   
-  pos = It->StartPos;
-  etat =It->State;
-  It  = It->Origin;
+  pos  = It->StartPos;
+  etat = It->State;
+  It   = It->Origin;
   
   while (It != NULL) {
-    for (i = pos; i > It->StartPos; i--) Choix[i] = etat;
-    pos = It->StartPos;
+    pred->add(pos, etat);
+    pos  = It->StartPos;
     etat = It->State;
-    It = It->Origin;
-  }  
-}
+    It   = It->Origin;
+  }
+  pred->setPos(0, pred->getPos(0)-1);
 
+  return pred;
+}
 
 // ----------------------------------------------------------------
 // Returns the best BackPoint. If the SwitchType matches the mask
