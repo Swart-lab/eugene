@@ -23,7 +23,7 @@ extern Parameters PAR;
 // ----------------------
 SensorPlotter :: SensorPlotter (int n, DNASeq *X) : Sensor(n)
 {
-  type = Type_Multiple;
+  type = Type_None;
 
   // Save parameters to limit the map access number
   window  = PAR.getI("Output.window");
