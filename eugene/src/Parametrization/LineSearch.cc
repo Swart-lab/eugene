@@ -142,10 +142,11 @@ void LineSearch :: Optimize(bool is_chaining)
     ReduceSearch();
     n++;
 
-  std::cout <<std::endl << "Optimal point of the cycle:" <<std::endl; 
-  for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
-  for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
-  std::cout <<"Fitness="<<FitOpt<<std::endl;
+    std::cout <<std::endl << "Optimal point of the cycle:" <<std::endl; 
+    for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+    for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
+    std::cout <<"Fitness="<<FitOpt<<std::endl;
+    fflush(stdout); fflush(stderr);
   }
   
   std::cout <<std::endl<< "---------------------------------------------------------------"<<std::endl;
@@ -292,5 +293,6 @@ void LineSearch::PrintParam(void)
       std::cout << Para[i] << "\t";
 
   std::cout << "Fitness = " << Fitness << "\n";
+  fflush(stdout); fflush(stderr);
 }
 
