@@ -11,14 +11,16 @@ extern Parameters PAR;
 // ----------------------
 SensorIfElse :: SensorIfElse (int n) : Sensor(n)
 {
-  char * sensorName;
+  char * sensorName = new char[FILENAME_MAX+1];
+  char * pluginsDir;
 
-  sensorName = new char[FILENAME_MAX+1];
-  strcpy(sensorName, "./PLUGINS/Sensor.");
+  pluginsDir = PAR.getC("EuGene.PluginsDir");
+
+  strcpy(sensorName, pluginsDir);
+  strcat(sensorName, "Sensor.");
   strcat(sensorName, PAR.getC("IfElse.SensorIf"));
   strcat(sensorName, ".so");
   sensorLIf =  new SensorLoader (sensorName);
-
   if (!sensorLIf->LastError()) {
     fprintf(stderr," -If  : Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf"),0);
     sensorIf = sensorLIf->MakeSensor(0);
@@ -29,8 +31,9 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
     exit(2);
   }
   
-  strcpy(sensorName, "./PLUGINS/Sensor.");
-  strcat(sensorName, PAR.getC("IfElse.SensorElse"));
+  strcpy(sensorName, pluginsDir);
+  strcat(sensorName, "Sensor.");
+  strcat(sensorName, PAR.getC("IfElse.SensorElse") );
   strcat(sensorName, ".so");
   sensorLElse = new SensorLoader (sensorName);
   if (!sensorLElse->LastError()) {
