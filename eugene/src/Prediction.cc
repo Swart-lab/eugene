@@ -134,33 +134,32 @@ int Prediction :: nbExon (int geneNumber)
   int i     = (int)vPos.size()-1;
   int nb    = 0;
   int stUtr = 0;
+  int utr53 = 0;
 
-  // --------------------------------------
-  // On se positionne sur le 1er exon du 1er gene.
-  // ATTENTION aux utrs en debut de prediction, cas problematiques :
-  //    -> Cas 1 :
-  //         - seq.1.1.0 Utr5   - ...  Gene 1
-  //         - seq.1.2.0 Utr5   + ...  Gene 2   <---
-  //         - seq.1.2.1 E.Init + ...  Gene 2
-  //    -> Cas 2 :
-  //         - seq.1.1.0 Utr5   + ...  Gene 1
-  //         - seq.1.2.0 Utr5   + ...  Gene 1
-  //         - seq.1.2.1 E.Init + ...  Gene 1   <---
-  // --------------------------------------
+  // ATTENTION aux utrs en debut de prediction.
   while(vState[i] >= InterGen) {
-    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3F) {
-      if (stUtr == -1)
-	break;
+    if (vState[i] == UTR5F) {
+      if (stUtr == -1  ||  utr53 == 3) break;
       stUtr = 1;
+      utr53 = 5;
     }
-    if (vState[i] >= UTR5R  &&  vState[i] <= UTR3R) {
-      if (stUtr == 1)
-	break;
+    if (vState[i] == UTR5R) {
+      if (stUtr == 1  ||  utr53 == 3) break;
       stUtr = -1;
+      utr53 = 5;
+    }
+    if (vState[i] == UTR3F) {
+      if (stUtr == -1  ||  utr53 == 5) break;
+      stUtr = 1;
+      utr53 = 3;
+    }
+    if (vState[i] == UTR3R) {
+      if (stUtr == 1  ||  utr53 == 5) break;
+      stUtr = -1;
+      utr53 = 3;
     }
     i--;
   }
-
   for(int j=1; j<geneNumber; j++) {
     while(vState[i] <= InterGen)
       i--;
@@ -183,33 +182,32 @@ int Prediction :: lenCDS (int geneNumber)
   int i     = (int)vPos.size()-1;
   int len   = 0;
   int stUtr = 0;
+  int utr53 = 0;
   
-  // --------------------------------------
-  // On se positionne sur le 1er exon du 1er gene.
-  // ATTENTION aux utrs en debut de prediction, cas problematiques :
-  //    -> Cas 1 :
-  //         - seq.1.1.0 Utr5   - ...  Gene 1
-  //         - seq.1.2.0 Utr5   + ...  Gene 2   <---
-  //         - seq.1.2.1 E.Init + ...  Gene 2
-  //    -> Cas 2 :
-  //         - seq.1.1.0 Utr5   + ...  Gene 1
-  //         - seq.1.2.0 Utr5   + ...  Gene 1
-  //         - seq.1.2.1 E.Init + ...  Gene 1   <---
-  // --------------------------------------
+  // ATTENTION aux utrs en debut de prediction.
   while(vState[i] >= InterGen) {
-    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3F) {
-      if (stUtr == -1)
-	break;
+    if (vState[i] == UTR5F) {
+      if (stUtr == -1  ||  utr53 == 3) break;
       stUtr = 1;
+      utr53 = 5;
     }
-    if (vState[i] >= UTR5R  &&  vState[i] <= UTR3R) {
-      if (stUtr == 1)
-	break;
+    if (vState[i] == UTR5R) {
+      if (stUtr == 1  ||  utr53 == 3) break;
       stUtr = -1;
+      utr53 = 5;
+    }
+    if (vState[i] == UTR3F) {
+      if (stUtr == -1  ||  utr53 == 5) break;
+      stUtr = 1;
+      utr53 = 3;
+    }
+    if (vState[i] == UTR3R) {
+      if (stUtr == 1  ||  utr53 == 5) break;
+      stUtr = -1;
+      utr53 = 3;
     }
     i--;
   }
-
   for(int j=1; j<geneNumber; j++) {
     while(vState[i] <= InterGen)
       i--;
