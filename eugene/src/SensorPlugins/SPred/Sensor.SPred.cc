@@ -170,21 +170,21 @@ void SensorSPred :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   int i;
   if( iterAccF < (int)vPosAccF.size()  &&  vPosAccF[iterAccF] == pos ) {
-      d->Acc[0] = vValAccF[iterAccF];
+    d->Acc[0] = vValAccF[iterAccF];
     iterAccF++;
   }
   i = (int)vPosAccR.size();
   if( abs(iterAccR) < i  &&  vPosAccR[iterAccR + i-1] == pos ) {
-      d->Acc[1] = vValAccR[iterAccR + i-1];
+    d->Acc[1] = vValAccR[iterAccR + i-1];
     iterAccR--;
   }
   if( iterDonF < (int)vPosDonF.size()  &&  vPosDonF[iterDonF] == pos ) {
-      d->Don[0] = vValDonF[iterDonF];
+    d->Don[0] = vValDonF[iterDonF];
     iterDonF++;
   }
   i = (int)vPosDonR.size();
   if( abs(iterDonR) < i  &&  vPosDonR[iterDonR + i-1] == pos ) {
-      d->Don[1] = vValDonR[iterDonR + i-1];
+    d->Don[1] = vValDonR[iterDonR + i-1];
     iterDonR--;
   }
 }
@@ -198,7 +198,7 @@ void SensorSPred :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
   if(*iter == pos)
     d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
   
-  iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos);
+  iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, greater<int>());
   if(*iter == pos)
     d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
   
@@ -206,10 +206,11 @@ void SensorSPred :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
   if(*iter == pos)
     d->Don[0] = vValDonF[iter-vPosDonF.begin()];
   
-  iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos);
+  iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, greater<int>());
   if(*iter == pos)
     d->Don[1] = vValDonR[iter-vPosDonR.begin()];
 }
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
@@ -226,4 +227,11 @@ void SensorSPred :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosDonR.size(); i++)
     PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),5);
+}
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorSPred :: PostAnalyse(Prediction *pred)
+{
 }

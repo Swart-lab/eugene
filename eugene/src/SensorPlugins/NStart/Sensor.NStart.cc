@@ -152,7 +152,7 @@ void SensorNStart :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
   if(*iter == pos)
     d->Start[0] += vValF[iter-vPosF.begin()];
   
-  iter = lower_bound(vPosR.begin(), vPosR.end(), pos);
+  iter = lower_bound(vPosR.begin(), vPosR.end(), pos, greater<int>());
   if(*iter == pos)
     d->Start[1] += vValR[iter-vPosR.begin()];
 }
@@ -167,4 +167,11 @@ void SensorNStart :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosR.size(); i++)
     PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i]-1)%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
+}
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorNStart :: PostAnalyse(Prediction *pred)
+{
 }
