@@ -17,12 +17,13 @@
 # Contents: compilation of the SPred directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.SPred.so
+noinst_PROGRAMS = Sensor.SPred.so
 Sensor_SPred_so_SOURCES = Sensor.SPred.cc Sensor.SPred.h
-Sensor_SPred_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_SPred_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

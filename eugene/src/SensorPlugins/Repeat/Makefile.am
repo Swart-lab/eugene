@@ -17,12 +17,13 @@
 # Contents: compilation of the Repeat directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Repeat.so
+noinst_PROGRAMS = Sensor.Repeat.so
 Sensor_Repeat_so_SOURCES = Sensor.Repeat.cc Sensor.Repeat.h 
-Sensor_Repeat_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_Repeat_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

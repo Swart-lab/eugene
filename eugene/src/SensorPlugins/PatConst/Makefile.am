@@ -17,12 +17,13 @@
 # Contents: compilation of the PatConst directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.PatConst.so
+noinst_PROGRAMS = Sensor.PatConst.so
 Sensor_PatConst_so_SOURCES = Sensor.PatConst.cc Sensor.PatConst.h 
-Sensor_PatConst_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_PatConst_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

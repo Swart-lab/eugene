@@ -17,12 +17,13 @@
 # Contents: compilation of the NStart directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.NStart.so
+noinst_PROGRAMS = Sensor.NStart.so
 Sensor_NStart_so_SOURCES = Sensor.NStart.cc Sensor.NStart.h 
-Sensor_NStart_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_NStart_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

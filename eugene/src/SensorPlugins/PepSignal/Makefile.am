@@ -17,12 +17,13 @@
 # Contents: compilation of the PepSignal directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.PepSignal.so
+noinst_PROGRAMS = Sensor.PepSignal.so
 Sensor_PepSignal_so_SOURCES = Sensor.PepSignal.cc Sensor.PepSignal.h 
-Sensor_PepSignal_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_PepSignal_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

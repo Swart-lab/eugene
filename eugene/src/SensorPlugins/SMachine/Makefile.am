@@ -17,12 +17,13 @@
 # Contents: compilation of the SMachine directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.SMachine.so
+noinst_PROGRAMS = Sensor.SMachine.so
 Sensor_SMachine_so_SOURCES = Sensor.SMachine.cc Sensor.SMachine.h
-Sensor_SMachine_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_SMachine_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

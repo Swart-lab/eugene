@@ -17,12 +17,13 @@
 # Contents: compilation of the NG2 directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.NG2.so
+noinst_PROGRAMS = Sensor.NG2.so
 Sensor_NG2_so_SOURCES = Sensor.NG2.cc Sensor.NG2.h 
-Sensor_NG2_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_NG2_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

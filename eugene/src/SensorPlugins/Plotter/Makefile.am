@@ -17,12 +17,13 @@
 # Contents: compilation of the Plotter directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Plotter.so
+noinst_PROGRAMS = Sensor.Plotter.so
 Sensor_Plotter_so_SOURCES = Sensor.Plotter.cc Sensor.Plotter.h
-Sensor_Plotter_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_Plotter_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~
