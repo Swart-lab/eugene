@@ -67,8 +67,8 @@ Markov.matname[0]	default.mat
 Markov.minGC[0]		0
 Markov.maxGC[0]		50
 #Markov.matname[1]	default.mat
-#Markov.minGC[1]		50
-#Markov.maxGC[1]		100
+#Markov.minGC[1]	50
+#Markov.maxGC[1]	100
 Markov.transCodant	1.0
 Markov.transIntron	1.0
 Markov.transUTR5	0.999
@@ -99,29 +99,43 @@ Repeat.UTRPenalty	0.0
 Repeat.IntronPenalty	0.1
 Repeat.ExonPenalty	1.0
 #
-# Sensors activation 
+# Homology Sensor parameters
+#
+Homology.TblastxP 	0.0094
+Homology.TblastxB 	0.0177
+Homology.protmatname	BLOSUM62
+#
+# Sensors activation
 #
 Sensor.EuStop.use	TRUE
 Sensor.NStart.use	TRUE
 Sensor.NG2.use		TRUE
 Sensor.SPred.use	TRUE
 #Sensor.Markov.use	2
-Sensor.Markov.use	TRUE
+Sensor.Markov.use	FALSE
 Sensor.BlastX.use	FALSE
 Sensor.Repeat.use	FALSE
 Sensor.Riken.use	FALSE
 Sensor.Est.use		FALSE
 Sensor.User.use		FALSE
+Sensor.Homology.use	FALSE
+Sensor.StartConst.use	FALSE
+Sensor.SpliceConst.use	FALSE
+Sensor.MarkovConst.use	TRUE
 #
 # Sensor priorities
 #
-Sensor.EuStop	1		#
-Sensor.NStart	1		# Sensor.Name Priority
-Sensor.NG2	1		#
-Sensor.SPred	1		#  
-Sensor.Markov	1		#
-Sensor.BlastX	2		#  Priority 0 -> First
-Sensor.Repeat	9		#  Priority 1 -> Second
-Sensor.Riken	7		#  ...
-Sensor.Est	2		#  Priority n -> Last
-Sensor.User	10		#
+Sensor.EuStop		1	#
+Sensor.StartConst	1	# Sensor.Name Priority
+Sensor.SpliceConst	1	#
+Sensor.NStart		1	#
+Sensor.NG2		1	#
+Sensor.SPred		1	#  
+Sensor.Markov		1	# 
+Sensor.MarkovConst	1	#
+Sensor.Est		2	#  
+Sensor.BlastX		2	#  Priority 0 -> First
+Sensor.Homology 	2	#
+Sensor.Riken		7	#  Priority 1 -> Second
+Sensor.Repeat		9	#  ...
+Sensor.User		10	#  Priority n -> Last
