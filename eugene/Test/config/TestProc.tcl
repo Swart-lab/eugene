@@ -433,7 +433,7 @@ proc PrepareReference {stdout stderr FileName} {
 #############################################################################
 proc RemoveFirstLines {file_name} {
    exec cp $file_name RemoveFirstLines.tmp
-   exec tail +3 RemoveFirstLines.tmp > $file_name
+   exec tail +5 RemoveFirstLines.tmp > $file_name
    exec rm RemoveFirstLines.tmp
 }
 
