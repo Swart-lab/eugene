@@ -49,6 +49,7 @@ class Parameters
   Parameters  ();
   ~Parameters ();
   void   initParam (int, char *[]);
+  int    count(char *key);
   char*  getC (char *key, int index = 0);
   double getD (char *key, int index = 0);
   int    getI (char *key, int index = 0);

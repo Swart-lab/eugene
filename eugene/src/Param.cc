@@ -309,6 +309,14 @@ void Parameters :: ReadPar(char *argv)
 }
 
 // ------------------------
+//  count.
+// ------------------------
+int Parameters :: count(char *key)
+{
+  return ( m.count(key) );
+}
+
+// ------------------------
 //  getChar param.
 // ------------------------
 char* Parameters :: getC(char *key, int index)
