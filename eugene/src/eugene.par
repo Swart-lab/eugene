@@ -136,7 +136,7 @@ Est.estM	6
 Est.utrP*	0.35
 Est.utrM	5
 Est.SpliceBoost* 0.0
-Est.StrongDonor* 0.95
+Est.StrongDonor 0.95
 #
 ##### Riken sensor parameters #####
 #
