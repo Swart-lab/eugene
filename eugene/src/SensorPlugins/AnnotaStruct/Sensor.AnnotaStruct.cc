@@ -335,7 +335,7 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	  isContents = 1;
 	  cSc        = scoreF;
 	}
-	else if(!strcmp(feature, "intron") || !strcmp(feature, "Intron")) {
+	else if(!strcmp(feature, "intron")) {
 	  vCon.push_back(new Contents(start, end, DATA::IntronF+edge, scoreF));
 	}
 	else if(!strcmp(feature, "utr5")) {
@@ -379,19 +379,22 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	}
 	else if(!strcmp(feature, "UTR5")) {
 	  vSig.push_back(new Signals (start-1, DATA::tStart, edge, tStartPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, exonPAR));
+	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR3")) {
 	  vSig.push_back(new Signals (end,   DATA::tStop, edge, tStopPAR));
-	  vCon.push_back(new Contents(start-1,end-1,DATA::UTR3F+edge,exonPAR));
+	  vCon.push_back(new Contents(start-1,end-1,DATA::UTR3F+edge,cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR")) {
 	  vSig.push_back(new Signals(start-1, DATA::tStart, edge,tStartPAR));
 	  vSig.push_back(new Signals(end,     DATA::tStop,  edge,tStopPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, exonPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, exonPAR));
+	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cdsPAR));
+	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cdsPAR));
 	}
-
+	else if(!strcmp(feature, "Intron")) {
+	  vCon.push_back(new Contents(start, end, DATA::IntronF+edge, cdsPAR));
+	}
+	
 	else if(!strcmp(feature, "E.Any")) {
 	  isContents = 1;
 	  cSc        = exonPAR;
