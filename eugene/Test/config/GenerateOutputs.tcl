@@ -198,35 +198,38 @@ foreach TEST $FunctionalTestList {
 
 
 ########################################################################
-######################## Sequences base Tests ##########################
+######################## Arabidopsis Sequences base Tests ##########################
 ########################################################################
 
-# Preparation of the parameter file with the correct sensors
-foreach sensor $SensorsList(Araset) \
-    {set NewValueAraset(Sensor.${sensor}.use) TRUE}
-ModifyParaValue ${EUGENE}.par  NewValueAraset
+foreach TEST $ArabidopsisTestList {
 
-catch {eval exec $EUGENE_DIR/$EUGENE $SEQ(Araset) > tmp%stdout}
-
-if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF(Araset)]} {
-    exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Araset)
-} elseif {[catch {exec diff $OUTPUT_DIR/$FILE_REF(Araset) tmp%stdout}]} {
-    AskReplace $OUTPUT_DIR/$FILE_REF(Araset)
-    if {[gets stdin] == "Y"} {
-	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Araset)
-    } else {
-	exec cp tmp%stdout $OUTPUT_DIR/${FILE_REF(Araset)}.new
+    # Preparation of the parameter file with the correct sensors
+    foreach sensor $SensorsList($TEST) \
+	{set NewValueBase(Sensor.${sensor}.use) TRUE}
+    ModifyParaValue ${EUGENE}.par  NewValueBase
+    
+    catch {eval exec $EUGENE_DIR/$EUGENE $SEQ($TEST) > tmp%stdout}
+    
+    if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF($TEST)]} {
+	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST)
+    } elseif {[catch {exec diff $OUTPUT_DIR/$FILE_REF($TEST) tmp%stdout}]} {
+	AskReplace $OUTPUT_DIR/$FILE_REF($TEST)
+	if {[gets stdin] == "Y"} {
+	    exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST)
+	} else {
+	    exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST).new
+	}
     }
+    
+    # remove temporary file	
+    exec rm tmp%stdout
+    
+    # Restore initial parameters values
+    InitParameterFile ${EUGENE}.par $AllSensorsList
+
+    puts "Reference files for $TEST test created or checked."
+
 }
-
-# remove temporary file	
-exec rm tmp%stdout
-
-# Restore initial parameters values
-InitParameterFile ${EUGENE}.par $AllSensorsList
-
-puts "Reference files for Araset test created or checked."
-
 
 
 ########################################################################

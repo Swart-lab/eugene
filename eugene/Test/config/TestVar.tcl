@@ -39,7 +39,7 @@ set OPTIONS(Sensor) "-pd"
 
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest SeqBig}
+set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest}
 
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
@@ -75,15 +75,10 @@ set IMG(SeqRest) {seq25ab005234g10g11.test.000.png}
 set FILE_REF(SeqRest) Output_SeqRest
 set OPTIONS(SeqRest) "-gtest"
 
-##################### SeqBig test variables ################################
-set SensorsList(SeqBig) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
-set SEQ(SeqBig) {chr1_2002.tfa_22540000-23040000.tfa}
-set IMG(SeqBig) {chr1_2002.tfa_22540000-23040000.test.000.png}
-set FILE_REF(SeqBig) Output_SeqBig
-set OPTIONS(SeqBig) "-gtest"
-
 
 ############################################################################
+set ArabidopsisTestList {Araset Big}
+
 ##################### Araset test variables ################################
 set SEQBASE_DIR "/Annotation/Arabidopsis/araset/Genes"
 set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
@@ -96,6 +91,11 @@ foreach f $seq {
     }
 }
 set FILE_REF(Araset) Output_Araset
+
+##################### Big test variables ################################
+set SensorsList(Big) {MarkovIMM  Transcript MarkovConst EuStop NStart  GSplicer Est BlastX}
+set SEQ(Big) {$SEQ_DIR/chr1_2002.tfa_22540000-23040000.tfa}
+set FILE_REF(Big) Output_Big
 
 
 
