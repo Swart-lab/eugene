@@ -55,7 +55,8 @@ void SensorFrameShift :: Plot(DNASeq *X)
 // ------------------
 void SensorFrameShift :: PostAnalyse(Prediction *pred)
 {
-  int state, stateBack;
+  int state;
+  int stateBack = 0;
   int posFs = -1;
   
   if (PAR.getI("Output.graph")) {
