@@ -126,6 +126,7 @@ void Chromosome::Print(std::string msg)
   for (unsigned int i=0; i<data->P.size(); i++) 
     std::cout << data->P[i] << "\t"; 
   std::cout << "Fitness="<<RawFitness <<"\t"<<msg;
+  fflush(stdout); fflush(stderr);
 }
 
 //-------------------------------------------------------

@@ -256,7 +256,8 @@ void Genetic::Optimize(bool is_chaining)
        CrossOver->Crosseval();
        Mutate->Muteval();
      } 
-     
+     fflush(stdout); fflush(stderr);
+
     } // gen
     
   } /*run*/
@@ -280,10 +281,11 @@ void Genetic::Optimize(bool is_chaining)
 //-------------------------------------------------------
 void Genetic::InitPopulation (void)
 {
+  unsigned int k;
   Chromosome* c;
 
-  for (unsigned int k=0; k<Population.size(); k++) delete Population[k];
-  Population.clear();
+  for (k=0; k<Population.size(); k++) delete Population[k]; Population.clear();
+  for (k=0; k<NewPopulation.size(); k++) delete NewPopulation[k]; NewPopulation.clear();
 
   for (int i=0; i<NbElement; i++) {
     c = new Chromosome(ParName.size());
@@ -303,7 +305,7 @@ void Genetic::EvalPopulation (void)
 
   for (int i=0; i<NbElement; i++) {
     if (!Population[i]->IsEvaluated) Population[i]->Evaluate();
-    if (IsTracing) Population[i]->Print("\n");
+    if (IsTracing) Population[i]->Print("\n");    
 
     /* Update BestChromosome */
     if (Population[i]->RawFitness > maxfit) {
