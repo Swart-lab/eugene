@@ -215,20 +215,20 @@ set NewValue1(SpliceWAM.MarkovianOrder)	1
 set NewValue1(SpliceWAM.donmodelfilename)	WAM/WAM.ARA.DON.L9
 set NewValue1(SpliceWAM.NbNtBeforeGT)	3
 set NewValue1(SpliceWAM.NbNtAfterGT)	4
-set NewValue1(SpliceWAM.DonScaleCoef)	2.9004
-set NewValue1(SpliceWAM.DonScalePenalty)	-7.5877
+set NewValue1(SpliceWAM.DonScaleCoef*)	2.9004
+set NewValue1(SpliceWAM.DonScalePenalty*)	-7.5877
 set NewValue1(SpliceWAM.accmodelfilename)	WAM/WAM.ARA.ACC.L7
 set NewValue1(SpliceWAM.NbNtBeforeAG)		2
 set NewValue1(SpliceWAM.NbNtAfterAG)		1
-set NewValue1(SpliceWAM.AccScaleCoef)		2.9004
-set NewValue1(SpliceWAM.AccScalePenalty)		-7.5877
+set NewValue1(SpliceWAM.AccScaleCoef*)		2.9004
+set NewValue1(SpliceWAM.AccScalePenalty*)		-7.5877
 ##### Sensor StartWAM #####
 set NewValue1(StartWAM.modelfilename)	WAM/WAM.ARA.START9
 set NewValue1(StartWAM.NbNtBeforeATG)	3
 set NewValue1(StartWAM.NbNtAfterATG)	3
 set NewValue1(StartWAM.MarkovianOrder)		1
-set NewValue1(StartWAM.ScaleCoef)		0.1594
-set NewValue1(StartWAM.ScalePenalty)		-3.1439
+set NewValue1(StartWAM.ScaleCoef*)		0.1594
+set NewValue1(StartWAM.ScalePenalty*)		-3.1439
 ##### Sensor GCPlot #####
 set NewValue1(GCPlot.Color)	5
 set NewValue1(GCPlot.Zoom)	2.0
