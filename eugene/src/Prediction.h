@@ -59,6 +59,7 @@ class Prediction
   void  plotPred      ();
   void  resetPred     ();
   int   nbExon        (int);
+  int   lenCDS        (int);
   void  reversePred   ();
   char* isStart       (int);
   char* isStop        (int);

@@ -158,6 +158,37 @@ int Prediction :: nbExon (int geneNumber)
   return nb;
 }
 
+// ------------------------
+//  lenCDS.
+// ------------------------
+int Prediction :: lenCDS (int geneNumber)
+{
+  int i     = (int)vPos.size()-1;
+  int len   = 0;
+  int nbUtr = 0;
+
+  while(vState[i] >= InterGen) {
+    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3R)
+      nbUtr++;
+    if (nbUtr > 1)
+      break;
+    i--;
+  }
+
+  for(int j=1; j<geneNumber; j++) {
+    while(vState[i] <= InterGen)
+      i--;
+    while(vState[i] >= InterGen)
+      i--;
+  }
+  while(vState[i] <= InterGen && i != -1) {
+    if(vState[i] <= TermR3)
+      len += (vPos[i] - vPos[i+1]-1) + 1;
+    i--;
+  }
+  return len;
+}
+
 // ----------------
 //  reverse.
 // ----------------
