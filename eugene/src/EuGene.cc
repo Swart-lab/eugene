@@ -55,8 +55,8 @@
 #include <cassert>
 #include <cerrno>
 #include <unistd.h>
-
 #include <string.h>
+
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
@@ -112,42 +112,42 @@ int main  (int argc, char * argv [])
   IGPrior    = PAR.getD("InterPrior"); 
   FivePrior  = PAR.getD("FivePrimePrior");
   ThreePrior = PAR.getD("ThreePrimePrior");
-  minL[0]  = PAR.getI("eugene.minL0");
-  minL[1]  = PAR.getI("eugene.minL1");
-  minL[2]  = PAR.getI("eugene.minL2");
-  minL[3]  = PAR.getI("eugene.minL3");
-  minL[4]  = PAR.getI("eugene.minL4");
-  minL[5]  = PAR.getI("eugene.minL5");
-  minL[6]  = PAR.getI("eugene.minL6");
-  minL[7]  = PAR.getI("eugene.minL7");
-  minL[8]  = PAR.getI("eugene.minL8");
-  minL[9]  = PAR.getI("eugene.minL9");
-  minL[10] = PAR.getI("eugene.minL10");
-  minL[11] = PAR.getI("eugene.minL11");
-  minL[12] = PAR.getI("eugene.minL12");
-  minL[13] = PAR.getI("eugene.minL13");
-  minL[14] = PAR.getI("eugene.minL14");
-  minL[15] = PAR.getI("eugene.minL15");
-  minL[16] = PAR.getI("eugene.minL16");
-  minL[17] = PAR.getI("eugene.minL17");
-  minDiv  = PAR.getI("eugene.minDiv");
-  minFlow = PAR.getI("eugene.minFlow");
-  minConv = PAR.getI("eugene.minConv");
-  min5    = PAR.getI("eugene.min5Prime");
-  min3    = PAR.getI("eugene.min3Prime");
-  transStartP = PAR.getD("eugene.transStartP");
-  transStopP  = PAR.getD("eugene.transStopP");
-  stopP       = PAR.getD("eugene.stopP");
+  minL[0]  = PAR.getI("EuGene.minL0");
+  minL[1]  = PAR.getI("EuGene.minL1");
+  minL[2]  = PAR.getI("EuGene.minL2");
+  minL[3]  = PAR.getI("EuGene.minL3");
+  minL[4]  = PAR.getI("EuGene.minL4");
+  minL[5]  = PAR.getI("EuGene.minL5");
+  minL[6]  = PAR.getI("EuGene.minL6");
+  minL[7]  = PAR.getI("EuGene.minL7");
+  minL[8]  = PAR.getI("EuGene.minL8");
+  minL[9]  = PAR.getI("EuGene.minL9");
+  minL[10] = PAR.getI("EuGene.minL10");
+  minL[11] = PAR.getI("EuGene.minL11");
+  minL[12] = PAR.getI("EuGene.minL12");
+  minL[13] = PAR.getI("EuGene.minL13");
+  minL[14] = PAR.getI("EuGene.minL14");
+  minL[15] = PAR.getI("EuGene.minL15");
+  minL[16] = PAR.getI("EuGene.minL16");
+  minL[17] = PAR.getI("EuGene.minL17");
+  minDiv  = PAR.getI("EuGene.minDiv");
+  minFlow = PAR.getI("EuGene.minFlow");
+  minConv = PAR.getI("EuGene.minConv");
+  min5    = PAR.getI("EuGene.min5Prime");
+  min3    = PAR.getI("EuGene.min3Prime");
+  transStartP = PAR.getD("EuGene.transStartP");
+  transStopP  = PAR.getD("EuGene.transStopP");
+  stopP       = PAR.getD("EuGene.stopP");
   graph = PAR.getI("graph");
   
   MS.InitMaster();
   
-  ReadKey(PAR.getC("eugene.key"), "EUGENEAT");
+  ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
   
   // any Frameshift prob below -1000.0 means "not possible"
-  if (PAR.getD("eugene.frameshift") <= -1000.0)
-    PAR.set("eugene.frameshift", "NINFINITY");
-  FsP = PAR.getD("eugene.frameshift");
+  if (PAR.getD("EuGene.frameshift") <= -1000.0)
+    PAR.set("EuGene.frameshift", "NINFINITY");
+  FsP = PAR.getD("EuGene.frameshift");
   
   // ---------------------------------------------------------------------------  
   // Lecture de la sequence
@@ -342,7 +342,7 @@ int main  (int argc, char * argv [])
     MS.GetInfoAt(TheSeq, 0, &Data);
     
     for (i = 0; i <= Data_Len; i++) {
-
+      
       maxi = -NINFINITY;
       for (k = 0 ; k < 18; k++) {
 	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
@@ -894,6 +894,6 @@ int main  (int argc, char * argv [])
   } // fin de traitement de chaque séquence....
  
   MS.ResetSensors();
-
+  
   return  0;
 }
