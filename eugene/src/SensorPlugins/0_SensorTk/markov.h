@@ -123,7 +123,7 @@ template<class CHAINE, typename T> class TabChaine
   int indiceprefixe (int indice) const;
   // attention: pour <double> ou <unsigned short>, modifie VAL
   void compte2probas (const TabChaine<CHAINE, int>& comptage,
-		      int occurence_min=0);
+		      int occurence_min=100);
   int nombredegc (int indice) const;
   
   // Convertisseurs de types double (e.g. double) et  usi (unsigned short int):
