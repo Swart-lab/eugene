@@ -1,9 +1,11 @@
 #ifndef  PARAM_H_INCLUDED
 #define  PARAM_H_INCLUDED
-#include <cstdio>
+
 #include <map>
-#include <strstream>
-#include <string>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <string.h>
 #ifdef HAVE_STRINGS_H
