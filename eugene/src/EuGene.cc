@@ -39,7 +39,7 @@
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
 
-#define  VERSION "1.2 (030502)"
+#define  VERSION "1.2a (110602)"
 #define PAYTOIGNORE 1
 
 #ifdef HAVE_CONFIG_H
@@ -57,6 +57,7 @@
 #include <ctime>
 #include <cassert>
 #include <cerrno>
+#include <unistd.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -334,7 +335,26 @@ char ph06(char p)
   else if (p > 0) return (p-1);
   else return 2-p;   
 }
+//--------------------------------------------------
+// Dump les signaux au format util user
+//--------------------------------------------------
+void DumpSignals(int Len, REAL** Donor, REAL **Acceptor,REAL** Stop, REAL **Start,FILE* flot)
+{
+  int i;
+  for (i=0; i< Len; i++) {
+    //    if (Stop[0][i]) fprintf(flot,"stop f %d %a\n",i+1,Stop[0][i]);
+    //    if (Stop[1][i]) fprintf(flot,"stop r %d %a\n",i+1,Stop[1][i]);
 
+    if (Start[0][i]) fprintf(flot,"start f %d %a\n",i+1,Start[0][i]);
+    if (Start[1][i]) fprintf(flot,"start r %d %a\n",i+1,Start[1][i]);
+
+    if (Donor[0][i]) fprintf(flot,"donor f %d %a\n",i+1,Donor[0][i]);
+    if (Donor[1][i]) fprintf(flot,"donor r %d %a\n",i+1,Donor[1][i]);
+
+    if (Acceptor[0][i]) fprintf(flot,"acceptor f %d %a\n",i+1,Acceptor[0][i]);
+    if (Acceptor[1][i]) fprintf(flot,"acceptor r %d %a\n",i+1,Acceptor[1][i]);
+  }
+}
 //--------------------------------------------------
 Hits **ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
 		 int EstM, REAL** Don, REAL **Acc, int *NumEST)
@@ -641,28 +661,36 @@ void CheckConsistency(int debut, int fin, int etat,
  *incons = inc;
 }
 // -------------------------------------------------------------------------
-void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
+// Tdebut/fin = debut/fin de transcript
+// debut/fin = debut/fin de traduit
+// -------------------------------------------------------------------------
+void ESTSupport(char * Choice, int Tdebut, int Tfin, int debut,int fin,  Hits **HitTable, int Size)
 {
   static int EstIndex;
   int supported = 0;
+  int CDSsupported = 0;
   unsigned char *Sup;
   Block *ThisBlock;
   int ConsistentEST,i;
   int from,to,ESTEnd;
   
-  if (fin < debut) { 
+  if (Choice == NULL) { 
     EstIndex = 0;
     return;
   }
 
-  Sup = new unsigned char[fin-debut+1]; 
+  Sup = new unsigned char[Tfin-Tdebut+1]; 
 
-  for (i=0; i <= fin-debut; i++)
+  for (i=0; i <= Tfin-Tdebut; i++)
     Sup[i]=0;
   
+  // si la fin du codant n'a pas ete rencontree
+  if (fin == -1) fin = Tfin;
+  if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
+
   while (EstIndex < Size) {
     // le dernier transcrit exploitable est passe
-    if (HitTable[EstIndex]->Start > fin) break;
+    if (HitTable[EstIndex]->Start > Tfin) break;
 
     ConsistentEST = 1;
     ThisBlock = HitTable[EstIndex]->Match;
@@ -671,16 +699,16 @@ void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
        // si on a un gap
        if (ThisBlock->Prev != NULL) {
 	 // intersection
-	 from = Max(debut,ThisBlock->Prev->End+1);
-	 to = Min(fin,ThisBlock->Start-1);
+	 from = Max(Tdebut,ThisBlock->Prev->End+1);
+	 to = Min(Tfin,ThisBlock->Start-1);
 	 
 	 for (i = from; i <=to; i++)
 	   if ((Choice[i+1] < IntronF1) || Choice[i+1] == InterGen5 || Choice[i+1] == InterGen3)
 	     ConsistentEST = 0;
        }
 
-       from = Max(debut,ThisBlock->Start);
-       to = Min(fin,ThisBlock->End);
+       from = Max(Tdebut,ThisBlock->Start);
+       to = Min(Tfin,ThisBlock->End);
        ESTEnd = ThisBlock->End;
 
 
@@ -692,15 +720,17 @@ void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
      }
       
 
-     printf("cDNA  %-12s %7d %7d     %4d     %2d introns     ",HitTable[EstIndex]->Name,
+     printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",HitTable[EstIndex]->Name,
 	    HitTable[EstIndex]->Start+1,ESTEnd+1,
 	    HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
 
      if (HitTable[EstIndex]->Rejected) printf("Filtered ");
      else if (!ConsistentEST) printf("Inconsistent");
      else {
-       if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
-	 printf("Full Support");
+       if ((HitTable[EstIndex]->Start) <= Tdebut && (ESTEnd >= Tfin))
+	 printf("Full Transcript Support");
+       else if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
+	 printf("Full Coding Support");
        else printf("Support");
        
 
@@ -708,23 +738,25 @@ void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
        while (ThisBlock) {
 	 if (ThisBlock->Prev != NULL) {
 	   // intersection
-	   from = Max(debut,ThisBlock->Prev->End+1);
-	   to = Min(fin,ThisBlock->Start-1);
+	   from = Max(Tdebut,ThisBlock->Prev->End+1);
+	   to = Min(Tfin,ThisBlock->Start-1);
 
 	   for (i= from; i <= to; i++) 
-	     if (!Sup[i-debut]) {
-	       Sup[i-debut] = TRUE;
+	     if (!Sup[i-Tdebut]) {
+	       Sup[i-Tdebut] = TRUE;
 	       supported++;
+	       if ((i >=debut) && (i <=fin)) CDSsupported++;
 	     }
 	 }
 
-	 from = Max(debut,ThisBlock->Start);
-	 to = Min(fin,ThisBlock->End);
+	 from = Max(Tdebut,ThisBlock->Start);
+	 to = Min(Tfin,ThisBlock->End);
 
 	 for (i= from; i <= to; i++) 
-	   if (!Sup[i-debut]) {
-	     Sup[i-debut] = TRUE;
+	   if (!Sup[i-Tdebut]) {
+	     Sup[i-Tdebut] = TRUE;
 	     supported++;
+	     if ((i >=debut) && (i <=fin)) CDSsupported++;
 	   }
 	 ThisBlock = ThisBlock->Next;
        }
@@ -732,8 +764,10 @@ void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
      printf("\n");
      EstIndex++;
   }
-
-  printf("      Gene         %7d %7d     %5d     supported on %d bases\n",debut+1,fin+1,fin-debut+1,
+  if (fin >= debut)
+  printf("      CDS          %7d %7d    %5d     supported on %d bases\n",debut+1,fin+1,fin-debut+1,
+	 CDSsupported);
+  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",Tdebut+1,Tfin+1,Tfin-Tdebut+1,
 	 supported);
   delete Sup;
   return;
@@ -801,7 +835,7 @@ int main  (int argc, char * argv [])
   estanal = FALSE;             // don't try to analyze EST support
   userinfo = FALSE;         // shall we read a user info file
   raflopt = FALSE;            // don't try to read a est.rafl file
-  blastopt = -1;              // don't try to read a blast file
+  blastopt = 0;              // don't try to read a blast file
   ncopt = FALSE;                   //don't try to read a non coding input
   normopt = 1;                // normalize across frames
   window  = 97;               // window length
@@ -831,7 +865,7 @@ int main  (int argc, char * argv [])
 	     &MinEx,&MinIn,&MinSg,&MinFlow,&MinConv,&MinDiv,
 	     &MinFivePrime,&MinThreePrime) != 28)
     {
-      fprintf(stderr, "Incorrect parameter file EuGene.par\n");
+      fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
       exit(2);
     }
   fprintf(stderr,"done\n");
@@ -850,10 +884,10 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
-            
+
     case 'n':            /* -n normalize across frames      */
       if (! GetIArg(optarg, &normopt, normopt))
 	errflag++;
@@ -1063,27 +1097,30 @@ int main  (int argc, char * argv [])
 	   (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
 
   // ---------------------------------------------------------------------------  
-  // Allocation signaux
+  // Allocation match prot/est
   // ---------------------------------------------------------------------------  
  
-  Stop[0] = new REAL[Data_Len+1];
-  Stop[1] = new REAL[Data_Len+1];
-
-  ESTMatch = new unsigned char[Data_Len+1];
-  ProtMatch = new REAL[Data_Len+1];
-  ProtMatchLevel = new REAL[Data_Len+1];
-  ProtMatchPhase = new int[Data_Len+1];
-  
-  for (i = 0; i<= Data_Len; i++) {
-    ESTMatch[i] = 0;
-    ProtMatch[i] = 0.0;
-    ProtMatchLevel[i] = 0.0;
-    ProtMatchPhase[i]=0;
+  if (estopt) {
+    ESTMatch = new unsigned char[Data_Len+1];
+    for (i = 0; i<= Data_Len; i++) 
+      ESTMatch[i] = 0;
   }
-
+  
+  if (blastopt) {
+    ProtMatch = new REAL[Data_Len+1];
+    ProtMatchLevel = new REAL[Data_Len+1];
+    ProtMatchPhase = new int[Data_Len+1];
+    for (i = 0; i<= Data_Len; i++) {
+      ProtMatch[i] = 0.0;
+      ProtMatchLevel[i] = 0.0;
+      ProtMatchPhase[i]=0;
+    }
+  }
   // ---------------------------------------------------------------------------
   //Acquisition des signaux
   // ---------------------------------------------------------------------------
+  Stop[0] = new REAL[Data_Len+1];
+  Stop[1] = new REAL[Data_Len+1];
 
   Start[0] = new REAL[Data_Len+1];
   Start[1] = new REAL[Data_Len+1];
@@ -1093,9 +1130,9 @@ int main  (int argc, char * argv [])
 
   Don[0] = new REAL[Data_Len+1];
   Don[1] = new REAL[Data_Len+1];
-  
-  Find_Stop_Codons(TheSeq, Stop);
 
+  Find_Stop_Codons(TheSeq, Stop);
+  
   fprintf(stderr, "Reading start files...");
   fflush(stderr);
   
@@ -1104,21 +1141,22 @@ int main  (int argc, char * argv [])
   Read_Start(tempname,Data_Len, exp(-StartP), StartB, Start[0],0);
   fprintf(stderr,"forward,");
   fflush(stderr);
-
+  
   strcpy(tempname,fstname);
   strcat(tempname,".startsR");
   Read_Start(tempname,Data_Len, exp(-StartP), StartB, Start[1],1);
   fprintf(stderr," reverse done\n");
-
+  
   fprintf(stderr, "Reading splice site files...");  
   fflush(stderr);
-
+  
   Read_Splice(fstname,1,Data_Len,Acc[0],Don[0],AccP,AccB,DonP,DonB);
   fprintf(stderr,"forward,");
   fflush(stderr);
-
+  
   Read_Splice(fstname,-1,Data_Len, Acc[1], Don[1],AccP,AccB,DonP,DonB);
   fprintf(stderr," reverse done\n");
+  
   // ---------------------------------------------------------------------------
   // Lecture donnees user
   // ---------------------------------------------------------------------------
@@ -1132,8 +1170,23 @@ int main  (int argc, char * argv [])
 
     strcpy(tempname,fstname);
     strcat(tempname,".user");
-    Utilisateur(tempname);   //prise en compte de donnees utilisateur
-    fprintf(stderr,"done\n");
+    errflag = Utilisateur(tempname);   //prise en compte de donnees utilisateur
+    if (errflag) {
+      userinfo = FALSE;
+      fprintf(stderr,"none found\n");
+    }
+    else fprintf(stderr,"done\n");
+  }
+
+  if (userinfo) {
+    UserInfoList = SignalUser;
+    //    WriteUtils(UserInfoList,stdout);
+    
+    for (i = 0; i <= Data_Len; i++) {
+      //application des regles utilisateur pour i
+      Util(i,UserInfoList);
+      for (k = 13; k<21; k++) Weights[k]++;
+    }
   }
   // ---------------------------------------------------------------------------
   // Preparation sortie graphique + Scores
@@ -1228,6 +1281,17 @@ int main  (int argc, char * argv [])
     }
     RAFL.push_back(RAFLtmp[j]);
 
+    if (graph) {
+      const int HLen = 30;
+
+      for (j =0; j<RAFL.size() ;j++) {
+	PlotBarF(RAFL[j].deb, 0,0.9,0.2,2);
+	PlotLine(RAFL[j].deb,RAFL[j].deb+HLen,0,0,1.0,1.0,2);
+	PlotBarF(RAFL[j].fin, 0,0.9,0.2,2);
+	PlotLine(RAFL[j].fin-HLen,RAFL[j].fin,0,0,1.0,1.0,2);
+      }
+    }
+
     fprintf(stderr,"%d kept\n",RAFL.size());
     fflush(stderr);
     if (RAFL.size() < 1) raflopt=FALSE;
@@ -1256,7 +1320,10 @@ int main  (int argc, char * argv [])
     while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
       deb = Max(1,deb)-1;
       fin = Min(Data_Len,fin)-1;
-      for (i = deb; i <= fin; i++) ForcedIG[i] = TRUE;
+      for (i = deb; i <= fin; i++) {
+	ForcedIG[i] = TRUE;
+	if (graph) PlotBarI(i,0,0.25,2,6);
+      }
     }
   }
 
@@ -1268,7 +1335,7 @@ int main  (int argc, char * argv [])
   // 3 levels of confidence may be used.
   // ---------------------------------------------------------------------------
   const int LevelColor[3] = {6,7,8}; 
-  if (blastopt > 0)
+  if (blastopt)
     {
       FILE *fblast;
        int overlap,deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
@@ -1285,7 +1352,7 @@ int main  (int argc, char * argv [])
 
        for( level = blastopt; level >= 0; level--)
 	 {
-	   if (blastopt&(1<<level)){
+	   if (blastopt & (1<<level)){
 	     strcpy(tempname,fstname);
 	     strcat(tempname,".blast");
 	     i = strlen(tempname);
@@ -1489,7 +1556,8 @@ int main  (int argc, char * argv [])
   LBP[UTR5R]->Update(log(FivePrimePrior/2.0)/2.0);
   LBP[UTR3R]->Update(log(ThreePrimePrior/2.0)/2.0);
 
-  u = ru;
+  UserInfoList = ContentsUser;
+  //  WriteUtils(UserInfoList,stdout);
 
   for (i = 0; i <= Data_Len; i++) {
 
@@ -1497,10 +1565,9 @@ int main  (int argc, char * argv [])
     Fill_Score(TheSeq,IMMatrix,i,BaseScore);
 
     //application des regles utilisateur pour i
-    if (userinfo) {
-      Util(i,u);
-      for (k = 13; k<21; k++) Weights[k] += 1;
-    }
+    // les Weight[] sont statiques ici (pas de signaux)
+    if (userinfo) 
+      Util(i,UserInfoList);
 
     // Calcul des meilleures opening edges
     PrevBP[0] = LBP[0]->BestUsable(i,SwitchMask[0],MinLength[0],&PBest[0]);
@@ -1601,11 +1668,12 @@ int main  (int argc, char * argv [])
       LBP[k]->Update(log(BaseScore[k])+log(4));
 
       // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((ESTMatch[i] & Gap) ||
-      	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitForward)))
-      	LBP[k]->Update(EstP);
+      if (estopt)
+	if ((ESTMatch[i] & Gap) || ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitForward)))
+	  LBP[k]->Update(EstP);
 
-      if((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
+      if (blastopt)
+	if ((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
 	LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1672,11 +1740,12 @@ int main  (int argc, char * argv [])
       LBP[k]->Update(log(BaseScore[k])+log(4)) ;
 
       // Si on a un Gap EST ou si l'on connait le sens du match EST
-      if ((ESTMatch[i] & Gap) ||
-      	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitReverse)))
-      	LBP[k]->Update(EstP);
+      if (estopt)
+	if ((ESTMatch[i] & Gap) || ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitReverse)))
+	  LBP[k]->Update(EstP);
 
-     if((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
+     if (blastopt)
+       if ((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
 	LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1721,9 +1790,10 @@ int main  (int argc, char * argv [])
     
     LBP[InterGen5]->Update(log(BaseScore[8])+log(4));
     //    LBP[InterGen5]->Update(log(TheSeq->GC_AT(i))+log(4));
-    LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+    if (estopt)
+      LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
-   if(ProtMatch[i]!=0)
+    if(blastopt && (ProtMatch[i]!=0))
       LBP[InterGen5]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -1759,9 +1829,10 @@ int main  (int argc, char * argv [])
     
     LBP[InterGen3]->Update(log(BaseScore[8])+log(4));
     //LBP[InterGen3]->Update(log(TheSeq->GC_AT(i))+log(4));
-    LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+    if (estopt)
+      LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
-    if(ProtMatch[i]!=0)
+    if (blastopt && (ProtMatch[i] != 0))
       LBP[InterGen3]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -1777,7 +1848,7 @@ int main  (int argc, char * argv [])
     // On reste 5' direct. On ne prend pas le Start eventuel.
     //  Kludge: si on a un EST qui nous dit que l'on est dans un
     //  intron, on oublie
-    if ((ESTMatch[i] & Gap) == 0)
+    if (!estopt || (ESTMatch[i] & Gap) == 0)
       LBP[UTR5F]->Update(log(1.0-Start[0][i]));
 #endif
 
@@ -1822,7 +1893,7 @@ int main  (int argc, char * argv [])
     //    LBP[UTR5F]->Update(log(TheSeq->GC_AT(i))+log(3.999));
     LBP[UTR5F]->Update(log(BaseScore[9])+log(3.999));
 
-   if(ProtMatch[i]!=0)
+    if (blastopt && (ProtMatch[i] != 0))
       LBP[UTR5F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -1860,7 +1931,7 @@ int main  (int argc, char * argv [])
     LBP[UTR3F]->Update(log(BaseScore[11])+log(4));
     //    LBP[UTR3F]->Update(log(TheSeq->GC_AT(i))+log(4));
 
-   if(ProtMatch[i]!=0)
+    if (blastopt && (ProtMatch[i] != 0))
       LBP[UTR3F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -1876,7 +1947,7 @@ int main  (int argc, char * argv [])
     // On reste 5' reverse
     //  Kludge: si on a un EST qui nous dit que l'on est dans un
     //  intron, on oublie
-    if ((ESTMatch[i] & Gap) == 0)
+    if (!estopt || (ESTMatch[i] & Gap) == 0)
       LBP[UTR5R]->Update(log(1.0-Start[1][i]));
 #endif
 
@@ -1909,7 +1980,7 @@ int main  (int argc, char * argv [])
     //    LBP[UTR5R]->Update(log(TheSeq->GC_AT(i))+log(3.999));
     LBP[UTR5R]->Update(log(BaseScore[10])+log(3.999));
 
-    if(ProtMatch[i]!=0)
+    if (blastopt && (ProtMatch[i]!=0))
       LBP[UTR5R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -1963,7 +2034,7 @@ int main  (int argc, char * argv [])
     LBP[UTR3R]->Update(log(BaseScore[12])+log(4));
     //    LBP[UTR3R]->Update(log(TheSeq->GC_AT(i))+log(4));
 
-    if(ProtMatch[i]!=0)
+    if (blastopt && (ProtMatch[i] != 0))
       LBP[UTR3R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
@@ -2005,14 +2076,15 @@ int main  (int argc, char * argv [])
 
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
-      if ((ESTMatch[i] & Hit) ||
-	  ((ESTMatch[i] & Gap) && !(ESTMatch[i] & GapForward)))
-	LBP[6+k]->Update(EstP);
+      if (estopt)
+	if((ESTMatch[i] & Hit) ||
+	   ((ESTMatch[i] & Gap) && !(ESTMatch[i] & GapForward)))
+	  LBP[6+k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[6+k]->Update(IGPenalty);
 
-      if(ProtMatch[i]>0)
+      if (blastopt && (ProtMatch[i] > 0))
 	LBP[6+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
@@ -2055,14 +2127,15 @@ int main  (int argc, char * argv [])
       LBP[9+k]->Update(log(BaseScore[7])+log(4));
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
-      if ((ESTMatch[i] & Hit) ||
+      if (estopt)
+	if ((ESTMatch[i] & Hit) ||
       	  ((ESTMatch[i] & Gap) && !(ESTMatch[i] & GapReverse)))
       	LBP[9+k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[9+k]->Update(IGPenalty);
 
-      if(ProtMatch[i]>0)
+      if (blastopt && (ProtMatch[i] > 0))
 	LBP[9+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
@@ -2122,14 +2195,19 @@ int main  (int argc, char * argv [])
   if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
   
-  fprintf(stderr,"Optimal path length = %#f\n",maxi-log(4)*(Data_Len+1));
+  fprintf(stderr,"Optimal path length = %#f\n",-maxi+log(4)*(Data_Len+1));
 
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
 
 #include "Output.h"
 
   // free used memory
-  if (graph) ClosePNG();
+  if (graph) {
+    fprintf(stderr,"Dumping images...");
+    fflush(stderr);
+    ClosePNG();
+    fprintf(stderr, "done\n");
+  }
 
   delete TheSeq;
 
@@ -2143,11 +2221,13 @@ int main  (int argc, char * argv [])
   delete [] Stop[0];
   delete [] Stop[1];
 
-  delete [] ESTMatch;
+  if (estopt)  delete [] ESTMatch;
 
-  delete [] ProtMatch;
-  delete [] ProtMatchLevel;
-  delete [] ProtMatchPhase;
+  if (blastopt) {
+    delete [] ProtMatch;
+    delete [] ProtMatchLevel;
+    delete [] ProtMatchPhase;
+  }
 
   delete [] Start[0];
   delete [] Start[1];
