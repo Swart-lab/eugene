@@ -1004,6 +1004,7 @@ int main  (int argc, char * argv [])
   unsigned char Switch;
 
   Choice =  new char[Data_Len+2];
+  for (i = 0; i < Data_Len +2; i++) Choice[i] = 0;
   
   for (i = 0; i < 18; i++) {
     LBP[i] = new BackPoint(i, -1,0.0);
@@ -1111,7 +1112,8 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(log(1.0-Don[0][i]));
       
       LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = k;
       }
@@ -1121,7 +1123,8 @@ int main  (int argc, char * argv [])
 
       if ((i % 3 == k) && Start[0][i] != 0.0) {
 	BestU = PBest[19]+log(Start[0][i]);
-	if (BestU > maxi) {
+	// Un test tordu pour casser le cou aux NaN
+	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 19;
 	  source = 13;
@@ -1133,7 +1136,8 @@ int main  (int argc, char * argv [])
       // Ca vient d'un intron
 
       BestU = PBest[6+((i-k+3) % 3)]+log(Acc[0][i]);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = 6+((i-k+3) % 3);
 	Switch = SwitchAcc;
@@ -1163,7 +1167,8 @@ int main  (int argc, char * argv [])
 
       
       LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = k;
       }
@@ -1173,7 +1178,8 @@ int main  (int argc, char * argv [])
 
       if (((Data_Len-i) % 3 == k-3) && Stop[1][i]) {
 	BestU = PBest[22]-StopP;
-	if (BestU > maxi) {
+	// Un test tordu pour casser le cou aux NaN
+	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 22;
 	  source = 16;
@@ -1185,7 +1191,8 @@ int main  (int argc, char * argv [])
       // Ca vient d'un intron
 
       BestU = PBest[9+((Data_Len-i-k) % 3)]+log(Don[1][i]);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = 9+((Data_Len-i-k) % 3);
 	Switch =  SwitchDon;
@@ -1214,14 +1221,16 @@ int main  (int argc, char * argv [])
     
     // On reste intergenique
     LBP[InterGen5]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
 
     // From 5' reverse
     BestU = PBest[21]-TransStartP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 21;
       source  = 15;
@@ -1242,14 +1251,16 @@ int main  (int argc, char * argv [])
     
     // On reste intergenique
     LBP[InterGen3]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
     
     // From 3' direct
     BestU = PBest[20]-TransStopP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 20;
       source  = 14;
@@ -1271,7 +1282,8 @@ int main  (int argc, char * argv [])
     LBP[UTR5F]->Update(log(1.0-Start[0][i]));
 
     LBP[UTR5F]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
@@ -1286,7 +1298,8 @@ int main  (int argc, char * argv [])
 
     // Sur 5' reverse
     BestU = PBest[23]-TransStartP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 23;
       source = InterGen5;
@@ -1295,7 +1308,8 @@ int main  (int argc, char * argv [])
 
     // Sur 3' direct
     BestU = PBest[18]-TransStartP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 18;
       source = InterGen3;
@@ -1313,7 +1327,8 @@ int main  (int argc, char * argv [])
     
     // On reste 3' direct
     LBP[UTR3F]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
@@ -1321,7 +1336,8 @@ int main  (int argc, char * argv [])
     for (k = 0; k < 3; k++) {
       if ((i % 3 == k) && Stop[0][i]) {
 	BestU = PBest[k+12]-StopP;
-	if (BestU > maxi) {
+	// Un test tordu pour casser le cou aux NaN
+	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = k+12;
 	  Switch = SwitchStop;
@@ -1343,7 +1359,8 @@ int main  (int argc, char * argv [])
 
 
     LBP[UTR5R]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
@@ -1352,7 +1369,8 @@ int main  (int argc, char * argv [])
     for (k = 3; k < 6; k++) {
       if (((Data_Len-i) % 3 == k-3) && Start[1][i] != 0.0) {
 	BestU = PBest[k+12]+log(Start[1][i]);
-	if (BestU > maxi) {
+	// Un test tordu pour casser le cou aux NaN
+	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = k+12;
 	  Switch = SwitchStart;
@@ -1371,7 +1389,8 @@ int main  (int argc, char * argv [])
  
     // On reste 3' reverse
     LBP[UTR3R]->BestUsable(i,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = -1;
     }
@@ -1386,7 +1405,8 @@ int main  (int argc, char * argv [])
 
     // Sur 5' reverse
     BestU = PBest[24]-TransStopP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 24;
       source = 12;
@@ -1395,7 +1415,8 @@ int main  (int argc, char * argv [])
 
     // Sur 3' direct
     BestU = PBest[25]-TransStopP;
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       best = 25;
       source = 12;
@@ -1416,13 +1437,15 @@ int main  (int argc, char * argv [])
       // On reste intronique
       LBP[6+k]->Update(log(1.0-Acc[0][i]));
       LBP[6+k]->BestUsable(i,SwitchAny,0,&BestU);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = -1;
       }
       // - on quitte un exon
       BestU = PBest[((i-k+3) % 3)]+log(Don[0][i]);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = ((i-k+3) % 3);
 	Switch = SwitchDon;
@@ -1447,14 +1470,16 @@ int main  (int argc, char * argv [])
       // On reste intronique
       LBP[9+k]->Update(log(1.0-Acc[1][i]));
       LBP[9+k]->BestUsable(i,SwitchAny,0,&BestU);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = -1;
       }
 
       // On quitte un exon
       BestU = PBest[3+((Data_Len-i-k) % 3)]+log(Acc[1][i]);
-      if (BestU > maxi) {
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = 3+((Data_Len-i-k) % 3);
 	Switch = SwitchAcc;
@@ -1506,15 +1531,16 @@ int main  (int argc, char * argv [])
 
   for (i = 1; i < 18 ; i++) {
     LBP[i]->BestUsable(Data_Len+1,SwitchAny,0,&BestU);
-    if (BestU > maxi) {
+    // Un test tordu pour casser le cou aux NaN
+    if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
       j = i;
-      }
+    }
   }
 
   LBP[j]->BackTrace(Choice);
   
-  for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
+    for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
 
   if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
