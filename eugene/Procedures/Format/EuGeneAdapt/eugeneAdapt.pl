@@ -76,8 +76,11 @@ use gffUtils;
        order than the others lists (separated by a tabulation).
 
   -i, --input [FILE NAME] (2)
-       Each line contain: genomic file name / cDNA file name /
-       Start / Stop.
+       Each line must contain:
+             genomic file name / cDNA file name / Start / Stop
+          or genomic file name / cDNA file name
+       In the second case the cDNA must start by ATG and finish  by
+       a stop codon.
 
   -a, --auto (2)
        Optional: For  an  automatic  process   (each  sequence   is
@@ -323,9 +326,14 @@ sub OptVerif
       while (my $inputsLine = <INPUTS>)
       {
 	my @tab = split (/\s+/,$inputsLine);
-	print TMP_GENO "$tab[0]\n";
-	print TMP_CDNA "$tab[1]\n";
-	print TMP_SS   "$tab[2]\t$tab[3]\n";
+	if (@tab == 2  ||  @tab == 4)
+	  {
+	    print TMP_GENO "$tab[0]\n";
+	    print TMP_CDNA "$tab[1]\n";
+	    if (@tab == 4) { print TMP_SS "$tab[2]\t$tab[3]\n"; }
+	    else           { print TMP_SS "\n"; }
+	  }
+	else { &Usage(); }
       }
       close INPUTS;
       close TMP_GENO;
@@ -575,8 +583,24 @@ sub GenoSim4
         chomp $genofile;
 	$nbSeq++;
 
+	# cDNA Length ?
+	my $lencDNA = "";
+	if (!open(CDNAFILE, $cdnafile))
+	  {
+            print STDERR "ERROR: Could not open cDNA file $cdnafile\n";
+            exit(2);
+	  }
+	while (my $line = <CDNAFILE>)
+	  {
+	    chomp $line;
+	    if ($line =~ />/) { }
+	    else              { $lencDNA .= $line; }
+	  }
+	$lencDNA = length($lencDNA);
+	close CDNAFILE;
+
         ## ID extraction ##
-        my $id = IDExtract($genofile);
+        my $id = IDExtract($cdnafile);
         print " $id :\n";
 
         ## Read Start Stop file ##
@@ -585,11 +609,20 @@ sub GenoSim4
         my $start;
         my $stop;
 	my $lenSS;       # Longueur Start->Stop (CDS)
-        chomp $ssline;
-        if ($ssline =~ /([0-9]+)\s+([0-9]+)/)
+        if ($ssline ne "\n")
 	  {
-            $start = $1;
-            $stop  = $2;
+	    chomp $ssline;
+	    if ($ssline =~ /([0-9]+)\s+([0-9]+)/)
+	      {
+		$start = $1;
+		$stop  = $2;
+		$lenSS = $stop-$start+1;
+	      }
+	  }
+	else
+	  {
+	    $start = 1;
+	    $stop  = $lencDNA;
 	    $lenSS = $stop-$start+1;
 	  }
         print "done\n";
@@ -784,20 +817,26 @@ sub GenoSim4
 }
 
 #-----------------------------------------------------------------------------#
-#-  ID extraction from genomic file. (1) & (2)                               -#
+#-  ID extraction from genomic (1) or cdna (2) file.                         -#
 #-----------------------------------------------------------------------------#
 sub IDExtract
 {
-  my $lgenofile = shift;
+  my $lfile = shift;
   # JER, 19 avril 2004  je fais ma bidouille pour les ID MENS sans
   # toucher a l'existant
-  if ( $lgenofile =~ /Mt[CDS]/ )
+  if ( $lfile =~ /Mt[CDS]/ )
     {	
-      my($id) = $lgenofile =~ /(Mt[CDS].+_GC)/;
+      my($id) = $lfile =~ /(Mt[CDS].+_GC)/;
       return ($id) if ( $id ne "" );
     }
-  if ($lgenofile =~ /\/?(.+\/)*([^\.]+)/) { return $2; }
-  else { die "ERROR: Incorrect genomic list (line:$lgenofile)\n" }
+  # Phi, 19 mai 2004 bidouille pour le jeu des belges
+    if ( $lfile =~ /AC.+_AC/ )
+    {	
+      my($id) = $lfile =~ /(AC.+_AC.+)\.tfa/;
+      return ($id) if ( $id ne "" );
+    }
+  if ($lfile =~ /\/?(.+\/)*([^\.]+)/) { return $2; }
+  else { die "ERROR: Incorrect file list (line:$lfile)\n" }
 }
 
 #-----------------------------------------------------------------------------#
