@@ -4,10 +4,13 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+
 #include "Const.h"
 extern "C"{
 #include "../GDIF/gdIF.h"
 }
+
+#include "SensorIF.h"
 
 /*************************************************************
  **                        Prediction                       **
@@ -42,6 +45,7 @@ class Prediction
   char* isStop        (int);
   char* isDon         (int);
   char* isAcc         (int);
+  bool IsState (DATA::SigType sig_type, int pos, char strand);
 };
 
 // Les etats

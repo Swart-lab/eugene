@@ -194,3 +194,80 @@ char* Prediction :: isAcc(int p)
     return "True";
   return "False";
 }
+
+ 
+// ------------------------
+// IsState: Is a nucleotid in a given state ? 
+// BE CAREFUL: 
+// this method could be used only for a prediction with one complete gene.
+//         the prediction could be the representation of an external gff annotation 
+//         that could not specify the UTR. In this case, the state from 0 to the first exon
+//         in the annotation (the first element of vPos and vState)
+//         is InterGen5 and the state after the last exon 
+//         in the annotation (the last element of vPos and vState)
+//         is not set (getStateForPos returns -1).
+//         To identify Start Reverse and Stop Forward, an other condition is used
+//         pos == vPos[0] that compares the position with 
+//                             in Forward the end of the last exon of the gene (vPos[0])
+//                             in Reverse the start of the first exon of the gene (vPos[0])
+// ------------------------
+bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
+{
+  bool is_state = false;
+  bool bad_strand = false;
+  char state, nState, pState;
+
+  if (sig_type == DATA::Start) {
+    state  = getStateForPos (pos);
+    nState = getStateForPos (pos+1);
+    if (strand == '+') {
+      if( (nState == ExonF1 || nState == ExonF2 || nState == ExonF3 ) &&  
+	  state == InterGen5) is_state = true;
+    } else if (strand == '-') {
+      if( (state == ExonR1 || state == ExonR2 || state == ExonR3)  &&  
+	  (nState == UTR5R ||  pos == vPos[0]) ) is_state = true;
+    } else bad_strand = true;
+
+  } else if (sig_type == DATA::Stop) {
+    state  = getStateForPos (pos);
+    nState = getStateForPos (pos+1);
+    if (strand == '+') {
+      if( (state == ExonF1 || state == ExonF2  || state == ExonF3) &&  
+	  (nState == UTR3F || pos == vPos[0])) is_state = true;
+    } else if (strand == '-') {
+      if( (nState == ExonR1 || nState == ExonR2 || nState == ExonR3)  &&  
+	  (state == UTR3R || state == InterGen5) ) is_state = true;
+    } else bad_strand = true;
+
+  } else if (sig_type == DATA::Acc) {
+    pState  = getStateForPos (pos);
+    state = getStateForPos (pos+1);
+    if (strand == '+') {
+      if( (state == ExonF1 || state == ExonF2 || state == ExonF3)  &&  
+	  (pState == IntronF1 || pState == IntronF2 || pState == IntronF3) ) is_state = true;
+    } else if (strand == '-') {
+      if( (pState == ExonR1 || pState == ExonR2 || pState == ExonR3)  &&  
+	  (state == IntronR1 || state == IntronR2 || state == IntronR3) ) is_state = true;
+    } else bad_strand = true;
+
+  } else if (sig_type == DATA::Don) {
+    state  = getStateForPos (pos);
+    nState = getStateForPos (pos+1);
+    if (strand == '+') {
+      if( (state == ExonF1 || state == ExonF2 || state == ExonF3) &&  
+	  (nState == IntronF1 || nState == IntronF2 || nState == IntronF3) ) is_state = true;
+    } else if (strand == '-') {
+      if( (nState == ExonR1 || nState == ExonR2 || nState == ExonR3) &&  
+	  (state == IntronR1 || state == IntronR2 || state == IntronR3) ) is_state = true;
+    } else bad_strand = true;
+
+  } else 
+    {std::cerr<<"ERROR: bad state "<<sig_type<<" given in argument in Prediction::IsState.\n"; exit(2);}
+
+  if (bad_strand)
+    {std::cerr<<"ERROR: bad strand "<<strand<<"  given in argument in Prediction::IsState.\n"; exit(2);}
+
+  return is_state;
+}
+
+
