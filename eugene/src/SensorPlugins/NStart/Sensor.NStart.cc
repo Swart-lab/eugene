@@ -153,7 +153,7 @@ void SensorNStart :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
     d->Start[0] += vValF[iter-vPosF.begin()];
   
   iter = lower_bound(vPosR.begin(), vPosR.end(), pos);
-  if(iter == pos)
+  if(*iter == pos)
     d->Start[1] += vValR[iter-vPosR.begin()];
 }
 
