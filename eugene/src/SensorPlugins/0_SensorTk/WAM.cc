@@ -43,7 +43,7 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
 
 // Loading models
 // (=binary matrix files containing a markov model, one per position of each motif)
-  fprintf (stderr,"Loading WAM models...  ");
+  fprintf (stderr,"Reading WAM models...  ");
   fflush (stderr);
   for (i=0; i<MotifLength ;i++) {
     fprintf (stderr,"%d ",i);
