@@ -1,6 +1,9 @@
 #ifndef  PARAM_H_INCLUDED
 #define  PARAM_H_INCLUDED
 #include <cstdio>
+#include <map>
+#include <strstream>
+#include <string>
 
 #include <string.h>
 #ifdef HAVE_STRINGS_H
@@ -15,48 +18,47 @@
 #include "Const.h"
 #include "System.h"
 
-const char VERSION_PAR[FILENAME_MAX+1] = "21_08_02";
+const char VERSION_PAR[FILENAME_MAX+1] = "25_09_02";
 const char VERSION[FILENAME_MAX+1]     = "1.2b (280802)";
 
 extern char   *optarg;   
 extern int     optind;
 
+
+class ltstr
+{
+  public :
+    bool operator() (const char* s1, const char* s2) const
+    { return (strcmp(s1, s2) <0); };
+};
+
 class Parameters
 {
- private:
+ private: 
   char *DFT_MATRIX;
-  char *DFT_OUTPUT;
+  char *DFT_OUTPUT;  
+  double FsP;
+  char parname[FILENAME_MAX+1];
+  int normopt, window, offset, resx, resy, gfrom, gto, golap, glen;
+  std::map <const char*, const char*, ltstr> m;
+  std::map <const char*, const char*, ltstr>::iterator iter;
 
   void ReadArg(int, char *[]);
   void ReadPar(char *);
-
+  
  public:
-  // Arguments
-  REAL ExonPrior, IntronPrior, InterPrior,FivePrimePrior, ThreePrimePrior;
-  int normopt, blastopt, estopt, estanal, ncopt, raflopt, userinfo;
-  int window,  offset,   graph,  resx,    resy;
-  int gfrom,   gfromSave,gto,    gtoSave, golap, glen;
-  char printopt;
-  char outputname[FILENAME_MAX+1], parname[FILENAME_MAX+1];
-  char blastArg[FILENAME_MAX+1],   grnameArg[FILENAME_MAX+1];
-  char matname[FILENAME_MAX+1];
-  char grname[FILENAME_MAX+1],     fstname[FILENAME_MAX+1];
-
-  // Par File
   FILE *fp;
-  char   clef[20];
-  char   versionPAR[FILENAME_MAX+1];
-  double FsP,StartP,StartB,StopP,TransStartP,TransStopP;
-  double AccP[2],AccB[2],DonP[2],DonB[2],BlastS[8],EstP;
-  double TransitionWeight[5];
-  int EstM;
-  int MinFivePrime, MinThreePrime;
-  int MinEx, MinIn, MinSg, MinFlow, MinConv, MinDiv;
-  int MinLength[18];  // Les longueurs
-
+    
   Parameters  ();
   ~Parameters ();
-  void InitParam (int, char *[]);
+  void   initParam (int, char *[]);
+  char*  getC (char *key);
+  double getD (char *key);
+  int    getI (char *key);
+  int    getUseSensor (char **, int*);
+  void   set  (const char *key, const char *value);
+  const char*  intToChar    (int);
+  const char*  doubleToChar (double);
 };
 
 #endif
