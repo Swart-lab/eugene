@@ -149,7 +149,7 @@ DNASeq :: DNASeq (FILE * fp)
       rewind(fp);
     }
 
-  Sequence = new unsigned short int[INIT_SIZE];
+  Sequence = (unsigned short int *) Safe_malloc (INIT_SIZE * sizeof(unsigned short int));
   Size = INIT_SIZE;
   
   Len = 0;
@@ -177,8 +177,8 @@ DNASeq :: DNASeq (FILE * fp)
 // ---------------------------------------------------------------------
 DNASeq :: ~ DNASeq  ()
 {
-  delete Sequence;
-  delete Name;
+  free(Sequence);
+  free(Name);
 }
 
 // ---------------------------------------------------------------------
@@ -456,7 +456,7 @@ void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
 }
 
 // ---------------------------------------------------------------------
-// test if a Stop Codon ends at position i. Returns the number of
+// test if a Stop Codon starts at position i. Returns the number of
 // possible matches with a STOP codon i.e. T{AA,AG,GA}
 // ---------------------------------------------------------------------
 double DNASeq :: IsStop(int i,int sens)
