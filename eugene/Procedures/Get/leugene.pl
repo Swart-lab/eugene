@@ -58,7 +58,7 @@ sub getsites( $ )
 	&flat2fasta("$$.tfa", 'tmp', substr($sequence,$i,$MaxLength), 60);
 	
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0]\n", $i, $i + $MaxLength;
-	open(FIN,"./netstart -at $$.tfa|") || die "Can't launch NetStart on $[0]";
+	open(FIN,"netstart -at $$.tfa|") || die "Can't launch NetStart on $[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -93,7 +93,7 @@ sub getsites( $ )
 	# create temp file with the sequence portion
 	&flat2fasta("$$.tfa", 'tmp', substr($rsequence,$i,$MaxLength), 60);
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0] (rev)\n", $i, $i + $MaxLength;
-	open(FIN,"./netstart -at $$.tfa|") || die "Can't launch NetStart on $_[0]";
+	open(FIN,"netstart -at $$.tfa|") || die "Can't launch NetStart on $_[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -114,56 +114,77 @@ sub getsites( $ )
     }
     # NetGene2
 
-    &flat2fasta("$$.tfa", "$$", $sequence, 60);
-    system("./netgene2 -a -e -p -r $$ -s at $$.tfa");
-    ($? == 0) || die "fail to run netgene2";
-    (-e "$$.score.txt" && -e "$$.comp.score.txt") || die "no result file";
-    rename("$$.score.txt", "$_[0].splices");
-    rename("$$.comp.score.txt", "$_[0].splicesR");
-    unlink("$$.results");
-    unlink("$$.tfa");
+    $DoIt = 0;
+    if (!( -e "$_[0].splices") || (-s "$_[0].splices" == 0))    {$DoIt = 1; }
+    if (!( -e "$_[0].splicesR") || (-s "$_[0].splicesR" == 0))    {$DoIt = 1; }
+
+    printf STDERR "\nNetGene2: ";
+
+    if ($DoIt) {
+      &flat2fasta("$$.tfa", "$$", $sequence, 60);
+      system("netgene2 -a -e -p -r $$ -s at $$.tfa");
+      ($? == 0) || die "fail to run netgene2";
+      (-e "$$.score.txt" && -e "$$.comp.score.txt") || die "no result file";
+      rename("$$.score.txt", "$_[0].splices");
+      rename("$$.comp.score.txt", "$_[0].splicesR");
+      unlink("$$.results");
+      unlink("$$.tfa");
+    }
+    else {print STDERR "[on disk]";}
 
     # Splice Predictor
-    system("fasta2gb.pl $_[0] > $_[0].gb"); # convert sequence into genbank format
-    # direct strand
-    print STDERR "Issuing request to SplicePredictor (direct strand)...\n";
-    open(FORWARD,">$_[0].spliceP");
-    open(FIN,"sgdp -f -c 1 -m 1 -l 0 $_[0].gb|") || die "Can't start Splice Predictor";
-    while(<FIN>)
-      {
-	if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
-	  {
-	    printf  FORWARD "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-	    '->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	  }
-	elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
-	  {
-	    printf  FORWARD "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-	    '<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	  }
-      }
-    close(FIN);
-    close(FORWARD);
+    $DoIt = 0;
+    if (!( -e "$_[0].spliceP") || (-s "$_[0].spliceP" == 0))    {$DoIt = 1;}
+    printf STDERR "\nSplicePredictor: ";
+
+    if ($DoIt) {
+      # direct strand
+      print STDERR "Issuing request to SplicePredictor (direct strand)...\n";
+      open(FORWARD,">$_[0].spliceP");
+      open(FIN,"./sgdp -f -c 1 -m 1 -l 1 $_[0].gb|") || die "Can't start Splice Predictor";
+      while(<FIN>)
+	{
+	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
+	    {
+	      printf  FORWARD "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
+		'->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
+	    }
+	  elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
+	    {
+	      printf  FORWARD "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
+		'<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
+	    }
+	}
+      close(FIN);
+      close(FORWARD);
+    }
+    else {print STDERR "[F on disk]";}
 
     # reverse strand
-    print STDERR "Issuing request to SplicePredictor (reverse strand)...\n";
-    open(REVERSE,">$_[0].splicePR");
-    open(FIN,"sgdp -f -c 1 -m 1 -l 0 -r $_[0].gb|") || die "Can't start Splice Predictor";
-    while(<FIN>)
-      {
-	if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
-	  {
-	    printf  REVERSE "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-	    '->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	  }
-	elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
-	  {
-	    printf  REVERSE "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-	    '<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	  }
-      }
-    close(FIN);
-    close(REVERSE);
+    $DoIt = 0;
+    if (!( -e "$_[0].splicePR") || (-s "$_[0].splicePR" == 0))    {$DoIt = 1; }
+
+    if ($DoIt) {
+      print STDERR "Issuing request to SplicePredictor (reverse strand)...\n";
+      open(REVERSE,">$_[0].splicePR");
+      open(FIN,"sgdp -f -c 1 -m 1 -l 0 -r $_[0].gb|") || die "Can't start Splice Predictor";
+      while(<FIN>)
+	{
+	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
+	    {
+	      printf  REVERSE "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
+		'->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
+	    }
+	  elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
+	    {
+	      printf  REVERSE "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
+		'<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
+	    }
+	}
+      close(FIN);
+      close(REVERSE);
+    }
+    else {print STDERR "[R on disk]";}
   }
 
 #------------------------------------------------------------
@@ -252,7 +273,7 @@ sub eugene( $ @ )
     
     print STDERR "\nprocessing $file\n\n";
     &getsites($file);
-    $cmd = sprintf("EuGeneAS -p h %s -g $file $file > $file.html", join(' ',@params));
+    $cmd = sprintf("EuGeneAS -p h %s -g $file > $file.html", join(' ',@params));
     system($cmd);
   }
 
@@ -262,7 +283,7 @@ sub eugene( $ @ )
 
 if (!exists($ENV{'EUGENEDIR'}))
   {
-    $ENV{'EUGENEDIR'} = '/group/biocomp/Soft/src/Eugene/dist';
+    $ENV{'EUGENEDIR'} = '/home/thomas/Linux/Annotation/EuGene';
     $ENV{'PATH'} = "$ENV{'PATH'}:$ENV{'EUGENEDIR'}";
   }
 
