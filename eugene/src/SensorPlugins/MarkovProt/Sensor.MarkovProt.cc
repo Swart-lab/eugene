@@ -272,15 +272,15 @@ void SensorMarkovProt :: Plot(DNASeq *TheSeq)
 
     p = ((i == 0) ? 0 : i-1);
     
-    PlotLine(p,i, 1, 1,LScore[0],Score[0],3);
-    PlotLine(p,i, 2, 2,LScore[1],Score[1],3);
-    PlotLine(p,i, 3, 3,LScore[2],Score[2],3);
-    PlotLine(p,i,-1,-1,LScore[3],Score[3],3);
-    PlotLine(p,i,-2,-2,LScore[4],Score[4],3);
-    PlotLine(p,i,-3,-3,LScore[5],Score[5],3);
-    PlotLine(p,i, 4, 4,LScore[6],Score[6],3);
-    PlotLine(p,i,-4,-4,LScore[7],Score[7],3);
-    PlotLine(p,i, 0, 0,LScore[8],Score[8],3);
+    PlotLine(p,i, 1, 1,LScore[0],Score[0],6);
+    PlotLine(p,i, 2, 2,LScore[1],Score[1],6);
+    PlotLine(p,i, 3, 3,LScore[2],Score[2],6);
+    PlotLine(p,i,-1,-1,LScore[3],Score[3],6);
+    PlotLine(p,i,-2,-2,LScore[4],Score[4],6);
+    PlotLine(p,i,-3,-3,LScore[5],Score[5],6);
+    PlotLine(p,i, 4, 4,LScore[6],Score[6],6);
+    PlotLine(p,i,-4,-4,LScore[7],Score[7],6);
+    PlotLine(p,i, 0, 0,LScore[8],Score[8],6);
 
     for (j = 0 ; j < 9 ; j++) {
       LScore[j] = Score[j];
