@@ -98,7 +98,10 @@ void MasterSensor :: InitMaster ()
 	fprintf(stderr,"Loading %s\t%d\n",msList[i]->Name,j);
 	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
       }
-      else fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",soList[i]);
+      else {
+	fprintf(stderr,"Error: ignored plugin (invalid or not found) : %s\n",soList[i]);
+	exit(2);
+      }
       nbSensors++;
     }
 }
@@ -139,17 +142,18 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
 {
   int i,j;
-
-  printf("%6d %c ", 1+pos, (*X)[pos]);
+  printf("%6d %c", 1+pos, (*X)[pos]);
 
   for(i=0; i<=DATA::UTR3R; i++)
     printf (" %.2f",d->contents[i]);
 
-  for(i=0; i<= Signal::Reverse;  i++) 
-    printf (" || ");
-  for (j=0; j<= DATA::Del; j++)
-    printf("%.2f ",d->sig[j].weight[i]);
-  
+  for(i=0; i<= Signal::Reverse;  i++) {
+//  for(i=0; i< Signal::LastEdge;  i++) {
+    printf (" ||");
+    for (j=0; j<= DATA::Del; j++)
+      printf(" %.2f",d->sig[j].weight[i]);
+  }
+  printf("\n");
 }
 
 // --------------------------------------------
