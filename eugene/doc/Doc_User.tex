@@ -3,9 +3,18 @@
 \subsection{\texttt{Sensor.User}}
 \label{pluguser}
 
-Todo.
+The user plugin is superseded by the AnnotaStruct\footnote{Also know
+  as the BarbaTruc plugin.} plugin. It is conserved for compatibility
+reasons.
 
 \paragraph{Description}
+
+The sensor allows to seamlessly modify \EuGene\ underlying graph
+weighting using a small langage that can modify the weights of signals
+and contents edges in the graph. The plugin priority is significant
+here because it may directly set signal weights to a specific value
+(to eg. remove a signal prediction). Contents edges are just penalized
+(a weight is added to the existing weight).
 
 The sensor is activated by either :
 \begin{itemize}
@@ -21,11 +30,45 @@ Sensor.USer      9         # Sensor priority
 
 \paragraph{Input files format}
 
+A small language is used to indicate which edges should have their
+weight modified. Signal weight modification is indicated by the
+keywords \texttt{start}, \texttt{stop}, \texttt{acceptor} and
+\texttt{donor}. Each line should indicate the type of signal edge
+which should be modified, the strand (either \texttt{f} or
+\texttt{r}), the position and the weight $p$ to use for the signal.
+$p$ can take any value between $0.0$ and $1.0$. The two signal edges
+(corresponding respectivelyto the fact the the signal is used or not)
+are respectively set to $\log(p)$ and $\log(1-p)$.
+
+For contents edges, the keywords \texttt{exon}, \texttt{intron},
+\texttt{utr3}, \texttt{utr5} and \texttt{intergenic} are used. Then
+the strand is indicated (either \texttt{f} or \texttt{r}), then the
+region where contents edge weights should be modified (as an interval
+\texttt{[begin..end]}). Finally, the weight modification $p$ is given
+as a floating point value. Any floating point value can be used
+including two special values denoted \texttt{infinity} and
+\texttt{-infinity} (with an obvious meaning).
+
+Here is an example:
+\begin{Verbatim}[fontsize=\small]
+utr5 f [2..28] 10.0
+acceptor f 2966 0.0
+\end{Verbatim}
+
+which delete any existing acceptor prediction at position 2966 on the
+forward strand and favors UTR5 prediction on the 2-28 region.
+
 \paragraph{Filtering input information}
 
 No filtering.
 
 \paragraph{Integration of information}
+
+The underlying graph edges are directly modified as indicated. Pay
+attention that signal edge weights are \emph{set} to the value
+indicated while contents edge weights are just incremented by the
+value indicated. The signal behavior is useful to be able to delete an
+existing signal.
 
 \paragraph{Post analyse}
 
