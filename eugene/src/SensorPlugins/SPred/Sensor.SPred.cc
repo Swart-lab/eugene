@@ -108,7 +108,7 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
 
     // erreur: on a pas tout lu ou ca ne croit pas
       if ((j < 4) || ((type[0] == 'D') && (k < prevkD)) || ((k < prevkA)))      {
-	fprintf(stderr,"%d %c %d %d %d\n",j,type[0],k,prevkD,prevkA);
+	//	fprintf(stderr,"%d %c %d %d %d\n",j,type[0],k,prevkD,prevkA);
  	fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
  	exit(2);
       }
