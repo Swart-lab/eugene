@@ -11,12 +11,15 @@ class GFFObject
  private:
   
  public:
-  char feature[30];
-  int  start, end;
-  char strand, frame;
-
+  char  name[30];
+  char  feature[30];
+  int   start, end;
+  char  strand, frame;
+  int   A, T, C, G, N;
+  float GC;
+  
   GFFObject  ();
-  GFFObject  (char*,int,int,char,char);
+  GFFObject  (char*, char*,int,int,char,char,int,int,int,int,int,float);
   void Print       ();
   void PrintHeader ();
   ~GFFObject ();
@@ -29,8 +32,11 @@ class SensorGFF : public Sensor
 {
  private:
   std::vector <GFFObject*> gffList;
+  static FILE *ppfile;
+  static bool IsInitialized;
+
   void ReadGFF(char[FILENAME_MAX+1]);
-  
+
  public:
   SensorGFF          (int n, DNASeq *X);
   virtual ~SensorGFF ();
@@ -41,5 +47,11 @@ class SensorGFF : public Sensor
 };
 
 extern "C" SensorGFF* builder0( int n, DNASeq *X) { return new SensorGFF(n, X);}
+
+
+
+FILE * SensorGFF::ppfile;
+bool SensorGFF::IsInitialized = false;
+
 
 #endif
