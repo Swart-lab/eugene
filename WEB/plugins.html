@@ -1,0 +1,620 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>EuGene : Plugins</title>
+                 
+  <link rel="SHORTCUT ICON" href="Images/eg.jpg">
+         
+  <link rel="STYLESHEET" type="text/css" href="Style/eugene.css">
+          
+  <script language="JavaScript1.2" src="JavaS/slide.js">
+    /**************************************************************************
+      NewsSlideFade 
+      *   Copyright (C) 2001 Thomas Brattli
+      *   This script was released at DHTMLCentral.com
+      *   Visit for more great scripts!
+      *   This may be used and changed freely as long as this msg is intact!
+      *   We will also appreciate any links you could give us.
+      *
+      *   Made by Thomas Brattli
+      ************************************************************************/
+    </script>
+        
+  <script language="JavaScript1.2" src="JavaS/coolmenus4.js">
+      /************************************************************************
+      Copyright (c) 2001 Thomas Brattli (webmaster@dhtmlcentral.com)
+      
+      DHTML coolMenus - Get it at coolmenus.dhtmlcentral.com
+      Version 4.0_beta
+      This script can be used freely as long as all copyright messages are
+      intact.
+      
+      Extra info - Coolmenus reference/help - Extra links to help files **** 
+      CSS help: http://192.168.1.31/projects/coolmenus/reference.asp?m=37
+      General:  http://coolmenus.dhtmlcentral.com/reference.asp?m=35
+      Menu properties   : http://coolmenus.dhtmlcentral.com/properties.asp?m=47
+      Level properties  : http://coolmenus.dhtmlcentral.com/properties.asp?m=48
+      Background bar pro: http://coolmenus.dhtmlcentral.com/properties.asp?m=49
+      Item properties:    http://coolmenus.dhtmlcentral.com/properties.asp?m=50
+      ************************************************************************/
+    </script>
+        
+  <script language="JavaScript1.2" src="JavaS/cm_addins.js">
+      /************************************************************************
+      Copyright (c) 2001 Thomas Brattli (webmaster@dhtmlcentral.com)
+      Coolmenus add-in file for more advanced featuers..
+      ************************************************************************/
+    </script>
+</head>
+  <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0"
+ bgcolor="white">
+       
+<script language="JavaScript1.2" src="JavaS/euG_menu.js">
+    </script>  
+         <!-- Bug netscape 4
+  <div id="divNewsCont">
+  <div id="divNews">
+  </div>
+  </div>
+    --> 
+              
+<table height="100%" width="100%" cellspacing="0" cellpadding="0"
+ border="0" rows="2">
+  	<tbody>
+     <tr height="140">
+  	  <td background="Images/top.jpg" colspan="2" height="140"
+ valign="top"><br>
+      </td>
+  	</tr>
+  	<tr>
+  	  <td width="145" valign="top" align="left"
+ background="Images/left.jpg"> 	    <img src="Images/left.jpg"
+ width="145" height="10">
+  	  </td>
+  	  <td width="100%" valign="top"> 	     	    <!-- DEBUT PAGE... --> 	 
+         
+      <table cellspacing="0" cellpadding="6" border="0">
+  		<tbody>
+           <tr>
+  		  <td> <br>
+             </td>
+  		</tr>
+  		<tr>
+  		  <td valign="top" align="justify"> 		    <img
+ src="Images/m_plugins_on.jpg">
+             <br>
+            <br>
+  		    Plugins are small software components that can be dynamically 		
+   loaded by EuG&egrave;ne. Although it is completely transparent 		    to 
+the end-user, every plugin loaded by EuG&egrave;ne must be 		    written in
+C++ and be a subclass of the Sensor class 		    (for more details see the
+EuG&egrave;ne documentation).<br>
+  		    <br>
+  		    Plugins are presented in 4 categories:<br>
+  		    <img src="Images/puce.jpg" width="10">
+  <a href="plug_all.html#signal_plugins">Signal plugins</a><br>
+  		    <img src="Images/puce.jpg" width="10">
+  <a href="plug_all.html#content_plugins">Content plugins</a><br>
+  		    <img src="Images/puce.jpg" width="10">
+  <a href="plug_all.html#mixed_signal_content_plugins">Mixed signal/content
+plugins</a><br>
+  		    <img src="Images/puce.jpg" width="10">
+  <a href="plug_all.html#others_plugins">Others plugins</a><br>
+   		  </td>
+  		</tr>
+  	             
+        </tbody>       
+      </table>
+  	    <br>
+  	           
+      <table cellspacing="0" cellpadding="10" cols="2" width="100%">
+  		<tbody>
+           <tr>
+  		  <td valign="top" width="50%">             
+            <div align="center"> 		      <font color="#06768c">  		    <a
+ name="signal_plugins"></a>  			<b>  Signal plugins  </b></font> 		      
+           
+            <table width="80%" cellpadding="0" cellspacing="0">
+  			  <tbody>
+                 <tr>
+  			    <td><img height="1" width="100%" src="Images/spacer.jpg">
+  			    </td>
+  			  </tr>
+  		                     
+              </tbody>             
+            </table>
+             </div>
+  		    <br>
+  		                 
+            <table width="100%" cellpadding="1" cellspacing="1">
+  			<tbody>
+                 <tr>
+  			  <td> 			                       
+                  <table width="100%" cellpadding="2" cellspacing="1">
+  				<tbody>
+                       <tr align="center" class="fonce">
+  				  <td><font color="white" size="-1"> 				      <b>Name</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Description</b></font></td>
+  				  <td nowrap="nowrap"><font color="white" size="-1"> 				      <b>Information 
+source</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Link</b></font></td>
+  				</tr>
+    				<tr class="A0">
+  				  <td><font size="-1">ATGpr</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects possible 				 
+     translation starts as predicted by the 				      ATGpr program.<br>
+  The 				      plugin reads the prediction of the 				      programs from 
+two files whose names 				      are derived from the sequence name 				  
+   by adding the <i>.atgpr</i> and 				      <i>.atgprR</i> suffix (respectively
+ 				      prediction for the forward and reverse 				      strand). 				 
+   </font> </td>
+  				  <td><font size="-1">ATGpr</font></td>
+  				  <td align="center"> 				    <a
+ href="http://www.hri.co.jp/atgpr/">  				      <img width="16"
+ src="Images/world.jpg" border="0">
+                         </a></td>
+  				</tr>
+    				  <tr class="A1">
+                         <td><font size="-1">EuStop</font></td>
+  				  <td align="justify"> 				    <font size="-1">Predicts translation
+				      stops. It is able to deal with 				      noisy sequences and will
+eg. predict a 				      possible stop on <i>TGN</i>. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne dummy stop 				      sensor</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A0">
+  				  <td><font size="-1">FrameShift</font></td>
+  				  <td align="justify"> 				    <font size="-1">Predicts possible 				 
+     frameshits (either insertions or 				      deletions) at each position 
+of the 				      sequence with a uniform cost. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne dummy 				      frameshift sensor</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td><font size="-1">GSplicer</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects possible 				 
+     splice sites as predicted by the  				      GeneSplicer program.<br>
+  				      The plugin reads the prediction of the 				      program from 
+one file whose name is 				      derived from the sequence name by 				  
+   adding the <i>.Gsplicer</i> 				      suffix. This file describe the predicted
+				      splice sites for the forward and reverse 				      strand.  				
+   </font> </td>
+  				  <td><font size="-1">GeneSplicer</font></td>
+  				  <td align="center"> 				    <a
+ href="http://www.tigr.org/tdb/GeneSplicer/gene_spl.html"> 				      <img
+ width="16" src="Images/world.jpg" border="0">
+                         </a></td>
+  				</tr>
+   				<tr class="A0">
+  				  <td><font size="-1">NG2</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects possible splice
+ 				      sites as predicted by the NetGene2 				      program.<br>
+  				      The plugin reads the prediction of the 				      programs from 
+two files whose names 				      are derived from the sequence name 				  
+   by adding the <i>.splices</i> and 				      <i>.splicesR</i> suffix (respectively
+ 				      prediction for the forward and reverse 				      strand). 				 
+   </font> </td>
+  				  <td><font size="-1">NetGene2</font></td>
+  				  <td align="center"> 				    <a
+ href="http://www.cbs.dtu.dk/services/NetGene2/"> 				      <img
+ width="16" src="Images/world.jpg" border="0">
+                         </a></td>
+  				</tr>
+  				<tr class="A1">
+  				  <td><font size="-1">NStart</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects possible 				 
+     translation starts as predicted by 				      NetStart program.<br>
+  The plugin reads 				      the prediction of the program from two 				
+     files whose names are derived from the 				      sequence name by adding 
+the 				      <i>.starts</i> and <i>.startsR</i> 				      suffix (respectively 
+prediction for the 				      forward and reverse strand). 				    </font> 
+                        </td>
+  				  <td><font size="-1">NetStart</font></td>
+  				  <td align="center"> 				    <a
+ href="http://www.cbs.dtu.dk/services/NetStart/"> 				      <img
+ width="16" src="Images/world.jpg" border="0">
+                         </a></td>
+  				</tr>
+   				<tr class="A0">
+  				  <td><font size="-1">PatConst</font></td>
+  				  <td align="justify"> 				    <font size="-1">Predicts a specific
+chosen type of signal at each occurence of a given pattern on the sequence.
+				    </font> </td>
+  				  <td><font size="-1">-</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+    				<tr class="A1">
+  				  <td><font size="-1">PepSignal</font></td>
+  				  <td align="justify"> 				    <font size="-1">Uses Predotar to predict
+peptide adressing sequences after every occurrence of an ATG an modifies
+ATG scoring accordingly.</font><br>
+                        </td>
+  				  <td><font size="-1"> </font><font size="-1">Predotar</font><br>
+                        </td>
+  				  <td align="center"> <a href="http://www.inra.fr/predotar/"> 				
+     <img width="16" src="Images/world.jpg"
+ border="0" alt="Predotar - INRA" height="16">
+                        </a><br>
+                        </td>
+  				</tr>
+    				<tr class="A0">
+  				  <td><font size="-1">SMachine</font></td>
+  				  <td align="justify"> 				    <font size="-1"> Injects possible signals
+as predicted by Splice Machine program.</font> </td>
+  				  <td><font size="-1">SpliceMachine</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td><font size="-1">SpliceWAM</font></td>
+  				  <td align="justify"> 				    <font size="-1">Detects the 				   
+  splice sites and to give 				      them a score reflecting the context
+				      accordance with given models.<br>
+  				      A score is attributed at each 				      potential splice sites 
+(<i>AG</i> /  				      <i>GT</i>), 				      according to Weight Array Method.
+ 				    </font> </td>
+  				  <td><font size="-1">EuG&eacute;ne Window Array 				      Model for 
+splice</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A0">
+  				  <td><font size="-1">SPred</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects possible splice
+ 				      sites as predicted by the 				      SplicePredictor program.<br>
+  				      The plugin reads the prediction of the 				      programs from 
+two files whose names 				      are derived from the sequence name by 				 
+     adding the <i>.spliceP</i> and 				      <i>.splicePR</i> suffix (respectively
+ 				      prediction for the forward and reverse 				      strand). 				 
+   </font> </td>
+  				  <td><font size="-1"> 				      SplicePredictor</font></td>
+  				  <td align="center"> 				    <a
+ href="http://bioinformatics.iastate.edu/cgi-bin/sp.cgi"> 				      <img
+ width="16" src="Images/world.jpg" border="0">
+                         </a></td>
+  				</tr>
+  				<tr class="A1">
+  				  <td><font size="-1">StartWAM</font></td>
+  				  <td align="justify"> 				    <font size="-1">Detects the 				   
+  translation start codons and to give 				      them a score reflecting
+the context 				      accordance with given models.<br>
+  				      A score is attributed at each 				      potential start codons 
+(ATG), 				      according to Weight Array Method (see 				      Zhang and 
+Marr, 				      <i>Comput Appl Biosci.</i> 1993 				      Oct;9(5):499-509), 
+or Weighted Array 				      Matrix models (Salzberg, 				      <i>Comput Appl
+Biosci</i> 1997 				      Aug;13(4):365-76). A WAM describes a 				     
+consensus motif of a functional 				      signal, and is composed by one
+				      markovian model per each position of 				      the motif. Here the
+motif is defined 				      by the ATG (present in all start 				      codons)
+plus the two flanking context 				      (informating for the WAM).  				
+     Globally, the score of a motif is 				      function of the emission 
+probabilities 				      of this motif given a true positive 				      model 
+and a false positive model. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne Window Array 				      Model for 
+start</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+     				  <tr class="A0">
+                         <td><font size="-1">Transcript</font></td>
+  				  <td align="justify"> 				    <font size="-1">Predicts a possible
+				      transcription start and stop at every 				      position, all with
+the same uniform 				      cost. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne dummy 				      transcript start/stop 
+sensor</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+  			                         
+                    </tbody>                   
+                  </table>
+   			  </td>
+  			</tr>
+  		                   
+              </tbody>             
+            </table>
+      		</td>
+           </tr>
+           <tr>
+  		  <td valign="top" width="50%">             
+            <div align="center"> 		      <font color="#06768c">  		    <a
+ name="content_plugins"></a>  			<b>  Content plugins  </b></font> 		    
+              
+            <table width="80%" cellpadding="0" cellspacing="0">
+  			  <tbody>
+                 <tr>
+  			    <td><img height="1" width="100%" src="Images/spacer.jpg">
+  			    </td>
+  			  </tr>
+  		                     
+              </tbody>             
+            </table>
+             </div>
+  		         		  <br>
+	 			   			     				             
+            <table width="100%" cellpadding="2" cellspacing="1">
+               <tbody>
+                 <tr align="center" class="fonce">
+  				  <td><font color="white" size="-1"> 				      <b>Name</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Description</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Information source</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Link</b></font></td>
+  				</tr>
+    				<tr class="A0">
+  				  <td><font size="-1">BlastX</font></td>
+  				  <td align="justify"> 				    <font size="-1">Exploit similarities
+				      with homologous proteins.<br>
+  				      The similarities influence exon and 				      intron detection. 
+Similarities from 				      several databases can be 				      exploited. 
+Usually 3 databases are 				      used: SwissProt, PIR and TrEMBL. 				  
+ </font> </td>
+  				  <td><font size="-1">BlastX-based proteic 				      similarity sensor</font></td>
+  				  <td align="center"> 				  <a
+ href="http://www.ncbi.nlm.nih.gov/BLAST/"> 				      <img width="16"
+ src="file:///home/cros/Linux/EuGeneWEB/Images/world.jpg" border="0">
+                   </a></td>
+  				</tr>
+   				<tr class="A1">
+  				  <td><font size="-1">Est</font></td>
+  				  <td align="justify"> 				    <font size="-1">Take into account 				 
+     information from aligned transcribed 				      sequences, both complete 
+cDNA and 				      EST.<br>
+  				      The existence of a hit (resp. gap) in 				      the spliced alignment 
+will influence 				      intergenic, exonic and intronic state 				      costs
+by penalizing states that are 				      incompatible with the alignment. The
+				      spliced alginments must be performed 				      beforehand using 
+a spliced aligner 				      such as <i>sim4</i> or <i>spidey</i>. 				   
+  The output of these aligners must be 				      converted in the adequate 
+format. 				    </font> </td>
+  				  <td><font size="-1">Sim4-based transcription  				      similarity 
+sensor</font></td>
+  				  <td align="center"> 			          <a
+ href="http://pbil.univ-lyon1.fr/sim4.php"> 				      <img width="16"
+ src="file:///home/cros/Linux/EuGeneWEB/Images/world.jpg" border="0">
+                   </a></td>
+  				</tr>
+   				<tr class="A0">
+  				   				  <td><font size="-1">Homology</font></td>
+  				  <td align="justify"> 				    <font size="-1">Exploit exon conservation.
+ 				    </font> </td>
+  				  <td><font size="-1">TBlastX-based exon 				      conservation sensor</font></td>
+  				  <td align="center"> 				    <a
+ href="http://www.ncbi.nlm.nih.gov/BLAST/"> 				      <img width="16"
+ src="file:///home/cros/Linux/EuGeneWEB/Images/world.jpg" border="0">
+                   </a></td>
+  				</tr>
+   				<tr class="A1">
+  				  <td><font size="-1">MarkovConst</font></td>
+  				  <td align="justify"> 				    <font size="-1">A simulated contents
+				      sensor that gives constant 				      probabilities to all positions 
+for 				      each region type.<br>
+  				      Two parameters (in the EuG&egrave;ne 				      parameters file) 
+indicate the GC scope 				      of the contents sensor. If the GC% of 				 
+     the sequence is out of the scope, the 				      plugin will give an equal
+null 				      loglikelihood to all types of regions. 				      Used for
+testing purposes and for 				      simulating the exponential length 				 
+     distributions of HMM. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne dummy constant 				      probabilities</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+  				<tr class="A0">
+ 				  <td><font size="-1">MarkovIMM</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects 				      coding/intronic/utr/intergenic
+ 				      likelihood as modeled by interpolated 				      Markov models
+(introduced in 				      Glimmer).<br>
+  These models are defined 				      in a so-called matrices file. 				 
+    Depending on the matrices file, this 				      may contain IMM for exons, 
+introns and 				      intergenic data and also optionnally 				      5' and 
+3' UTR regions. If these 2 last 				      IMMs are absent from the matrices
+ 				      file, intronic models are used for UTR. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne DNA level 				      interpolated 
+markov models</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td><font size="-1">MarkovProt</font></td>
+  				  <td align="justify"> 				    <font size="-1">Injects coding/non 				 
+     coding likelihood as modeled by proteic 				      Markov models.<br>
+  				      These models are defined in a matrices 				      file. The order 
+of the Markov model 				      must be given in the EuG&egrave;ne parameters
+ 				      file. 				    </font> </td>
+  				  <td><font size="-1">EuG&egrave;ne amino acid level 				      markov 
+models</font></td>
+  				  <td align="center">-</td>
+  				</tr>
+  				<tr class="A0">
+ 				  <td><font size="-1">Repeat</font></td>
+ 				  <td align="justify"> 				    <font size="-1">Exploit the output of 
+				      repeated sequences detector such as 				      RepeatMasker by penalizing
+exonic, 				      inronic or UTR states when repeats are 				      detected. 
+				    </font> </td>
+ 				  <td><font size="-1">RepeatMasker</font></td>
+ 				  <td align="center"> 				    <a
+ href="http://ftp.genome.washington.edu/cgi-bin/RepeatMasker"> 				     
+                  <img width="16" src="Images/world.jpg" border="0">
+                  </a></td>
+ 				</tr>
+                   
+              </tbody>             
+            </table>
+     		</td>
+           </tr>
+           <tr>
+  		  <td valign="top" width="50%">             
+            <div align="center"> <font color="#06768c">  		             
+  <a name="mixed_signal_content_plugins"></a>             <b>  Mixed Signal/Content
+plugins </b></font>              
+            <table width="80%" cellpadding="0" cellspacing="0">
+  			  <tbody>
+                              <tr>
+  			    <td><img height="1" width="100%" src="Images/spacer.jpg">
+  			    </td>
+  			  </tr>
+  		                     
+              </tbody>             
+            </table>
+             </div>
+  		    <br>
+  		                 
+            <table width="100%" cellpadding="1" cellspacing="1">
+  			<tbody>
+                 <tr>
+  			  <td> 			                       
+                  <table width="100%" cellpadding="2" cellspacing="1">
+  				<tbody>
+                       <tr align="center" class="fonce">
+  				  <td><font color="white" size="-1"> 				      <b>Name</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Description</b></font></td>
+  				  <td nowrap="nowrap"><font color="white" size="-1"> 				      <b>Information 
+source</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Link</b></font></td>
+  		    </tr>
+   				<tr class="A0">
+  				  <td><font size="-1">AnnotaStruct</font></td>
+  				  <td align="justify"> 				                                <font
+ size="-1">Take into account arbitrary user information using GFF files.
+High level information of either CDS or transcript elements can be given
+as well as low-level information on signals or regions.</font><br>
+                        </td>
+  				  <td><font size="-1">GFF file</font><br>
+                        </td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td> <font size="-1">IfElse</font> </td>
+  				  <td align="justify"> 				    <font size="-1">Combine the predictions 
+ 				      of two existing plugins.<br>
+  				      It listen to a first plugin. For each 				      possible predictable 
+item, if this 				      plugin predicts something then this 				      prediction 
+is used. If the plugin does 				      not predict anything, then the output
+ 				      of the second plugin is used.  				    </font> </td>
+  				  <td> <font size="-1">EuG&egrave;ne information 				      combination</font> 
+                  </td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A0">
+  				  <td><font size="-1">Riken</font></td>
+  				  <td align="justify"> 				    <font size="-1">Full-length mRNA.<br>
+  				      A file with extension <i>.riken</i> is 				      read. Each line 
+must contain the 				      positions of the extremities of the 				      match
+of the 5' EST then the name of 				      the 5' EST the same thing for the
+				      3'EST then the name of the clone. 				    </font> </td>
+  				  <td><font size="-1">Full-length mRNA 				    </font></td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td> <font size="-1">User</font> </td>
+  				  <td align="justify"> 							    <font size="-1">Take into account 
+				      specific user information (usefull to 				      explore alternative
+gene 				      structures).<br>
+ A 				      <font color="#ad3000"
+ onmouseover="AffBulle('<table width=100% border=0 CELLSPACING=1 CELLPADDING=1><tr bgcolor=orange><td colspan=4 align=center><font face=arial size=-1><b>USER information </b><i>(click for details)</font></td></tr></table><table align=center width=100% border=0 CELLSPACING=0 CELLPADDING=0><tr bgcolor=orange><td><table border=0 CELLSPACING=1 CELLPADDING=0><tr bgcolor=#FFCC66><td colspan=4><font face=arial size=-1>The prediction can take into account specific user information  (usefull to explore<br>alternative gene structures). A simple language is required :</font></td></tr><tr bgcolor=#FFCC66><td colspan=2 align=center><font face=arial size=-1><b>Signals</b></font></td><td colspan=2 align=center><font face=arial size=-1><b>Sequence itself</b></font></td></tr><tr bgcolor=#FFCC66><td><font face=arial size=-1><i> type </i></font></td><td><font face=arial size=-1> start stop acceptor donor </font></td><td><font face=arial size=-1><i> type </i></font></td><td><font face=arial size=-1> exon intron utr5/3 intergenic </font></td></tr><tr bgcolor=#FFCC66><td><font face=arial size=-1><i> strand </i></font></td><td><font face=arial size=-1> f = forward / r = reverse </font></td><td><font face=arial size=-1><i> strand </i></font></td><td><font face=arial size=-1> f = forward / r = reverse </font></td></tr><tr bgcolor=#FFCC66><td colspan=2></td><td><font face=arial size=-1><i> frame </i></font></td><td><font face=arial size=-1> only for exons / introns </font></td></tr><tr bgcolor=#FFCC66><td><font face=arial size=-1><i> position </i></font></td><td><font face=arial size=-1> position on the sequence </font></td><td><font face=arial size=-1><i> [start..end] </i></font></td><td><font face=arial size=-1> scope of the information </font></td></tr><tr bgcolor=#FFCC66><td><font face=arial size=-1><i> value </i></font></td><td><font face=arial size=-1> float between 0.0, 1.0</font></td><td><font face=arial size=-1><i> value </i></font></td><td><font face=arial size=-1> float between -infinity, infinity </font></td></tr></table></td></tr></table>')"
+ onmouseout="HideBulle()"
+ onclick="OuvrirPopup('sensorUser.html','','resizable=no,location=no,width=600,height=440,menubar=yes,status=no,scrollbars=yes')">
+ 					<b><u>simple language</u></b></font> is 				      required containing 
+statements on 				      signals and on the sequence itself. 				     </font> 
+                  </td>
+  				  <td> <font size="-1">EuG&egrave;ne arbitrary user 				      information 
+sensor (language 				      based)</font> </td>
+  				  <td align="center">-</td>
+  				</tr>
+                      
+                    </tbody>                   
+                  </table>
+  		  </td>
+  		</tr>
+  	                      
+              </tbody>             
+            </table>
+  	</td>
+           </tr>
+           <tr>
+  		  <td valign="top" width="50%">             
+            <div align="center"> <font color="#06768c"> 	    <a
+ name="others_plugins"></a>              <b>  Others plugins  </b></font>
+	 	                  
+            <table width="80%" cellpadding="0" cellspacing="0">
+  	      <tbody>
+                <tr>
+ 	         <td><img height="1" width="100%" src="Images/spacer.jpg">
+                  </td>
+ 	       </tr>
+	                     
+              </tbody>             
+            </table>
+             </div>
+   <br>
+             
+            <table width="100%" cellpadding="2" cellspacing="1">
+               <tbody>
+                 <tr align="center" class="fonce">
+  				  <td><font color="white" size="-1"> 				      <b>Name</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Description</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Information source</b></font></td>
+  				  <td><font color="white" size="-1"> 				      <b>Link</b></font></td>
+  				</tr>
+   				<tr class="A0">
+  				  <td> <font size="-1">GCPlot</font> </td>
+  				  <td align="justify"> 				    <font size="-1">Add to the graphical
+				      representation a plot of basic 				      composition statistics
+on the  				      sequence.<br>
+  				      The composition statistics represented 				      can be arbitrarily 
+chosen. For 				      example, the 				      <i>GC%=(G+C)/(A+T+G+C)</i> 
+				      Statistics on the 3rd base of each 				      codon are automatically 
+computed and 				      plotted. The color (integer between 0 				      and 
+8), the smoothing window width 				      and a zooming factor can be specified.
+ 				      The zooming factor for the 3rd base 				      in each codon in 
+zoomed using specific 				      zooming factor. 				    </font> </td>
+  				  <td> <font size="-1">EuG&egrave;ne basic 				      composition statitics 
+plot</font> </td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A1">
+  				  <td> <font size="-1">GFF</font></td>
+  				  <td align="justify"> 				    <font size="-1">Add to the graphical
+				      representation an annotation provided 				      in a GFF format.<br>
+  				      Note that the provided GFF annotation 				      could be an EuG&egrave;ne 
+prediction given 				      in GFF format (obtained using the 				      <i>-pg</i> 
+argument). This could allow 				      to visualise two predictions on the
+ 				      same graph. For a sequence, the plugin 				      reads the annotation 
+from one file 				      whose name is derived from the 				      sequence 
+name by adding the 				      <i>.gff</i> suffix. 				    </font> </td>
+  				  <td> <font size="-1">EuG&egrave;ne gff annotation 				    plot</font> 
+                  </td>
+  				  <td align="center">-</td>
+  				</tr>
+   				<tr class="A0">
+  				  <td> <font size="-1">Plotter</font> </td>
+  				  <td align="justify"> 				    <font size="-1">Add to the graphical
+				      representation the GC%, the GC3% and 				      the two quotients
+A/T+A and T/T+A. 				    </font> </td>
+  				  <td> <font size="-1">EuG&egrave;ne GC%, GC3%, 				      A/AT% T/AT% 
+plot</font> </td>
+  				  <td align="center">-</td>
+  				</tr>
+  				<tr class="A1">
+ 				  <td> <font size="-1">Tester</font> </td>
+  				  <td align="justify"> 				    <font size="-1">Evaluate signal sensors.
+ 				      <br>
+ For a sequence, the plugin reads 				      the truth gene coordinates from 
+one 				      file whose name is derived from the 				      sequence name 
+by adding the 				      <i>.gff</i> suffix, and creates one 				      file 
+                  <i>test.sensorName.gff</i> 				      for each sensor tested.
+ 				    </font> </td>
+  				  <td> <font size="-1">EuG&egrave;ne signal sensors 				      test</font> 
+                  </td>
+  				  <td align="center">-</td>
+                 </tr>
+               
+              </tbody>             
+            </table>
+   		  </td>
+  		</tr>
+  	             
+        </tbody>       
+      </table>
+     	    <!-- FIN PAGE. -->  	  </td>
+  	</tr>
+         
+  </tbody> 
+</table>
+    <br>
+ <br>
+</body>
+</html>

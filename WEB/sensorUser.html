@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+    <head>
+      <title>EuGene: User information</title>
+      <link rev="made" href="mailto:tschiex@toulouse.inra.fr" />
+        <link rel="stylesheet" type="text/css"
+              href="../IM_CSS_JS_EX/bleu.css" />
+	  <body>
+	    <table align=center width=100% border=0 CELLSPACING=2
+	      CELLPADDING=2>
+	      <tr bgcolor=orange>
+		<td colspan=4 align=center><font face=arial size=-1>
+		    <b>USER information</b></font>
+		</td>
+	      </tr>
+	    </table>
+	    
+	    <table align=center width=100% border=0 CELLSPACING=0
+	      CELLPADDING=0>
+	      <tr bgcolor=orange>
+		<td>
+		  <table width=100% border=0 CELLSPACING=1 CELLPADDING=2>
+		    <tr bgcolor=#FFCC66>
+		      <td colspan=4 align=justify>
+			<font face=arial size=-1>
+			  The prediction can take into account specific user
+			  information (usefull to explore alternative gene
+			  structures). A simple language is required,
+			  described bellow, containing statements on signals
+			  and on the sequence itself :
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td colspan=2 align=center>
+			<font face=arial size=-1>
+			  <b>Statements on signals</b></font>
+		      </td>
+		      <td colspan=2 align=center>
+			<font face=arial size=-1>
+			  <b>Statements on sequence itself</b></font>
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td width=10%><font face=arial size=-1>
+			  <i>type</i></font>
+		      </td>
+		      <td width=40% nowrap><font face=arial size=-1>
+			  start stop acceptor donor</font>
+		      </td>
+		      <td width=10%><font face=arial size=-1>
+			  <i>type</i></font>
+		      </td>
+		      <td nowrap><font face=arial size=-1>
+			  exon intron utr5 utr3 intergenic</font>
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td><font face=arial size=-1>
+			  <i>strand</i></font>
+		      </td>
+		      <td nowrap><font face=arial size=-1>
+			  f = forward - r = reverse</font>
+		      </td>
+		      <td><font face=arial size=-1>
+			  <i>strand</i></font>
+		      </td>
+		      <td nowrap><font face=arial size=-1>
+			  f = forward - r = reverse</font>
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td colspan=2>&nbsp;</td>
+		      <td><font face=arial size=-1>
+			  <i>frame</i></font>
+		      </td>
+		      <td align=justify><font face=arial size=-1>
+			  Only used for exons - introns<br>
+			    The frame of an exon indicates the position of
+			    the codons wrt. to the start-end of the sequence
+			    (modulo 3, same as reported by BlastX).<br> 
+			      The frame of an intron specifies how the codon
+			      is split by the splice site : between 2 codons,
+			      after 1 nucleotide or after 2. Basically, if
+			      you don't care of the intron "frame" just put
+			      the same information for all 3 frames.</font>
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td><font face=arial size=-1>
+			  <i>position</i></font></td>
+		      <td><font face=arial size=-1>
+			  Position on the sequence</font>
+		      </td>
+		      <td><font face=arial size=-1>
+			  <i>[start..end]</i></font></td>
+		      <td><font face=arial size=-1>
+			  Scope of the information</font>
+		      </td>
+		    </tr>
+		    <tr bgcolor=#FFCC66>
+		      <td><font face=arial size=-1>
+			  <i>value</i></font>
+		      </td>
+		      <td align=justify><font face=arial size=-1>
+			  Cost associated with the signal.<br>
+			    It can range from 0.0 to 1.0. A value of 0.0 
+			    means that no site of this type exists at this
+			    position. The cost will override any existing
+			    cost.</font>
+		      </td>
+		      <td><font face=arial size=-1>
+			  <i>value</i></font>
+		      </td>
+		      <td align=justify><font face=arial size=-1>
+			  Score that can take any floating point value
+			  plus the extra values "infinity" and "-infinity".
+			  This cost will be added to the existing cost.<br>
+			    A positive cost helps predicting something
+			    consistent with the information.<br>
+			      A negative one prevents from predicting
+			      something consistent with the information.
+			      Thus a cost "-infinity" effectively forbids
+			      the prediction.</font>
+		      </td>
+		    </tr>
+		  </table>
+		</td>
+	      </tr>
+	    </table>
+	  </body>
+  </html>
+  
