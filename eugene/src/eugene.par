@@ -112,7 +112,7 @@ Sensor.NStart.use	TRUE
 Sensor.NG2.use		TRUE
 Sensor.SPred.use	TRUE
 #Sensor.Markov.use	2
-Sensor.Markov.use	FALSE
+Sensor.Markov.use	TRUE
 Sensor.BlastX.use	FALSE
 Sensor.Repeat.use	FALSE
 Sensor.Riken.use	FALSE
@@ -121,7 +121,7 @@ Sensor.User.use		FALSE
 Sensor.Homology.use	FALSE
 Sensor.StartConst.use	FALSE
 Sensor.SpliceConst.use	FALSE
-Sensor.MarkovConst.use	TRUE
+Sensor.MarkovConst.use	FALSE
 #
 # Sensor priorities
 #
