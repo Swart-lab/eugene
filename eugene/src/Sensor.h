@@ -10,7 +10,6 @@
 
 #include "Param.h"
 #include "DNASeq.h"
-#include "Plot.h"
 #include "System.h"
 #include "Const.h"
 
