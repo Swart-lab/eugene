@@ -57,13 +57,13 @@ sub getsites( $ )
 	print STDERR "F...";
         $Do   = $DoIt;
        	$seq  = $sequence;
-	open(FILE,">$_[0].atgpr");	
+	if($Do) {open(FILE,">$_[0].atgpr"); }
       }
       else {
 	print STDERR "R...";
 	$Do   = $DoItR;
      	$seq  = $rsequence;
-	open(FILE,">$_[0].atgprR");	
+	if($Do) { open(FILE,">$_[0].atgprR"); }
       }
 
       if ($Do) {
