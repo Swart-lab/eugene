@@ -92,13 +92,13 @@ void MasterSensor :: InitMaster ()
     nb0++;
   }
   
-  dllList = new (DLLFactory *)[(int)msList.size()];
+  dllList = new (SensorLoader *)[(int)msList.size()];
   
   for(i=nb0; i<(int)msList.size(); i++) {
     if(PAR.getI(useList[i])) {
-      dllList[i] = new DLLFactory ( soList[i] );
-      if(dllList[i]->factory)
-	theSensors.push_back( dllList[i]->factory->CreateSensor() );
+      dllList[i] = new SensorLoader ( soList[i] );
+      if(!dllList[i]->LastError())
+	theSensors.push_back( dllList[i]->MakeSensor() );
       else fprintf(stderr,"WARNING: Plugin not valid or not found : %s\n",soList[i]);
     }
   }

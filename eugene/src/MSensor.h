@@ -36,7 +36,7 @@ class MasterSensor
   std::vector <Sensor*>    theSensors;
   char **soList;
   char **useList;
-  DLLFactory **dllList;
+  SensorLoader **dllList;
   
  public:
   MasterSensor  ();
