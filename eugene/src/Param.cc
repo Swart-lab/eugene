@@ -401,7 +401,7 @@ int Parameters :: getUseSensor(char **key, int *val)
 	++iter;
       else {
 	strcpy(s,iter->first); strcat(s,".use"); 
-	if (!strcmp(m[s],"TRUE")) {
+	if (strcmp(m[s],"FALSE")) {
 	  *key = (char*)iter->first;
 	  *val = atoi(iter->second);
 	  ++iter;
