@@ -25,6 +25,12 @@
 
 #include <cstdio>
 #include <cstdlib>
+
+// MacOS-X kludge. cmath undefines these macros. Turn them into inlines 
+#include <math.h>
+inline int (isinf)(double r) { return isinf(r); }
+inline int (isnan)(double r) { return isnan(r); }
+
 #include <cmath>
 #include <cctype>
 #include <climits>
@@ -945,7 +951,6 @@ int main  (int argc, char * argv [])
   char   grnameFile[FILENAME_MAX+1];
   char   grname[FILENAME_MAX+1];
   int    graph;
-  std::string para_optimization_use;
 
   fprintf(stderr,"-------------------------------------");
   fprintf(stderr,"--------------------------------\n");
@@ -953,8 +958,7 @@ int main  (int argc, char * argv [])
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
 
-  para_optimization_use = PAR.getC("ParaOptimization.Use");
-  if ((para_optimization_use == "1") || (para_optimization_use == "TRUE")) 
+  if (PAR.getI("ParaOptimization.Use")) 
     OPTIM.ParaOptimize(argc, argv);
   else 
     {
