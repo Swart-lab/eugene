@@ -107,7 +107,7 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
 {
   FILE *fp;
   int i;
-  char *feature;
+  char *feature = (char *)malloc(FILENAME_MAX*sizeof(char));;
   int  start, end;
   char strand, frame;
 
