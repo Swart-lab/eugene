@@ -183,7 +183,7 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
   for(i=0; i<(int)theSensors.size(); i++) 
     theSensors[i]->GiveInfo(X, pos, d);
   
-  for (i=0; i<= DATA::LastSigType; i++)
+  for (i=0; i< DATA::LastSigType; i++)
     d->sig[i].SetToDefault();
 }
 
@@ -196,12 +196,12 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
   printf("%6d %c", 1+pos, (*X)[pos]);
 
   for(i=0; i<DATA::LastContentsType; i++)
-    printf (" %4.2f",d->contents[i]);
+    printf (" %5.3g",d->contents[i]);
 
   for(i=0; i< Signal::LastEdge;  i++) {
     printf (" ||");
     for (j=0; j< DATA::LastSigType; j++)
-      printf(" %4.2f",d->sig[j].weight[i]);
+      printf(" %5.3g",d->sig[j].weight[i]);
   }
   printf("\n");
 }
@@ -230,12 +230,11 @@ int MasterSensor :: GetInfoSpAt (unsigned char type,
       info = TRUE;
     }
 
-  for (i=0; i<= DATA::LastSigType; i++)
+  for (i=0; i< DATA::LastSigType; i++)
     d->sig[i].SetToDefault();
 
   return info;
 }
-
 
 // --------------------------
 //  Post analyse the sensors.
