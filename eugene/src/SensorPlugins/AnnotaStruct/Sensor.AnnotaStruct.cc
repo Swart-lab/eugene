@@ -304,14 +304,11 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
   char  feature[20];
   char  scoreC[20];
   int   frame = -1;
-
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open AnnotaStruct file %s\n", name);
-    exit(2);
-  }
+ 
+  fp = FileOpen(NULL, name, "r", PAR.getI("EuGene.sloppy"));
   
   int j=0;
-  while(fgets (line, MAX_LINE, fp) != NULL) {
+  while(fp  &&  fgets (line, MAX_LINE, fp) != NULL) {
     j++;
     if (line[0] != '#') {
       // GFF line : seqn source feature start end score strand phase
@@ -467,7 +464,7 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
       }
     }
   }
-  fclose(fp);
+  if (fp) fclose(fp);
 }
 
 // ----------------
