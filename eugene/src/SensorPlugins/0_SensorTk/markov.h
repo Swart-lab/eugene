@@ -179,5 +179,4 @@ class ProtMat : public TabChaine <Chaine,int>
 };
 #endif
 
-#include "markov.cc"
 #endif

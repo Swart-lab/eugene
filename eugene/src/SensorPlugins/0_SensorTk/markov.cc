@@ -350,7 +350,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
 // lit une sequence format fasta, retourne 0 si pb, 1 si OK, et si un caractere n'est pas prevu (hors alphabet), retourne 2 et Sequence=NULL
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE *fp, char* &Sequence)
 {
-  // printf("fichier2seq: entree,seq=%s\n",Sequence);
+  //  fprintf(stderr,"fichier2seq: entree,seq=%s\n",Sequence);
   const unsigned int  INCR_SIZE = 10000;
   const unsigned int  INIT_SIZE = 10000;
   char  *seqname, Line [1000];
@@ -452,25 +452,27 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
 
   Sequence[Len] = '\0';
 
-  // printf("fichier2seq: sortie,seq=%s\n",Sequence);
+  //   fprintf(stderr,"fichier2seq: sortie,seq=%s\n",Sequence);
   return  1;
 }
 
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon)
 {
-  char* Sequence;
+  char* Sequence=NULL;
   while (fichier2seq(fp,Sequence)) {
     seq2compte(Sequence,parcodon);
     free(Sequence);
+    Sequence=NULL;
   };
 }
 
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
 {
-  char* Sequence;
+  char* Sequence=NULL;
   while (fichier2seq(fp,Sequence)) {
     seq2compte(Sequence,debut,fin,parcodon);
     free(Sequence);
+    Sequence=NULL;
   };
 }
 
