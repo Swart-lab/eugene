@@ -12,7 +12,7 @@ SensorLoader :: SensorLoader(const char *fname, const char *builder)
   builder_func=0;
 
   if( LastError()==0 && h) {
-    builder_func = (Sensor *(*)(int))dlsym( h, builder ? builder : "builder0" );
+    builder_func = (Sensor *(*)(int, DNASeq *))dlsym( h, builder ? builder : "builder0" );
     err=dlerror();
   }
 }
@@ -24,7 +24,7 @@ SensorLoader :: ~SensorLoader()
     dlclose(h);
 }
 
-Sensor* SensorLoader :: MakeSensor(int n)
+Sensor* SensorLoader :: MakeSensor(int n, DNASeq *X)
 {
-  return (* builder_func)(n);
+  return (* builder_func)(n, X);
 }
