@@ -77,7 +77,13 @@ RC [\r]+
 
 "infinity" {yylval.reel = -log(0.0); return(POIDS);}
 
--?[0-9]|[0-9]+"."[0-9]+|-?0x[0-9a-h]"."?[0-9a-h]*p[+-][0-9]+  {yylval.reel = strtod(yytext,NULL); return(POIDS);}
+"-infinity" {yylval.reel = log(0.0); return(POIDS);}
+
+
+%-?[0-9]|[0-9]+"."[0-9]+|-?0x[0-9a-h]"."?[0-9a-h]*p[+-][0-9]+  {yylval.reel = strtod(yytext,NULL); return(POIDS);}
+
+
+-?[0-9]+"."[0-9]+  {yylval.reel = strtod(yytext,NULL); return(POIDS);}
 
 .  printf( "Unknown character : %s\n", yytext );
 
