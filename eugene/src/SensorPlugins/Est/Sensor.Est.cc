@@ -4,7 +4,7 @@
 /*************************************************************
  **                        SensorEst                        **
  *************************************************************/
-
+#define EXTREMEMARGIN 1
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
 extern MasterSensor *MS;
@@ -46,7 +46,7 @@ int HitsCompareLex(const void *A, const void *B)
 SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 {
   type = Type_Content;
-
+  HitTable = NULL;
   N = n;
 }
 
@@ -57,10 +57,7 @@ SensorEst :: ~SensorEst ()
 {
   vPos.clear();
   vESTMatch.clear();
-  if(HitTable != NULL) {
-    delete HitTable[NumEST];
-    delete HitTable;
-  }
+  if(HitTable != NULL) delete [] HitTable;
   HitTable = NULL;
 }
 
@@ -77,16 +74,15 @@ void SensorEst :: Init (DNASeq *X)
 
   vPos.clear();
   vESTMatch.clear();
-  if(HitTable != NULL) {
-    delete HitTable[NumEST];
-    delete HitTable;
-  }
+
+  if(HitTable != NULL) delete [] HitTable;
   HitTable = NULL;
 
   estP = PAR.getD("Est.estP*",N);
   estM = PAR.getI("Est.estM",N);
   utrP = PAR.getD("Est.utrP*",N);
   utrM = PAR.getI("Est.utrM",N);
+  spliceBoost = PAR.getD("Est.SpliceBoost*",N);
   DonorThreshold = PAR.getD("Est.StrongDonor*");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
   
@@ -134,6 +130,23 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
   if (index < (int)vPos.size()  &&  vPos[index] == pos) {
 
     cESTMatch = vESTMatch[index];
+
+    // Favor splice sites in marginal exon-intron regions
+   if ((cESTMatch & MLeftForward) && 
+	d->sig[DATA::Don].weight[Signal::Forward] != 0.0) 
+      d->sig[DATA::Don].weight[Signal::Forward] += spliceBoost;
+
+    if ((cESTMatch & MRightForward) && 
+	d->sig[DATA::Acc].weight[Signal::Forward] != 0.0)
+      d->sig[DATA::Acc].weight[Signal::Forward] += spliceBoost;
+
+    if ((cESTMatch & MLeftReverse) && 
+	d->sig[DATA::Acc].weight[Signal::Reverse])
+      d->sig[DATA::Acc].weight[Signal::Reverse] += spliceBoost;
+
+    if ((cESTMatch & MRightReverse) &&
+	d->sig[DATA::Don].weight[Signal::Reverse] != 0.0)
+      d->sig[DATA::Don].weight[Signal::Reverse] += spliceBoost;
     
     // Exon Forward
     // Si on a un Gap EST ou si l'on connait le sens du match EST
@@ -161,31 +174,30 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
        ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
       d->contents[DATA::IntronR] += estP;
     
-    // Pour une raison que je ne comprends pas, cela perturbe les predictions 
-    //     // UTR Forward
-    //     // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
-    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
-    //       d->contents[DATA::UTR5F] += estP;
-    //       d->contents[DATA::UTR3F] += estP;
-    //     }
-
-    //     // UTR Reverse
-    //     // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
-    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
-    //       d->contents[DATA::UTR5R] += estP;
-    //       d->contents[DATA::UTR3R] += estP;
-    //     }
-
+    // UTR Forward
+    // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
+      d->contents[DATA::UTR5F] += estP;
+      d->contents[DATA::UTR3F] += estP;
+    }
+    
+    // UTR Reverse
+    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
+      d->contents[DATA::UTR5R] += estP;
+      d->contents[DATA::UTR3R] += estP;
+    }
+    
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
     
     d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
-
+    
     index++;
   }
 
    // Pour que les UTR soient supportés par un EST
-  if ( cESTMatch == 0  &&  (int)vPos.size() != 0) {
+  if (cESTMatch == 0  &&  (int)vPos.size() != 0) {
     // Left
     for (int k=1; k<=utrM; k++) {
       iter = lower_bound(vPos.begin(), vPos.end(), pos+k);
@@ -219,7 +231,6 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       }
     }
   }
-
 }
 
 // -----------------------
@@ -332,7 +343,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 
       for (i = ThisBlock->Start+EstM; !Inc && i <= ThisBlock->End-EstM; i++) {
 
-	if (((ESTMatch[i] & Hit) && !(ESTMatch[i] & TheStrand)) |
+	if (((ESTMatch[i] & Hit) && !(ESTMatch[i] & TheStrand)) ||
 	    (Inconsistent(ESTMatch[i] | TheStrand))) {
 	  fprintf(stderr,"   [%s]: inconsistent hit [%d-%d]\n",
 		  ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
@@ -344,7 +355,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       if ((ThisBlock->Prev != NULL) &&
 	  abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
         for (i=ThisBlock->Prev->End+1+EstM; !Inc && i<ThisBlock->Start-EstM; i++) 
-	  if (((ESTMatch[i] & Gap) && !(ESTMatch[i] & (TheStrand << HitToGap))) |
+	  if (((ESTMatch[i] & Gap) && !(ESTMatch[i] & (TheStrand << HitToGap))) ||
 	    (Inconsistent(ESTMatch[i] | (TheStrand << HitToGap)))) {
             fprintf(stderr,"   [%s]: inconsistent gap [%d-%d]\n",
                     ThisEST->Name,ThisBlock->Prev->End+2,ThisBlock->Start);
@@ -406,6 +417,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     else {
       int LBoundary;
       int RBoundary;
+      unsigned char Info;
       
       ThisBlock = ThisEST->Match;
       
@@ -423,12 +435,14 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 		     ThisBlock->End);
 	
 	for (i = LBoundary; i <= RBoundary; i++) {
-	  if (ESTMatch[i] & Hit)
-	    ESTMatch[i] |= (ESTMatch[i] & TheStrand);
+	  if ((Info = (ESTMatch[i] & Hit)))
+	    ESTMatch[i] |= (Info & TheStrand);
 	  else
 	    ESTMatch[i] |= TheStrand;
 	}
 
+	// Do we want to mark extreme region or alignements as margins ?
+#ifdef EXTREMEMARGIN	
 	if (ThisBlock->Prev == NULL)
 	  for (i = ThisBlock->Start; i<LBoundary; i++)
 	    ESTMatch[i] |= TheStrand << HitToMLeft;
@@ -436,27 +450,28 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	if (ThisBlock->Next == NULL)
 	  for (i = RBoundary+1; i <= ThisBlock->End; i++)
 	    ESTMatch[i] |= TheStrand << HitToMRight;
+#endif
 	
 	if ((ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  
 	  for (i = Max(0,ThisBlock->Prev->End+1-EstM); 
 	       i < Min(X->SeqLen, ThisBlock->Prev->End+1+EstM); i++) 
-	    if (ESTMatch[i] & MLeft)
-	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToMLeft));
+	    if ((Info = (ESTMatch[i] & MLeft)))
+	      ESTMatch[i] |= (Info & (TheStrand << HitToMLeft));
 	    else
 	      ESTMatch[i] |= TheStrand << HitToMLeft;
 	  
 	  for (i = ThisBlock->Prev->End+1; i <= ThisBlock->Start-1; i++)
-	    if (ESTMatch[i] & Gap)
-	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToGap));
+	    if ((Info = (ESTMatch[i] & Gap)))
+	      ESTMatch[i] |= (Info & (TheStrand << HitToGap));
 	    else
-	    ESTMatch[i] |= TheStrand << HitToGap;
+	      ESTMatch[i] |= TheStrand << HitToGap;
 	  
 	  for (i =  Max(0,ThisBlock->Start-1-EstM);
 	       i <  Min(X->SeqLen, ThisBlock->Start-1+EstM); i++)
-	    if (ESTMatch[i] & MRight)
-	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToMRight));
+	    if ((Info = (ESTMatch[i] & MRight)))
+	      ESTMatch[i] |= (Info & (TheStrand << HitToMRight));
 	    else
 	      ESTMatch[i] |= TheStrand << HitToMRight;
 
