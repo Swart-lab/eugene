@@ -3,7 +3,6 @@
 #
 EuGene.key		HVGNNJUDTJDQDF	# Software key 
 EuGene.versionPAR	16_10_02	# Parameter file version (date)
-EuGene.frameshift	-9999.0		# Frameshift penalty 
 #
 # Minimum lengths
 #
@@ -17,8 +16,6 @@ EuGene.min5Prime	20
 EuGene.min3Prime	20
 #
 EuGene.stopP		4.155
-EuGene.transStartP	4.155
-EuGene.transStopP	4.155
 #
 # Priors
 #
@@ -51,6 +48,16 @@ Output.offset		0
 Output.normopt		1
 Output.Prefix		./
 #
+# Transcript parameters
+#
+Transcript.Start	4.155
+Transcript.Stop		4.155
+#
+# FrameShift parameters
+#
+FrameShift.Ins	999.0
+FrameShift.Del	999.0
+#
 # NetStart parameters
 #
 NStart.startP	0.052
@@ -58,7 +65,7 @@ NStart.startB	0.308
 #
 # IfElse
 #
-IfElse.SensorIf		NG2
+IfElse.SensorIf	NG2
 IfElse.SensorElse	SPred
 #
 # NetGene2 parameters
@@ -131,29 +138,33 @@ MarkovConst.maxGC[0]	100
 #
 # Sensors activation
 #
-Sensor.EuStop.use	1
-Sensor.NStart.use	1
-Sensor.NG2.use		1
-Sensor.SPred.use	1
-Sensor.MarkovIMM.use	1
+Sensor.Transcript.use	TRUE
+Sensor.FrameShift.use	TRUE
+Sensor.EuStop.use		TRUE
+Sensor.NStart.use		TRUE
+Sensor.NG2.use		FALSE
+Sensor.SPred.use		FALSE
+Sensor.IfElse.use		TRUE
+Sensor.MarkovIMM.use	TRUE
 #Sensor.MarkovIMM.use	2
-Sensor.BlastX.use	0
-Sensor.Repeat.use	0
-Sensor.Riken.use	0
-Sensor.Est.use		0
-Sensor.User.use		0
-Sensor.Homology.use	0
-Sensor.StartConst.use	0
-Sensor.SpliceConst.use	0
-Sensor.MarkovConst.use	0
-Sensor.MarkovProt.use   0
-Sensor.IfElse.use	1
+Sensor.BlastX.use		FALSE
+Sensor.Repeat.use		FALSE
+Sensor.Riken.use		FALSE
+Sensor.Est.use		FALSE
+Sensor.User.use		FALSE
+Sensor.Homology.use	FALSE
+Sensor.StartConst.use	FALSE
+Sensor.SpliceConst.use	FALSE
+Sensor.MarkovConst.use	FALSE
+Sensor.MarkovProt.use	FALSE
 #
 # Sensor priorities
 #
-Sensor.IfElse		1	#
+Sensor.Transcript		1
+Sensor.FrameShift	1
+Sensor.IfElse		1
 Sensor.EuStop		1	#
-Sensor.StartConst	1	# Sensor.Name Priority
+Sensor.StartConst		1	# Sensor.Name Priority
 Sensor.SpliceConst	1	#
 Sensor.NStart		1	#
 Sensor.NG2		1	#
