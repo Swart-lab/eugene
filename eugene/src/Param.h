@@ -22,7 +22,7 @@
 
 const char VERSION[FILENAME_MAX+1]     = "1.60";
 const char VERSION_DATE[FILENAME_MAX+1]     = "190903";
-const char VERSION_PAR[FILENAME_MAX+1]     = "190903";
+const char VERSION_PAR[FILENAME_MAX+1]     = "111003";
 extern char   *optarg;   
 extern int     optind;
 

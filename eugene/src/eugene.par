@@ -2,7 +2,7 @@
 # Edité pour EuGeneAS 1.60 (190903)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	190903          # Parameter file version (date)
+EuGene.versionPAR	111003        # Parameter file version (date)
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
@@ -201,6 +201,15 @@ StartWAM.MarkovianOrder	1
 StartWAM.ScaleCoef	0.1594
 StartWAM.ScalePenalty	-3.1439
 #
+##### Sensor GCPlot #####
+#
+GCPlot.Color	5
+GCPlot.Zoom	2.0
+GCPlot.Zoom3	1.0
+GCPlot.Up	GC
+GCPlot.Over	ATGC
+GCPlot.Smooth	100
+#
 ##### Sensor Plotter
 #
 Plotter.GC	 1   # 0 -> no plot  -  1 -> plot 
@@ -247,7 +256,11 @@ Sensor.Homology.use	FALSE
 Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
+<<<<<<< EuGeneAS.par
+Sensor.GCPlot.use		TRUE
+=======
 Sensor.Plotter.use	TRUE
+>>>>>>> 1.38
 #
 # TEST
 Sensor.Tester.use	FALSE
@@ -277,5 +290,10 @@ Sensor.Riken		7	#  Priority 1 -> Second
 Sensor.Repeat		8	#  ...
 Sensor.User		9	#  Priority n -> Last
 Sensor.GFF		10	#
+<<<<<<< EuGeneAS.par
+Sensor.GCPlot		11	#
+Sensor.Tester		12	#
+=======
 Sensor.Plotter		11	#
 Sensor.Tester		12	#
+>>>>>>> 1.38
