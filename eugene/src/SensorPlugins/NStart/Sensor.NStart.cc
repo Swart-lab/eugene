@@ -128,14 +128,15 @@ void SensorNStart :: ResetIter ()
 // ------------------------
 void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if( iterF <= (int)vPosF.size()  &&  vPosF[iterF] == pos ) {
+  int i;
+  if( iterF < (int)vPosF.size() && vPosF[iterF] == pos ) {
     d->Start[0] += vValF[iterF];
     iterF++;
   }
-  
-  if( iterR <= (int)vPosR.size()  &&  vPosR[iterR] == pos ) {
-    d->Start[1] += vValR[iterR];
-    iterR++;
+  i = (int)vPosR.size();
+  if( abs(iterR) < i  &&  vPosR[iterR + i-1] == pos ) {
+    d->Start[1] += vValR[iterR + i-1];
+    iterR--;
   }
 }
 
