@@ -113,13 +113,15 @@ Hits :: Hits  (char* name, int length, char strand, int deb, int fin,
 Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin) 
 {
   char   *HitId, *PHitId;
-  int    deb, fin, phase, HSPDeb, HSPFin, poids, read;
+  int    deb, fin, phase, Pphase, HSPDeb, HSPFin, poids, read;
   double evalue, Pevalue;
   char   A[128], B[128];
   Block *ThisBlock = NULL;
   Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
-  
+  const int MaxHitLen = 15000;
+
   Pevalue = -1.0;
+  Pphase = 0;
   A[0]    = B[0] = 0;
   HitId   = A;
   PHitId  = B;
@@ -138,7 +140,14 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
 	HSPDeb  = HSPFin;
 	HSPFin  = tmp;
       }
-      if ((strcmp(HitId,PHitId) == 0)      &&
+
+      if (abs(fin-deb) > MaxHitLen) {
+	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",
+		HitId);
+	continue;
+      }
+
+      if ((strcmp(HitId,PHitId) == 0)      && (phase*Pphase >= 0) &&
 	  (deb + margin > ThisBlock->End)  &&  evalue == Pevalue  &&
 	  (phase >= 0  &&  (HSPDeb + margin > ThisBlock->LEnd)    ||
 	   phase < 0   &&  (HSPDeb - margin < ThisBlock->LEnd)))
@@ -159,6 +168,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
 	ThisBlock = OneHit->Match;
 	PHitId    = HitId;
 	Pevalue   = evalue;
+	Pphase = phase;
 
 	if (AllHit == NULL) {
 	  AllHit = OneHit;
