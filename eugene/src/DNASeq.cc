@@ -219,6 +219,7 @@ unsigned short DNASeq :: operator () (int i, int mode)
   default:
     printf("Error, call to DNASeq :: operator () with mode >2\n");
     exit(1);
+    return 255;
   }
 }
 // ---------------------------------------------------------------------
