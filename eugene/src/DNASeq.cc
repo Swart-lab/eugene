@@ -323,6 +323,16 @@ double DNASeq :: Markov(int i)
   return Markov0[Code2Bit[Sequence[i] & MASKSEQ]];
 }
 // ---------------------------------------------------------------------
+// Compute 0th order Markov model probabilities on nuc i
+// ---------------------------------------------------------------------
+double DNASeq :: MarkovR(int i)
+{
+
+  if (i >= SeqLen) return 0.0;
+  
+  return Markov0[Code2Bit[Code2CCode[Sequence[i] & MASKSEQ]]];
+}
+// ---------------------------------------------------------------------
 // Compute GC/AT probabilities on nuc i
 // ---------------------------------------------------------------------
 double DNASeq :: GC_AT(int i)

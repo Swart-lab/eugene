@@ -61,6 +61,7 @@ class  DNASeq
   double IsEStart(int i,int sens);
   
   double Markov(int);
+  double MarkovR(int);
   double GC_AT(int);
   
   void Transfer(int Pos, int Len, char *To, int mode);
