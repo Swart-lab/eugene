@@ -26,8 +26,8 @@ class BackPoint
     void Dump();
     void BackTrace(char *Choix);
     void Update(double cost);
-    BackPoint *BestUsable(int pos, unsigned char mask, int len,double *cost);
-    BackPoint *StrictBestUsable(int pos, int len,double *cost);
+    BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost);
+    BackPoint *StrictBestUsable(int pos, int len,REAL *cost);
     void Zap();
     
     char State;
@@ -144,7 +144,7 @@ void BackPoint :: Update(double cost)
 // Returns the best BackPoint. If the SwitchType matches the mask
 // given, then the BackPoint MUST BE at least len nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, double *cost)
+BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost)
 {
   BackPoint *It = this->Next;
   double add = 0.0;
@@ -166,7 +166,7 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, double 
 // Returns the best BackPoint and the BackPoint is at least len
 // nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: StrictBestUsable(int pos, int len, double *cost)
+BackPoint *BackPoint :: StrictBestUsable(int pos, int len, REAL *cost)
 {
   BackPoint *It = this->Next;
   double add = 0.0;
