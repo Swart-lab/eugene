@@ -54,7 +54,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
   int    j, k;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior,IntronFivePrior;
-  double PredictTime = cpuTime();
+  //  double PredictTime = cpuTime();
   int    Data_Len;
   DATA	 Data;
   
@@ -698,10 +698,10 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   }
 
   // Memory usage
-  j=0;
-  for (k =0;k<NbTracks;k++)  j+= LBP[k].NumBP;
-  fprintf(stderr,"Number of Backpoints allocated: %d (%.1f sec)\n",
-	  j,cpuTime()-PredictTime);
+  //  j=0;
+  //  for (k =0;k<NbTracks;k++)  j+= LBP[k].NumBP;
+  //  fprintf(stderr,"Number of Backpoints allocated: %d (%.1f sec)\n",
+  //	  j,cpuTime()-PredictTime);
 
   // clean memory
   for  (k = 0;  k < NbTracks;  k++) LBP[k].Zap();
