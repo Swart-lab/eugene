@@ -26,7 +26,7 @@ CXXFLAGS = $(eugene_CXXFLAGS)
 
 bin_PROGRAMS = eugene
 eugene_SOURCES = EuGene.cc Output.cc Output.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h
-eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl -lnsl
+eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl 
 
 
 export host_alias = @host@
