@@ -10,7 +10,6 @@
 #include "MSensor.h"
 #include "Param.h"
 #include "DNASeq.h"
-#include "EuIMMScoreAS.h"
 #include "Hits.h"
 #include "Const.h"
 
