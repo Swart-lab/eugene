@@ -117,13 +117,6 @@ void SensorMarkovProt :: Init (DNASeq *X)
   if(PAR.getI("Output.graph")) Plot(X);
 }
 
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorMarkovProt :: ResetIter ()
-{
-}
-
 // --------------------------
 //  GiveInfo Content MarkovProt.
 // --------------------------
@@ -204,14 +197,6 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
 }
 
 // ----------------------------
-//  GiveInfoAt Content MarkovProt.
-// ----------------------------
-void SensorMarkovProt :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  GiveInfo(X, pos, d);
-}
-
-// ----------------------------
 //  Plot Sensor information
 // ----------------------------
 void SensorMarkovProt :: Plot(DNASeq *TheSeq)
@@ -246,7 +231,7 @@ void SensorMarkovProt :: Plot(DNASeq *TheSeq)
       }
     }
     if (i+window/2 < TheSeq->SeqLen) {
-      GiveInfoAt(TheSeq,i+window/2,&data);
+      GiveInfo(TheSeq,i+window/2, &data);
       for (j = 0 ; j < 9 ; j++) Score[j] = Recadre(Score[j]);
       for (j = 0 ; j < 9 ; j++) 
 	NScore[j] += Score[j];

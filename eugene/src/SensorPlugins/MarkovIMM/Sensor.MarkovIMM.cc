@@ -74,7 +74,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     }
     
     
-    fprintf(stderr,"Loading IMM...");
+    fprintf(stderr,"Reading IMM...");
     fflush(stderr);
     
     // On essaie d'abord de charger les 5 modeles fondamentaux (3 ex/int/interG)
@@ -84,7 +84,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
 	fprintf(stderr,"Model %d unreadable in %s. Aborting.\n",i+1,PAR.getC("MarkovIMM.matname"));
 	exit(1);
       } 
-      fprintf(stderr,"%d ",i+1);
+      fprintf(stderr," %d",i+1);
       fflush(stderr);
     }
     
@@ -97,15 +97,15 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
       IMMatrix[6] = IMMatrix[3];
       IMMatrix[5] = IMMatrix[3];
     } else {
-      fprintf(stderr,"6 ");
+      fprintf(stderr," 6");
       IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
       if (IMMatrix[5]->Read(fp)) {
 	fprintf(stderr,"- No second UTR model found, using intron model. ");
 	delete IMMatrix[5];
 	IMMatrix[5] = IMMatrix[3];
-      } else fprintf(stderr,"7 ");
+      } else fprintf(stderr," 7");
     }  
-    fprintf(stderr,"done\n");
+    fprintf(stderr," ...done\n");
     fclose(fp);
 
     IsInitialized = true;
@@ -131,13 +131,6 @@ SensorMarkovIMM :: ~SensorMarkovIMM ()
 void SensorMarkovIMM :: Init (DNASeq *X)
 {
   if(PAR.getI("Output.graph")) Plot(X);
-}
-
-// -----------------------
-//  ResetIter.
-// -----------------------
-void SensorMarkovIMM :: ResetIter ()
-{
 }
 
 // ----------------------------
@@ -195,14 +188,6 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   return;
 }
 
-// ------------------------------
-//  GiveInfoAt Content MarkovIMM.
-// ------------------------------
-void SensorMarkovIMM :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
-{
-  GiveInfo(X, pos, d);
-}
-
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
@@ -239,7 +224,7 @@ void SensorMarkovIMM :: Plot(DNASeq *TheSeq)
     }
 
     if (i+window/2 < TheSeq->SeqLen) {
-      GiveInfoAt(TheSeq,i+window/2,&data);
+      GiveInfo(TheSeq,i+window/2, &data);
       for (j = 0 ; j < 9 ; j++) 
 	NScore[j] += Score[j];
     }
