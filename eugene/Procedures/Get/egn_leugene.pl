@@ -15,7 +15,7 @@
 #
 # $Id$
 # ------------------------------------------------------------------
-# File:     leugene.pl
+# File:     egn_leugene.pl
 # Contents: if needed, lauch local NetStart, NetGene2, SplicePredictor 
 # and eugene on sequences files
 # ------------------------------------------------------------------

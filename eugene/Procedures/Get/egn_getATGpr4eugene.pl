@@ -15,8 +15,8 @@
 #
 # $Id$
 # ------------------------------------------------------------------
-# File:     getFGENESH4eugene.pl
-# Contents: launch of FGENESH on sequence files
+# File:     egn_getATGpr4eugene.pl
+# Contents: launch of ATGpr on sequence files
 # ------------------------------------------------------------------
 
 use HTTP::Request::Common qw(POST);
@@ -27,7 +27,7 @@ use LWP::UserAgent;
 
  This program takes as parameter a nucleic acid sequence file in FASTA
  format  or  a folder containing  such files   (*.tfa *.fasta), launch
- FGENESH.
+ ATGpr.
 
  Initial version: T. Schiex (INRA, Toulouse)
  Enhancements by: P. Dehais (INRA / Univ. of Gand, Belgium)
@@ -45,7 +45,6 @@ sub usage( $ )
 
 
 #------------------------------------------------------------
-# just a copy of getsites.pl from EuGene dist
 sub getsites( $ )
   {
     local($file, @params) = @_;
@@ -58,64 +57,77 @@ sub getsites( $ )
 
     $sequence = &fasta2flat($_[0]);
     #$l = length($sequence);
+    $rsequence = &reverse(&complement($sequence));
 
     $DoIt = 0;
+    $DoItR = 0;
 
-    # Request for FGENESH
-    print STDERR "FGENESH : ";
+    # Request for ATGpr
+    print STDERR "ATGpr : ";
     $DoIt = 0;
-    if (!( -e "$_[0].fgenesh")  || (-s "$_[0].fgenesh" == 0))   {$DoIt = 1;}
+    if (!( -e "$_[0].atgpr") || (-s "$_[0].atgpr" == 0))    {$DoIt = 1;}
+    if (!( -e "$_[0].atgprR") || (-s "$_[0].atgprR" == 0))  {$DoItR = 1;}
 
-    print STDERR "F...";
-    $seq  = $sequence;
-
-    if ($DoIt) {
-      open(FILE,">$_[0].fgenesh");
-
-      $ua = new LWP::UserAgent;
-      $ua->agent("AgentName/0.1 " . $ua->agent);
-
-      # Create a request
-      $req = POST 'http://www.softberry.com/cgi-bin/programs/gfind/fgenesh.pl',
-	[
-	 "SEQ_DATA" => $seq,
-	 "FILE" => '',
-	 "org" => 'z',	# "h" Human
-			# "m" Mouse
-			# "d" Drosophila
-			# "n" C.elegans
-			# "a" Dicots (Arabidopsis)
-			# "t" Nicotiana tabacum
-			# "z" Monocots (Corn, Rice, Wheat, Barley)
-			# "p" Schizosaccharomyces pombe
-			# "c" Neurospora crassa
-			# "l" Plasmodium falciparum
-			# "o" Anopheles gambiae
-			# "f" Fish
-			# "D" Algae
-			# "A" Aspergillus
-	  # "PROG_OPTS" => '-pmrna'
-	];
-
-      # Pass request to the user agent and get a response back
-      $res = $ua->request($req);
-
-      # Check the outcome of the response
-      if ($res->is_success) {
-	print STDERR "done\n";
-	@result = split '\n',$res->content;
-	
-	$bool = 0;
-	foreach $line (@result) {
-	  if ($line =~ /G Str   Feature/)   { $bool = 1; next; }
-	  if ($line =~ /Predicted protein/) { last; }
-	  if ($bool) { print FILE $line."\n"; }
-	}
-	close FILE;
+    for ($i=0; $i<2; $i++) {
+      # $i=0 -> ATGpr FORWARD
+      # $i=1 -> ATGpr REVERSE
+      if($i==0) {
+	print STDERR "F...";
+        $Do   = $DoIt;
+       	$seq  = $sequence;
+	if($Do) {open(FILE,">$_[0].atgpr"); }
       }
-      else { print STDERR "Bad luck this time\n"; }
+      else {
+	print STDERR "R...";
+	$Do   = $DoItR;
+     	$seq  = $rsequence;
+	if($Do) { open(FILE,">$_[0].atgprR"); }
+      }
+
+      if ($Do) {
+	$ua = new LWP::UserAgent;
+	$ua->agent("AgentName/0.1 " . $ua->agent);
+	
+	# Create a request
+	$req = POST 'http://www.hri.co.jp/atgpr/cgi-bin/atgpr.cgi',
+	  [
+	   "number" => 100000000,
+	   "seq" => $seq,
+	  ];
+
+	# Pass request to the user agent and get a response back
+	$res = $ua->request($req);
+	
+	# Check the outcome of the response
+	if ($res->is_success) {
+	  if ($i==0) {print STDERR "done  /  "; }
+	  else       {print STDERR "done\n";    }
+	  @result = split '\n',$res->content;
+	
+	  $output = "";
+	  foreach $line (@result) {
+	    if ($line =~ /<TD/) {
+	      if ($line =~ /<.+><.+>(.+)<.+><.+>/) {
+		$output .= "$1\t";
+	      }
+	      else { $output .= "\n"; }
+	    }
+	  }
+	
+	  @out = split '\n',$output;
+	  @out = sort {(split '\t', $a)[0] <=> (split '\t', $b)[0]} @out;
+	  foreach $line (@out) {
+	    print FILE $line."\n";
+	  }
+	  close FILE;
+	}
+	else { print STDERR "Bad luck this time\n"; }
+      }
+      else {
+	if ($i==0) {print STDERR "[on disk]  /  "; }
+	else       {print STDERR "[on disk]\n";    }
+      }
     }
-    else { print STDERR "[on disk]\n"; }
   }
 
 
@@ -211,4 +223,4 @@ else
     &usage("$param1 is neither a file, nor a folder");
   }
 
-system('echo "Finished on "`date`');
+system('echo "finished on "`date`');

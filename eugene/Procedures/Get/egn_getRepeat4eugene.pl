@@ -15,8 +15,8 @@
 #
 # $Id$
 # ------------------------------------------------------------------
-# File:     getRepeat4eugene.pl
-# Contents: build .ig file for EuGene
+# File:     egn_getRepeat4eugene.pl
+# Contents: build .ig file for eugene
 # ------------------------------------------------------------------
 
 use Getopt::Long;
@@ -67,7 +67,7 @@ MAIN:
     my($tfafile) = $rh_param->Get('seqs');
     my($dbfile)  = $rh_param->Get('database');
 
-    print STDERR "#\n# Get repeat for EuGene\n#\n";
+    print STDERR "#\n# Get repeat for eugene\n#\n";
 
     ## PRESSDB
     print STDERR "pressdb...";

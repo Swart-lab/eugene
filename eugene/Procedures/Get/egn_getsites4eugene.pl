@@ -1,5 +1,24 @@
 #!/usr/bin/perl -w
 
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     egn_getsites4eugene.pl
+# Contents: see description below
+# ------------------------------------------------------------------
+
 use HTTP::Request::Common qw(POST);
 use HTTP::Request::Common qw(GET);
 use LWP::UserAgent;
@@ -32,7 +51,6 @@ sub usage( $ )
   }
 
 #------------------------------------------------------------
-# just a copy of getsites.pl from EuGene dist
 
 sub getsites( $ )
   {
@@ -447,7 +465,7 @@ sub eugene( $ @ )
 
     print STDERR "\nprocessing $file\n\n";
     &getsites($file);
-    # JER $cmd = sprintf("./EuGeneAS -p h %s -g $file > $file.html", join(' ',@params));
+    # JER $cmd = sprintf("./eugene -p h %s -g $file > $file.html", join(' ',@params));
     # JER system($cmd);
   }
 #------------------------------------------------------------
@@ -507,11 +525,11 @@ system('echo "started on "`date`');
 
 $param1 = shift @ARGV;
 
-if (-f "$param1") # just launch EuGene on this file
+if (-f "$param1") # just launch eugene on this file
   {
     &eugene($param1, @ARGV);
   }
-elsif (-d "$param1") # launch EuGene on all fasta files in this folder
+elsif (-d "$param1") # launch eugene on all fasta files in this folder
   {
     $param1 =~ s/\/$//;
     @L = glob("$param1/*.tfa");
