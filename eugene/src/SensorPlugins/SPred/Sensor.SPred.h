@@ -22,23 +22,6 @@ class SensorSPred : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                  SensorSPredFactory                     **
- *************************************************************/
-class SensorSPredFactory : public SensorFactory
-{
- public:
-  SensorSPredFactory()  { }
-	
-  ~SensorSPredFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorSPred;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorSPredFactory;
-}
+extern "C" SensorSPred * builder0( void ) {  return new SensorSPred;}
 
 #endif

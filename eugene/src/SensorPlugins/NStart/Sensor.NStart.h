@@ -21,24 +21,6 @@ class SensorNStart : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-
-/*************************************************************
- **                 SensorNStartFactory                     **
- *************************************************************/
-class SensorNStartFactory : public SensorFactory
-{
- public:
-  SensorNStartFactory()  { }
-  
-  ~SensorNStartFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorNStart;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorNStartFactory;
-}
+extern "C" SensorNStart* builder0( void ) { return new SensorNStart;}
 
 #endif

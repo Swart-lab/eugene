@@ -23,23 +23,6 @@ class SensorEst : public Sensor
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
 };
 
-/*************************************************************
- **                    SensorEstFactory                     **
- *************************************************************/
-class SensorEstFactory : public SensorFactory
-{
- public:
-  SensorEstFactory()  { }
-  
-  ~SensorEstFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorEst;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorEstFactory;
-}
+extern "C" SensorEst * builder0( void ) { return new SensorEst;}
 
 #endif

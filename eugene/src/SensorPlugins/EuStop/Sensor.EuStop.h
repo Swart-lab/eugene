@@ -18,23 +18,6 @@ class SensorEuStop : public Sensor
   virtual void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                 SensorEuStopFactory                     **
- *************************************************************/
-class SensorEuStopFactory : public SensorFactory
-{
- public:
-  SensorEuStopFactory()  { }
-  
-  ~SensorEuStopFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorEuStop;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorEuStopFactory;
-}
+extern "C" SensorEuStop * builder0() {  return new SensorEuStop; }
 
 #endif

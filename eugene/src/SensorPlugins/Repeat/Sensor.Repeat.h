@@ -18,23 +18,6 @@ class SensorRepeat : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                   SensorRepeatFactory                   **
- *************************************************************/
-class SensorRepeatFactory : public SensorFactory
-{
- public:
-  SensorRepeatFactory()  { }
-	
-  ~SensorRepeatFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorRepeat;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorRepeatFactory;
-}
+extern "C" SensorRepeat * builder0( void ) { return new SensorRepeat;}
 
 #endif

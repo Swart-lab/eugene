@@ -46,23 +46,6 @@ class SensorRiken : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                  SensorRikenFactory                     **
- *************************************************************/
-class SensorRikenFactory : public SensorFactory
-{
- public:
-  SensorRikenFactory()  { }
-  
-  ~SensorRikenFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorRiken;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorRikenFactory;
-}
+extern "C" SensorRiken * builder0( void ) {  return new SensorRiken;}
 
 #endif

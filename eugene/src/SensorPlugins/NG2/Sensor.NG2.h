@@ -22,23 +22,7 @@ class SensorNG2 : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                   SensorNG2Factory                      **
- *************************************************************/
-class SensorNG2Factory : public SensorFactory
-{
-public:
-  SensorNG2Factory()  { }
-	
-  ~SensorNG2Factory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorNG2;
-  }
-};
+extern "C" SensorNG2 * builder0( void ) {  return new SensorNG2;}
 
-extern "C" void * factory0( void ) {
-  return new SensorNG2Factory;
-}
 
 #endif

@@ -25,23 +25,5 @@ class SensorBlastX : public Sensor
   void GiveInfo (DNASeq *, int, DATA *);
 };
 
-/*************************************************************
- **                  SensorBlastXFactory                    **
- *************************************************************/
-class SensorBlastXFactory : public SensorFactory
-{
- public:
-  SensorBlastXFactory()  { }
-  
-  ~SensorBlastXFactory() { }
-  
-  virtual Sensor * CreateSensor() {
-    return new SensorBlastX;
-  }
-};
-
-extern "C" void * factory0( void ) {
-  return new SensorBlastXFactory;
-}
-
+extern "C" SensorBlastX * builder0( void ) {  return new SensorBlastX;}
 #endif
