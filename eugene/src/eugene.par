@@ -69,9 +69,9 @@ PepSignal.startB*	0
 ##### SpliceMachine parameters #####
 SMachine.cmd		"/homes/thomas/Annotation/SpliceMachine/splicemachine.pl "
 SMachine.isScaled	1
-SMachine.accP*		0.102032725565
+SMachine.accP*		0,102032725565
 SMachine.accB*		5.585
-SMachine.donP*		0.020202707318
+SMachine.donP*		0,020202707318
 SMachine.donB*		27.670
 SMachine.startP*	0.052
 SMachine.startB*	0.308
