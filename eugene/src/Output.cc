@@ -340,7 +340,12 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 			      "  <font face=\"monospace\">" +
 			      to_string(abs(PhaseAdapt(state))-1) + 
 			      "</font></td>\n</tr>\n");
-	    else
+	    else {
+	      if (forward)
+		((stateBack == -1) ? Phase=-1 : Phase = PhaseAdapt(stateBack));
+	      else
+		((stateNext == -1) ? Phase=-1 : Phase = PhaseAdapt(stateNext));
+
 	      if (printopt0 == 'H') {
 		printf("</TD><TD>%c</TD><TD>%7d</TD><TD>%7d</TD>",
 		       ((forward) ? '+' : '-'),Lend,Rend);
@@ -348,11 +353,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		
 		if (init)
 		  fprintf(f,"<TD>%+2d</TD>", ((forward) ? 1: -1));
-		else {
-		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack) :
-			   PhaseAdapt(stateNext));
-		  
+		else {		  
 		  if (abs(Phase) <= 6 && abs(Phase) >=4) 
 		    fprintf(f,"<TD>%+2d</TD>",(forward) ? Phase-3 : Phase+3);
 		  else fprintf(f,"<TD>Unk.</TD>");
@@ -366,10 +367,6 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		if (init)
 		  fprintf(f,"   %+2d", ((forward) ? 1: -1));
 		else {
-		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack) :
-			   PhaseAdapt(stateNext));
-		  
 		  if (abs(Phase) <= 6 && abs(Phase) >= 4) 
 		    fprintf(f,"   %+2d",(forward) ? Phase-3 : Phase+3);
 		  else fprintf(f," Unk.");
@@ -379,6 +376,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		fprintf(f,"  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
 			100.0*(double)incons/(Rend-Lend+1));
 	      }
+	    }
 	}
 	else 
 	  if ((state >= UTR5F) && (state <= UTR3R)) {
