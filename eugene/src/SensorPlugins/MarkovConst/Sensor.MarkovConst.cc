@@ -34,8 +34,6 @@ SensorMarkovConst :: ~SensorMarkovConst ()
 void SensorMarkovConst :: Init (DNASeq *X)
 {
   type = Type_Content;
-  
-  if(PAR.getI("Output.graph")) Plot(X);
 }
 
 // -----------------------
@@ -108,64 +106,6 @@ void AmplifyScore(double Score [], unsigned int normopt)
 // ----------------------------
 void SensorMarkovConst :: Plot(DNASeq *TheSeq)
 {
-  int window, normopt;
-  DATA data;
-  double *Score = data.contents;
-  double NScore[9], LScore[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,-1.0,-1.0};  
-  int i,j,p;
-
-  window = PAR.getI("Output.window")*2+1;
-  normopt = PAR.getI("Output.normopt");
-  
-  for (j = 0 ; j < 9 ; j++)
-    NScore[j] = Score[j] = 0.0;
-  
-  for (i = 0; i < window/2; i++) {
-    GiveInfo(TheSeq,i, &data);
-    for (j = 0 ; j < 9 ; j++) {
-      NScore[j] += Score[j];
-      Score[j] = 0;
-    }
-  }
-
-  for (i=0; i<TheSeq->SeqLen; i++)  {
-
-    if (i-window/2 >= 0) {
-      GiveInfo(TheSeq,i-window/2, &data);
-      for (j = 0 ; j < 9 ; j++) {
-	NScore[j] -= Score[j];
-	Score[j] = 0;
-      }
-    }
-
-    if (i+window/2 < TheSeq->SeqLen) {
-      GiveInfo(TheSeq,i+window/2,&data);
-      for (j = 0 ; j < 9 ; j++) 
-	NScore[j] += Score[j];
-    }
-    
-    for (j = 0 ; j < 9 ; j++) Score[j] = NScore[j];
-    AmplifyScore(Score,normopt);
-    
-    if (LScore[0] < 0) for (j = 0 ; j < 9 ; j++) LScore[j] = Score[j];
-
-    p = ((i == 0) ? 0 : i-1);
-    
-    PlotLine(p,i, 1, 1,LScore[0],Score[0],3);
-    PlotLine(p,i, 2, 2,LScore[1],Score[1],3);
-    PlotLine(p,i, 3, 3,LScore[2],Score[2],3);
-    PlotLine(p,i,-1,-1,LScore[3],Score[3],3);
-    PlotLine(p,i,-2,-2,LScore[4],Score[4],3);
-    PlotLine(p,i,-3,-3,LScore[5],Score[5],3);
-    PlotLine(p,i, 4, 4,LScore[6],Score[6],3);
-    PlotLine(p,i,-4,-4,LScore[7],Score[7],3);
-    PlotLine(p,i, 0, 0,LScore[8],Score[8],3);
-      
-    for (j = 0 ; j < 9 ; j++) {
-      LScore[j] = Score[j];
-      Score[j] = 0;
-    }
-  }
 }
 
 // ------------------
