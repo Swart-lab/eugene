@@ -1,8 +1,20 @@
+//==============================================================
+//           Copyright (c) 2003 by INRA. All rights reserved.
+//                 Redistribution is not permitted without
+//                 the express written permission of INRA.
+//                     Mail : tschiex@toulouse.inra.fr
+//-----------------------------------------------------------------------------------------
+
+// File                : EuGeneTk/SensorPlugins/StartWAM/Sensor.StartWAM.h
+// Description    : Definition of a start codon detection sensor based on a 
+//                         Weight Array Model (WAM)
+// Authors         : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex
+
 #ifndef  SENSOR_StartWAM_INCLUDED
 #define  SENSOR_StartWAM_INCLUDED
 
 #include "../../EuGene/Sensor.h"
-#include "../0_SensorTk/markov.h"
+#include "../0_SensorTk/WAM.h"
 
 /*************************************************************
  **                 SensorStartWAM                    **
@@ -10,15 +22,16 @@
 class SensorStartWAM : public Sensor
 {
  private:
-  int order;    // order of the markov models in the Window Array Model
-  double coef; // coefficient for the WAM score
-  double pen; //  penality for the WAM score (score= coef * WAMscore - pen)
-// merge flanking the consensus dinucleotide GT|AG (nbr of nt before and after)
-  int beforestart,afterstart;
-  int startsitelen;
-  ChaineADN* ADN;
-  TabChaine<ChaineADN,unsigned short int>* TPSTARTMOD; // True Positive Start site Model
-  TabChaine<ChaineADN,unsigned short int>* FPSTARTMOD; // False         Start
+  int NbNtBeforeATG;
+  int NbNtAfterATG;
+  int MotifLength;
+  int MarkovianOrder; // order of the markov models in the WAM
+  double ScaleCoef; // coefficient for the WAM score scaling
+  double ScalePenalty; //  penality for the WAM score scaling
+  double PlotScoreIncrease;
+  WAM* WAModel;
+  double ScaleWAMScore (double WAMScore);  //  (score= coef * WAMscore - pen)
+  inline double NormalizePlot (double x, double n);  // normalization for the plot
 
  public:
   SensorStartWAM  (int);
@@ -27,8 +40,6 @@ class SensorStartWAM : public Sensor
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
   virtual void PostAnalyse(Prediction *);
-  void ReadModelFile (TabChaine<ChaineADN, unsigned short int> &model, char* filename);
-  double startscoring (char* oligont,int order, int insitepos);
 };
 
 extern "C" SensorStartWAM * builder0(int n) {  return new SensorStartWAM(n); }
