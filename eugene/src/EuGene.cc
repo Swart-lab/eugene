@@ -64,11 +64,12 @@
 //#include "dmallocc.cc"
 //#define STAND 1
 
+#include "Const.h"
+#include "SensorIF.h"
 #include "MSensor.h"
 #include "Param.h"
 #include "DNASeq.h"
 #include "BackP.h"
-#include "Const.h"
 #include "clef.h"
 #include "Output.h"
 #include "Prediction.h"
@@ -94,7 +95,6 @@ int main  (int argc, char * argv [])
   DNASeq *TheSeq;
   int    Data_Len;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior;
-  double stopP;
   int    minL[18], minDiv, minFlow, minConv, min5, min3;
   int    graph;
   const unsigned char SwitchMask[18] = 
@@ -134,7 +134,6 @@ int main  (int argc, char * argv [])
   minConv = PAR.getI("EuGene.minConv");
   min5    = PAR.getI("EuGene.min5Prime");
   min3    = PAR.getI("EuGene.min3Prime");
-  stopP       = PAR.getD("EuGene.stopP");
   graph = PAR.getI("Output.graph");
   
   MS.InitMaster();
@@ -340,11 +339,11 @@ int main  (int argc, char * argv [])
 	
 	// On va tout droit.
 	// S'il y  a un STOP en phase on ne peut continuer
-	if ((i % 3 == k) && Data.Stop[0])
-	  LBP[k]->Update(DontCrossStop); 
+	if ((i % 3 == k))
+	  LBP[k]->Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
 #ifdef PAYTOIGNORE      
 	else // on ne prend pas le donneur
-	  LBP[k]->Update(log(1.0-Data.Don[0]));
+	  LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 #endif
 	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
 	// Un test tordu pour casser le cou aux NaN
@@ -355,10 +354,10 @@ int main  (int argc, char * argv [])
 	
 	// On commence a coder (Start)
 	// Ca vient d'une UTR 5' forward
-	if ((i % 3 == k) && Data.Start[0] != 0.0) {
-	  BestU = PBest[19]+log(Data.Start[0]);
+	if ((i % 3 == k)) {
+	  BestU = PBest[19]+Data.sig[DATA::Start].weight[Signal::Forward];
 #ifndef PAYTOIGNORE
-	  BestU -= log(1.0-Data.Start[0]);
+	  BestU -= Data.sig[DATA::Start].weight[Signal::ForwardNo];
 #endif 
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
@@ -371,9 +370,9 @@ int main  (int argc, char * argv [])
 	
 	// On recommence a coder (Accepteur)
 	// Ca vient d'un intron
-	BestU = PBest[6+((i-k+3) % 3)]+log(Data.Acc[0]);
+	BestU = PBest[6+((i-k+3) % 3)]+Data.sig[DATA::Acc].weight[Signal::Forward];
 #ifndef PAYTOIGNORE
-	BestU -= log(1.0-Data.Acc[0]);
+	BestU -= Data.sig[DATA::Acc].weight[Signal::ForwardNo];
 #endif
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
@@ -384,7 +383,7 @@ int main  (int argc, char * argv [])
 	
 	// Il y a une insertion (frameshift). Pour l'instant, on ne
 	// prend pas en compte le saut de nucléotide.
-	BestU = PBest[(k+2)%3] + log(Data.Ins);
+	BestU = PBest[(k+2)%3] + Data.sig[DATA::Ins].weight[Signal::Forward];
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+2)%3;
@@ -392,7 +391,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[(k+1)%3] + log(Data.Del);
+	BestU = PBest[(k+1)%3] + Data.sig[DATA::Del].weight[Signal::Forward];
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+1)%3;
@@ -401,7 +400,7 @@ int main  (int argc, char * argv [])
 
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
-	LBP[k]->Update(Data.ContentScore[k]);
+	LBP[k]->Update(Data.contents[k]);
       }
       
       // ----------------------------------------------------------------
@@ -411,11 +410,11 @@ int main  (int argc, char * argv [])
 	maxi = NINFINITY;
 	
 	// On continue sauf si l'on rencontre un autre STOP
-	if (((Data_Len-i) % 3 == k-3) && Data.Stop[1]) 
-	  LBP[k]->Update(DontCrossStop);
+	if (((Data_Len-i) % 3 == k-3)) 
+	  LBP[k]->Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
 #ifdef PAYTOIGNORE      
 	else // sinon on ne prend pas le donneur 
-	  LBP[k]->Update(log(1.0-Data.Don[1]));
+	  LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 #endif
 	
 	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
@@ -427,8 +426,8 @@ int main  (int argc, char * argv [])
 	
 	// On commence a coder (Stop)
 	// Ca vient d'une UTR 3' reverse
-	if (((Data_Len-i) % 3 == k-3) && Data.Stop[1]) {
-	  BestU = PBest[22] - stopP;
+	if (((Data_Len-i) % 3 == k-3)) {
+	  BestU = PBest[22] + Data.sig[DATA::Stop].weight[Signal::Reverse];
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
 	    maxi = BestU;
@@ -440,9 +439,9 @@ int main  (int argc, char * argv [])
 	
 	// - on recommence a coder (Donneur)
 	// Ca vient d'un intron
-	BestU = PBest[9+((Data_Len-i-k) % 3)]+log(Data.Don[1]);
+	BestU = PBest[9+((Data_Len-i-k) % 3)] + Data.sig[DATA::Don].weight[Signal::Reverse];
 #ifndef PAYTOIGNORE
-	BestU -= log(1.0-Data.Don[1]);
+	BestU -= Data.sig[DATA::Don].weight[Signal::ReverseNo];
 #endif
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
@@ -452,7 +451,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une insertion (frameshift)
-	BestU = PBest[3+(k+2)%3] +log(Data.Ins);
+	BestU = PBest[3+(k+2)%3] + Data.sig[DATA::Ins].weight[Signal::Reverse];
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 3+(k+2)%3;
@@ -460,7 +459,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[3+(k+1)%3] + log(Data.Del);
+	BestU = PBest[3+(k+1)%3] + Data.sig[DATA::Del].weight[Signal::Reverse];
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 3+(k+1)%3;
@@ -469,7 +468,7 @@ int main  (int argc, char * argv [])
 
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
-	LBP[k]->Update(Data.ContentScore[k]);
+	LBP[k]->Update(Data.contents[k]);
       }
       
       // ----------------------------------------------------------------
@@ -492,7 +491,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 5' reverse
-      BestU = PBest[21] + log(Data.tStart[1]);
+      BestU = PBest[21] + Data.sig[DATA::tStart].weight[Signal::Reverse];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -504,7 +503,7 @@ int main  (int argc, char * argv [])
       if (best != -1) 
 	LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
-      LBP[InterGen5]->Update(Data.ContentScore[8]);
+      LBP[InterGen5]->Update(Data.contents[8]);
       
       // ----------------------------------------------------------------
       // Puis les 3' forward => LBP[InterGen3]
@@ -520,7 +519,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 3' direct
-      BestU = PBest[20] + log(Data.tStop[0]);
+      BestU = PBest[20] + Data.sig[DATA::tStop].weight[Signal::Forward];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -532,7 +531,7 @@ int main  (int argc, char * argv [])
       if (best != -1) 
 	LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
-      LBP[InterGen3]->Update(Data.ContentScore[8]);
+      LBP[InterGen3]->Update(Data.contents[8]);
       
       // ----------------------------------------------------------------
       // ---------------------- UTR 5' direct ---------------------------
@@ -544,7 +543,7 @@ int main  (int argc, char * argv [])
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
       if (!PAR.getI("Sensor.Est.use") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
-	LBP[UTR5F]->Update(log(1.0-Data.Start[0]));
+	LBP[UTR5F]->Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
 #endif
       
       LBP[UTR5F]->BestUsable(i,SwitchAny,0,&BestU);
@@ -563,7 +562,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[23] + log(Data.tStart[0]);
+      BestU = PBest[23] + Data.sig[DATA::tStart].weight[Signal::Forward];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -573,7 +572,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[18] + log(Data.tStart[0]);
+      BestU = PBest[18] + Data.sig[DATA::tStart].weight[Signal::Forward];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -584,7 +583,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
-      LBP[UTR5F]->Update(Data.ContentScore[9]);
+      LBP[UTR5F]->Update(Data.contents[9]);
       
       // ----------------------------------------------------------------
       // ---------------------- UTR 3' direct ---------------------------
@@ -601,8 +600,8 @@ int main  (int argc, char * argv [])
 
       // Ca vient d'un exon direct + STOP
       for (k = 0; k < 3; k++) {
-	if ((i % 3 == k) && Data.Stop[0]) {
-	  BestU = PBest[k+12] - stopP;
+	if ((i % 3 == k)) {
+	  BestU = PBest[k+12] + Data.sig[DATA::Stop].weight[Signal::Forward];
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
 	    maxi = BestU;
@@ -614,7 +613,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[UTR3F]->InsertNew(best %12,Switch,i,maxi,PrevBP[best]);
       
-      LBP[UTR3F]->Update(Data.ContentScore[11]);
+      LBP[UTR3F]->Update(Data.contents[11]);
       
       // ----------------------------------------------------------------
       // ----------------------- UTR 5'reverse --------------------------
@@ -626,7 +625,7 @@ int main  (int argc, char * argv [])
       //  Kludge: si on a un EST qui nous dit que l'on est dans un
       //  intron, on oublie
       if (!PAR.getI("Sensor.Est.use") || (Data.ESTMATCH_TMP & Gap) == 0)  // WARNING
-	LBP[UTR5R]->Update(log(1.0-Data.Start[1]));
+	LBP[UTR5R]->Update(Data.sig[DATA::Start].weight[Signal::ReverseNo]);
 #endif
       
       LBP[UTR5R]->BestUsable(i,SwitchAny,0,&BestU);
@@ -638,10 +637,10 @@ int main  (int argc, char * argv [])
       
       // Ca vient d'un exon reverse + START
       for (k = 3; k < 6; k++) {
-	if (((Data_Len-i) % 3 == k-3) && Data.Start[1] != 0.0) {
-	  BestU = PBest[k+12]+log(Data.Start[1]);
+	if (((Data_Len-i) % 3 == k-3)) {
+	  BestU = PBest[k+12]+Data.sig[DATA::Start].weight[Signal::Reverse];
 #ifndef PAYTOIGNORE
-	  BestU -= log(1.0-Data.Start[1]);
+	  BestU -= Data.sig[DATA::Start].weight[Signal::ReverseNo];
 #endif
 	  // Un test tordu pour casser le cou aux NaN
 	  if (isnan(maxi) || (BestU > maxi)) {
@@ -654,7 +653,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
       
-      LBP[UTR5R]->Update(Data.ContentScore[10]);
+      LBP[UTR5R]->Update(Data.contents[10]);
       
       // ----------------------------------------------------------------
       // ----------------------- UTR 3'reverse --------------------------
@@ -678,7 +677,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[24] + log(Data.tStop[1]);
+      BestU = PBest[24] + Data.sig[DATA::tStop].weight[Signal::Reverse];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -688,7 +687,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[25] + log(Data.tStop[1]);
+      BestU = PBest[25] + Data.sig[DATA::tStop].weight[Signal::Reverse];
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -699,7 +698,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[UTR3R]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
-      LBP[UTR3R]->Update(Data.ContentScore[12]);
+      LBP[UTR3R]->Update(Data.contents[12]);
       
       // ----------------------------------------------------------------
       // ---------------- Introns de phase k forward --------------------
@@ -709,7 +708,7 @@ int main  (int argc, char * argv [])
 	
 	// On reste intronique
 #ifdef PAYTOIGNORE      
-	LBP[6+k]->Update(log(1.0-Data.Acc[0]));
+	LBP[6+k]->Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 #endif
 	LBP[6+k]->BestUsable(i,SwitchAny,0,&BestU);
 	// Un test tordu pour casser le cou aux NaN
@@ -718,9 +717,9 @@ int main  (int argc, char * argv [])
 	  best = -1;
 	}
 	// - on quitte un exon
-	BestU = PBest[((i-k+3) % 3)]+log(Data.Don[0]);
+	BestU = PBest[((i-k+3) % 3)]+ Data.sig[DATA::Don].weight[Signal::Forward];
 #ifndef PAYTOIGNORE
-	BestU -= log(1.0-Data.Don[0]);
+	BestU -= Data.sig[DATA::Don].weight[Signal::ForwardNo];
 #endif
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
@@ -731,7 +730,7 @@ int main  (int argc, char * argv [])
 	
 	if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
 
-	LBP[6+k]->Update(Data.ContentScore[6]);
+	LBP[6+k]->Update(Data.contents[6]);
       }
       
       // ----------------------------------------------------------------
@@ -742,7 +741,7 @@ int main  (int argc, char * argv [])
 	
 	// On reste intronique
 #ifdef PAYTOIGNORE      
-	LBP[9+k]->Update(log(1.0-Data.Acc[1]));
+	LBP[9+k]->Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 #endif
 	LBP[9+k]->BestUsable(i,SwitchAny,0,&BestU);
 	// Un test tordu pour casser le cou aux NaN
@@ -752,9 +751,9 @@ int main  (int argc, char * argv [])
 	}
 	
 	// On quitte un exon
-	BestU = PBest[3+((Data_Len-i-k) % 3)]+log(Data.Acc[1]);
+	BestU = PBest[3+((Data_Len-i-k) % 3)]+Data.sig[DATA::Acc].weight[Signal::Reverse];
 #ifndef PAYTOIGNORE
-	BestU -= log(1.0-Data.Acc[1]);
+	BestU -= Data.sig[DATA::Acc].weight[Signal::ReverseNo];
 #endif
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
@@ -765,7 +764,7 @@ int main  (int argc, char * argv [])
 	
 	if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
 	
-	LBP[9+k]->Update(Data.ContentScore[7]);
+	LBP[9+k]->Update(Data.contents[7]);
       }
     }
     
