@@ -85,9 +85,10 @@ template<class CHAINE, typename T> class TabChaine
   void affichage(int l=-1); // par defaut, n'affiche pas les valeurs, l==0 -> ttes les valeurs, l!=0 -> valeurs pour les mots de lgr l
   void affichagevaleurs(int l);
   void incremente (int indice); // attention: pour <int>, modifie VAL[indice]
+  void incremente (int indice,int n); // attention: pour <int>, modifie VAL[indice]
   void initialisation ();           // attention: pour <int>, remet le compteur a 0.
-//  void pseudocount (int pseudocomptes); // incremente toutes les valeurs
-// a faire un de ces 4, en attendant, il suffit de lire un multifasta contenant tous les k-meres possibles 1 fois (fichiers pseudocompte).
+  void initialisation (double GCrate); // init. sachant un GC%
+  void pseudocount (int pseudocomptes); // incremente toutes les valeurs
   int fichier2seq(FILE *fp,char* &Sequence);
 // appel du style: 
 // char* Sequence;
@@ -103,6 +104,7 @@ template<class CHAINE, typename T> class TabChaine
   int indiceprefixe (char* seq, int lgr, int deb, int fin) const;
   int indiceprefixe (int indice) const;
   void compte2probas (const TabChaine<CHAINE, int>& comptage); // attention: pour <REAL> ou <unsigned short>, modifie VAL
+  int nombredegc (int indice) const;
 
 // Convertisseurs de types REAL (e.g. double) et  usi (unsigned short int):
   unsigned short int real2usi (REAL x); 
@@ -124,6 +126,8 @@ template<class CHAINE, typename T> class TabChaine
   REAL rapdevrai (char *seq, int n, const TabChaine<CHAINE, REAL> &autremodele, int ordre) const;
   REAL lograpdevrai (char *seq, int n, const TabChaine<CHAINE, REAL> &autremodele, int ordre) const;
   REAL lograpdevrai (char *seq, int deb, int fin, const TabChaine<CHAINE, REAL> &autremodele, int ordre) const;
+  T cumuleVAL(int indice) const;
+  T cumuleVAL(char aa) const;
 };
 #endif
 
@@ -165,7 +169,7 @@ class ProtMat : public TabChaine <Chaine,int>
 {
  public:
   const int nbreaa;      // ty. 20 mais 24 pour BLOSUM62
-  const int offset; // 24, cad le nbre de cases du tableau val inutiles (lgr des mots<3)
+  const int offset; // 21, cad le nbre de cases du tableau val inutiles (lgr des mots<3)
 //  ProtMat();
 //  ~ProtMat();
 // CONSTRUCTEURS:

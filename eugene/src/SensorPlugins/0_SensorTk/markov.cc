@@ -4,7 +4,10 @@
 #include <string.h>
 #include <typeinfo>
 #include <ctype.h>
-#define CODEGENETIQUE "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF"
+#include <assert.h>
+
+char* CODEGENETIQUE = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
+const int NBRECODONS[64]     = {2,2,2,2,4,4,4,4,6,6,6,6,3,3,1,3,2,2,2,2,4,4,4,4,6,6,6,6,6,6,6,6,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,3,2,3,2,6,6,6,6,3,2,1,2,6,2,6,2};
 
 /////////////////////////////////////////////////////////
 //////                CLASSE Chaine                //////
@@ -192,7 +195,6 @@ template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine(int ordre, C
 // POURQUOI NE COMPILE PAS AVEC "CONST"?!!!
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l=-1)
 {
-  int i;
   if(alphabet != NULL) alphabet->affichage();
   printf("Affichage de la classe template TabChaine:\n");
   printf("lgrmax=%d, taille alphabet=%d, nbrevaleurs=%d\n",lgrmax,alphabet->taille,nbrevaleurs);
@@ -201,9 +203,8 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l=-
 
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l) 
 {
-  int i,test;
+  int i;
   char* affiche;
-  REAL tmpvaleur;
   printf("affichage des valeurs:\n");
 
   if ( ( typeid(T) == typeid(int) ) || ( typeid(T) == typeid(unsigned)) )
@@ -286,6 +287,12 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int in
   if (indice2lgrmot(indice)==1) VAL[0]+=1;
 }
 
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice,int n)
+{
+  if (indice < nbrevaleurs) VAL[indice] += n;
+  if (indice2lgrmot(indice)==1) VAL[0] += n;
+}
+
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation()
 {
   for (int i=0; i<nbrevaleurs;i++){
@@ -293,27 +300,40 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation()
   }
 }
 
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation(double GCrate)
+{
+  T precval;
+//  char tampon;  // derniere lettre du mot
+  int der=0;
+  VAL[0]=1;
+  for (int i=1; i<nbrevaleurs ; i++){
+    precval= VAL[indiceprefixe(i)];
+    der= indiceprefixe(indice2mot(i),1,indice2lgrmot(i)-1,indice2lgrmot(i)) - 1;
+//    tampon= alphabet->lettre[indiceprefixe(indice2mot(i),1,indice2lgrmot(i)-1,indice2lgrmot(i)) - 1];
+    VAL[i] = precval * ( ((der==1) || (der==2)) ? GCrate/2 : (1-GCrate)/2 ) ;
+//    VAL[i] = precval * ( ((strcmp(&tampon,"G")) && (strcmp(&tampon,"C"))) ? GCrate : 1-GCrate ) ;
+//    printf("i=%d,mot=%s,tampon=%c\n",i,indice2mot(i),alphabet->lettre[der]);
+  }
+}
+
 // permet d'eviter des probas de 0 (et du coup des log de 0...)
-//template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes)
-//{
-//  for (int i=0;i<
-//}
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes)
+{
+  for (int i=0;i<nbrevaleurs;i++) 
+    incremente(i);
+}
 
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int parcodon=0)
 {
   int i,j;
-//  printf("lgr de la seq:%d, condition d'arret:%d\n",strlen(seq),(strlen(seq)-lgrmax));
-  if (seq!=NULL){
-    if(parcodon==0){
-      for(i=0; i <= (int)((strlen(seq)-lgrmax)) ; i++) {
-	for(j=0;j<lgrmax;j++){
-	  incremente(mot2indice(seq,(lgrmax-j),i));
-	}
-      }
+  if ( (seq!=NULL)&&(strlen(seq)>lgrmax)) {
+    for(i=0; i<lgrmax-1 ;i++) { //debut
+      for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
     }
-    else{
-      for(i=0; i <= (int)((strlen(seq)-lgrmax)) ; i+=3) {
-	incremente(mot2indice(seq,3,i));
+
+    for(i=lgrmax-1 ; i<strlen(seq) ; i++){
+      for(j=0;j<lgrmax;j++) {
+	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
     }
   }
@@ -357,7 +377,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
 	}
       Ch = toupper (Ch);
 
-      if ( strcmp((const char *)alphabet->lettre,"ACGT")==0){
+      if ( strcmp((const char *)alphabet->lettre,"ACGT")==0) {
 	switch  (Ch)
 	  {
 	  case  'A' : case  'C' : case  'G' : case  'T' :
@@ -407,6 +427,17 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
       Sequence [Len++] = Ch;
     }
 
+  // TMP!! Cas particulier: sequence proteique a terminer par un stop (sinon P(TGA)=0)!!
+  // A traiter peut etre plus proprement...
+  if ( strcmp((const char *)alphabet->lettre,"ACDEFGHIKLMNPQRSTVWY*")==0){
+    if  (Len >= Size)
+      {
+	Size += 1;
+	Sequence = (char *) realloc (Sequence, sizeof(char)*Size);
+      }
+    Sequence [Len++] = '*';
+  }
+
   // prepare for next call
   if (Ch != EOF) 
     ungetc(Ch,fp);
@@ -443,13 +474,30 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: sauve2fichier (FI
   return;
 }
 
+// ---------------------------------------------------------------------
+//  Dealing with endianness
+// ---------------------------------------------------------------------
+inline unsigned int LEndianReverse (unsigned int N)
+{
+  return ((N & 0x000000FF) << 24) |
+         ((N & 0x0000FF00) << 8)  |
+         ((N & 0x00FF0000) >> 8)  |
+         ((N & 0xFF000000) >> 24);
+}
+
+inline unsigned short int SEndianReverse (unsigned short int N)
+{
+  return ((N & 0x00FF) << 8) |
+         ((N & 0xFF00) >> 8);
+}
+
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: chargefichier (FILE *fp)
 {
-  int  i, A, N;
+  int  A, N;
   unsigned int M;
   char endian;
   int Ok;
-  
+
   endian = 0;
   M = A = N = 0;
 
@@ -472,21 +520,23 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: chargefichier (FIL
 
   if (endian) N = LEndianReverse(N);
 
-  assert (M == lgrmax && A == alphabet->taille && N == nbrevaleurs);
-/* PROBLEME de type:
-Necessite le developpement d'une fonction endianreverse generique, ou overloadee, qui puisse traiter tous les types...
-Pour l'instant, pas de endianreverse...
+  if ( ((signed)M != lgrmax) || (A !=(signed)alphabet->taille) || ((signed)N != nbrevaleurs) ) fprintf(stderr,"markov.cc : Incompatibility between model expected and read in function chargefichier: M=%d, lgrmax=%d, A=%d,alphabet->taille =%d, N=%d, nbrevaleurs=%d\n",M,lgrmax,A,alphabet->taille,N,nbrevaleurs);
+  assert ((signed)M == lgrmax && A == (signed)alphabet->taille && (signed)N == nbrevaleurs);
 
-  Ok = fread (VAL, sizeof(unsigned short), nbrevaleurs, fp);
-  if (Ok != nbrevaleurs) return 1;
+  // compatibilite des matrices entre machines garantie uniquement pour le type usi
+  if (typeid(T) == typeid(unsigned short int)) {
+    Ok = fread (VAL, sizeof(unsigned short), nbrevaleurs, fp);
+    if (Ok != nbrevaleurs) return 1;
 
-  if (endian)
-    for (i = 0;  i < nbrevaleurs;  i ++)
-      VAL[i] = SEndianReverse(VAL[i]);
-*/
-  Ok = fread (VAL, sizeof(T), nbrevaleurs, fp);
-  if (Ok != nbrevaleurs) return 1;
+    if (endian)
+      for (int i = 0;  i < nbrevaleurs;  i ++)
+	VAL[i] = SEndianReverse(VAL[i]);
+  }
 
+  else{
+    Ok = fread (VAL, sizeof(T), nbrevaleurs, fp);
+    if (Ok != nbrevaleurs) return 1;
+  }
   return 0;
 }
 
@@ -518,24 +568,30 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: usi() const
   return 0;
 }
 
-// Les comptages doivent etre bien construits
-// (cad que e.g. A = AA+AC+AG+AT)
 // necessite en argument une classe de meme type chaine et de meme taille
 // pour passer des frequences aux probabilites
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (const TabChaine<CHAINE, int>& comptage)
 {
-  int i,j;
-  if (nbrevaleurs == comptage.nbrevaleurs){
-    if (typeid(T) == typeid(unsigned short int)) VAL[0] = 1;
+  int i,j,cumul,indicedeclinant;
+  if (nbrevaleurs == comptage.nbrevaleurs) {
+    if ((typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) ) VAL[0] = 1;
     else VAL[0] = 1.0;
-//    VAL[0] = 1;
-//VAL[0] = ((typeid(T) == typeid(unsigned short int) ) ? 1 : 1.0);
     for(i=1;i<nbrevaleurs;i++) {
-      if (typeid(T) == typeid(unsigned short int) )
-	VAL[i]= ((comptage.VAL[indiceprefixe(i)]==0) ? 0 : real2usi((REAL)(comptage.VAL[i]) / (REAL)(comptage.VAL[indiceprefixe(i)])) );
+      cumul=0;
+      indicedeclinant=indiceprefixe(indice2mot(i),indice2lgrmot(i),0,indice2lgrmot(i)-2);
+      for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) {
+	cumul+= comptage.VAL[j];
+//	printf("i=%d,j=%d,mot=%s,indicedeclinant=%d,declinant=%s,n(%s)=%d,cumul=%d\n",i,j,indice2mot(i),indicedeclinant,indice2mot(indicedeclinant),comptage.indice2mot(j),comptage.VAL[j],cumul);
+	// Ex. avec ACGT: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
+      }
+      if (indice2lgrmot(i) == lgrmax) {
+//	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage.VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(REAL)comptage.VAL[i] / (REAL)cumul);
+//	fflush(stdout);
+      }
+      if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
+	VAL[i]= ((cumul==0) ? 0 : real2usi( (REAL)comptage.VAL[i] / (REAL)cumul) );
       else
-	VAL[i]=((comptage.VAL[indiceprefixe(i)]==0) ? 0 : 
-		(REAL)(comptage.VAL[i]) / (REAL)(comptage.VAL[indiceprefixe(i)]) );
+	VAL[i]=((cumul==0) ? 0 : (REAL)comptage.VAL[i] / (REAL)cumul ) ;
     }
   }
 }
@@ -547,6 +603,17 @@ template<class CHAINE, typename T>  unsigned short int TabChaine<CHAINE,T> :: re
 
 template<class CHAINE, typename T> REAL TabChaine<CHAINE,T> :: usi2real (unsigned short int n) {
   return ( (REAL)n / 65535.0 );
+}
+
+template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: nombredegc (int indice) const
+{
+  int compt=0;
+  char* mot= new char[lgrmax];
+  mot= indice2mot(indice);
+  for(int i=0;i<lgrmax;i++){
+    if ((mot[i]=='G')||(mot[i]=='C')) compt++;
+  }
+  return compt;
 }
 
 ///////////////////////////////////////////////////////
@@ -561,7 +628,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: proba (char *seq, in
   else          return (VAL[mot2indice(seq,i+1,0)]);
 }
 
-// proba d'apparition de la lettre en position i selon un ordre maximum particulier
+// proba d'apparition de la lettre en position i selon un ordre particulier
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: proba (char *seq, int i, int ordre) const
 {
   if (i > ordre) return (VAL[mot2indice(seq,ordre+1,i-ordre)]);
@@ -666,6 +733,36 @@ lograpdevrai (char *seq, int deb, int fin, const TabChaine<CHAINE, REAL> &autrem
   return val;
 }
 
+//--------------------------
+// Fonction qui pour une TabChaine, un indice de codon(de 0 a 63) et un codegenetique,
+// cumule les valeurs des cases des codons synonymes et renvoie le total.
+template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: cumuleVAL (int indice) const
+{
+  char* codegenetique=CODEGENETIQUE;
+  T cumul=0;
+  for (int i=0 ; i<64 ; i++) {
+    if ( codegenetique[i] == codegenetique[indice] )
+      cumul += VAL[i+21];
+//    printf("i=%d, aa= %c vs %c, cumul=%lf\n",i,codegenetique[i],codegenetique[indice],cumul);
+  }
+  return cumul;
+}
+
+//--------------------------
+// Fonction qui pour une TabChaine, un Acide Amine (code une lettre) et un codegenetique,
+// cumule les valeurs des cases des codons synonymes et renvoie le total.
+template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: cumuleVAL (char aa) const
+{
+  char* codegenetique=CODEGENETIQUE;
+  T cumul=0;
+  for (int i=0 ; i<64 ; i++) {
+    if ( codegenetique[i] == aa )
+      cumul += VAL[i+21];
+//    printf("i=%d, aa= %c vs %c, cumul=%lf\n",i,codegenetique[i],codegenetique[indice],cumul);
+  }
+  return cumul;
+}
+
 /////////////////////////////////////////////////////////
 //////                CLASSE TabChaine             //////
 /////////////////////////////////////////////////////////
@@ -707,6 +804,7 @@ void UsageCode :: affichage() const
     printf ("codon:%s occurence:%d aa:%c occurence:%d usage:%f\n", indice2mot(i+offset), VAL[i+offset], codegenetique[i], cumuleaa(i), usagecode[i]);
   }
 }
+
 int UsageCode :: cumuleaa(int aa) const
 {
   int occurence=0;
@@ -716,13 +814,13 @@ int UsageCode :: cumuleaa(int aa) const
   }
   return occurence;
 }
+
 void UsageCode :: compte2usage ()
 {
   for (int i=0;i<nbrecodons;i++){
     usagecode[i]= ( (cumuleaa(i)==0) ? 0.0 : (REAL)VAL[i+offset] / (REAL)cumuleaa(i)) ;
   }
 }
-
 
 /////////////////////////////////////////////////////////
 //////     CLASSE ProtMat : MATRICE PROTEIQUE      //////
@@ -739,6 +837,7 @@ ProtMat :: ProtMat(char* aa) : TabChaine <Chaine,int> (1, new Chaine(aa)) , nbre
 {
 }
 
+//---------------------------------------------
 // FONCTION qui lit un fichier MATRICE PROTEIQUE (type Blosum ou Pam)
 // et cree la classe ProtMat correspondante, et renvoie 1 si PB.
 // (1er armgt= pointeur vers un fichier ouvert de type Blosum ou Pam
@@ -795,3 +894,4 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   return(0);
 //  MAT->affichage(2);
 }
+
