@@ -71,7 +71,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	m[key] = val;
       }
       else {
-	fprintf(stderr,"Invalid command line parameter definition: %s\n",optarg);
+	fprintf(stderr,"\nInvalid command line parameter definition: %s\n",optarg);
 	exit(2);
       }
       break;
@@ -252,7 +252,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   // check usage
   if (errflag) {
-    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
+    fprintf(stderr, "\nUsage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
 	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
 	    "              [-g {graphArg}] [-G] [-u start] [-v end] [-l len] [-c olap]\n"
 	    "              [-x xres] [-y yres] FASTA files\n");
@@ -283,9 +283,9 @@ void Parameters :: ReadPar(char *argv)
 	m[key] = val;
       else {
 	if (EugDir != NULL)
-	  fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
+	  fprintf(stderr, "\nIncorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
 	else
-	  fprintf(stderr, "Incorrect parameter file %s line %d\n",BaseName(tempname),n);
+	  fprintf(stderr, "\nIncorrect parameter file %s line %d\n",BaseName(tempname),n);
 	exit(2);
       }
     }
@@ -337,7 +337,7 @@ char* Parameters :: getC(char *key, int index)
     return key;
   }
   else {
-    fprintf(stderr,"Error: Undefined key %s\n",altkey);
+    fprintf(stderr,"\nError: Undefined key %s\n",altkey);
     exit(2);
   }
 }
