@@ -1,7 +1,7 @@
 #include <dlfcn.h>
 #include "Dll.h"
 
-SensorLoader :: SensorLoader(const char *fname, const char *builder=0)
+SensorLoader :: SensorLoader(const char *fname, const char *builder)
 {
   // Try to open the library now and get any error message.
   h = dlopen( fname, RTLD_NOW );
