@@ -294,14 +294,28 @@ int main  (int argc, char * argv [])
 
     MS.GetInfoAt(TheSeq, 0, &Data);
     for (i = 0; i <= Data_Len; i++) {
+
+      maxi = -NINFINITY;
+      for (k = 0 ; k < 18; k++) {
+	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
+	if ((BestU > NINFINITY) && (BestU < maxi)) maxi =BestU;
+     }
+
+      for (k = 0 ; k < 18; k++) 
+	LBP[k]->Update(-maxi);
+
       // Calcul des meilleures opening edges
-      PrevBP[0] = LBP[0]->BestUsable(i,SwitchMask[0],PAR.MinLength[0],&PBest[0]);
-      PrevBP[1] = LBP[1]->BestUsable(i,SwitchMask[1],PAR.MinLength[1],&PBest[1]);
-      PrevBP[2] = LBP[2]->BestUsable(i,SwitchMask[2],PAR.MinLength[2],&PBest[2]);
-      
-      for (k = 3 ; k < 18; k++) 
+      for (k = 0 ; k < 18; k++) 
 	PrevBP[k] = LBP[k%12]->BestUsable(i,SwitchMask[k],PAR.MinLength[k],&PBest[k]);
       
+      // UTR 5' et 3' direct
+      PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[19]);
+      PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[20]);
+
+      // UTR 5' et 3' reverse
+      PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[21]);
+      PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[22]);
+
       // intergenic: longueur min depend du sens
       // -> -> ou <- <-   MinFlow
       // -> <-            MinConv
@@ -311,14 +325,6 @@ int main  (int argc, char * argv [])
       
       PrevBP[18] = LBP[InterGen3]->StrictBestUsable(i,PAR.MinFlow,&PBest[18]);
       PrevBP[25] = LBP[InterGen3]->StrictBestUsable(i,PAR.MinConv,&PBest[25]);
-      
-      // UTR 5' et 3' direct
-      PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[19]);
-      PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[20]);
-
-      // UTR 5' et 3' reverse
-      PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,PAR.MinFivePrime,&PBest[21]);
-      PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,PAR.MinThreePrime,&PBest[22]);
           
       // ----------------------------------------------------------------
       // ------------------ Exons en forward ----------------------------
@@ -326,6 +332,7 @@ int main  (int argc, char * argv [])
       for (k = 0; k < 3; k++) {
 	maxi = NINFINITY;     
 	
+	// On va tout droit.
 	// S'il y  a un STOP en phase on ne peut continuer
 	if ((i % 3 == k) && Data.Stop[0])
 	  LBP[k]->Update(DontCrossStop); 
@@ -342,7 +349,6 @@ int main  (int argc, char * argv [])
 	
 	// On commence a coder (Start)
 	// Ca vient d'une UTR 5' forward
-	
 	if ((i % 3 == k) && Data.Start[0] != 0.0) {
 	  BestU = PBest[19]+log(Data.Start[0]);
 #ifndef PAYTOIGNORE
@@ -359,7 +365,6 @@ int main  (int argc, char * argv [])
 	
 	// On recommence a coder (Accepteur)
 	// Ca vient d'un intron
-	
 	BestU = PBest[6+((i-k+3) % 3)]+log(Data.Acc[0]);
 #ifndef PAYTOIGNORE
 	BestU -= log(1.0-Data.Acc[0]);
@@ -400,7 +405,6 @@ int main  (int argc, char * argv [])
 	
 	// On commence a coder (Stop)
 	// Ca vient d'une UTR 3' reverse
-	
 	if (((Data_Len-i) % 3 == k-3) && Data.Stop[1]) {
 	  BestU = PBest[22]-PAR.StopP;
 	  // Un test tordu pour casser le cou aux NaN
@@ -414,7 +418,6 @@ int main  (int argc, char * argv [])
 	
 	// - on recommence a coder (Donneur)
 	// Ca vient d'un intron
-	
 	BestU = PBest[9+((Data_Len-i-k) % 3)]+log(Data.Don[1]);
 #ifndef PAYTOIGNORE
 	BestU -= log(1.0-Data.Don[1]);
@@ -558,6 +561,7 @@ int main  (int argc, char * argv [])
 	maxi = BestU;
 	best = -1;
       }
+
       // Ca vient d'un exon direct + STOP
       for (k = 0; k < 3; k++) {
 	if ((i % 3 == k) && Data.Stop[0]) {
