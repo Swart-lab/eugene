@@ -17,13 +17,14 @@
 # Contents: compilation of the MarkovIMM directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 SUBDIRS = GetData
 
-bin_PROGRAMS = Sensor.MarkovIMM.so
+noinst_PROGRAMS = Sensor.MarkovIMM.so
 Sensor_MarkovIMM_so_SOURCES = Sensor.MarkovIMM.cc Sensor.MarkovIMM.h
-Sensor_MarkovIMM_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_MarkovIMM_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~
