@@ -2,8 +2,11 @@
 
 $setoffset=0;
 $offset=0;
+$borneg=0;
+$borned=0;
 $sortie=1; # 0-> short, 2-> detaillee
 $name2="";
+$ntlevel=0;
 $NOMduPROG = $0;
 @CMD="$NOMduPROG "."@ARGV";
 
@@ -50,7 +53,7 @@ sub description{
 # ...
 # depuis mai 2002: tolere les lignes "Utr5" et "Utr3"
 #
-#     - 3, 4 et 5: arguments facultatifs (ordre indifferent).
+#     - 3, 4, 5, 6 : arguments facultatifs (ordre indifferent).
 # -oN
 # N=offset, qui definit des bornes de part et d'autre des 
 # coordonnees des genes reels au dela desquelles les predictions
@@ -62,11 +65,13 @@ sub description{
 # sert pour sortie detaillee, le nom des sequences proviendra non pas du
 # fichier predictions (comme par defaut, preleve sur la 1ere colonne),
 # mais du fichier X (un nom par ligne, pouvant etre l ID, le chemin,...)
+# -nt
+# option ajoutant les valeurs sensibilite/specificite au niveau nucleotide,
+# calculees sur tte la seq, ou la region contenant: gene(s) + offset
+# attention! codee dans l'urgence, la fonction coute bcp de temps de calcul!
 #
-# ex : $NOMduPROG araclean.exons.coord eugene.outpred -o300 -pl -fID.list
+# ex: $NOMduPROG araclean.exons.coord eugene.outpred -o300 -pl -fID.list
 #
-# todo: ajouter niveau nucleotidique 
-# (demande un autre fichier en entree avec les lgrs des seq)
 ############################################################################
 
 EOF
@@ -78,16 +83,34 @@ sub usage{
 
 usage : 
 $NOMduPROG exons_coord_file pred_file [-o{offset}] [-p{s|l}] [-f{IDfile}]
-        -o  : offset, only predictions in the region 
-              "gene +/- offset" are considered.
-        -ps : short outpout (used for optimisation scripts)
-        -pl : long outpout  (used for expertised analyses)
-              (default = intermediaire)
-        -f  : name (or ID, path...) file (one name/line), used if -pl active 
+    -o  : offset (integer), only predictions in the region 
+          "real_gene_frontiers +/- offset" are evaluated.
+          DEFAULT=INF -> all predictions are considerate
+    -ps : short output (used for optimisation scripts)
+    -pl : long output  (used for expertised analyses)
+          (default = intermediaire)
+    -f  : name (or ID, path...) file (one name/line), used if -pl is active
+    -nt : compute accuracy at nucleotide level - warning: time expensive
 "-" arguments are optionnal, must be adjacent to the "-", order no matters
 ex : $NOMduPROG seq.exons.coord eugene.outpred -o300 -pl -fseq.ID.list
 
 EOF
+}
+
+############################################################################ 
+# Fonction qui lit une sequence fasta et renvoie sa longueur 
+sub seqlength{
+  my$filename = $_[0];
+  my$len=0;
+  open(FASTASEQ,"$filename") || die "Can't open seq file $filename in seqlength\n";
+  if (!(<FASTASEQ> =~ /^\s?>/ )) { 
+    die "Fasta format is needed for length calcul for nt level in seq $filename\n";
+  }
+  while (<FASTASEQ>){
+    chomp;
+    $len += length($_);
+  }
+  return $len;
 }
 
 ############################################################################ 
@@ -133,6 +156,85 @@ sub evaluation_niveau_exon{
       $VPe+=(($E[$i-1]==$P[$j-1])&&($E[$i]==$P[$j]));
     }
   }
+}
+
+############################################################################ 
+## Fonction determinant si la position i est predite dans un etat codant
+sub ispredcoding{
+  my$pos=@_[0]; # 1er arg: position
+  my@P=@{@_[1]};# 2eme arg: tab. des frontieres d'exons predits
+  my$i=0;
+  for($i=0;$i<$#P;$i+=2) {
+    if ($P[$i]>0) {
+      if ( ($P[$i] <= $pos) && ($P[$i+1] >= $pos) ) {
+	return 1;
+      }
+    }
+    else {
+      if ( ($P[$i+1] <= (-$pos)) && ($P[$i] >= (-$pos)) ) {
+	return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+############################################################################ 
+## Fonction determinant s'il y a un chgmt d'etat predit dans un intervalle
+sub ispredchanged{
+  my$beg=@_[0]; # 1er arg
+  my$end=@_[1];
+  my@P=@{@_[1]};
+  my$i=0;
+  foreach $i (@P) {
+    if ( (abs($i) >= $beg) || (abs($i) <= $end) ) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+############################################################################ 
+## Fonction d'evaluation au niveau nucleotide
+sub evaluation_niveau_nucleotide{
+  my@E=@{@_[0]};  # 1er argument
+  my@P=@{@_[1]};  # 2eme argument
+  my$i=0;;
+  my$j=0;;
+  my$precedent=$borneg; # cas de l'offset gauche
+
+#  print "evaluation niveau nt gau=$borneg dro=$borned\n";
+  for( $i=0 ; $i<$#E ; $i+=2 ) { # pour tous les debuts d'exons reels
+    for( $j=$precedent ; $j< abs($E[$i]) ; $j++ ){  # chq nt a partir de la derniere frontiere C->NCodant
+      $FPn += (&ispredcoding($j,\@P));    # (en amont de l'exon reel, donc dans de l'intron)
+      if (&ispredcoding($j,\@P)) { $nNP ++ }
+      
+#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+    }
+    for ($j = abs($E[$i]); $j <= abs($E[$i+1]); $j++) { # chq nt de l'exon reel
+      $nNR ++;   # nbre total de nucleotides codants
+      if (&ispredcoding($j,\@P)) {      # predit codant aussi, OK
+	$VPn++;
+	$nNP ++ ;
+#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+      }
+      else { # loupe!
+#	print" non codant\n";
+	$FNn++;
+#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+      }
+    }
+    $precedent= abs($E[$i+1])+1;
+  }
+  for ($j=$precedent; $j <= $borned; $j++) { # cas de l'offset droit
+    $FPn += (&ispredcoding($j,\@P));
+    if (&ispredcoding($j,\@P)) { $nNP ++ }
+#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+  }
+#  for($i=0;$i<$#P;$i+=2) { # pour tous les debuts d'exons predits ## ATTENTION!! cas de l'offset chevauchant!
+#    $nNP += (abs($P[$i+1]) - abs($P[$i])) +1;   # nbr total de nt predits codants
+#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+#  }
 }
 
 ############################################################################ 
@@ -301,6 +403,7 @@ sub evaluation_et_affichage{
 $FPg=0;$FNg=0;$VNg=0;$VPg=0;$nGR=0;$nGP=0;
 $FPe=0;$FNe=0;$VNe=0;$VPe=0;$nER=0;$nEP=0;
 $FPn=0;$FNn=0;$VNn=0;$VPn=0;$nNR=0;$nNP=0;$nNtot=0;
+$totalseqlen=0;$AC=0;$CC=0;
 @coord=();@pred=();
 @E=();
 @P=();
@@ -310,16 +413,18 @@ $nseqreelles=1;
 $nseqpred=1;
 
 ######################################################################
+####################          ARGMT            #######################
+######################################################################
 # lecture des arguments (pas joli, mais pas besoin de use Getopt::Std)
-if ($#ARGV != 1){
+if ($#ARGV != 1) {
   if ($ARGV[0] eq '-h') { description() }
   if ($#ARGV < 1) { usage() }
   for (my$i=2 ; $i<=$#ARGV ; $i++) {
     if ($ARGV[$i] =~ /^\-(.)(.+)/) {
       if ($1 eq 'o') {
-	if (!($2 =~ /^\d+$/)) { usage() }
+	if (!($2 =~ /^(\d+)$/)) { usage() }
 	$setoffset=1;
-	$offset= $2;
+	$offset= $1; 
       }
       elsif ($1 eq 'f') {
 	$name2="1";
@@ -328,6 +433,20 @@ if ($#ARGV != 1){
       elsif ($1 eq 'p') {
 	if (($2 eq 's') || ($2 eq 'l')) {
 	  $sortie= ( ($2 eq 's') ? 0 : 2 );
+	}
+	else { usage() }
+      }
+      elsif ($1 eq 'n') {
+	if ($2 eq 't'){
+	  $ntlevel=1;
+	}
+	elsif ($2 eq 'tplus') {
+	  if ($name2) {
+	    $ntlevel=2;
+	  }
+	  else {
+	    die "special ntplus option requires first the list of fasta sequences (-f)\n";
+	  }
 	}
 	else { usage() }
       }
@@ -356,7 +475,7 @@ while($lCOORD=<COORD>) {
     $newseqreelle=0;
   }
   # Si on est dans une sequence
-  if($lCOORD =~ /(\s+\-?([0-9]+))+/){
+  if($lCOORD =~ /(\s+\-?([0-9]+))+/) {
     $numgene++;
     @TMP=split(/\s+/,$lCOORD);
 #TMP!! on pourrait verifier si vide avant de shifter (+ de souplesse de format coord)
@@ -371,7 +490,7 @@ while($lCOORD=<COORD>) {
       $newseqreelle=1;
 
       # calcul des bornes droite et gauche
-      $borneg= abs($COORD2D[0][0]) - $offset;
+      $borneg= ( (abs($COORD2D[0][0]) - $offset) > 0 ) ? abs($COORD2D[0][0]) - $offset : 1 ;
       $borned= abs($COORD2D[$#COORD2D][$#{$#COORD2D}]) + $offset;
 
       ## LECTURE des predictions d'EuGene
@@ -392,7 +511,7 @@ while($lCOORD=<COORD>) {
       while($lPRED ne ""){ # tant qu'il y a un exon trouve
 	if ($lPRED =~ /^([^\s]+)\s+([a-zA-Z]+)\s+([\+\-])\s+([0-9]+)\s+([0-9]+)\s+[0-9]+\s+[^\s]+\s+[^\s]+\s+([0-9]+)\s+([0-9]+)\s+/) {
 	  if ( ($setoffset==0) ||
-	       (($5 >= $borneg) && ($4 <= $borned))) {
+	       ((abs($5) >= $borneg) && (abs($4) <= $borned))) {
 	    $name= ( ($name2) ? $name2 : $1);
 	    $type=$2;
 	    $sens=$3;
@@ -431,14 +550,35 @@ while($lCOORD=<COORD>) {
 	@TMP=();
 	$gene_en_cours=0;
       }
+      # Les tableaux de coordonees et predictions sont prets
+      # Si l'offset n'a pas ete defini (ttes les pred ont ete prises), on prend les valeurs extremes (pour niveau nt)
+      if ($setoffset==0) {
+	$borneg= (abs($PRED2D[0][0]) < $borneg) ? abs($PRED2D[0][0]) : $borneg ;
+	$borned= (abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) > $borned) ? abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) : $borned; 
+      }
+      else { # par contre, si offset est defini, on prend l'intervalle mini
+	if (abs($PRED2D[0][0]) < abs($COORD2D[0][0])) {
+	  $borneg= (abs($PRED2D[0][0]) < $borneg) ? $borneg : abs($PRED2D[0][0]);
+	}
+	else { 
+	  $borneg= abs($COORD2D[0][0]);
+	}
+	$borned= (abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) > $borned) ? $borned : abs($PRED2D[$#PRED2D][$#{$#PRED2D}]);
+      }
+
       if ($sortie == 2) {
+	if ($ntlevel>0) { &evaluation_niveau_nucleotide(\@E,\@P); }
 	&evaluation_et_affichage(\@COORD2D,\@PRED2D,\@E,\@P,$name);
       }
       else {
 	&evaluation_niveau_gene(\@COORD2D,\@PRED2D);
 	&evaluation_niveau_exon(\@E,\@P);
+	if ($ntlevel>0) { &evaluation_niveau_nucleotide(\@E,\@P);}
       }
       $numgene=0;
+      if ($ntlevel==2) {
+	$totalseqlen += &seqlength($name);
+      }
 
       # liberation memoire tableaux:
       @E=();
@@ -456,22 +596,32 @@ while($lCOORD=<COORD>) {
   }
 }
 
-if (($nGR==0)||($nER==0)){die"Pb : nbre de seq soumises (ou d'exons) nul!\n"}
+if (($nGR==0)||($nER==0)){die"Pb(4) : nbre de seq soumises (ou d'exons) nul!\n"}
 
 $SENSg=($VPg*100)/$nGR;
 $SENSe=($VPe*100)/$nER;
-#$SENSn=($VPn*100)/$nNR;
+if ($ntlevel>0) {$SENSn=($VPn*100)/$nNR;}
 
 if (($nGP==0)||($nEP==0)){
   $SPECg=100;
   $SPECe=100;
-#  $SPECn=100;
+  $SPECn=100;
 }
 else{
   $SPECg=($VPg*100)/$nGP;
   $SPECe=($VPe*100)/$nEP;
-#  $SPECn=($VPn*100)/$nNP;
+  if ($ntlevel>0) { $SPECn=($VPn*100)/$nNP; }
 }
+
+if ($ntlevel>0) { 
+  if ($SENSn != (100*$VPn)/($VPn+$FNn)) {
+    die "internal error computing nt sens:\n VPn=$VPn , nNR=$nNR , sensn= $SENSn\n VPn=$VPn , FNn=$FNn\n";
+  }
+  if ($SPECn != (100*$VPn)/($VPn+$FPn)) {
+    die "internal error computing nt spec:\n$VPn*100/$nNP != 100*($VPn/($VPn+$FPn))\n VPn=$VPn , nNP=$nNP , specn= $SPECn\n VPn=$VPn , FPn=$FPn\n";
+  }
+}
+#print"VPn=$VPn , nNP=$nNP , specn= $SPECn\n VPn=$VPn , FPn=$FPn\n";
 if ($sortie==0) {
   print"$SENSg $SPECg $SENSe $SPECe\n";
 }
@@ -479,6 +629,7 @@ else {
   print "\n>TOTAL (@CMD)\n";
   print "$VPg genes bien detectes sur $nGR avec $nGP predictions\n";
   print "$VPe exons bien detectes sur $nER avec $nEP predictions\n";
+  if ($ntlevel>0) {  print "$VPn nt bien detectes sur $nNR avec $nNP predictions\n";}
 #print "$VPn nt codants bien detectes sur $nNR ($FNn rates);$nNP predits dont $FPn faux pos\n";
 #print "\n";
 #print "SENSIBILITE GENES : $SENSg\n";
@@ -487,8 +638,16 @@ else {
 #print "SPECIFICITE EXONS : $SPECe\n";
 #print "SENSIBILITE NUCL  : $SENSn\n";
 #print "SPECIFICITE NUCL  : $SPECn\n";
-  print"SNG: $SENSg SPG: $SPECg SNE: $SENSe SPE: $SPECe\n";
+  print"SNG: $SENSg SPG: $SPECg SNE: $SENSe SPE: $SPECe";
+  if ($ntlevel>0) {  print " SNN: $SENSn SPN: $SPECn";}
 }
+if ($ntlevel == 2) {
+  $VNn= $totalseqlen -$FPn -$FNn -$VPn;
+  $AC= 0.5*( $VPn/($VPn+$FNn) + $VPn/($VPn+$FPn) + $VNn/($VNn+$FPn) + $VNn/($VNn+$FNn) ) -1;
+  $CC= ( ($VPn*$VNn)-($FNn*$FPn) ) / ( sqrt( ($VPn+$FNn)*($VNn+$FPn)*($VPn+$FPn)*($VNn+$FNn) ) );
+  print " AC: $AC CC: $CC";
+}
+print"\n";
 if($name2) {close LS}
 close COORD;
 close PRED;
