@@ -160,22 +160,13 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
 
   for(i=0; i<(int)theSensors.size(); i++) {
     if(theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
-      theSensors[i]->GiveInfoAt(X, pos, d);
+      theSensors[i]->GiveInfo(X, pos, d);
       info = TRUE;
     }
     else if(theSensors[i]->type == Type_Unknown)
       return info;  // Aucune info pour ce type
   }
   return info;
-}
-
-// --------------------------
-//  Reset iterator.
-// --------------------------
-void MasterSensor :: ResetIterator ()
-{
-  for(int i=0; i<(int)theSensors.size(); i++)
-    theSensors[i]->ResetIter();
 }
 
 // --------------------------

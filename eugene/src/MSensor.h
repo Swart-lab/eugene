@@ -52,7 +52,6 @@ class MasterSensor
   ~MasterSensor ();
   void InitMaster   ();
   void InitSensors  (DNASeq *);
-  void ResetIterator();
   void ResetType    ();
   void GetInfoAt    (DNASeq *, int, DATA *);
   void PrintDataAt  (DNASeq *X, int, DATA *);
