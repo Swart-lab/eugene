@@ -28,10 +28,10 @@ foreach TEST $ArabidopsisTestList {
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
 	{set NewValueBase(Sensor.${sensor}.use) 1}
-    ModifyParaValue ${EUGENE}.par  NewValueBase
+    ModifyParaValue $EUGENE_TEST_PAR  NewValueBase
     
     # Run EuGene
-    catch {eval exec $EUGENE_DIR/$EUGENE $SEQ($TEST) > tmp%stdout}
+    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $SEQ($TEST) > tmp%stdout}
     
     # Checking the output
     set test [diff $OUTPUT_DIR/$FILE_REF($TEST) tmp%stdout]
@@ -46,6 +46,6 @@ foreach TEST $ArabidopsisTestList {
     catch {exec rm tmp%stdout}
     
     # Restore initial parameters values
-    InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
+    InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
 }

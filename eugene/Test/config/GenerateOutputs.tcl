@@ -59,11 +59,9 @@ if {$key=="Y"} {
 #             BEWARE does not concern sensor use parameters
 ###########################################################################
 # Copy locally the default parameter file
-exec cp  ${EUGENE_DIR}/${EUGENE_REF}.par ${EUGENE}.par
+exec cp  ${EUGENE_DIR}/cfg/eugene.par $EUGENE_TEST_PAR
 # Init parameters values
-InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
-# Create a local symbolic link for the binary
-catch { eval exec ln -s ${EUGENE_DIR}/${EUGENE} ${EUGENE} }
+InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
 ########################################################################
 ##################        Units tests       ############################
@@ -72,15 +70,18 @@ foreach sensor $AllSensorsList {
     # Get stderr and stdout
     if {$sensor != "Est" && $sensor != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	    -A $EUGENE_TEST_PAR \
 	    -D Sensor.${sensor}.use=1 \
 	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
     } else {
 	if {$sensor == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+		-A $EUGENE_TEST_PAR \
 		-D Sensor.${sensor}.use=1 -D Sensor.NG2.use=1 \
 		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
 	} else {
-	    eval exec $EUGENE $OPTIONS(Sensor) \
+	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+		-A $EUGENE_TEST_PAR \
 		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta  \
 		2> tmp%stderr > tmp%stdout
 	}
@@ -117,7 +118,9 @@ foreach sensor $AllSensorsList {
     }
 
     # Remove all temporary files
-    exec rm tmp%GenerateOutputs tmp%stderr tmp%stdout
+    catch {exec rm tmp%GenerateOutputs tmp%stderr tmp%stdout}
+    # Remove created files, note that eugeneTest.par.<date>.OPTI remains
+    catch {exec rm Sensor.EuStop.SpSn}
 
     puts "Reference files for $sensor unit test created or checked."
 }
@@ -132,14 +135,15 @@ foreach TEST $FunctionalTestList {
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
 	{set NewValue${TEST}(Sensor.${sensor}.use) 1}
-    ModifyParaValue ${EUGENE}.par  NewValue${TEST}
+    ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
 
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
 
     # Save output of software and treat them
-    eval exec $EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) \
-	2> tmp%stderr > tmp%stdout
+    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
+	$OPTIONS($TEST) \
+	-l $l $SEQ_DIR/$SEQ($TEST) 2> tmp%stderr > tmp%stdout
 
     # 1/ image file
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.png]} {
@@ -200,7 +204,7 @@ foreach TEST $FunctionalTestList {
     exec rm tmp%stderr tmp%stdout tmp%FunctionalTest
 
     # Restore initial parameters values
-    InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
+    InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
     puts "Reference files for $TEST functional test created or checked."
 }
@@ -216,9 +220,10 @@ foreach TEST $ArabidopsisTestList {
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
 	{set NewValueBase(Sensor.${sensor}.use) 1}
-    ModifyParaValue ${EUGENE}.par  NewValueBase
+    ModifyParaValue $EUGENE_TEST_PAR  NewValueBase
     
-    catch {eval exec $EUGENE $SEQ($TEST) > tmp%stdout}
+
+    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $SEQ($TEST) > tmp%stdout}
    
     if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF($TEST)]} {
 	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST)
@@ -235,7 +240,7 @@ foreach TEST $ArabidopsisTestList {
     exec rm tmp%stdout
     
     # Restore initial parameters values
-    InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
+    InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
     puts "Reference files for $TEST test created or checked."
 
@@ -246,7 +251,7 @@ foreach TEST $ArabidopsisTestList {
 ##################### Parameters optimization ##########################
 ########################################################################
 
-catch {eval exec $EUGENE test -D ParaOptimization.Use=1 > tmp%stdout}
+catch {eval exec $EUGENE_DIR/$EUGENE test -A $EUGENE_TEST_PAR -D ParaOptimization.Use=1 > tmp%stdout}
 
 if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF(Optimization)]} {
     exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Optimization)
@@ -267,5 +272,5 @@ puts "Reference files for Optimization test created or checked."
 # Indicate the end of the reference files generation
 puts "Reference files generated in the $OUTPUT_DIR directory."
 
-catch {eval exec rm ./$EUGENE.par}
+catch {eval exec rm ./$EUGENE_TEST_PAR}
 

@@ -19,16 +19,18 @@
 
 
 ############################# Environment variables ###########################
-set EUGENE eugeneTest
-set EUGENE_REF eugene
+set EUGENE_TEST_PAR eugeneTest.par
+set EUGENE src/eugene
 
 if {$action=="Test"} {
+# ask tests in the root directory
     set EUGENE_DIR [exec pwd]
-    set OUTPUT_DIR ../Test/Outputs
-    set SEQ_DIR ../Test/Sequences
-    set TRACE_DIR ../Test/TestTrace
+    set OUTPUT_DIR Test/Outputs
+    set SEQ_DIR Test/Sequences
+    set TRACE_DIR Test/TestTrace
 } elseif {$action=="Generate"} {
-    set EUGENE_DIR [exec pwd]/../../src
+# ask generation of ouput files in Test/config
+    set EUGENE_DIR [exec pwd]/../..
     set OUTPUT_DIR ../Outputs
     set SEQ_DIR ../Sequences
     set TRACE_DIR ../TestTrace

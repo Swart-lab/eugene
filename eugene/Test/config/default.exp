@@ -18,15 +18,16 @@
 # ------------------------------------------------------------------
 
 ############################# Environment variables ##########################
+# Set for execution in the root directory
 set action "Test"
 set timeout 1000 ;# DejaGnu variable, time out if no response for spawn
-source ../Test/config/TestVar.tcl
-source ../Test/config/TestProc.tcl
-exec cp -f ${EUGENE_REF}.par ${EUGENE}.par
+source Test/config/TestVar.tcl
+source Test/config/TestProc.tcl
+exec cp -f cfg/eugene.par ${EUGENE_TEST_PAR}
 ##############################################################################
 
 # Init parameters values
-InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
+InitParameterFile ${EUGENE_TEST_PAR} $AllSensorsList $EUGENE_DIR
 
 # Remove all EuGene trace files 
 # but not DejaGnu trace files that are yet the current ones

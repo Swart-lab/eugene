@@ -31,7 +31,7 @@ foreach TEST $FunctionalTestList {
 	# Preparation of the parameter file with the correct sensors
 	foreach sensor $SensorsList($TEST) \
 	    {set NewValue${TEST}(Sensor.${sensor}.use) 1}
-	ModifyParaValue ${EUGENE}.par  NewValue${TEST}
+	ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
 
 	# Open reference file
 	set f [open $OUTPUT_DIR/$FILE_REF($TEST)_test {RDONLY}]
@@ -42,7 +42,7 @@ foreach TEST $FunctionalTestList {
 	set l [GetSeqLength $SEQ_DIR/$seq]
 
 	# Run EuGene
-	eval spawn $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$seq
+	eval spawn $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$seq
 
 	# Checking the output
 	match_max 10000
@@ -61,7 +61,8 @@ foreach TEST $FunctionalTestList {
 	} else {
 	    if {$test_std != 1} {
 		fail "${TEST} (text)"
-		eval exec $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l \
+		eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		    $OPTIONS($TEST) -l $l \
 		    $SEQ_DIR/$seq >& $TRACE_DIR/$FILE_REF($TEST)
 		# Remove the first lines related to version number
 		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
@@ -74,6 +75,6 @@ foreach TEST $FunctionalTestList {
 	}
 
 	# Restore initial parameters values
-	InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
+	InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
     }
 }
