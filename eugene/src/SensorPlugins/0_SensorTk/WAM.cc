@@ -58,7 +58,7 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
       exit (1);
     }
     if (TPMOD[i].chargefichier(fp)) {
-      fprintf(stderr,"Error when loading model file %s\n",filename);
+      fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
     fclose (fp);
@@ -73,7 +73,7 @@ WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
       exit (1);
     }
     if (FPMOD[i].chargefichier(fp)) {
-      fprintf(stderr,"Error when loading model file %s\n",filename);
+      fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
     fclose (fp);

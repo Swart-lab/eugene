@@ -30,7 +30,7 @@ void SensorUser :: Init (DNASeq *X)
   char tempname[FILENAME_MAX+1];
   int errflag;
 
-  fprintf(stderr,"Loading user data............");
+  fprintf(stderr,"Reading user data............");
   
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".user");

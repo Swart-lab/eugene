@@ -91,9 +91,9 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname); exit (2);
   }
   // chargement classe protmat
-  fprintf(stderr,"Loading protmat file.........");
+  fprintf(stderr,"Reading protmat file.........");
   if (fichier2protmat(protmatfile , PROTMAT)) {
-    fprintf(stderr,"error when loading protmat file %s\n",tempname);
+    fprintf(stderr,"error when reading protmat file %s\n",tempname);
     exit(2);
   }
   fclose(protmatfile);

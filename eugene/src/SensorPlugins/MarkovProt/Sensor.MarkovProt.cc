@@ -74,7 +74,7 @@ SensorMarkovProt :: SensorMarkovProt (int n, DNASeq *X) : Sensor(n)
       exit(2);
     }
     
-    fprintf(stderr,"Loading MarkovProt model...");
+    fprintf(stderr,"Reading MarkovProt model...");
     fflush(stderr);
     ModeleProt= new TabChaine<ChainePROT21,unsigned short int> (maxorder,new ChainePROT21);
     //  ModeleProt= new TabChaine<ChainePROT21,double> (maxorder,new ChainePROT21);
