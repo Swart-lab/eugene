@@ -194,14 +194,13 @@ set NewValue1(Repeat.ExonPenalty*)	1.0
 ##### Homology Sensor parameters #####
 set NewValue1(Homology.TblastxP*) 	0
 set NewValue1(Homology.TblastxB*) 	0.0595
-set NewValue1(Homology.protmatname	BLOSUM80
-##### Sensors with uniform penalties #####
-set NewValue1(SpliceConst.accP*)	1e-9
-set NewValue1(SpliceConst.accPNo*)       0
-set NewValue1(SpliceConst.donP*)    1e-9
-set NewValue1(SpliceConst.donPNo*)       0
-set NewValue1(StartConst.startP*)	2.897949
-set NewValue1(StartConst.startPNo*)	0
+set NewValue1(Homology.protmatname)	BLOSUM80
+##### PatConst sensor (uniform penalties) #####
+set NewValue1(PatConst.type\[0\])	start
+set NewValue1(PatConst.pat\[0\])	ATG
+set NewValue1(PatConst.newStatePos\[0\]) 1
+set NewValue1(PatConst.patP*\[0\])	2.897949
+set NewValue1(PatConst.patPNo*\[0\])	0
 ##### State penalties (exp length distributions) #####
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
