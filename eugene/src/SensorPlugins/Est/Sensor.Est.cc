@@ -591,8 +591,10 @@ void SensorEst :: PostAnalyse(Prediction *pred)
     if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
         
     // Si fin de gene ou fin seq gene en cours
-    if ((state <= TermR3 && stateNext >= InterGen) ||
-	(i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {
+    if (((state == UTR3F || state == UTR5R) && stateNext == InterGen) ||
+	(i==0 && (state <= IntronR3
+		  || state == UTR3R || state == IntronU3R
+		  || state == UTR5F || state == IntronU5F))) {
       NumGene++;
       if (pprocess == 1)
 	// Analyse des ESTs par rapport à la prédiction
