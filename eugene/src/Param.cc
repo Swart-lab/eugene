@@ -55,8 +55,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   m["fstname"] = "\000";        // no default input
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
-    
+  while ((carg = getopt(argc, argv, "GUREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
     switch (carg) {
       
     case 'D':           /* Definition of any parameter */
@@ -152,13 +151,17 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	m["grnameArg"] = "0";
       }
       break;
+
+    case 'O':           /* -O output                        */
+      m["Output.Prefix"] = optarg;
+      break;
       
     case 'p':           /* print opt: short/long/detailed   */
       m["Output.format"] = optarg;
-      if ((optarg[0] == 'h') &&  getI("Output.graph") == 0) {
-	m["Output.graph"] = "TRUE"; // HTML output means graphical output 
-	m["grnameArg"]    = "0";
-      }
+      //if ((optarg[0] == 'h') &&  getI("Output.graph") == 0) {
+      //m["Output.graph"] = "TRUE"; // HTML output means graphical output 
+      //m["grnameArg"]    = "0";
+      //}
       if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
 	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a'))
 	errflag++;
@@ -172,10 +175,6 @@ void Parameters :: ReadArg(int argc, char * argv[])
     case 'M':           /* -M proteic markovian matrix      */
       m["Sensor.MarkovProt.use"] = "TRUE";
       m["MarkovProt.matname"] = optarg;
-      break;
-
-    case 'O':           /* -O output                        */
-      m["Output.Prefix"] = optarg;
       break;
 
     case 'o':           /* -o offset                        */
@@ -206,6 +205,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
       
     case 'U':
       m["Sensor.User.use"] = "TRUE";
+      break;
+
+    case 'G':           /* -G use sensor GFF */
+      m["Sensor.GFF.use"] = "TRUE";
       break;
 
     case 'd':           /* -d  use cDNA blastn results      */
@@ -243,7 +246,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   if (errflag) {
     fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
 	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
-	    "              [-g {graphArg}] [-u start] [-v end] [-l len] [-c olap]\n"
+	    "              [-g {graphArg}] [-G] [-u start] [-v end] [-l len] [-c olap]\n"
 	    "              [-x xres] [-y yres] FASTA files\n");
     exit(1);
   }
@@ -257,12 +260,14 @@ void Parameters :: ReadPar(char *argv)
   char line    [MAX_LINE];
   char tempname[FILENAME_MAX+1];
   char *key, *val = NULL;
-  
+  int  n=0;
+
   strcpy(tempname, argv);
   strcat(tempname, ".par");
   fp = FileOpen(EugDir, BaseName(tempname),"r");
 
   while(fgets (line, MAX_LINE, fp) != NULL) {
+    n++;
     if (line[0] != '#') {
       key = new char[FILENAME_MAX+1];
       val = new char[FILENAME_MAX+1];
@@ -272,7 +277,7 @@ void Parameters :: ReadPar(char *argv)
 	if (EugDir != NULL)
 	  fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
 	else
-	  fprintf(stderr, "Incorrect parameter file %s\n",BaseName(tempname));
+	  fprintf(stderr, "Incorrect parameter file %s line %d\n",BaseName(tempname),n);
 	exit(2);
       }
     }
