@@ -306,9 +306,9 @@ int main  (int argc, char * argv [])
     LBP[UTR5R]->Update(log(FivePrior /2.0)/2.0);
     LBP[UTR3R]->Update(log(ThreePrior/2.0)/2.0);
     
-    MS.GetInfoAt(TheSeq, 0, &Data);
-    
     for (i = 0; i <= Data_Len; i++) {
+
+    MS.GetInfoAt(TheSeq, i, &Data);
       
       maxi = -NINFINITY;
       for (k = 0 ; k < 18; k++) {
@@ -776,14 +776,6 @@ int main  (int argc, char * argv [])
 	if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
 	
 	LBP[9+k]->Update(Data.ContentScore[7]);
-      }
-      
-      if (graph)
-	PlotSignalsF(i, Data.Stop, Data.Start, Data.Acc, Data.Don);
-      if (i+1 <= Data_Len) {
-	MS.GetInfoAt(TheSeq, i+1, &Data);
-	if (graph)
-	  PlotSignalsR(Data_Len, i, Data.Stop, Data.Start, Data.Acc, Data.Don);
       }
     }
     
