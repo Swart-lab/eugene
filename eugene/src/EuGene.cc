@@ -1580,7 +1580,7 @@ int main  (int argc, char * argv [])
 		      ProtMatchPhase[i]=0;
 		    }
 		    else {
-		      if (PGlobalScore >= fabs(ProtMatch[i])){
+		      if (GlobalScore >= fabs(ProtMatch[i])){
 			ProtMatch[i]= -GlobalScore;
 			ProtMatchPhase[i]= 0;
 		      }
