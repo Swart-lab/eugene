@@ -1156,7 +1156,7 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i]));
+      LBP[k]->Update(log(BaseScore[k][i])+log(4));
       LBP[k]->Update(((ESTMatch[i] & Gap) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1211,7 +1211,7 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i])) ;
+      LBP[k]->Update(log(BaseScore[k][i])+log(4)) ;
       LBP[k]->Update(((ESTMatch[i] & Gap ) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1250,7 +1250,7 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen5]->Update(log(BaseScore[8][i]));
+    LBP[InterGen5]->Update(log(BaseScore[8][i])+log(4));
     LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
     // ----------------------------------------------------------------
@@ -1280,7 +1280,7 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen3]->Update(log(BaseScore[8][i]));
+    LBP[InterGen3]->Update(log(BaseScore[8][i])+log(4));
     LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
     // ----------------------------------------------------------------
@@ -1328,7 +1328,7 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5F]->Update(log(BaseScore[8][i]));
+    LBP[UTR5F]->Update(log(BaseScore[8][i])+log(4));
 
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
@@ -1357,7 +1357,7 @@ int main  (int argc, char * argv [])
     
     if (best != -1) LBP[UTR3F]->InsertNew(best %12,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR3F]->Update(log(BaseScore[9][i]));
+    LBP[UTR3F]->Update(log(BaseScore[9][i])+log(4));
 
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
@@ -1390,7 +1390,7 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5R]->Update(log(BaseScore[8][i]));
+    LBP[UTR5R]->Update(log(BaseScore[8][i])+log(4));
 
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
@@ -1435,7 +1435,7 @@ int main  (int argc, char * argv [])
          
     if (best != -1) LBP[UTR3R]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
       
-    LBP[UTR3R]->Update(log(BaseScore[10][i]));
+    LBP[UTR3R]->Update(log(BaseScore[10][i])+log(4));
 
     // ----------------------------------------------------------------
     // ---------------- Introns de phase k forward --------------------
@@ -1463,7 +1463,7 @@ int main  (int argc, char * argv [])
  
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[6+k]->Update(log(BaseScore[6][i]));
+      LBP[6+k]->Update(log(BaseScore[6][i])+log(4));
       LBP[6+k]->Update(((ESTMatch[i] & Hit ) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1497,7 +1497,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[9+k]->Update(log(BaseScore[7][i]));
+      LBP[9+k]->Update(log(BaseScore[7][i])+log(4));
       LBP[9+k]->Update(((ESTMatch[i] & Hit) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
@@ -1555,7 +1555,7 @@ int main  (int argc, char * argv [])
   if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
   
-  fprintf(stderr,"Optimal path length = %#f\n",maxi);
+  fprintf(stderr,"Optimal path length = %#f\n",maxi+log(0.25)*(Data_Len+1));
 
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
 
