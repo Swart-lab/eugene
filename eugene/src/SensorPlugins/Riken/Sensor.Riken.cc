@@ -61,7 +61,7 @@ void SensorRiken :: Init (DNASeq *X)
   RAFLgene *tmp = new RAFLgene();
   std::vector <RAFLgene*> RAFLtmp;
   
-  fprintf(stderr, "Reading RAFL gene...");
+  fprintf(stderr, "Reading RAFL gene............");
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".riken");

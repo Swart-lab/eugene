@@ -42,7 +42,7 @@ void SensorRepeat :: Init (DNASeq *X)
   intronPenalty = PAR.getD("Repeat.IntronPenalty");
   exonPenalty = PAR.getD("Repeat.ExonPenalty");
   
-  fprintf(stderr,"Reading Intergenic regions... ");
+  fprintf(stderr,"Reading Intergenic regions...");
   fflush(stderr);
   
   strcpy(tempname,PAR.getC("fstname"));

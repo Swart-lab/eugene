@@ -184,12 +184,12 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   Hits *ThisEST = NULL, *AllEST = NULL;
   Block *ThisBlock = NULL;
   
-  fprintf(stderr,"Reading cDNA hits...");
+  fprintf(stderr,"Reading cDNA hits............");
   fflush(stderr);
 
   AllEST = AllEST->ReadFromFile(ESTFile,NumEST);
   
-  fprintf(stderr,"%d sequences read.\n",*NumEST);
+  fprintf(stderr,"%d sequences read\n",*NumEST);
   fflush(stderr);
 
   // on trie les hits sur le nombre de gaps et la
