@@ -27,9 +27,9 @@
 #include "Const.h"
 #include "System.h"
 
-const char VERSION[FILENAME_MAX+1]     = "1.64";
-const char VERSION_DATE[FILENAME_MAX+1]     = "291003";
-const char VERSION_PAR[FILENAME_MAX+1]     = "291003";
+const char VERSION[FILENAME_MAX+1]     = "2.0";
+const char VERSION_DATE[FILENAME_MAX+1]     = "8080704";
+const char VERSION_PAR[FILENAME_MAX+1]     = "8080704";
 extern char   *optarg;   
 extern int     optind;
 
