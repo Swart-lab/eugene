@@ -35,8 +35,9 @@ class SensorTester : public Sensor
   char **source;
   char seqName[FILENAME_MAX+1];
   Sensor       **sensor;
-  FILE         **fp;
   Prediction   * gene;
+  static FILE  **fp;
+  static bool  IsInitialized;
   
   void  ReadCoord(char[FILENAME_MAX+1]);
   char* SigType_TF(int, int, char **);
@@ -52,5 +53,11 @@ class SensorTester : public Sensor
 };
 
 extern "C" SensorTester * builder0(int n, DNASeq *X) { return new SensorTester(n, X); }
+
+
+
+FILE ** SensorTester::fp;
+bool SensorTester::IsInitialized = false;
+
 
 #endif

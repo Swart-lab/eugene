@@ -39,6 +39,14 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 
   nbTest = 0;
   pluginsDir = PAR.getC("EuGene.PluginsDir");
+ 
+  fprintf(stderr,"Sensor.Tester :\n");
+  fprintf(stderr," Reading coordinates file......................");
+  fflush(stderr);
+  strcpy(seqName,PAR.getC("fstname"));
+  strcat(seqName,".gff");
+  ReadCoord(seqName);
+  fprintf(stderr,"done\n");
 
   // Nombre de sensor à tester ?
   sprintf(paramKey,"%s%d",paramT,nbTest);
@@ -48,9 +56,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
   }
 
   sensor  = new (Sensor *)[nbTest];
-  fp      = new (FILE *)[nbTest];
   source  = new (char *)[nbTest];
-  
+
   for(int i=0; i<nbTest; i++) {
     sprintf(paramKey,"%s%d",paramT,i);
     source[i] = PAR.getC(paramKey);
@@ -63,46 +70,36 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     int nbIdx = PAR.getI(paramKey);
 
     // load ".so" of sensor if necessary
-    dll_index   = MS->LoadSensor(used_sensor, nbIdx);
-    fprintf(stderr," -Test.%d : Sensor.%.5s\t%d\n",i,source[i],nbIdx);
+    dll_index = MS->LoadSensor(used_sensor, nbIdx, " ");
+    fprintf(stderr," ");
     sensor[i] = MS->dllList[dll_index]->MakeSensor(nbIdx, X);
     
     char * outputFile = new char[FILENAME_MAX+1];
     sprintf(outputFile,"%stest.%s.gff",PAR.getC("Output.Prefix"),source[i]);
-    // On verif outputFile n'existe pas
-    if (!(fp[i] = fopen(outputFile, "r"))) {
-      if (!(fp[i] = fopen(outputFile, "w"))) {
-	fprintf(stderr, "cannot open %s output file\n", outputFile);
+    
+    if (!IsInitialized) {
+      fp = new (FILE *)[nbTest];
+      // On verif outputFile n'existe pas
+      if (!(fp[i] = fopen(outputFile, "r"))) {
+	if (!(fp[i] = fopen(outputFile, "w"))) {
+	  fprintf(stderr, "cannot open %s output file\n", outputFile);
+	  exit(2);
+	}
+	else
+	  fprintf(fp[i],"SeqName\t Source\tFeature\t  Start\t    End\t  Score"
+		  "\t Strand\t  Frame\t    T/F\t  State\n");
+      }
+      else {
+	fclose(fp[i]);
+	fprintf(stderr,"WARNING: test output file \"%s\" exist\n", outputFile);
 	exit(2);
       }
-      else
-	fprintf(fp[i],"SeqName\t Source\tFeature\t  Start\t    End\t  Score"
-		"\t Strand\t  Frame\t    T/F\t  State\n");
-    }
-    else {
-      fclose(fp[i]);
-      fprintf(stderr, "WARNING: test output file \"%s\" exist\n", outputFile);
-      exit(2);
     }
   }
-
-  fprintf(stderr,"Test");
-  for(int i=0; i<nbTest; i++)
-    fprintf(stderr," %s",source[i]);
-  fprintf(stderr," :\n");
-
-  fprintf(stderr," Reading coordinates file......................");
-  fflush(stderr);
-  strcpy(seqName,PAR.getC("fstname"));
-  strcat(seqName,".gff");
-  ReadCoord(seqName);
-  fprintf(stderr,"done\n");
-
-  for(int i=0; i<nbTest; i++) {
-    fprintf(stderr," ");
-    sensor[i]->Init(X);
-  }
-
+  IsInitialized = true;
+  
+  for(int i=0; i<nbTest; i++) { sensor[i]->Init(X); }
+  
   // Sequence name
   strcpy(seqName, BaseName(PAR.getC("fstname")));
   if (char * suffix = rindex(seqName,'.')) *suffix = 0;
