@@ -20,13 +20,14 @@
 #ifndef  SENSOR_TESTER_H_INCLUDED
 #define  SENSOR_TESTER_H_INCLUDED
 
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <string>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
-#endif
-
-#ifdef HAVE_CONFIG_H
-#include "../../../config.h"
 #endif
 
 #include "../../Sensor.h"

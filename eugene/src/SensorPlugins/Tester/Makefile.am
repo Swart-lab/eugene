@@ -17,12 +17,13 @@
 # Contents: compilation of the Tester directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Tester.so
+noinst_PROGRAMS = Sensor.Tester.so
 Sensor_Tester_so_SOURCES = Sensor.Tester.cc Sensor.Tester.h 
-Sensor_Tester_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_Tester_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~
