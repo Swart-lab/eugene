@@ -41,10 +41,7 @@ CrossingOver::CrossingOver(double proba)
 //-------------------------------------------------------
 CrossingOver::~CrossingOver(void)
 {
-  Genetic* algo =  (Genetic*) OPTIM.Algorithms[OPTIM.AlgoIndex];
-
-  if (algo->IsSACrossingOver) 
-    for (int i=0; i<2; i++) 
+  for (unsigned int i=0; i<ChildrenPopulation.size(); i++) 
       delete ChildrenPopulation[i];
 }
 

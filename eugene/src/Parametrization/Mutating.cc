@@ -41,11 +41,8 @@ Mutating::Mutating(double proba)
 //-------------------------------------------------------
 Mutating::~Mutating(void)
 {
-  Genetic* algo =  (Genetic*) OPTIM.Algorithms[OPTIM.AlgoIndex];
-
-  if (algo->IsSAMutating) 
-    for (int i=0; i<2; i++) 
-      delete ChildrenPopulation[i];
+  for (unsigned int i=0; i<ChildrenPopulation.size(); i++) 
+    delete ChildrenPopulation[i];
 }
 
 
