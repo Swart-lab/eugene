@@ -1,12 +1,28 @@
 #include "Param.h"
+// -----------------------------------------------
+// Gestion des arguments (integer)
+// -----------------------------------------------
+
+int TestIArg(char *arg)
+{
+  int tmp;
+  return (sscanf(arg, "%d", &tmp) == 1) && (tmp >= 0);
+}
+// -----------------------------------------------
+// Gestion des arguments (double)
+// -----------------------------------------------
+
+int TestDArg(char *arg)
+{
+    double tmp;
+    return  (sscanf(arg, "%lf", &tmp) == 1) && (tmp >= 0);
+}
 
 // ------------------------
 //  Default constructor.
 // ------------------------
 Parameters :: Parameters ()
 {
-  DFT_MATRIX = "default.mat";
-  DFT_OUTPUT = "./";
 }
 
 // ------------------------
@@ -14,14 +30,13 @@ Parameters :: Parameters ()
 // ------------------------
 void Parameters :: initParam (int argc, char * argv[])
 {
-  ReadArg(argc, argv);
-
   fprintf(stderr,"EuGene rel. %s\n",VERSION);
   fprintf(stderr,"Loading parameters file...");
   fflush(stderr);
 
   ReadPar(argv[0]);
- 
+  ReadArg(argc, argv);
+
   //for (iter = m.begin(); iter!=m.end(); ++iter)
   //fprintf(stderr,"%s  est associé à %s\n",iter->first, iter->second);
 
@@ -35,42 +50,18 @@ void Parameters :: ReadArg(int argc, char * argv[])
 {
   int carg, errflag;
   
-  // Prior on the initial state, Sato et al 1999 / Terryn et al. 1999
-  m["ExonPrior"]   = "0.33", m["IntronPrior"]    = "0.17";
-  m["InterPrior"]  = "0.4",  m["FivePrimePrior"] = "0.03";
-  m["ThreePrimePrior"] = "0.07";
-  
   // Process args (default values)
-  m["glen"]      = m["golap"] = m["gfrom"]   = "-1";
-  m["gfromSave"] = m["gto"]   = m["gtoSave"] = "-1";
-  m["resx"]     = "900";        // x res for graph. output
-  m["resy"]     = "400";        // y res for graph. output
-  m["graph"]    = "FALSE";      // don't produce a graphical output
-  m["estopt"]   = "FALSE";      // don't try to read a EST file
-  m["estanal"]  = "FALSE";      // don't try to analyze EST support
-  m["userinfo"] = "FALSE";      // shall we read a user info file
-  m["raflopt"]  = "FALSE";      // don't try to read a est.rafl file
-  m["blastopt"] = "FALSE";      // don't try to read a blast file
-  m["ncopt"]    = "FALSE";      // don't try to read a non coding input
-  m["normopt"]  = "1";          // normalize across frames
-  m["window"]   = "97";         // window length
-  m["printopt"] = "l";          // short print format 
-  m["offset"]   = "0";          // no offset
-  m["matname"]    = DFT_MATRIX; // default matrix file
-  m["outputname"] = DFT_OUTPUT; // default output
   m["fstname"] = "\000";        // no default input
-  parname[0]   = '0';           // no -P
-  FsP          = 0;
   errflag      = 0;
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:P:O:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:")) != -1) {
     
     switch (carg) {
       
     case 'n':           /* -n normalize across frames      */
-      if (! GetIArg(optarg, &normopt, normopt))
+      if (! TestIArg(optarg))
 	errflag++;
-      else m["normopt"] = intToChar(normopt);
+      else m["Output.normopt"] = optarg;
       break;
       
     case 'h':           /* help                             */
@@ -78,53 +69,51 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
       
     case 's':           /* Single gene mode. Start/End on IG only   */
-      m["ExonPrior"]   = "0.0";
-      m["IntronPrior"] = "0.0";
+      m["EuGene.ExonPrior"]   = "0.0";
+      m["EuGene.IntronPrior"] = "0.0";
       //InterPrior = 1.0;
-      m["FivePrimePrior"]  = "0.0";
-      m["ThreePrimePrior"] = "0.0";
+      m["EuGene.FivePrimePrior"]  = "0.0";
+      m["EuGene.ThreePrimePrior"] = "0.0";
       break;
 
     case 'r':    /* RepeatMasker input */
-      m["ncopt"] = "TRUE";
+      m["Sensor.Repeat.use"] = "TRUE";
       break;
       
     case 'c':           /* -c couverture      */
-      if (! GetIArg(optarg, &golap, golap))
+      if (! TestIArg(optarg))
         errflag++;
-      else m["golap"] = intToChar(golap);
+      else m["Output.golap"] = optarg;
       break;
       
     case 'l':           /* -l imglen      */
-      if (! GetIArg(optarg, &glen, glen))
+      if (! TestIArg(optarg))
         errflag++;
-      else m["glen"] = intToChar(glen);
+      else m["Output.glen"] = optarg;
       break;
       
     case 'u':           /* -u From      */
-      if (! GetIArg(optarg, &gfrom, gfrom))
+      if (! TestIArg(optarg))
 	errflag++;
-      else m["gfrom"] = intToChar(gfrom);
-      m["gfromSave"] = m["gfrom"];
+      else m["Output.gfrom"] = optarg;
       break;
       
     case 'v':           /* -v To      */
-      if (! GetIArg(optarg, &gto, gto))
+      if (! TestIArg(optarg))
 	errflag++;
-      else m["gto"] = intToChar(gto);
-      m["gtoSave"] = m["gto"];
+      else m["Output.gto"] = optarg;
       break;
       
     case 'x':           /* -x resx      */
-      if (! GetIArg(optarg, &resx, resx))
+      if (! TestIArg(optarg))
         errflag++;
-      else m["resx"] = intToChar(resx);
+      else m["Output.resx"] = optarg;
       break;
       
     case 'y':           /* -y resy      */
-      if (! GetIArg(optarg, &resy, resy))
+      if (! TestIArg(optarg))
         errflag++;
-      else m["resy"] = intToChar(resy);
+      else m["Output.resy"] = optarg;
       break;
       
     case 'g':          /* -g "Graphic File"                */
@@ -138,7 +127,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	    m["grnameArg"] = optarg;   // != NO pris en compte
 	  else 
 	    m["grnameArg"] = "0";      // == NO non pris en compte
-	  m["graph"] = "TRUE";
+	  m["Output.graph"] = "TRUE";
 	}
 	else errflag++;
       }
@@ -147,71 +136,67 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
       
     case 'p':           /* print opt: short/long/detailed   */
-      m["printopt"] = optarg;
-      if ((m["printopt"] == "h") &&  m["graph"] == "FALSE") {
-	m["graph"]     = "TRUE"; // HTML output means graphical output 
+      m["Output.format"] = optarg;
+      if ((optarg == "h") &&  m["Output.graph"] == "FALSE") {
+	m["Output.graph"]     = "TRUE"; // HTML output means graphical output 
 	m["grnameArg"] = "0";
       }
-      if ((m["printopt"][0] != 's') && (m["printopt"][0] != 'l') &&
-	  (m["printopt"][0] != 'g') && (m["printopt"][0] != 'd') &&
-	  (m["printopt"][0] != 'h'))
+      if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') && (optarg[0] != 'd') &&
+	  (optarg[0] != 'h'))
 	errflag++;
       break;
       
     case 'm':           /* -m matrix                        */
-      m["matname"] = optarg;
+      m["Markov.matname"] = optarg;
       break;
 
     case 'O':           /* -O output                        */
-      m["outputname"] = optarg;
-      break;
-
-    case 'P':           /* -P .par                          */
-      (void) strcpy(parname, optarg);
+      m["Output.Prefix"] = optarg;
       break;
 
     case 'o':           /* -o offset                        */
-      if (! GetIArg(optarg, &offset, offset))
+      if (! TestIArg(optarg))
 	errflag++;
-      else m["offset"] = intToChar(offset);
+      else m["Output.offset"] = optarg;
       break;
       
     case 'w':           /* -w window                        */
-      if (! GetIArg(optarg, &window, window))
+      if (! TestIArg(optarg))
 	errflag++;
-      else m["window"] = intToChar(window);
-      if (m["window"] == "0") m["window"] = "1";
+      else m["Output.window"] = optarg;
       break;
 
     case 'b':           /* -b  use blastx result            */
+      m["Sensor.BlastX.use"] = "TRUE";
       if (optarg) {
-	m["blastArg"] = optarg;
-	m["blastopt"] = "TRUE";
-	if(strlen(m["blastArg"]) > 8)
+	m["BlastX.levels"] = optarg;
+	if(strlen(optarg) > 8)
 	  errflag++;
       }
-      else m["blastArg"] = "123";
+      else m["BlastX.levels"] = "123";
       break;
       
     case 'E':
-      m["estanal"] = "TRUE";
+      m["Est.PostProcess"] = "TRUE";
       break;
       
     case 'U':
-      m["userinfo"] = "TRUE";
+      m["Sensor.User.use"] = "TRUE";
       break;
 
     case 'd':           /* -d  use cDNA blastn results      */
-      m["estopt"] = "TRUE";
+      m["Sensor.Est.use"] = "TRUE";
       break; 
 
     case 'R':           /* -R use RAFL-like EST*/
-      m["raflopt"] = "TRUE";
+      m["Sensor.Riken.use"] = "TRUE";
       break;
 
     case 'f':           /* -f frameshift loglike            */
-      if (! GetDArg(optarg, &FsP, FsP))
+      if (! TestDArg(optarg))
 	errflag++;
+      else m["EuGene.frameshift"] = optarg;
+
       break;
       
     case '?':           /* bad option                       */
@@ -242,31 +227,23 @@ void Parameters :: ReadPar(char *argv)
   char tempname[FILENAME_MAX+1];
   char *key, *val = NULL;
   
-  if(parname[0] == '0') {
-    strcpy(tempname, argv);
-    strcat(tempname, ".par");
-    fp = FileOpen(EugDir, BaseName(tempname),"r");
-  }
-  else {
-    fp = FileOpen(EugDir, parname,"r");
-    strcpy(tempname, parname);
-  }
-
-  fgets (line, MAX_LINE, fp);
-  fgets (line, MAX_LINE, fp);
-  fgets (line, MAX_LINE, fp);
+  strcpy(tempname, argv);
+  strcat(tempname, ".par");
+  fp = FileOpen(EugDir, BaseName(tempname),"r");
 
   while(fgets (line, MAX_LINE, fp) != NULL) {
-    key = new char[FILENAME_MAX+1];
-    val = new char[FILENAME_MAX+1];
-    if(sscanf(line, "%s %s", key, val) == 2)  
-      m[key] = val;
-    else {
-      if (EugDir != NULL)
-	fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
-      else
-	fprintf(stderr, "Incorrect parameter file %s\n",BaseName(tempname));
-      exit(2);
+    if (line[0] != '#') {
+      key = new char[FILENAME_MAX+1];
+      val = new char[FILENAME_MAX+1];
+      if(sscanf(line, "%s %s", key, val) == 2)  
+	m[key] = val;
+      else {
+	if (EugDir != NULL)
+	  fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
+	else
+	  fprintf(stderr, "Incorrect parameter file %s\n",BaseName(tempname));
+	exit(2);
+      }
     }
   }
 
@@ -287,21 +264,6 @@ void Parameters :: ReadPar(char *argv)
   m["EuGene.minL9"] = m["EuGene.minL10"]= m["EuGene.minL11"]= m["EuGene.minIn"];
   m["EuGene.minL12"]= m["EuGene.minL13"]= m["EuGene.minL14"]= m["EuGene.minSg"];
   m["EuGene.minL15"]= m["EuGene.minL16"]= m["EuGene.minL17"]= m["EuGene.minSg"];
-
-  // La ligne d'argument est prioritaire sur le .par
-  // Si info défini en argument on modifie sa valeur lu dans .par
-  if( FsP != 0 )                                 // -f -> Frameshift
-    m["EuGene.frameshift"] = doubleToChar(FsP);
-  if( m["estopt"] == "TRUE" )                    // -d -> Est
-    m["Sensor.Est.use"] = "TRUE";
-  if( m["blastopt"] == "TRUE" )                  // -b -> BlastX
-    m["Sensor.BlastX.use"] = "TRUE";
-  if( m["userinfo"] == "TRUE" )                  // -U -> User
-    m["Sensor.User.use"] = "TRUE";
-  if( m["raflopt"] == "TRUE" )                   // -R -> Riken
-    m["Sensor.Riken.use"] = "TRUE";
-  if( m["ncopt"] == "TRUE" )                     // -r -> Repeat
-    m["Sensor.Repeat.use"] = "TRUE";
 }
 
 // ------------------------
@@ -391,33 +353,10 @@ void Parameters :: set (const char *key, const char *value)
 }
 
 // ------------------------
-//  Convert int -> char*.
-// ------------------------
-const char* Parameters :: intToChar(int val)
-{
-  strstream buf;
-  string s;
-  buf << val;
-  buf >> s;  
-  return s.c_str();
-}
-
-// --------------------------
-//  Convert double -> char*.
-// --------------------------
-const char* Parameters :: doubleToChar(double val)
-{
-  strstream buf;
-  string s;
-  buf << val;
-  buf >> s;  
-  return s.c_str();
-}
-
-// ------------------------
 //  Default destructor.
 // ------------------------
 Parameters :: ~Parameters ()
 {
   m.clear();
 }
+
