@@ -68,7 +68,7 @@ class SensorTester : public Sensor
   char         seqName[FILENAME_MAX+1];
   static FILE  *fp;
   enum SIGNAL_STRAND_NO {START_F=0, START_R=1, STOP_F=0, STOP_R=1, ACC_F=0, ACC_R=1, DON_F=2, DON_R=3};
-  TYPE_SENSOR SensorType;
+  unsigned char SensorType;
 
   Prediction* ReadGFFAnnotation(void);
   char* SigType_TF(int, int, char **);
