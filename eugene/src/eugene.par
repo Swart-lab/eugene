@@ -321,39 +321,39 @@ Sensor.Tester.use	FALSE
 ##### Sensor priorities	 #####
 #  the lower the priority, the first loaded sensor
 # SIGNAL SENSORS
-Sensor.ATGpr 		1
-Sensor.EuStop 		1
-Sensor.FrameShift 	1
-Sensor.GSplicer 	1
-Sensor.NG2 		1
-Sensor.NStart 		1
-Sensor.PatConst 	1
-Sensor.PepSignal 	1
-Sensor.SMachine 	1
-Sensor.SpliceWAM 	1
-Sensor.SPred 		1
-Sensor.StartWAM	 	1
-Sensor.Transcript 	1
+Sensor.ATGpr 		10
+Sensor.EuStop 		10
+Sensor.FrameShift 	10
+Sensor.GSplicer 	10
+Sensor.NG2 		10
+Sensor.NStart 		10
+Sensor.PatConst 	10
+Sensor.PepSignal 	10
+Sensor.SMachine 	10
+Sensor.SpliceWAM 	10
+Sensor.SPred 		10
+Sensor.StartWAM	 	10
+Sensor.Transcript 	10
 #
 # CONTENT SENSORS
 Sensor.BlastX 		10
-Sensor.Est 		30
+Sensor.Est 		20
 Sensor.Homology   	10
-Sensor.MarkovConst 	5
-Sensor.MarkovIMM 	5
-Sensor.MarkovProt 	5
+Sensor.MarkovConst 	10
+Sensor.MarkovIMM 	1
+Sensor.MarkovProt 	1
 Sensor.Repeat 		10
 #
 # SIGNAL/CONTENT SENSORS
-Sensor.AnnotaStruct      1
-Sensor.IfElse 		1
+Sensor.AnnotaStruct     1
+Sensor.IfElse 		10
 Sensor.Riken 		10
-Sensor.User 		20
+Sensor.User 		30
 #
 # OTHERS SENSORS
-Sensor.GCPlot 		10
+Sensor.GCPlot 		1
 Sensor.GFF 		10
-Sensor.Plotter 		10
+Sensor.Plotter 		1
 Sensor.Tester 		1
 #
 #
