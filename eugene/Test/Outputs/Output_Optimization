@@ -21,7 +21,7 @@ Seed: 4
 Trace: TRUE
 
 NbParameter: 5
-Param: 	para1	para2	para3	para4	para5	
+Param: 	pa..1*	pa..2*	pa..3*	pa..4*	pa..5*	
 Min: 	0.0000	0.0000	0.0000	0.0000	0.0000	
 Max: 	1.0000	1.0000	1.0000	1.0000	1.0000	
 
@@ -67,7 +67,7 @@ Cluster 3: 0.3351	0.2903	0.3830	0.8634	Fitness=0.0090
 
 ---------------------------------------------------------------
 Best optimum for the runs
-para1	para2	para3	para4	para5	
+pa..1*	pa..2*	pa..3*	pa..4*	pa..5*	
 0.6278	0.3664	0.7978	0.7978	0.6089	Fitness=0.0090
 ---------------------------------------------------------------
 
@@ -83,21 +83,21 @@ Seed: 1
 Trace: TRUE
 
 NbParameter: 5	NbCluster: 3
-Param: 	para1	para2	para3	para4	para5	
+Param: 	pa..1*	pa..2*	pa..3*	pa..4*	pa..5*	
 Init: 	0.6278	0.3664	0.7978	0.7978	0.6089	
 Min: 	0.0000	0.0000	0.0000	0.0000	0.0000	
 Max: 	1.0000	1.0000	1.0000	1.0000	1.0000	
 MinStep: 	0.0100	0.0100	0.0100	0.0100	0.0100	
 
-Cluster[0]: 	para1 para2    LINKED
-Cluster[1]: 	para3 para4    IDENTICAL
-Cluster[2]: 	para5    IDENTICAL
+Cluster[0]: 	para1* para2*    LINKED
+Cluster[1]: 	para3* para4*    IDENTICAL
+Cluster[2]: 	para5*    IDENTICAL
 
 Fitness of initial point: 0.0090
 
 
 Cycle: 1 -----------------------------------------------------
-para1	para2	para3	para5	
+pa..1*	pa..2*	pa..3*	pa..5*	
 0.0000	0.0000	0.7978	0.6089	Fitness = 0.0072
 0.0000	0.1000	0.7978	0.6089	Fitness = 0.0075
 0.0000	0.2000	0.7978	0.6089	Fitness = 0.0078
@@ -208,17 +208,6 @@ para1	para2	para3	para5
 0.9000	0.8000	0.7978	0.6089	Fitness = 0.0081
 0.9000	0.9000	0.7978	0.6089	Fitness = 0.0078
 0.9000	1.0000	0.7978	0.6089	Fitness = 0.0075
-1.0000	0.0000	0.7978	0.6089	Fitness = 0.0072
-1.0000	0.1000	0.7978	0.6089	Fitness = 0.0075
-1.0000	0.2000	0.7978	0.6089	Fitness = 0.0078
-1.0000	0.3000	0.7978	0.6089	Fitness = 0.0080
-1.0000	0.4000	0.7978	0.6089	Fitness = 0.0081
-1.0000	0.5000	0.7978	0.6089	Fitness = 0.0081
-1.0000	0.6000	0.7978	0.6089	Fitness = 0.0081
-1.0000	0.7000	0.7978	0.6089	Fitness = 0.0080
-1.0000	0.8000	0.7978	0.6089	Fitness = 0.0078
-1.0000	0.9000	0.7978	0.6089	Fitness = 0.0075
-1.0000	1.0000	0.7978	0.6089	Fitness = 0.0072
 Local optimal point:
 0.5000	0.5000	0.7978	0.6089	Fitness = 0.0092
 
@@ -256,6 +245,6 @@ LineSearch stops after 1 cycles.
 Maximum number of cycles achieved.
 
 Final Optimal Point:
-para1	para2	para3	para4	para5	
+pa..1*	pa..2*	pa..3*	pa..4*	pa..5*	
 0.5000	0.5000	0.5000	0.5000	0.5000	
 ---------------------------------------------------------------

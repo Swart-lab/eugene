@@ -1,7 +1,7 @@
-Loading Sensor.Tester.........0
- -Test.0 : Sensor.EuSto	0
 -------------------------------------------------------------------
 Loading sequence...GHU53701, 2626 bases read, GC Proportion = 40.3%
+Loading Sensor.Tester.........0
+ -Test.0 : Sensor.EuSto	0
 Test EuStop :
  Reading coordinates file......................done
  Optimal path length = 0.9163
