@@ -15,7 +15,9 @@ const unsigned char SwitchAcc        = 0x4;
 const unsigned char SwitchDon        = 0x8;
 const unsigned char SwitchTransStart = 0x10;
 const unsigned char SwitchTransStop  = 0x20;
-const unsigned char SwitchAny        = 0x3F; 
+const unsigned char SwitchIns = 0x40;
+const unsigned char SwitchDel  = 0x80;
+const unsigned char SwitchAny        = 0xFF; 
 
 class BackPoint
   {
