@@ -62,7 +62,8 @@ if {$key=="Y"} {
 exec cp  ${EUGENE_DIR}/${EUGENE_REF}.par ${EUGENE}.par
 # Init parameters values
 InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
-
+# Create a local symbolic link for the binary
+catch { eval exec ln -s ${EUGENE_DIR}/${EUGENE} ${EUGENE} }
 
 ########################################################################
 ##################        Units tests       ############################
@@ -71,16 +72,16 @@ foreach sensor $AllSensorsList {
     # Get stderr and stdout
     if {$sensor != "Est" && $sensor != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-	    -D Sensor.${sensor}.use=TRUE \
+	    -D Sensor.${sensor}.use=1 \
 	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
     } else {
 	if {$sensor == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-D Sensor.${sensor}.use=TRUE -D Sensor.NG2.use=TRUE \
+		-D Sensor.${sensor}.use=1 -D Sensor.NG2.use=1 \
 		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
 	} else {
-	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-D Sensor.${sensor}.use=TRUE $SEQ_DIR/exSeqHom.fasta  \
+	    eval exec $EUGENE $OPTIONS(Sensor) \
+		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta  \
 		2> tmp%stderr > tmp%stdout
 	}
     }
@@ -130,14 +131,14 @@ foreach sensor $AllSensorsList {
 foreach TEST $FunctionalTestList {
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
-	{set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
+	{set NewValue${TEST}(Sensor.${sensor}.use) 1}
     ModifyParaValue ${EUGENE}.par  NewValue${TEST}
 
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
 
     # Save output of software and treat them
-    eval exec $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) \
+    eval exec $EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) \
 	2> tmp%stderr > tmp%stdout
 
     # 1/ image file
@@ -214,11 +215,11 @@ foreach TEST $ArabidopsisTestList {
 
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
-	{set NewValueBase(Sensor.${sensor}.use) TRUE}
+	{set NewValueBase(Sensor.${sensor}.use) 1}
     ModifyParaValue ${EUGENE}.par  NewValueBase
     
-    catch {eval exec $EUGENE_DIR/$EUGENE $SEQ($TEST) > tmp%stdout}
-    
+    catch {eval exec $EUGENE $SEQ($TEST) > tmp%stdout}
+   
     if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF($TEST)]} {
 	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST)
     } elseif {[catch {exec diff $OUTPUT_DIR/$FILE_REF($TEST) tmp%stdout}]} {
@@ -245,7 +246,7 @@ foreach TEST $ArabidopsisTestList {
 ##################### Parameters optimization ##########################
 ########################################################################
 
-catch {eval exec $EUGENE_DIR/$EUGENE test -D ParaOptimization.Use=TRUE > tmp%stdout}
+catch {eval exec $EUGENE test -D ParaOptimization.Use=1 > tmp%stdout}
 
 if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF(Optimization)]} {
     exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Optimization)

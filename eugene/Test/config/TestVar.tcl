@@ -102,7 +102,7 @@ set FILE_REF(Araset) Output_Araset
 
 ##################### Big test variables ################################
 set SensorsList(Big) {MarkovIMM  Transcript MarkovConst EuStop NStart  GSplicer Est BlastX}
-set SEQ(Big) {$SEQ_DIR/chr1_2002.tfa_22540000-23040000.tfa}
+set SEQ(Big) $SEQ_DIR/chr1_2002.tfa_22540000-23040000.tfa
 set FILE_REF(Big) Output_Big
 
 
