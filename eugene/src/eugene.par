@@ -1,7 +1,7 @@
 #
 # Edité pour EuGeneAS 2.0 (8080704)
 #
-EuGene.versionPAR	8080704          # Parameter file version (date)
+EuGene.versionPAR	"July 8, 2004"          # Parameter file version (date)
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
