@@ -104,7 +104,7 @@ template<class CHAINE, typename T> class TabChaine
   int indiceprefixe (char* mot) const;
   int indiceprefixe (char* seq, int lgr, int deb, int fin) const;
   int indiceprefixe (int indice) const;
-  void compte2probas (const TabChaine<CHAINE, int>& comptage); // attention: pour <REAL> ou <unsigned short>, modifie VAL
+  void compte2probas (const TabChaine<CHAINE, int>& comptage, int occurence_min=0); // attention: pour <REAL> ou <unsigned short>, modifie VAL
   int nombredegc (int indice) const;
 
 // Convertisseurs de types REAL (e.g. double) et  usi (unsigned short int):

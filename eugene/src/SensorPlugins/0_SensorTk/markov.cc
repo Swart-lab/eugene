@@ -30,7 +30,7 @@ Chaine :: Chaine(const char* const data)
   : taille(strlen(data)),
     lettre(new unsigned char[taille+1])
 {
-  for (int i=0;i< (signed)taille;i++){
+  for (int i=0;i< (signed)taille;i++) {
     lettre[i]=data[i];
   }
   lettre[taille]=0;
@@ -55,7 +55,7 @@ char Chaine :: operator [] (int i) const
 int Chaine :: operator [] (char c) const
 {
   int i;
-  for (i=0;i<(signed)taille;i++){
+  for (i=0;i<(signed)taille;i++) {
     if(lettre[i]==c) break;
   }
 //  if(i!=taille)return i; // version securisee
@@ -66,7 +66,7 @@ int Chaine :: operator [] (char c) const
 void Chaine :: affichage() const {
   printf ("affichage de l'alphabet: ");
   printf ("taille=%d, lettres=%s\n",taille,lettre);
-//  for (int i=0;i<taille;i++){
+//  for (int i=0;i<taille;i++) {
 //    printf("lettre[%d]:%c, ",i,(*this)[i]);
 //  }
 //  printf("\n");
@@ -81,12 +81,12 @@ char* Chaine :: code2mot(int code, int lgr) const
   char* tampon;
   int i,reste;
   tampon = new char[lgr+1];
-  for (i=0;i<lgr;i++){
+  for (i=0;i<lgr;i++) {
     tampon[i]='X';
   }
   clef= new int[lgr];
   reste= code;
-  for (i=lgr-1; i>0; i--){
+  for (i=lgr-1; i>0; i--) {
     clef[i]=(int)pow(taille,i);
     tampon[lgr-i-1]=lettre[(int)reste/clef[i]];
     reste = reste % clef[i];
@@ -103,7 +103,7 @@ int Chaine :: mot2code(const char* const mot) const
   int i,code,lgr;
   lgr=strlen(mot);
   code=0;
-  for(i=0;i<lgr;i++){
+  for(i=0;i<lgr;i++) {
     code+= (*this)[mot[i]]*(int)pow(taille,(lgr-1-i));
   }
   return code;
@@ -114,7 +114,7 @@ int Chaine :: mot2code(const char* const mot,int lgr) const
   int i,j,lgrmot,code;
   lgrmot=strlen(mot); // vraie longueur
   code=0;
-  for(i=0;i<lgr;i++){
+  for(i=0;i<lgr;i++) {
     j= ( (i<lgrmot) ? (*this)[mot[i]] : 0 );
     code+= j *(int)pow(taille,(lgr-1-i));
   }
@@ -124,7 +124,7 @@ int Chaine::mot2code(const char* const mot,int lgr, int deb) const
 {
   int i,code;
   code=0;
-  for(i=deb ; i< deb+lgr ; i++){
+  for(i=deb ; i< deb+lgr ; i++) {
     code+= (*this)[mot[i]]*(int)pow(taille,(lgr-1-i+deb));
   }
   return code;
@@ -135,7 +135,7 @@ int Chaine::mot2code(const char* const mot,int lgr, int deb, int fin) const
 {
   int i,j,code;
   code=0;
-  for(i=deb ; i< deb+lgr ; i++){
+  for(i=deb ; i< deb+lgr ; i++) {
     j= ( (i<=fin) ? (*this)[mot[i]] : 0 );
     code+= j *(int)pow(taille,(lgr-1-i+deb));
   }
@@ -175,17 +175,17 @@ template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine(int ordre, C
 {
   int i;
   indexlgrmots= new int[lgrmax+1];
-  for (i=0; i< lgrmax+1;i++){
+  for (i=0; i< lgrmax+1;i++) {
     indexlgrmots[i]= int (pow (alphabet->taille,i) - 1) / (alphabet->taille - 1);
   }
   nbrevaleurs= int (pow (alphabet->taille, lgrmax+1 ) - 1) / (alphabet->taille - 1);
   VAL= new T[nbrevaleurs];
   for (i=0; i<nbrevaleurs ;i++) { VAL[i] = 0; }
 /*
-  if (typeid(VAL[0]) == typeid(i)){
+  if (typeid(VAL[0]) == typeid(i)) {
   for (i=0; i<nbrevaleurs ;i++) { VAL[i] = 0; }
   }
-  else {
+  else{
   VAL[0]=1.0;
   for (i=1; i<nbrevaleurs ;i++) VAL[i] = 0.0;
   }
@@ -226,8 +226,8 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2index(int indice) const
 {
   int i,j = 0;
-  if(indice<nbrevaleurs){
-    for (i=0;i<=lgrmax;i++){
+  if(indice<nbrevaleurs) {
+    for (i=0;i<=lgrmax;i++) {
       if (indice>=indexlgrmots[i]) j=indexlgrmots[i];
       else break;
     }
@@ -239,8 +239,8 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2index(int i
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2lgrmot(int indice) const
 {
   int i,j = 0;
-  if(indice<nbrevaleurs){
-    for (i=0;i<=lgrmax;i++){
+  if(indice<nbrevaleurs) {
+    for (i=0;i<=lgrmax;i++) {
       if (indice>=indexlgrmots[i]) j=i;
       else break;
     }
@@ -288,7 +288,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int in
 
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation()
 {
-  for (int i=0; i<nbrevaleurs;i++){
+  for (int i=0; i<nbrevaleurs;i++) {
     VAL[i]=0;
   }
 }
@@ -299,7 +299,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation(do
 //  char tampon;  // derniere lettre du mot
   int der=0;
   VAL[0]=1;
-  for (int i=1; i<nbrevaleurs ; i++){
+  for (int i=1; i<nbrevaleurs ; i++) {
     precval= VAL[indiceprefixe(i)];
     der= indiceprefixe(indice2mot(i),1,indice2lgrmot(i)-1,indice2lgrmot(i)) - 1;
 //    tampon= alphabet->lettre[indiceprefixe(indice2mot(i),1,indice2lgrmot(i)-1,indice2lgrmot(i)) - 1];
@@ -324,7 +324,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
       for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
     }
 
-    for(i=lgrmax-1 ; i<strlen(seq) ; i++){
+    for(i=lgrmax-1 ; i<strlen(seq) ; i++) {
       for(j=0;j<lgrmax;j++) {
 	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
@@ -339,7 +339,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
     for(i=debut; i< debut+lgrmax-1 ;i++) { //debut
       for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
     }
-    for(i= (debut+lgrmax-1) ; i< fin ; i++){
+    for(i= (debut+lgrmax-1) ; i< fin ; i++) {
       for(j=0;j<lgrmax;j++) {
 	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
@@ -373,8 +373,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
   Size = INIT_SIZE;
   Len = 0;
 
-  while  ((Ch = fgetc (fp)) != EOF && Ch != '>')
-    {
+  while  ((Ch = fgetc (fp)) != EOF && Ch != '>') {
       if  (isspace (Ch))
 	continue;
 
@@ -419,7 +418,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
 	  }
       }
       else{
-	if ( strcmp((const char *)alphabet->lettre,"ACDEFGHIKLMNPQRSTVWY*")==0){
+	if ( strcmp((const char *)alphabet->lettre,"ACDEFGHIKLMNPQRSTVWY*")==0) {
 	  if ( alphabet->operator[](Ch) == alphabet->taille) {
 	    fprintf (stderr, "Unexpected character `%c\' fonction fichier2seq ((multi)fasta proteique requis)-> sequence %s rejetee\n", Ch,seqname);
 	    Sequence=NULL;
@@ -439,7 +438,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
 
   // TMP!! Cas particulier: sequence proteique a terminer par un stop (sinon P(TGA)=0)!!
   // A traiter peut etre plus proprement...
-  if ( strcmp((const char *)alphabet->lettre,"ACDEFGHIKLMNPQRSTVWY*")==0){
+  if ( strcmp((const char *)alphabet->lettre,"ACDEFGHIKLMNPQRSTVWY*")==0) {
     if  (Len >= Size)
       {
 	Size += 1;
@@ -591,30 +590,46 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: usi() const
 
 // necessite en argument une classe de meme type chaine et de meme taille
 // pour passer des frequences aux probabilites
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (const TabChaine<CHAINE, int>& comptage)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (const TabChaine<CHAINE, int>& comptage, int occurence_min)
 {
   int i,j,cumul,indicedeclinant;
+  char* mot= new char[lgrmax];
   if (nbrevaleurs == comptage.nbrevaleurs) {
     if ((typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) ) VAL[0] = 1;
     else VAL[0] = 1.0;
     for(i=1;i<nbrevaleurs;i++) {
       cumul=0;
+      mot= indice2mot(i);
       indicedeclinant=indiceprefixe(indice2mot(i),indice2lgrmot(i),0,indice2lgrmot(i)-2);
       for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) {
 	cumul+= comptage.VAL[j];
-//	printf("i=%d,j=%d,mot=%s,indicedeclinant=%d,declinant=%s,n(%s)=%d,cumul=%d\n",i,j,indice2mot(i),indicedeclinant,indice2mot(indicedeclinant),comptage.indice2mot(j),comptage.VAL[j],cumul);
 	// Ex. avec adn: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
       }
-      if (indice2lgrmot(i) == lgrmax) {
-//	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage.VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(REAL)comptage.VAL[i] / (REAL)cumul);
-//	fflush(stdout);
+      //      if (indice2lgrmot(i) == lgrmax) {
+      //	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage.VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(REAL)comptage.VAL[i] / (REAL)cumul);
+      //	fflush(stdout);
+      //    }
+      if (cumul < occurence_min) { // pas assez d'info pour calculer une proba
+	if (indice2lgrmot(i)==1) { // et en plus on n'est qu'a l'ordre 0
+	  fprintf(stderr,"WARNING!! Not enough information to compute P(%s) AT ORDER ZERO!\n",mot);
+	}
+	else {
+	  VAL[i]= VAL[mot2indice(mot,indice2lgrmot(i)-1,1)];
+	  //fprintf(stderr,"Warning : not enough information to compute P(%s), taking P(%s)\n",mot,indice2mot(mot2indice(mot,indice2lgrmot(i)-1,1)));
+	}
       }
-      if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
-	VAL[i]= ((cumul==0) ? 0 : real2usi( (REAL)comptage.VAL[i] / (REAL)cumul) );
-      else
-	VAL[i]=((cumul==0) ? 0 : (REAL)comptage.VAL[i] / (REAL)cumul ) ;
+      else {
+	if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
+	  VAL[i]= ((cumul==0) ? 0 : real2usi( (REAL)comptage.VAL[i] / (REAL)cumul) );
+	else
+	  VAL[i]=((cumul==0) ? 0 : (REAL)comptage.VAL[i] / (REAL)cumul ) ;
+      }
     }
   }
+  else{
+    fprintf(stderr,"\n\n\nERROR !!\n\n\nError in markov.cc (method compte2probas)\n\n\nERROR !!\n\n\n");
+  }
+  delete mot;
 }
 
 // Convertisseurs de types REAL/USI (double/unsigned short int)
@@ -631,7 +646,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: nombredegc (int in
   int compt=0;
   char* mot= new char[lgrmax];
   mot= indice2mot(indice);
-  for(int i=0;i<lgrmax;i++){
+  for(int i=0;i<lgrmax;i++) {
     if ((mot[i]=='G')||(mot[i]=='C')) compt++;
   }
   return compt;
@@ -660,7 +675,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: proba (char *seq, in
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: probaseq (char *seq, int deb, int fin) const
 {
   T prob=1.0;
-  for (int i=deb; i<=fin; i++){
+  for (int i=deb; i<=fin; i++) {
     prob*=proba(seq,i);
   }
   return prob;
@@ -669,7 +684,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: probaseq (char *seq,
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: probaseq (char *seq) const
 {
   T prob=1.0;
-  for (int i=0; i< strlen(seq); i++){
+  for (int i=0; i< strlen(seq); i++) {
     prob*=proba(seq,i);
   }
   return prob;
@@ -679,7 +694,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: probaseq (char *seq)
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: probaseq (char *seq, int deb, int fin, int ordre) const
 {
   T prob=1.0;
-  for (int i=deb; i<=fin; i++){
+  for (int i=deb; i<=fin; i++) {
     prob*=proba(seq,i,ordre);
   }
   return prob;
@@ -702,7 +717,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logproba (char *seq,
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logprobaseq (char *seq, int deb, int fin) const
 {
   T score=0;
-  for (int i=deb; i<=fin; i++){
+  for (int i=deb; i<=fin; i++) {
     score+=logproba(seq,i);
   }
   return score;
@@ -711,7 +726,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logprobaseq (char *s
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logprobaseq (char *seq, int deb, int fin, int ordre) const
 {
   T score=0;
-  for (int i=deb; i<=fin; i++){
+  for (int i=deb; i<=fin; i++) {
     score+=logproba(seq,i,ordre);
   }
   return score;
@@ -721,7 +736,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logprobaseq (char *s
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: logprobaseq (char *seq) const
 {
   T score=0;
-  for (int i=0; i< strlen(seq); i++){
+  for (int i=0; i< strlen(seq); i++) {
     score+=logproba(seq,i);
   }
   return score;
@@ -748,7 +763,7 @@ lograpdevrai (char *seq, int deb, int fin, const TabChaine<CHAINE, REAL> &autrem
 {
   int i;
   REAL val=0.0;
-  for (i=deb; i<=fin; i++){
+  for (i=deb; i<=fin; i++) {
     val+= lograpdevrai(seq, i, autremodele, ordre);
   }
   return val;
@@ -805,7 +820,7 @@ UsageCode :: UsageCode() : TabChaine <ChaineADN,int> (2, new ChaineADN) , nbreaa
   codegenetique= CODEGENETIQUE;
 //  codegenetique= "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
   usagecode = new REAL[nbrecodons+1];
-  for (int i=0;i<nbrecodons;i++){
+  for (int i=0;i<nbrecodons;i++) {
     usagecode[i]=0.0;
   }
   initialisation();
@@ -821,7 +836,7 @@ void UsageCode :: affichage() const
   if(alphabet != NULL) alphabet->affichage();
   printf("lgrmax=%d, taille alphabet=%d, nbrevaleurs=%d\n",lgrmax,alphabet->taille,nbrevaleurs);
   printf("nbre d'aa:%d, nbre de codons (sans stops):%d\n",nbreaa,nbrecodons);
-  for(i=0; i< nbrecodons; i++){
+  for(i=0; i< nbrecodons; i++) {
     printf ("codon:%s occurence:%d aa:%c occurence:%d usage:%f\n", indice2mot(i+offset), VAL[i+offset], codegenetique[i], cumuleaa(i), usagecode[i]);
   }
 }
@@ -829,7 +844,7 @@ void UsageCode :: affichage() const
 int UsageCode :: cumuleaa(int aa) const
 {
   int occurence=0;
-  for (int i=0;i<nbrecodons;i++){
+  for (int i=0;i<nbrecodons;i++) {
     if (codegenetique[i] == codegenetique[aa]) // cherche tous les codons de l'aa
       occurence+= VAL[i+offset]; // occurence de l'aa += occurence du codon
   }
@@ -838,7 +853,7 @@ int UsageCode :: cumuleaa(int aa) const
 
 void UsageCode :: compte2usage ()
 {
-  for (int i=0;i<nbrecodons;i++){
+  for (int i=0;i<nbrecodons;i++) {
     usagecode[i]= ( (cumuleaa(i)==0) ? 0.0 : (REAL)VAL[i+offset] / (REAL)cumuleaa(i)) ;
   }
 }
@@ -875,7 +890,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
 
 // on saute les commentaires
   fscanf (fp, "%s", &tampon); 
-  while (tampon=='#'){
+  while (tampon=='#') {
     if (fgets (Line, MAX_LINE, fp) == NULL) return(1);
     fscanf (fp, "%s", &tampon); 
   }
@@ -884,7 +899,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   // on est a la ligne contenant les Acides Amines (une lettre chacun)
   n=0;
   STR[n]='\0';
-  while ( (tampon != '\n') && ( ! feof(fp) ) ){ // comptage et memorisation des AA
+  while ( (tampon != '\n') && ( ! feof(fp) ) ) { // comptage et memorisation des AA
     tampon=fgetc(fp);
     if (isspace(tampon)) continue;
     if (n>=nmaxAA) {fprintf(stderr,"error in PROTMAT file, blosum/pam format required (too many AA in first line)\n");return(1);}
@@ -903,7 +918,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   // remplissage des valeurs
   i=-1; // valeurs scannees
   j=-1;  // valeurs a enregistrer
-  while ( ! (feof(fp) ) ){
+  while ( ! (feof(fp) ) ) {
     fscanf(fp,"%s",STR);
     i++ ;
     if ( (i % (1+MAT->alphabet->taille)) == 0 ) continue;  // 1ere colonne= lettres des AA
