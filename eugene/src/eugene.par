@@ -1,20 +1,20 @@
 #
-# Edité pour EuGeneAS 1.44 (250902)
+# Edité pour EuGeneAS 1.46 (141002)
 #
-eugene.key		HVGNNJUDTJDQDF	# Clef
-eugene.versionPAR	25_09_02	# Version du fichier .par (date)
-eugene.frameshift	-9999.0		# Penalite de frameshift  (obsolete)
-eugene.minEx		3
-eugene.minIn		50
-eugene.minSg		150
-eugene.minFlow		50
-eugene.minConv		0
-eugene.minDiv		100
-eugene.min5Prime	20
-eugene.min3Prime	20
-eugene.stopP		4.155
-eugene.transStartP	4.155
-eugene.transStopP	4.155
+EuGene.key		HVGNNJUDTJDQDF	# Clef
+EuGene.versionPAR	14_10_02	# Version du fichier .par (date)
+EuGene.frameshift	-9999.0		# Penalite de frameshift  (obsolete)
+EuGene.minEx		3
+EuGene.minIn		50
+EuGene.minSg		150
+EuGene.minFlow		50
+EuGene.minConv		0
+EuGene.minDiv		100
+EuGene.min5Prime	20
+EuGene.min3Prime	20
+EuGene.stopP		4.155
+EuGene.transStartP	4.155
+EuGene.transStopP	4.155
 NStart.startP	0.052
 NStart.startB	0.308
 NG2.accP	0.903
@@ -40,13 +40,23 @@ BlastX.level4	0.0
 BlastX.level5	0.0
 BlastX.level6	0.0
 BlastX.level7	0.0
-sensor.EuStop	1	#
-sensor.NStart	3	# sensor.Name Priority
-sensor.NG2	4	#
-sensor.SPred	5	#  Priority 0 -> Ignored
-sensor.Markov	1	#
-sensor.BlastX	2	#  Priority 1 -> First
-sensor.Repeat	0	#  Priority 2 -> Second
-sensor.Riken	0	#  ...
-sensor.Est	7	#  Priority n -> Last
-sensor.User	0	#
+Sensor.EuStop.use	TRUE
+Sensor.NStart.use	TRUE
+Sensor.NG2.use		TRUE
+Sensor.SPred.use	TRUE
+Sensor.Markov.use	TRUE
+Sensor.BlastX.use	FALSE
+Sensor.Repeat.use	FALSE
+Sensor.Riken.use	FALSE
+Sensor.Est.use		FALSE
+Sensor.User.use		FALSE
+Sensor.EuStop	1		#
+Sensor.NStart	3		# Sensor.Name Priority
+Sensor.NG2	4		#
+Sensor.SPred	5		#  Priority 0 -> Ignored
+Sensor.Markov	1		#
+Sensor.BlastX	2		#  Priority 1 -> First
+Sensor.Repeat	0		#  Priority 2 -> Second
+Sensor.Riken	7		#  ...
+Sensor.Est	8		#  Priority n -> Last
+Sensor.User	10		#
