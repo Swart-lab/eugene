@@ -42,8 +42,10 @@ sub gffGetCoord {
   else { push(@geneCoord, 0); $i--; }
 
   for (; $i<$gff->count()-1; $i++) {
-    push(@geneCoord, $strand.$lineList[$i]->start());
-    push(@geneCoord, $strand.$lineList[$i]->end());
+    if ($lineList[$i]->feature() ne "Intron") {
+      push(@geneCoord, $strand.$lineList[$i]->start());
+      push(@geneCoord, $strand.$lineList[$i]->end());
+    }
   }
 
   if ($lineList[-1]->feature() eq "UTR5" ||
@@ -174,7 +176,8 @@ sub gffVerify {
 	my $s = $self->feature();
 	if ($s eq "UTR5"   || $s eq "UTR3" ||
 	    $s eq "E.Init" || $s eq "E.Intr" ||
-	    $s eq "E.Term" || $s eq "E.Sngl" ) {
+	    $s eq "E.Term" || $s eq "E.Sngl" ||
+	    $s eq "Intron") {
 	  if ($s eq "UTR5")   { $nbUtr5++; }
 	  if ($s eq "UTR3")   { $nbUtr3++; }
 	  if ($s eq "E.Init") { $nbInit++; }
@@ -187,7 +190,7 @@ sub gffVerify {
 	  print "\nERROR in GFF file.\n".
 	    "WARNING :\n".
 	      "   - Feature must be UTR5, UTR3, E.Init,".
-		" E.Intr, E.Term or E.Sngl.\n".
+		" E.Intr, E.Term, E.Sngl or Intron.\n".
 		  "   - Fields must be tab-separated\n";
 	  exit;
 	}
