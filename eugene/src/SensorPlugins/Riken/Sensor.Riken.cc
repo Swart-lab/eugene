@@ -214,4 +214,5 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ---------------------------
 void SensorRiken :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
+  GiveInfo(X, pos, d);
 }

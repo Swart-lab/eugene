@@ -66,4 +66,5 @@ void SensorUser :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // -------------------------
 void SensorUser :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
+  GiveInfo(X, pos, d);
 }
