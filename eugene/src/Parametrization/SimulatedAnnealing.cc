@@ -9,15 +9,14 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
+#include <iostream>
 #include <math.h>
 
 #include "SimulatedAnnealing.h"
-
 #include "../ParaOptimization.h"
 #include "Genetic.h"
 
 extern ParaOptimization OPTIM;
-
 
 //-------------------------------------------------------
 // Constructor
@@ -28,8 +27,6 @@ SimulatedAnnealing::SimulatedAnnealing(void)
   CC1=0.8;
   CC2=0.95;
 }
-
-
 
 //-------------------------------------------------------
 //-------------------------------------------------------
@@ -64,7 +61,7 @@ void SimulatedAnnealing::SAInit(void)
     DE_MIN=DE_MAX/2.0;
   }
 
-  if (algo->IsTracing) cout << "DE_MAX=" << DE_MAX << "\tDE_MIN=" << DE_MIN <<endl;
+  if (algo->IsTracing) std::cout << "DE_MAX=" << DE_MAX << "\tDE_MIN=" << DE_MIN <<std::endl;
   k=0.75;
   Ts=-DE_MAX/log(1/k-1); /* Starting Temperature */
   k=0.99;
@@ -89,8 +86,8 @@ void SimulatedAnnealing::SAInit(void)
   algo->NbGeneration=CP*z;
   T=Ts; 
   
-  cout << "Ts=" <<Ts<< "\tTx=" <<Tx<< "\tTf=" <<Tf <<endl;
-  cout << "z=" <<z<< "\tNbGeneration=" << algo->NbGeneration << "\tCP=" <<CP <<endl;
+  std::cout << "Ts=" <<Ts<< "\tTx=" <<Tx<< "\tTf=" <<Tf <<std::endl;
+  std::cout << "z=" <<z<< "\tNbGeneration=" << algo->NbGeneration << "\tCP=" <<CP <<std::endl;
 }
 
 

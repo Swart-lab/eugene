@@ -29,7 +29,7 @@ class Mutating {
   void Muteval (void); 
 
  private:
-  vector<Chromosome*> ChildrenPopulation;
+  std::vector<Chromosome*> ChildrenPopulation;
   void ChooseChromosome(int* n);
   void Mutation(Chromosome* c);
 };

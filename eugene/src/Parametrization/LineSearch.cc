@@ -9,6 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
+#include <iostream>
 #include <string>
 
 #include "LineSearch.h"
@@ -28,7 +29,7 @@ LineSearch::LineSearch (void) : OptiAlgorithm()
 {
   double step;
   int i;
-  vector <bool> FirstEltCluster;
+  std::vector <bool> FirstEltCluster;
 
   NbMaxCycle = PAR.getI("LineSearch.NbMaxCycle");
   NbMinCycle = PAR.getI("LineSearch.NbMinCycle");
@@ -78,57 +79,57 @@ void LineSearch :: Optimize(bool is_chaining)
   double FitOptPrec = Fitness;
   FitOpt = 0.0;
   unsigned int i; int c;
-  string warning_message;
+  std::string warning_message;
 
   // if chains another algo then takes the optimum found as initial point
   if (is_chaining)
     Para = OPTIM.Algorithms[OPTIM.AlgoIndex-1]->Para;
 
   // Display parametrization of the algorithm
-  cout <<endl << "---------------------------------------------------------------"<<endl;
-  cout << "Optimization of EuGène parameters with the LineSearch algorithm"<<endl<<endl;
-  cout << "---------------------------------------------------------------"<<endl;
-  cout << "Parametrisation of the algorithm:"<<endl<<endl;
-  cout << "NbMaxCycle: " << NbMaxCycle << "\tNbMinCycle: " << NbMinCycle 
-       << "\tNbMaxStab: " << NbMaxStab <<endl;
-  cout << "DivInter: " << DivInter << "\tAlpha: " << Alpha 
-       << "\tEvolutionMini: " << EvolutionMini <<endl;
-  cout << "Seed: " << Rand->Seed <<endl;
-  cout << "Trace: " << ((IsTracing) ? "TRUE" : "FALSE") <<endl<<endl;
+  std::cout <<std::endl << "---------------------------------------------------------------"<<std::endl;
+  std::cout << "Optimization of EuGène parameters with the LineSearch algorithm"<<std::endl<<std::endl;
+  std::cout << "---------------------------------------------------------------"<<std::endl;
+  std::cout << "Parametrisation of the algorithm:"<<std::endl<<std::endl;
+  std::cout << "NbMaxCycle: " << NbMaxCycle << "\tNbMinCycle: " << NbMinCycle 
+       << "\tNbMaxStab: " << NbMaxStab <<std::endl;
+  std::cout << "DivInter: " << DivInter << "\tAlpha: " << Alpha 
+       << "\tEvolutionMini: " << EvolutionMini <<std::endl;
+  std::cout << "Seed: " << Rand->Seed <<std::endl;
+  std::cout << "Trace: " << ((IsTracing) ? "TRUE" : "FALSE") <<std::endl<<std::endl;
 
-  cout << "NbParameter: " << (int) Para.size() << "\tNbCluster: " << NbParaCluster <<endl;
-  cout << "Param: \t"; for (i=0; i<ParaName.size(); i++) cout << ReduceName(ParaName[i]) << "\t"; cout <<endl;
-  cout << "Init: \t"; for (i=0; i<Para.size(); i++) cout << Para[i] << "\t"; cout <<endl;
-  cout << "Min: \t"; for (i=0; i<ParaMin.size(); i++) cout << ParaMin[i] << "\t"; cout <<endl;
-  cout << "Max: \t"; for (i=0; i<ParaMax.size(); i++) cout << ParaMax[i] << "\t"; cout <<endl;
-  cout << "MinStep: \t"; for (i=0; i<ParaMinStep.size(); i++) cout << ParaMinStep[i] << "\t"; cout <<endl;
+  std::cout << "NbParameter: " << (int) Para.size() << "\tNbCluster: " << NbParaCluster <<std::endl;
+  std::cout << "Param: \t"; for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+  std::cout << "Init: \t"; for (i=0; i<Para.size(); i++) std::cout << Para[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Min: \t"; for (i=0; i<ParaMin.size(); i++) std::cout << ParaMin[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Max: \t"; for (i=0; i<ParaMax.size(); i++) std::cout << ParaMax[i] << "\t"; std::cout <<std::endl;
+  std::cout << "MinStep: \t"; for (i=0; i<ParaMinStep.size(); i++) std::cout << ParaMinStep[i] << "\t"; std::cout <<std::endl;
 
-  cout <<endl;
+  std::cout <<std::endl;
   for (c=0; c<NbParaCluster; c++) {
-    cout << "Cluster[" << c << "]: \t";
+    std::cout << "Cluster[" << c << "]: \t";
     for (unsigned int j=0; j<ParaClusters[c].size(); j++) 
-      cout << ParaName[((ParaClusters[c])[j])] <<" ";
+      std::cout << ParaName[((ParaClusters[c])[j])] <<" ";
     if (ParaClusterRelations[c] == IDENTICAL) 
-      cout << "   IDENTICAL"<<endl;
+      std::cout << "   IDENTICAL"<<std::endl;
     else
-      cout << "   LINKED"<<endl;
+      std::cout << "   LINKED"<<std::endl;
   }
 
   Fitness = OPTIM.ParaEvaluate();
-  cout <<endl<< "Fitness of initial point: " << Fitness <<endl<<endl;
+  std::cout <<std::endl<< "Fitness of initial point: " << Fitness <<std::endl<<std::endl;
 
   // general loop
   n=0; STOP = 0;
   while ((n < NbMaxCycle) && ((n < NbMinCycle) || (STOP < NbMaxStab))) {
-    cout <<endl <<"Cycle: " << (n + 1)
+    std::cout <<std::endl <<"Cycle: " << (n + 1)
 	 << " -----------------------------------------------------\n";
-    cout << MsgParaNames << endl;
+    std::cout << MsgParaNames << std::endl;
     
     for (int k = 0; k < NbParaCluster; k++) { 
       ScanCluster(k);
       ChooseOptimal();
 
-      if (IsTracing) { cout << "Local optimal point:" <<endl; PrintParam(); cout <<endl;}
+      if (IsTracing) { std::cout << "Local optimal point:" <<std::endl; PrintParam(); std::cout <<std::endl;}
     }
     
     if ((FitOpt - FitOptPrec) < EvolutionMini)
@@ -142,15 +143,15 @@ void LineSearch :: Optimize(bool is_chaining)
     n++;
   }
   
-  cout <<endl<< "---------------------------------------------------------------"<<endl;
-  cout << "LineSearch stops after " << n << " cycles."<<endl;
-  if (n==NbMaxCycle) cout <<"Maximum number of cycles achieved."<<endl;
-  if (STOP==NbMaxStab) cout <<"Fitness is stable since "<<NbMaxStab<<" cycles." <<endl;
-  cout <<endl << "Final Optimal Point:" <<endl; 
-  for (i=0; i<ParaName.size(); i++) cout << ReduceName(ParaName[i]) << "\t"; cout <<endl;
-  for (i=0; i<ParaName.size(); i++) cout << Para[i] << "\t"; cout <<endl;
-  cout << "---------------------------------------------------------------"<<endl;
-  cerr <<endl<< warning_message ;
+  std::cout <<std::endl<< "---------------------------------------------------------------"<<std::endl;
+  std::cout << "LineSearch stops after " << n << " cycles."<<std::endl;
+  if (n==NbMaxCycle) std::cout <<"Maximum number of cycles achieved."<<std::endl;
+  if (STOP==NbMaxStab) std::cout <<"Fitness is stable since "<<NbMaxStab<<" cycles." <<std::endl;
+  std::cout <<std::endl << "Final Optimal Point:" <<std::endl; 
+  for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+  for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; std::cout <<std::endl;
+  std::cout << "---------------------------------------------------------------"<<std::endl;
+  std::cerr <<std::endl<< warning_message ;
 }
 
 
@@ -269,19 +270,19 @@ void LineSearch :: ReduceSearch(void) {
 void LineSearch::PrintParam(void)
 {
   unsigned int i;
-  vector <bool> FirstEltCluster;
+  std::vector <bool> FirstEltCluster;
 
   // parameters value with just the first elt of clusters IDENTICAL
   for (i=0; i<ParaClusters.size(); i++) FirstEltCluster.push_back( true );
   for (i=0; i<ParaName.size(); i++) 
     if (ParaClusterRelations[ParaCluster[i]] == IDENTICAL) {
       if ( FirstEltCluster[ParaCluster[i]] ) {
-	cout << Para[i] << "\t";
+	std::cout << Para[i] << "\t";
 	FirstEltCluster[ParaCluster[i]] = false;
       }
     } else
-      cout << Para[i] << "\t";
+      std::cout << Para[i] << "\t";
 
-  cout << "Fitness = " << Fitness << "\n";
+  std::cout << "Fitness = " << Fitness << "\n";
 }
 

@@ -9,7 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
+#include <iostream>
 #include "Genetic.h"
 
 #include "../../EuGene/Param.h"
@@ -36,7 +36,7 @@ Genetic::Genetic (void) : OptiAlgorithm()
 
   d = PAR.getD("Genetic.Elitism");
   if (d==0)
-    	{cerr <<"SORRY: the old software was just writting no parallel version available when no elitism was asked. This software runs but the functionning has to be valided."<<endl; exit(100);}
+    	{std::cerr <<"SORRY: the old software was just writting no parallel version available when no elitism was asked. This software runs but the functionning has to be valided."<<std::endl; exit(100);}
   else {
     IsElitist = true;
     Elitism = d;
@@ -51,15 +51,15 @@ Genetic::Genetic (void) : OptiAlgorithm()
 
   d = PAR.getD("Genetic.Sharing");
   if (d==0)
-    	{cerr <<"SORRY: the old software was just writting no parallel version available when no sharing was asked. This software runs but the functionning has to be valided."<<endl; exit(100);}
+    	{std::cerr <<"SORRY: the old software was just writting no parallel version available when no sharing was asked. This software runs but the functionning has to be valided."<<std::endl; exit(100);}
   else {
     IsSharing = true;
     Share = new Sharing (d);
   }
-  IsClustering =  ( ((string) PAR.getC("Genetic.Clustering")) == "TRUE") ? true : false;
+  IsClustering =  ( ((std::string) PAR.getC("Genetic.Clustering")) == "TRUE") ? true : false;
 
-  IsSAMutating =  ( ((string) PAR.getC("Genetic.SA.Mutation")) == "TRUE") ? true : false;
-  IsSACrossingOver =  ( ((string) PAR.getC("Genetic.SA.CrossOver")) == "TRUE") ? true : false;
+  IsSAMutating =  ( ((std::string) PAR.getC("Genetic.SA.Mutation")) == "TRUE") ? true : false;
+  IsSACrossingOver =  ( ((std::string) PAR.getC("Genetic.SA.CrossOver")) == "TRUE") ? true : false;
 
   d_mean=0.0;
   minmaxfactor= 2.0;
@@ -68,7 +68,7 @@ Genetic::Genetic (void) : OptiAlgorithm()
 
   // Update Par attributes (the same than Para with just the first elt of clusters IDENTICAL
   int i, q, l;
-  vector <bool> FirstEltCluster;
+  std::vector <bool> FirstEltCluster;
   bool is_to_consider;
 
   for (i=0; i<(int)ParaClusters.size(); i++) FirstEltCluster.push_back( true );
@@ -139,7 +139,7 @@ void Genetic::Optimize(bool is_chaining)
   int run, gen;
 
   if (is_chaining)
-    {cerr <<"ERROR: ask to chain Genetic Algorithm in Genetic::Optimize."<<endl; exit(100);}
+    {std::cerr <<"ERROR: ask to chain Genetic Algorithm in Genetic::Optimize."<<std::endl; exit(100);}
 
 
   // not in the constructor because OPTIM.Algorithm[OPTIM.AlgoIndex] is not updated
@@ -149,30 +149,30 @@ void Genetic::Optimize(bool is_chaining)
   if (IsSAMutating || IsSACrossingOver)  SA = new SimulatedAnnealing();
 
  // Display parametrization of the algorithm
-  cout <<endl;
-  cout << "---------------------------------------------------------------"<<endl;
-  cout<< "Optimization of EuGène parameters with the Genetic algorithm"<<endl<<endl;
-  cout << "---------------------------------------------------------------"<<endl;
-  cout << "Parametrisation of the algorithm:"<<endl<<endl;
-  cout << "NbRun: " << NbRun <<endl;
-  cout << "NbGeneration: " << NbGeneration <<endl;
-  cout << "NbElement: " << NbElement <<endl;
-  cout << "CrossOverProbability: " << CrossOver->Proba <<endl;
-  cout << "MutationProbability: " << Mutate->Proba <<endl;
-  cout << "SelectionType: " << Select->Type <<endl;
-  if (!IsElitist) cout <<"No Elitism"; else cout <<"Elitism: " << Elitism; cout <<endl;
-  if (!IsSharing) cout << "No sharing"; else cout << "Sharing:" << Share->Value; cout <<endl;
-  if (!IsScaling) cout << "No scaling"; else cout << "ScalingType:" << Scale->Type; cout <<endl;
-  if (!IsClustering) cout << "No "; cout << "Clustering" <<endl;
-  if (!IsSAMutating) cout << "No "; cout << "SA Mutating" <<endl;
-  if (!IsSACrossingOver) cout << "No "; cout << "SA CrossingOver" <<endl;
-  cout << "Seed: " << Rand->Seed <<endl;
-  cout << "Trace: " << ((IsTracing) ? "TRUE" : "FALSE") <<endl<<endl;
+  std::cout <<std::endl;
+  std::cout << "---------------------------------------------------------------"<<std::endl;
+  std::cout<< "Optimization of EuGène parameters with the Genetic algorithm"<<std::endl<<std::endl;
+  std::cout << "---------------------------------------------------------------"<<std::endl;
+  std::cout << "Parametrisation of the algorithm:"<<std::endl<<std::endl;
+  std::cout << "NbRun: " << NbRun <<std::endl;
+  std::cout << "NbGeneration: " << NbGeneration <<std::endl;
+  std::cout << "NbElement: " << NbElement <<std::endl;
+  std::cout << "CrossOverProbability: " << CrossOver->Proba <<std::endl;
+  std::cout << "MutationProbability: " << Mutate->Proba <<std::endl;
+  std::cout << "SelectionType: " << Select->Type <<std::endl;
+  if (!IsElitist) std::cout <<"No Elitism"; else std::cout <<"Elitism: " << Elitism; std::cout <<std::endl;
+  if (!IsSharing) std::cout << "No sharing"; else std::cout << "Sharing:" << Share->Value; std::cout <<std::endl;
+  if (!IsScaling) std::cout << "No scaling"; else std::cout << "ScalingType:" << Scale->Type; std::cout <<std::endl;
+  if (!IsClustering) std::cout << "No "; std::cout << "Clustering" <<std::endl;
+  if (!IsSAMutating) std::cout << "No "; std::cout << "SA Mutating" <<std::endl;
+  if (!IsSACrossingOver) std::cout << "No "; std::cout << "SA CrossingOver" <<std::endl;
+  std::cout << "Seed: " << Rand->Seed <<std::endl;
+  std::cout << "Trace: " << ((IsTracing) ? "TRUE" : "FALSE") <<std::endl<<std::endl;
 
-  cout << "NbParameter: " << ParaName.size() <<endl;
-  cout << "Param: \t"; for (i=0; i<ParaName.size(); i++) cout << ReduceName(ParaName[i]) << "\t"; cout <<endl;
-  cout << "Min: \t"; for (i=0; i<ParaMin.size(); i++) cout << ParaMin[i] << "\t"; cout <<endl;
-  cout << "Max: \t"; for (i=0; i<ParaMax.size(); i++) cout << ParaMax[i] << "\t"; cout <<endl<<endl<<endl;
+  std::cout << "NbParameter: " << ParaName.size() <<std::endl;
+  std::cout << "Param: \t"; for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+  std::cout << "Min: \t"; for (i=0; i<ParaMin.size(); i++) std::cout << ParaMin[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Max: \t"; for (i=0; i<ParaMax.size(); i++) std::cout << ParaMax[i] << "\t"; std::cout <<std::endl<<std::endl<<std::endl;
 
 
   for (k=0; k<NbElement; k++)
@@ -184,8 +184,8 @@ void Genetic::Optimize(bool is_chaining)
     InitPopulation();
 
     for (gen=0; gen<NbGeneration; gen++) {
-      cout <<endl<< "Run: " <<run<< "\tGen: " << gen 
-	   << "--------------------------------------------"<<endl;
+      std::cout <<std::endl<< "Run: " <<run<< "\tGen: " << gen 
+	   << "--------------------------------------------"<<std::endl;
       EvalPopulation() ;
 
       if ((IsSharing) && (IsClustering)) NbCluster = MakeClusters();
@@ -197,14 +197,14 @@ void Genetic::Optimize(bool is_chaining)
       if (IsSharing) Share->Share() ;
 
      if (BestFitness == 0.0)
-	cout << "No admissible element." <<endl;
+	std::cout << "No admissible element." <<std::endl;
       else {
-	cout << "Fitness: " << BestChromosome->RawFitness 
+	std::cout << "Fitness: " << BestChromosome->RawFitness 
 	     << "\tAvgFitness: " << AvgFitness
-	     << "\tSigmaFitness: " << SigmaFitness <<endl;
+	     << "\tSigmaFitness: " << SigmaFitness <<std::endl;
 	for (i=0; i<BestChromosome->data->P.size(); i++) 
-	  cout << BestChromosome->data->P[i] << "\t"; 
-	cout<<endl;
+	  std::cout << BestChromosome->data->P[i] << "\t"; 
+	std::cout<<std::endl;
 	if (BestChromosome->RawFitness > 999999999999.0) gen=NbGeneration;
       }
 
@@ -217,24 +217,24 @@ void Genetic::Optimize(bool is_chaining)
 	/* Get elements of the population that are the best of */
 	/* each optimal cluster, then print optimal clusters   */
 	/* and corresponding best fitness */
-	cout <<endl<< "Optimum for the run "<< run <<"-------------------------------------"<<endl;
+	std::cout <<std::endl<< "Optimum for the run "<< run <<"-------------------------------------"<<std::endl;
 	for (j=0; j<NbCluster; j++) {
 	  /* Put index of best element from cluster j in k if this */
 	  /* cluster is optimal else put -1 in it */
 	  if (Clusters[j]->NbChrom!=0) {
 	    k = GetOptimalInCluster(j, max) ;
 	    if (k != -1) {
-	      cout << "Cluster " << j << ": ";
+	      std::cout << "Cluster " << j << ": ";
 	      for (i=0; i<Population[k]->data->P.size(); i++) 
-		cout << Population[k]->data->P[i] << "\t"; 
-	      cout << "Fitness="<<Population[k]->RawFitness <<"\t";
+		std::cout << Population[k]->data->P[i] << "\t"; 
+	      std::cout << "Fitness="<<Population[k]->RawFitness <<"\t";
 	      if (BestChromosome == Population[k]) {
-		cout <<"(Best element)";
+		std::cout <<"(Best element)";
 		// Remenber the optimum of the run if it is better than the previous ones
 		if ((ParOpti.size()==0) || (BestFitness > FitnessOpti))
 		  { ParOpti = Population[k]->data->P; FitnessOpti = Population[k]->RawFitness;}
 	      }
-	      cout <<endl;
+	      std::cout <<std::endl;
 	    }
 	  }
 	}
@@ -252,19 +252,19 @@ void Genetic::Optimize(bool is_chaining)
 
       Mutate->Muteval();
     } 
-    cout <<endl;
+    std::cout <<std::endl;
   } /*run*/
 
   // Put the best optimum of the runs in Para
   Par = ParOpti; BestFitness = FitnessOpti;
   for (unsigned int q=0; q<Para.size(); q++) Para[q] = Par[ParaPar[q]];
   if (run>0) {
-    cout <<endl<< "---------------------------------------------------------------"<<endl;
-    cout <<"Best optimum for the runs"<<endl;
-    for (i=0; i<ParaName.size(); i++) cout << ReduceName(ParaName[i]) << "\t"; cout <<endl;
-    for (i=0; i<ParaName.size(); i++) cout << Para[i] << "\t"; 
-    cout << "Fitness=" << BestFitness <<endl;
-    cout << "---------------------------------------------------------------"<<endl;
+    std::cout <<std::endl<< "---------------------------------------------------------------"<<std::endl;
+    std::cout <<"Best optimum for the runs"<<std::endl;
+    for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+    for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
+    std::cout << "Fitness=" << BestFitness <<std::endl;
+    std::cout << "---------------------------------------------------------------"<<std::endl;
   }
 }
 
@@ -368,29 +368,29 @@ int Genetic::MakeClusters (void)
   max = BestChromosome->RawFitness * Share->Value;  
   nopt = CountNopt(nb_clusters, max) ;
 
-  cout << "Nb of  cluster: " << nb_clusters << "\t";
-  cout << "Number of optimal clusters: " << nopt <<endl;
-  cout << "Nb of element by cluster: ";
+  std::cout << "Nb of  cluster: " << nb_clusters << "\t";
+  std::cout << "Number of optimal clusters: " << nopt <<std::endl;
+  std::cout << "Nb of element by cluster: ";
   for (i=0; i<nb_clusters; i++) {
     nb_moy += Clusters[i]->NbChrom;
-    cout << Clusters[i]->NbChrom <<" ";
+    std::cout << Clusters[i]->NbChrom <<" ";
     }
-  cout <<endl;
+  std::cout <<std::endl;
 
 
 
-  cout << "Mean number of element by clusters: " << nb_moy/nb_clusters << "\t";
+  std::cout << "Mean number of element by clusters: " << nb_moy/nb_clusters << "\t";
   d_mean=sumd/nb_dist;
-  cout << "Mean distance:" << d_mean <<"\t";
+  std::cout << "Mean distance:" << d_mean <<"\t";
 
   max=(double)(nopt)/(double)(nb_clusters) ;
   if ((max>0.85)&&(minmaxfactor<100.0)) {
     minmaxfactor *= 1.05;
-    cout << "Higher minmaxfactor= " << minmaxfactor <<endl;
+    std::cout << "Higher minmaxfactor= " << minmaxfactor <<std::endl;
   }
   if ((max<0.75)&&(minmaxfactor>1.0)) {    
     minmaxfactor *= 0.95;
-    cout << "Lower  minmaxfactor= " << minmaxfactor <<endl;
+    std::cout << "Lower  minmaxfactor= " << minmaxfactor <<std::endl;
   }
 
   return nb_clusters;

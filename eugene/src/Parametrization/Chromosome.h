@@ -18,7 +18,7 @@
 
 class Data {
  public:
-  vector <double> P;
+  std::vector <double> P;
 
   Data(int n);
   double GetDistance(Data* d);

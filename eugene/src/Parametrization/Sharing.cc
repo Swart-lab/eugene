@@ -9,8 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
-
+#include <iostream>
 #include "Sharing.h"
 
 
@@ -51,7 +50,7 @@ void Sharing::Share (void)
 	  else 
 	    t2 = t1/0.0000001 ;
 	  if (t2>=1.0) 
-	    {cerr <<"ERROR: bad Dmax in Sharing.cc."<<endl; exit(100);}	  
+	    {std::cerr <<"ERROR: bad Dmax in Sharing.cc."<<std::endl; exit(100);}	  
 	  else {
 	    t3 = ((double) algo->Clusters[algo->Population[i]->NoCluster]->NbChrom)
 	      *(1-t2*t2*t2);

@@ -9,7 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
+#include <iostream>
 #include "Scaling.h"
 
 #include "../ParaOptimization.h"
@@ -89,13 +89,13 @@ void Scaling::Scalestat (int gen)
     for (i=0;i<algo->NbElement;i++) {
       f=algo->Population[i]->RawFitness;
       if (f<0.0)
-	{cerr <<"ERROR: Negative fitness in Scaling::Scalestat."<<endl; exit(100);}
+	{std::cerr <<"ERROR: Negative fitness in Scaling::Scalestat."<<std::endl; exit(100);}
       f=pow(f,k);
       algo->Population[i]->ScaledFitness=f;
     } 
     break;
     
   default :
-    {cerr <<"ERROR: Invalid type of scaling."<<endl; exit(100);}
+    {std::cerr <<"ERROR: Invalid type of scaling."<<std::endl; exit(100);}
   } 
 }

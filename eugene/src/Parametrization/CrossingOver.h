@@ -27,7 +27,7 @@ class CrossingOver {
   void Crosseval(void); 
 
  private:
-  vector<Chromosome*> ChildrenPopulation;
+  std::vector<Chromosome*> ChildrenPopulation;
 
   void Crossover(Chromosome* c1, Chromosome* c2);
   void ChooseCouple(int* n1, int* n2);

@@ -19,12 +19,12 @@
 class LineSearch : public OptiAlgorithm {
 
  private:
-  vector <double> ParaMinInter;
-  vector <double> ParaMaxInter;
-  vector <double> ParaLInter;
-  vector <double> ParaStep;
-  vector <double> ParaMinStep;
-  vector < vector <double> > Optimums;
+  std::vector <double> ParaMinInter;
+  std::vector <double> ParaMaxInter;
+  std::vector <double> ParaLInter;
+  std::vector <double> ParaStep;
+  std::vector <double> ParaMinStep;
+  std::vector < std::vector <double> > Optimums;
   int NbMaxCycle;
   int NbMinCycle;
   int NbMaxStab;
@@ -33,7 +33,7 @@ class LineSearch : public OptiAlgorithm {
   double EvolutionMini;
   double FitOpt;
   double Fitness;
-  string MsgParaNames;
+  std::string MsgParaNames;
 
   void ReduceSearch(void);
   void ScanCluster(int k);

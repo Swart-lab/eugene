@@ -9,7 +9,7 @@
 // Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
 //=======================================================================
 
-
+#include <iostream>
 #include <vector>
 
 #include "Selecting.h"
@@ -57,7 +57,7 @@ void Selecting::Selection(void)
   int i, j, k, l, p, n, jassign, jpick;
   double a, expected, avg_s_fitness, maxo;
   double total_fitness=0.0;
-  vector<Chromosome*> buf_pop;
+  std::vector<Chromosome*> buf_pop;
  
   if (Type==0) {
     /*************************************************************/
@@ -127,7 +127,7 @@ void Selecting::Selection(void)
 	while(jassign > 0) {
 	  jassign--;
 	  if ( (k>=algo->NbElement) || (k<0) )
-	    cout << k << " bang...." <<endl;
+	    std::cout << k << " bang...." <<std::endl;
 	  else
 	    choices[k] = j;
 	  k++;
