@@ -2,8 +2,6 @@
 #define  SENSOR_USER_H_INCLUDED
 
 #include "../Sensor.h"
-#include "../structure.h"
-#include "../yacc.tab.h"
 
 /*************************************************************
  **                       SensorUser                        **

@@ -1,4 +1,6 @@
 #include "Sensor.User.h"
+#include "structure.h"
+#include "yacc.tab.h"
 
 /*************************************************************
  **                        SensorUser                       **
