@@ -95,7 +95,7 @@ void MasterSensor :: InitMaster ()
     for (j=0; j<PAR.getI(useList[i]); j++) {
       dllList[nbSensors] = new SensorLoader ( soList[i] );
       if(!dllList[nbSensors]->LastError()) {
-	fprintf(stderr,"Loading %s, %d\n",msList[i]->Name,j);
+	fprintf(stderr,"Loading %s\t%d\n",msList[i]->Name,j);
 	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
       }
       else fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",soList[i]);
@@ -141,6 +141,7 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
     printf (" || %1.0f %.2f %.2f %.2f",d->Stop[i],d->Start[i],d->Acc[i],d->Don[i]);
   printf("\n");
 }
+
 // --------------------------------------------
 //  Get special info at special pos.
 //  Retourne TRUE si les sensors sont porteurs
