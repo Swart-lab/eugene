@@ -20,7 +20,7 @@
 AM_CXXFLAGS = $(eugene_cxxflags)
 AM_CFLAGS = 
 CC = $(CXX)
-YFLAGS = -d
+AM_YFLAGS = -d
 
 
 noinst_PROGRAMS = Sensor.User.so
