@@ -20,8 +20,8 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
   }
   
-  else if ((printopt0 == 'l') || (printopt0 == 'h') ||
-	   (printopt0 == 'g') || (printopt0 == 'a')) {
+  else if ((printopt0 == 'l') || (printopt0 == 'a') || (printopt0 == 'g') ||
+	   (printopt0 == 'h') || (printopt0 == 'H')) {
     int nbGene  = 1;
     int nbExon  = 0;
     int cons = 0, incons = 0;
@@ -31,35 +31,68 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     char *position;
     int stateBack = 0, state, stateNext = 0;
     int posBack   = 0, pos;
-        
-    fprintf(stderr,"\n");
-      
+    
+    int lc = 1; // EuGeneHom -pH : alternance couleur des lignes de la table
+    
+    if (printopt0 != 'H') {
+      fprintf(stderr,"\n");
+    }
+    
     if (printopt0 == 'h') {
       printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
       printf("<center><listing>\n");
       printf("\n\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
     }
+
+    else if (printopt0 == 'H') {
+      printf("<CENTER><LISTING><H2>EuGeneHom prediction</H2>\n");
+      printf("<TABLE width=700 CELLSPACING=2 CELLPADDING=2 class=clair>\n"
+	     " <TR class=clair><TD>\n"
+	     "  <TABLE CELLSPACING=2 CELLPADDING=2 border=0 width=100%%"
+	     "  class=clair>\n"
+	     "   <TR class=fonce>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Gene<br>number</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Element<br>number</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Feature<br>type&nbsp;name</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Strand</b></font></TD>\n"
+             "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Left&nbsp;end</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Right&nbsp;end</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Length</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Phase</b></font></TD>\n"
+	     "    <TD width=11%% align=center><font color=white>\n"
+	     "     <b>Frame</b></font></TD>\n"
+	     "   </TR>\n");
+    }
     
     else if (printopt0 == 'l')
-      fprintf(stderr,"    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
+      fprintf(stderr,"    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr\n");
     
     else if (printopt0 == 'a')
-      fprintf(stderr,"Seq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
+      fprintf(stderr,"Seq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr\n");
     
     if (printopt0 == 'g' && sequence == optind)
-      printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+      fprintf(stderr,"name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
     
     if(printopt0 != 'g')
       if(sequence != optind)
 	printf("\n");
       else fprintf(stderr,"\n");
     
-    //position = strstr(argv[sequence],"/seq");
+    // position = strstr(argv[sequence],"/seq");
     position = BaseName(argv[sequence]);
     if (position  == NULL)
       strcpy(seqn,"     ");
     else {
-      if (char * suffix = rindex(position,'.')) *suffix = 0; // on enleve l'extension (.fasta)
+      // on enleve l'extension (.fasta)
+      if (char * suffix = rindex(position,'.')) *suffix = 0;
       strncpy(seqn,position,5);
       if(strlen(seqn) < 5 && printopt0 != 'g')
 	for(i=strlen(seqn); i<5; i++)
@@ -115,29 +148,59 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	if(printopt0 == 'g' || printopt0 == 'a')
 	  printf("%s",seqn);
 	else
-	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
-
+	  if(printopt0 == 'H') {
+	    lc++;
+	    printf("   <TR class=A%d align=center>\n"
+		   "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
+	  }
+	  else
+	    printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
+	
 	if (printopt0 == 'g') printf("\tEuGene\t");
 	else if (printopt0 == 'a') printf(" ");
-	else printf("\t");
+	else if (printopt0 != 'H') printf("\t");
 	
 	if (init && term) {
-	  printf("Sngl");
+	  if (printopt0 == 'H') printf("<TD>Single</TD>");
+	  else printf("Sngl");
 	  nbExon = 0;
 	}
 	else if (init) {
-	  printf("Init");
+	  if (printopt0 == 'H') printf("<TD>Initial</TD>");
+	  else printf("Init");
 	  if(!forward) nbExon = 0;
 	}
 	else if (term) {
-	  printf("Term");
+	  if (printopt0 == 'H') printf("<TD>Terminal</TD>");
+	  else printf("Term");
 	  if(forward)  nbExon = 0;
 	}
-	else printf ("Intr");
+	else {
+	  if (printopt0 == 'H') printf("<TD>Internal</TD>");
+	  else printf ("Intr");
+	}
 	
 	if (printopt0 == 'g')
 	  printf("\t%d\t%d\t0\t%c\t%d\n",
-		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state)));
+		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state))-1);
+	else if (printopt0 == 'H') {
+	  printf("</TD><TD>%c</TD><TD>%7d</TD><TD>%7d</TD>",
+		 ((forward) ? '+' : '-'),Lend,Rend);
+	  printf("<TD>%4d</TD>", Rend-Lend+1);
+	  
+	  if (init)
+	    printf("<TD>%+2d</TD>", ((forward) ? 1: -1));
+	  else {
+	    Phase = ((forward) ?
+		     PhaseAdapt(stateBack-6) :
+		     -PhaseAdapt(stateNext-9));
+	    
+	    if (abs(Phase) <= 3)
+	      printf("<TD>%+2d</TD>",Phase);
+	    else printf("<TD>Unk.</TD>");
+	  }
+	  printf("<TD>%+2d</TD>\n   </TR>\n",PhaseAdapt(state));
+	}
 	else {
 	  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
 	  printf("     %4d  ", Rend-Lend+1);
@@ -163,52 +226,65 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	if(printopt0 == 'g' || printopt0 == 'a')
 	  printf("%s",seqn);
 	else
-	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
+	  if(printopt0 == 'H') {
+	    lc++;
+	    printf("   <TR class=A%d align=center>\n"
+		   "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
+	  }
+	  else
+	    printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
 	
 	if (printopt0 == 'g') printf("\tEuGene\t");
 	else if (printopt0 == 'a') printf(" ");
-	else printf("\t");
+	else if (printopt0 != 'H') printf("\t");
 	
 	switch (state) {
 	case 13: // UTR5' F
 	  if (printopt0 == 'g')
-	    printf("Utr5\t%d\t%d\t0\t+\t.\n",
-		   offset+posBack+1, offset+pos);
+	    printf("Utr5\t%d\t%d\t0\t+\t.\n", offset+posBack+1, offset+pos);
+	  else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>+</TD>");
 	  else printf("Utr5    +");
 	  break;
 	  
 	case 14: // UTR 3' F
 	  nbGene++;
 	  if (printopt0 == 'g')
-	    printf("Utr3\t%d\t%d\t0\t+\t.\n",
-		   offset+posBack+1, offset+pos);
+	    printf("Utr3\t%d\t%d\t0\t+\t.\n", offset+posBack+1, offset+pos);
+	  else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>+</TD>");
 	  else printf("Utr3    +");
 	  break;
 	  
 	case 15: // UTR5' R
 	  nbGene++;
 	  if (printopt0 == 'g')
-	    printf("Utr5\t%d\t%d\t0\t-\t.\n",
-		   offset+posBack+1, offset+pos);
+	    printf("Utr5\t%d\t%d\t0\t-\t.\n", offset+posBack+1, offset+pos);
+	  else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>-</TD>");
 	  else printf("Utr5    -");
 	  break;
 	  
 	case 16:// UTR 3' R
 	  if (printopt0 == 'g')
-	    printf("Utr3\t%d\t%d\t0\t-\t.\n",
-		   offset+posBack+1, offset+pos);
+	    printf("Utr3\t%d\t%d\t0\t-\t.\n", offset+posBack+1, offset+pos);
+	  else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>-</TD>");
 	  else printf("Utr3    -");
 	  break;
 	}
 	
-	if(printopt0 != 'g') {
+	if(printopt0 != 'g' && printopt0 != 'H') {
 	  printf("    %7d %7d", offset+posBack+1, offset+pos);
 	  printf("     %4d  ",  pos - (posBack+1) +1);
-	  printf("   NA      NA      NA      NA ");
-	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/((offset+pos) - (offset+posBack+1)+1),
+	  printf("   NA      NA");
+	  printf("      NA      NA ");
+	  printf("  %3.0f.%-3.0f\n",
+		 100.0*(double)cons/((offset+pos) - (offset+posBack+1)+1),
 		 100.0*(double)incons/((offset+pos) - (offset+posBack+1)+1));
 	}
-	if(stateNext >= ExonR1 && stateNext <= ExonR3)
+	else if (printopt0 == 'H') {
+	  printf("<TD>%7d</TD><TD>%7d</TD>", offset+posBack+1, offset+pos);
+	  printf("<TD>%4d</TD>",  pos - (posBack+1) +1);
+	  printf("<TD>NA</TD><TD>NA</TD>\n   </TR>\n");
+	}
+      	if(stateNext >= ExonR1 && stateNext <= ExonR3)
 	  nbExon = pred->nbExon(nbGene) + 1;
       }
       if(pos == Data_Len)
@@ -216,7 +292,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     }
     
     if (printopt0 == 'h')   {
-      //position = BaseName(argv[sequence]);
+      // position = BaseName(argv[sequence]);
       position = argv[sequence];
       strcat(position,".fasta");
       printf("</listing></center>\n");
@@ -231,6 +307,10 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       
       OutputHTMLFileNames();
       printf("</body></html>\n");
+    }
+    
+    if (printopt0 == 'H')   {
+      printf("  </TABLE></TD></TR></TABLE></LISTING></CENTER>");
     }
   }
   
@@ -315,9 +395,10 @@ void CheckConsistency(int debut, int fin, int etat,
   if (debut == -1) debut = 0;
   
   for (i = debut; i <fin; i++) {
+    
     MS.GetInfoSpAt(Type_Content, X, i, &dTMP);
-
-    // y a t'l de l'info
+    
+    // y a t'il de l'info
     if (dTMP.ESTMATCH_TMP) {
       // y a t'il une info incoherente avec l'etat
       if (dTMP.ESTMATCH_TMP & ~MaskConsistent[etat]) 
