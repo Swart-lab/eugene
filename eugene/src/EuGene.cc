@@ -40,6 +40,7 @@
 // non single.
 
 #define  VERSION "1.2a (110602)"
+#define  VERSION_PAR "21_08_02"
 #define PAYTOIGNORE 1
 
 #ifdef HAVE_CONFIG_H
@@ -77,6 +78,7 @@
 //#define STAND 1
 
 #define DFT_MATRIX          "default.mat"
+#define DFT_OUTPUT          "./"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
@@ -117,8 +119,8 @@ const unsigned char GapForward    = 0x4;
 const unsigned char MRightForward = 0x8; 
 
 // shift to go from Hits to ...
-const  unsigned int HitToMLeft = 1;
-const  unsigned int HitToGap = 2;
+const  unsigned int HitToMLeft  = 1;
+const  unsigned int HitToGap    = 2;
 const  unsigned int HitToMRight = 3;
 
 const unsigned char HitReverse    = 0x10;
@@ -128,13 +130,13 @@ const unsigned char MRightReverse = 0x80;
 
 const unsigned char Hit           = HitForward    | HitReverse;
 const unsigned char MLeft         = MLeftForward  | MLeftReverse;
-const unsigned char MForward         = MLeftForward  | MRightForward;
-const unsigned char MReverse         = MLeftReverse  | MRightReverse;
+const unsigned char MForward      = MLeftForward  | MRightForward;
+const unsigned char MReverse      = MLeftReverse  | MRightReverse;
 const unsigned char Gap           = GapForward    | GapReverse;
 const unsigned char MRight        = MRightForward | MRightReverse;
 const unsigned char Margin        = MRight        | MLeft;
 
-const  unsigned char NotAHit       = Margin | Gap;
+const unsigned char NotAHit       = Margin | Gap;
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
@@ -142,10 +144,10 @@ double Score [9],NScore[9];
 int Data_Len;
 int normopt,blastopt,estopt,estanal,ncopt,raflopt,userinfo;
 int window, offset,graph,resx,resy;
-int    gfrom,gto,golap,glen;
+int    gfrom,gfromSave,gto,gtoSave,golap,glen;
 
 extern char     *optarg;   
-extern int      optind;
+extern int       optind;
 
 #include "System.h"
 #include "DNASeq.h"
@@ -156,7 +158,6 @@ extern int      optind;
 #include "BackP.h"
 #include "Plot.h"
 #include "Hits.h"
-
 //#include "SpliceGS.h"
 //#include "SpliceP.h"
 //#include "SpliceN.h"
@@ -176,10 +177,10 @@ typedef struct RAFLgene{
 } RAFLgene;
 
 bool Before(const RAFLgene &A,const RAFLgene &B) {
-  int m1 = A.deb+A.fin;
-  int m2  = B.deb+B.fin;
-
-  return (m1 < m2);
+//  int m1 = A.deb+A.fin;
+//  int m2  = B.deb+B.fin;
+//  return (m1 < m2);
+  return (A.deb < B.deb);
 }
 
 // ------------------ Globals ---------------------
@@ -672,7 +673,7 @@ void ESTSupport(char * Choice, int Tdebut, int Tfin, int debut,int fin,  Hits **
   unsigned char *Sup;
   Block *ThisBlock;
   int ConsistentEST,i;
-  int from,to,ESTEnd;
+  int from = 0, to = 0, ESTEnd = 0;
   
   if (Choice == NULL) { 
     EstIndex = 0;
@@ -765,13 +766,14 @@ void ESTSupport(char * Choice, int Tdebut, int Tfin, int debut,int fin,  Hits **
      EstIndex++;
   }
   if (fin >= debut)
-  printf("      CDS          %7d %7d    %5d     supported on %d bases\n",debut+1,fin+1,fin-debut+1,
-	 CDSsupported);
-  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",Tdebut+1,Tfin+1,Tfin-Tdebut+1,
-	 supported);
+  printf("      CDS          %7d %7d    %5d     supported on %d bases\n",
+	 debut+1,fin+1,fin-debut+1,CDSsupported);
+  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",
+	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
   delete Sup;
   return;
 }
+
 // -------------------------------------------------------------------------
 //            MAIN
 // -------------------------------------------------------------------------
@@ -781,30 +783,43 @@ int main  (int argc, char * argv [])
   FILE             *fp;
   REAL             BaseScore[13],*Start[2] ;
   REAL             *Don[2],*Acc[2];
-  REAL    *Stop[2];
-  unsigned char    *ESTMatch;
+  REAL             *Stop[2];
+  unsigned char    *ESTMatch = NULL;
 
-  REAL             *ProtMatch;
-  REAL             *ProtMatchLevel;
-  int              *ProtMatchPhase;
+  REAL             *ProtMatch = NULL;
+  REAL             *ProtMatchLevel = NULL;
+  int              *ProtMatchPhase = NULL;
 
   BString_Array    *IMMatrix[7];
   char             clef[20];
   DNASeq           *TheSeq;
   char             printopt;
+  char             outputname[FILENAME_MAX+1];
+  char             parname[FILENAME_MAX+1];
+  char             blastArg[FILENAME_MAX+1];
   char             matname[FILENAME_MAX+1], tempname[FILENAME_MAX+1], fstname[FILENAME_MAX+1];
   char             grname[FILENAME_MAX+1];
+  char             grnameArg[FILENAME_MAX+1]; // argument -g"...."
+  char             *grnameFile = NULL;
   int              EstM;
+  char             versionPAR[FILENAME_MAX+1];
   double           FsP,StartP,StartB,StopP,TransStartP,TransStopP;
-  double           AccP[2],AccB[2],DonP[2],DonB[2],BlastS[3],EstP;
-  unsigned char *ForcedIG;
-  Hits **HitTable = NULL;
-  int NumEST;
+  double           AccP[2],AccB[2],DonP[2],DonB[2],BlastS[8],EstP;
+  double           TransitionWeight[5];
   
-  char *EugDir;
+  // Nombre de paramètre dans le fichier .par
+  const int NBPARAM  = 39;
+  const int MAX_LINE = 300;
+  char      Line [MAX_LINE];
+
+  unsigned char    *ForcedIG  = NULL;
+  Hits             **HitTable = NULL;
+  int              NumEST;
+  
+  char             *EugDir;
 
   std::vector <RAFLgene> RAFL;
-  int              RAFLpos;  //position par rapport a un gene RAFL
+  int              RAFLpos = 0;  //position par rapport a un gene RAFL
 
   // prior on the initial state, selon Sato et al 1999 / Terryn et
   // al. 1999
@@ -812,7 +827,7 @@ int main  (int argc, char * argv [])
   REAL InterPrior = 0.4,FivePrimePrior = 0.03,ThreePrimePrior = 0.07;
 
   const REAL DontCrossStop = NINFINITY;
-  const REAL IGPenalty = -1.0; 
+  const REAL IGPenalty = NINFINITY; 
   const REAL RAFLPenalty = NINFINITY; 
 
   // Les longueurs. 
@@ -827,67 +842,33 @@ int main  (int argc, char * argv [])
   glen = -1;
   golap = -1;
   gfrom = -1;
+  gfromSave = -1;
   gto = -1;
+  gtoSave = -1;
   resx = 900;                 // x res for graph. output
   resy = 400;                 // y res for graph. output
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
-  estanal = FALSE;             // don't try to analyze EST support
-  userinfo = FALSE;         // shall we read a user info file
+  estanal = FALSE;            // don't try to analyze EST support
+  userinfo = FALSE;           // shall we read a user info file
   raflopt = FALSE;            // don't try to read a est.rafl file
-  blastopt = 0;              // don't try to read a blast file
-  ncopt = FALSE;                   //don't try to read a non coding input
+  blastopt = FALSE;           // don't try to read a blast file
+  ncopt = FALSE;              // don't try to read a non coding input
   normopt = 1;                // normalize across frames
   window  = 97;               // window length
   printopt = 'l';             // short print format 
   offset = 0;                 // no offset
 
   (void) strcpy(matname, DFT_MATRIX); // default matrix file
-  *fstname = '\000';                  // no default input    
+  (void) strcpy(outputname, DFT_OUTPUT); // default output
+  *fstname = '\000';                  // no default input
+  parname[0] = '0';                   // no -P
   errflag = 0;
 
-
-  EugDir = getenv("EUGENEDIR");
-
-  strcpy(tempname,argv[0]);
-  strcat(tempname,".par");
-  fp = FileOpen(EugDir,BaseName(tempname),"r");
-
-  fprintf(stderr,"EuGene rel. %s\n",VERSION);
-  fprintf(stderr,"Loading parameters file...");
-  fflush(stderr);
-  
-  if (fscanf(fp,
-"%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %d", 
-	     clef,&FsP,&StartP,&StartB,&StopP,&TransStartP,&TransStopP,
-             &AccP[0],&AccB[0],&DonP[0],&DonB[0],&AccP[1],&AccB[1],&DonP[1],&DonB[1],
-	     &BlastS[0],&BlastS[1],&BlastS[2],&EstP,&EstM,
-	     &MinEx,&MinIn,&MinSg,&MinFlow,&MinConv,&MinDiv,
-	     &MinFivePrime,&MinThreePrime) != 28)
-    {
-      fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
-      exit(2);
-    }
-  fprintf(stderr,"done\n");
-  fclose(fp);
-
- // remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
-
-  for (i = 0; i < 6; i++) {
-    MinLength[i] = MinEx;
-    MinLength[i+6] = MinIn;
-    MinLength[i+12] = MinSg;
-  }
-
-  ReadKey(clef,"EUGENEAT");
-
-  // any Frameshift prob below -1000.0 means "not possible"
-  if (FsP <= -1000.0) FsP = NINFINITY;
-
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:P:O:")) != -1) {
     
     switch (carg) {
-
+      
     case 'n':            /* -n normalize across frames      */
       if (! GetIArg(optarg, &normopt, normopt))
 	errflag++;
@@ -921,12 +902,14 @@ int main  (int argc, char * argv [])
       
     case 'u':            /* -u From      */
       if (! GetIArg(optarg, &gfrom, gfrom))
-        errflag++;
+	errflag++;
+      gfromSave = gfrom;
       break;
       
     case 'v':            /* -v To      */
       if (! GetIArg(optarg, &gto, gto))
-        errflag++;
+	errflag++;
+      gtoSave = gto;
       break;
       
     case 'x':            /* -x resx      */
@@ -940,24 +923,45 @@ int main  (int argc, char * argv [])
       break;
       
     case 'g':           /* -g "Graphic File"                */
-      if (optarg) strcpy(grname,optarg);
-      else grname[0] = 0;
-      graph = TRUE;
+      if (optarg) {
+	if (strspn(".fasta", optarg)    != 6 
+	    && strspn(".fsa", optarg)   != 4
+	    && strspn(".tfa", optarg)   != 4
+	    && strspn(".txt", optarg)   != 4
+	    && optarg[0] != '-') {
+	  if(strcmp(optarg, "NO"))      // Argument suivant le -g
+	    strcpy(grnameArg,optarg);   // != NO pris en compte
+	  else 
+	    grnameArg[0] = 0;           // == NO non pris en compte
+	  graph = TRUE;
+	}
+	else errflag++;
+      }
+      else
+	grnameArg[0] = 0;
       break;
-    
+      
     case 'p':           /* print opt: short/long/detailed   */
       printopt = optarg[0];
       if ((printopt == 'h') &&  graph == FALSE) {
 	graph = TRUE; // HTML output means graphical output 
-	grname[0] = 0;
+	grnameArg[0] = 0;
       }
-      if ((printopt != 's') && (printopt != 'l') && 
-	  (printopt != 'd')&& (printopt != 'h'))
+      if ((printopt != 's') && (printopt != 'l') && (printopt != 'g') && 
+	  (printopt != 'd') && (printopt != 'h'))
 	errflag++;
       break;
       
     case 'm':           /* -m matrix                        */
       (void) strcpy(matname, optarg);
+      break;
+
+    case 'O':           /* -m matrix                        */
+      (void) strcpy(outputname, optarg);
+      break;
+
+    case 'P':           /* -P .par                          */
+      (void) strcpy(parname, optarg);
       break;
 
     case 'o':           /* -o offset                        */
@@ -972,14 +976,19 @@ int main  (int argc, char * argv [])
       break;
 
     case 'b':           /* -b  use blastx result            */
-      if (optarg)
-	errflag += !GetIArg(optarg, &blastopt, blastopt);
-      else
-	blastopt = 7;
-
-      if (blastopt > 7) errflag++;
-      break; 
-
+      if (optarg) {
+	(void) strcpy(blastArg, optarg);
+	blastopt = TRUE;
+	if(strlen(blastArg) > 8)
+	  errflag++;
+      }
+      else {
+	blastArg[0] = '1';
+	blastArg[1] = '2';
+	blastArg[2] = '3';
+      }
+      break;
+      
     case 'E':
       estanal = TRUE;
       break;
@@ -1006,20 +1015,114 @@ int main  (int argc, char * argv [])
     }
   }
 
-
   // may remain arguments -> fasta filenames
-
   if ((argc - optind) == 0)
     errflag++;
-    
-  // check usage
   
+  // check usage
   if (errflag) {
-    fprintf(stderr, "usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|s|l|d] [-w window]\n");
-    fprintf(stderr, "              [-b {level}] [-d] [-o offset] [-g {groutput}] [-u start]\n");
-    fprintf(stderr, "              [-v end] [-l len] [-c olap] [-x xres] [-y yres] FASTA files\n");
+    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-P .par] [-n 0|1|2] [-s] [-p h|g|s|l|d]\n"
+	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
+	    "              [-g {graphArg}] [-u start] [-v end] [-l len] [-c olap]\n"
+	    "              [-x xres] [-y yres] FASTA files\n");
     exit(1);
   }
+  
+  fprintf(stderr,"EuGene rel. %s\n",VERSION);
+  fprintf(stderr,"Loading parameters file...");
+  fflush(stderr);
+
+  // Lecture des parametres (.par)
+  EugDir = getenv("EUGENEDIR");
+  
+  if(parname[0] == '0') {
+    strcpy(tempname,argv[0]);
+    strcat(tempname,".par");
+    fp = FileOpen(EugDir,BaseName(tempname),"r");
+  }
+  else {
+    fp = FileOpen(EugDir,parname,"r");
+    strcpy(tempname,parname);
+  }
+  
+  i = 0;
+  fgets (Line, MAX_LINE, fp);
+  fgets (Line, MAX_LINE, fp);
+  fgets (Line, MAX_LINE, fp);
+  if (fgets (Line, MAX_LINE, fp) != NULL)
+  if (sscanf(Line, "%s", clef))
+    if (fgets (Line, MAX_LINE, fp) != NULL)
+    if (sscanf(Line, "%s", versionPAR))
+      if (fgets (Line, MAX_LINE, fp) != NULL)
+      if (sscanf(Line, "%lf", &FsP))
+        if (fgets (Line, MAX_LINE, fp) != NULL)
+        if (sscanf(Line, "%lf %lf", &StartP, &StartB) == 2)
+          if (fgets (Line, MAX_LINE, fp) != NULL)
+          if (sscanf(Line, "%lf", &StopP))
+            if (fgets (Line, MAX_LINE, fp) != NULL)
+            if (sscanf(Line, "%lf", &TransStartP))
+              if (fgets (Line, MAX_LINE, fp) != NULL)
+              if (sscanf(Line, "%lf", &TransStopP))
+       	        if (fgets (Line, MAX_LINE, fp) != NULL)
+                if (sscanf(Line, "%lf %lf", &AccP[0], &AccB[0]) == 2)
+                  if (fgets (Line, MAX_LINE, fp) != NULL)
+     	          if (sscanf(Line, "%lf %lf", &DonP[0], &DonB[0]) == 2)
+                    if (fgets (Line, MAX_LINE, fp) != NULL)
+    	            if (sscanf(Line, "%lf %lf", &AccP[1], &AccB[1]) == 2)
+                      if (fgets (Line, MAX_LINE, fp) != NULL)
+    	              if (sscanf(Line, "%lf %lf", &DonP[1], &DonB[1]) == 2)
+			if (fgets (Line, MAX_LINE, fp) != NULL)
+			if (sscanf(Line, "%lf", &EstP))
+			  if (fgets (Line, MAX_LINE, fp) != NULL)
+			  if (sscanf(Line, "%d", &EstM))
+			    if (fgets (Line, MAX_LINE, fp) != NULL)
+			    if (fgets (Line, MAX_LINE, fp) != NULL)
+			    if (sscanf(Line, "%lf %lf %lf %lf %lf %lf %lf %lf",
+				       &BlastS[0],&BlastS[1],&BlastS[2],&BlastS[3],
+				       &BlastS[4],&BlastS[5],&BlastS[6],&BlastS[7]) == 8)
+			      if (fgets (Line, MAX_LINE, fp) != NULL)
+			      if (fgets (Line, MAX_LINE, fp) != NULL)
+			      if (sscanf(Line, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+					 &MinEx, &MinIn, &MinSg, &MinFlow, &MinConv,
+					 &MinDiv, &MinFivePrime, &MinThreePrime) == 8)
+				if (fgets (Line, MAX_LINE, fp) != NULL)
+				if (fgets (Line, MAX_LINE, fp) != NULL)
+				if (sscanf(Line, "%lf %lf %lf %lf %lf",
+					   &TransitionWeight[0], &TransitionWeight[1],
+					   &TransitionWeight[2], &TransitionWeight[3],
+					   &TransitionWeight[4]) == 5) {
+				  i = NBPARAM;
+				  fprintf(stderr,"done\n");
+				  if(strcmp(versionPAR,VERSION_PAR)) {
+				    fprintf(stderr,"Incorrect parameter file version : %s\n",
+					    versionPAR);
+				    fprintf(stderr,"Version %s required\n", VERSION_PAR);
+				    exit(2);
+				  }
+				  else
+				    fprintf(stderr,"Parameters file %s\n", versionPAR);
+				}
+  if (i != NBPARAM)
+    {
+      if (EugDir != NULL)
+	fprintf(stderr, "Incorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
+      else
+	fprintf(stderr, "Incorrect parameter file %s\n",BaseName(tempname));
+      exit(2);
+    }
+  fclose(fp);
+
+ // remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
+  for (i = 0; i < 6; i++) {
+    MinLength[i] = MinEx;
+    MinLength[i+6] = MinIn;
+    MinLength[i+12] = MinSg;
+  }
+
+  ReadKey(clef,"EUGENEAT");
+
+  // any Frameshift prob below -1000.0 means "not possible"
+  if (FsP <= -1000.0) FsP = NINFINITY;
 
   // ---------------------------------------------------------------------------  
   // Lecture des modeles de Markov
@@ -1044,62 +1147,63 @@ int main  (int argc, char * argv [])
     fprintf(stderr,"%d ",i+1);
     fflush(stderr);
   }
+
   // On essaie ensuite de lire un 6eme modele. Si cela echoue,
   // le modele interG est utilise pour les UTR
-
-    IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-    if (IMMatrix[6]->Read(fp)) {
-      fprintf(stderr,"- No UTR model found, using introns model. ");
-      delete IMMatrix[6];
-      IMMatrix[6] = IMMatrix[3];
+  IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+  if (IMMatrix[6]->Read(fp)) {
+    fprintf(stderr,"- No UTR model found, using introns model. ");
+    delete IMMatrix[6];
+    IMMatrix[6] = IMMatrix[3];
+    IMMatrix[5] = IMMatrix[3];
+  } else {
+    fprintf(stderr,"6 ");
+    IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+    if (IMMatrix[5]->Read(fp)) {
+      fprintf(stderr,"- No second UTR model found, using intron model. ");
+      delete IMMatrix[5];
       IMMatrix[5] = IMMatrix[3];
-    } else {
-      fprintf(stderr,"6 ");
-      IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-      if (IMMatrix[5]->Read(fp)) {
-	fprintf(stderr,"- No second UTR model found, using intron model. ");
-	delete IMMatrix[5];
-	IMMatrix[5] = IMMatrix[3];
-      } else fprintf(stderr,"7 ");
-    }
-
+    } else fprintf(stderr,"7 ");
+  }
+  
   fprintf(stderr,"done\n");
   fclose(fp);
+
   // ---------------------------------------------------------------------------  
   // Lecture de la sequence
   // ---------------------------------------------------------------------------  
   int sequence;
   for (sequence = optind; sequence < argc ; sequence++) {
-      
-    (void) strcpy(fstname, argv[sequence]);
     
+    (void) strcpy(fstname, argv[sequence]);
+   
     // read fasta file
     
   fp = (*fstname ? FileOpen (NULL,fstname, "r") : stdin);
-
+    
   if (fp == NULL) {
     fprintf(stderr, "cannot open fasta file %s\n",  fstname);
     exit(3);
   }
-
+  
   fprintf(stderr,"Loading sequence...");
   fflush(stderr);
   
   TheSeq = new DNASeq(fp);
-
+  
   if (fp != stdin) fclose(fp);
   
   Data_Len = TheSeq->SeqLen;
-
+  
   fprintf(stderr,"%s, %d bases read\n",TheSeq->Name, Data_Len);
-
+  
   fprintf (stderr,"GC Proportion = %.1f%%\n", 
 	   (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
-
+  
   // ---------------------------------------------------------------------------  
   // Allocation match prot/est
   // ---------------------------------------------------------------------------  
- 
+  
   if (estopt) {
     ESTMatch = new unsigned char[Data_Len+1];
     for (i = 0; i<= Data_Len; i++) 
@@ -1121,16 +1225,16 @@ int main  (int argc, char * argv [])
   // ---------------------------------------------------------------------------
   Stop[0] = new REAL[Data_Len+1];
   Stop[1] = new REAL[Data_Len+1];
-
+  
   Start[0] = new REAL[Data_Len+1];
   Start[1] = new REAL[Data_Len+1];
-
+  
   Acc[0] = new REAL[Data_Len+1];
   Acc[1] = new REAL[Data_Len+1];
-
+  
   Don[0] = new REAL[Data_Len+1];
   Don[1] = new REAL[Data_Len+1];
-
+  
   Find_Stop_Codons(TheSeq, Stop);
   
   fprintf(stderr, "Reading start files...");
@@ -1146,9 +1250,7 @@ int main  (int argc, char * argv [])
   strcat(tempname,".startsR");
   Read_Start(tempname,Data_Len, exp(-StartP), StartB, Start[1],1);
   fprintf(stderr," reverse done\n");
-
-  Check_Start(TheSeq,Start);
-
+  
   fprintf(stderr, "Reading splice site files...");  
   fflush(stderr);
   
@@ -1159,8 +1261,6 @@ int main  (int argc, char * argv [])
   Read_Splice(fstname,-1,Data_Len, Acc[1], Don[1],AccP,AccB,DonP,DonB);
   fprintf(stderr," reverse done\n");
   
-  Check_Splices(TheSeq,Acc,Don);
-
   // ---------------------------------------------------------------------------
   // Lecture donnees user
   // ---------------------------------------------------------------------------
@@ -1171,7 +1271,7 @@ int main  (int argc, char * argv [])
     Weights[17] = Acc[0];    Weights[18] = Acc[1];
     Weights[19] = Don[0];    Weights[20] = Don[1];
     fprintf(stderr,"Loading user data...");
-
+    
     strcpy(tempname,fstname);
     strcat(tempname,".user");
     errflag = Utilisateur(tempname);   //prise en compte de donnees utilisateur
@@ -1181,7 +1281,7 @@ int main  (int argc, char * argv [])
     }
     else fprintf(stderr,"done\n");
   }
-
+  
   if (userinfo) {
     UserInfoList = SignalUser;
     //    WriteUtils(UserInfoList,stdout);
@@ -1195,18 +1295,30 @@ int main  (int argc, char * argv [])
   // ---------------------------------------------------------------------------
   // Preparation sortie graphique + Scores
   // ---------------------------------------------------------------------------
-
   if (graph) {
-    if (grname[0] == 0) {
-      strcpy(grname,fstname);
-      *rindex(grname,'.') = 0; // on enleve l'extension (.fasta typ.)
-    }
+    // Récupération du nom du fichier d'origine
+    grnameFile = BaseName(fstname);
 
-    if (gfrom != -1) sprintf(grname+strlen(grname),"%d",gfrom);
-    if (gto != -1) sprintf(grname+strlen(grname),"-%d",gto);
+    // Construction du nom de sortie (*.png)
+    strcpy(grname,outputname);
+    strcat(grname,grnameFile);
+    *rindex(grname,'.') = 0;   // on enleve l'extension (.fasta typ.)
+    if(grnameArg[0] != 0) {    // -p h sans -g ou -g NO pas d'argument
+      strcat(grname,".");
+      strcat(grname,grnameArg);
+    }
     
     if ((gfrom <= 0)|| (gfrom >= Data_Len)) gfrom = 1;
     if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len)) gto = Data_Len;
+    
+    if (gfromSave != -1) {
+      sprintf(grname+strlen(grname), ".%d", gfrom);
+      if (gtoSave == -1) sprintf(grname+strlen(grname), "-%d", Data_Len);
+    }
+    if (gtoSave != -1) {
+      if (gfromSave == -1) sprintf(grname+strlen(grname), ".%d", 1);
+      sprintf(grname+strlen(grname), "-%d", gto);
+    }
     
     gfrom--;
     gto--;
@@ -1215,19 +1327,43 @@ int main  (int argc, char * argv [])
     
     InitPNG(resx,resy,offset,gfrom,gto,golap,glen,grname);
     PlotScore(TheSeq,IMMatrix,window,normopt);
+     
+    if(gtoSave == -1 && gfromSave == -1) {    // Si pas d'option -u et -v
+      gto   = -1;
+      gfrom = -1; 
+      glen  = -1;
+    }
+    else {
+      if(gfromSave != -1 && gtoSave != -1) {  // Si option -u && -v
+	gto   = gtoSave;
+	gfrom = gfromSave;
+	glen  = -1;
+      }
+      else {
+	if(gfromSave != -1) {                 // Si option -u
+	  gto   = -1;
+	  gfrom = gfromSave;
+	  glen  = -1;
+	}
+	else {                                // Si option -v
+	  gto   = gtoSave;
+	  gfrom = -1;
+	  glen  = -1;
+	}
+      }
+    }
   }
-    
+  
   OpenDoor();
-
+  
   if (!PorteOuverte && Data_Len > 6000) 
     {
       printf("Valid license key not found ! The software is therefore limited to 6kb long\n");
       printf("sequences. Please contact Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
       printf("license key.\n");
-      
       exit(2);
     }
-
+  
   // ---------------------------------------------------------------------------
   /* Exploiting spliced alignements against EST and complete cDNA */
   // ---------------------------------------------------------------------------
@@ -1240,7 +1376,7 @@ int main  (int argc, char * argv [])
     HitTable = ESTAnalyzer(fEST,ESTMatch,EstM,Don,Acc,&NumEST);
     fclose(fEST);
   }
-
+  
   // ---------------------------------------------------------------------------
   // Lecture des RIKEN
   // ---------------------------------------------------------------------------
@@ -1251,7 +1387,7 @@ int main  (int argc, char * argv [])
     char name[FILENAME_MAX+1];
     RAFLgene tmp;
     std::vector <RAFLgene> RAFLtmp;
-
+    
     fprintf(stderr,"Reading RAFL gene...");
     fflush(stderr);
     strcpy(tempname,fstname);
@@ -1272,218 +1408,229 @@ int main  (int argc, char * argv [])
     fclose(fRAFL);
     fprintf(stderr,"%d RAFL EST pairs read, ",RAFLtmp.size());
     if (j != EOF) fprintf(stderr,"Incorrect RAFL file\n");
-
+    
     sort(RAFLtmp.begin(),RAFLtmp.end(),Before);
-
-    for (j =0; j<RAFLtmp.size()-1 ;j++) {
-      if (RAFLtmp[j].fin >= RAFLtmp[j+1].deb)  // overlap
-	if (RAFLtmp[j].fin - RAFLtmp[j+1].deb < 60)  {
-	  RAFLtmp[j].fin = (RAFLtmp[j].fin+RAFLtmp[j+1].deb)/2;
-	  RAFLtmp[j+1].deb = RAFLtmp[j].fin +2;
-	} else continue;
-      RAFL.push_back(RAFLtmp[j]);
+    
+    for (j = 0; j<(int)RAFLtmp.size()-1 ;j++) {
+      /*	if (RAFLtmp[j].fin - RAFLtmp[j+1].deb < 60)  {
+		RAFLtmp[j].fin = (RAFLtmp[j].fin+RAFLtmp[j+1].deb)/2;
+		RAFLtmp[j+1].deb = RAFLtmp[j].fin +2;
+		} else continue;
+		RAFL.push_back(RAFLtmp[j]);
+      */
+      if (RAFLtmp[j].fin - RAFLtmp[j+1].deb < 60) {// pas de grand overlap
+	RAFL.push_back(RAFLtmp[j]);
+      }
+      else { 
+	fprintf(stderr,"fusion...");
+	// grand overlap, on fusionne les deux riken (meme gene)
+	RAFLtmp[j].deb = Min( RAFLtmp[j].deb , RAFLtmp[j+1].deb );
+	RAFLtmp[j].fin = Max( RAFLtmp[j].fin , RAFLtmp[j+1].fin );
+	RAFL.push_back(RAFLtmp[j]); 
+	// on prend le gene resultant et on saute le suivant
+	j++;
+      }
     }
-    RAFL.push_back(RAFLtmp[j]);
-
+    if(j==(int)RAFLtmp.size()-1) RAFL.push_back(RAFLtmp[j]);
+    
     if (graph) {
       const int HLen = 30;
-
-      for (j =0; j<RAFL.size() ;j++) {
+      
+      for (j =0; j<(int)RAFL.size() ;j++) {
 	PlotBarF(RAFL[j].deb, 0,0.9,0.2,2);
 	PlotLine(RAFL[j].deb,RAFL[j].deb+HLen,0,0,1.0,1.0,2);
 	PlotBarF(RAFL[j].fin, 0,0.9,0.2,2);
 	PlotLine(RAFL[j].fin-HLen,RAFL[j].fin,0,0,1.0,1.0,2);
       }
     }
-
+    
     fprintf(stderr,"%d kept\n",RAFL.size());
     fflush(stderr);
     if (RAFL.size() < 1) raflopt=FALSE;
   }
-
+  
   // index du RIKEN en cours
   int RAFLindex = 0;
-
+  
   // ---------------------------------------------------------------------------
   // Analysing NC input
   // ---------------------------------------------------------------------------
   if (ncopt) {
     FILE* ncfile;
     int deb,fin;
-
+    
     fprintf(stderr,"Reading Intergenic regions... ");
     fflush(stderr);
-
+    
     strcpy(tempname,fstname);
     strcat(tempname,".ig");
     ncfile = FileOpen(NULL,tempname, "r");
-
+    
     ForcedIG = new unsigned char[Data_Len+1];
     for (j = 0; j <= Data_Len; j++) ForcedIG[j] = FALSE;
-
+    
     while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
       deb = Max(1,deb)-1;
       fin = Min(Data_Len,fin)-1;
       for (i = deb; i <= fin; i++) {
 	ForcedIG[i] = TRUE;
 	if (graph) PlotBarI(i,0,0.25,2,6);
-      }
+	}
     }
   }
-
+    
   // ---------------------------------------------------------------------------
   // Blastx against protein databases 1st simple version, we simply
   // enhance coding probability according to phase Dangerous (NR
   // contains translation of frameshifted sequences) another
   // possibility would be too forbid introns/intergenic states
-  // 3 levels of confidence may be used.
+  // 8 levels of confidence may be used.
   // ---------------------------------------------------------------------------
   const int LevelColor[3] = {6,7,8}; 
   if (blastopt)
     {
       FILE *fblast;
-       int overlap,deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
-       char A[128],B[128];
-       char *ProtId, *PProtId,*tmp;
-       REAL GlobalScore;
-       REAL PGlobalScore;
-       const int MaxOverlap=10; 
-       const int MaxHitLen = 15000;
-
-
-       fprintf(stderr,"Reading Blastx data, level... ");
-       fflush(stderr);
-
-       for( level = blastopt; level >= 0; level--)
-	 {
-	   if (blastopt & (1<<level)){
-	     strcpy(tempname,fstname);
-	     strcat(tempname,".blast");
-	     i = strlen(tempname);
-	     tempname[i] = '0'+level;
-	     tempname[i+1] = 0;
-
-	     fblast = FileOpen(NULL,tempname, "r");
-	     if (fblast == NULL) continue;
-
-	     A[0] = B[0]= 0;
-	     ProtId = A;
-	     PProtId = B;
-	     PProtFin = -10000;
-
-	     while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
-			   &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
-
-	       if (abs(fin-deb) > MaxHitLen) {
-		 fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",ProtId);
-		 continue;
-	       }
-
-	       if (phase < 0) {
-		 j = deb;
-		 deb = fin;
-		 fin = j;
-		 j = ProtDeb;
-		 ProtDeb = ProtFin;
-		 ProtFin = j;
-	       }
-	       GlobalScore=((REAL)score)/((REAL)abs(fin-deb));
-
-	       overlap=0;
-	       // Reconstruction GAPS -> INTRONS
-	       if ( (strcmp(ProtId,PProtId) == 0) &&
-		    (abs(PProtFin-ProtDeb)<= (MaxOverlap)) ) {
-		 // Detection d'un INTRON
-		 overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
-		 // overlap >0 : hits chevauchants, overlap <0 : hits espaces
-		 if ((deb-Pfin+overlap) >= MinLength[8] ){
-		   // Le tableau des introns est rempli prudemment: uniquement les bordures, et sans serrer pres de l'exon. 
-		   for (i= Pfin-(overlap<0)*overlap ; i< Pfin+MinLength[8]-abs(overlap) ; i++) {
-		     // debut de l'intron seulement... (dont le score est fonction de l'exon precedent)
-		     if (BlastS[level] >= ProtMatchLevel[i]){
-		       if (BlastS[level] > ProtMatchLevel[i]){
-			 ProtMatchLevel[i]= BlastS[level];
-			 ProtMatch[i]= -PGlobalScore;
-			 ProtMatchPhase[i]=0;
-		       }
-		       else{
-			 if (PGlobalScore > fabs(ProtMatch[i])){
-			   ProtMatch[i]= -PGlobalScore;
-			   ProtMatchPhase[i]= 0;
-			 }
-		       }
-		     }
-		     //		     j=((phase < 0)?-4:4);
-		     //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
-		   }
-		   for (i = deb-MinLength[8]+abs(overlap) ; i < deb+(overlap<0)*overlap ; i++){
-		     // ...et fin de l'intron (score est fonction de l'exon actuel)
-		     if (BlastS[level] >= ProtMatchLevel[i]){
-		       if (BlastS[level] > fabs(ProtMatchLevel[i])){
-			 ProtMatchLevel[i]= BlastS[level];
-			 ProtMatch[i]= -GlobalScore;
-			 ProtMatchPhase[i]=0;
-		       }
-		       else {
-			 if (PGlobalScore > fabs(ProtMatch[i])){
-			   ProtMatch[i]= -GlobalScore;
-			   ProtMatchPhase[i]= 0;
-			 }
-		       }
-		     }
-		     //		     j=((phase < 0)?-4:4);
-		     //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
-		   }
-		 }
-		 if (graph) {
-		   PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
-//		   for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
-//		     j=((phase < 0)?-4:4);
-//		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
-//		   }
-		 }
-	       }
-	       
-	       PGlobalScore=GlobalScore;
-	       Pfin = fin;
-	       tmp = PProtId;
-	       PProtId = ProtId;
-	       ProtId = tmp;
-	       PProtFin = ProtFin;
-	       PPhase = phase;
-	       
-	       phase = ph06(phase);
-	       
-// HITS -> CODANT
-	       if (graph) {
-		 for (i = deb-1; i < fin; i++){
-		   PlotBarI(i,PhaseAdapt(phase),0.6+(level/8.0),1,LevelColor[level]);
-		 }
-	       }
-	       
-	       for (i = deb-1; i < fin; i++)  {
-		 if (BlastS[level] >= ProtMatchLevel[i]){
-		   if (BlastS[level] > ProtMatchLevel[i]){
-		     ProtMatchLevel[i] = BlastS[level];
-		     ProtMatch[i]= GlobalScore;
-		     ProtMatchPhase[i]= PhaseAdapt(phase);
-		   }
-		   else{
-		     if (GlobalScore > fabs(ProtMatch[i])){ 
-		       ProtMatch[i] = GlobalScore;
-		       ProtMatchPhase[i]= PhaseAdapt(phase);
-		     }
-		   }
-		 }
-	       }
-	     }
-	     fprintf(stderr,"%d ",level);
-	     fflush(stderr);
-
-	     fclose(fblast);       
-	   }
-	 }
-       fprintf(stderr," done\n");
+      int  overlap,deb,fin,phase,ProtDeb,ProtFin,PProtFin,level;
+      float score;
+      int  Pfin = 0, PPhase = 0;
+      char A[128],B[128];
+      char *ProtId, *PProtId,*tmp;
+      REAL GlobalScore;
+      REAL PGlobalScore = 0;
+      const int MaxOverlap = 10; 
+      const int MaxHitLen  = 15000;
+      
+      fprintf(stderr,"Reading Blastx data, level... ");
+      fflush(stderr);
+      
+      for( k=0; k<(int)strlen(blastArg); k++ )
+	{
+	  strcpy(tempname,fstname);
+	  strcat(tempname,".blast");
+	  i = strlen(tempname);
+	  tempname[i] = blastArg[k] - 1;
+	  tempname[i+1] = 0;
+		 
+	  fblast = FileOpen(NULL,tempname, "r");
+	  if (fblast == NULL) continue;
+	  
+	  level = (blastArg[k] - '0') - 1;
+	  A[0] = B[0]= 0;
+	  ProtId = A;
+	  PProtId = B;
+	  PProtFin = -10000;
+	  
+	  while (fscanf(fblast,"%d %d %f %*s %d %s %d %d\n", 
+			&deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
+	    if (abs(fin-deb) > MaxHitLen) {
+	      fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",ProtId);
+	      continue;
+	    }
+	    
+	    if (phase < 0) {
+	      j = deb;
+	      deb = fin;
+	      fin = j;
+	      j = ProtDeb;
+	      ProtDeb = ProtFin;
+	      ProtFin = j;
+	    }
+	    GlobalScore=((REAL)score)/((REAL)abs(fin-deb));
+	    
+	    overlap=0;
+	    // Reconstruction GAPS -> INTRONS
+	    if ( (strcmp(ProtId,PProtId) == 0) &&
+		 (abs(PProtFin-ProtDeb)<= (MaxOverlap)) ) {
+	      // Detection d'un INTRON
+	      overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
+	      // overlap >0 : hits chevauchants, overlap <0 : hits espaces
+	      if ((deb-Pfin+overlap) >= MinLength[8] ){
+		// Le tableau des introns est rempli prudemment: uniquement les bordures, et sans serrer pres de l'exon. 
+		for (i= Pfin-(overlap<0)*overlap ; i< Pfin+MinLength[8]-abs(overlap) ; i++) {
+		  // debut de l'intron seulement... (dont le score est fonction de l'exon precedent)
+		  if (BlastS[level] >= ProtMatchLevel[i]){
+		    if (BlastS[level] > ProtMatchLevel[i]){
+		      ProtMatchLevel[i]= BlastS[level];
+		      ProtMatch[i]= -PGlobalScore;
+		      ProtMatchPhase[i]=0;
+		    }
+		    else{
+		      if (PGlobalScore > fabs(ProtMatch[i])){
+			ProtMatch[i]= -PGlobalScore;
+			ProtMatchPhase[i]= 0;
+		      }
+		    }
+		  }
+		  //		     j=((phase < 0)?-4:4);
+		  //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+		}
+		for (i = deb-MinLength[8]+abs(overlap) ; i < deb+(overlap<0)*overlap ; i++){
+		  // ...et fin de l'intron (score est fonction de l'exon actuel)
+		  if (BlastS[level] >= ProtMatchLevel[i]){
+		    if (BlastS[level] > fabs(ProtMatchLevel[i])){
+		      ProtMatchLevel[i]= BlastS[level];
+		      ProtMatch[i]= -GlobalScore;
+		      ProtMatchPhase[i]=0;
+		    }
+		    else {
+		      if (PGlobalScore > fabs(ProtMatch[i])){
+			ProtMatch[i]= -GlobalScore;
+			ProtMatchPhase[i]= 0;
+		      }
+		    }
+		  }
+		  //		     j=((phase < 0)?-4:4);
+		  //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+		}
+	      }
+	      if (graph && level<3) {
+		PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
+		//		   for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
+		//		     j=((phase < 0)?-4:4);
+		//		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+		//		   }
+	      }
+	    }
+	    
+	    PGlobalScore=GlobalScore;
+	    Pfin = fin;
+	    tmp = PProtId;
+	    PProtId = ProtId;
+	    ProtId = tmp;
+	    PProtFin = ProtFin;
+	    PPhase = phase;
+	    
+	    phase = ph06(phase);
+	    
+	    // HITS -> CODANT
+	    if (graph && level<3) {
+	      for (i = deb-1; i < fin; i++){
+		PlotBarI(i,PhaseAdapt(phase),0.6+(level/8.0),1,LevelColor[level]);
+	      }
+	    }
+	    
+	    for (i = deb-1; i < fin; i++)  {
+	      if (BlastS[level] >= ProtMatchLevel[i]){
+		if (BlastS[level] > ProtMatchLevel[i]){
+		  ProtMatchLevel[i] = BlastS[level];
+		  ProtMatch[i]= GlobalScore;
+		  ProtMatchPhase[i]= PhaseAdapt(phase);
+		}
+		else{
+		  if (GlobalScore > fabs(ProtMatch[i])){ 
+		    ProtMatch[i] = GlobalScore;
+		    ProtMatchPhase[i]= PhaseAdapt(phase);
+		  }
+		}
+	      }
+	    }
+	  }
+	  fprintf(stderr,"%d ",level);
+	  fflush(stderr);
+	  
+	  fclose(fblast);       
+	}
+      fprintf(stderr," done\n");
     }
   // ---------------------------------------------------------------------------
   // Data allocation for the shortest path with length constraints
@@ -1508,13 +1655,13 @@ int main  (int argc, char * argv [])
   // 16 UTR 3' reverse
   // 17 Intergenique
   // ---------------------------------------------------------------------------
-
+  
   char *Choice;
   BackPoint *LBP[18];
   REAL BestU;
-  signed char best;
-  unsigned char Switch;
-
+  signed   char best   = 0;
+  unsigned char Switch = 0;
+  
   Choice =  new char[Data_Len+2];
   for (i = 0; i < Data_Len +2; i++) Choice[i] = 0;
   
@@ -1523,14 +1670,14 @@ int main  (int argc, char * argv [])
     LBP[i]->Next = LBP[i];
     LBP[i]->Prev = LBP[i];
   }
-
+  
   // Les PrevBP sont des pointeurs sur les "opening edges"
   // Les PBest correspondent au cout du chemin correspondant
-
+  
   REAL  maxi, PBest[26];
   BackPoint *PrevBP[26];
-  int source;
-  
+  int source = 0;
+
   // ---------------------------------------------------------------------------
   // Couts initiaux  
   // ---------------------------------------------------------------------------
@@ -1541,7 +1688,7 @@ int main  (int argc, char * argv [])
   LBP[ExonR1]->Update(log(ExonPrior/6.0)/2.0);
   LBP[ExonR2]->Update(log(ExonPrior/6.0)/2.0);
   LBP[ExonR3]->Update(log(ExonPrior/6.0)/2.0);
-  
+    
   // Intron
   LBP[IntronF1]->Update(log(IntronPrior/6.0)/2.0);
   LBP[IntronF2]->Update(log(IntronPrior/6.0)/2.0);
@@ -1553,31 +1700,31 @@ int main  (int argc, char * argv [])
   // Intergenique 
   LBP[InterGen5]->Update(log(InterPrior)/2.0); // ameliorations sur 5' reverse
   LBP[InterGen3]->Update(log(InterPrior)/2.0); // ameliorations sur 3' direct
-
+  
   // UTR 5' et 3'
   LBP[UTR5F]->Update(log(FivePrimePrior/2.0)/2.0);
   LBP[UTR3F]->Update(log(ThreePrimePrior/2.0)/2.0);  
   LBP[UTR5R]->Update(log(FivePrimePrior/2.0)/2.0);
   LBP[UTR3R]->Update(log(ThreePrimePrior/2.0)/2.0);
-
+  
   UserInfoList = ContentsUser;
   //  WriteUtils(UserInfoList,stdout);
-
+  
   for (i = 0; i <= Data_Len; i++) {
-
+    
     // compute coding... probabilities
     Fill_Score(TheSeq,IMMatrix,i,BaseScore);
-
+    
     //application des regles utilisateur pour i
     // les Weight[] sont statiques ici (pas de signaux)
     if (userinfo) 
       Util(i,UserInfoList);
-
+    
     // Calcul des meilleures opening edges
     PrevBP[0] = LBP[0]->BestUsable(i,SwitchMask[0],MinLength[0],&PBest[0]);
     PrevBP[1] = LBP[1]->BestUsable(i,SwitchMask[1],MinLength[1],&PBest[1]);
     PrevBP[2] = LBP[2]->BestUsable(i,SwitchMask[2],MinLength[2],&PBest[2]);
-
+    
     for (k = 3 ; k < 18; k++) 
       PrevBP[k] = LBP[k%12]->BestUsable(i,SwitchMask[k],MinLength[k],&PBest[k]);
     
@@ -1587,33 +1734,53 @@ int main  (int argc, char * argv [])
     // <- ->            MinDiv
     PrevBP[23] = LBP[InterGen5]->StrictBestUsable(i,MinDiv,&PBest[23]);
     PrevBP[24] = LBP[InterGen5]->StrictBestUsable(i,MinFlow,&PBest[24]);
-
+    
     PrevBP[18] = LBP[InterGen3]->StrictBestUsable(i,MinFlow,&PBest[18]);
     PrevBP[25] = LBP[InterGen3]->StrictBestUsable(i,MinConv,&PBest[25]);
-
+    
     // UTR 5' et 3' direct
     PrevBP[19] = LBP[UTR5F]->StrictBestUsable(i,MinFivePrime,&PBest[19]);
     PrevBP[20] = LBP[UTR3F]->StrictBestUsable(i,MinThreePrime,&PBest[20]);
     // UTR 5' et 3' reverse
     PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,MinFivePrime,&PBest[21]);
     PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,MinThreePrime,&PBest[22]);
-
+    
     // ---------------------------------------------------------------------------
     // Calcul de la position par rapport aux genes RAFL (Riken Ara.Full-Length)
     // valeurs de RAFLpos:
     // 0-> en dehors, 1-> frontiere(intergenique obligatoire), 2-> dedans(penalisation IG)
+    // 3-> debut d'un overlap entre 2 genes riken (UTR obligatoire)
+    // 4-> fin d'un overlap
     // ---------------------------------------------------------------------------
     if (raflopt){
-      if ( i > RAFL[RAFLindex].fin){ // si on depasse le RAFL, on prend l'eventuel prochain
-	(RAFLindex+1 < RAFL.size()) ? RAFLindex++ : raflopt=FALSE ;
+      if (i > RAFL[RAFLindex].fin){
+	// si on depasse le RAFL, on prend l'eventuel prochain
+	(RAFLindex+1 < (int)RAFL.size()) ? RAFLindex++ : raflopt=FALSE ;
       }
-      if ( (i >= RAFL[RAFLindex].deb-2) && (i < RAFL[RAFLindex].fin+1) ){
-	RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
+      
+      RAFLpos=0;
+      if (RAFLindex+1 == (int)RAFL.size()) {
+	// pas d'autre gene riken apres celui-ci
+	if ( (i >= RAFL[RAFLindex].deb-2) && (i < RAFL[RAFLindex].fin+1) ){
+	  RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
+	}
       }
       else{
-	RAFLpos=0;
+	// il en reste au moins un
+	if ( (i >= RAFL[RAFLindex].deb-2) && 
+	     (i <= Min(RAFL[RAFLindex].fin,RAFL[RAFLindex+1].deb-2)) ){ 
+	  // dans le gene riken courant
+	  RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
+	}
+	// si chevauchement
+	if ( (RAFL[RAFLindex+1].deb-2) < (RAFL[RAFLindex].fin) ){
+	  if ( (i <= RAFL[RAFLindex].fin)&&(i >= RAFL[RAFLindex+1].deb-2)){  // dans overlap
+	    if (i==RAFL[RAFLindex+1].deb-2) RAFLpos=3;
+	    if (i==RAFL[RAFLindex].fin) RAFLpos=4;
+	  }
+	}
       }
-    }
+    } 
     // ----------------------------------------------------------------
     // ------------------ Exons en forward ----------------------------
     // ----------------------------------------------------------------
@@ -1637,24 +1804,24 @@ int main  (int argc, char * argv [])
       
       // On commence a coder (Start)
       // Ca vient d'une UTR 5' forward
-
+	
       if ((i % 3 == k) && Start[0][i] != 0.0) {
 	BestU = PBest[19]+log(Start[0][i]);
 #ifndef PAYTOIGNORE
-	BestU -= log(1.0-Start[0][i]);
+	  BestU -= log(1.0-Start[0][i]);
 #endif 
-	// Un test tordu pour casser le cou aux NaN
-	if (isnan(maxi) || (BestU > maxi)) {
-	  maxi = BestU;
-	  best = 19;
-	  source = 13;
-	  Switch = SwitchStart;
-	}
+	  // Un test tordu pour casser le cou aux NaN
+	  if (isnan(maxi) || (BestU > maxi)) {
+	    maxi = BestU;
+	    best = 19;
+	    source = 13;
+	    Switch = SwitchStart;
+	  }
       }
-      
+     
       // On recommence a coder (Accepteur)
       // Ca vient d'un intron
-
+      
       BestU = PBest[6+((i-k+3) % 3)]+log(Acc[0][i]);
 #ifndef PAYTOIGNORE
       BestU -= log(1.0-Acc[0][i]);
@@ -1670,21 +1837,21 @@ int main  (int argc, char * argv [])
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
       LBP[k]->Update(log(BaseScore[k])+log(4));
-
+       
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if (estopt)
 	if ((ESTMatch[i] & Gap) || ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitForward)))
 	  LBP[k]->Update(EstP);
-
+      
       if (blastopt)
 	if ((ProtMatch[i]<0) || ((ProtMatch[i]>0)&&(ProtMatchPhase[i]!=PhaseAdapt(k))))
-	LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
-
+	  LBP[k]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
+      
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
-
+      
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== -1))) 
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== -1)) || (RAFLpos>=3)) 
 	  LBP[k]->Update(RAFLPenalty);
       }
     }
@@ -1692,9 +1859,9 @@ int main  (int argc, char * argv [])
     // ------------------------- Exons en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 3; k<6; k++) {
-
+      
       maxi = NINFINITY;
-
+      
       // On continue sauf si l'on rencontre un autre STOP
       if (((Data_Len-i) % 3 == k-3) && Stop[1][i]) 
 	LBP[k]->Update(DontCrossStop);
@@ -1756,7 +1923,8 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(IGPenalty);
 
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== 1))) LBP[k]->Update(RAFLPenalty);
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== 1)) || (RAFLpos>=3)) 
+	  LBP[k]->Update(RAFLPenalty);
       }
     }
     // ----------------------------------------------------------------
@@ -1801,7 +1969,7 @@ int main  (int argc, char * argv [])
       LBP[InterGen5]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if (RAFLpos==2) LBP[InterGen5]->Update(RAFLPenalty);
+      if ( (RAFLpos==2) || (RAFLpos>=3)) LBP[InterGen5]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -1840,7 +2008,7 @@ int main  (int argc, char * argv [])
       LBP[InterGen3]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if (RAFLpos==2) LBP[InterGen3]->Update(RAFLPenalty);
+      if ((RAFLpos==2) || (RAFLpos>=3)) LBP[InterGen3]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -1901,7 +2069,8 @@ int main  (int argc, char * argv [])
       LBP[UTR5F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==-1))) LBP[UTR5F]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==-1) && ((RAFLpos==2)||(RAFLpos==4))) || (RAFLpos==3) ) 
+	LBP[UTR5F]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
@@ -1939,7 +2108,8 @@ int main  (int argc, char * argv [])
       LBP[UTR3F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==-1))) LBP[UTR3F]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==-1) && ((RAFLpos==2)||(RAFLpos==3))) || (RAFLpos==4) ) 
+	LBP[UTR3F]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -1988,7 +2158,8 @@ int main  (int argc, char * argv [])
       LBP[UTR5R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==1))) LBP[UTR5R]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==1) && ((RAFLpos==2)||RAFLpos==3)) || (RAFLpos==4) ) 
+	LBP[UTR5R]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
@@ -2042,7 +2213,8 @@ int main  (int argc, char * argv [])
       LBP[UTR3R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==1))) LBP[UTR3R]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==1) && ((RAFLpos==2)||(RAFLpos==4))) || (RAFLpos==3) ) 
+	LBP[UTR3R]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -2092,7 +2264,8 @@ int main  (int argc, char * argv [])
 	LBP[6+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==-1))) LBP[6+k]->Update(RAFLPenalty);
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==-1)) || (RAFLpos>=3)) 
+	  LBP[6+k]->Update(RAFLPenalty);
       }
     }
 
@@ -2143,7 +2316,7 @@ int main  (int argc, char * argv [])
 	LBP[9+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==1))) 
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==1)) || (RAFLpos>=3)) 
 	  LBP[9+k]->Update(RAFLPenalty);
       }
     }
@@ -2191,39 +2364,33 @@ int main  (int argc, char * argv [])
       j = i;
     }
   }
-
+ 
   LBP[j]->BackTrace(Choice);
-  
-    for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
+ 
+  for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
 
   if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
   
   fprintf(stderr,"Optimal path length = %#f\n",-maxi+log(4)*(Data_Len+1));
 
-  // Sanity check ! A feasible path has not been found ?
-  if (isnan(maxi))
-    fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
-  
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
-
+  
 #include "Output.h"
-
   // free used memory
   if (graph) {
-    fprintf(stderr,"Dumping images...");
+    fprintf(stderr,"Dumping images (\"%s.---.png\")...",grname);
     fflush(stderr);
     ClosePNG();
-    fprintf(stderr, "done\n");
+    fprintf(stderr, "done\n\n");
   }
-
   delete TheSeq;
-
+  
   if (HitTable) {
     delete HitTable[NumEST];
     delete HitTable;
   }
-
+  
   HitTable = NULL;
   
   delete [] Stop[0];
@@ -2246,8 +2413,8 @@ int main  (int argc, char * argv [])
   delete [] Acc[0];
   delete [] Acc[1];
 
-   delete [] Choice;
-  }
+  delete [] Choice;
+  } // fin de traitement de chaque séquence....
 
   // free remaining used memory
   if (IMMatrix[5] != IMMatrix[3]) delete  IMMatrix[5];
