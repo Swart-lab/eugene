@@ -55,7 +55,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   m["fstname"] = "\000";        // no default input
 
-  while ((carg = getopt(argc, argv, "GUREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
+  while ((carg = getopt(argc, argv, "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
     switch (carg) {
       
     case 'D':           /* Definition of any parameter */
@@ -201,11 +201,15 @@ void Parameters :: ReadArg(int argc, char * argv[])
       }
       else m["BlastX.levels"] = "123";
       break;
-      
+
     case 'E':
       m["Est.PostProcess"] = "TRUE";
       break;
-      
+
+    case 'B':
+      m["BlastX.PostProcess"] = "TRUE";
+      break;
+
     case 'U':
       m["Sensor.User.use"] = "TRUE";
       break;
