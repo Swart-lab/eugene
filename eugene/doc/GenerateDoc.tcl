@@ -34,12 +34,12 @@ set FIC_TMP "tmp"
 set CMDFLAGS_INDEX "CmdFlags"
 
 set Cmd_end " >& $FIC_TMP"
-set Flag(1) EXECUTION_TRACE1; set Cmd_begin(1) ""; set Cmd(1) "$EUGENE $SEQ -s"
-set Flag(2) EXECUTION_TRACE2; set Cmd_begin(2) ""; set Cmd(2) "$EUGENE $SEQ -s -d"
-set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE $SEQ -s -d -E -DEst.PostProcess=2"
-set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE $SEQ -s -d -b012"
-set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) "cp $SEQ.user1 $SEQ.user;"; set Cmd(5) "$EUGENE $SEQ -U"
-set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) "cp $SEQ.user2 $SEQ.user;"; set Cmd(6) "$EUGENE $SEQ -U"
+set Flag(1) EXECUTION_TRACE1; set Cmd_begin(1) ""; set Cmd(1) "$EUGENE -s $SEQ"
+set Flag(2) EXECUTION_TRACE2; set Cmd_begin(2) ""; set Cmd(2) "$EUGENE -s -d $SEQ"
+set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE -s -d -E -DEst.PostProcess=2 $SEQ"
+set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE -s -d -b012 $SEQ"
+set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) "cp $SEQ.user1 $SEQ.user;"; set Cmd(5) "$EUGENE -U $SEQ"
+set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) "cp $SEQ.user2 $SEQ.user;"; set Cmd(6) "$EUGENE -U $SEQ"
 set nbflags 6
 #===========================================================================
 
