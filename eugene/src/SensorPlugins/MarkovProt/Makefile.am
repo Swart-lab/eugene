@@ -17,13 +17,13 @@
 # Contents: compilation of the MarkovProt directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 SUBDIRS = GetData
 
-bin_PROGRAMS = Sensor.MarkovProt.so
+noinst_PROGRAMS = Sensor.MarkovProt.so
 Sensor_MarkovProt_so_SOURCES = Sensor.MarkovProt.cc Sensor.MarkovProt.h 
-Sensor_MarkovProt_so_LDFLAGS = $(eugene_LDFLAGS) 
-
+Sensor_MarkovProt_so_LDFLAGS = $(sensors_ldflags) 
 
 CLEANFILES = *~

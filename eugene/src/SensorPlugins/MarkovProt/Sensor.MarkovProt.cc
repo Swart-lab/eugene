@@ -78,6 +78,7 @@ void AmplifyScore(double Score [], unsigned int normopt)
 SensorMarkovProt :: SensorMarkovProt (int n, DNASeq *X) : Sensor(n)
 {
   FILE *fp;
+  char *tmpdir = new char[FILENAME_MAX+1];
 
   type = Type_Content;
 
@@ -88,7 +89,9 @@ SensorMarkovProt :: SensorMarkovProt (int n, DNASeq *X) : Sensor(n)
     maxorder = PAR.getI("MarkovProt.maxorder");
     order    = PAR.getI("MarkovProt.order");
     
-    if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir"), PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
+    strcpy(tmpdir, PAR.getC("eugene_dir"));
+    strcat(tmpdir, MODELS_DIR);
+    if (! (fp = FileOpen(tmpdir, PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
       fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
       exit(2);
     }
@@ -117,6 +120,8 @@ SensorMarkovProt :: SensorMarkovProt (int n, DNASeq *X) : Sensor(n)
   GCrate = (X->Markov0[BitG] + X->Markov0[BitC]);
   Probacodon = ProbacodonGeneral;
   Probacodon->initialisation(GCrate);
+
+  delete [] tmpdir;
 }
 
 // ----------------------
