@@ -56,7 +56,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	     "    <TD width=11%% align=center><font color=white>\n"
 	     "     <b>Element<br>number</b></font></TD>\n"
 	     "    <TD width=11%% align=center><font color=white>\n"
-	     "     <b>Feature<br>type&nbsp;name</b></font></TD>\n"
+	     "     <b>Exons/UTR</b></font></TD>\n"
 	     "    <TD width=11%% align=center><font color=white>\n"
 	     "     <b>Strand</b></font></TD>\n"
              "    <TD width=11%% align=center><font color=white>\n"
@@ -99,7 +99,13 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  strcat(seqn, " ");
       seqn[5] = '\0';
     }
-       
+    
+    if (printopt0 == 'H') {
+      i=pred->size()-1;
+      if (i == 0)
+	printf("<tr class=clair><td colspan=9 align=center><b>No exons/genes "
+	       "predicted in your submitted sequence !</b></td></tr>");
+    }
     for(i=pred->size()-1; i!=-1; i--) {
       if(i != pred->size()-1) {
 	stateBack = pred->getState(i+1);
