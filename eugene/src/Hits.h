@@ -54,6 +54,7 @@ class  Hits
   int Length;
   int NGaps;
   int Start;
+  int End;
   char Rejected;
 
   Block *Match;

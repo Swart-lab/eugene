@@ -68,6 +68,7 @@ Hits :: Hits  ()
 {
   Rejected = 0;
   Start = 0;
+  End = 0;
   Length = 0;
   Strand = 0;
   NGaps = 0;
@@ -87,6 +88,7 @@ Hits :: Hits  (char* name, int length, char strand, int deb,int fin,int ldeb,int
   Strand = strand;
   Length = length;
   Start = deb;
+  End = fin;
   Match = new Block(deb,fin,ldeb,lfin);
   NGaps = 0;
   Next = NULL;
@@ -118,6 +120,7 @@ Hits* Hits::ReadFromFile(FILE* ESTFile, int *NumEST)
 	// de position (sur l'est et le genomique)
 	  {
 	    ThisEST->NGaps++;
+	    ThisEST->End = fin-1;
 	    ThisBlock->AddBlockAfter(deb-1,fin-1,EstDeb,EstFin);
 	    ThisBlock = ThisBlock->Next;
 	  }
