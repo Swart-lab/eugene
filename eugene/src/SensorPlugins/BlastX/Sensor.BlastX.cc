@@ -52,6 +52,11 @@ void SensorBlastX :: Init (DNASeq *X)
   const int MaxHitLen  = 15000;
   char tempname[FILENAME_MAX+1];
 
+  vPos.clear();
+  vPMatch.clear();
+  vPMLevel.clear();
+  vPMPhase.clear();
+
   keyBXLevel[0] = PAR.getD("BlastX.level0*",N);
   keyBXLevel[1] = PAR.getD("BlastX.level1*",N);
   keyBXLevel[2] = PAR.getD("BlastX.level2*",N);
