@@ -61,7 +61,7 @@ void MasterSensor :: InitMaster ()
 {
   char *key_name;
   int  val_prior;
-  int i;
+  int i, j, nbSensors = 0;
   
   // On récupère les couples nom de sensor/priorité du .par
   while(PAR.getUseSensor(&key_name, &val_prior))
@@ -85,23 +85,24 @@ void MasterSensor :: InitMaster ()
     strcat(useList[i], ".use");
   }
   
-  // On indique les plugins ignorés
-  int nb0 = 0;
-  while (msList[nb0]->Priority == 0) {
-    fprintf(stderr,"WARNING: Ignored information : %s\n", msList[nb0]->Name);
-    nb0++;
-  }
+  for(i=0; i<(int)msList.size(); i++) 
+    nbSensors += PAR.getI(useList[i]);
   
-  dllList = new (SensorLoader *)[(int)msList.size()];
+   dllList = new (SensorLoader *)[nbSensors];
   
-  for(i=nb0; i<(int)msList.size(); i++) {
-    if(PAR.getI(useList[i])) {
-      dllList[i] = new SensorLoader ( soList[i] );
-      if(!dllList[i]->LastError())
-	theSensors.push_back( dllList[i]->MakeSensor() );
-      else fprintf(stderr,"WARNING: Plugin not valid or not found : %s\n",soList[i]);
+   nbSensors = 0;
+
+  for(i=0; i<(int)msList.size(); i++) 
+    for (j=0; j<PAR.getI(useList[i]); j++) {
+      dllList[nbSensors] = new SensorLoader ( soList[i] );
+      if(!dllList[nbSensors]->LastError()) {
+	fprintf(stderr,"Loading %s, %d\n",msList[i]->Name,j);
+	theSensors.push_back( dllList[nbSensors]->MakeSensor());
+	theSensors.back()->instanceNumber = j;
+      }
+      else fprintf(stderr,"WARNING: ingored plugin (invalid or not found) : %s\n",soList[i]);
+      nbSensors++;
     }
-  }
 }
 
 // ------------------------
