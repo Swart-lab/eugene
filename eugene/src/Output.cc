@@ -337,10 +337,11 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  fprintf(f,"<TD>%+2d</TD>", ((forward) ? 1: -1));
 		else {
 		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack-IntronF1) :
-			   -PhaseAdapt(stateNext-IntronR1));
+			   PhaseAdapt(stateBack) :
+			   PhaseAdapt(stateNext));
 		  
-		  if (abs(Phase) <= 3 && abs(Phase) >=1) fprintf(f,"<TD>%+2d</TD>",Phase);
+		  if (abs(Phase) <= 6 && abs(Phase) >=4) 
+		    fprintf(f,"<TD>%+2d</TD>",(forward) ? Phase-3 : Phase+3);
 		  else fprintf(f,"<TD>Unk.</TD>");
 		}
 		fprintf(f,"<TD>%+2d</TD>\n   </TR>\n",PhaseAdapt(state));
@@ -353,10 +354,11 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  fprintf(f,"   %+2d", ((forward) ? 1: -1));
 		else {
 		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack-IntronF1) :
-			   -PhaseAdapt(stateNext-IntronR1));
+			   PhaseAdapt(stateBack) :
+			   PhaseAdapt(stateNext));
 		  
-		  if (abs(Phase) <= 3 && abs(Phase) >=1) fprintf(f,"   %+2d",Phase);
+		  if (abs(Phase) <= 6 && abs(Phase) >= 4) 
+		    fprintf(f,"   %+2d",(forward) ? Phase-3 : Phase+3);
 		  else fprintf(f," Unk.");
 		}
 		fprintf(f,"      %+2d",PhaseAdapt(state));
@@ -708,6 +710,8 @@ void CheckConsistency(int debut, int fin, int etat,
     HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
     GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
     GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
+    GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
+    GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
     0,
     HitForward|MForward, HitForward|MForward|GapForward,
     HitReverse|MReverse, HitReverse|MReverse|GapReverse,
@@ -724,6 +728,8 @@ void CheckConsistency(int debut, int fin, int etat,
     Hit|Margin,    Hit|Margin,    Hit|Margin,    
     Hit|Margin,    Hit|Margin,    Hit|Margin,    
     Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Gap|Margin,    Gap|Margin,    Gap|Margin,
+    Gap|Margin,    Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     0,
