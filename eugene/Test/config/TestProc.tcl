@@ -90,6 +90,11 @@ proc InitParameterFile {FileName SensorsList EuGeneDir} {
 set space " "
 
 # Set the parameter to wanted values
+#################################################################
+###################### GENERAL PARAMETERS #######################
+#################################################################
+# Avoid to set set EuGene.version
+set NewValue1(EuGene.organism) 		Arabidopsis
 set NewValue1(EuGene.PluginsDir)        $EuGeneDir/PLUGINS/
 ##### Lengths #####
 set NewValue1(EuGene.InitExDist)	init.dist
@@ -101,6 +106,7 @@ set NewValue1(EuGene.InterGDist)	intergenic.dist
 set NewValue1(EuGene.5PrimeDist)	utr.dist
 set NewValue1(EuGene.3PrimeDist)	utr.dist
 ##### Priors #####
+set NewValue1(EuGene.SplicedStopPen)    1e999.0
 set NewValue1(EuGene.ExonPrior)	        0.33	
 set NewValue1(EuGene.IntronPrior)	0.17	
 set NewValue1(EuGene.InterPrior)	0.4
@@ -121,31 +127,22 @@ set NewValue1(Output.format)		l
 set NewValue1(Output.offset)		0
 set NewValue1(Output.normopt)		1
 set NewValue1(Output.Prefix)		./
-##### Transcript parameters #####
-set NewValue1(Transcript.Start*)	4.155
-set NewValue1(Transcript.Stop*)		4.155
+#################################################################
+################### SIGNAL SENSORS PARAMETERS####################
+#################################################################
+##### ATGpr parameters #####
+set NewValue1(ATGpr.startP*) 0.052
+set NewValue1(ATGpr.startB*) 0.308
 ##### EuStop parameters #####
 set NewValue1(EuStop.stopP*)            4.155
 ##### FrameShift parameters #####
 set NewValue1(FrameShift.Ins*)	1e999.0
 set NewValue1(FrameShift.Del*)	1e999.0
-##### NetStart parameters #####
-set NewValue1(NStart.startP*)	0.052
-set NewValue1(NStart.startB*)	0.308
-##### ATGpr parameters #####
-set NewValue1(ATGpr.startP*) 0.052
-set NewValue1(ATGpr.startB*) 0.308
-##### IfElse #####
-set NewValue1(IfElse.SensorIf)		NG2
-set NewValue1(IfElse.SensorElse)	SPred
-# SpliceMachine parameters #####
-set NewValue1(SMachine.cmd)		"cat "
-set NewValue1(SMachine.accP*)		0.903
-set NewValue1(SMachine.accB*)		5.585
-set NewValue1(SMachine.donP*)		0.980
-set NewValue1(SMachine.donB*)		27.670
-set NewValue1(SMachine.startP*)	        0.052
-set NewValue1(SMachine.startB*)	        0.308
+##### GeneSplicer parameters #####
+set NewValue1(GSplicer.coefAcc*)	1
+set NewValue1(GSplicer.penAcc*)	        0
+set NewValue1(GSplicer.coefDon*)	1
+set NewValue1(GSplicer.penDon*) 	0
 # NetGene2 parameters #####
 set NewValue1(NG2.accP*\[0\])     0.903
 set NewValue1(NG2.accB*\[0\])     5.585
@@ -155,6 +152,38 @@ set NewValue1(NG2.accP*\[1\])	0.903
 set NewValue1(NG2.accB*\[1\])	5.585
 set NewValue1(NG2.donP*\[1\])	0.980
 set NewValue1(NG2.donB*\[1\])	27.670
+##### NetStart parameters #####
+set NewValue1(NStart.startP*)	0.052
+set NewValue1(NStart.startB*)	0.308
+##### PatConst sensor (uniform penalties) #####
+set NewValue1(PatConst.type\[0\])	start
+set NewValue1(PatConst.pat\[0\])	ATG
+set NewValue1(PatConst.newStatePos\[0\]) 1
+set NewValue1(PatConst.patP*\[0\])	2.897949
+set NewValue1(PatConst.patPNo*\[0\])	0
+##### PepSignal #####
+set NewValue1(PepSignal.startP*)	1
+set NewValue1(PepSignal.startB*)	0
+# SpliceMachine parameters #####
+set NewValue1(SMachine.cmd)		"cat "
+set NewValue1(SMachine.accP*)		0.903
+set NewValue1(SMachine.accB*)		5.585
+set NewValue1(SMachine.donP*)		0.980
+set NewValue1(SMachine.donB*)		27.670
+set NewValue1(SMachine.startP*)	        0.052
+set NewValue1(SMachine.startB*)	        0.308
+##### Sensor SpliceWAM #####
+set NewValue1(SpliceWAM.MarkovianOrder)	1
+set NewValue1(SpliceWAM.donmodelfilename)	WAM/WAM.ARA.DON.L9
+set NewValue1(SpliceWAM.NbNtBeforeGT)	3
+set NewValue1(SpliceWAM.NbNtAfterGT)	4
+set NewValue1(SpliceWAM.DonScaleCoef*)	2.9004
+set NewValue1(SpliceWAM.DonScalePenalty*)	-7.5877
+set NewValue1(SpliceWAM.accmodelfilename)	WAM/WAM.ARA.ACC.L7
+set NewValue1(SpliceWAM.NbNtBeforeAG)		2
+set NewValue1(SpliceWAM.NbNtAfterAG)		1
+set NewValue1(SpliceWAM.AccScaleCoef*)		2.9004
+set NewValue1(SpliceWAM.AccScalePenalty*)		-7.5877
 ##### SplicePredictor parameters #####
 set NewValue1(SPred.accP*\[0\])   0.987
 set NewValue1(SPred.accB*\[0\])  3.850
@@ -164,41 +193,19 @@ set NewValue1(SPred.accP*\[1\])	0.987
 set NewValue1(SPred.accB*\[1\])	3.850
 set NewValue1(SPred.donP*\[1\])	0.929
 set NewValue1(SPred.donB*\[1\])	10.800
-##### GeneSplicer parameters #####
-set NewValue1(GSplicer.coefAcc*)	1
-set NewValue1(GSplicer.penAcc*)	        0
-set NewValue1(GSplicer.coefDon*)	1
-set NewValue1(GSplicer.penDon*) 	0
-##### Interpolated Markov Models parameters #####
-set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
-set NewValue1(MarkovIMM.minGC\[0\])	0
-set NewValue1(MarkovIMM.maxGC\[0\])	100
-set NewValue1(MarkovIMM.useM0asIG\[0\])	0
-set NewValue1(MarkovIMM.maxOrder\[0\])	8
-##### Markov proteic model parameters #####
-set NewValue1(MarkovProt.matname\[0\])	swissprot.maxorder2.bin
-set NewValue1(MarkovProt.minGC\[0\])	0
-set NewValue1(MarkovProt.maxGC\[0\])	100
-set NewValue1(MarkovProt.maxorder)    2
-set NewValue1(MarkovProt.order)        2
-##### Est sensor parameters #####
-set NewValue1(Est.PostProcess)	FALSE
-set NewValue1(Est.PPNumber)     2
-set NewValue1(Est.estP*)	-0.4
-set NewValue1(Est.estM)	        6
-set NewValue1(Est.utrP*)	0.35
-set NewValue1(Est.utrM)	        5
-set NewValue1(Est.SpliceBoost*) 0.0
-set NewValue1(Est.StrongDonor)	0.95
-##### Riken sensor parameters #####
-set NewValue1(Riken.StrandRespect)		0
-set NewValue1(Riken.Min\_est\_diff)		100
-set NewValue1(Riken.Max\_overlap		60
-set NewValue1(Riken.Max\_riken\_length)		60000
-set NewValue1(Riken.Max\_riken\_est\_length)	3000
-set NewValue1(Riken.Min\_riken\_length)		120 
-set NewValue1(Riken.Min\_riken\_est\_length)	10
-set NewValue1(Riken.RAFLPenalty*)		-120.0
+##### Sensor StartWAM #####
+set NewValue1(StartWAM.modelfilename)	WAM/WAM.ARA.START9
+set NewValue1(StartWAM.NbNtBeforeATG)	3
+set NewValue1(StartWAM.NbNtAfterATG)	3
+set NewValue1(StartWAM.MarkovianOrder)		1
+set NewValue1(StartWAM.ScaleCoef*)		0.1594
+set NewValue1(StartWAM.ScalePenalty*)		-3.1439
+##### Transcript parameters #####
+set NewValue1(Transcript.Start*)	4.155
+set NewValue1(Transcript.Stop*)		4.155
+#################################################################
+################# CONTENT SENSORS PARAMETERS ####################
+#################################################################
 ##### Proteic similarity sensor parameters #####
 set NewValue1(BlastX.PostProcess) FALSE
 set NewValue1(BlastX.levels)	0
@@ -214,22 +221,19 @@ set NewValue1(BlastX.level8*)	0.0
 set NewValue1(BlastX.level9*)	0.0
 set NewValue1(BlastX.blastxM*)	10	
 set NewValue1(BlastX.minIn) 50
-##### Repeat sensor parameters #####
-set NewValue1(Repeat.UTRPenalty*)	0.0
-set NewValue1(Repeat.IntronPenalty*)	0.1
-set NewValue1(Repeat.ExonPenalty*)	1.0
+##### Est sensor parameters #####
+set NewValue1(Est.PostProcess)	FALSE
+set NewValue1(Est.PPNumber)     2
+set NewValue1(Est.estP*)	-0.4
+set NewValue1(Est.estM)	        6
+set NewValue1(Est.utrP*)	0.35
+set NewValue1(Est.utrM)	        5
+set NewValue1(Est.SpliceBoost*) 0.0
+set NewValue1(Est.StrongDonor)	0.95
 ##### Homology Sensor parameters #####
 set NewValue1(Homology.TblastxP*) 	0
 set NewValue1(Homology.TblastxB*) 	0.0595
 set NewValue1(Homology.protmatname)	BLOSUM80
-##### GFF sensor parameters #####
-set NewValue1(GFF.PostProcess)		FALSE
-##### PatConst sensor (uniform penalties) #####
-set NewValue1(PatConst.type\[0\])	start
-set NewValue1(PatConst.pat\[0\])	ATG
-set NewValue1(PatConst.newStatePos\[0\]) 1
-set NewValue1(PatConst.patP*\[0\])	2.897949
-set NewValue1(PatConst.patPNo*\[0\])	0
 ##### State penalties (exp length distributions) #####
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
@@ -239,25 +243,57 @@ set NewValue1(MarkovConst.Intron*) 	1.0
 set NewValue1(MarkovConst.UTR5*)	0.999
 set NewValue1(MarkovConst.UTR3*) 	0.999
 set NewValue1(MarkovConst.Inter*) 	1.0
-##### Sensor SpliceWAM #####
-set NewValue1(SpliceWAM.MarkovianOrder)	1
-set NewValue1(SpliceWAM.donmodelfilename)	WAM/WAM.ARA.DON.L9
-set NewValue1(SpliceWAM.NbNtBeforeGT)	3
-set NewValue1(SpliceWAM.NbNtAfterGT)	4
-set NewValue1(SpliceWAM.DonScaleCoef*)	2.9004
-set NewValue1(SpliceWAM.DonScalePenalty*)	-7.5877
-set NewValue1(SpliceWAM.accmodelfilename)	WAM/WAM.ARA.ACC.L7
-set NewValue1(SpliceWAM.NbNtBeforeAG)		2
-set NewValue1(SpliceWAM.NbNtAfterAG)		1
-set NewValue1(SpliceWAM.AccScaleCoef*)		2.9004
-set NewValue1(SpliceWAM.AccScalePenalty*)		-7.5877
-##### Sensor StartWAM #####
-set NewValue1(StartWAM.modelfilename)	WAM/WAM.ARA.START9
-set NewValue1(StartWAM.NbNtBeforeATG)	3
-set NewValue1(StartWAM.NbNtAfterATG)	3
-set NewValue1(StartWAM.MarkovianOrder)		1
-set NewValue1(StartWAM.ScaleCoef*)		0.1594
-set NewValue1(StartWAM.ScalePenalty*)		-3.1439
+##### Interpolated Markov Models parameters #####
+set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
+set NewValue1(MarkovIMM.minGC\[0\])	0
+set NewValue1(MarkovIMM.maxGC\[0\])	100
+set NewValue1(MarkovIMM.useM0asIG\[0\])	0
+set NewValue1(MarkovIMM.maxOrder\[0\])	8
+##### Markov proteic model parameters #####
+set NewValue1(MarkovProt.matname\[0\])	swissprot.maxorder2.bin
+set NewValue1(MarkovProt.minGC\[0\])	0
+set NewValue1(MarkovProt.maxGC\[0\])	100
+set NewValue1(MarkovProt.maxorder)    2
+set NewValue1(MarkovProt.order)        2
+##### Repeat sensor parameters #####
+set NewValue1(Repeat.UTRPenalty*)	0.0
+set NewValue1(Repeat.IntronPenalty*)	0.1
+set NewValue1(Repeat.ExonPenalty*)	1.0
+#################################################################
+############## SIGNAL/CONTENT SENSORS PARAMETERS ################
+#################################################################
+##### Sensors AnnotaStruct #####
+set NewValue1(AnnotaStruct.FileExtension)     gff
+set NewValue1(AnnotaStruct.Start*)            1
+set NewValue1(AnnotaStruct.StartType)         p 
+set NewValue1(AnnotaStruct.Stop*)             1
+set NewValue1(AnnotaStruct.StopType)          p
+set NewValue1(AnnotaStruct.Acc*)              1
+set NewValue1(AnnotaStruct.AccType)           p
+set NewValue1(AnnotaStruct.Don*)              1
+set NewValue1(AnnotaStruct.DonType)           p
+set NewValue1(AnnotaStruct.TrStart*)          1
+set NewValue1(AnnotaStruct.TrStartType)       p
+set NewValue1(AnnotaStruct.TrStop*)           1
+set NewValue1(AnnotaStruct.TrStopType)        p
+set NewValue1(AnnotaStruct.Exon*)             10
+set NewValue1(AnnotaStruct.Intron*)           10
+set NewValue1(AnnotaStruct.CDS*)              10
+##### IfElse #####
+set NewValue1(IfElse.SensorIf)		NG2
+set NewValue1(IfElse.SensorElse)	SPred
+##### Riken sensor parameters #####
+set NewValue1(Riken.StrandRespect)		0
+set NewValue1(Riken.Min\_est\_diff)		100
+set NewValue1(Riken.Max\_overlap		60
+set NewValue1(Riken.Max\_riken\_length)		60000
+set NewValue1(Riken.Max\_riken\_est\_length)	3000
+set NewValue1(Riken.Min\_riken\_length)		120 
+set NewValue1(Riken.Min\_riken\_est\_length)	10
+set NewValue1(Riken.RAFLPenalty*)		-120.0
+#################################################################
+################## OTHERS SENSORS PARAMETERS ####################
+#################################################################
 ##### Sensor GCPlot #####
 set NewValue1(GCPlot.Color)	5
 set NewValue1(GCPlot.Zoom)	2.0
@@ -265,6 +301,8 @@ set NewValue1(GCPlot.Zoom3)	1.0
 set NewValue1(GCPlot.Up)	GC
 set NewValue1(GCPlot.Over)	ATGC
 set NewValue1(GCPlot.Smooth)	100
+##### GFF sensor parameters #####
+set NewValue1(GFF.PostProcess)		FALSE
 ##### Sensor Plotter
 set NewValue1(Plotter.GC\[0\])	 1 
 set NewValue1(Plotter.GC3\[0\])	 1 
@@ -275,9 +313,76 @@ set NewValue1(Tester.Sensor)		EuStop
 set NewValue1(Tester.Sensor.Instance)	0
 set NewValue1(Tester.SPSN.MinNumbers)	100
 #
-# No sensor used
-foreach sensor $SensorsList {set NewValue1(Sensor.${sensor}.use) FALSE}
-
+#################################################################
+################# SENSORS CONFIGURATION PARAMETERS ##############
+#################################################################
+##### Sensors desactivation #####
+# SIGNAL SENSORS
+set NewValue1(Sensor.ATGpr.use)	        FALSE
+set NewValue1(Sensor.EuStop.use)	FALSE
+set NewValue1(Sensor.FrameShift.use)	FALSE
+set NewValue1(Sensor.GSplicer.use)	FALSE
+set NewValue1(Sensor.SMachine.use)	FALSE
+set NewValue1(Sensor.NG2.use)		FALSE
+set NewValue1(Sensor.NStart.use)	FALSE
+set NewValue1(Sensor.PatConst.use)	FALSE
+set NewValue1(Sensor.PepSignal.use)	FALSE
+set NewValue1(Sensor.SpliceWAM.use) 	FALSE
+set NewValue1(Sensor.SPred.use)	        FALSE
+set NewValue1(Sensor.StartWAM.use)	FALSE
+set NewValue1(Sensor.Transcript.use)	FALSE
+# CONTENT SENSORS
+set NewValue1(Sensor.BlastX.use)	FALSE
+set NewValue1(Sensor.Est.use)		FALSE
+set NewValue1(Sensor.Homology.use)	FALSE
+set NewValue1(Sensor.MarkovConst.use)	FALSE
+set NewValue1(Sensor.MarkovIMM.use)	FALSE
+set NewValue1(Sensor.MarkovProt.use)	FALSE
+set NewValue1(Sensor.Repeat.use)	FALSE
+# SIGNAL/CONTENT SENSORS
+set NewValue1(Sensor.AnnotaStruct.use)  FALSE
+set NewValue1(Sensor.IfElse.use)	FALSE
+set NewValue1(Sensor.Riken.use)	        FALSE
+set NewValue1(Sensor.User.use)		FALSE
+# OTHERS SENSORS
+set NewValue1(Sensor.GCPlot.use)	FALSE
+set NewValue1(Sensor.GFF.use)		FALSE
+set NewValue1(Sensor.Plotter.use)	FALSE
+set NewValue1(Sensor.Tester.use)	FALSE
+#
+##### Sensor priorities	 #####
+# SIGNAL SENSORS
+set NewValue1(Sensor.ATGpr$space)	1
+set NewValue1(Sensor.EuStop$space)	1
+set NewValue1(Sensor.FrameShift$space)	1
+set NewValue1(Sensor.GSplicer$space)	1
+set NewValue1(Sensor.NG2$space)		1
+set NewValue1(Sensor.NStart$space)	1
+set NewValue1(Sensor.PatConst$space)	1
+set NewValue1(Sensor.PepSignal$space) 	1
+set NewValue1(Sensor.SMachine$space)	1
+set NewValue1(Sensor.SpliceWAM$space) 	1
+set NewValue1(Sensor.SPred$space)	1
+set NewValue1(Sensor.StartWAM$space)	1
+set NewValue1(Sensor.Transcript$space)	1
+# CONTENT SENSORS
+set NewValue1(Sensor.BlastX$space)	1
+set NewValue1(Sensor.Est$space)		20
+set NewValue1(Sensor.Homology$space)  	1
+set NewValue1(Sensor.MarkovConst$space) 1
+set NewValue1(Sensor.MarkovIMM$space) 	1
+set NewValue1(Sensor.MarkovProt$space)	1
+set NewValue1(Sensor.Repeat$space)	1
+# SIGNAL/CONTENT SENSORS
+set NewValue1(Sensor.AnnotaStruct$space) 1
+set NewValue1(Sensor.IfElse$space)	1
+set NewValue1(Sensor.Riken$space)	1
+set NewValue1(Sensor.User$space)	10
+# OTHERS SENSORS
+set NewValue1(Sensor.GCPlot$space)	1
+set NewValue1(Sensor.GFF$space)		1
+set NewValue1(Sensor.Plotter$space)	1
+set NewValue1(Sensor.Tester$space)	1
 #################################################################
 ################### PARAMETERS OPTIMIZATION #####################
 #################################################################
