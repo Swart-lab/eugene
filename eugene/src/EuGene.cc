@@ -579,7 +579,7 @@ int main  (int argc, char * argv [])
     
     if (glen < 0) glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
     
-    InitPNG(resx,resy,gfrom,gto,golap,glen,grname);
+    InitPNG(resx,resy,offset,gfrom,gto,golap,glen,grname);
   }
     
   // Precompute all probabilities
