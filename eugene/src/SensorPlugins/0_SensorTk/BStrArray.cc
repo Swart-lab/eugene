@@ -12,8 +12,8 @@
 // ---------------------------------------------------------------
 
 #include <math.h>
-#include "../Const.h"
-#include "../System.h"
+#include "../../EuGene/Const.h"
+#include "../../EuGene/System.h"
 #include "BStrArray.h"
 
 // ---------------------------------------------------------------------

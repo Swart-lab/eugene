@@ -11,11 +11,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "markov.h"
-#include "System.h"
-#include "System.cc"
-#include "DNASeq.h"
-#include "DNASeq.cc"
+#include "../../0_SensorTk/markov.h"
+#include "../../../EuGene/System.h"
+#include "../../../EuGene/System.cc"
+#include "../../../EuGene/DNASeq.h"
+#include "../../../EuGene/DNASeq.cc"
 
 int ORDREMAX = 4;  /* maximum of 4 recommended ( pow(21,5) > 4 000 000 ...) */
 char* DBfile     = "/www/db/sp";                 // infile

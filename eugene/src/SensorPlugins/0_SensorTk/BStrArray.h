@@ -14,7 +14,7 @@
 #ifndef  BSTRARRAY_H_INCLUDED
 #define  BSTRARRAY_H_INCLUDED
 
-#include "../DNASeq.h"
+#include "../../EuGene/DNASeq.h"
 
 class  BString_Array
 {

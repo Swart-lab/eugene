@@ -1,7 +1,7 @@
 #ifndef  SENSOR_EU_H_INCLUDED
 #define  SENSOR_EU_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorEuStop                        **

@@ -1,7 +1,7 @@
 #ifndef  SENSOR_NG2_H_INCLUDED
 #define  SENSOR_NG2_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                       SensorNG2                         **

@@ -1,7 +1,7 @@
 #ifndef  SENSOR_MARKOVCONST_INCLUDED
 #define  SENSOR_MARKOVCONST_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorMarkovConst                    **

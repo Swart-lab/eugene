@@ -1,8 +1,8 @@
 #ifndef  SENSOR_IFELSE_H_INCLUDED
 #define  SENSOR_IFELSE_H_INCLUDED
 
-#include "../Sensor.h"
-#include "../Dll.h"
+#include "../../EuGene/Sensor.h"
+#include "../../EuGene/Dll.h"
 
 /*************************************************************
  **                     SensorIfElse                        **

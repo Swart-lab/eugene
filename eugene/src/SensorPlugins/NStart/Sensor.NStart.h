@@ -1,7 +1,7 @@
 #ifndef  SENSOR_NSTART_H_INCLUDED
 #define  SENSOR_NSTART_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                    SensorNStart                         **

@@ -1,7 +1,7 @@
 #ifndef  SENSOR_SPred_H_INCLUDED
 #define  SENSOR_SPred_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorSPred                         **

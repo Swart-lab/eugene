@@ -1,7 +1,7 @@
 #ifndef  SENSOR_REPEAT_H_INCLUDED
 #define  SENSOR_REPEAT_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 
 /*************************************************************

@@ -1,7 +1,7 @@
 #ifndef  SENSOR_USER_H_INCLUDED
 #define  SENSOR_USER_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                       SensorUser                        **

@@ -1,7 +1,7 @@
 #ifndef  SENSOR_BLASTX_H_INCLUDED
 #define  SENSOR_BLASTX_H_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorBlastX                        **

@@ -23,9 +23,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "../Const.h"
-#include "../SensorIF.h"
-#include "../System.h"
+#include "../../EuGene/Const.h"
+#include "../../EuGene/SensorIF.h"
+#include "../../EuGene/System.h"
 #include "structure.h"
 
 //---------------------------------------------------------------------------------

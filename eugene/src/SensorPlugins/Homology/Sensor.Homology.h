@@ -1,8 +1,8 @@
 #ifndef SENSOR_HOMOLOGY_H_INCLUDED
 #define SENSOR_HOMOLOGY_H_INCLUDED
 
-#include "../Sensor.h"
-#include "../markov.h"
+#include "../../EuGene/Sensor.h"
+#include "../0_SensorTk/markov.h"
 
 /*************************************************************
  **                     SensorHomology                        **

@@ -1,8 +1,8 @@
 #ifndef  SENSOR_MARKOVIMM_H_INCLUDED
 #define  SENSOR_MARKOVIMM_H_INCLUDED
 
-#include "../Sensor.h"
-#include "BStrArray.h"
+#include "../../EuGene/Sensor.h"
+#include "../0_SensorTk/BStrArray.h"
 
 /****************************************************************
  **                     SensorMarkovIMM                        **

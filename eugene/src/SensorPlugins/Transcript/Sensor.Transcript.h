@@ -1,7 +1,7 @@
 #ifndef  SENSOR_STARTCONST_INCLUDED
 #define  SENSOR_STARTCONST_INCLUDED
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorTranscript                    **

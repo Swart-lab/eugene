@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../Sensor.h"
+#include "../../EuGene/Sensor.h"
 
 /*************************************************************
  **                     SensorRiken                         **

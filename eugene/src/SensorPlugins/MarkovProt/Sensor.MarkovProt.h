@@ -1,9 +1,9 @@
 #ifndef  SENSOR_MARKOVPROT_INCLUDED
 #define  SENSOR_MARKOVPROT_INCLUDED
 
-#include "../Sensor.h"
-#include "BStrArray.h"
-#include "../markov.h"
+#include "../../EuGene/Sensor.h"
+#include "../0_SensorTk/BStrArray.h"
+#include "../0_SensorTk/markov.h"
 
 /*************************************************************
  **                     SensorMarkovProt                        **

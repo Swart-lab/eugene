@@ -1,8 +1,8 @@
 #ifndef  SENSOR_EST_H_INCLUDED
 #define  SENSOR_EST_H_INCLUDED
 
-#include "../Sensor.h"
-#include "../Hits.h"
+#include "../../EuGene/Sensor.h"
+#include "../../EuGene/Hits.h"
 
 /*************************************************************
  **                       SensorEst                         **
