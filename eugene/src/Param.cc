@@ -48,18 +48,34 @@ void Parameters :: initParam (int argc, char * argv[])
 // ------------------------
 void Parameters :: ReadArg(int argc, char * argv[])
 {
-  int carg, errflag;
+  int carg, errflag = 0;
+  char *key, *val = NULL;
+  char* indexPos = NULL;
   
-  // Process args (default values)
   m["fstname"] = "\000";        // no default input
-  errflag      = 0;
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:")) != -1) {
     
     switch (carg) {
       
+    case 'D':           /* Definition of any parameter */
+
+      if ( (indexPos = index(optarg,'=')) && (indexPos > optarg) && (indexPos < optarg+strlen(optarg)-1)) {
+	key = new char[FILENAME_MAX+1];
+	val = new char[FILENAME_MAX+1];
+	*indexPos = 0;
+	sscanf(optarg, "%s", key);
+	sscanf(indexPos+1, "%s", val);
+	m[key] = val;
+      }
+      else {
+	fprintf(stderr,"Invalid command line parameter definition: %s\n",optarg);
+	exit(2);
+      }
+      break;
+
     case 'n':           /* -n normalize across frames      */
-      if (! TestIArg(optarg))
+      if (!TestIArg(optarg))
 	errflag++;
       else m["Output.normopt"] = optarg;
       break;
@@ -71,7 +87,6 @@ void Parameters :: ReadArg(int argc, char * argv[])
     case 's':           /* Single gene mode. Start/End on IG only   */
       m["EuGene.ExonPrior"]   = "0.0";
       m["EuGene.IntronPrior"] = "0.0";
-      //InterPrior = 1.0;
       m["EuGene.FivePrimePrior"]  = "0.0";
       m["EuGene.ThreePrimePrior"] = "0.0";
       break;
