@@ -8,7 +8,9 @@
 #define myassert(x) assert(x)
 //#define myassert(x)
 
+#if defined (__sun)
 int isinf(double x);
+#endif
 
 char * BaseName(char *path);
 int ProbeFile(char *path);
