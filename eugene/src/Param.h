@@ -35,7 +35,6 @@ class ltstr
 class Parameters
 {
  private: 
-  char parname[FILENAME_MAX+1];
   std::map <const char*, const char*, ltstr> m;
   std::map <const char*, const char*, ltstr>::iterator iter;
 
