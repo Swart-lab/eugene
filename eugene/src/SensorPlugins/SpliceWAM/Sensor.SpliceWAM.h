@@ -21,15 +21,16 @@
 class SensorSpliceWAM : public Sensor
 {
  private:
-  int NbNtBeforeGT, NbNtAfterGT, DonorSiteLength;
-  int NbNtBeforeAG, NbNtAfterAG, AcceptorSiteLength;
-  int MarkovianOrder;    // MarkovianOrder of the markov models in the Weight Array Model
-  double DonScaleCoef; // coef for the WAM score
-  double DonScalePenalty; //  penalty for the WAM score (score= ScaleCoef * WAMscore - ScalePenalt
   double AccScaleCoef;
   double AccScalePenalty;
-  WAM* DonWAModel;
-  WAM* AccWAModel;
+  double DonScaleCoef; // coef for the WAM score
+  double DonScalePenalty; //  penalty for the WAM score (score= ScaleCoef * WAMscore - ScalePenalt
+  static int NbNtBeforeGT, NbNtAfterGT, DonorSiteLength;
+  static int NbNtBeforeAG, NbNtAfterAG, AcceptorSiteLength;
+  static int MarkovianOrder;    // MarkovianOrder of the markov models in the Weight Array Model
+  static WAM* DonWAModel;
+  static WAM* AccWAModel;
+  static bool IsInitialized;
 
  public:
   SensorSpliceWAM  (int n, DNASeq *X);
@@ -41,5 +42,13 @@ class SensorSpliceWAM : public Sensor
 };
 
 extern "C" SensorSpliceWAM * builder0(int n, DNASeq *X) {  return new SensorSpliceWAM(n, X); }
+
+int SensorSpliceWAM::NbNtBeforeGT, SensorSpliceWAM::NbNtAfterGT, SensorSpliceWAM::DonorSiteLength;
+int SensorSpliceWAM::NbNtBeforeAG, SensorSpliceWAM::NbNtAfterAG, SensorSpliceWAM::AcceptorSiteLength;
+int SensorSpliceWAM::MarkovianOrder;   
+WAM* SensorSpliceWAM::DonWAModel;
+WAM* SensorSpliceWAM::AccWAModel;
+bool SensorSpliceWAM::IsInitialized = false;
+
 
 #endif

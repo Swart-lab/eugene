@@ -28,23 +28,26 @@ SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
 {
   type = Type_Splice;
 
-  char donmodelfilename[FILENAME_MAX+1];
-  char accmodelfilename[FILENAME_MAX+1];
-  MarkovianOrder= PAR.getI("SpliceWAM.MarkovianOrder");
-  NbNtBeforeGT = PAR.getI("SpliceWAM.NbNtBeforeGT");
-  NbNtAfterGT = PAR.getI("SpliceWAM.NbNtAfterGT");
-  DonorSiteLength= NbNtBeforeGT + 2 + NbNtAfterGT;
-  NbNtBeforeAG = PAR.getI("SpliceWAM.NbNtBeforeAG");
-  NbNtAfterAG = PAR.getI("SpliceWAM.NbNtAfterAG");
-  AcceptorSiteLength= NbNtBeforeAG + 2 + NbNtAfterAG;
-
-  strcpy(donmodelfilename,PAR.getC("EuGene.PluginsDir"));
-  strcat(donmodelfilename,PAR.getC("SpliceWAM.donmodelfilename"));
-  strcpy(accmodelfilename,PAR.getC("EuGene.PluginsDir"));
-  strcat(accmodelfilename,PAR.getC("SpliceWAM.accmodelfilename"));
-
-  DonWAModel= new WAM(MarkovianOrder, DonorSiteLength,"ACGT", donmodelfilename);
-  AccWAModel= new WAM(MarkovianOrder, AcceptorSiteLength, "ACGT", accmodelfilename);
+  if (!IsInitialized) {
+    char donmodelfilename[FILENAME_MAX+1];
+    char accmodelfilename[FILENAME_MAX+1];
+    MarkovianOrder= PAR.getI("SpliceWAM.MarkovianOrder");
+    NbNtBeforeGT = PAR.getI("SpliceWAM.NbNtBeforeGT");
+    NbNtAfterGT = PAR.getI("SpliceWAM.NbNtAfterGT");
+    DonorSiteLength= NbNtBeforeGT + 2 + NbNtAfterGT;
+    NbNtBeforeAG = PAR.getI("SpliceWAM.NbNtBeforeAG");
+    NbNtAfterAG = PAR.getI("SpliceWAM.NbNtAfterAG");
+    AcceptorSiteLength= NbNtBeforeAG + 2 + NbNtAfterAG;
+    
+    strcpy(donmodelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcat(donmodelfilename,PAR.getC("SpliceWAM.donmodelfilename"));
+    strcpy(accmodelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcat(accmodelfilename,PAR.getC("SpliceWAM.accmodelfilename"));
+    
+    DonWAModel= new WAM(MarkovianOrder, DonorSiteLength,"ACGT", donmodelfilename);
+    AccWAModel= new WAM(MarkovianOrder, AcceptorSiteLength, "ACGT", accmodelfilename);
+    IsInitialized = true;
+  }
 }
 
 // ----------------------
@@ -135,6 +138,7 @@ void SensorSpliceWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
     }
     d->sig[DATA::Don].weight[Signal::Reverse] += (DonScaleCoef * DonWAModel->ScoreTheMotif(DonSite)) + DonScalePenalty;
   }
+  delete DonSite; delete AccSite;
 }
 
 // ----------------------------
