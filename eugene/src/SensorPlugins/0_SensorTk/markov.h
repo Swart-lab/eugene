@@ -83,21 +83,22 @@ template<class CHAINE, typename T> class TabChaine
   int mot2indice(char* mot,int lgr, int deb) const;
   char* indice2mot(int indice) const;
   void affichage(int l=-1); // par defaut, n'affiche pas les valeurs, l==0 -> ttes les valeurs, l!=0 -> valeurs pour les mots de lgr l
-  void affichagevaleurs(int l);
-  void incremente (int indice); // attention: pour <int>, modifie VAL[indice]
-  void incremente (int indice,int n); // attention: pour <int>, modifie VAL[indice]
+  void affichagevaleurs(int l=0);
+  void incremente (int indice,int n=1); // attention: pour <int>, modifie VAL[indice]
   void initialisation ();           // attention: pour <int>, remet le compteur a 0.
   void initialisation (double GCrate); // init. sachant un GC%
-  void pseudocount (int pseudocomptes); // incremente toutes les valeurs
+  void pseudocount (int pseudocomptes=1); // incremente toutes les valeurs de pseudocomptes
   int fichier2seq(FILE *fp,char* &Sequence);
 // appel du style: 
 // char* Sequence;
 // "while (fichier2seq(fp,Sequence)){
 // seq2compte(Sequence);free(Sequence) }"
   void seq2compte(char* seq, int parcodon=0);      // attention: pour <int>, modifie VAL
+  void seq2compte(char* seq, int debut, int fin, int parcodon=0);      // attention: pour <int>, modifie VAL
 //  void seq2compte(char* seq, int debut, int fin, int parcodon=0);
 //  void seq2compte(char* seq, int debut, int fin, int phase, int parcodon=0); A faire...
   int fichier2compte (FILE *fp, int parcodon=0); // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
+  int fichier2compte (FILE *fp, int debut, int fin, int parcodon=0); // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
   void sauve2fichier (FILE *fp);  // sauvegarde; ATTENTION! uniquement pour <double>
   int chargefichier (FILE *fp);  // lecture d'un fichier contenant un modele sauvegarde
   int indiceprefixe (char* mot) const;

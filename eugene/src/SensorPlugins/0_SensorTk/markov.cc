@@ -64,8 +64,8 @@ int Chaine :: operator [] (char c) const
 
 // Visualisation du tableau
 void Chaine :: affichage() const {
-  printf ("Affichage de l'alphabet:\n");
-  printf ("taille=%d\nlettres=%s\n",taille,lettre);
+  printf ("affichage de l'alphabet: ");
+  printf ("taille=%d, lettres=%s\n",taille,lettre);
 //  for (int i=0;i<taille;i++){
 //    printf("lettre[%d]:%c, ",i,(*this)[i]);
 //  }
@@ -195,13 +195,13 @@ template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine(int ordre, C
 // POURQUOI NE COMPILE PAS AVEC "CONST"?!!!
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l=-1)
 {
-  if(alphabet != NULL) alphabet->affichage();
   printf("Affichage de la classe template TabChaine:\n");
+  if(alphabet != NULL) alphabet->affichage();
   printf("lgrmax=%d, taille alphabet=%d, nbrevaleurs=%d\n",lgrmax,alphabet->taille,nbrevaleurs);
   if(l>=0) affichagevaleurs(l);
 }
 
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l) 
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l=0) 
 {
   int i;
   char* affiche;
@@ -280,17 +280,10 @@ template<class CHAINE, typename T> char* TabChaine<CHAINE,T> :: indice2mot(int i
   return (alphabet->code2mot((indice-index),lgr));
 }
 
-
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice)
-{
-  if (indice < nbrevaleurs) VAL[indice]+=1;
-  if (indice2lgrmot(indice)==1) VAL[0]+=1;
-}
-
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice,int n)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice, int n=1)
 {
   if (indice < nbrevaleurs) VAL[indice] += n;
-  if (indice2lgrmot(indice)==1) VAL[0] += n;
+  if (indice2lgrmot(indice)==1) VAL[0]  += n;
 }
 
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation()
@@ -317,10 +310,10 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation(do
 }
 
 // permet d'eviter des probas de 0 (et du coup des log de 0...)
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes=1)
 {
-  for (int i=0;i<nbrevaleurs;i++) 
-    incremente(i);
+  for (int i=0;i<nbrevaleurs;i++)
+    incremente(i,pseudocomptes);
 }
 
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int parcodon=0)
@@ -332,6 +325,21 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
     }
 
     for(i=lgrmax-1 ; i<strlen(seq) ; i++){
+      for(j=0;j<lgrmax;j++) {
+	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
+      }
+    }
+  }
+}
+
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int debut, int fin, int parcodon=0)
+{
+  int i,j;
+  if ((seq!=NULL)&&(strlen(seq)>lgrmax)) {
+    for(i=debut; i< debut+lgrmax-1 ;i++) { //debut
+      for(j=0;j<=i;j++) incremente(mot2indice(seq,j+1,i-j));
+    }
+    for(i= (debut+lgrmax-1) ; i< fin ; i++){
       for(j=0;j<lgrmax;j++) {
 	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
@@ -457,6 +465,15 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FI
   };
 }
 
+template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon=0)
+{
+  char* Sequence;
+  while (fichier2seq(fp,Sequence)) {
+    seq2compte(Sequence,debut,fin,parcodon);
+    free(Sequence);
+  };
+}
+
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: sauve2fichier (FILE *fp)
 {
   int    i;
@@ -518,7 +535,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: chargefichier (FIL
   Ok = fread (&N, sizeof(int), 1, fp);
   if (!Ok) return 1;
 
-  if (endian) N = LEndianReverse(N);
+  if (endian) N = LEndianReverse(N); 
 
   if ( ((signed)M != lgrmax) || (A !=(signed)alphabet->taille) || ((signed)N != nbrevaleurs) ) fprintf(stderr,"markov.cc : Incompatibility between model expected and read in function chargefichier: M=%d, lgrmax=%d, A=%d,alphabet->taille =%d, N=%d, nbrevaleurs=%d\n",M,lgrmax,A,alphabet->taille,N,nbrevaleurs);
   assert ((signed)M == lgrmax && A == (signed)alphabet->taille && (signed)N == nbrevaleurs);
@@ -582,7 +599,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
       for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) {
 	cumul+= comptage.VAL[j];
 //	printf("i=%d,j=%d,mot=%s,indicedeclinant=%d,declinant=%s,n(%s)=%d,cumul=%d\n",i,j,indice2mot(i),indicedeclinant,indice2mot(indicedeclinant),comptage.indice2mot(j),comptage.VAL[j],cumul);
-	// Ex. avec ACGT: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
+	// Ex. avec adn: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
       }
       if (indice2lgrmot(i) == lgrmax) {
 //	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage.VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(REAL)comptage.VAL[i] / (REAL)cumul);
