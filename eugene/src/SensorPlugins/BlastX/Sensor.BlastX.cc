@@ -128,8 +128,8 @@ void SensorBlastX :: Init (DNASeq *X)
   int i, j;
   int Len = X->SeqLen;
   const int LevelColor[3] = {6,7,8}; 
-  int   level,levelidx,Pphase;
-  double GlobalScore,PGlobalScore;
+  int   level, levelidx, Pphase = 0;
+  double GlobalScore,    PGlobalScore = 0;
  
   vPos.clear();
   vPMatch.clear();
