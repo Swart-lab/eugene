@@ -1,9 +1,14 @@
 Loading sequence...GHU53701, 2626 bases read, GC Proportion = 40.3%
 Loading Sensor.Tester.........done
-Reading coordinates file......................done
 Loading Sensor.EuStop.........done
+Reading coordinates file......................done
 Optimal path length = 0.9163
 ---------------------------------------------------------------------
+Thres.		Nb	TP	FP	TN	FN	Sens.	Spec.
+-7.21527	1	1	258	0	0	0.3861	100
+-6.23444	2	1	257	1	0	0.387597	100
+-5.54129	1	1	255	3	0	0.390625	100
+-4.155	255	1	254	4	0	0.392157	100
    pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del
      1 a 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || -inf -inf -inf -inf -inf -inf -inf -inf || -inf -inf -inf -inf -inf -inf -inf -inf || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
      2 t 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || -inf -inf -inf -inf -inf -inf -inf -inf || -inf -inf -inf -inf -inf -inf -inf -inf || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
