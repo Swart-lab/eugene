@@ -167,8 +167,8 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
   
   int j=0;
   while(fgets (line, MAX_LINE, fp) != NULL) {
+    j++;
     if (line[0] != '#') {
-      j++;
       i = sscanf(line,"%s %*s %s %d %d %*s %c %c %d %d %d %d %d %f",
 		 seqname, feature, &start, &end, &strand, &frame,
 		 &a, &t, &c, &g, &n, &gc);
