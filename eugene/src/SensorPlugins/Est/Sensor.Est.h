@@ -17,8 +17,8 @@ class SensorEst : public Sensor
   unsigned char *ESTMatch;
   Hits **HitTable;
   int NumEST;
-  double estP;
-  int estM;
+  double estP, utrP;
+  int    estM, utrM;
   
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
   void   ESTSupport  (Prediction *pred, int Tdebut, int Tfin,
