@@ -48,6 +48,11 @@ Output.Prefix		./
 NStart.startP	0.052
 NStart.startB	0.308
 #
+# IfElse
+#
+IfElse.SensorIf		NG2
+IfElse.SensorElse	SPred
+#
 # NetGene2 parameters
 #
 NG2.accP	0.903
@@ -109,8 +114,9 @@ Homology.protmatname	BLOSUM62
 #
 Sensor.EuStop.use	TRUE
 Sensor.NStart.use	TRUE
-Sensor.NG2.use		TRUE
-Sensor.SPred.use	TRUE
+Sensor.NG2.use		FALSE
+Sensor.SPred.use	FALSE
+Sensor.IfElse.use	TRUE
 #Sensor.Markov.use	2
 Sensor.Markov.use	TRUE
 Sensor.BlastX.use	FALSE
@@ -125,6 +131,7 @@ Sensor.MarkovConst.use	FALSE
 #
 # Sensor priorities
 #
+Sensor.IfElse		1
 Sensor.EuStop		1	#
 Sensor.StartConst	1	# Sensor.Name Priority
 Sensor.SpliceConst	1	#
