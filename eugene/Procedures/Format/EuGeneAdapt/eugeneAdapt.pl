@@ -125,7 +125,7 @@ my $wam_sto_tp   = "WAM.STOP.TP";
 my $verif        = "verif.txt";
 
 # For print info
-my $excluSeq      = 7;       # first method (seq excluded when exon < N nt)
+my $excluSeq      = 9;       # first method (seq excluded when exon < N nt)
 my $nbExclu       = 0;       # number of excluded sequence
 my $nbNoUTR5      = 0;       # number of sequence without utr5
 my $nbNoUTR3      = 0;       # number of sequence without utr3
@@ -198,7 +198,8 @@ MAIN:
   print"------------------------------------".
     "-------------------------------\n";
   print "Launch TrainImm (Build matrices)..";
-  system "$cmd_IMM $exonFile $intFile -5 $utr5File -3 $utr3File > $matLogFile";
+  my $arg = "-h";
+  system "$cmd_IMM $exonFile $intFile -5 $utr5File -3 $utr3File $arg > $matLogFile";
   system "mv $outputDir/exon.txt.bin $matFile";
   print "$matFile....done\n";
 
