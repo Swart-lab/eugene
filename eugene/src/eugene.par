@@ -334,7 +334,7 @@ Sensor.PepSignal 	10
 Sensor.SMachine 	10
 Sensor.SpliceWAM 	10
 Sensor.SPred 		10
-Sensor.StartWAM	 	10
+Sensor.StartWAM 	10
 Sensor.Transcript 	10
 #
 # CONTENT SENSORS
