@@ -37,7 +37,7 @@
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
 
-#define  VERSION "1.1d (120701)"
+#define  VERSION "1.2 (030502)"
 
 
 #ifdef HAVE_CONFIG_H
@@ -721,7 +721,7 @@ void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
      EstIndex++;
   }
 
-  printf("      Gene         %7d %7d     %5d     supported on %d bases\n",debut,fin,fin-debut+1,
+  printf("      Gene         %7d %7d     %5d     supported on %d bases\n",debut+1,fin+1,fin-debut+1,
 	 supported);
   delete Sup;
   return;
@@ -1130,7 +1130,8 @@ int main  (int argc, char * argv [])
 
   if (raflopt) {
     FILE *fRAFL;
-    int beg,end;
+    int beg5,end5;
+    int beg3,end3;
     char name[FILENAME_MAX+1];
     RAFLgene tmp;
 
@@ -1139,15 +1140,17 @@ int main  (int argc, char * argv [])
     strcpy(tempname,fstname);
     strcat(tempname,".riken");
     fRAFL = FileOpen(NULL,tempname, "r");
-    while (fscanf (fRAFL,"%d %*s %d %*s %s",&beg,&end,name) != EOF){
-      tmp.deb=Min(beg,end);
-      tmp.fin=Max(beg,end);
+    while ((j=fscanf (fRAFL,"%d %d %*s %d %d %*s %s",&beg5,&end5,&beg3,&end3,name)) == 5){
+      tmp.deb=Min(beg3,Min(end3,Min(beg5,end5)));
+      tmp.fin=Max(beg3,Max(end3,Max(beg5,end5)));
       strcpy(tmp.ID,name);
-      tmp.sens= ((beg<end)?'+':'-');
+      tmp.sens= (((beg5+end5) < (beg3+end3)) ?'+':'-');
       RAFL.push_back(tmp);
     }
     fclose(fRAFL);
-    fprintf(stderr,"done\n");
+    fprintf(stderr,"%d RAFL EST pairs read\n",RAFL.size());
+    if (j != EOF) fprintf(stderr,"Incorrect RAFL file\n");
+
     fflush(stderr);
     if (RAFL.size() < 1) raflopt=FALSE;
   }
@@ -1364,7 +1367,7 @@ int main  (int argc, char * argv [])
   REAL  maxi, PBest[26];
   BackPoint *PrevBP[26];
   int source;
-  j=0;
+  int RAFLindex = 0;
 
   for (i = 0; i <= Data_Len; i++) {
     
@@ -1399,11 +1402,11 @@ int main  (int argc, char * argv [])
     // 0-> en dehors, 1-> frontiere(intergenique obligatoire), 2-> dedans(penalisation IG)
 
     if (raflopt){
-      if ( i > RAFL[j].fin){ // si on depasse le RAFL, on prend l'eventuel prochain
-	(j+1 < RAFL.size()) ? j++ : raflopt=FALSE ;
+      if ( i > RAFL[RAFLindex].fin){ // si on depasse le RAFL, on prend l'eventuel prochain
+	(RAFLindex+1 < RAFL.size()) ? RAFLindex++ : raflopt=FALSE ;
       }
-      if ( (i >= RAFL[j].deb-2) && (i < RAFL[j].fin+1) ){
-	RAFLpos= ( ((i==RAFL[j].deb-2) || (i==RAFL[j].fin)) ? 1 : 2);
+      if ( (i >= RAFL[RAFLindex].deb-2) && (i < RAFL[RAFLindex].fin+1) ){
+	RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
       }
       else{
 	RAFLpos=0;
@@ -1468,7 +1471,7 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(IGPenalty);
 
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[k]->Update(RAFLPenalty);
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[k]->Update(RAFLPenalty);
       }
     }
     // ----------------------------------------------------------------
@@ -1531,7 +1534,7 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(IGPenalty);
 
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[k]->Update(RAFLPenalty);
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) LBP[k]->Update(RAFLPenalty);
       }
     }
     // ----------------------------------------------------------------
@@ -1659,7 +1662,7 @@ int main  (int argc, char * argv [])
     LBP[UTR5F]->Update(log(BaseScore[8][i])+log(3.999));
  
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[UTR5F]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[UTR5F]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
@@ -1691,7 +1694,7 @@ int main  (int argc, char * argv [])
     LBP[UTR3F]->Update(log(BaseScore[9][i])+log(4));
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[UTR3F]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[UTR3F]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -1731,7 +1734,7 @@ int main  (int argc, char * argv [])
     LBP[UTR5R]->Update(log(BaseScore[8][i])+log(3.999));
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[UTR5R]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) LBP[UTR5R]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
@@ -1779,7 +1782,7 @@ int main  (int argc, char * argv [])
     LBP[UTR3R]->Update(log(BaseScore[10][i])+log(4));
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[UTR3R]->Update(RAFLPenalty);
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) LBP[UTR3R]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -1820,7 +1823,7 @@ int main  (int argc, char * argv [])
 	LBP[6+k]->Update(IGPenalty);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[6+k]->Update(RAFLPenalty);
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='-'))) LBP[6+k]->Update(RAFLPenalty);
       }
     }
 
@@ -1862,7 +1865,7 @@ int main  (int argc, char * argv [])
 	LBP[9+k]->Update(IGPenalty);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) 
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens=='+'))) 
 	  LBP[9+k]->Update(RAFLPenalty);
       }
     }
