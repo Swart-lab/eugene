@@ -336,6 +336,11 @@ sensitive. The definition order is not important.
   where plugins could be found (``\texttt{.so}'' files, sensor specific 
   models files); that is the path to the \texttt{PLUGINS} directory.
   
+  \item \texttt{EuGene.sloppy}: in the default (non-sloppy) mode, 
+  \EuGene\ will stop and abort if some needed parameters in the parameter
+  file is missing. If the parameter is set to \texttt{1} then a simple warning
+  is emitted. Not advised unless you know what you do.
+  
 \item \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
   \texttt{EuGene.InterPrior}, \texttt{EuGene.FivePri\-mePrior},
   \texttt{EuGene.ThreePrimePrior}: prior on the initial/final state of
@@ -363,6 +368,9 @@ sensitive. The definition order is not important.
   predicted if prefixed by the FASTA sequence id (or the filename if
   no FASTA id is available). This is truncated to the number of
   caracters indicated. If set to 0 (or FALSE), the full id is used.
+
+\item \texttt{Output.MinCDSLen}: any predicted gene whose CDS length in number of nucleotides is lower than this is
+filtered out from the output.
 
 \item \texttt{Output.stepid}: in the text output, step for numbering genes.
 
@@ -555,13 +563,14 @@ Sensor.IfElse           1
 Sensor.EuStop           1       
 Sensor.NStart           1       
 Sensor.MarkovIMM        1 
-Sensor.User             10
-Sensor.Est              20         
+Sensor.User             20
+Sensor.Est              30         
 \end{Verbatim}
 
-The \texttt{Sensor.Est} is loaded last because it has the highest priority.
-This is important since the sensor actually uses the information
-provided by other sensors (splice site prediction sensors) that then have to be loaded before.
+The \texttt{Sensor.Est} is loaded last because it has the highest
+priority.  This is important since the sensor actually uses the
+information provided by other sensors (splice site prediction sensors)
+that then have to be loaded before.
 
 Several instances of the same sensor can be loaded. Eg., if you are
 dealing with an organism that has a large GC\% range, one may use
