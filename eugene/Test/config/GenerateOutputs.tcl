@@ -34,7 +34,9 @@ puts "Remove all reference files ? (enter 'Y' if you are OK else another key)"
 set key [gets stdin]
 if {$key=="Y"} {
     foreach f [exec ls ${OUTPUT_DIR}] {
-	exec rm ${OUTPUT_DIR}/$f
+	if {![string match CVS $f]} {
+	    exec rm ${OUTPUT_DIR}/$f
+	}
     }
     set erase 1
 } else {
@@ -57,47 +59,51 @@ InitParameterFile ${EUGENE}.par $AllSensorsList
 ##################        Units tests       ############################
 ########################################################################
 foreach sensor $AllSensorsList {
-# Get stderr and stdout
+    # Get stderr and stdout
     if {$sensor != "Est"} {
-	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
-	    -D Sensor.${sensor}.use=TRUE 2> stderr > stdout
+	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	    -D Sensor.${sensor}.use=TRUE \
+	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
     } else {
-	eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ(Sensor) $OPTIONS(Sensor) \
-	    -D Sensor.${sensor}.use=TRUE -D Sensor.NG2.use=TRUE 2> stderr > stdout
+	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	    -D Sensor.${sensor}.use=TRUE -D Sensor.NG2.use=TRUE \
+	$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
     }
+    
+    # Open files
+    set out [open tmp%stdout {RDONLY}]
+    set err [open tmp%stderr {RDONLY}]
+    set std [open tmp%GenerateOutputs w+]
 
-# Open files
-    set out [open stdout {RDONLY}]
-    set err [open stderr {RDONLY}]
-    set std [open GenerateOutputs.tmp w+]
-
-# Copy stderr and stdout in the reference file
+    # Copy stderr and stdout in the reference file
     set f [read -nonewline $err]
     puts $std $f
     set flux [read -nonewline $out]
     puts $std $flux
 
-# Close files
+    # Close files
     close $out
     close $err
     close $std
 
-# Remove the 2 first lines related to version number
-    RemoveFirstLines GenerateOutputs.tmp
+    # Remove the 2 first lines related to version number
+    RemoveFirstLines tmp%GenerateOutputs
     
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${sensor}]} {
-	exec cp GenerateOutputs.tmp $OUTPUT_DIR/Output_${sensor}
-    } elseif {[catch {exec diff $OUTPUT_DIR/Output_${sensor} GenerateOutputs.tmp}]} {
+	exec cp tmp%GenerateOutputs $OUTPUT_DIR/Output_${sensor}
+    } elseif {[catch {exec diff $OUTPUT_DIR/Output_${sensor} tmp%GenerateOutputs}]} {
 	AskReplace $OUTPUT_DIR/Output_${sensor} 
 	if {[gets stdin] == "Y"} {
-	    exec cp GenerateOutputs.tmp $OUTPUT_DIR/Output_${sensor}
+	    exec cp tmp%GenerateOutputs $OUTPUT_DIR/Output_${sensor}
 	} else {
-	    exec cp GenerateOutputs.tmp $OUTPUT_DIR/Output_${sensor}.new
+	    exec cp tmp%GenerateOutputs $OUTPUT_DIR/Output_${sensor}.new
 	}
     }
 	
-# Remove all temporary files
-    exec rm GenerateOutputs.tmp stderr stdout
+    # Remove all temporary files
+    exec rm tmp%GenerateOutputs tmp%stderr tmp%stdout
+
+    puts "Reference files for $sensor unit test created or checked."
 }
 
 
@@ -108,50 +114,52 @@ foreach sensor $AllSensorsList {
 ########################################################################
 foreach TEST $FunctionalTestList {
     # Preparation of the parameter file with the correct sensors
-    foreach sensor $SensorsList($TEST) {set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
+    foreach sensor $SensorsList($TEST) \
+	{set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
     ModifyParaValue ${EUGENE}.par  NewValue${TEST}
 
-    # Get the sequence length
+    # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
 
     # Save output of software and treat them
-    eval exec $EUGENE_DIR/$EUGENE $SEQ_DIR/$SEQ($TEST) $OPTIONS($TEST) -l $l 2> stderr > stdout
+    eval exec $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) \
+	2> tmp%stderr > tmp%stdout
 
     # 1/ image file
-    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.000.png]} {
-	exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.000.png
-    } elseif {[catch {exec diff $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.000.png}]} {
-	AskReplace $OUTPUT_DIR/Output_${TEST}.000.png
+    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.png]} {
+	exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.png
+    } elseif {[catch {exec diff $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.png}]} {
+	AskReplace $OUTPUT_DIR/Output_${TEST}.png
 	if {[gets stdin] == "Y"} {
-	    eval exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.000.png
+	    eval exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.png
 	} else {
-	    eval exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.000.png.new
+	    eval exec cp $IMG($TEST) $OUTPUT_DIR/Output_${TEST}.png.new
 	}
     }
     # Remove temporary file
     exec rm $IMG($TEST)
 
     # 2/ reference file in test format
-    PrepareReference stdout stderr FunctionalTest.tmp 
+    PrepareReference tmp%stdout tmp%stderr tmp%FunctionalTest
 
-    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}]} {
-	exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}
-    } elseif {[catch {exec diff FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}}]} {
-	AskReplace OUTPUT_DIR/Output_${TEST}
+    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}_test]} {
+	exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test
+    } elseif {[catch {exec diff tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test}]} {
+	AskReplace OUTPUT_DIR/Output_${TEST}_test
 	if {[gets stdin] == "Y"} {
-	    exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}
+	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test
 	} else {
-	    exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}.new
+	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test.new
 	}
     }
     # Remove temporary file
-    exec rm FunctionalTest.tmp
+    exec rm tmp%FunctionalTest
 
     # 3/ reference file in spawn format (no buffered pipes)
     #Open files
-    set out [open stdout {RDONLY}]
-    set err [open stderr {RDONLY}]
-    set std [open "FunctionalTest.tmp" w+]
+    set out [open tmp%stdout {RDONLY}]
+    set err [open tmp%stderr {RDONLY}]
+    set std [open "tmp%FunctionalTest" w+]
     # Copy stderr and stdout in the reference file
     set f [read -nonewline $err]
     puts $std $f
@@ -162,21 +170,23 @@ foreach TEST $FunctionalTestList {
     close $err
     close $std
 
-    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}_std]} {
-	exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}_std
-    } elseif {[catch {exec diff $OUTPUT_DIR/Output_${TEST}_std FunctionalTest.tmp}]} {
-	AskReplace $OUTPUT_DIR/Output_${TEST}_std
+    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}]} {
+	exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
+    } elseif {[catch {exec diff $OUTPUT_DIR/Output_${TEST} tmp%FunctionalTest}]} {
+	AskReplace $OUTPUT_DIR/Output_${TEST}
 	if {[gets stdin] == "Y"} {
-	    exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}_std
+	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
 	} else {
-	    exec cp FunctionalTest.tmp $OUTPUT_DIR/Output_${TEST}_std.new
+	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}.new
 	}
     }
     # Remove temporary files
-    exec rm stderr stdout FunctionalTest.tmp
+    exec rm tmp%stderr tmp%stdout tmp%FunctionalTest
 
     # Restore initial parameters values
     InitParameterFile ${EUGENE}.par $AllSensorsList
+
+    puts "Reference files for $TEST functional test created or checked."
 }
 
 
@@ -186,28 +196,30 @@ foreach TEST $FunctionalTestList {
 ########################################################################
 
 # Preparation of the parameter file with the correct sensors
-foreach sensor $SensorsList(Araset) {set NewValueAraset(Sensor.${sensor}.use) TRUE}
+foreach sensor $SensorsList(Araset) \
+    {set NewValueAraset(Sensor.${sensor}.use) TRUE}
 ModifyParaValue ${EUGENE}.par  NewValueAraset
 
-catch {eval exec $EUGENE_DIR/$EUGENE $SEQ(Araset) > stdout}
+catch {eval exec $EUGENE_DIR/$EUGENE $SEQ(Araset) > tmp%stdout}
 
 if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_Araset]} {
-    exec cp stdout $OUTPUT_DIR/Output_Araset
-} elseif {[catch {exec diff $OUTPUT_DIR/Output_Araset stdout}]} {
+    exec cp tmp%stdout $OUTPUT_DIR/Output_Araset
+} elseif {[catch {exec diff $OUTPUT_DIR/Output_Araset tmp%stdout}]} {
     AskReplace $OUTPUT_DIR/Output_Araset
     if {[gets stdin] == "Y"} {
-	exec cp stdout $OUTPUT_DIR/Output_Araset
+	exec cp tmp%stdout $OUTPUT_DIR/Output_Araset
     } else {
-	exec cp stdout $OUTPUT_DIR/Output_Araset.new
+	exec cp tmp%stdout $OUTPUT_DIR/Output_Araset.new
     }
 }
 
 # remove temporary file	
-exec rm stdout
+exec rm tmp%stdout
 
 # Restore initial parameters values
 InitParameterFile ${EUGENE}.par $AllSensorsList
 
+puts "Reference files for Araset test created or checked."
 
 
 
