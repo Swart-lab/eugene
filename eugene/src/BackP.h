@@ -23,6 +23,7 @@ const unsigned char SwitchAny        = 0xFF;
 class BackPoint
   {
   private:
+    bool Optimal;
     signed char State;
     unsigned char SwitchType;
     int StartPos;  
@@ -37,7 +38,7 @@ class BackPoint
     BackPoint ();
     BackPoint  (char state, int pos, double cost);
     ~BackPoint();
-    void InsertNew(char state, unsigned char Switch,int pos, double cost,BackPoint *Or);
+    void InsertNew(char state, unsigned char Switch,int pos, double cost,BackPoint *Or,bool opt = true);
     void Print();
     void Dump();
     Prediction* BackTrace();

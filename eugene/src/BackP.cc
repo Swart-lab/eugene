@@ -19,11 +19,12 @@
 // ----------------------------------------------------------------
 BackPoint :: BackPoint  ()
   {
-   State = -1;
-   StartPos = -1;
-   SwitchType = SwitchAny;
-   Cost = Additional = 0.0;
-   Next = Prev = Origin = NULL;
+    Optimal = true;
+    State = -1;
+    StartPos = -1;
+    SwitchType = SwitchAny;
+    Cost = Additional = 0.0;
+    Next = Prev = Origin = NULL;
   }
 
 // ----------------------------------------------------------------
@@ -31,6 +32,7 @@ BackPoint :: BackPoint  ()
 // ----------------------------------------------------------------
 BackPoint :: BackPoint  (char state, int pos, double cost)
 {
+  Optimal = true;
   State = state;
   StartPos = pos;
   SwitchType = SwitchAny;
@@ -52,12 +54,13 @@ BackPoint :: ~BackPoint  ()
 // Insert  a new backpoint
 // ----------------------------------------------------------------
 void BackPoint :: InsertNew(char state, unsigned char Switch, int pos, 
-			    double cost, BackPoint *Or)
+			    double cost, BackPoint *Or, bool opt)
 {
   BackPoint *It = this->Next;
 
   if (cost > NINFINITY) {
     It =  new BackPoint(state,pos,cost);
+    It->Optimal = opt;
     It->Next = this->Next;
     It->Prev = this->Next->Prev;
     It->Origin = Or;
@@ -123,13 +126,24 @@ Prediction* BackPoint :: BackTrace ()
 BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost, int len2)
 {
   BackPoint *It = this->Next;
+  BackPoint *BestBP;
+  double BestScore = NINFINITY;
   double add = 0.0;
 
   do {
     add += It->Additional;
+    // la condition filtre les aiguillages interdits: trop pres (len2) ou trop pres (len) et de mauvais type
     if ((It->StartPos <= pos-len) || ( (!(It->SwitchType & mask))&& (It->StartPos <= pos-len2)) || (It->StartPos < 0)) {
-      *cost = add+It->Cost;
-      return It;
+      // on regarde si on ameliore
+      if ((add+It->Cost) > BestScore) {
+	BestScore = add+It->Cost;
+	BestBP = It;
+      }
+      // si c'est un aiguillage autorise optimal, c'est fini sinon on continue.
+      if (It->Optimal) {
+	*cost = BestScore;
+	return BestBP;
+      }
     }
     It = It -> Next;
   } while (It != this->Next);
@@ -148,7 +162,7 @@ BackPoint *BackPoint :: StrictBestUsable(int pos, int len, REAL *cost)
 
   do {
     add += It->Additional;
-    if ((It->StartPos <= pos-len) || (It->StartPos < 0)) {
+    if (It->Optimal && ((It->StartPos <= pos-len) || (It->StartPos < 0))) {
       *cost = add+It->Cost;
       return It;
     }
