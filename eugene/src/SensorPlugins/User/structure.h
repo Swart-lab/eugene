@@ -13,7 +13,6 @@ typedef struct UTIL
   ptUTIL suiv;
 } UTIL;
 
-extern int Utilisateur(char *nom_fich);
-extern ptUTIL SignalUser,ContentsUser,UserInfoList ;
+extern int Utilisateur(char *nom_fich,ptUTIL *a, ptUTIL *b);
 void Util(int i, ptUTIL ut, DATA *d);
 void WriteUtils(ptUTIL,FILE *);

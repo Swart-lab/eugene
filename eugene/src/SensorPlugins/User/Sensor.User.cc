@@ -1,5 +1,4 @@
 #include "Sensor.User.h"
-#include "structure.h"
 #include "yacc.tab.h"
 
 /*************************************************************
@@ -35,7 +34,7 @@ void SensorUser :: Init (DNASeq *X)
   
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".user");
-  errflag = Utilisateur(tempname);   //prise en compte de donnees utilisateur
+  errflag = Utilisateur(tempname, &Signals, &Contents);   //prise en compte de donnees utilisateur
     
   if (errflag) {
     fprintf(stderr,"none found\n");
@@ -48,11 +47,8 @@ void SensorUser :: Init (DNASeq *X)
 // -----------------------
 void SensorUser :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  UserInfoList = SignalUser;
-  Util(pos, UserInfoList, d);
-  
-  UserInfoList = ContentsUser;
-  Util(pos, UserInfoList, d);
+  Util(pos, Signals, d);
+  Util(pos, Contents, d);
 }
 
 // ----------------------------

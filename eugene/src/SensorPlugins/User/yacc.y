@@ -33,7 +33,7 @@
   char* Choice;
 
   // les listes d'info utilisateur
-  ptUTIL SignalUser,ContentsUser,UserInfoList;
+  ptUTIL SignalUser,ContentsUser;
 
   // pour afficher une raison (source)
   char* raison;
@@ -460,12 +460,16 @@ int yywrap(void)
   return 1;
 }
 
-int Utilisateur(char *nom_fich)
-{
-  yyin = fopen( nom_fich, "r" );
+int Utilisateur(char *nom_fich, ptUTIL *SigInfo, ptUTIL *ConInfo) {
+
+  yyin = fopen(nom_fich, "r" );
   if (yyin) {
     yyparse();
     fclose(yyin);
+    *SigInfo = SignalUser;
+    SignalUser = NULL;
+    *ConInfo = ContentsUser;
+    ContentsUser = NULL;
     return 0;
     //    SignalUser = SignalUser->suiv;
     //    ContentsUser = ContentsUser->suiv;

@@ -2,13 +2,16 @@
 #define  SENSOR_USER_H_INCLUDED
 
 #include "../../EuGene/Sensor.h"
-
+#include "structure.h"
 /*************************************************************
  **                       SensorUser                        **
  *************************************************************/
 class SensorUser : public Sensor
 {
  private:
+  
+  ptUTIL Signals;
+  ptUTIL Contents;
   
  public:
   SensorUser  (int n, DNASeq *X);
