@@ -78,10 +78,17 @@ if (printopt == 'd')
 else if ((printopt == 'l') || (printopt == 'h'))
 {
   int Starts[18];
+  int cons =0,incons = 0;
+  int TStart = 0, TEnd;
   int forward,init,term,Lend,Rend,Phase;
   int Don,Acc;
   char seqn[6];
   char *pos;
+
+  if (estopt) {    
+    qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+  }
+
 
   if (printopt == 'h')
     {
@@ -94,10 +101,6 @@ else if ((printopt == 'l') || (printopt == 'h'))
   for (j = 0; j<18; j++)
     Starts[j] = ((Choice[0] == j) ? 0 : -1);
 
-  /*
-  fprintf(stderr,"\n Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
-  */
-  
   fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
 
   
@@ -112,30 +115,40 @@ else if ((printopt == 'l') || (printopt == 'h'))
     }
   
   // Kludge = a non existing choice to force exon termination
-  Choice[Data_Len+1] = 120;
+  if ((Choice[Data_Len] != InterGen5) && (Choice[Data_Len] != InterGen3))
+    Choice[Data_Len+1] = InterGen5;
   //  Choice[0] = 120;
   
   for (i=0; i <= Data_Len; i++) {
     if (Choice[i+1] != Choice[i]) {
       // something happens
+
+      CheckConsistency(Starts[Choice[i]],i,Choice[i],ESTMatch,&cons,&incons);
+	
+      // demarrage exon extreme. Noter pour verif EST
+      if ((Choice[i] == UTR5F) || (Choice[i] == UTR3R)) TStart = i;
+      if ((Choice[i+1] == UTR3F) || (Choice[i+1] == UTR5R)) TEnd = i-1;
+
       // An exon is finishing
-      if (Choice[i] < 6) {
+      if (Choice[i] <= ExonR3) {
 	// strand ?
 	forward = (Choice[i] < 3);
 	
 	// first or last exon ?
-	init = ((forward  && Choice[Starts[Choice[i]]] >= 12) || (!forward && Choice[i+1] >= 12));
-	term = ((!forward  && Choice[Starts[Choice[i]]] >= 12) || (forward && Choice[i+1] >= 12));
+	init = ((forward  && Choice[Starts[Choice[i]]] >= InterGen5) || 
+		(!forward && Choice[i+1] >= InterGen5));
+
+	term = ((!forward  && Choice[Starts[Choice[i]]] >=InterGen5) || 
+		(forward && Choice[i+1] >= InterGen5));
 	
-	if (forward) {
 	  Lend = offset+Starts[Choice[i]]+1;
 	  Rend = offset+i;
+
+	if (forward) {
 	  Don = Lend-1;
 	  Acc = Rend+1;
 	}
 	else {
-	  Lend = offset+Starts[Choice[i]]+1;
-	  Rend = offset+i;
 	  Acc = Lend-1;
 	  Don = Rend+1;
 	}
@@ -162,12 +175,12 @@ else if ((printopt == 'l') || (printopt == 'h'))
 	  else printf(" Unk.");
 	}
 	printf("      %+2d",PhaseAdapt(Choice[i]));
-	printf(" %7d %7d   1.0", Don,Acc);
-	
-	printf("\n");
+	printf(" %7d %7d ", Don,Acc);
+	printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(Rend-Lend+1),
+	       100.0*(double)incons/(Rend-Lend+1));
 	Starts[Choice[i]] = -1;
       } 
-      else if ((Choice[i] >= 13) && (Choice[i] <= 16)) {
+      else if ((Choice[i] >= UTR5F) && (Choice[i] <= UTR3R)) {
 
 	printf("%s ",seqn);
 
@@ -191,9 +204,14 @@ else if ((printopt == 'l') || (printopt == 'h'))
 
 	printf("    %7d %7d", offset+Starts[Choice[i]]+1,offset+i);
 	printf("     %4d  ", i-Starts[Choice[i]]);
-	printf("   NA      NA      NA      NA   1.0\n");
+	printf("   NA      NA      NA      NA ");
+	printf("  %3.0f.%-3.0f\n",100.0*(double)cons/(i-Starts[Choice[i]]),
+	       100.0*(double)incons/(i-Starts[Choice[i]]));
 	Starts[Choice[i]] = -1;
       }
+
+      if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
+	if (estopt && estanal) ESTSupport(Choice,TStart,TEnd,HitTable,NumEST);
 
       Starts[Choice[i+1]] = i;
     }
