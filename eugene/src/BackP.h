@@ -9,11 +9,13 @@
 
 #include "Const.h"
 
-const unsigned char SwitchStart = 0x1;
-const unsigned char SwitchStop  = 0x2;
-const unsigned char SwitchAcc   = 0x4;
-const unsigned char SwitchDon   = 0x8;
-const unsigned char SwitchAny   = 0xF; 
+const unsigned char SwitchStart      = 0x1;
+const unsigned char SwitchStop       = 0x2;
+const unsigned char SwitchAcc        = 0x4;
+const unsigned char SwitchDon        = 0x8;
+const unsigned char SwitchTransStart = 0x10;
+const unsigned char SwitchTransStop  = 0x20;
+const unsigned char SwitchAny        = 0x3F; 
 
 class BackPoint
   {
