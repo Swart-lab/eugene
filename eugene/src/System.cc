@@ -1,6 +1,11 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "System.h"
 #include <string.h>
-
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 // ------------------------------------------------------------------
 // BASENAME: returns a pointer to the filename, w/o any
 // leading prefix
