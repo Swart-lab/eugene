@@ -611,8 +611,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
   int i,j,cumul,indicedeclinant;
   char* mot= new char[lgrmax];
   if (nbrevaleurs == comptage->nbrevaleurs) {
-    if ((typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) ) VAL[0] = 1;
-    else VAL[0] = 1.0;
+    VAL[0] = (T)1.0;
     for(i=1;i<nbrevaleurs;i++) {
       cumul=0;
       mot= indice2mot(i);
@@ -635,10 +634,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
 	}
       }
       else {
-	if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
-	  VAL[i]= ((cumul==0) ? 0 : real2usi( (double)comptage->VAL[i] / (double)cumul) );
-	else
-	  VAL[i]=((cumul==0) ? 0 : (double)comptage->VAL[i] / (double)cumul ) ;
+	  VAL[i]=((cumul==0) ? 0 : (T)((double)comptage->VAL[i] / (double)cumul ));
       }
     }
   }
