@@ -16,7 +16,6 @@ SensorSPred :: SensorSPred (int n) : Sensor(n)
   accB = PAR.getD("SPred.accB",GetNumber());
   donP = PAR.getD("SPred.donP",GetNumber());
   donB = PAR.getD("SPred.donB",GetNumber());
-
   PositionGiveInfo = -1;
 }
 
@@ -78,45 +77,54 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
 {
   FILE *fp;
   char buf[FILENAME_MAX];
-  double strength,add;
-  int i = 1, j, k;
+  double par[3],strength;
+  char *type;
+  int i=1,j, k;
   int prevkA = -1, prevkD = -1;
   
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open splice sites file %s\n", name);
-    exit(2);
-  }
+  fp = FileOpen(NULL,name,"r");
   
   k = -1;
   while (1) {
-    if (!fgets(buf,99,fp))
+
+    if (!fgets(buf,FILENAME_MAX-1,fp))
       break;
     
-    j = 0;
-    j += sscanf(buf+9,"%d",&k);
-    j += sscanf(buf+38,"%lf",&strength);
-    j += sscanf(buf+45,"%lf",&add);
-    j += sscanf(buf+52,"%lf",&add);
-        
-    // erreur: on a pas tout lu ou ca ne croit pas
-    if ((j < 4) || ((buf[0] == 'D') && (k <= prevkD)) || ((k <= prevkA)))
+    // vieux format ou -p5 ?
+    if (buf[0] == 'A' || buf[0] == 'D') { //old
+      j = sscanf(buf+9,"%d",&k);
+      j += sscanf(buf+38,"%lf",&par[0]);
+      j += sscanf(buf+45,"%lf",&par[1]);
+      j += sscanf(buf+52,"%lf",&par[2]);
+      type = buf;
+    }
+    else
       {
+	j = sscanf(buf+16,"%d",&k);
+	j += sscanf(buf+42,"%lf %lf %lf", par,par+1,par+2);
+	type = buf+2;
+      }
+
+    strength = par[0];
+
+    // erreur: on a pas tout lu ou ca ne croit pas
+      if ((j < 4) || ((type[0] == 'D') && (k < prevkD)) || ((k < prevkA)))      {
+	fprintf(stderr,"%d %c %d %d %d\n",j,type[0],k,prevkD,prevkA);
  	fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
  	exit(2);
       }
-  
-    if (buf[0] == 'D' && strength != 0.0) {
-      prevkD = k;
-      vPosDonF.push_back( k-1 );
-      vValDonF.push_back( pow(strength, donB)*donP );
-    }
-    else
-      if (strength != 0.0) {
-	prevkA = k;
-	vPosAccF.push_back( k );
-	vValAccF.push_back( pow(strength, accB)*accP );
-      }
-    i++;
+      
+      if (type[0] == 'D' && strength != 0.0 && k>prevkD) {
+	prevkD = k;
+	vPosDonF.push_back( k-1 );
+	vValDonF.push_back( pow(strength, donB)*donP );
+      }  else
+	if (strength != 0.0 && k > prevkA)  {
+	  prevkA = k;
+	  vPosAccF.push_back( k );
+	  vValAccF.push_back( pow(strength, accB)*accP );
+	}
+      i++;
   }
   
   if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");
@@ -130,39 +138,49 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
 {
   FILE *fp;
   char buf[FILENAME_MAX];
-  double strength,add;
+  double strength;
+  double par[3];
+  char* type;
   int i = 1, j, k;
   int prevkA = INT_MAX, prevkD = INT_MAX;
 
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open splice sites file %s\n", name);
-    exit(2);
-  }
+  fp = FileOpen(NULL,name,"r");
 
   k = -1;
   while (1) {
-    if (!fgets(buf,99,fp))
+    if (!fgets(buf,FILENAME_MAX-1,fp))
       break;
-    
-    j = 0;
-    j += sscanf(buf+9,"%d",&k);
-    j += sscanf(buf+38,"%lf",&strength);
-    j += sscanf(buf+45,"%lf",&add);
-    j += sscanf(buf+52,"%lf",&add);
-        
+
+    // vieux format ou -p5 ?
+    if (buf[0] == 'A' || buf[0] == 'D') { //old
+      j = sscanf(buf+9,"%d",&k);
+      j += sscanf(buf+38,"%lf",&par[0]);
+      j += sscanf(buf+45,"%lf",&par[1]);
+      j += sscanf(buf+52,"%lf",&par[2]);
+      type = buf;
+    }
+    else
+      {
+	j = sscanf(buf+16,"%d",&k);
+	j += sscanf(buf+42,"%lf %lf %lf", par,par+1,par+2);
+	type = buf+2;
+      }
+
+    strength = par[0];
+
     // on ne lit pas tout on ca l'index position ne decroit pas
-    if ((j < 4) || (buf[0] == 'D' && k >= prevkD) || (k >= prevkA)) {
+    if ((j < 4) || (type[0] == 'D' && k > prevkD) || (k > prevkA)) {
       fprintf(stderr, "\nError in splice sites file %s, line %d\n", name, i);
       exit(2);
     }
           
-    if (buf[0] == 'D' && strength != 0.0) {
-      prevkD = k;
-      vPosDonR.push_back( k );
-      vValDonR.push_back( pow(strength, donB)*donP );
-    }
-    else
-      if (strength != 0.0) {
+    if (strength != 0.0) 
+      if (type[0] == 'D') {
+	prevkD = k;
+	vPosDonR.push_back( k );
+	vValDonR.push_back( pow(strength, donB)*donP );
+      }
+      else {
 	prevkA = k;
 	vPosAccR.push_back( k-1 );
 	vValAccR.push_back( pow(strength, accB)*accP);
