@@ -568,6 +568,8 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 // -ph print on stdout the begin of the HTML output
 //-------------------------------------------------
 void StartHTML() {
+  char *d = new char[MAX_LINE];  GetStrDate(d);
+
   printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 	 "<html>\n"
 	 "  <head>\n"
@@ -604,7 +606,8 @@ void StartHTML() {
 	 "                <tr>\n"
 	 "                  <td colspan=\"2\"> "
 	 "<img src=\"WEB/Images/euGpred_on.jpg\">\n"
-	 "                    <br> <br> </td>\n"
+	 "<br><a href=\"http://www.inra.fr/bia/T/EuGene/index.html\">eugene</a> "
+	 "%s for %s, %s, %d sequence(s) <br> </td>\n"
 	 "                </tr>\n"
 	 "                <tr>\n"
 	 "		   <td>\n"
@@ -615,7 +618,10 @@ void StartHTML() {
 	 "border=\"0\" bgcolor=\"#c0dbe2\">\n"
 	 "			      <tr>\n"
 	 "				<td colspan=\"3\" align=\"center\" "
-	 "bgcolor=\"white\">\n");
+	 "bgcolor=\"white\">\n",
+	 PAR.getC("EuGene.version"), PAR.getC("EuGene.organism"), d, PAR.getI("NbSequence") );
+
+  delete [] d;
 }
 
 //-------------------------------------------------
