@@ -16,16 +16,23 @@ foreach TEST $AllSensorsList {
     puts "Performing $TEST unit test"
 
     # Run EuGene
-    if {$TEST != "Est"} {
+    if {$TEST != "Est" && $TEST != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 	    -D Sensor.${TEST}.use=TRUE $SEQ_DIR/$SEQ(Sensor) \
 	2> tmp%stderr > tmp%stdout
     } else {
-	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE \
-	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
+	if {$TEST == "Est"} {
+	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+		-D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE \
+		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
+	} else {
+	    catch {exec rm test.EuStop.gff}
+	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+		-D Sensor.${TEST}.use=TRUE $SEQ_DIR/exSeqHom.fasta  \
+		2> tmp%stderr > tmp%stdout
+	}
     }
-    
+
     set out [open tmp%stdout {RDONLY}]
     set err [open tmp%stderr {RDONLY}]
     set std [open tmp%$TEST w+]
@@ -61,4 +68,19 @@ foreach TEST $AllSensorsList {
 	exec mv tmp%$TEST $TRACE_DIR/Output_${TEST}
     }
 
+    if {$TEST == "Tester"} {
+	if {[file exists tmp%testdiff] == 1} {
+	    exec rm tmp%testdiff
+	}
+	catch {exec diff -i $OUTPUT_DIR/Output_${TEST}.gff  > tmp%testdiff }
+	set t [open tmp%testdiff {RDONLY}]
+	set difference [read $t]
+	close $t
+	if {$difference != ""} {
+	    fail "${TEST} (gff)"
+	    exec mv Output_${TEST}.gff $TRACE_DIR/Output_${TEST}.gff
+
+	}
+    }
+    
 }
