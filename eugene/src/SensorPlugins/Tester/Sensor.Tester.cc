@@ -26,9 +26,6 @@ extern MasterSensor* MS;
 // ----------------------
 SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 {
-  int dll_index;
-  UseSensor* used_sensor;
-
   type = Type_Unknown;
   
   char * sensorName = new char[FILENAME_MAX+1];
@@ -40,8 +37,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
   nbTest = 0;
   pluginsDir = PAR.getC("EuGene.PluginsDir");
  
-  fprintf(stderr,"Sensor.Tester :\n");
-  fprintf(stderr," Reading coordinates file......................");
+  fprintf(stderr,"Reading coordinates file......................");
   fflush(stderr);
   strcpy(seqName,PAR.getC("fstname"));
   strcat(seqName,".gff");
@@ -63,16 +59,11 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     source[i] = PAR.getC(paramKey);
     sprintf(sensorName,"Sensor.%s",source[i]);
 
-    used_sensor = new UseSensor(0, sensorName);
-
     // On récupère le numéro d'instance
     sprintf(paramKey,"%s%d",paramI,i);
     int nbIdx = PAR.getI(paramKey);
 
-    // load ".so" of sensor if necessary
-    dll_index = MS->LoadSensor(used_sensor, nbIdx, " ");
-    fprintf(stderr," ");
-    sensor[i] = MS->dllList[dll_index]->MakeSensor(nbIdx, X);
+    sensor[i] = MS->MakeSensor( sensorName, nbIdx, X);
     
     char * outputFile = new char[FILENAME_MAX+1];
     sprintf(outputFile,"%stest.%s.gff",PAR.getC("Output.Prefix"),source[i]);
