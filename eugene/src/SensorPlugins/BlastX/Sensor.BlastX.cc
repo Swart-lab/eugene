@@ -330,7 +330,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
   int begCDS = 1, endCDS    = 0;
   int CodingNuc    = 0;
   int SupportedNuc = 0;
-  int NumGene      = 1;  
+  int NumGene      = 0;  
 
   int pprocess = PAR.getI("BlastX.PostProcess",GetNumber());
   if (!pprocess)    return;
@@ -358,7 +358,6 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 	CodingNuc = 0;
 	SupportedNuc = 0;
 	begCDS=posBack+1;
-	NumGene++;
       }
       
       CodingNuc += pos-posBack;
@@ -388,6 +387,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 	    printf("supported on %d/%d coding.\n", SupportedNuc,CodingNuc);
 	}
 	else {
+	  NumGene++;
 	  ProtSupport(pred, begCDS, endCDS, HitTable, NumProt, NumGene);
 	}
       }
