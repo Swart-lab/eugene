@@ -806,7 +806,7 @@ int main  (int argc, char * argv [])
   char *Choice;
   BackPoint *LBP[14];
   REAL BestU;
-  char best;
+  signed char best;
   unsigned char Switch;
 
   Choice =  new char[Data_Len+2];
