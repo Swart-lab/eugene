@@ -47,9 +47,6 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
     int s = (int)vDeb.size();
     deb   = Max(1,deb)-1;
     fin   = Min(X->SeqLen,fin)-1;
-    printf("Deb:%d\tFin:%d\n",deb,fin);
-    for(int j=0;j<s;j++)
-      printf("%d\tVDeb:%d\tVFin:%d\n",j,vDeb[j],vFin[j]);
     if(deb > fin  ||
        (s != 0  &&  vFin[s-1] >= deb)) {
       fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
@@ -58,7 +55,6 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
     vDeb.push_back( deb );
     vFin.push_back( fin );
   }
-
   fprintf(stderr,"done\n");
 }
 
