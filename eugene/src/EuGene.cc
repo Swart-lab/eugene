@@ -621,15 +621,18 @@ void CheckConsistency(int debut, int fin, int etat,
 // -------------------------------------------------------------------------
 void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
 {
-  static int EstIndex = 0;
+  static int EstIndex;
   int supported = 0;
   unsigned char *Sup;
   Block *ThisBlock;
   int ConsistentEST,i;
   int from,to,ESTEnd;
   
-  if (fin < debut) return;
-     
+  if (fin < debut) { 
+    EstIndex = 0;
+    return;
+  }
+
   Sup = new unsigned char[fin-debut+1]; 
 
   for (i=0; i <= fin-debut; i++)

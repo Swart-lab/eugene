@@ -87,6 +87,8 @@ else if ((printopt == 'l') || (printopt == 'h'))
 
   if (estopt) {    
     qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+    // reset static in EST Support
+    if (estanal) ESTSupport(0,100,0,NULL,0);
   }
 
 
