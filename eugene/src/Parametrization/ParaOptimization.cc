@@ -35,7 +35,7 @@ ParaOptimization::~ParaOptimization(void)
 {
   unsigned int i;
   // delete created instances 
-  //  for (i=0; i<Algorithms.size(); i++) delete Algorithms[i]; does not work
+  for (i=0; i<Algorithms.size(); i++) delete Algorithms[i]; 
   for (i=0; i<Sequences.size(); i++) delete Sequences[i];
   for (i=0; i<MSensors.size(); i++) delete MSensors[i];
 }
@@ -163,6 +163,7 @@ double ParaOptimization::ParaEvaluate (void)
 	pred = Predict(Sequences[i], MSensors[i]);  
 	Output(Sequences[i], MSensors[i], pred, 1, 0, cc, fp);
 	if (i!=Sequences.size()-1) fprintf(fp,"\n");
+	delete pred;
       }
       fclose(fp);
       fic_eval = "tmp%eval%" + ExecutableName;
