@@ -12,63 +12,17 @@ const int FASTA_Len = 50;
 const int MAX_LINE = 300;
 const int TRUE  = 1;
 const int FALSE = 0;
-
 const double NINFINITY   = log(0.0);
-const REAL DontCrossStop = NINFINITY;
-
-typedef struct DATA {
-  // Translation Start
-  double Start[2];
-  // Translation Stop
-  double Stop[2];
-  // Transcription start
-  double tStart[2];  
-  // Transcription Stop
-  double tStop[2];  
-  // Frameshift (insertion)
-  double Ins;
-  // Frameshift (deletion)
-  double Del;
-  // Acceptor Site
-  double Acc[2];
-  // Donor Site
-  double Don[2];
-  // Contents scores 
-  double  ContentScore[13];
-  // WARNING temporaire : EST -> on est dans intron
-  unsigned char ESTMATCH_TMP; 
-} DATA;
-
-// Type de sensor
-enum TYPE_SENSOR {Type_Stop,     //               : Stop
-		  Type_Start,    // Sensor SIGNAL : Start
-		  Type_Splice,   //               : Splice
-		  Type_Content,  // Sensor CONTENT
-		  Type_Multiple, // Sensor porteur de multiple info (Ex : User)
-		  Type_Unknown}; // Sensor de type inconnu (non encore initialisé)
 
 // Les etats
-const int ExonF1 = 0;
-const int ExonF2 = 1;
-const int ExonF3 = 2;
-const int ExonR1 = 3;
-const int ExonR2 = 4;
-const int ExonR3 = 5;
-
-const int IntronF1 = 6;
-const int IntronF2 = 7;
-const int IntronF3 = 8;
-const int IntronR1 = 9;
-const int IntronR2 = 10;
-const int IntronR3 = 11;
-
-const int InterGen5 = 12;
-const int InterGen3 = 17;
-
-const int UTR5F = 13;
-const int UTR5R = 15;
-const int UTR3F = 14;
-const int UTR3R = 16;
+enum Tracks { 
+  ExonF1 = 0, ExonF2 = 1, ExonF3 = 2,
+  ExonR1 = 3, ExonR2 = 4, ExonR3 = 5,
+  IntronF1 = 6,IntronF2 = 7, IntronF3 = 8,
+  IntronR1 = 9, IntronR2 = 10, IntronR3 = 11,
+  InterGen5 = 12, InterGen3 = 17,
+  UTR5F = 13, UTR5R = 15,
+  UTR3F = 14, UTR3R = 16};
 
 // Les Hits EST
 const unsigned char HitForward    = 0x1;
