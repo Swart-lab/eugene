@@ -4,7 +4,7 @@ Loading Sensor.EuStop.........done
 Reading coordinates file......................done
 Optimal path length = 0.9163
 ---------------------------------------------------------------------
-Thres.		Nb	TP	FP	TN	FN	Sens.	Spec.
+Thres.		Nb	TP	FP	TN	FN	Spec.	Sens.
 -7.21527	1	1	258	0	0	0.3861	100
 -6.23444	2	1	257	1	0	0.387597	100
 -5.54129	1	1	255	3	0	0.390625	100
