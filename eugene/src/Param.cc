@@ -257,6 +257,9 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	    "              [-x xres] [-y yres] [-Z coord] FASTA files\n");
     exit(1);
   }
+
+  // Set number of sequences given in arguments in the map
+  setD("NbSequence", argc - optind); 
 }
 
 // ------------------------
