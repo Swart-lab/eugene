@@ -14,7 +14,8 @@
 #include "Const.h"
 #include "Prediction.h"
 
-void Output (DNASeq *, Prediction *, int sequence, int argc, char * argv[]);
+void Output (DNASeq *, MasterSensor *, Prediction *, int sequence, 
+	     int argc, char * argv[], FILE* f);
 
 // Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
 int PhaseAdapt(char);
@@ -25,4 +26,4 @@ int PhaseAdapt(char);
 // cons/incons: retour des valeurs
 // WARNING : A modifier, utilise ESTMATCH_TMP (Cf struct DATA) !!!!!!!!!!!!
 void CheckConsistency(int debut, int fin, int etat, 
-		      int * cons, int* incons, DNASeq *);
+		      int * cons, int* incons, DNASeq *, MasterSensor *);
