@@ -4,7 +4,7 @@
 /*************************************************************
  **                     SensorSplicePredictor               **
  *************************************************************/
-
+ 
 extern Parameters PAR;
 
 // ----------------------
@@ -39,8 +39,6 @@ void SensorSPred :: Init (DNASeq *X)
   char tempname[FILENAME_MAX+1];
 
   type = Type_Splice;
-
-  iAccF = iDonF = 0;
   
   vPosAccF.clear();  vPosAccR.clear();
   vPosDonF.clear();  vPosDonR.clear();
@@ -62,10 +60,15 @@ void SensorSPred :: Init (DNASeq *X)
 
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 
+  // vectors for reverse are put in the increasing order
+  reverse(vPosAccR.begin(), vPosAccR.end()); 
+  reverse(vValAccR.begin(), vValAccR.end());
+  reverse(vPosDonR.begin(), vPosDonR.end());
+  reverse(vValDonR.begin(), vValDonR.end());
+
+  iAccF = iDonF = iAccR = iDonR = 0;
+
   if (PAR.getI("Output.graph")) Plot(X);
-  
-  iAccR = (int)vPosAccR.size() - 1;
-  iDonR = (int)vPosDonR.size() - 1;
 }
 
 // -------------------------------------
@@ -179,7 +182,6 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
   bool update = false;
 
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; 
-  // update indexes on vectors
   PositionGiveInfo = pos;
 
   // Accepteur Forward
@@ -196,16 +198,13 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
   
   // Accepteur Reverse
   if (!vPosAccR.empty()) {
-    if (update) { 
-      iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, std::greater<int>())-vPosAccR.begin();
-      if (iAccR==(int)vPosAccR.size()) iAccR--; // if pos is before first site, then point first site
-      if (vPosAccR[iAccR]<pos) iAccR = -1; // if pos is after last site, then do not point
-    }
+    if (update) 
+      iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos)-vPosAccR.begin();
 
-    if((iAccR!=-1) && (iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
+    if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iAccR]);
       d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iAccR]);
-      iAccR--;
+      iAccR++;
     }
   }
 
@@ -223,16 +222,13 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
   
   // Donneur Reverse
   if(!vPosDonR.empty()) {
-    if (update) {
-      iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, std::greater<int>())-vPosDonR.begin();
-      if (iDonR==(int)vPosDonR.size()) iDonR--;  // if pos is before first site, then point first site
-      if (vPosDonR[iDonR]<pos) iDonR = -1; // if pos is after last site, then do not point
-    }
+    if (update) 
+      iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos)-vPosDonR.begin();
 
-    if((iDonR!=-1) && (vPosDonR[iDonR] == pos)) {
+    if((iDonR<(int)vPosDonR.size()) && (vPosDonR[iDonR] == pos)) {
       d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
       d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
-      iDonR--;
+      iDonR++;
     }
   }
 
