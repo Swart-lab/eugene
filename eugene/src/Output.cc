@@ -174,8 +174,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	}
 	state = pred->getState(i);
 	pos   = pred->getPos(i);
-	if(i != 0)
-	  stateNext = pred->getState(i-1);
+	stateNext = (i ? pred->getState(i-1) : -1);
 	
 	if(pos == 0)
 	  continue;
