@@ -87,8 +87,8 @@ dist-hook:
 uninstall-local:
 	rm -r $(datadir)/$(PACKAGE)
 
+# note that $(pkgdatadir) = $(datadir)/$(PACKAGE)
 install-data-hook:
-	# note that $(pkgdatadir) = $(datadir)/$(PACKAGE)
 	if ! [ -d $(datadir) ]; then mkdir $(datadir); fi
 	mkdir $(pkgdatadir)
 	mkdir $(pkgdatadir)/doc 
