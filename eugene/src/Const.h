@@ -17,13 +17,27 @@ const double NINFINITY   = log(0.0);
 const REAL DontCrossStop = NINFINITY;
 
 typedef struct DATA {
-  double Stop[2];
+  // Translation Start
   double Start[2];
+  // Translation Stop
+  double Stop[2];
+  // Transcription start
+  double tStart[2];  
+  // Transcription Stop
+  double tStop[2];  
+  // Frameshift (insertion)
+  double Ins;
+  // Frameshift (deletion)
+  double Del;
+  // Acceptor Site
   double Acc[2];
+  // Donor Site
   double Don[2];
+  // Contents scores 
   double  ContentScore[13];
-  unsigned char ESTMATCH_TMP; // WARNING temporaire : EST -> on est dans intron
-}DATA;
+  // WARNING temporaire : EST -> on est dans intron
+  unsigned char ESTMATCH_TMP; 
+} DATA;
 
 // Type de sensor
 enum TYPE_SENSOR {Type_Stop,     //               : Stop
