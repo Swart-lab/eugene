@@ -35,6 +35,10 @@ void SensorRepeat :: Init (DNASeq *X)
   index = 0;
 
   vPos.clear();
+
+  UTRPenalty = PAR.getD("Repeat.UTRPenalty");
+  intronPenalty = PAR.getD("Repeat.IntronPenalty");
+  exonPenalty = PAR.getD("Repeat.ExonPenalty");
   
   fprintf(stderr,"Reading Intergenic regions... ");
   fflush(stderr);
@@ -68,8 +72,12 @@ void SensorRepeat :: ResetIter ()
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   if( index <= (int)vPos.size()  &&  vPos[index] == pos ) {
-    for(int i=0; i<8; i++)   // Exon(6) + Intron(2)
-      d->ContentScore[i] += IGPenalty;
+    for(int i=0; i<6; i++)   // Exon(6)
+      d->ContentScore[i] += exonPenalty;
+    for(int i=7; i<8; i++)   // Intron (2)
+      d->ContentScore[i] += intronPenalty; 
+    for(int i=9; i<13; i++)   // UTR (4)
+      d->ContentScore[i] += UTRPenalty; 
     index++;
   }
 }
@@ -80,7 +88,12 @@ void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorRepeat :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   iter = find(vPos.begin(), vPos.end(), pos);
-  if(iter != vPos.end())
-    for(int i=0; i<8; i++)   // Exon(6) + Intron(2)
-      d->ContentScore[i] += IGPenalty;
+  if(iter != vPos.end()) {
+    for(int i=0; i<6; i++)   // Exon(6)
+      d->ContentScore[i] += exonPenalty;
+    for(int i=7; i<8; i++)   // Intron (2)
+      d->ContentScore[i] += intronPenalty; 
+    for(int i=9; i<13; i++)   // UTR (4)
+      d->ContentScore[i] += UTRPenalty; 
+  }
 }

@@ -6,14 +6,15 @@
 /*************************************************************
  **                     SensorRepeat                        **
  *************************************************************/
-const REAL IGPenalty = -1.0; 
-
 class SensorRepeat : public Sensor
 {
  private:
   std::vector<int>           vPos;
   std::vector<int>::iterator iter;
   int index;
+  double intronPenalty;
+  double UTRPenalty;
+  double exonPenalty;
 
  public:
   SensorRepeat  (int);
