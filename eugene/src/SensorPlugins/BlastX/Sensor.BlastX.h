@@ -15,9 +15,10 @@ class SensorBlastX : public Sensor
   std::vector<REAL> vPMLevel, vPMatch;
   std::vector<int>::iterator iter;
   int    index;
-  double keyBXLevel[8];
-  int    minL8;
-  
+  double keyBXLevel[10];
+  int    minIn;
+  int blastxM;
+
   void LoadContentScore (DNASeq *);
   int  PhaseAdapt (char);
   char ph06       (char);
