@@ -8,6 +8,7 @@
 #define myassert(x) assert(x)
 //#define myassert(x)
 
+char * BaseName(char *path);
 
 template<class T>
 inline T Min(T x, T y)

@@ -2,6 +2,16 @@
 #include <string.h>
 
 // ------------------------------------------------------------------
+// BASENAME: returns a pointer to the filename, w/o any
+// leading prefix
+// ------------------------------------------------------------------
+char * BaseName(char *path)
+{
+  char *lead = rindex(path,'/');
+  
+  return ((lead != NULL)  ? lead+1 : path);
+}
+// ------------------------------------------------------------------
 // Function to open a file by using environment variables.  We first
 // search in local directory and if not found in directory defdir
 // ------------------------------------------------------------------
