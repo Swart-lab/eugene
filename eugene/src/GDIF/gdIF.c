@@ -197,6 +197,16 @@ void PlotLine(unsigned int nuc1, unsigned int nuc2,
       gdImageLine(images[i].im,ToX(nuc1-images[i].Left),ToY(phase1, pos1),ToX(nuc2-images[i].Left),ToY(phase2, pos2), Col[col]);
 }
 
+void PlotString(unsigned int nuc, signed char phase, REAL pos, char st[], int col)
+{
+  int i;
+  for (i=0; i< NbIm; i++)
+    if (CheckIn(nuc, &images[i]))
+      gdImageString(images[i].im, gdFontTiny,
+		    (ToX(nuc-images[i].Left)-(strlen(st)*gdFontTiny->w/2)),
+		    ToY(phase, pos), st, Col[col]);
+}
+
 void ClosePNG()
 {
   int i;
