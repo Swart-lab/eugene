@@ -79,7 +79,7 @@ void Prediction :: plotPred ()
 
   for (int i=0; i<SeqLen; i++)
     PlotBarI(i, State2Phase[(int)getNextState(i)], 0.4, PredWidth,
-	     1+((getNextState(i)==12) || (getNextState(i)==17))*3);
+	     1+(getNextState(i)==InterGen)*3);
 }
 
 // ------------------------
