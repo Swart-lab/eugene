@@ -141,6 +141,7 @@ void Genetic::Optimize(bool is_chaining)
   if (is_chaining)
     {std::cerr <<"ERROR: ask to chain Genetic Algorithm in Genetic::Optimize."<<std::endl; exit(100);}
 
+  FitnessOpti = 0;
 
   // not in the constructor because OPTIM.Algorithm[OPTIM.AlgoIndex] is not updated
   CrossOver = new CrossingOver (PAR.getD("Genetic.CrossOverProbability"));
@@ -196,7 +197,7 @@ void Genetic::Optimize(bool is_chaining)
 
       if (IsSharing) Share->Share() ;
 
-     if (BestFitness == 0.0)
+     if (BestChromosome->RawFitness == 0.0)
 	std::cout << "No admissible element." <<std::endl;
      else {
        std::cout << "Fitness: " << BestChromosome->RawFitness 
@@ -231,7 +232,8 @@ void Genetic::Optimize(bool is_chaining)
 	       if (BestChromosome == Population[k]) {
 		 std::cout <<"(Best element)";
 		 // Remenber the optimum of the run if it is better than the previous ones
-		 if ((ParOpti.size()==0) || (BestFitness > FitnessOpti))
+		 if ((ParOpti.size()==0) || (BestChromosome->RawFitness > FitnessOpti))
+		   // remenber this best chromosome as the best found in all runs
 		   { ParOpti = Population[k]->data->P; FitnessOpti = Population[k]->RawFitness;}
 	       }
 	       std::cout <<std::endl;
@@ -260,14 +262,14 @@ void Genetic::Optimize(bool is_chaining)
   } /*run*/
 
   // Put the best optimum of the runs in Para
-  Par = ParOpti; BestFitness = FitnessOpti;
+  Par = ParOpti;
   for (unsigned int q=0; q<Para.size(); q++) Para[q] = Par[ParaPar[q]];
   if (run>0) {
     std::cout <<std::endl<< "---------------------------------------------------------------"<<std::endl;
     std::cout <<"Best optimum for the runs"<<std::endl;
     for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
     for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
-    std::cout << "Fitness=" << BestFitness <<std::endl;
+    std::cout << "Fitness=" << FitnessOpti <<std::endl;
     std::cout << "---------------------------------------------------------------"<<std::endl;
   }
 }

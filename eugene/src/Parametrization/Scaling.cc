@@ -46,7 +46,6 @@ void Scaling::Scalestat (int gen)
   for (i=0; i<algo->NbElement; i++) {
     if (algo->Population[i]->RawFitness > maxi) {
       maxi = algo->Population[i]->RawFitness;
-      algo->BestFitness = maxi;
       algo->BestChromosome = algo->Population[i];
     }
     if (algo->Population[i]->RawFitness < mini) 

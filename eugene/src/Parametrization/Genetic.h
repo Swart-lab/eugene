@@ -30,8 +30,8 @@ class Genetic : public OptiAlgorithm {
   bool IsScaling;
 
   int NbRun;
-  double FitnessOpti;
-  std::vector<double> ParOpti;
+  double FitnessOpti;            // best fitness of the runs
+  std::vector<double> ParOpti;   // best para values of the runs
 
   CrossingOver* CrossOver;
   Mutating* Mutate;
@@ -53,27 +53,27 @@ class Genetic : public OptiAlgorithm {
  public:
   int NbElement;
   int NbGeneration;
-  int NbCluster;       // Nb of effective AG clusters
+  int NbCluster;              // Nb of effective AG clusters
   bool IsElitist;
   bool IsClustering;
   bool IsSharing;
   bool IsSACrossingOver;
   bool IsSAMutating;
   double Elitism;
-  Chromosome* BestChromosome;
+  Chromosome* BestChromosome; // best chromosome of the population used at each generation
   std::vector<Chromosome*> Population;
   std::vector<Chromosome*> NewPopulation;
   std::vector<Cluster*> Clusters;
-  double BestFitness;
-  double AvgFitness;    // average fitness
-  double SigmaFitness;
+  double AvgFitness;          // average fitness used at each generation
+  double SigmaFitness;        // sigma fitness used at each generation
 
+  // list of parameters with just the first parameter of IDENTICAL clusters
   std::vector <double> Par;  
   std::vector <std::string> ParName;
   std::vector <double> ParMax;
   std::vector <double> ParMin; 
   std::vector <int> ParCluster;
-  std::vector <int> ParaPar;
+  std::vector <int> ParaPar;  // to remember the link between Par and Para
 
   SimulatedAnnealing* SA;
 
