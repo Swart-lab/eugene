@@ -14,7 +14,7 @@ $usage .= "\n";
 $Init="E.Init";
 $Intr="E.Intr";
 $Term="E.Term";
-$Single="E.Single";
+$Single="E.Sngl";
 
 if ($#ARGV != 0) {
   die "$usage";
