@@ -2,9 +2,9 @@
 # Edité pour EuGeneAS 1.60 (190903)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	190903        # Parameter file version (date)
+EuGene.versionPAR	190903          # Parameter file version (date)
 EuGene.organism		Arabidopsis
-EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
+EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
 ##### Minimum lengths #####
 #
@@ -32,7 +32,7 @@ EuGene.ThreePrimePrior	0.07
 #
 ##### Output control ######
 #
-Output.graph		FALSE		# don't produce a graphical output
+Output.graph		FALSE		# Don't produce a graphical output
 Output.resx		900
 Output.resy		400
 Output.glen		-1
@@ -56,18 +56,23 @@ EuStop.stopP            4.155
 #
 ##### FrameShift parameters #####
 #
-FrameShift.Ins	1e999.0
-FrameShift.Del	1e999.0
+FrameShift.Ins		1e999.0
+FrameShift.Del		1e999.0
 #
 ##### NetStart parameters #####
 #
-NStart.startP	0.052
-NStart.startB	0.308
+NStart.startP		0.052
+NStart.startB		0.308
+#
+##### ATGpr parameters #####
+#
+ATGpr.startP		?
+ATGpr.startB		?
 #
 ##### IfElse #####
 #
 IfElse.SensorIf		NG2
-IfElse.SensorElse		SPred
+IfElse.SensorElse	SPred
 #
 # NetGene2 parameters #####
 #
@@ -177,14 +182,14 @@ MarkovConst.Inter	1.0
 #
 SpliceWAM.MarkovianOrder	1
 SpliceWAM.donmodelfilename	WAM/WAM.ARA.DON.L9
-SpliceWAM.NbNtBeforeGT	3
-SpliceWAM.NbNtAfterGT	4
-SpliceWAM.DonScaleCoef	2.9004
+SpliceWAM.NbNtBeforeGT		3
+SpliceWAM.NbNtAfterGT		4
+SpliceWAM.DonScaleCoef		2.9004
 SpliceWAM.DonScalePenalty	-7.5877
 SpliceWAM.accmodelfilename	WAM/WAM.ARA.ACC.L7
-SpliceWAM.NbNtBeforeAG	2
-SpliceWAM.NbNtAfterAG	3
-SpliceWAM.AccScaleCoef	2.9004
+SpliceWAM.NbNtBeforeAG		2
+SpliceWAM.NbNtAfterAG		3
+SpliceWAM.AccScaleCoef		2.9004
 SpliceWAM.AccScalePenalty	-7.5877
 #
 ##### Sensor StartWAM #####
@@ -195,6 +200,12 @@ StartWAM.NbNtAfterATG	3
 StartWAM.MarkovianOrder	1
 StartWAM.ScaleCoef	0.1594
 StartWAM.ScalePenalty	-3.1439
+#
+##### Sensor Plotter
+#
+Plotter.GC	 1   # 0 -> no plot  -  1 -> plot 
+Plotter.GC3	 1   #
+Plotter.A|T/A+T	 0   # T/A+T -> IntronF - A/A+T -> IntronR
 #
 ##### Sensor Tester #####
 #
@@ -209,6 +220,7 @@ Sensor.EuStop.use		TRUE
 #
 # START SENSORS:
 Sensor.NStart.use		TRUE
+Sensor.ATGpr.use	FALSE
 Sensor.StartConst.use	FALSE
 Sensor.StartWAM.use	FALSE
 #
@@ -235,6 +247,7 @@ Sensor.Homology.use	FALSE
 Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
+Sensor.Plotter.use	TRUE
 #
 # TEST
 Sensor.Tester.use	FALSE
@@ -246,6 +259,7 @@ Sensor.FrameShift	1	#
 Sensor.Homology 	1	#
 Sensor.EuStop		1	#
 Sensor.NStart		1	#
+Sensor.ATGpr		1	#
 Sensor.StartConst	1	#
 Sensor.StartWAM		1	#
 Sensor.IfElse		1	#
@@ -253,7 +267,7 @@ Sensor.NG2		1	#
 Sensor.SPred		1	#
 Sensor.GSplicer		1	#
 Sensor.SpliceConst	1	#
-Sensor.SpliceWAM   1       #
+Sensor.SpliceWAM	1       #
 Sensor.MarkovIMM	1	#
 Sensor.MarkovProt	1	#
 Sensor.MarkovConst	1	#
@@ -263,4 +277,5 @@ Sensor.Riken		7	#  Priority 1 -> Second
 Sensor.Repeat		8	#  ...
 Sensor.User		9	#  Priority n -> Last
 Sensor.GFF		10	#
-Sensor.Tester		11	#
+Sensor.Plotter		11	#
+Sensor.Tester		12	#
