@@ -239,16 +239,16 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	  MS.GetInfoSpAt(Type_Splice, X, k, &dTmp);
 	  DonF = Max(DonF, dTmp.Don[0]);
 	  AccR = Max(AccR, dTmp.Acc[1]);
-	  
+
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
 	  if(MS.GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
 	    DonR = Max(DonR, dTmp.Don[1]);
 	    AccF = Max(AccF, dTmp.Acc[0]);
 	  }
 	  else {
-	    printf("   WARNING: cDNA hits ignored."
-		   " No splices sites predicted !\n");
-	    return NULL;
+	    fprintf(stderr,"   WARNING: cDNA hits ignored."
+		    " No splices sites predicted !\n");
+	    exit(2);
 	  }
 	}
 
