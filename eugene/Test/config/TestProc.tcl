@@ -166,9 +166,9 @@ set NewValue1(PepSignal.startP*)	1
 set NewValue1(PepSignal.startB*)	0
 # SpliceMachine parameters #####
 set NewValue1(SMachine.cmd)		"cat "
-set NewValue1(SMachine.accP*)		0.903
+set NewValue1(SMachine.accP*)		0.102032725565
 set NewValue1(SMachine.accB*)		5.585
-set NewValue1(SMachine.donP*)		0.980
+set NewValue1(SMachine.donP*)		0.020202707318
 set NewValue1(SMachine.donB*)		27.670
 set NewValue1(SMachine.startP*)	        0.052
 set NewValue1(SMachine.startB*)	        0.308
