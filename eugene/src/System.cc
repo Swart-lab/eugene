@@ -85,16 +85,14 @@ void *  Safe_realloc  (void * Q, size_t Len)
 // Provides the current date on the form jjMMMaaaa 
 // where jj, aaaa are numbers and MMM caracters
 // ------------------------------------------------------------------
-char*  GetStrDate(void)
+void GetStrDate (char* d)
 {
+
   char *m,*j,*a;
-  char d[100];
   m = new char[4]; j = new char[3]; a = new char[5];
   time_t t=time(0);
 
   strcpy(d,ctime(&t));
   sscanf(d, "%*s %s %s %*s %s", m,j,a);
   strcpy(d,j);strcat(d,m);strcat(d,a);
-  
-  return d;
 }

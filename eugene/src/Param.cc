@@ -457,6 +457,7 @@ string Parameters::WriteParam (const char* para_file, vector<string> para_name,
   char filename[FILENAME_MAX+1];
   unsigned int i;
   bool find_para;
+  char *d = new char[MAX_LINE];
 
   strcpy(filename, para_file);
   strcat(filename, ".par");
@@ -464,7 +465,8 @@ string Parameters::WriteParam (const char* para_file, vector<string> para_name,
 
   strcpy(filename, para_file);
   strcat(filename, ".");
-  strcat(filename, GetStrDate() );
+  GetStrDate(d);
+  strcat(filename, d);
   strcat(filename, ".OPTI");
   strcat(filename, ".par");
   fp_opti = FileOpen(EugDir, BaseName(filename),"w");

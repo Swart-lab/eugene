@@ -30,7 +30,6 @@ FILE *FileOpen(const char *defdir, const char *filename, const char *mode);
 void *  Safe_malloc  (size_t Len);
 void *  Safe_realloc  (void * Q, size_t Len);
 
-char* GetStrDate(void);
-
+void GetStrDate (char* d);
 
 #endif
