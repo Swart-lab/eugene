@@ -273,14 +273,14 @@ void Parameters :: ReadPar(char *argv)
   }
 
   fclose(fp);
-  fprintf(stderr,"done\n");
+  fprintf(stderr,"done ");
   if(strcmp(getC("EuGene.versionPAR"), VERSION_PAR)) {
-    fprintf(stderr, "Incorrect parameter file version : %s.\n", getC("EuGene.versionPAR"));
+    fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.versionPAR"));
     fprintf(stderr,"Version %s required\n", VERSION_PAR);
     exit(2);
   }
   else
-    fprintf(stderr, "Parameters file %s\n", m["EuGene.versionPAR"]);
+    fprintf(stderr, "(%s)\n", m["EuGene.versionPAR"]);
   
   // Remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
   m["EuGene.minL0"] = m["EuGene.minL1"] = m["EuGene.minL2"] = m["EuGene.minEx"];
