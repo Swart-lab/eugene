@@ -166,6 +166,7 @@ set NewValue1(Est.estP*)	-0.4
 set NewValue1(Est.estM)	6
 set NewValue1(Est.utrP*)	0.35
 set NewValue1(Est.utrM)	5
+set NewValue1(Est.SpliceBoost*) 0.0
 set NewValue1(Est.StrongDonor*)	0.95
 ##### Riken sensor parameters #####
 set NewValue1(Riken.StrandRespect)		0
