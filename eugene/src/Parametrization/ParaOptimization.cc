@@ -75,7 +75,6 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
 //-------------------------------------------------------
 void ParaOptimization::Init(int argc, char * argv [])
 {
-  FILE   *fp;
   std::string algo_name;
 
   ExecutableName = argv[0];
@@ -107,14 +106,8 @@ void ParaOptimization::Init(int argc, char * argv [])
     // Update the sequences list
     std::cout << "Loading sequence(s) file(s) ...";
     for (sequence = optind; sequence < argc ; sequence++) {
-      fp = (*argv[sequence] ? FileOpen (NULL, argv[sequence], "r") : stdin);    
-      if (fp == NULL) {
-	std::cerr <<"ERROR: Cannot open fasta file "<<argv[sequence]<<std::endl; 
-	exit(100);
-      }        
-      Sequences.push_back( new DNASeq(fp) );    
-      if (fp != stdin) fclose(fp);
-      SeqNames.push_back(argv[sequence]);
+      Sequences.push_back(new DNASeq(argv[sequence]) );    
+       SeqNames.push_back(argv[sequence]);
     }
     std::cout << "done (" << Sequences.size() << " sequence(s))" << std::endl;
   
