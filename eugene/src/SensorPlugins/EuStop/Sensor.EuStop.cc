@@ -53,12 +53,14 @@ void SensorEuStop :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorEuStop :: Plot(DNASeq *X)
 {
-  for(int i = 0;  i <= X->SeqLen;  i++) {
-    if (X->IsStop(i-3,1)  != 0.0) 
-      PlotBarF(i,(i%3)+1,0.1,0.2,1);
+  double Strength;
 
-    if(X->IsStop(i+2,-1) != 0.0) 
-      PlotBarF(i,-((X->SeqLen-i)%3)-1,0.1,0.2,1);
+  for(int i = 0;  i <= X->SeqLen;  i++) {
+    if ((Strength= X->IsStop(i-3,1)) != 0.0) 
+      PlotBarF(i,(i%3)+1,0.1,0.2,(Strength == 1.0 ? 1 : 9));
+
+    if((Strength = X->IsStop(i+2,-1)) != 0.0) 
+      PlotBarF(i,-((X->SeqLen-i)%3)-1,0.1,0.2,(Strength == 1.0 ? 1 : 9));
   }
 }
 
