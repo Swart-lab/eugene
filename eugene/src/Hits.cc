@@ -181,6 +181,6 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
 Hits :: ~ Hits  ()
 {
   delete Match;
-  delete Name;
+  delete [] Name;
   delete Next;
 }
