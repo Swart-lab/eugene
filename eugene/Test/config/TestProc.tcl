@@ -80,16 +80,17 @@ proc InitParameterFile {FileName SensorsList} {
 set space " "
 
 # Set the parameter to wanted values
-set NewValue1(EuGene.minEx)	3
-set NewValue1(EuGene.minIn)	50
-set NewValue1(EuGene.minSg)	150
-set NewValue1(EuGene.minFlow)	50
-set NewValue1(EuGene.minConv)	0
-set NewValue1(EuGene.minDiv)	100
-set NewValue1(EuGene.min5Prime)	20
-set NewValue1(EuGene.min3Prime)	20
+##### Lengths #####
+set NewValue1(EuGene.InitExDist)	init.dist
+set NewValue1(EuGene.IntrExDist)	intr.dist
+set NewValue1(EuGene.TermExDist)	term.dist
+set NewValue1(EuGene.SnglExDist)	sngl.dist
+set NewValue1(EuGene.IntronDist)	intron.dist
+set NewValue1(EuGene.InterGDist)	intergenic.dist
+set NewValue1(EuGene.5PrimeDist)	utr.dist
+set NewValue1(EuGene.3PrimeDist)	utr.dist
 ##### Priors #####
-set NewValue1(EuGene.ExonPrior)	0.33	
+set NewValue1(EuGene.ExonPrior)	        0.33	
 set NewValue1(EuGene.IntronPrior)	0.17	
 set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
@@ -125,6 +126,14 @@ set NewValue1(ATGpr.startB*) 0.308
 ##### IfElse #####
 set NewValue1(IfElse.SensorIf)		NG2
 set NewValue1(IfElse.SensorElse)	SPred
+# SpliceMachine parameters #####
+set NewValue1(SMachine.cmd)		"cat "
+set NewValue1(SMachine.accP*)		0.903
+set NewValue1(SMachine.accB*)		5.585
+set NewValue1(SMachine.donP*)		0.980
+set NewValue1(SMachine.donB*)		27.670
+set NewValue1(SMachine.startP*)	        0.052
+set NewValue1(SMachine.startB*)	        0.308
 # NetGene2 parameters #####
 set NewValue1(NG2.accP*\[0\])     0.903
 set NewValue1(NG2.accB*\[0\])     5.585
@@ -145,7 +154,7 @@ set NewValue1(SPred.donP*\[1\])	0.929
 set NewValue1(SPred.donB*\[1\])	10.800
 ##### GeneSplicer parameters #####
 set NewValue1(GSplicer.coefAcc*)	1
-set NewValue1(GSplicer.penAcc*)	0
+set NewValue1(GSplicer.penAcc*)	        0
 set NewValue1(GSplicer.coefDon*)	1
 set NewValue1(GSplicer.penDon*) 	0
 ##### Interpolated Markov Models parameters #####
@@ -191,6 +200,7 @@ set NewValue1(BlastX.level7*)	0.0
 set NewValue1(BlastX.level8*)	0.0
 set NewValue1(BlastX.level9*)	0.0
 set NewValue1(BlastX.blastxM*)	10	
+set NewValue1(BlastX.minIn) 50
 ##### Repeat sensor parameters #####
 set NewValue1(Repeat.UTRPenalty*)	0.0
 set NewValue1(Repeat.IntronPenalty*)	0.1
@@ -199,6 +209,8 @@ set NewValue1(Repeat.ExonPenalty*)	1.0
 set NewValue1(Homology.TblastxP*) 	0
 set NewValue1(Homology.TblastxB*) 	0.0595
 set NewValue1(Homology.protmatname)	BLOSUM80
+##### GFF sensor parameters #####
+set NewValue1(GFF.PostProcess)		FALSE
 ##### PatConst sensor (uniform penalties) #####
 set NewValue1(PatConst.type\[0\])	start
 set NewValue1(PatConst.pat\[0\])	ATG
