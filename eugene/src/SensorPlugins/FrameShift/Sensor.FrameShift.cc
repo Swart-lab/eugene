@@ -37,9 +37,10 @@ void SensorFrameShift :: Init (DNASeq *X)
 // -----------------------
 void SensorFrameShift :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  
-    d->Ins = insProb;
-    d->Del = delProb;
+    d->sig[DATA::Ins].weight[Signal::Forward] = insProb;
+    d->sig[DATA::Ins].weight[Signal::Reverse] = insProb;
+    d->sig[DATA::Del].weight[Signal::Forward] = delProb;
+    d->sig[DATA::Del].weight[Signal::Reverse] = delProb;
 }
 
 // ----------------------------

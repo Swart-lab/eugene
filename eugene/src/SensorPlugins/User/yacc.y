@@ -24,6 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include "../Const.h"
+#include "../SensorIF.h"
 #include "../System.h"
 #include "structure.h"
 
@@ -67,25 +68,25 @@
 void ExecuteRegle(ptUTIL ut, DATA *d)
 {
   if (ut->tab <= 12) // contents edges
-    d->ContentScore[ut->tab] *= exp(-ut->delta);
+    d->contents[ut->tab] *= exp(-ut->delta);
   else
     switch (ut->tab) {
     case 13:
-      d->Start[0] = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Start].weight[Signal::Forward] = Max(0.0,Min(1.0,ut->delta));
     case 14:
-      d->Start[1] = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Start].weight[Signal::Reverse] = Max(0.0,Min(1.0,ut->delta));
     case 15:
-      d->Stop[0]  = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Stop].weight[Signal::Forward]  = Max(0.0,Min(1.0,ut->delta));
     case 16:
-      d->Stop[1]  = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Stop].weight[Signal::Reverse]  = Max(0.0,Min(1.0,ut->delta));
     case 17:
-      d->Acc[0]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Acc].weight[Signal::Forward]   = Max(0.0,Min(1.0,ut->delta));
     case 18:
-      d->Acc[1]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Acc].weight[Signal::Reverse]   = Max(0.0,Min(1.0,ut->delta));
     case 19:
-      d->Don[0]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Don].weight[Signal::Forward]   = Max(0.0,Min(1.0,ut->delta));
     case 20:
-      d->Don[1]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Don].weight[Signal::Reverse]   = Max(0.0,Min(1.0,ut->delta));
     }
 }
  

@@ -237,15 +237,15 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 	for(i=0; i<6; i++)       //exons
 	  if(vPMatch[iter-vPos.begin()] < 0 ||
 	     ((vPMatch[iter-vPos.begin()] > 0) && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
-	    d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+	    d->contents[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
 	
 	for(i=8; i<13; i++)      //inter & UTRs
 	  if(vPMatch[iter-vPos.begin()] != 0)
-	    d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+	    d->contents[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
 	
 	for(i=6; i<8; i++)       //introns
 	  if(vPMatch[iter-vPos.begin()] > 0)
-	    d->ContentScore[i] += -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
+	    d->contents[i] += -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
 	index = iter-vPos.begin() + 1;
       }
       else index = iter-vPos.begin();
@@ -255,15 +255,15 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
       for(i=0; i<6; i++)       //exons
 	if(vPMatch[index] < 0 || 
 	   ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
-	  d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+	  d->contents[i] += -fabs(vPMatch[index])*vPMLevel[index];
       
       for(i=8; i<13; i++)      //inter & UTRs
 	if(vPMatch[index] != 0)
-	  d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+	  d->contents[i] += -fabs(vPMatch[index])*vPMLevel[index];
       
       for(i=6; i<8; i++)       //introns
 	if(vPMatch[index] > 0)
-	  d->ContentScore[i] += -vPMatch[index]*vPMLevel[index];
+	  d->contents[i] += -vPMatch[index]*vPMLevel[index];
       index++;
     }
 }

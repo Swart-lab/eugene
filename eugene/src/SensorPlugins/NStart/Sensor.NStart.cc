@@ -56,7 +56,7 @@ void SensorNStart :: Init (DNASeq *X)
   ReadNStartR(tempname, X->SeqLen);
   fprintf(stderr," reverse done\n");
   
-  CheckStart(X, vPosF, vPosR);
+  CheckStart(X,vPosF, vPosR);
 
   if (PAR.getI("Output.graph")) Plot(X);
 
@@ -131,14 +131,16 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
       if(*iter == pos) {
-	d->Start[0] += vValF[iter-vPosF.begin()];
+	d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[iter-vPosF.begin()]);
+	d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[iter-vPosF.begin()]);
 	indexF = iter-vPosF.begin() + 1;
       }
       else indexF = iter-vPosF.begin();
     }
   else if(indexF < (int)vPosF.size()  &&  vPosF[indexF] == pos)
     {
-      d->Start[0] += vValF[indexF];
+      d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[indexF]);
+      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[indexF]);
       indexF++;
     }
   
@@ -148,14 +150,16 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosR.begin(), vPosR.end(), pos, greater<int>());
       if(*iter == pos) { 
-	d->Start[1] += vValR[iter-vPosR.begin()];
-      indexR = iter-vPosR.begin();
+	d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[iter-vPosR.begin()]);
+	d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[iter-vPosR.begin()]);
+	indexR = iter-vPosR.begin();
       }
       else indexR = iter-vPosR.begin() - 1;
     }
   else if(indexR > -1  &&  vPosR[indexR] == pos)
     {
-      d->Start[1] += vValR[indexR];
+      d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[indexR]);
+      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[indexR]);
       indexR--;
     }
 }

@@ -9,17 +9,14 @@
 class SensorEuStop : public Sensor
 {
  private:
-  std::vector<int>  vPosF, vPosR;
-  std::vector<REAL> vValF, vValR;
-  std::vector<int>::iterator iter;
-  int indexF, indexR;
+  double   stopP;
 
  public:
   SensorEuStop  (int);
   virtual ~SensorEuStop   ();
   virtual void Init       (DNASeq *);
-  virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot       (DNASeq *);
+  virtual void GiveInfo   (DNASeq *X, int, DATA *);
+  virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 

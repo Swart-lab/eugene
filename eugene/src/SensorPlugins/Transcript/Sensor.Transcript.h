@@ -17,8 +17,8 @@ class SensorTranscript : public Sensor
   SensorTranscript  (int);
   virtual ~SensorTranscript   ();
   virtual void Init       (DNASeq *);
-  virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot       (DNASeq *);
+  virtual void GiveInfo   (DNASeq *X, int, DATA *);
+  virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 

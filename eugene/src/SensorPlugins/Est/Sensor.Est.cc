@@ -122,28 +122,28 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	  if ((vESTMatch[iter-vPos.begin()] & Gap) || 
 	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
 	       !(vESTMatch[iter-vPos.begin()] & HitForward)))
-	    d->ContentScore[i] += estP;
+	    d->contents[i] += estP;
 	
 	for(int i=3; i<6; i++)              // Exon R
 	  // Si on a un Gap EST ou si l'on connait le sens du match EST
 	  if ((vESTMatch[iter-vPos.begin()] & Gap) ||
 	      ((vESTMatch[iter-vPos.begin()] & Hit) &&
 	       !(vESTMatch[iter-vPos.begin()] & HitReverse)))
-	    d->ContentScore[i] += estP;
+	    d->contents[i] += estP;
 	
 	// Si on a un Hit EST ou si l'on connait le sens du match EST
 	if((vESTMatch[iter-vPos.begin()] & Hit) ||
 	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
 	    !(vESTMatch[iter-vPos.begin()] & GapForward)))
-	  d->ContentScore[6] += estP;       // IntronF
+	  d->contents[6] += estP;       // IntronF
 	
 	// Si on a un Hit EST ou si l'on connait le sens du match EST
 	if((vESTMatch[iter-vPos.begin()] & Hit) ||
 	   ((vESTMatch[iter-vPos.begin()] & Gap) &&
 	    !(vESTMatch[iter-vPos.begin()] & GapReverse)))
-	  d->ContentScore[7] += estP;       // IntronR
+	  d->contents[7] += estP;       // IntronR
 	
-	d->ContentScore[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
+	d->contents[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
 	
 	d->ESTMATCH_TMP = vESTMatch[iter-vPos.begin()];  // WARNING : EST -> on est dans intron
 	index = iter-vPos.begin() + 1;
@@ -155,25 +155,25 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if ((vESTMatch[index] & Gap) || 
 	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitForward)))
-	d->ContentScore[i] += estP;
+	d->contents[i] += estP;
     
     for(int i=3; i<6; i++)              // Exon R
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if ((vESTMatch[index] & Gap) ||
 	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitReverse)))
-	d->ContentScore[i] += estP;
+	d->contents[i] += estP;
     
     // Si on a un Hit EST ou si l'on connait le sens du match EST
     if((vESTMatch[index] & Hit) ||
        ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapForward)))
-      d->ContentScore[6] += estP;       // IntronF
+      d->contents[6] += estP;       // IntronF
     
     // Si on a un Hit EST ou si l'on connait le sens du match EST
     if((vESTMatch[index] & Hit) ||
        ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapReverse)))
-      d->ContentScore[7] += estP;       // IntronR
+      d->contents[7] += estP;       // IntronR
     
-    d->ContentScore[8] += ((vESTMatch[index] & (Gap|Hit)) != 0)*estP;  //InterG
+    d->contents[8] += ((vESTMatch[index] & (Gap|Hit)) != 0)*estP;  //InterG
     
     d->ESTMATCH_TMP = vESTMatch[index];  // WARNING : EST -> on est dans intron
     index++;
@@ -244,13 +244,13 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
 	  MS.GetInfoSpAt(Type_Splice, X, k, &dTmp);
-	  DonF = Max(DonF, dTmp.Don[0]);
-	  AccR = Max(AccR, dTmp.Acc[1]);
+	  DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]);
+	  AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]);
 	  
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
 	  if(MS.GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
-	    DonR = Max(DonR, dTmp.Don[1]);
-	    AccF = Max(AccF, dTmp.Acc[0]);
+	    DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]);
+	    AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]);
 	  }
 	  else {
 	    fprintf(stderr,"   WARNING: cDNA hits ignored."
@@ -309,8 +309,8 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       // calcul des sites d'epissage internes a l'exon
       for (i = ThisBlock->Start+EstM+1; !Inc && i <= ThisBlock->End-EstM-1; i++) {
 	MS.GetInfoSpAt(Type_Splice, X, i, &dTmp);
-	DonF = Max(DonF, dTmp.Don[0]);
-	DonR = Max(DonR, dTmp.Don[1]);
+	DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]);
+	DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]);
 	//	Don[0][i] *= 0.99;
 	//	Don[1][i] *= 0.99;
       }

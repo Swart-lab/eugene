@@ -22,8 +22,8 @@ class SensorNStart : public Sensor
   SensorNStart   (int);
   virtual ~SensorNStart   ();
   virtual void Init       (DNASeq *);
-  virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot       (DNASeq *);
+  virtual void GiveInfo   (DNASeq *X, int, DATA *);
+  virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 

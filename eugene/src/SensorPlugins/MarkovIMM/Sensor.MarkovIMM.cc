@@ -167,40 +167,40 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   indexR = (*IMMatrix[0]).String_To_Sub(X,pos-FModelLen+1,FModelLen);
 
   // Exons F
-  d->ContentScore[0] += log((double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0);
-  d->ContentScore[1] += log((double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0);
-  d->ContentScore[2] += log((double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0);
+  d->contents[0] += log((double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0);
+  d->contents[1] += log((double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0);
+  d->contents[2] += log((double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0);
     
   // Exons R
-  d->ContentScore[3] += log((double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0);
-  d->ContentScore[4] += log((double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0);
-  d->ContentScore[5] += log((double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0);
+  d->contents[3] += log((double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0);
+  d->contents[4] += log((double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0);
+  d->contents[5] += log((double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0);
   
   // Introns F/R
-  d->ContentScore[6] += log((double)(*IMMatrix[3])[indexF]/65535.0);
-  d->ContentScore[7] += log((double)(*IMMatrix[3])[indexR]/65535.0);
+  d->contents[6] += log((double)(*IMMatrix[3])[indexF]/65535.0);
+  d->contents[7] += log((double)(*IMMatrix[3])[indexR]/65535.0);
     
   // InterG
-  d->ContentScore[8] += 
+  d->contents[8] += 
     log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
     
   // UTR 5' F/R
-  d->ContentScore[9] += log((double)(*IMMatrix[6])[indexF]/65535.0);
-  d->ContentScore[10] += log((double)(*IMMatrix[6])[indexR]/65535.0);
+  d->contents[9] += log((double)(*IMMatrix[6])[indexF]/65535.0);
+  d->contents[10] += log((double)(*IMMatrix[6])[indexR]/65535.0);
       
   // UTR 3' F/R
-  d->ContentScore[11] += log((double)(*IMMatrix[5])[indexF]/65535.0);
-  d->ContentScore[12] += log((double)(*IMMatrix[5])[indexR]/65535.0);
+  d->contents[11] += log((double)(*IMMatrix[5])[indexF]/65535.0);
+  d->contents[12] += log((double)(*IMMatrix[5])[indexR]/65535.0);
   
   for(int i=0; i<6; i++)
-    d->ContentScore[i] += log(transCodant); //Exon
-  d->ContentScore[6] += log(transIntron); //IntronF
-  d->ContentScore[7] += log(transIntron); //IntronR
-  d->ContentScore[8] += log(transInter);  //InterG
-  d->ContentScore[9] += log(transUTR5);   //UTR5'F
-  d->ContentScore[10] += log(transUTR5);   //UTR5'R
-  d->ContentScore[11] += log(transUTR3);   //UTR3'F
-  d->ContentScore[12] += log(transUTR3);   //UTR3'R
+    d->contents[i] += log(transCodant); //Exon
+  d->contents[6] += log(transIntron); //IntronF
+  d->contents[7] += log(transIntron); //IntronR
+  d->contents[8] += log(transInter);  //InterG
+  d->contents[9] += log(transUTR5);   //UTR5'F
+  d->contents[10] += log(transUTR5);   //UTR5'R
+  d->contents[11] += log(transUTR3);   //UTR3'F
+  d->contents[12] += log(transUTR3);   //UTR3'R
   return;
 }
 
@@ -219,7 +219,7 @@ void SensorMarkovIMM :: Plot(DNASeq *TheSeq)
 {
   int window, normopt;
   DATA data;
-  double *Score = data.ContentScore;
+  double *Score = data.contents;
   double NScore[9], LScore[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,-1.0,-1.0};  
   int i,j,p;
 

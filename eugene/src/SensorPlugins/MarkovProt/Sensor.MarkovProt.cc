@@ -181,9 +181,9 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
 
     // special degenerated caracter "X";
     if (tampon == 'X')
-      d->ContentScore[j] += log(1/21) / 3;
+      d->contents[j] += log(1/21) / 3;
     else {
-      d->ContentScore[j] +=
+      d->contents[j] +=
 	( log(  ModeleProt->usi2real(ModeleProt->proba(peptid,order))/NBRECODONS[Probacodon->mot2indice(codon, 3,0) -21] ) ) / 3 ;
 //	( log(  ModeleProt->proba(peptid,order)/NBRECODONS[Probacodon->mot2indice(codon, 3,0) -21] ) ) / 3 ;
     }
@@ -193,23 +193,23 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
   NonCodingF = log (X->Markov(pos));
   NonCodingR = log (X->MarkovR(pos));
 
-  d->ContentScore[6] += NonCodingF;                //IntronF
-  d->ContentScore[7] += NonCodingR;                //IntronR
-  d->ContentScore[8] += (NonCodingF+NonCodingR)/2; //InterG
-  d->ContentScore[9] += NonCodingF;                // UTR5'F
-  d->ContentScore[10] += NonCodingR;               // UTR5'R
-  d->ContentScore[11] += NonCodingF;               // UTR3'F
-  d->ContentScore[12] += NonCodingR;               // UTR3'R
+  d->contents[6] += NonCodingF;                //IntronF
+  d->contents[7] += NonCodingR;                //IntronR
+  d->contents[8] += (NonCodingF+NonCodingR)/2; //InterG
+  d->contents[9] += NonCodingF;                // UTR5'F
+  d->contents[10] += NonCodingR;               // UTR5'R
+  d->contents[11] += NonCodingF;               // UTR3'F
+  d->contents[12] += NonCodingR;               // UTR3'R
 
   for(int i=0; i<6; i++)
-    d->ContentScore[i] += log(transCodant);        //Exon
-  d->ContentScore[6] += log(transIntron);          //IntronF
-  d->ContentScore[7] += log(transIntron);          //IntronR
-  d->ContentScore[8] += log(transInter);           //InterG
-  d->ContentScore[9] += log(transUTR5);            //UTR5'F
-  d->ContentScore[10] += log(transUTR5);           //UTR5'R
-  d->ContentScore[11] += log(transUTR3);           //UTR3'F
-  d->ContentScore[12] += log(transUTR3);           //UTR3'R
+    d->contents[i] += log(transCodant);        //Exon
+  d->contents[6] += log(transIntron);          //IntronF
+  d->contents[7] += log(transIntron);          //IntronR
+  d->contents[8] += log(transInter);           //InterG
+  d->contents[9] += log(transUTR5);            //UTR5'F
+  d->contents[10] += log(transUTR5);           //UTR5'R
+  d->contents[11] += log(transUTR3);           //UTR3'F
+  d->contents[12] += log(transUTR3);           //UTR3'R
 
   delete peptid;
   delete codon;
@@ -231,7 +231,7 @@ void SensorMarkovProt :: Plot(DNASeq *TheSeq)
 {
   int window, normopt;
   DATA data;
-  double *Score = data.ContentScore;
+  double *Score = data.contents;
   double NScore[9], LScore[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,-1.0,-1.0};  
   int i,j,p;
 //  fprintf(stderr,"PLOT1...");

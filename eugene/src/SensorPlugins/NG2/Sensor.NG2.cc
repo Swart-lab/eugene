@@ -58,7 +58,7 @@ void SensorNG2 :: Init (DNASeq *X)
   ReadNG2R(tempname, X->SeqLen);
   fprintf(stderr," reverse done\n");
   
-  CheckSplices(X, vPosAccF, vPosDonF, vPosAccR, vPosDonR);
+  CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
   
   if (PAR.getI("Output.graph")) Plot(X);
   
@@ -159,14 +159,16 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
       if(*iter == pos) {
-	d->Acc[0] += vValAccF[iter-vPosAccF.begin()];
+	d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iter-vPosAccF.begin()]);
+	d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iter-vPosAccF.begin()]);
 	iAccF = iter-vPosAccF.begin() + 1;
       }
       else iAccF = iter-vPosAccF.begin();
     }
   else if(iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF] == pos)
     {
-      d->Acc[0] = vValAccF[iAccF];
+      d->sig[DATA::Acc].weight[Signal::Forward] += log(vValAccF[iAccF]);
+      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-vValAccF[iAccF]);
       iAccF++;
     }
   
@@ -176,14 +178,16 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, greater<int>());
       if(*iter == pos) {
-	d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
+	d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iter-vPosAccR.begin()]);
+	d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iter-vPosAccR.begin()]);
 	iAccR = iter-vPosAccR.begin();
       }
       else iAccR = iter-vPosAccR.begin() - 1;
     }
   else if(iAccR > -1  &&  vPosAccR[iAccR] == pos)
     {
-      d->Acc[1] = vValAccR[iAccR];
+      d->sig[DATA::Acc].weight[Signal::Reverse] = log(vValAccR[iAccR]);
+      d->sig[DATA::Acc].weight[Signal::ReverseNo] = log(1.0-vValAccR[iAccR]);
       iAccR--;
     }
   
@@ -193,14 +197,16 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
       if(*iter == pos) {
-	d->Don[0] += vValDonF[iter-vPosDonF.begin()];
+	d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iter-vPosDonF.begin()]);
+	d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iter-vPosDonF.begin()]);
 	iDonF = iter-vPosDonF.begin() + 1;
       }
       else iDonF = iter-vPosDonF.begin();
     }
   else if(iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF] == pos)
     {
-      d->Don[0] = vValDonF[iDonF];
+      d->sig[DATA::Don].weight[Signal::Forward] += log(vValDonF[iDonF]);
+      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-vValDonF[iDonF]);
       iDonF++;
     }
   
@@ -210,14 +216,16 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
       iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, greater<int>());
       if(*iter == pos) {
-	d->Don[1] = vValDonR[iter-vPosDonR.begin()];
+	d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iter-vPosDonR.begin()]);
+	d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iter-vPosDonR.begin()]);
 	iDonR = iter-vPosDonR.begin();
       }
       else iDonR = iter-vPosDonR.begin() - 1;
     }
   else if(iDonR > -1  &&  vPosDonR[iDonR] == pos )
     {
-      d->Don[1] = vValDonR[iDonR];
+      d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
+      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
       iDonR--;
     }
 }

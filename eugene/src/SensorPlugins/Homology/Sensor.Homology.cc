@@ -166,7 +166,7 @@ void SensorHomology :: GiveInfo(DNASeq *X, int pos, DATA *d)
   int k;
   for (k = 0; k<6; k++) {
     if (TblastxNumber[k][pos]>0)
-      d->ContentScore[k] += tblastxupdate(TblastxNumber[k][pos],TblastxScore[k][pos],TblastxP,TblastxB);
+      d->contents[k] += tblastxupdate(TblastxNumber[k][pos],TblastxScore[k][pos],TblastxP,TblastxB);
   }
 }
 

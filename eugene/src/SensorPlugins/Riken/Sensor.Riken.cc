@@ -160,35 +160,35 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
     for(int i=0; i<3; i++)
       if ((RAFLpos == 1) || (RAFLpos == 2) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex]->sens == -1)) )
-	d->ContentScore[i] += RAFLPenalty;   //ExonF
+	d->contents[i] += RAFLPenalty;   //ExonF
     
     for(int i=3; i<6; i++)
       if ((RAFLpos == 1) || (RAFLpos == 2) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex]->sens == 1)) )
-	d->ContentScore[i] += RAFLPenalty;   //ExonR
+	d->contents[i] += RAFLPenalty;   //ExonR
     
     if ( (RAFLpos == 1) || (RAFLpos == 2) || 
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex]->sens == -1)) )
-      d->ContentScore[6] += RAFLPenalty;     //IntronF
+      d->contents[6] += RAFLPenalty;     //IntronF
     
     if ( (RAFLpos == 1) || (RAFLpos == 2) ||
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex]->sens == 1)) )
-      d->ContentScore[7] += RAFLPenalty;     //IntronR
+      d->contents[7] += RAFLPenalty;     //IntronR
     
     if (RAFLpos == 3)
-      d->ContentScore[8] += RAFLPenalty;     //InterG
+      d->contents[8] += RAFLPenalty;     //InterG
     
     if ( (RAFLpos == 2) || ((RAFL[RAFLindex]->sens == -1) && (RAFLpos >= 1) ) )
-      d->ContentScore[9] += RAFLPenalty;     //UTR5'F
+      d->contents[9] += RAFLPenalty;     //UTR5'F
     
     if ( (RAFLpos == 2) || ((RAFL[RAFLindex]->sens == 1) && (RAFLpos >= 1) ) )
-      d->ContentScore[10]+= RAFLPenalty;     //UTR5'R
+      d->contents[10]+= RAFLPenalty;     //UTR5'R
     
     if ( (RAFLpos == 1) || ((RAFL[RAFLindex]->sens == -1) && (RAFLpos >= 1) ) )
-      d->ContentScore[11]+= RAFLPenalty;     //UTR3'F
+      d->contents[11]+= RAFLPenalty;     //UTR3'F
     
     if ( (RAFLpos == 1) || ((RAFL[RAFLindex]->sens == 1) && (RAFLpos >= 1) ) )
-      d->ContentScore[12]+= RAFLPenalty;     //UTR3'R
+      d->contents[12]+= RAFLPenalty;     //UTR3'R
   }
 }
 

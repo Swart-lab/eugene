@@ -22,8 +22,8 @@ class SensorNG2 : public Sensor
   SensorNG2  (int);
   virtual ~SensorNG2      ();
   virtual void Init       (DNASeq *);
-  virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot       (DNASeq *);
+  virtual void GiveInfo   (DNASeq *X, int, DATA *);
+  virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 
