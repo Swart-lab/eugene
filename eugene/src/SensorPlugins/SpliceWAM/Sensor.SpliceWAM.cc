@@ -73,7 +73,7 @@ void SensorSpliceWAM :: Init (DNASeq *X)
 // -----------------------
 void SensorSpliceWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  int i, j, insitepos;
+  int i, j;
   double score;
   char* DonSite = new char[DonorSiteLength+MarkovianOrder+2];
   DonSite[DonorSiteLength+MarkovianOrder+1]= '\0';
