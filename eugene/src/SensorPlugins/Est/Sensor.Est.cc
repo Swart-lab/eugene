@@ -190,19 +190,25 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	d->sig[DATA::Don].weight[Signal::Reverse] != 0.0)
       d->sig[DATA::Don].weight[Signal::Reverse] += spliceBoost;
 
-    // Exon Forward
+    // Exon ou UTR  Forward
     // Si on a un Gap EST ou si l'on connait le sens du match EST
-    for(int i=0; i<3; i++)
-      if ((cESTMatch & Gap) || 
-	  ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
+    if ((cESTMatch & Gap) || 
+	((cESTMatch & Hit) && !(cESTMatch & HitForward))) {
+      d->contents[DATA::UTR5F] += estP;
+      d->contents[DATA::UTR3F] += estP;
+      for(int i=0; i<3; i++)
 	d->contents[i] += estP;
-    
-    // Exon Reverse
+    }
+
+    // Exon ou UTR Reverse
     // Si on a un Gap EST ou si l'on connait le sens du match EST
-    for(int i=3; i<6; i++)              
-      if ((cESTMatch & Gap) ||
-	  ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
+    if ((cESTMatch & Gap) ||
+	((cESTMatch & Hit) && !(cESTMatch & HitReverse))) {
+      d->contents[DATA::UTR5R] += estP;
+      d->contents[DATA::UTR3R] += estP;
+      for(int i=3; i<6; i++)              
 	d->contents[i] += estP;
+    }
     
     // Intron Forward
     // Si on a un Hit EST ou si l'on connait le sens du match EST
@@ -220,35 +226,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       d->contents[DATA::IntronUTRR] += estP;
     }
 
-    // UTR Forward
-    // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
-    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
-      d->contents[DATA::UTR5F] += estP;
-      d->contents[DATA::UTR3F] += estP;
-    }
-    
-    // UTR Reverse
-    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
-    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
-      d->contents[DATA::UTR5R] += estP;
-      d->contents[DATA::UTR3R] += estP;
-    }
 
-    // Ca merdouille sur SeqAra. A creuser
-    // UTR Forward
-    // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
-    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
-    //       d->contents[DATA::UTR5F] += estP;
-    //       d->contents[DATA::UTR3F] += estP;
-    //     }
-    
-    //     // UTR Reverse
-    //     // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
-    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
-    //       d->contents[DATA::UTR5R] += estP;
-    //       d->contents[DATA::UTR3R] += estP;
-    //     }
-    
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
     
