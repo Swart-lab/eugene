@@ -6,6 +6,7 @@ SensorLoader :: SensorLoader(const char *fname, const char *builder)
   // Try to open the library now and get any error message.
   h = dlopen( fname, RTLD_NOW );
   err = dlerror();
+  if (err) printf("dlerror: %s\n",err);
   
   // Try get the creation function if there is no error yet
   builder_func=0;
