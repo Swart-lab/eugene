@@ -9,6 +9,8 @@
 //#define myassert(x)
 
 char * BaseName(char *path);
+int ProbeFile(char *path);
+
 
 template<class T>
 inline T Min(T x, T y)

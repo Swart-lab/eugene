@@ -11,6 +11,9 @@
 #include <time.h>
 #include <string>
 #include "Const.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 // ------------------------------------------------------------------
 // BASENAME: returns a pointer to the filename, w/o any
@@ -21,6 +24,17 @@ char * BaseName(char *path)
   char *lead = rindex(path,'/');
   
   return ((lead != NULL)  ? lead+1 : path);
+}
+// ------------------------------------------------------------------
+// ProbeFile: test if a file exists and has non empty size
+// return 1 if Ok.
+// ------------------------------------------------------------------
+int ProbeFile(char *path)
+{
+  struct stat FileStat;
+
+  if (stat(path,&FileStat) != 0) return 0;
+  return (S_ISREG(FileStat.st_mode) && FileStat.st_size != 0);
 }
 // ------------------------------------------------------------------
 // Function to open a file by using environment variables.  We first
