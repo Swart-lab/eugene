@@ -28,6 +28,14 @@ EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
 #
+# States penalties
+#
+EuGene.transCodant	1.0
+EuGene.transIntron	1.0
+EuGene.transUTR5	0.999
+EuGene.transUTR3	0.999
+EuGene.transInter	1.0
+#
 # Output control
 #
 Output.graph		FALSE		# don't produce a graphical output
@@ -67,22 +75,25 @@ SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
 #
-# Interpolated Markov models parameters
-Markov.matname[0]	default.mat 
-Markov.minGC[0]		0
-Markov.maxGC[0]		100
-#Markov.matname[1]	default.mat
-#Markov.minGC[1]	50
-#Markov.maxGC[1]	100
-Markov.transCodant	1.0
-Markov.transIntron	1.0
-Markov.transUTR5	0.999
-Markov.transUTR3	0.999
-Markov.transInter	1.0
+# Interpolated Markov Models parameters
+MarkovIMM.matname[0]	default.mat 
+MarkovIMM.minGC[0]	0
+MarkovIMM.maxGC[0]	100
+#MarkovIMM.matname[1]	default.mat
+#MarkovIMM.minGC[1]	50
+#MarkovIMM.maxGC[1]	100
+#
+# Markov proteic model parameters
+#
+MarkovProt.matname[0]	default_prot.mat
+MarkovProt.minGC[0]	0
+MarkovProt.maxGC[0]	100
+MarkovProt.maxorder     4
+MarkovProt.order        4
 #
 # Est sensor parameters
 #
-Est.PostProcess		FALSE
+Est.PostProcess	FALSE
 Est.estP	-0.2
 Est.estM	6
 #
@@ -110,36 +121,46 @@ Homology.TblastxP 	0.0094
 Homology.TblastxB 	0.0177
 Homology.protmatname	BLOSUM62
 #
+# Sensors with uniform penalties
+#
+SpliceConst.val		0.5
+StartConst.val		0.5
+MarkovConst.val		0.25
+MarkovConst.minGC[0]	0
+MarkovConst.maxGC[0]	100
+#
 # Sensors activation
 #
-Sensor.EuStop.use	TRUE
-Sensor.NStart.use	TRUE
-Sensor.NG2.use		FALSE
-Sensor.SPred.use	FALSE
-Sensor.IfElse.use	TRUE
-#Sensor.Markov.use	2
-Sensor.Markov.use	TRUE
-Sensor.BlastX.use	FALSE
-Sensor.Repeat.use	FALSE
-Sensor.Riken.use	FALSE
-Sensor.Est.use		FALSE
-Sensor.User.use		FALSE
-Sensor.Homology.use	FALSE
-Sensor.StartConst.use	FALSE
-Sensor.SpliceConst.use	FALSE
-Sensor.MarkovConst.use	FALSE
+Sensor.EuStop.use	1
+Sensor.NStart.use	1
+Sensor.NG2.use		1
+Sensor.SPred.use	1
+Sensor.MarkovIMM.use	1
+#Sensor.MarkovIMM.use	2
+Sensor.BlastX.use	0
+Sensor.Repeat.use	0
+Sensor.Riken.use	0
+Sensor.Est.use		0
+Sensor.User.use		0
+Sensor.Homology.use	0
+Sensor.StartConst.use	0
+Sensor.SpliceConst.use	0
+Sensor.MarkovConst.use	0
+Sensor.MarkovProt.use   0
+Sensor.IfElse.use	1
 #
 # Sensor priorities
 #
-Sensor.IfElse		1
+Sensor.IfElse		1	#
 Sensor.EuStop		1	#
 Sensor.StartConst	1	# Sensor.Name Priority
 Sensor.SpliceConst	1	#
 Sensor.NStart		1	#
 Sensor.NG2		1	#
 Sensor.SPred		1	#  
-Sensor.Markov		1	# 
+Sensor.MarkovIMM	1	# 
 Sensor.MarkovConst	1	#
+Sensor.MarkovProt	1	#
 Sensor.Est		2	#  
 Sensor.BlastX		2	#  Priority 0 -> First
 Sensor.Homology 	2	#
