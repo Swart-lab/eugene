@@ -15,8 +15,8 @@
 
 \newcommand{\EuGenie}{\textsc{EuG\`ene}}
 % comment one of the above line to hide or not the developpers documentation
-%\newcommand{\shrink}[1]{}   % hide text
-\newcommand{\shrink}[1]{#1} % no effect
+\newcommand{\shrink}[1]{}   % hide text
+%\newcommand{\shrink}[1]{#1} % no effect
 
 \author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex\\Biometry and AI Dept.\\ INRA Toulouse\\France}
 
@@ -508,212 +508,33 @@ As the example show, it is equivalent to define the parameter
 
 We now descrive each plugin, its behavior and parameters.
 
-\subsection{\texttt{Sensor.Transcript}}
-
-This simple plugin predicts a possible transcription start and stop at
-every position, all with the same uniform cost. These costs are
-respectively set by the \texttt{Transcript.Start} and
-\texttt{Transcript.Stop} parameters.
-
-\subsection{\texttt{Sensor.EuStop}}
-
-This simple plugin predicts translation stops. It is able to deal with
-noisy sequences and will eg.edict a possible stop on \texttt{TGN}.
-
-\subsection{\texttt{Sensor.StartConst}}
-
-This simple plugin predicts ppossible translation starts on all
-occurrence of \texttt{ATG}, all with the same cost, as indicated by
-the \texttt{StartConst.val} parameter.
-
-\subsection{\texttt{Sensor.NStart}}
-
-This plugin injects possible translation starts as predicted by the
-\textsc{NetStart} program. The plugin reads the prediction of the
-programs from two files whose names are derived from the sequence name
-by adding the \texttt{.starts} and \texttt{.startsR} suffix
-(respectively prediction for the forward and reverse strand).
-
-The \textsc{NetStart} score $s$ for a given position is rescaled using
-the $\log(\alpha.s^\beta)$ function. The two parameters
-\texttt{NStart.startP} and \texttt{NStart.startB} indicates the values
-of these $\alpha$ and $\beta$ parameters. These parameters have been
-estimated on existing data.
-
-
-\subsection{\texttt{Sensor.SpliceConst}}
-
-This plugin predicts splice sites at each \texttt{AG} and \texttt{GT}
-occurrence on the sequence. The corresponding uniform costs can be set
-using the \texttt{SpliceConst.accP} and \texttt{SpliceConst.donP}
-parameters.
-
-\subsection{\texttt{Sensor.NG2}}
-
-This plugin injects possible splice sites as predicted by the
-\textsc{NetGene2} program. The plugin reads the prediction of the
-programs from two files whose names are derived from the sequence name
-by adding the \texttt{.splices} and \texttt{.splicesR} suffix
-(respectively prediction for the forward and reverse strand).
-
-The \textsc{NetGene2} score $s$ for a given position is rescaled using
-the $\log(\alpha.s^\beta)$ function. The four parameters \texttt{NG2.accP},
-\texttt{NG2.accB}, \texttt{NG2.donP}, \texttt{NG2.donB}
-indicates the values of these $\alpha$ and $\beta$ parameters for
-acceptor sites and donor sites respectively. These parameters have
-been estimated on existing data.
-
-\subsection{\texttt{Sensor.SPred}}
-
-This plugin injects possible splice sites as predicted by the
-\textsc{SplicePredictor} program. The plugin reads the prediction of
-the programs from two files whose names are derived from the sequence
-name by adding the \texttt{.spliceP} and \texttt{.splicePR} suffix
-(respectively prediction for the forward and reverse strand).
-
-One of the \textsc{SplicePredictor} scores $s$ for a given position is
-rescaled using the $\log(\alpha.s^\beta)$ function. The four parameters
-\texttt{SPred.accP}, \texttt{SPred.accB}, \texttt{SPred.donP},
-\texttt{SPred.donB} indicates the values of these $\alpha$ and $\beta$
-parameters for acceptor sites and donor sites respectively.  These
-parameters have been estimated on existing data.
-
-\subsection{\texttt{Sensor.GSplicer}}
-\input {../SensorPlugins/GSplicer/GSplicerDoc.tex}
-
-\subsection{\texttt{Sensor.IfElse}}
-
-This plugin is used to combine the predictions of two existing
-plugins. It listen to a first plugin. For each possible predictable
-item, if this plugin predicts something then this prediction is used.
-If the plugin does not predict anything, then the output of the second
-plugin is used.
- 
-The plugin needs two parameters to be informed:
-\texttt{IfElse.SensorIf} and \texttt{IfElse.SensorElse} which indicate
-the names of the two slave plugins.
-
-\subsection{\texttt{Sensor.FrameShift}}
-
-This plugin predicts possible frameshits (either insertions or
-deletions) at each position of the sequence with a uniform cost. The
-parameters \texttt{FrameShift.Ins} \texttt{FrameShift.Del} give the
-corresponding penalties.
-
-\subsection{\texttt{Sensor.MarkovConst}}
-
-
-
-\subsection{\texttt{Sensor.MarkovIMM}}
-
-This plugin injects coding/non coding likelihood as modeled by
-interpolated Markov models (introduced in Glimmer). These models are
-defined in a so-called matrices file (located in the directory 
-specified by the \texttt{EuGene.PluginsDir} parameter) whose name is indicated by the
-\texttt{MarkovIMM.matname} parameter. Depending on the matrices file,
-this may contain IMM for exons, introns and intergenic data and also
-optionnally 5' and 3' UTR regions. If these 2 last IMM are absent from
-the matrices file, intronic models are used for UTR.
-
-The plugin is controlled by two further parameters:
-\texttt{MarkovIMM.minGC} and \texttt{MarkovIMM.maxGC} which indicate
-the GC scope of the matrices. If the GC\% of the sequence is out of
-the scope, the plugin will give an equal null likelihood to all types
-of regions.
-
-By instanciating multiple \texttt{MarkovIMM} plugins, this enables the use 
-of several IMM according to the GC\%.
-
-\subsection{\texttt{Sensor.MarkovProt}}
-
-This plugin injects coding/non coding likelihood as modeled by proteic
-Markov models. These models are defined in a matrices file  (located in the directory 
-specified by the \texttt{EuGene.PluginsDir} parameter) whose name
-is indicated by the \texttt{MarkovProt.matname} parameter. 
-%Sylvain
-
-\subsection{\texttt{Sensor.Est}}
-\label{plugest}
-%todo
-
-Ce fichier est un fichier texte avec 8 champs par ligne: debut-hit
-fin-hit score inutilis\'e brin nom debut-hit-EST fin-hit-EST Il faut
-que les lignes soient ordonn\'ees d'abord par EST/cDNA, puis pour
-chaque EST/cDNA dans l'ordre des positions de hit sur l'EST/cDNA.
-Exemple pour SYNO\_ARATH:
-
-Tous les hits de la m\^eme s\'equence (ATAJ644) sont ensemble et ordonn\'es
-dans l'ordre croissant des positions de hits sur l'est/cdna.  J'ai
-modifi\'e SIM4 pour sortir ce type de sorties. Attention, ce n'est pas
-v\'erifi\'e solidement (c'est une nouvelle version de sim4). Le binaire sim4
-est dans le directory. Il sort ses resultats sur stdout. Je t'ai aussi
-gliss\'e ma banque d'est/cDNA mais elle n'est pas de bonne qualit\'e (nom:
-cDNA) ! Si tu as mieux je suis preneur
-
-Dans SIM4, je ne garde que les hits avec une couverture de plus de 80% et
-un matches de plus de 60% sur le hit. Il faut peut-tre faire mieux...
-me le dire !  Je t'ai glisse\'e le patch \`a appliquer \`a sim4 si tu veux
-changer ces parametres. Pour utiliser sim4: flag A=6 (\`a mettre apres
-les s\'equences)
-
-
-J'ai aussi gliss\'e un script awk pour mettre au format sim4 (sans
-minuscules ni code deg\'en\'er\'e) une banque de seq. FASTA (cf.
-norm4sim4.awk). C'est d\'ej\`a fait sur la banque "cDNA".
-
-
-\texttt{Est.PostProcess}: if set, the Est sensor will perform a
-post-analysis of the prediction compared to existing transcript data.
-See the ``\texttt{-E}'' command line flag.
-  
-\texttt{Est.estP}: the penalty for inconsistency with similarity
-information with transcribed sequences.  The larger, the more
-important the influence of this information (0.0 meand no influence at
-all).
-  
-\texttt{Est.estM}: the margin (in number of nucleotides) that is used
-to analyse similarities. All actual data on the frontier of a
-similarity between the DNA sequence and the cDNA sequence are
-considered to be defined up to this number of nucleotides in
-precision.
-
-
-\subsection{\texttt{Sensor.Riken}}
-A file with extension \texttt{.riken} is read.  Each line must contain
-the positions of the extremities of the match of the 5' EST then the
-name of the 5' EST the same thing for the 3'EST then the name of the
-clone.
-
-
-\subsection{\texttt{Sensor.BlastX}}
-\input {../SensorPlugins/BlastX/BlastxDoc.tex}
-
-
-\subsection{\texttt{Sensor.Repeat}}
-
-\texttt{Repeat.IntronPenalty}: the penalty for predicting an intron over a
-``repeat''.\\
-\texttt{Repeat.ExonPenalty}: the penalty for predicting an exon over a
-``repeat''.\\
-\texttt{Repeat.UTRPenalty}: the penalty for predicting an UTR over a
-``repeat''.
-
-\subsection{\texttt{Sensor.Homology}}
-%todo: sylvain
-
-
-\subsection{\texttt{Sensor.User}}
-\label{pluguser}
-%todo
-
-
-\subsection{\texttt{Sensor.GFF}}
-\input {../SensorPlugins/GFF/GFFDoc.tex}
-
-
-\subsection{\texttt{Sensor.Tester}}
-\input {../SensorPlugins/Tester/TesterDoc.tex}
-
+\input{../SensorPlugins/Transcript/Doc.tex}
+\input{../SensorPlugins/EuStop/Doc.tex}
+\input{../SensorPlugins/StartConst/Doc.tex}
+\input{../SensorPlugins/NStart/Doc.tex}
+\input{../SensorPlugins/StartWAM/Doc.tex}
+\input{../SensorPlugins/SpliceConst/Doc.tex}
+% A faire !
+\input{../SensorPlugins/SpliceWAM/Doc.tex}
+\input{../SensorPlugins/NG2/Doc.tex}
+\input{../SensorPlugins/SPred/Doc.tex}
+\input {../SensorPlugins/GSplicer/Doc.tex}
+\input {../SensorPlugins/IfElse/Doc.tex}
+\input {../SensorPlugins/FrameShift/Doc.tex}
+\input {../SensorPlugins/MarkovConst/Doc.tex}
+\input {../SensorPlugins/MarkovIMM/Doc.tex}
+\input {../SensorPlugins/MarkovProt/Doc.tex}
+\input {../SensorPlugins/Est/Doc.tex}
+% A faire !
+\input {../SensorPlugins/Riken/Doc.tex}
+\input {../SensorPlugins/BlastX/Doc.tex}
+\input {../SensorPlugins/Repeat/Doc.tex}
+% A faire !
+\input {../SensorPlugins/Homology/Doc.tex}
+% A faire !
+\input {../SensorPlugins/User/Doc.tex}
+\input {../SensorPlugins/GFF/Doc.tex}
+\input {../SensorPlugins/Tester/Doc.tex}
 
 \section{Command line flags}
  

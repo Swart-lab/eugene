@@ -1,4 +1,4 @@
-#!/usr/bin/tcl
+#!/usr/bin/tclsh
 #============================================================================
 #=             Copyright (c) 2002 by INRA. All rights reserved.             
 #=                 Redistribution is not permitted without                  
