@@ -333,7 +333,7 @@ ParaOptimization.Use FALSE
 ParaOptimization.TrueCoordFile ---
 ParaOptimization.EvalPredDir   ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
-ParaOptimization.Test TRUE
+ParaOptimization.Test FALSE
 ParaOptimization.Trace TRUE
 #
 ParaOptimization.NbCluster 3
