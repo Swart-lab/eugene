@@ -159,7 +159,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       sprintf (buffer,"%d",getpid()); fic_pred += buffer;
       sprintf (buffer,"%d",(int)time(NULL)); fic_pred += buffer;
       cmde = "rm -f " + fic_pred; system(cmde.c_str());
-      fp = fopen(fic_pred.c_str(),"w");
+      fp = FileOpen(NULL,fic_pred.c_str(),"w");
       if (fp == NULL)
 	{std::cerr <<"ERROR: Cannot open temporary file "<<fic_pred<<std::endl; exit(100);}        
       for (i=0; i<Sequences.size(); i++) {
