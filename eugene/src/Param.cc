@@ -382,7 +382,8 @@ int Parameters :: getI(char *key,int index)
 int Parameters :: getUseSensor(char **key, int *val)
 {
   int l;
-  
+  char *s; s = new char[FILENAME_MAX+1];
+
   while(iter != m.end()) {
     while(iter != m.end() &&
 	  (iter->first[0] != 'S' || iter->first[1] != 'e' ||
@@ -394,10 +395,14 @@ int Parameters :: getUseSensor(char **key, int *val)
       if(iter->first[l-2] == 'u' && iter->first[l-1] == 's' && iter->first[l] == 'e')  
 	++iter;
       else {
-	*key = (char*)iter->first;
-	*val = atoi(iter->second);
+	strcpy(s,iter->first); strcat(s,".use"); 
+	if (!strcmp(m[s],"TRUE")) {
+	  *key = (char*)iter->first;
+	  *val = atoi(iter->second);
+	  ++iter;
+	  return TRUE;
+	}
 	++iter;
-	return TRUE;
       }
     }
   }
