@@ -31,24 +31,23 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     char *position;
     int stateBack = 0, state, stateNext = 0;
     int posBack   = 0, pos;
-    
-    if (printopt0 != 'h') {
-      fprintf(stderr,"\n");
-    }
-
+        
+    fprintf(stderr,"\n");
+      
     if (printopt0 == 'h') {
-      printf("<CENTER><H2>EuGeneHom prediction</H2><LISTING>\n\n");
-      printf("<B>\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr</B>\n\n");
+      printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
+      printf("<center><listing>\n");
+      printf("\n\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
     }
     
     else if (printopt0 == 'l')
-      fprintf(stderr,"    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr\n");
+      fprintf(stderr,"    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
     
     else if (printopt0 == 'a')
-      fprintf(stderr,"Seq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr\n");
+      fprintf(stderr,"Seq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
     
     if (printopt0 == 'g' && sequence == optind)
-      fprintf(stderr,"name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+      printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
     
     if(printopt0 != 'g')
       if(sequence != optind)
@@ -60,7 +59,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     if (position  == NULL)
       strcpy(seqn,"     ");
     else {
-      *rindex(position,'.') = 0; // on enleve l'extension (.fasta)
+      if (char * suffix = rindex(position,'.')) *suffix = 0; // on enleve l'extension (.fasta)
       strncpy(seqn,position,5);
       if(strlen(seqn) < 5 && printopt0 != 'g')
 	for(i=strlen(seqn); i<5; i++)
@@ -138,7 +137,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	
 	if (printopt0 == 'g')
 	  printf("\t%d\t%d\t0\t%c\t%d\n",
-		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state))-1);
+		 Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state)));
 	else {
 	  printf("    %c    %7d %7d",((forward) ? '+' : '-'),Lend,Rend);
 	  printf("     %4d  ", Rend-Lend+1);
@@ -217,7 +216,21 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     }
     
     if (printopt0 == 'h')   {
-      printf("</LISTING></CENTER>\n");
+      //position = BaseName(argv[sequence]);
+      position = argv[sequence];
+      strcat(position,".fasta");
+      printf("</listing></center>\n");
+      printf("<a href=%s.trace>Trace</a><br>",position);
+      printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",position,position);
+      printf("<a href=%s.splices>NetGene2 F</a> <a href=%s.splicesR>NetGene2 R</a><br>",position,position);
+      printf("<a href=%s.spliceP>SplicePred F</a> <a href=%s.splicePR>SplicePred R</a><br>",position,position);
+      printf("<a href=%s.est>Sim4</a><br>",position);
+      printf("<a href=%s.blastx0.html>BlastX SP</a><br>",position);
+      printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",position);
+      printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",position);
+      
+      OutputHTMLFileNames();
+      printf("</body></html>\n");
     }
   }
   
@@ -302,10 +315,9 @@ void CheckConsistency(int debut, int fin, int etat,
   if (debut == -1) debut = 0;
   
   for (i = debut; i <fin; i++) {
-    
     MS.GetInfoSpAt(Type_Content, X, i, &dTMP);
-    
-    // y a t'il de l'info
+
+    // y a t'l de l'info
     if (dTMP.ESTMATCH_TMP) {
       // y a t'il une info incoherente avec l'etat
       if (dTMP.ESTMATCH_TMP & ~MaskConsistent[etat]) 
