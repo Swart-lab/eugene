@@ -186,8 +186,8 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
     }
   else if(iAccR > -1  &&  vPosAccR[iAccR] == pos)
     {
-      d->sig[DATA::Acc].weight[Signal::Reverse] = log(vValAccR[iAccR]);
-      d->sig[DATA::Acc].weight[Signal::ReverseNo] = log(1.0-vValAccR[iAccR]);
+      d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iAccR]);
+      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iAccR]);
       iAccR--;
     }
   
@@ -222,7 +222,7 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
       }
       else iDonR = iter-vPosDonR.begin() - 1;
     }
-  else if(iDonR > -1  &&  vPosDonR[iDonR] == pos )
+  else if(iDonR > -1  &&  vPosDonR[iDonR] == pos)
     {
       d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iDonR]);
       d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iDonR]);
