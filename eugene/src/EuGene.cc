@@ -1271,12 +1271,14 @@ int main  (int argc, char * argv [])
   if (blastopt > 0)
     {
       FILE *fblast;
-       int overlap,MaxOverlap,deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
+       int overlap,deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
        char A[128],B[128];
        char *ProtId, *PProtId,*tmp;
        REAL GlobalScore;
        REAL PGlobalScore;
-       MaxOverlap=10; 
+       const int MaxOverlap=10; 
+       const int MaxHitLen = 15000;
+
 
        fprintf(stderr,"Reading Blastx data, level... ");
        fflush(stderr);
@@ -1300,6 +1302,12 @@ int main  (int argc, char * argv [])
 
 	     while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
 			   &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
+
+	       if (abs(fin-deb) > MaxHitLen) {
+		 fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",ProtId);
+		 continue;
+	       }
+
 	       if (phase < 0) {
 		 j = deb;
 		 deb = fin;
@@ -1311,15 +1319,16 @@ int main  (int argc, char * argv [])
 	       GlobalScore=((REAL)score)/((REAL)abs(fin-deb));
 
 	       overlap=0;
-// Reconstruction GAPS -> INTRONS
-	       if ( (strcmp(ProtId,PProtId) == 0) &&  (abs(PProtFin-ProtDeb)<= (MaxOverlap)) ){
-// Detection d'un INTRON
+	       // Reconstruction GAPS -> INTRONS
+	       if ( (strcmp(ProtId,PProtId) == 0) &&
+		    (abs(PProtFin-ProtDeb)<= (MaxOverlap)) ) {
+		 // Detection d'un INTRON
 		 overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
-// overlap >0 : hits chevauchants, overlap <0 : hits espaces
+		 // overlap >0 : hits chevauchants, overlap <0 : hits espaces
 		 if ((deb-Pfin+overlap) >= MinLength[8] ){
-// Le tableau des introns est rempli prudemment: uniquement les bordures, et sans serrer pres de l'exon.
-		   for (i= Pfin-(overlap<0)*overlap ; i< Pfin+MinLength[8]-abs(overlap) ; i++){
-// debut de l'intron seulement... (dont le score est fonction de l'exon precedent)
+		   // Le tableau des introns est rempli prudemment: uniquement les bordures, et sans serrer pres de l'exon. 
+		   for (i= Pfin-(overlap<0)*overlap ; i< Pfin+MinLength[8]-abs(overlap) ; i++) {
+		     // debut de l'intron seulement... (dont le score est fonction de l'exon precedent)
 		     if (BlastS[level] >= ProtMatchLevel[i]){
 		       if (BlastS[level] > ProtMatchLevel[i]){
 			 ProtMatchLevel[i]= BlastS[level];
@@ -1337,14 +1346,14 @@ int main  (int argc, char * argv [])
 		     //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 		   }
 		   for (i = deb-MinLength[8]+abs(overlap) ; i < deb+(overlap<0)*overlap ; i++){
-// ...et fin de l'intron (score est fonction de l'exon actuel)
+		     // ...et fin de l'intron (score est fonction de l'exon actuel)
 		     if (BlastS[level] >= ProtMatchLevel[i]){
 		       if (BlastS[level] > fabs(ProtMatchLevel[i])){
 			 ProtMatchLevel[i]= BlastS[level];
 			 ProtMatch[i]= -GlobalScore;
 			 ProtMatchPhase[i]=0;
 		       }
-		       else{
+		       else {
 			 if (PGlobalScore > fabs(ProtMatch[i])){
 			   ProtMatch[i]= -GlobalScore;
 			   ProtMatchPhase[i]= 0;
