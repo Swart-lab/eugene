@@ -1,16 +1,5 @@
 #include "MSensor.h"
-#include "SensorEuStop.h"
-#include "SensorNStart.h"
-#include "SensorNG2.h"
-#include "SensorSPred.h"
-#include "SensorMarkov.h"
-#include "SensorBlastX.h"
-#include "SensorRepeat.h"
-#include "SensorRiken.h"
-#include "SensorUser.h"
-#include "SensorEst.h"
-
-
+#include <strings.h>
 
 inline bool Prior(const UseSensor *A, const UseSensor *B)
 { return(A->Priority < B->Priority); }
@@ -74,53 +63,45 @@ void MasterSensor :: InitMaster ()
   int  val_prior;
   int i;
   
+  // On récupère les couples nom de sensor/priorité du .par
   while(PAR.getUseSensor(&key_name, &val_prior))
     msList.push_back(new UseSensor(val_prior, key_name));
 
+  // On les tri
   sort(msList.begin(), msList.end(), Prior);
   
-  for(i=0;i<(int)msList.size();i++) {
-    if(!strcmp(msList[i]->Name, "sensor.EuStop") && msList[i]->Priority != 0) {
-      theSensors.push_back(new SensorEuStop());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.NStart") && msList[i]->Priority != 0) {
-      theSensors.push_back(new SensorNStart());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.NG2") && msList[i]->Priority != 0) {
-      theSensors.push_back(new SensorNG2());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.SPred") && msList[i]->Priority != 0) {
-      theSensors.push_back(new SensorSPred());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.Markov") && msList[i]->Priority != 0) {
-      theSensors.push_back(new SensorMarkov());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.BlastX") && msList[i]->Priority != 0) {
-      if(PAR.getI("blastopt"))
-	theSensors.push_back(new SensorBlastX());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.Repeat") && msList[i]->Priority != 0) {
-      if(PAR.getI("ncopt"))
-	theSensors.push_back(new SensorRepeat());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.Riken") && msList[i]->Priority != 0) {
-      if(PAR.getI("raflopt"))
-	theSensors.push_back(new SensorRiken());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.User") && msList[i]->Priority != 0) {
-      if(PAR.getI("userinfo"))
-	theSensors.push_back(new SensorUser());
-    }
-    else if(!strcmp(msList[i]->Name, "sensor.Est") && msList[i]->Priority != 0) {
-      if(PAR.getI("estopt"))
-	theSensors.push_back(new SensorEst());
-    }
-    else if(msList[i]->Priority == 0)
-      fprintf(stderr,"WARNING: Ignored information : %s\n", msList[i]->Name);
-    else
-      fprintf(stderr,"WARNING: Unknown information : %s\n", msList[i]->Name);
+  // Liste des plugins devant se trouver dans ./PLUGINS
+  soList  = new char*[(int)msList.size()];
+  // Liste des plugins à utiliser (key pour attaquer PAR)
+  useList = new char*[(int)msList.size()];
+  
+  for(i=0; i<(int)msList.size(); i++) {
+    soList[i] = new char[FILENAME_MAX+1];
+    strcpy(soList[i], "./PLUGINS/");
+    strcat(soList[i], msList[i]->Name);
+    strcat(soList[i], ".so");
+    useList[i] = new char[FILENAME_MAX+1];
+    strcpy(useList[i], msList[i]->Name);
+    strcat(useList[i], ".use");
   }
-  msList.clear();
+  
+  // On indique les plugins ignorés
+  int nb0 = 0;
+  while (msList[nb0]->Priority == 0) {
+    fprintf(stderr,"WARNING: Ignored information : %s\n", msList[nb0]->Name);
+    nb0++;
+  }
+  
+  dllList = new (DLLFactory *)[(int)msList.size()];
+  
+  for(i=nb0; i<(int)msList.size(); i++) {
+    if(PAR.getI(useList[i])) {
+      dllList[i] = new DLLFactory ( soList[i] );
+      if(dllList[i]->factory)
+	theSensors.push_back( dllList[i]->factory->CreateSensor() );
+      else fprintf(stderr,"WARNING: Plugin not valid or not found : %s\n",soList[i]);
+    }
+  }
 }
 
 // ------------------------
@@ -128,9 +109,8 @@ void MasterSensor :: InitMaster ()
 // ------------------------
 void MasterSensor :: InitSensors (DNASeq *X)
 {
-  for(int i=0; i<(int)theSensors.size(); i++) {
+  for(int i=0; i<(int)theSensors.size(); i++)
     theSensors[i]->Init(X);
-  }
 }
 
 // --------------------------
@@ -143,7 +123,7 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
   for(i=0; i<13; i++) d->ContentScore[i] = 0.0;
 
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
-
+  
   for(i=0; i<(int)theSensors.size(); i++) {
     theSensors[i]->GiveInfo(X, pos, d);
   }

@@ -8,6 +8,7 @@
 #include "BStrArray.h"
 #include "Param.h"
 #include "Const.h"
+#include "Dll.h"
 
 /*************************************************************
  **                        UseSensor                        **
@@ -33,7 +34,10 @@ class MasterSensor
  private:
   std::vector <UseSensor*> msList;
   std::vector <Sensor*>    theSensors;
-
+  char **soList;
+  char **useList;
+  DLLFactory **dllList;
+  
  public:
   MasterSensor  ();
   ~MasterSensor ();
