@@ -1,56 +1,34 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#define  TRUE  1
-#define  FALSE 0
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define MAX(x, y) (((x) < (y)) ? (y) : (x))
+#define myassert(x) assert(x)
+//#define myassert(x)
 
-inline FILE *FileOpen(const char *defdir, const char *filename, const char *mode)
+
+template<class T>
+inline T Min(T x, T y)
 {
-  FILE  *fp;
-  char buffer[FILENAME_MAX];
-  
-  if ((fp = fopen(filename, mode)))
-    return fp;
-  
-  if (defdir) {
-    strcat(strcat(strcpy(buffer, defdir), "/"), filename);
-    fp = fopen (buffer, mode);
-  }
-  
-  if  (!fp) {
-    fprintf (stderr, "ERROR:  Could not open file %s \n", filename);
-    exit (1);
-  }  
-  return  fp;
+  if (x < y) return x;
+  else
+    return y;
 }
 
-// Malloc sur
-inline void *  MyMalloc(size_t Len)     
+template<class T>
+inline T Max(T x, T y)
 {
-  void  *Ptr;
-  
-  if  (!(Ptr = malloc (Len))) {
-    fprintf (stderr, "ERROR:  malloc failed\n");
-    exit (1);
-  }
-  return  Ptr;
+  if (x < y) return y;
+  else
+    return x;
 }
 
-// Realloc sur
-
-inline void *  MyRealloc(void *Or, size_t Len)
-{
-  void  *Ptr;
-  
-  if  (!(Ptr = realloc (Or, Len))) {
-    fprintf (stderr, "ERROR:  realloc failed\n");
-    exit (1);
-  }  
-  return Ptr;
-}
-
+FILE *FileOpen(const char *defdir, const char *filename, const char *mode);
+void *  Safe_malloc  (size_t Len);
+void *  Safe_realloc  (void * Q, size_t Len);
+int GetIArg(char *arg, int *value, int dft);
+int GetDArg(char *arg, double *value, double dft);
 
 #endif

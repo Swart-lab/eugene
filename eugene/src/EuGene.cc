@@ -24,6 +24,9 @@
 // remettre Frameshifts
 // alignement cds cDNA et proteines sur les splice sites
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,36 +36,30 @@
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
-#ifdef __sun
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#else
 #include "getopt.h"
+#endif
+#ifdef STDC_HEADERS
+#include <string.h>
+#else
 #include <strings.h>
 #endif
-#ifdef __linux__
-#include <getopt.h>
-#include <string.h>
-#endif
+#include "Const.h"
 
 //#define STAND 1
 
 #define DFT_MATRIX          "default.mat"
-//#define REAL double
-#define REAL float
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
 #endif
 
-#define NORM(x,n) (((n)+(MAX(-(n),x)))/(n))
 
 //#define SpliceNOnly
 //#define SplicePOnly
 // ------------------ Globals ---------------------
-const int  MODEL_LEN = 9;
-const int  SIMPLE_MODEL_LEN = 6;
-const int  ALPHABET_SIZE = 4;
-const double NINFINITY = log(0.0);
-const int PredWidth = 2;
-
 // Les Hits EST
 
 const char HitForward    = 0x1;
@@ -85,10 +82,9 @@ const char NotAHit       = MLeft | MRight | Gap;
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
-const short int State2Phase[13] = {1,2,3,-1,-2,-3,4,4,4,-4,-4,-4,0};
 
 double Score [9],NScore[9];
-long int Data_Len;
+int Data_Len;
 int normopt,blastopt,estopt;
 int window, offset,graph,resx,resy;
 int    gfrom,gto,golap,glen;
@@ -97,13 +93,13 @@ extern char     *optarg;
 extern int      optind;
 
 #include "System.h"
-#include "gene.h"
+#include "DNASeq.h"
 #include "Stop.h"
 #include "BStrArray.h"
 #include "EuIMMScoreAS.h"
-#include "ArgDecode.h"
 #include "EuStart.h"
 #include "BackP.h"
+#include "Plot.h"
 #ifdef SplicePOnly
 #include "SpliceP.h"
 #else
@@ -177,81 +173,6 @@ char ph06(char p)
 // -------------------------------------------------------------------------
 // sortie graphique
 // -------------------------------------------------------------------------
-void PlotPredictions(char *Choice,REAL *BaseScore[9], 
-		     unsigned char *Stop[2],REAL *Start[2],
-		     REAL *Acc[2], REAL *Don[2])
-{
-  static double LScore[9] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0,-1.0,-1.0};  
-  int i,j,p;
-
-  for (i=0; i<Data_Len; i++)
-    PlotBarI(i,State2Phase[Choice[i]],0.4,PredWidth,1);
-  
-  for (j = 0 ; j < 9 ; j++)
-    NScore [j] = 0.0;
-  
-  for (j = 0 ; j < 9 ; j++)
-    for (i = 0; i < window/2; i++)
-      NScore [j] += log(BaseScore[j][i]);
-
-  for (i=0; i<Data_Len; i++)
-    {
-      if (i-window/2 >= 0)
-	for (j = 0 ; j < 9 ; j++)
-	  NScore [j] -= log(BaseScore[j][i-window/2]);
-      
-      if (i+window/2 < Data_Len)
-	for (j = 0 ; j < 9 ; j++)
-	  NScore [j] += log(BaseScore[j][i+window/2]);
-      
-      for (j = 0 ; j < 9 ; j++) Score[j] = NScore[j];
-      
-      AmplifyScore(Score,normopt);
-      
-      if (LScore[0] < 0) for (j = 0 ; j < 9 ; j++) LScore[j] = Score[j];
-
-      p = ((i == 0) ? 0 : i-1);
-      
-      PlotLine(p,i, 1, 1,LScore[0],Score[0],3);
-      PlotLine(p,i, 2, 2,LScore[1],Score[1],3);
-      PlotLine(p,i, 3, 3,LScore[2],Score[2],3);
-      PlotLine(p,i,-1,-1,LScore[3],Score[3],3);
-      PlotLine(p,i,-2,-2,LScore[4],Score[4],3);
-      PlotLine(p,i,-3,-3,LScore[5],Score[5],3);
-      PlotLine(p,i, 4, 4,LScore[6],Score[6],3);
-      PlotLine(p,i,-4,-4,LScore[7],Score[7],3);
-      PlotLine(p,i, 0, 0,LScore[8],Score[8],3);
-      
-      for (j = 0 ; j < 9 ; j++) LScore[j] = Score[j];
-    }
-
-  for (i=0; i<Data_Len; i++)
-    {
-      if (Stop[0][i]) 
-	PlotBarF(i,(i%3)+1,0.1,0.2,1);
-      
-      if (Stop[1][i+1]) 
-	PlotBarF(i,-((Data_Len-i-1)%3)-1,0.1,0.2,1);
-      
-      if (Start[0][i] > 0.0) 
-	PlotBarF(i,(i%3)+1,0.5,NORM(log(Start[0][i]),4),2);
-      
-      if (Start[1][i+1] > 0.0) 
-	PlotBarF(i,-((Data_Len-i-1)%3)-1,0.5,NORM(log(Start[1][i+1]),4),2);
-      
-      if (Acc[0][i] > 0.0) 
-	PlotBarF(i,4,0.5,NORM(log(Acc[0][i]),20),4);
-      
-      if (Acc[1][i+1] > 0.0) 
-	PlotBarF(i,-4,0.5,NORM(log(Acc[1][i+1]),20),4);
-
-      if (Don[0][i] > 0.0) 
-	PlotBarF(i,4,0.5,NORM(log(Don[0][i]),20),5);
-      
-      if (Don[1][i+1] > 0.0) 
-	PlotBarF(i,-4,0.5,NORM(log(Don[1][i+1]),20),5);
-    }    
-}
 
 // -------------------------------------------------------------------------
 //            MAIN
@@ -264,15 +185,12 @@ int main  (int argc, char * argv [])
   REAL             *Don[2],*Acc[2];
   unsigned char    *Stop[2];
   unsigned char    *ESTMatch;
-  long int         Input_Size;
-  double           Ch_Ct[ALPHABET_SIZE] = {0.0};
   BString_Array    *IMMatrix[5];
   char             clef[20];
-  char             *Data;
+  DNASeq           *TheSeq;
   char             printopt;
   char             matname[FILENAME_MAX+1], tempname[FILENAME_MAX+1], fstname[FILENAME_MAX+1];
   char             grname[FILENAME_MAX+1];
-  char             seqname[MAX_LINE];
   int              EstM;
   double           FsP,StartP,StartB,StopP;
   double           AccP,AccB,DonP,DonB,BlastS[3],EstP;
@@ -295,6 +213,7 @@ int main  (int argc, char * argv [])
   window  = 97;               // window length
   printopt = 'l';             // short print format 
   offset = 0;                 // no offset
+
   ExonPrior = 0.33;
   IntronPrior = 0.17;
   InterPrior = 0.5;
@@ -466,10 +385,7 @@ int main  (int argc, char * argv [])
     (void) strcpy(fstname, argv[sequence]);
     
     // read fasta file
-  
-  Input_Size = INIT_SIZE;
-  Data  = (char *) MyMalloc(Input_Size);
-  
+    
   fp = (*fstname ? FileOpen (NULL,fstname, "r") : stdin);
   
   if (fp == NULL) {
@@ -480,42 +396,16 @@ int main  (int argc, char * argv [])
   fprintf(stderr,"Loading sequence...");
   fflush(stderr);
   
-  Read_String (fp, Data, Input_Size, seqname, FALSE);
-
-  Data += 1;
-  Data_Len = strlen(Data);
-  fprintf(stderr,"%s, %ld bases read\n",seqname, Data_Len);
+  TheSeq = new DNASeq(fp);
 
   if (fp != stdin) fclose(fp);
   
-  Ch_Ct[0] =  Ch_Ct [1] = Ch_Ct [2] = Ch_Ct [3] = 0.0;
+  Data_Len = TheSeq->SeqLen;
 
-  for  (i = 0;  i < Data_Len;  i ++)
-    {
-      Data [i] = Filter (tolower (Data [i]));
-      switch  (Data [i])
-        {
-	case  'a' :
-	case  't' :
-	  Ch_Ct [0] += 1.0;
-	  break;
-	case  'c' :
-	case  'g' :
-	  Ch_Ct [1] += 1.0;
-	  break;
-        }
-    }
-  
-  Ch_Ct [2] = Ch_Ct [1];
-  Ch_Ct [3] = Ch_Ct [0];
-  
-  for  (i = 0;  i < 4;  i ++)
-    Ch_Ct [i] = Ch_Ct [i] / (2.0 * Data_Len);
-  
-  fprintf (stderr,"GC Proportion = %.1f%%\n", 200.0 * Ch_Ct [1]);
-  
-  for  (i = 0;  i < 4;  i ++)
-    Ch_Ct [i] = log (Ch_Ct [i]);
+  fprintf(stderr,"%s, %d bases read\n",TheSeq->Name, Data_Len);
+
+  fprintf (stderr,"GC Proportion = %.1f%%\n", 
+	   (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
 
   for (i = 0;  i < 9;  i ++)
     BaseScore[i] = new REAL[Data_Len+1];
@@ -536,7 +426,7 @@ int main  (int argc, char * argv [])
   Don[0] = new REAL[Data_Len+1];
   Don[1] = new REAL[Data_Len+1];
   
-  Find_Stop_Codons(Data, Data_Len, Stop);
+  Find_Stop_Codons(TheSeq, Stop);
 
   fprintf(stderr, "Reading start files...");
   fflush(stderr);
@@ -587,14 +477,7 @@ int main  (int argc, char * argv [])
   fprintf(stderr, "Computing coding probabilities...");  
   fflush(stderr);
   
-  for  (i = 0 ; i < Data_Len ; i++)
-    {
-      Simple_Score (Data, i, Data_Len,
-		    IMMatrix, Score);
-            
-      for (j = 0;  j < 9;  j ++)
-	BaseScore[j][i] = Score[j];
-    }
+  Fill_Score(TheSeq,IMMatrix,BaseScore);
 
   for (j = 0;  j < 9;  j ++)
     BaseScore[j][Data_Len] = 1.0;
@@ -706,12 +589,14 @@ int main  (int argc, char * argv [])
     }
   else
 
-  if (!PorteOuverte) {
-    printf("\nThis version of EuGene cannot be executed\n");
-    printf("Contact the author tschiex@toulouse.inra.fr\n");
-    printf("and ask for a free license key\n");
-    exit(2);
-  }
+    if (!PorteOuverte && Data_Len > 6000) 
+      {
+	printf("Valid license key not found ! The software is therefore limited to 6kb long\n");
+	printf("sequences. Please contact Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
+	printf("license key.\n");
+	
+	exit(2);
+      }
   
   /* Blastn against EST */
 
@@ -851,14 +736,6 @@ int main  (int argc, char * argv [])
 
     PrevBP[20] = LBP[12]->StrictBestUsable(i,MinIgFlow,&PBest[20]);
     PrevBP[21] = LBP[13]->StrictBestUsable(i,MinIgConv,&PBest[21]);
-
-
-    //    printf("%d ",i);
-    //    for (k = 0; k < 19; k++)
-    //      printf("%f ",PBest[k]);
-    //    printf("%f ",MAX(PBest[18],PBest[19]));
-    //    printf("\n");
-	
 
     // Codant en forward
     for (k = 0; k<3; k++) {
@@ -1146,21 +1023,20 @@ int main  (int argc, char * argv [])
   
   for  (i = 0;  i < 14;  i ++) LBP[i]->Zap();
 
-  if (!PorteOuverte) {
+  if (!PorteOuverte && Data_Len > 6000) 
     exit(2);
-  }
   
   fprintf(stderr,"Optimal path length = %#f\n",maxi);
 
-  if (graph) PlotPredictions(Choice,BaseScore,Stop,Start,Acc,Don);
+  if (graph) PlotPredictions(Data_Len,window,normopt,Choice,BaseScore,Stop,Start,Acc,Don);
 
 #include "Output.h"
 
   // free used memory
   if (graph) ClosePNG();
 
-  delete (Data-1);
-    
+  delete TheSeq;
+  
   delete Stop[0];
   delete Stop[1];
 

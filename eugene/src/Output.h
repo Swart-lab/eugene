@@ -25,8 +25,7 @@ if (printopt == 'd')
 	 
       AmplifyScore(Score,normopt);
       
-      printf("%6d %c%c ", offset+1+i, Filter(tolower(Data[i])),
-	     Filter(tolower(Complement(Data[i]))));
+      printf("%6d %c%c ", offset+1+i, (*TheSeq)[i],(*TheSeq)(i));
       
       PrintPhase(Choice[i+1]);
       
@@ -39,7 +38,7 @@ if (printopt == 'd')
 	printf("  - ");
       
       if (Stop[1][i+1])
-	printf(" %2ld ", -((Data_Len-i-1)%3)-1);
+	printf(" %2d ", -((Data_Len-i-1)%3)-1);
       else
 	printf("  - ");
       
@@ -49,7 +48,7 @@ if (printopt == 'd')
 	printf("  -   - ");
       
       if (Start[1][i+1] > 0.0)
-	printf(" %2ld %4.1f",-((Data_Len-i-1)%3)-1,Start[1][i+1]);
+	printf(" %2d %4.1f",-((Data_Len-i-1)%3)-1,Start[1][i+1]);
       else
 	printf("  -   - ");
       
