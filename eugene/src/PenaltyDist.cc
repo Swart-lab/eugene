@@ -101,9 +101,14 @@ double PenaltyDist :: MinPen(int len)
 // ----------------------------------------------------------------
 void PenaltyDist :: LoadPenaltyDist(char *FileName)
 {
-  FILE* Handle = FileOpen(PAR.getC("EuGene.PluginsDir"), FileName,"r");
+  FILE* Handle;
   int FirstLen,Len,LastLen;
   double FirstPen,Pen,LastPen;
+  char *DirName = new char[FILENAME_MAX+1];
+
+  strcpy(DirName, PAR.getC("eugene_dir"));
+  strcat(DirName, MODELS_DIR);
+  Handle = FileOpen(DirName, FileName,"r");
 
   Distribution.clear();
   
@@ -142,6 +147,8 @@ void PenaltyDist :: LoadPenaltyDist(char *FileName)
   Normalize();
 
   fclose(Handle);
+
+  delete [] DirName;
 }
 // ----------------------------------------------------------------
 //  Default destructor.

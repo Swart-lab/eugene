@@ -17,20 +17,15 @@
 # Contents: compilation of the src directory
 # ------------------------------------------------------------------
 
-AUTOMAKE_OPTIONS = dejagnu
-
 
 SUBDIRS = Parametrization GDIF . SensorPlugins
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 bin_PROGRAMS = eugene
 eugene_SOURCES = EuGene.cc Output.cc Output.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h
-eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl 
+eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl
 
-
-export host_alias = @host@
-TEST = 
-RUNTESTDEFAULTFLAGS =  --tool TestSuite --srcdir ../Test --objdir . --outdir ../Test/TestTrace $(TEST)
 
 CLEANFILES = *~

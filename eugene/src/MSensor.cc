@@ -69,11 +69,11 @@ MasterSensor :: ~MasterSensor (void)
   // Need to be commented because a segmentation fault sometimes occured 
   // for example in Units tests
   // delete created instances with new
-  //unsigned int i;
-  //for(i=0; i<theSensors.size(); i++) delete theSensors[i];
-  //theSensors.clear();
-  //for(i=0; i<dllList.size(); i++) delete dllList[i];
-  //dllList.clear();
+  // unsigned int i;
+  // for(i=0; i<theSensors.size(); i++) delete theSensors[i];
+  // theSensors.clear();
+  // for(i=0; i<dllList.size(); i++) delete dllList[i];
+  // dllList.clear();
 }
 
 // ------------------------
@@ -90,7 +90,7 @@ void MasterSensor :: InitMaster (DNASeq *X)
   std::string use_name;
 
   if (!IsInitialized) {
-    PluginsDir = PAR.getC("EuGene.PluginsDir");
+    PluginsDir = (std::string)PAR.getC("eugene_dir")+"/"+PLUGINS_DIR+"/";
 
     // On récupère les couples nom de sensor/priorité du .par
     PAR.ResetIter();

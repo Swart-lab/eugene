@@ -36,27 +36,31 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   int  trunclen  = PAR.getI("Output.truncate");
   int  stepid    = PAR.getI("Output.stepid");
   char nameformat[20];
-  
+  char *html_dir = new char[FILENAME_MAX+1];
+
+  strcpy(html_dir, PAR.getC("web_dir"));
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
   else strcpy(nameformat,"%s");
 
   if (printopt0 == 'h') {
     if (sequence == optind) {   // -ph && first seq
-      StartHTML();
-      OutputHTMLFileNames(1);
+      StartHTML(html_dir);
+      OutputHTMLFileNames(1, html_dir);
       vhtml.push_back("				  </select>\n"
 		      "				</td>\n"
 		      "				<td width=\"100\" "
 		      "align=\"center\"\n"
 		      "				    bgcolor=\"#c0dbe2\">\n"
-		      "				  <img src=\"WEB/Images/"
-		      "next.jpg\"\n"
+		      "				  <img src=\""
+		      + (std::string)html_dir +
+		      "/Images/next.jpg\"\n"
 		      "				       onclick=\"next();\"\n"
 		      "				       title=\"Next\" "
 		      "align=\"middle\">\n"
 		      "				  &nbsp; &nbsp; &nbsp;\n"
-		      "				  <img src=\"WEB/Images/"
-		      "last.jpg\"\n"
+		      "				  <img src=\""
+		      + (std::string)html_dir +
+		      "/Images/last.jpg\"\n"
 		      "				       onclick=\"last();\"\n"
 		      "				       title=\"Jump to end\" "
 		      "align=\"middle\">\n");
@@ -82,7 +86,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		      "width=\"100%%\""
 		      " cellpadding=\"2\" cellspacing=\"1\">\n");
     }
-    else OutputHTMLFileNames(0);
+    else OutputHTMLFileNames(0, html_dir);
   }
   
   if (printopt0 == 'd') {
@@ -562,12 +566,13 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   if (printopt0 == 'h'  &&  sequence+1 == argc) {   // -ph && last seq
     EndHTML();
   }
+  delete [] html_dir;
 }
 
 //-------------------------------------------------
 // -ph print on stdout the begin of the HTML output
 //-------------------------------------------------
-void StartHTML() {
+void StartHTML(char* html_dir) {
   char *d = new char[MAX_LINE];  GetStrDate(d);
 
   printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
@@ -575,9 +580,9 @@ void StartHTML() {
 	 "  <head>\n"
 	 "    <title>EuGène : Prediction</title>\n"
 	 "    <link rel=\"STYLESHEET\" type=\"text/css\" "
-	 "href=\"WEB/Style/eugene.css\">\n\n"
+	 "href=\"%s/Style/eugene.css\">\n\n"
 	 "    <script language=\"JavaScript1.2\" "
-	 "src=\"WEB/Javascripts/diap.js\">\n"
+	 "src=\"%s/Javascripts/diap.js\">\n"
 	 "    </script>\n"
 	 "  </head>\n\n"
 	 "  <body leftmargin=\"0\" topmargin=\"0\" marginwidth=\"0\" "
@@ -587,14 +592,14 @@ void StartHTML() {
 	 "CELLSPACING=\"0\" CELLPADDING=\"0\"\n"
 	 "	   border=\"0\" rows=\"2\">\n"
 	 "	<tr height=\"140\">\n"
-	 "	  <td BACKGROUND=\"WEB/Images/top.jpg\" "
+	 "	  <td BACKGROUND=\"%s/Images/top.jpg\" "
 	 "colspan=\"2\" height=\"140\"\n"
 	 "	      valign=\"top\">&nbsp;</td>\n"
 	 "	</tr>\n"
 	 "	<tr>\n"
          "	  <td width=\"145\" valign=\"top\" align=\"left\"\n"
-	 "	      BACKGROUND=\"WEB/Images/left.jpg\">\n"
-	 "	    <img src=\"WEB/Images/left.jpg\" "
+	 "	      BACKGROUND=\"%s/Images/left.jpg\">\n"
+	 "	    <img src=\"%s/Images/left.jpg\" "
 	 "width=\"145\" height=\"10\"></td>\n"
 	 "	  <td width=\"100%%\" valign=\"top\">\n\n"
 	 "	    <!-- DEBUT PAGE... -->\n"
@@ -605,8 +610,11 @@ void StartHTML() {
 	 "                </tr>\n"
 	 "                <tr>\n"
 	 "                  <td colspan=\"2\"> "
-	 "<img src=\"WEB/Images/euGpred_on.jpg\">\n"
-	 "<br><a href=\"http://www.inra.fr/bia/T/EuGene/index.html\">eugene</a> "
+	 "<img src=\"%s/Images/euGpred_on.jpg\">\n",
+	 html_dir,html_dir,html_dir,
+	 html_dir,html_dir,html_dir);
+
+	 printf("<br><a href=\"http://www.inra.fr/bia/T/EuGene/index.html\">eugene</a> "
 	 "%s for %s, %s, %d sequence(s) <br> </td>\n"
 	 "                </tr>\n"
 	 "                <tr>\n"

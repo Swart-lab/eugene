@@ -38,14 +38,30 @@ int TestDArg(char *arg)
     return  (sscanf(arg, "%lf", &tmp) == 1) && (tmp >= 0);
 }
 
-
 // ------------------------
 //  initParam.
 // ------------------------
 void Parameters :: initParam (int argc, char * argv[])
 {
+  char *key, *val = NULL;
+  key = new char[FILENAME_MAX+1];
+  val = new char[FILENAME_MAX+1];
+  char *key2, *val2 = NULL;
+  key2 = new char[FILENAME_MAX+1];
+  val2 = new char[FILENAME_MAX+1];
+
   fprintf(stderr,"EuGene rel. %s ",VERSION);
   fflush(stderr);
+
+  // store in the map the eugene directory
+  strcpy(key,"eugene_dir");
+  if (EUGENE_DIR == NULL) 
+    m["eugene_dir"] = DEFAULT_EUGENE_DIR;
+  else 
+    m["eugene_dir"] = EUGENE_DIR;
+  strcpy(val, getC("eugene_dir"));
+  strcat(val,"/");
+  m[key] = val;
 
   UpdateParametersFileName(argc, argv);
   ReadPar((std::string) getC("parameters_file"));
@@ -60,6 +76,13 @@ void Parameters :: initParam (int argc, char * argv[])
   fprintf(stderr,"- %s -\n",getC("EuGene.organism"));
   fprintf(stderr,"Parameters file loaded.\n");
   if (getI("EuGene.sloppy")) fprintf(stderr,"WARNING: Sloppy mode selected.\n");
+  strcpy(key2,"web_dir");
+  if (!strcmp(getC("Output.webdir"),"LOCAL")) {
+    strcpy(val2, getC("eugene_dir"));
+    strcat(val2,WEB_DIR);
+  } else 
+    strcpy(val2, getC("Output.webdir"));
+  m[key2] = val2;
 }
 
 // ---------------------------------------------------
@@ -71,7 +94,7 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
   char *key, *val;
   key = new char[FILENAME_MAX+1];
   val = new char[FILENAME_MAX+1];
-  std::string name = (std::string)argv[0] + ".par";
+  std::string name = "";
 
   while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
     switch (carg) {
@@ -81,6 +104,9 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
     }
   }
   
+  if (name == "") 
+    name = ((std::string) getC("eugene_dir"))+"/"+DEFAULT_PARA_FILE;
+
   strcpy(key,"parameters_file");
   strcpy(val, name.c_str());
   m[key] = val;
@@ -530,17 +556,21 @@ Parameters :: ~Parameters ()
 std::string Parameters::WriteParam (std::vector<std::string> para_name, 
 				    std::vector<double> para_val)
 {
-  FILE   *fp, *fp_opti;
+  FILE *fp, *fp_opti;
   char line[MAX_LINE], new_line[MAX_LINE];
   char key[MAX_LINE], val[MAX_LINE];
   char filename[FILENAME_MAX+1];
-  unsigned int i;
   bool find_para;
   char *d = new char[MAX_LINE];
+  std::string s; unsigned int i;
 
   strcpy(filename, getC("parameters_file"));
   fp = FileOpen(NULL,filename,"r");
 
+  // write the new file in the current repertory
+  s = (std::string) filename; i = s.rfind("/");
+  if (i != std::string::npos) s = s.substr(i+1,s.length());
+  strcpy(filename, s.c_str());
   strcat(filename, ".");
   GetStrDate(d);
   strcat(filename, d);

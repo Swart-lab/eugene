@@ -18,7 +18,7 @@
 // ------------------------------------------------------------------
 
 #ifdef HAVE_CONFIG_H
-#include "../config.h"
+#include <config.h>
 #endif
 
 #include <sstream>
@@ -38,7 +38,7 @@ void Output (DNASeq *, MasterSensor *, Prediction *, int sequence,
 	     int argc, char * argv[], FILE* f);
 
 // -ph print on stdout the begin of the HTML output
-void StartHTML();
+void StartHTML(char* html_dir);
 
 // -ph print on stdout the end of the HTML output
 void EndHTML();
