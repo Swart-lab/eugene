@@ -50,3 +50,10 @@ EXTRA_DIST = reconf configure  config/* CREATE_LINKS \
 SUBDIRS = src doc
 
 CLEANFILES = *~
+
+# the files to distribute are automatically found by Automake: 
+# all source files are automatically included in a distribution
+# the following line avoids to have lex.c and yacc.c 
+# in the gzip'd tar file for distribution
+dist-hook:
+	rm $(distdir)/src/SensorPlugins/User/*.c
