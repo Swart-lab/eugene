@@ -12,7 +12,7 @@
 #include <string.h>
 #endif
 
-#define REAL double
+#define REAL float
 
 #define LMargin 20
 #define RMargin 20
@@ -222,3 +222,4 @@ void OutputHTMLFileNames()
   }
   printf("</center>\n");
 }
+
