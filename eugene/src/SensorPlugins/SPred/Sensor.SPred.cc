@@ -186,7 +186,7 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
   if((iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR+1] >= pos) ||
      (iAccR > -1                    &&  vPosAccR[iAccR]   <  pos))
     {
-      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, greater<int>());
+      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, std::greater<int>());
       if(*iter == pos) {
 	d->sig[DATA::Acc].weight[Signal::Reverse] += log(vValAccR[iter-vPosAccR.begin()]);
 	d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-vValAccR[iter-vPosAccR.begin()]);
@@ -224,7 +224,7 @@ void SensorSPred :: GiveInfo (DNASeq *X,int pos, DATA *d)
   if((iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR+1] >= pos) ||
      (iDonR > -1                    &&  vPosDonR[iDonR]   <  pos))
     {
-      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, greater<int>());
+      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, std::greater<int>());
       if(*iter == pos) {
 	d->sig[DATA::Don].weight[Signal::Reverse] += log(vValDonR[iter-vPosDonR.begin()]);
 	d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-vValDonR[iter-vPosDonR.begin()]);

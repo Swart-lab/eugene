@@ -148,7 +148,7 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
   if((indexR < (int)vPosR.size()  &&  vPosR[indexR+1] >= pos) ||
      (indexR > -1                 &&  vPosR[indexR]   <  pos))
     {
-      iter = lower_bound(vPosR.begin(), vPosR.end(), pos, greater<int>());
+      iter = lower_bound(vPosR.begin(), vPosR.end(), pos, std::greater<int>());
       if(*iter == pos) { 
 	d->sig[DATA::Start].weight[Signal::Reverse] += log(vValR[iter-vPosR.begin()]);
 	d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[iter-vPosR.begin()]);
