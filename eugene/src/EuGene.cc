@@ -739,7 +739,7 @@ int main  (int argc, char * argv [])
   DNASeq *TheSeq;
   int    Data_Len;
   Prediction *pred;
-  char   *grnameFile = NULL;
+  char   grnameFile[FILENAME_MAX+1];
   char   grname[FILENAME_MAX+1];
   int    graph;
 
@@ -775,12 +775,13 @@ int main  (int argc, char * argv [])
 	  int glen      = PAR.getI("Output.glen");
       
 	  // Récupération du nom du fichier d'origine
-	  grnameFile = BaseName(PAR.getC("fstname"));
-	  
+	  strcpy(grnameFile, BaseName(PAR.getC("fstname")));
+	  if ( rindex(grnameFile, '.') != NULL )
+	    *rindex(grnameFile, '.') = 0;     // on enleve l'extension
+		  
 	  // Construction du nom de sortie (*.png)
 	  strcpy(grname, PAR.getC("Output.Prefix"));
 	  strcat(grname, grnameFile);
-	  *rindex(grname, '.') = 0;           // on enleve l'extension
 	  if(PAR.getC("grnameArg")[0]!='0') { // -ph sans -g ou -g NO pas d'arg
 	    strcat(grname,".");
 	    strcat(grname,PAR.getC("grnameArg"));
