@@ -1,1 +1,30 @@
+-------------------------------------------------------------------------------
+v3.1 released 2 Feb. 2005 
+-------------------------------------------------------------------------------
+	
+* new plugin PepSignal
+* new procedures:
+    - Procedures/Get/egn_compseq.pl (counts composition of dimer/trimer/etc words)
+    - Procedures/Get/getRepeat4eugene.pl (build .ig files)
+* new parameters defined:
+   - EuGene.sloppy: if 1 then some sensors files can be missing
+   - EuGene.SplicedStopPen: penalty for predicting genes containing in-frame spliced STOPs
+   - Output.MinCDSLen: specify the minimum length of CDS in nucleotid
+   - Est.MinDangling: minimum length of the first and last match region in a genomic spliced alignment
+   - EstMaxIntron: maximum length for the first and last gap (intron) in a spliced alignment
+   - SMachine.isScaled: indicates if prediction is scaled after fitsigmoid in SpliceMachine
+   - Tester.SPSN.Eval: defines the type of the considering signal
+* use of 1 and 0 instead of TRUE and FALSE in the parameters file (old values are still accepted)
+* new argument -A <parameter file name>
+* no more librairies are provided (they have to be on the system)
+* debug and improvement of the Est sensor (takes into account UTR introns), 
+  the Repeat sensor (exit if the .ig files contain overlapped or non sorted repeats)
+* modification of the compilation arguments
+* little modification of the HTML output
+* update in documentation
 
+
+-------------------------------------------------------------------------------
+v3.0 released 21 Oct. 2004 
+-------------------------------------------------------------------------------
+	
