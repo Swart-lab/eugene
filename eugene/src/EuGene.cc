@@ -26,10 +26,12 @@
 #include <cstdio>
 #include <cstdlib>
 
+#ifdef __APPLE__
 // MacOS-X kludge. cmath undefines these macros. Turn them into inlines 
 #include <math.h>
 inline int (isinf)(double r) { return isinf(r); }
 inline int (isnan)(double r) { return isnan(r); }
+#endif
 
 #include <cmath>
 #include <cctype>
