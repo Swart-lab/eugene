@@ -250,10 +250,10 @@ editing this file or for some values through flags in the command line (such as
 parameter file. The name of the parameter file that \EuGenie\ seeks is
 obtained by adding the suffix ``\texttt{.par}'' to the name of the
 \EuGenie\ command itself.  As it is distributed, \EuGenie\ command's
-name is \texttt{EuGeneAS} and accordingly the parameter file is
-\texttt{EuGeneAS.par}. If at some point you want to use several
+name is \texttt{eugene} and accordingly the parameter file is
+\texttt{eugene.par}. If at some point you want to use several
 different parameter files, you can simply use symbolic links to the
-\texttt{EuGeneAS} binary executable. Using a symbolic link, with a
+\texttt{eugene} binary executable. Using a symbolic link, with a
 specific name to call \EuGenie\ will enable you to load a different
 parameter file whose name is derived from the symbolic link name by
 ading `\texttt{`.par}'' The parameter file is first sought in the
@@ -274,7 +274,7 @@ dynamically loaded by \EuGenie\ according to the parameters.
 The typical call to \EuGenie\ is:
 
 \begin{Verbatim}[fontsize=\small]
-EuGeneAS <fasta files>
+eugene <fasta files>
 \end{Verbatim}
 
 where each FASTA file contains one single DNA sequence. In this cas,
@@ -300,15 +300,13 @@ the name of the parameter, the second is its value. Everything is case
 sensitive. The definition order is not important.
 
 \begin{itemize}
-\item \texttt{EuGene.key}: a key code that limit \EuGenie\ in IP space
-  and time. If the key is incorrect, EuGene will still work but will
-  be limited to less than 6kB long sequences.
-  
-\item \texttt{EuGene.versionPAR}: specifies the version of the
+\item \texttt{EuGene.version}: specifies the version of the
   parameter file. After having load the parameter file, EuGene checks
   that the parameter file version is consistent with the expected
   version.
-  
+
+\item \texttt{EuGene.organism}: name of the considered organism.
+   
 \item \texttt{EuGene.PluginsDir}: specify the location of the directory
   where plugins could be found (``\texttt{.so}'' files, sensor specific 
   models files); that is the path to the \texttt{PLUGINS} directory.
@@ -510,35 +508,35 @@ As the example show, it is equivalent to define the parameter
 
 We now descrive each plugin, its behavior and parameters.
 
-\input{../SensorPlugins/Transcript/Doc.tex}
-\input{../SensorPlugins/EuStop/Doc.tex}
-\input{../SensorPlugins/PatConst/Doc.tex}
-\input{../SensorPlugins/NStart/Doc.tex}
-\input{../SensorPlugins/ATGpr/Doc.tex}
-\input{../SensorPlugins/StartWAM/Doc.tex}
+\input{Doc_Transcript.tex}
+\input{Doc_EuStop.tex}
+\input{Doc_PatConst.tex}
+\input{Doc_NStart.tex}
+\input{Doc_ATGpr.tex}
+\input{Doc_StartWAM.tex}
 % A faire !
-\input{../SensorPlugins/SpliceWAM/Doc.tex}
-\input{../SensorPlugins/NG2/Doc.tex}
-\input{../SensorPlugins/SPred/Doc.tex}
-\input {../SensorPlugins/GSplicer/Doc.tex}
-\input {../SensorPlugins/IfElse/Doc.tex}
-\input {../SensorPlugins/FrameShift/Doc.tex}
-\input {../SensorPlugins/MarkovConst/Doc.tex}
-\input {../SensorPlugins/MarkovIMM/Doc.tex}
-\input {../SensorPlugins/MarkovProt/Doc.tex}
-\input {../SensorPlugins/Est/Doc.tex}
+\input{Doc_SpliceWAM.tex}
+\input{Doc_NG2.tex}
+\input{Doc_SPred.tex}
+\input {Doc_GSplicer.tex}
+\input {Doc_IfElse.tex}
+\input {Doc_FrameShift.tex}
+\input {Doc_MarkovConst.tex}
+\input {Doc_MarkovIMM.tex}
+\input {Doc_MarkovProt.tex}
+\input {Doc_Est.tex}
 % A faire !
-\input {../SensorPlugins/Riken/Doc.tex}
-\input {../SensorPlugins/BlastX/Doc.tex}
-\input {../SensorPlugins/Repeat/Doc.tex}
+\input {Doc_Riken.tex}
+\input {Doc_BlastX.tex}
+\input {Doc_Repeat.tex}
 % A faire !
-\input {../SensorPlugins/Homology/Doc.tex}
+\input {Doc_Homology.tex}
 % A faire !
-\input {../SensorPlugins/User/Doc.tex}
-\input {../SensorPlugins/GFF/Doc.tex}
-\input {../SensorPlugins/Plotter/Doc.tex}
-\input {../SensorPlugins/GCPlot/Doc.tex}
-\input {../SensorPlugins/Tester/Doc.tex}
+\input {Doc_User.tex}
+\input {Doc_GFF.tex}
+\input {Doc_Plotter.tex}
+\input {Doc_GCPlot.tex}
+\input {Doc_Tester.tex}
 
 
 
@@ -557,7 +555,7 @@ The value of some numerical plugins parameters (specified in the parameter file 
 \end{figure}
 
 The optimization can be lauched with the \texttt{-Z} argument \index{CmdFlags}{[parameters optimization] Z} on the command line or with the \texttt{ParaOptimization.Use} parameter set to \texttt{TRUE}.\\
-After updating the parameter file EuGeneAS.par (which sensors to use, ...), the software is lauched with the usual command line specifying in argument the sequences to consider. At the end, the software creates a new parameter file called \texttt{EuGeneAS.<date>.OPTI.par} (for example, \texttt{EuGeneAS.30Sep2003.OPTI.par}) with the new value for the optimized parameters.\\
+After updating the parameter file eugene.par (which sensors to use, ...), the software is lauched with the usual command line specifying in argument the sequences to consider. At the end, the software creates a new parameter file called \texttt{eugene.<date>.OPTI.par} (for example, \texttt{eugene.30Sep2003.OPTI.par}) with the new value for the optimized parameters.\\
 For parameters optimization, the inputs to be specified in the parameter file are:
 \begin{itemize}
 \item the parameters to optimize with their value domain,

@@ -1,0 +1,70 @@
+% Documentation of the  Repeat sensor
+
+\subsection{\texttt{Sensor.Repeat}}
+
+\paragraph{Description}
+
+The plugin allows to exploit the output of repeated sequences detector
+such as RepeatMasker by penalizing exonic, inronic or UTR states when
+repeats are detected.
+
+The sensor is activated by either :
+\begin{itemize}
+\item the \texttt{-r} argument \index{CmdFlags}{[Repeat activation] r}
+\item the value TRUE for the parameter \texttt{Sensor.Repeat.use} in the
+  parameter file.
+\end{itemize}
+The penalties used when a repeat exists are \texttt{Repeat.IntronPenalty},
+\texttt{Repeat.ExonPenalty} and \texttt{Repeat.UTRPenalty}
+respectively.
+
+Here is an example of Repeat parameters definition.
+\begin{Verbatim}[fontsize=\small]
+Repeat.UTRPenalty*      0.0
+Repeat.IntronPenalty*   0.1
+Repeat.ExonPenalty*     1.0
+Sensor.Repeat.use       TRUE    # Use Repeat sensor
+Sensor.Repeat           8       # Sensor priority
+\end{Verbatim}
+
+\paragraph{Input files format}
+
+The file with a \texttt{.ig} suffix is needed. Each line of the file
+contains the beginning and the end of aq region detected as a
+repeat. The positions must be sorted in increasing positions. Such a
+file can be obtained by eg. reformatting RepeatMasker output.
+
+Here is an extract from a typical \texttt{.ig} file:
+\begin{Verbatim}[fontsize=\small]
+4800    5006
+22494   22758
+22703   22772
+22841   23017
+22929   23017
+29433   29703
+[...]
+\end{Verbatim}
+
+\paragraph{Filtering input information}
+
+No filtering.
+
+\paragraph{Integration of information}
+
+For exonic, intronic and UTR tracks, all positions that occur in a
+repeat interval as reported in the \texttt{.ig} file are penalized
+suing the corresponding \texttt{Repeat.IntronPenalty},
+\texttt{Repeat.ExonPenalty} and \texttt{Repeat.UTRPenalty} penalties.
+
+\paragraph{Post analyse}
+
+No post analyse.
+
+\paragraph{Graph}
+
+Repeat intervals are visualized as grey blocks in the intergenic
+track.
+
+
+
+

@@ -1,0 +1,43 @@
+% Documentation of the FrameShift sensor
+
+\subsection{\texttt{Sensor.FrameShift}}
+
+\paragraph{Description}
+
+This plugin predicts possible frameshits (either insertions or
+deletions) at each position of the sequence with a uniform cost. The
+parameters \texttt{FrameShift.Ins} \texttt{FrameShift.Del} give the
+corresponding penalties.
+
+Here is an example of FrameShift parameters definition.
+\begin{Verbatim}[fontsize=\small]
+FrameShift.Ins*        1e999.0
+FrameShift.Del*        1e999.0
+Sensor.FrameShift.use  TRUE     # Use FrameShift sensor
+Sensor.FrameShift      1        # Sensor priority
+\end{Verbatim}
+
+\paragraph{Input files format}
+
+No input files  needed.
+
+\paragraph{Filtering input information}
+
+No filtering.
+
+\paragraph{Integration of information}
+
+All predictions that use a frameshift (going from one coding phase to
+another coding phase) are given an extra \texttt{FrameShift.Ins} or
+\texttt{FrameShift.Del} penalty according to the phase change.
+
+\paragraph{Post analyse}
+
+No post analyse.
+
+\paragraph{Graph}
+
+Every predicted frameshift is plotted as a vertical red line that
+connect the exonic prediction blocks in the 2 corresponding phase.
+
+

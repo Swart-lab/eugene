@@ -1,0 +1,33 @@
+% Documentation of the Homology sensor
+
+\subsection{\texttt{Sensor.Homology}}
+
+Todo.
+
+\paragraph{Description}
+
+The sensor is activated by either :
+\begin{itemize}
+\item the \texttt{-t} argument \index{CmdFlags}{[Homology activation] t}
+\item the value TRUE for the parameter \texttt{Sensor.Homology.use} in the
+  parameter file.
+\end{itemize}
+Here is an example of Homology parameters definition :
+\begin{Verbatim}[fontsize=\small]
+Homology.TblastxP*      0
+Homology.TblastxB*      0.0595
+Homology.protmatname    BLOSUM80
+Sensor.Homology.use     TRUE      # Use Homology sensor
+Sensor.Homology         1         # Sensor priority
+\end{Verbatim}
+
+\paragraph{Input files format}
+
+\paragraph{Filtering input information}
+
+\paragraph{Integration of information}
+
+\paragraph{Post analyse}
+
+\paragraph{Graph}
+

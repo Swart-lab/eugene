@@ -1,0 +1,52 @@
+% Documentation of the Riken sensor
+
+\subsection{\texttt{Sensor.Riken}}
+
+Todo.
+
+\paragraph{Description}
+
+A file with extension \texttt{.riken} is read.  Each line must contain
+the positions of the extremities of the match of the 5' EST then the
+name of the 5' EST the same thing for the 3'EST then the name of the
+clone.
+
+The sensor is activated by either :
+\begin{itemize}
+\item the \texttt{-R} argument \index{CmdFlags}{[Riken activation] R}
+\item the value TRUE for the parameter \texttt{Sensor.Riken.use} in the
+  parameter file.
+\end{itemize}
+Here is an example of Riken parameters definition :
+\begin{Verbatim}[fontsize=\small]
+Riken.StrandRespect             0
+Riken.Min_est_diff              100
+Riken.Max_overlap               60
+Riken.Max_riken_length          60000
+Riken.Max_riken_est_length      3000
+Riken.Min_riken_length          120 
+Riken.Min_riken_est_length      10
+Riken.RAFLPenalty*              -120
+Sensor.Riken.use                TRUE     # Use Riken sensor
+Sensor.Riken                    7        # Sensor priority
+\end{Verbatim}
+
+\paragraph{Input files format}
+
+
+\paragraph{Filtering input information}
+
+
+\paragraph{Integration of information}
+
+
+\paragraph{Post analyse}
+
+
+\paragraph{Graph}
+
+
+
+
+
+
