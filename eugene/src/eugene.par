@@ -319,6 +319,7 @@ Sensor.Tester		12	#
 #################################################################
 ParaOptimization.Use FALSE
 ParaOptimization.TrueCoordFile ---
+ParaOptimization.EvalPredDir   ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
 ParaOptimization.Test TRUE
 ParaOptimization.Trace TRUE
