@@ -177,14 +177,11 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
   
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
 
-  for(i=0; i<(int)theSensors.size(); i++) {
+  for(i=0; i<(int)theSensors.size(); i++) 
     if (theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
       theSensors[i]->GiveInfo(X, pos, d);
       info = TRUE;
     }
-    else if (theSensors[i]->type == Type_Unknown)
-      return info;  // Aucune info pour ce type
-  }
 
   for (i=0; i<= DATA::Del; i++)
     d->sig[i].SetToDefault();
