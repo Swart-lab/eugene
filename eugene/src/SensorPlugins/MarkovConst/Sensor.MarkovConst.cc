@@ -11,14 +11,14 @@ extern Parameters PAR;
 // ----------------------
 SensorMarkovConst :: SensorMarkovConst (int n) : Sensor(n)
 {
-  transCodant = PAR.getD("Markov.transCodant"); //Exon
-  transIntron = PAR.getD("Markov.transIntron"); //IntronF
-  transInter  = PAR.getD("Markov.transInter");  //InterG
-  transUTR5   = PAR.getD("Markov.transUTR5");   //UTR5
-  transUTR3   = PAR.getD("Markov.transUTR3");   //UTR3
+  transCodant = PAR.getD("EuGene.transCodant"); //Exon
+  transIntron = PAR.getD("EuGene.transIntron"); //IntronF
+  transInter  = PAR.getD("EuGene.transInter");  //InterG
+  transUTR5   = PAR.getD("EuGene.transUTR5");   //UTR5
+  transUTR3   = PAR.getD("EuGene.transUTR3");   //UTR3
 
-  minGC = PAR.getD("Markov.minGC",GetNumber());
-  maxGC = PAR.getD("Markov.maxGC",GetNumber());
+  minGC = PAR.getD("MarkovConst.minGC",GetNumber());
+  maxGC = PAR.getD("MarkovConst.maxGC",GetNumber());
 }
 
 // ----------------------
@@ -36,7 +36,7 @@ void SensorMarkovConst :: Init (DNASeq *X)
   type = Type_Content;
   
   if(PAR.getI("Output.graph")) Plot(X);
-  value=0.25;
+  value= PAR.getD("MarkovConst.val");
 }
 
 // -----------------------
