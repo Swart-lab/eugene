@@ -68,25 +68,41 @@
 void ExecuteRegle(ptUTIL ut, DATA *d)
 {
   if (ut->tab <= 12) // contents edges
-    d->contents[ut->tab] *= exp(-ut->delta);
+    d->contents[ut->tab] += ut->delta;
   else
     switch (ut->tab) {
     case 13:
-      d->sig[DATA::Start].weight[Signal::Forward] = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Start].weight[Signal::Forward] = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Start].weight[Signal::ForwardNo] = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 14:
-      d->sig[DATA::Start].weight[Signal::Reverse] = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Start].weight[Signal::Reverse] = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Start].weight[Signal::ReverseNo] = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 15:
-      d->sig[DATA::Stop].weight[Signal::Forward]  = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Stop].weight[Signal::Forward]  = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Stop].weight[Signal::ForwardNo]  = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 16:
-      d->sig[DATA::Stop].weight[Signal::Reverse]  = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Stop].weight[Signal::Reverse]  = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Stop].weight[Signal::ReverseNo]  = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 17:
-      d->sig[DATA::Acc].weight[Signal::Forward]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Acc].weight[Signal::Forward]   = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Acc].weight[Signal::ForwardNo]   = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 18:
-      d->sig[DATA::Acc].weight[Signal::Reverse]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Acc].weight[Signal::Reverse]   = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Acc].weight[Signal::ReverseNo]   = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 19:
-      d->sig[DATA::Don].weight[Signal::Forward]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Don].weight[Signal::Forward]   = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Don].weight[Signal::ForwardNo]   = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     case 20:
-      d->sig[DATA::Don].weight[Signal::Reverse]   = Max(0.0,Min(1.0,ut->delta));
+      d->sig[DATA::Don].weight[Signal::Reverse]   = log(Max(0.0,Min(1.0,ut->delta)));
+      d->sig[DATA::Don].weight[Signal::ReverseNo]   = log(1.0-Max(0.0,Min(1.0,ut->delta)));
+      break;
     }
 }
  
