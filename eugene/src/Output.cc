@@ -1,7 +1,6 @@
 #include "Output.h"
 
 extern Parameters   PAR;
-extern MasterSensor MS;
 
 
 void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int argc, char * argv[], FILE* f)
