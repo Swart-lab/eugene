@@ -58,7 +58,7 @@ void InitImg(struct Image *image, int n)
   gdImageLine(image->im, LMargin-1, TMargin-1, LMargin-1, ry+TMargin+5, Col[3]);
   gdImageLine(image->im, rx+LMargin, TMargin-1, rx+LMargin, ry+TMargin+5, Col[3]);
   
-  for (i = -4; i < 5; i++) {
+  for (i = -NLigne; i <= NLigne; i++) {
     gdImageString(image->im,gdFontTiny,5, ToY(i,0.6),Ylab[i+4],Col[3]);
     gdImageString(image->im,gdFontTiny,rx+LMargin+5, ToY(i,0.6),Ylab[i+4],Col[3]);
   }
