@@ -1,32 +1,39 @@
-/* ---------------------------------------------------------------------------
-* Fichier : yacc.y
-* Module : yacc
-* Version : 1.0
-* Date de creation de la version : 01/07/99
-* Auteurs : Lucien Duret
-* ---------------------
-* Description : anayseur syntaxique du langage utilisateur EuGene
-* ---------------------
-* Divers : il est lie a l'analyseur lexicale defini dans le fichier lex.l
-* ----------------------------------------------------------------------------
-* --- INRA --------------  Station de Biometrie et d'Intelligence Artificielle
-* ----------------------------------------------------------------------------
-*/
+/* ------------------------------------------------------------------
+   Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+  
+   This program is open source; you can redistribute it and/or modify
+   it under the terms of the Artistic License (see LICENSE file).
+  
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+  
+   You should have received a copy of Artistic License along with
+   this program; if not, please see http://www.opensource.org
+  
+   $Id$
+   ------------------------------------------------------------------
+   File:     yacc.y
+   Contents: analyseur syntaxique du langage utilisateur eugene
+   ------------------------------------------------------------------*/
+
 
 /*------------------------------------------------------------------------*/
 /*----------- DECLARATION et DEFINITION des unites lexicales -------------*/
 /*------------------------------------------------------------------------*/
 %{
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "../../EuGene/Const.h"
-#include "../../EuGene/SensorIF.h"
-#include "../../EuGene/System.h"
+
+#include "../../Const.h"
+#include "../../SensorIF.h"
+#include "../../System.h"
+
 #include "structure.h"
+
 
 //---------------------------------------------------------------------------------
   // La prediction (pour verifier la coherence)
@@ -38,9 +45,16 @@
   // pour afficher une raison (source)
   char* raison;
 
-  // declarations externes / en avant
+  // declarations externes
   extern int yylex();
-  void yyerror(char* s);                 /* nouveauté Linux compatible Solaris */
+  extern char *yytext;
+  extern FILE *yyin;
+
+  /* nouveauté Linux compatible Solaris */
+  void yyerror(char* s) {
+    fprintf (stderr, "%s : \"%s\"\n",s,yytext);
+    exit(0);
+  }
 
 //---------------------------------------------------------------------------------
   char* ContentsText[13] = {
@@ -227,7 +241,7 @@ void Retour(ptUTIL r)
   raison = "#";
   while (ut!=NULL)
     {
-      if (ut->check==nocheck) {ut=ut->suiv;continue;};
+      if (ut->check==false) {ut=ut->suiv;continue;};
       if (ut->tab== 13) 
 	{ 
 	  i = ut->n1-1;
@@ -306,9 +320,9 @@ void Retour(ptUTIL r)
   int entier;
   double reel;
   int tab;
-  enum CHECK check;
+  bool check;
   char* chaine;
-} 
+};
 
 
 /*---------- mots cles ----------*/
@@ -342,7 +356,7 @@ input   :
   SignalUser->n2 = 0;
   SignalUser->delta = 0;
   SignalUser->rais = raison;
-  SignalUser->check = nocheck;
+  SignalUser->check = false;
   SignalUser->suiv = NULL;
 
   ContentsUser = mall();
@@ -351,7 +365,7 @@ input   :
   ContentsUser->n2 = 0;
   ContentsUser->delta = 0;
   ContentsUser->rais = raison;
-  ContentsUser->check = nocheck;
+  ContentsUser->check = false;
   ContentsUser->suiv = NULL;
 }
 | input NL
@@ -373,7 +387,6 @@ RAISON
   us->n2 = $3;
   us->delta = $4;
   us->rais = raison;
-  //  us->check = $5;
   us->suiv = suivant(us,SignalUser);
 }
 
@@ -385,7 +398,6 @@ RAISON
   us->n2 = $7;
   us->delta = $9;
   us->rais = raison;
-  //  us->check = $10;  
   us->suiv = suivant(us,ContentsUser);
 }
 
@@ -396,7 +408,6 @@ RAISON
   us->n1 = $4;
   us->n2 = $6;
   us->delta = $8;
-  //  us->check = $9;  
   us->rais = raison; 
   us->suiv = suivant(us,ContentsUser);
 }
@@ -409,7 +420,6 @@ RAISON
   us->n2 = $6;
   us->delta = $8;
   us->rais = raison;
-  //  us->check = $9; 
   us->suiv = suivant(us,ContentsUser);
 }
 
@@ -421,7 +431,6 @@ RAISON
   us->n2 = $6;
   us->delta = $8;
   us->rais = raison;
-  //  us->check = $9; 
   us->suiv = suivant(us,ContentsUser);
 }
 
@@ -433,7 +442,6 @@ RAISON
   us->n2 = $5;
   us->delta = $7;
   us->rais = raison;
-  //  us->check = $8; 
   us->suiv = suivant(us,ContentsUser);
 }
 
@@ -447,19 +455,6 @@ RAISON
 /*------------------------------------------------------------------------*/
 
 
-#include "lex.yy.c"
-
-void yyerror(char* s)
-{
-  fprintf (stderr, "%s : \"%s\"\n",s,yytext);
-  exit(0);
-}
-
-int yywrap(void)
-{
-  return 1;
-}
-
 int Utilisateur(char *nom_fich, ptUTIL *SigInfo, ptUTIL *ConInfo) {
 
   yyin = fopen(nom_fich, "r" );
@@ -471,8 +466,6 @@ int Utilisateur(char *nom_fich, ptUTIL *SigInfo, ptUTIL *ConInfo) {
     *ConInfo = ContentsUser;
     ContentsUser = NULL;
     return 0;
-    //    SignalUser = SignalUser->suiv;
-    //    ContentsUser = ContentsUser->suiv;
   } else  return (1);
 }
 

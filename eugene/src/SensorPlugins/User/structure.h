@@ -1,6 +1,27 @@
-typedef struct UTIL *ptUTIL ;
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     structure.h
+// Contents: definition of structures for the User sensor
+// ------------------------------------------------------------------
 
-enum CHECK {check,nocheck};
+
+#ifndef STRUCTURE_H_INCLUDED
+#define STRUCTURE_H_INCLUDED
+
+typedef struct UTIL *ptUTIL ;
 
 typedef struct UTIL
 {
@@ -9,10 +30,12 @@ typedef struct UTIL
   int   n2;
   double  delta;
   char* rais;
-  enum CHECK check;
+  bool check;
   ptUTIL suiv;
 } UTIL;
 
 extern int Utilisateur(char *nom_fich,ptUTIL *a, ptUTIL *b);
 void Util(int i, ptUTIL ut, DATA *d);
 void WriteUtils(ptUTIL,FILE *);
+
+#endif 
