@@ -111,11 +111,12 @@ MarkovProt.order        2
 #
 Est.PostProcess	FALSE
 Est.estP	-0.4
-#Est.estP	-1e4 # forces EuGene to match with est
+#Est.estP	-1e4  # forces EuGene to match with est
 Est.estM	6
 #
 ##### Proteic similarity sensor parameters #####
 #
+BlastX.PostProcess FALSE
 BlastX.levels	012
 BlastX.level0	0.2
 BlastX.level1	0.05
@@ -128,7 +129,6 @@ BlastX.level7	0.0
 BlastX.level8	0.0
 BlastX.level9	0.0
 BlastX.blastxM	10	
-BlastX.PostProcess	0
 #
 ##### Repeat sensor parameters #####
 #
