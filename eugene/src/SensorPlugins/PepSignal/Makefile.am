@@ -14,14 +14,15 @@
 # $Id$
 # ------------------------------------------------------------------
 # File:     Makefile.am
-# Contents: compilation of the SensorPlugins directory
+# Contents: compilation of the PepSignal directory
 # ------------------------------------------------------------------
 
+CXXFLAGS = $(eugene_CXXFLAGS)
 
-export eugene_LDFLAGS = -shared -mimpure-text
 
-SUBDIRS = 0_SensorTk AnnotaStruct ATGpr BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript User
-
+bin_PROGRAMS = Sensor.PepSignal.so
+Sensor_PepSignal_so_SOURCES = Sensor.PepSignal.cc Sensor.PepSignal.h 
+Sensor_PepSignal_so_LDFLAGS = $(eugene_LDFLAGS) 
 
 
 CLEANFILES = *~

@@ -86,6 +86,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/NG2/Makefile
 	src/SensorPlugins/NStart/Makefile
 	src/SensorPlugins/PatConst/Makefile
+	src/SensorPlugins/PepSignal/Makefile
 	src/SensorPlugins/Plotter/Makefile
 	src/SensorPlugins/Repeat/Makefile
 	src/SensorPlugins/Riken/Makefile
