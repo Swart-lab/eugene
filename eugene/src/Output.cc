@@ -20,7 +20,10 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     }
   }
 
-  else if ((printopt0 == 'l') || (printopt0 == 'h') || (printopt0 == 'g')) {
+  else if ((printopt0 == 'l') || (printopt0 == 'h') ||
+	   (printopt0 == 'g') || (printopt0 == 'a')) {
+    int nbGene  = 1;
+    int nbExon  = 0;
     int cons = 0, incons = 0;
     int TStart = 0, GStart = 0, GEnd = 0;
     int forward,init,term,Lend,Rend,Phase;
@@ -39,11 +42,14 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     if (printopt0 == 'h') {
       printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
       printf("<center><listing>\n");
-      printf("\n    Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+      printf("\n\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
     }
-
-    fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
     
+    if (printopt0 != 'a')
+      fprintf(stderr,"\n    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+    else
+      fprintf(stderr,"\nSeq     Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+
     if (printopt0 == 'g' && sequence == optind)
       printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
     
@@ -83,6 +89,11 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       if (state <= ExonR3) {
 	// strand ?
 	forward = (state < 3);
+	if(forward) nbExon++;
+	else        nbExon--;
+	if(!forward && (i == pred->size()-1 ||
+			(i == pred->size()-2 && stateBack < InterGen5)))
+	  nbExon = pred->nbExon(1);
 	
 	// first or last exon ?
 	init = ((forward  && stateBack >= InterGen5) ||
@@ -103,14 +114,26 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  Don = Rend+1;
 	}
 	
-	printf("%s",seqn);
-	
+	if(printopt0 == 'g' || printopt0 == 'a')
+	  printf("%s",seqn);
+	else
+	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
+
 	if (printopt0 == 'g') printf("\tEuGene\t");
-	else printf(" ");
+	else printf("\t");
 	
-	if (init && term) printf("Sngl");
-	else if (init) printf("Init");
-	else if (term) printf("Term");
+	if (init && term) {
+	  printf("Sngl");
+	  nbExon = 0;
+	}
+	else if (init) {
+	  printf("Init");
+	  if(!forward) nbExon = 0;
+	}
+	else if (term) {
+	  printf("Term");
+	  if(forward)  nbExon = 0;
+	}
 	else printf ("Intr");
 	
 	if (printopt0 == 'g')
@@ -138,11 +161,13 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	}
       }
       else if ((state >= UTR5F) && (state <= UTR3R)) {
-	
-	printf("%s",seqn);
+	if(printopt0 == 'g' || printopt0 == 'a')
+	  printf("%s",seqn);
+	else
+	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
 	
 	if (printopt0 == 'g') printf("\tEuGene\t");
-	else printf(" ");
+	else printf("\t");
 	
 	switch (state) {
 	case 13: // UTR5' F
@@ -153,6 +178,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  break;
 	  
 	case 14: // UTR 3' F
+	  nbGene++;
 	  if (printopt0 == 'g')
 	    printf("Utr3\t%d\t%d\t0\t+\t.\n",
 		   offset+posBack+1, offset+pos);
@@ -160,6 +186,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  break;
 	  
 	case 15: // UTR5' R
+	  nbGene++;
 	  if (printopt0 == 'g')
 	    printf("Utr5\t%d\t%d\t0\t-\t.\n",
 		   offset+posBack+1, offset+pos);
@@ -181,6 +208,9 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  printf("  %3.0f.%-3.0f\n",100.0*(double)cons/((offset+pos) - (offset+posBack+1)+1),
 		 100.0*(double)incons/((offset+pos) - (offset+posBack+1)+1));
 	}
+	if(stateNext >= ExonR1 && stateNext <= ExonR3)
+	  nbExon = pred->nbExon(nbGene) + 1;
+        
      	//if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
 	//if (estopt && PAR.estanal) {
 	//  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
@@ -194,7 +224,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     if (printopt0 == 'h')   {
       //position = BaseName(argv[sequence]);
       position = argv[sequence];
-      
+      strcat(position,".fasta");
       printf("</listing></center>\n");
       printf("<a href=%s.trace>Trace</a><br>",position);
       printf("<a href=%s.starts>NetStart F</a> <a href=%s.startsR>NetStart R</a><br>",position,position);
@@ -205,7 +235,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",position);
       printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",position);
       
-      OutputHTMLFileNames();
+      //OutputHTMLFileNames();
       printf("</body></html>\n");
     }
   }

@@ -159,8 +159,8 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	m["Output.graph"]     = "TRUE"; // HTML output means graphical output 
 	m["grnameArg"] = "0";
       }
-      if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') && (optarg[0] != 'd') &&
-	  (optarg[0] != 'h'))
+      if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
+	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a'))
 	errflag++;
       break;
       
@@ -235,7 +235,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   // check usage
   if (errflag) {
-    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d]\n"
+    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
 	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
 	    "              [-g {graphArg}] [-u start] [-v end] [-l len] [-c olap]\n"
 	    "              [-x xres] [-y yres] FASTA files\n");
