@@ -125,19 +125,19 @@ else if ((printopt == 'l') || (printopt == 'h'))
 	    {
 	      forward = (Choice[i] < 3);
 	      
-	      init = ((forward  && Choice[Starts[Choice[i]]] == 12) || (!forward && Choice[i+1] == 12));
-	      term = ((!forward  && Choice[Starts[Choice[i]]] == 12) || (forward && Choice[i+1] == 12));
+	      init = ((forward  && Choice[Starts[Choice[i]]] >= 12) || (!forward && Choice[i+1] >= 12));
+	      term = ((!forward  && Choice[Starts[Choice[i]]] >= 12) || (forward && Choice[i+1] >= 12));
 
 	      if (forward)
 		{
 		  Lend = offset+Starts[Choice[i]]+1;
-		  Rend = offset+i+(3*(Choice[i+1] == 12));
+		  Rend = offset+i+(3*(Choice[i+1] >= 12));
 		  Don = Lend-1;
 		  Acc = Rend+1;
 		}
 	      else
 		{
-		  Lend = offset+Starts[Choice[i]]+1-(3*(Choice[Starts[Choice[i]]] == 12));
+		  Lend = offset+Starts[Choice[i]]+1-(3*(Choice[Starts[Choice[i]]] >= 12));
 		  Rend = offset+i;
 		  Acc = Lend-1;
 		  Don = Rend+1;
@@ -168,11 +168,6 @@ else if ((printopt == 'l') || (printopt == 'h'))
 	      printf("      %+2d",PhaseAdapt(Choice[i]));
 	      printf(" %7d %7d   1.0", Don,Acc);
 		  
-	      /*
-		if (Choice[i+1] < 6) printf(" FS ");
-		if ((Starts[Choice[i]] == 0) || (Choice[i+1] == 127))
-		printf(" P");
-	      */
 	      printf("\n");
 	      Starts[Choice[i]] = -1;
 	    }
@@ -208,7 +203,7 @@ else
     {
       if (Choice[i+1] != Choice[i])
 	{
-	  Intergenic = (Choice[i+1] == 12);
+	  Intergenic = (Choice[i+1] >= 12);
 	   
 	  for (j = 0; j<6; j++)
 	    {
