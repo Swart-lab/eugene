@@ -49,20 +49,28 @@ MasterSensor :: MasterSensor ()
 // ------------------------
 MasterSensor :: ~MasterSensor ()
 {
-  msList.clear();
+  for(int i=0; i<(int)theSensors.size(); i++) delete theSensors[i];
   theSensors.clear();
+
+  for(int i=0; i<(int)msList.size(); i++) {
+    delete msList[i];
+    delete dllList[i];
+  }
+  msList.clear();
 }
 
 // ------------------------
 //  Init Master.
 // ------------------------
-void MasterSensor :: InitMaster ()
+void MasterSensor :: InitMaster (void)
 {
   char *key_name,*pluginsDir;
   int  val_prior;
   int i, j, nbSensors = 0;
   
+
   // On récupère les couples nom de sensor/priorité du .par
+  PAR.ResetIter();
   while(PAR.getUseSensor(&key_name, &val_prior))
     msList.push_back(new UseSensor(val_prior, key_name));
 
@@ -93,7 +101,7 @@ void MasterSensor :: InitMaster ()
   nbSensors = 0;
 
   for(i=0; i<(int)msList.size(); i++) 
-    for (j=0; j<PAR.getI(useList[i]); j++) {
+    for (j=0; j<PAR.getI(useList[i]); j++) {   
       dllList[nbSensors] = new SensorLoader ( soList[i] );
       if(!dllList[nbSensors]->LastError()) {
 	fprintf(stderr,"Loading %.21s",msList[i]->Name);
@@ -108,6 +116,7 @@ void MasterSensor :: InitMaster ()
       }
       nbSensors++;
     }
+
 }
 
 // ------------------------
@@ -189,14 +198,6 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
   return info;
 }
 
-// --------------------------
-//  Reset type.
-// --------------------------
-void MasterSensor :: ResetType ()
-{
-  for(int i=0; i<(int)theSensors.size(); i++)
-    theSensors[i]->type = Type_Unknown;
-}
 
 // --------------------------
 //  Post analyse the sensors.
@@ -207,11 +208,3 @@ void MasterSensor :: PostAnalyse (Prediction *pred)
     theSensors[i]->PostAnalyse(pred);
 }
 
-// -------------------------
-//  Destroy the sensors.
-// -------------------------
-void MasterSensor :: ResetSensors ()
-{
-  for(int i=0; i<(int)theSensors.size(); i++)
-    delete theSensors[i];
-}

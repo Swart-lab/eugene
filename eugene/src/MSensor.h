@@ -50,14 +50,12 @@ class MasterSensor
  public:
   MasterSensor  ();
   ~MasterSensor ();
-  void InitMaster   ();
+  void InitMaster   (void);
   void InitSensors  (DNASeq *);
-  void ResetType    ();
   void GetInfoAt    (DNASeq *, int, DATA *);
   void PrintDataAt  (DNASeq *X, int, DATA *);
   int  GetInfoSpAt  (TYPE_SENSOR, DNASeq *, int, DATA *);
   void PostAnalyse  (Prediction *);
-  void ResetSensors ();
 };
 
 #endif
