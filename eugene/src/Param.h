@@ -47,13 +47,11 @@ class Parameters
   Parameters  ();
   ~Parameters ();
   void   initParam (int, char *[]);
-  char*  getC (char *key);
-  double getD (char *key);
-  int    getI (char *key);
+  char*  getC (char *key, int index = 0);
+  double getD (char *key, int index = 0);
+  int    getI (char *key, int index = 0);
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
-  const char*  intToChar    (int);
-  const char*  doubleToChar (double);
 };
 
 #endif

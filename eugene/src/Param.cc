@@ -37,8 +37,9 @@ void Parameters :: initParam (int argc, char * argv[])
   ReadPar(argv[0]);
   ReadArg(argc, argv);
 
-  //for (iter = m.begin(); iter!=m.end(); ++iter)
-  //fprintf(stderr,"%s  est associé à %s\n",iter->first, iter->second);
+  if (m.count("Param.debug")) 
+    for (iter = m.begin(); iter!=m.end(); ++iter)
+      fprintf(stderr,"%s = %s\n",iter->first, iter->second);
 
   iter = m.begin();  // Cf. : getUseSensor
 }
@@ -146,8 +147,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	}
 	else errflag++;
       }
-      else
+      else {
+	m["Output.graph"] = "TRUE";
 	m["grnameArg"] = "0";
+      }
       break;
       
     case 'p':           /* print opt: short/long/detailed   */
@@ -282,53 +285,63 @@ void Parameters :: ReadPar(char *argv)
 }
 
 // ------------------------
-//  getDouble param.
+//  getChar param.
 // ------------------------
-char* Parameters :: getC(char *key)
+char* Parameters :: getC(char *key, int index = 0)
 {
-  if(m.count(key))
+  if (!index && m.count(key))
     return (char*)m[key];
+
+  int len = strlen(key);
+  char *altkey = new char[len+10];
+
+  strcpy(altkey,key);
+  key = altkey+len;
+  sprintf(key,"[%d]",index);
+
+  if (m.count(altkey)) {
+    key = (char*)m[altkey];
+    delete altkey;
+    return key;
+  }
   else {
-    fprintf(stderr,"WARNING: Undefined key %s\n",key);
-    return (char*)"";
+    fprintf(stderr,"WARNING: Undefined key %s\n",altkey);
+    return NULL;
   }
 }
 
 // ------------------------
 //  getDouble param.
 // ------------------------
-double Parameters :: getD(char *key)
+double Parameters :: getD(char *key, int index = 0)
 {
-  if(m.count(key)) {
-    if(!strcmp(m[key], "NINFINITY"))
+  char *res = getC(key,index);
+
+  if (res) {
+    if(!strcmp(res, "NINFINITY"))
       return NINFINITY;
     else
-      return atof(m[key]);
+      return atof(res);
   }
-  else {
-    fprintf(stderr,"WARNING: Undefined key %s\n",key);
-    return 0.0;
-  }
+  return 0.0;
 }
 
 // ------------------------
 //  getInt param.
 // ------------------------
-int Parameters :: getI(char *key)
+int Parameters :: getI(char *key,int index = 0)
 {
-  if(m.count(key)) {
-    if(!strcmp(m[key], "TRUE"))
+  char *res = getC(key,index);
+
+  if(res) {
+    if(!strcmp(res, "TRUE"))
       return TRUE;
-    else if(!strcmp(m[key], "FALSE"))
+    else if(!strcmp(res, "FALSE"))
       return FALSE;
     else
-      return atoi(m[key]);
+      return atoi(res);
   }
-
-  else {
-    fprintf(stderr,"WARNING: Undefined key %s\n",key);
-    return 0; 
-  }
+  return 0; 
 }
   
 // ------------------------
