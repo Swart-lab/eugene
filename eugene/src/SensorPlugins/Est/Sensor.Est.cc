@@ -13,7 +13,7 @@ extern Parameters   PAR;
 int HitsCompare(const void *A, const void *B)
 {
   Hits **UA,**UB;
-  
+
   UA = (Hits **) A;
   UB = (Hits **) B;
 
@@ -21,6 +21,22 @@ int HitsCompare(const void *A, const void *B)
   if ((*UA)->NGaps < (*UB)->NGaps)   return  1;
   if ((*UA)->Length > (*UB)->Length) return -1;
   if ((*UA)->Length < (*UB)->Length) return  1;
+  return 0;
+}
+
+int HitsCompareLex(const void *A, const void *B)
+{
+  Hits **UA,**UB;
+  
+  UA = (Hits **) A;
+  UB = (Hits **) B;
+  
+  if ((*UA)->Start < (*UB)->Start) return -1;
+  if ((*UA)->Start > (*UB)->Start) return 1;
+  if ((*UA)->NGaps > (*UB)->NGaps) return -1;
+  if ((*UA)->NGaps < (*UB)->NGaps) return 1;
+  if ((*UA)->Length > (*UB)->Length) return -1;
+  if ((*UA)->Length < (*UB)->Length) return 1;
   return 0;
 }
 
@@ -239,7 +255,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	  MS.GetInfoSpAt(Type_Splice, X, k, &dTmp);
 	  DonF = Max(DonF, dTmp.Don[0]);
 	  AccR = Max(AccR, dTmp.Acc[1]);
-
+	  
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
 	  if(MS.GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
 	    DonR = Max(DonR, dTmp.Don[1]);
@@ -258,7 +274,6 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	WorstSpliceR = Min(WorstSpliceR,DonR);
 	WorstSpliceR = Min(WorstSpliceR,AccR);
       }
-      
       ThisBlock = ThisBlock->Next;
       }
     
@@ -434,9 +449,164 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,*NumEST);
   return HitTable;
 }
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
 void SensorEst :: Plot(DNASeq *TheSeq)
 {
+}
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorEst :: PostAnalyse(Prediction *pred)
+{
+  int TStart = 0, TEnd = 0, GStart = 0, GEnd = 0;
+  int state, stateNext = 0, stateBack = 0;
+  int pos,   posNext   = 0, posBack   = 0;
+  
+  if (PAR.getI("Est.PostProcess")) {
+    qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+    // Reset static in EST Support
+    ESTSupport(NULL,100,0,100,0,NULL,0);
+    
+    for(int i=pred->size()-1; i!=-1; i--) {
+      if(i != pred->size()-1) {
+	stateBack = pred->getState(i+1);
+	posBack   = pred->getPos(i+1);
+      }
+      state = pred->getState(i);
+      pos   = pred->getPos(i);
+      if(i != 0) {
+	stateNext = pred->getState(i-1);
+	posNext   = pred->getPos(i-1);
+      }
+
+      // Demarrage exon extreme. Noter pour verif EST
+      if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
+      if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
+      if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
+      if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
+      
+      if ((state <= ExonR3 && stateNext >= InterGen5) || // fin de gene
+	  (i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
+	ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
+	GStart = TStart = GEnd = TEnd = -1;
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------
+//  Post analyse
+//    Tdebut/fin = debut/fin de transcript
+//    debut/fin  = debut/fin de traduit
+// -------------------------------------------------------------------------
+void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
+			     int debut, int fin,  Hits **HitTable, int Size)
+{
+  static int EstIndex;
+  int supported = 0;
+  int CDSsupported = 0;
+  unsigned char *Sup;
+  Block *ThisBlock;
+  int ConsistentEST,i;
+  int from = 0, to = 0, ESTEnd = 0;
+  int state;
+
+  if (pred == NULL) {
+    EstIndex = 0;
+    return;
+  }
+
+  Sup = new unsigned char[Tfin-Tdebut+1]; 
+  
+  for (i=0; i <= Tfin-Tdebut; i++)
+    Sup[i]=0;
+  
+  // si la fin du codant n'a pas ete rencontree
+  if (fin == -1) fin = Tfin;
+  if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
+  
+  while (EstIndex < Size) {
+    // le dernier transcrit exploitable est passe
+    if (HitTable[EstIndex]->Start > Tfin) break;
+    
+    ConsistentEST = 1;
+    ThisBlock = HitTable[EstIndex]->Match;
+    
+    while (ThisBlock && ConsistentEST) {
+      // si on a un gap
+      if (ThisBlock->Prev != NULL) {
+	// intersection
+	from = Max(Tdebut,ThisBlock->Prev->End+1);
+	to = Min(Tfin,ThisBlock->Start-1);
+	
+	for (i = from; i <= to; i++) {
+	  state = pred->getStateForPos(i+1);
+	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3)
+	    ConsistentEST = 0;
+	}
+      }      
+      from = Max(Tdebut,ThisBlock->Start);
+      to = Min(Tfin,ThisBlock->End);
+      ESTEnd = ThisBlock->End;
+      
+      for (i = from; i <= to; i++) {
+	state = pred->getStateForPos(i+1);
+	if (((state > ExonR3) && (state <= InterGen5)) || state == InterGen3)
+	  ConsistentEST = 0;
+      } 
+      ThisBlock = ThisBlock->Next;
+    }
+    printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",HitTable[EstIndex]->Name,
+	   HitTable[EstIndex]->Start+1,ESTEnd+1,
+	   HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
+    
+    if (HitTable[EstIndex]->Rejected) printf("Filtered ");
+    else if (!ConsistentEST) printf("Inconsistent");
+    else {
+      if ((HitTable[EstIndex]->Start) <= Tdebut && (ESTEnd >= Tfin))
+	printf("Full Transcript Support");
+      else if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
+	printf("Full Coding Support");
+      else printf("Support");
+       
+      ThisBlock = HitTable[EstIndex]->Match;
+      while (ThisBlock) {
+	if (ThisBlock->Prev != NULL) {
+	  // intersection
+	  from = Max(Tdebut,ThisBlock->Prev->End+1);
+	  to = Min(Tfin,ThisBlock->Start-1);
+	  
+	  for (i= from; i <= to; i++) 
+	    if (!Sup[i-Tdebut]) {
+	      Sup[i-Tdebut] = TRUE;
+	      supported++;
+	      if ((i >=debut) && (i <=fin)) CDSsupported++;
+	    }
+	}
+	from = Max(Tdebut,ThisBlock->Start);
+	to = Min(Tfin,ThisBlock->End);
+	
+	for (i= from; i <= to; i++) 
+	  if (!Sup[i-Tdebut]) {
+	    Sup[i-Tdebut] = TRUE;
+	    supported++;
+	    if ((i >=debut) && (i <=fin)) CDSsupported++;
+	  }
+	ThisBlock = ThisBlock->Next;
+      }
+    }
+    printf("\n");
+    EstIndex++;
+  }
+  if (fin >= debut)
+    printf("      CDS          %7d %7d    %5d     supported on %d bases\n",
+	   debut+1,fin+1,fin-debut+1,CDSsupported);
+  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",
+	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
+  delete Sup;
+  return;
 }

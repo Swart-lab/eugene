@@ -20,6 +20,8 @@ class SensorEst : public Sensor
   double estP, estM;
   
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
+  void   ESTSupport  (Prediction *pred, int Tdebut, int Tfin,
+		      int debut,int fin,  Hits **HitTable, int Size);
 
  public:
   SensorEst  (int);
@@ -28,7 +30,8 @@ class SensorEst : public Sensor
   virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void GiveInfoAt (DNASeq *, int, DATA *);
-  virtual void Plot(DNASeq *);
+  virtual void Plot       (DNASeq *);
+  virtual void PostAnalyse(Prediction *);
 };
 
 extern "C" SensorEst * builder0( int n ) { return new SensorEst(n);}
