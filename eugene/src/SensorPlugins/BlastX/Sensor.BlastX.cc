@@ -362,16 +362,18 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
       
       CodingNuc += pos-posBack;
       
-      while ( (index < (int)vPos.size()) && (vPos[index] < posBack)) index++;
-      // index=indice du premier match etant > ou = au debut de l'exon
-      // fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d,
-      // index=%d\n",vPos[index],index);
-      
-      if (index < (int)vPos.size()) { // il reste des hits
-	// pour chaque nuc de l'exon supporte par un hit
-	while (index < (int)vPos.size() && vPos[index]<pos) {
-	  if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
-	  index++;
+      if (pprocess == 1) {
+	while ( (index < (int)vPos.size()) && (vPos[index] < posBack)) index++;
+	// index=indice du premier match etant > ou = au debut de l'exon
+	// fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d,
+	// index=%d\n",vPos[index],index);
+	
+	if (index < (int)vPos.size()) { // il reste des hits
+	  // pour chaque nuc de l'exon supporte par un hit
+	  while (index < (int)vPos.size() && vPos[index]<pos) {
+	    if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
+	    index++;
+	  }
 	}
       }
 
@@ -581,8 +583,8 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
   for(; i<(int)vSupProtI.size() || i==index; i++) {
     ThisBlock = HitTable[vSupProtI[i]]->Match;
     while (ThisBlock) {
-      from = Max(beg, ThisBlock->Start);
-      to   = Min(end, ThisBlock->End);
+      from = Max(beg, ThisBlock->Start+1);
+      to   = Min(end, ThisBlock->End+1);
        
       for (j=from; j<=to; j++) {
 	state = pred->getStateForPos(j);
