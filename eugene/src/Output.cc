@@ -249,8 +249,9 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      vhtml.push_back(" <td align=\"center\">\n  <font face="
 			      "\"monospace\">Single</font></td>\n");
 	    else
-	      if (printopt0 == 'H') printf("<TD>Single</TD>");
-	      else fprintf(f,"Sngl");
+	      if (printopt0 == 'H')      printf("<TD>Single</TD>");
+	      else if (printopt0 == 'g') fprintf(f,"E.Sngl");
+	      else	                 fprintf(f,"Sngl");
 	    nbExon = 0;
 	  } else 
 	    if (init) {
@@ -258,8 +259,9 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		vhtml.push_back(" <td align=\"center\">\n  <font face="
 				"\"monospace\">Initial</font></td>\n");
 	      else
-		if (printopt0 == 'H') printf("<TD>Initial</TD>");
-		else fprintf(f,"Init");
+		if (printopt0 == 'H')      printf("<TD>Initial</TD>");
+		else if (printopt0 == 'g') fprintf(f,"E.Init");
+		else	                   fprintf(f,"Init");
 	      if(!forward) nbExon = 0;
 	    } else 
 	      if (term) {
@@ -267,8 +269,9 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  vhtml.push_back(" <td align=\"center\">\n  <font face="
 				  "\"monospace\">Terminal</font></td>\n");
 		else
-		  if (printopt0 == 'H') printf("<TD>Terminal</TD>");
-		  else fprintf(f,"Term");
+		  if (printopt0 == 'H')       printf("<TD>Terminal</TD>");
+		  else  if (printopt0 == 'g') fprintf(f,"E.Term");
+		  else	                      fprintf(f,"Term");
 		if(forward)  nbExon = 0;
 	      }
 	      else {
@@ -276,8 +279,9 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  vhtml.push_back(" <td align=\"center\">\n  <font face="
 				  "\"monospace\">Internal</font></td>\n");
 		else		
-		  if (printopt0 == 'H') printf("<TD>Internal</TD>");
-		  else fprintf (f,"Intr");
+		  if (printopt0 == 'H')       printf("<TD>Internal</TD>");
+		  else  if (printopt0 == 'g') fprintf(f,"E.Intr");
+		  else	                      fprintf(f,"Intr");
 	      }
 	  
 	  if (printopt0 == 'g')
@@ -391,7 +395,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 	        if (printopt0 == 'g')
-		  printf("Utr5\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR5\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
 		else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>+</TD>");
 		else fprintf(f,"Utr5    +");
 	      break;
@@ -416,7 +420,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("Utr3\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR3\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
 		else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>+</TD>");
 		else fprintf(f,"Utr3    +");
 	      break;
@@ -441,7 +445,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("Utr5\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR5\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
 		else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>-</TD>");
 		else fprintf(f,"Utr5    -");
 	      break;
@@ -465,7 +469,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("Utr3\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR3\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
 		else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>-</TD>");
 		else fprintf(f,"Utr3    -");
 	      break;
