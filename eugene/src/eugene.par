@@ -4,19 +4,19 @@
 HVGNNJUDTJDQDF	# Clef
 21_08_02	# Version (date)
 -9999.0		# Penalite de frameshift (obsolete)
-0.001 0.000	# StartP StartB
-4.333		# StopP
-4.333		# TransStartP
-4.333		# TransStopP
-0.919 5.806	# AccP AccB
-0.966 28.640	# DonP DonB
-0.971 3.930	# AccP AccB
-0.951 10.800	# DonP DonB
--0.19		# EstP
+0.052 0.308	# StartP StartB
+4.155		# StopP
+4.155		# TransStartP
+4.155		# TransStopP
+0.903 5.585	# AccP AccB
+0.980 27.670	# DonP DonB
+0.987 3.850	# AccP AccB
+0.929 10.800	# DonP DonB
+-0.2		# EstP
 6		# EstM
 # Blast (8 niveaux)
 0.2 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 #MinEx	MinIn	MinSg	MinFlow	MinConv	MinDiv	Min5'	Min3'
-0	50	150	50	0	100	20	20
+3	50	150	50	0	100	20	20
 # 5 Poids sur les modèles
 1.0 1.0 1.0 1.0 1.0
