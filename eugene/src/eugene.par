@@ -128,14 +128,15 @@ MarkovProt.order        2
 #
 ##### Est sensor parameters #####
 #
-Est.PostProcess	FALSE
+Est.PostProcess	2     # FALSE TRUE OR 2
+Est.PPNumber	5     # For PostProcess = "2"
 Est.estP*	-0.4
 #Est.estP*	-1e4  # forces EuGene to match with est
 Est.estM	6
 Est.utrP*	0.35
 Est.utrM	5
 Est.SpliceBoost* 0.0
-Est.StrongDonor*	0.95
+Est.StrongDonor* 0.95
 #
 ##### Riken sensor parameters #####
 #
@@ -150,7 +151,8 @@ Riken.RAFLPenalty*			-120.0
 #
 ##### Proteic similarity sensor parameters #####
 #
-BlastX.PostProcess FALSE
+BlastX.PostProcess 2    # FALSE TRUE OR 2
+BlastX.PPNumber	   5    # For PostProcess = "2"
 BlastX.levels	012
 BlastX.level0*	0.2
 BlastX.level1*	0.05
