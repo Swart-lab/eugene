@@ -142,7 +142,7 @@ void SensorHomology :: Init (DNASeq *X)
       if ( (i-deb+1)%3 == 0 ) {
 	if (i >deb-1) tampon=fgetc(ftblastx);
 	paire[1]=tampon;
-	paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,-1) );
+	paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
 	score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
 	//	      printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
       }
@@ -154,13 +154,7 @@ void SensorHomology :: Init (DNASeq *X)
   }
   fclose(ftblastx);
   fprintf(stderr,"done\n");
-  //	for(i=1495;i>1445;i-=3){
-  //	for (i=1440;i<1500;i+=3) {
-  //	  printf("i:%d  %c %c %c  %c %c %c\n",i,X->AA(i  ,1), X->AA(i+1,1), X->AA(i+2,1), X->AA(i  ,-1), X->AA(i+1,-1), X->AA(i+2,-1) );
-  //	}
-  
-  //	  printf("i:%d  %c %c %c   %c\n",i,X->AA(i,-1),X->AA(i-1,-1),X->AA(i-2,-1),X->AA(i-3,-1)) ;
-  
+
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
