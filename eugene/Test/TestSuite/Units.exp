@@ -26,16 +26,16 @@ foreach TEST $AllSensorsList {
     # Run eugene
     if {$TEST != "Est" && $TEST != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=TRUE $SEQ_DIR/$SEQ(Sensor) \
+	    -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor) \
 	2> tmp%stderr > tmp%stdout
     } else {
 	if {$TEST == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-D Sensor.${TEST}.use=TRUE -D Sensor.NG2.use=TRUE \
+		-D Sensor.${TEST}.use=1 -D Sensor.NG2.use=1 \
 		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
 	} else {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-D Sensor.${TEST}.use=TRUE $SEQ_DIR/exSeqHom.fasta  \
+		-D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta  \
 		2> tmp%stderr > tmp%stdout
 	}
     }

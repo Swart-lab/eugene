@@ -30,7 +30,7 @@ foreach TEST $FunctionalTestList {
 
 	# Preparation of the parameter file with the correct sensors
 	foreach sensor $SensorsList($TEST) \
-	    {set NewValue${TEST}(Sensor.${sensor}.use) TRUE}
+	    {set NewValue${TEST}(Sensor.${sensor}.use) 1}
 	ModifyParaValue ${EUGENE}.par  NewValue${TEST}
 
 	# Open reference file

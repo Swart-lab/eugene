@@ -27,7 +27,7 @@ foreach TEST $ArabidopsisTestList {
 
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
-	{set NewValueBase(Sensor.${sensor}.use) TRUE}
+	{set NewValueBase(Sensor.${sensor}.use) 1}
     ModifyParaValue ${EUGENE}.par  NewValueBase
     
     # Run EuGene
