@@ -14,8 +14,8 @@
 // $Id$
 // ------------------------------------------------------------------
 // File:     EuGene.cc
-// Contents: This program finds exons/introns and intergenic regions (including UTR)
-// Manage T/TG/TA for introns in coding regions.
+// Contents: This program finds exons/introns and intergenic regions 
+//           (including UTR)
 // ------------------------------------------------------------------
 
 
@@ -67,6 +67,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
   int    j, k;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior,IntronFivePrior;
+  double SplicedStopPen;
   //  double PredictTime = cpuTime();
   int    Data_Len;
   DATA	 Data;
@@ -78,6 +79,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   signed   char best   = 0;
   
   // Objectif -> limiter le nombre d'appel à la map de PAR
+  SplicedStopPen = -PAR.getD("EuGene.SplicedStopPen");
   ExPrior    = PAR.getD("EuGene.ExonPrior");
   InPrior    = PAR.getD("EuGene.IntronPrior");
   IGPrior    = PAR.getD("EuGene.InterPrior"); 
@@ -250,6 +252,9 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 #define PICOMP(C,S,B,O) if (C && ISPOSSIBLE(S,B)) {\
 	BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B];\
 	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
+#define PICOMPEN(C,S,B,O,P) if (C && ISPOSSIBLE(S,B)) {		\
+	BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+P;\
+	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
 #define INSERTANDPAYTHESLOPE(P,C)					\
     LBP[P].InsertNew(best, nuc, maxi,PrevBP[best]);\
     if (nuc < Data_Len){\
@@ -278,13 +283,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
     // Exons F  (splicing, with and without spliced stops)
     if (ISPOSSIBLE(Acc,Forward)) {
-      if (!(StopStop & DNASeq::StopAfterT))
+      //      if (!(StopStop & DNASeq::StopAfterT))
 	INEED(IntronF2T);
       
-      if (!(StopStop & DNASeq::StopAfterTG))
+	//      if (!(StopStop & DNASeq::StopAfterTG))
 	INEED(IntronF3TG);
    
-      if (!(StopStop & DNASeq::StopAfterTA)) 
+	//      if (!(StopStop & DNASeq::StopAfterTA)) 
 	INEED(IntronF3TA);
       
       // No spliced stops
@@ -306,13 +311,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   
     // Exons R (splicing, with and without spliced stops)
     if (ISPOSSIBLE(Don,Reverse)) {
-      if (!(StartStop & DNASeq::StopAfterG))
+      //      if (!(StartStop & DNASeq::StopAfterG))
 	INEED(IntronR3G);
       
-      if (!(StartStop & DNASeq::StopAfterA))
+	//      if (!(StartStop & DNASeq::StopAfterA))
 	INEED(IntronR3A);
    
-      if (!(StartStop & DNASeq::StopAfterAG)) 
+	//      if (!(StartStop & DNASeq::StopAfterAG)) 
 	INEED(IntronR2AG);
 
       // No spliced stops
@@ -398,11 +403,11 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
       // Not AfterG
-      PICOMP(!(StartStop & DNASeq::StopAfterG) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3G);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
       // Not AfterA
-      PICOMP(!(StartStop & DNASeq::StopAfterA) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3A);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3A ,((StartStop & DNASeq::StopAfterA)  ? SplicedStopPen : 0.0));
       // Not AfterAG
-      PICOMP(!(StartStop & DNASeq::StopAfterAG) && (((Data_Len-nuc-k) % 3) == 1),Don,Reverse,IntronR2AG);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 1,Don,Reverse,IntronR2AG,((StartStop & DNASeq::StopAfterAG) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift)
       PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
@@ -464,11 +469,11 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       // On recommence a coder (Accepteur). Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Acc,Forward,IntronF1+((nuc-k+3) % 3));
       // Not AfterT
-      PICOMP(!(StopStop & DNASeq::StopAfterT) && (((nuc-k+3) % 3) == 1),Acc,Forward,IntronF2T);
+      PICOMPEN(((nuc-k+3) % 3) == 1,Acc,Forward,IntronF2T ,((StopStop & DNASeq::StopAfterT)  ? SplicedStopPen : 0.0));
       // Not AfterTG
-      PICOMP(!(StopStop & DNASeq::StopAfterTG) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TG);
+      PICOMPEN(((nuc-k+3) % 3) == 2,Acc,Forward,IntronF3TG,((StopStop & DNASeq::StopAfterTG) ? SplicedStopPen : 0.0));
       // Not AfterTA
-      PICOMP(!(StopStop & DNASeq::StopAfterTA) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TA);
+      PICOMPEN(((nuc-k+3) % 3) == 2,Acc,Forward,IntronF3TA,((StopStop & DNASeq::StopAfterTA) ? SplicedStopPen : 0.0));
       // Il y a une insertion (frameshift). Saut de nucléotide ignore.
       PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
       // Il y a une deletion (frameshift)
@@ -491,11 +496,11 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Don,Reverse,IntronR1+((Data_Len-nuc-k) % 3));
       // Not AfterG
-      PICOMP(!(StartStop & DNASeq::StopAfterG) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3G);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
       // Not AfterA
-      PICOMP(!(StartStop & DNASeq::StopAfterA) && (((Data_Len-nuc-k) % 3) == 2),Don,Reverse,IntronR3A);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 2,Don,Reverse,IntronR3A ,((StartStop & DNASeq::StopAfterA)  ? SplicedStopPen : 0.0));
       // Not AfterAG
-      PICOMP(!(StartStop & DNASeq::StopAfterAG) && (((Data_Len-nuc-k) % 3) == 1),Don,Reverse,IntronR2AG);
+      PICOMPEN(((Data_Len-nuc-k) % 3) == 1,Don,Reverse,IntronR2AG,((StartStop & DNASeq::StopAfterAG) ? SplicedStopPen : 0.0));
         // Il y a une insertion (frameshift)
       PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
       // Il y a une deletion (frameshift)
@@ -516,11 +521,11 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       // On recommence a coder (Accepteur). Ca vient d'un intron
       PICOMP(true,Acc,Forward,IntronF1+((nuc-k+3) % 3));
       // Not AfterT
-      PICOMP(!(StopStop & 1) && (((nuc-k+3) % 3) == 1),Acc,Forward,IntronF2T);
+      PICOMPEN(((nuc-k+3) % 3) == 1,Acc,Forward,IntronF2T ,((StopStop & DNASeq::StopAfterT)  ? SplicedStopPen :0.0));
       // Not AfterTG
-      PICOMP(!(StopStop & 2) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TG);
+      PICOMPEN(((nuc-k+3) % 3) == 2,Acc,Forward,IntronF3TG,((StopStop & DNASeq::StopAfterTG) ? SplicedStopPen : 0.0));
       // Not AfterTA
-      PICOMP(!(StopStop & 4) && (((nuc-k+3) % 3) == 2),Acc,Forward,IntronF3TA);
+      PICOMPEN(((nuc-k+3) % 3) == 2,Acc,Forward,IntronF3TA,((StopStop & DNASeq::StopAfterTA) ? SplicedStopPen : 0.0));
       // Il y a une insertion (frameshift). Saut de nucléotide ignore.
       PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
       // Il y a une deletion (frameshift)
