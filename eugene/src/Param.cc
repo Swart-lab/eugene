@@ -155,9 +155,9 @@ void Parameters :: ReadArg(int argc, char * argv[])
       
     case 'p':           /* print opt: short/long/detailed   */
       m["Output.format"] = optarg;
-      if ((optarg == "h") &&  m["Output.graph"] == "FALSE") {
-	m["Output.graph"]     = "TRUE"; // HTML output means graphical output 
-	m["grnameArg"] = "0";
+      if ((optarg[0] == 'h') &&  getI("Output.graph") == 0) {
+	m["Output.graph"] = "TRUE"; // HTML output means graphical output 
+	m["grnameArg"]    = "0";
       }
       if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
 	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a'))
