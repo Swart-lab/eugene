@@ -174,19 +174,21 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
        ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
       d->contents[DATA::IntronR] += estP;
     
+
+    // Ca merdouille sur SeqAra. A creuser
     // UTR Forward
     // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
-    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
-      d->contents[DATA::UTR5F] += estP;
-      d->contents[DATA::UTR3F] += estP;
-    }
+//     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
+//       d->contents[DATA::UTR5F] += estP;
+//       d->contents[DATA::UTR3F] += estP;
+//     }
     
-    // UTR Reverse
-    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
-    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
-      d->contents[DATA::UTR5R] += estP;
-      d->contents[DATA::UTR3R] += estP;
-    }
+//     // UTR Reverse
+//     // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+//     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
+//       d->contents[DATA::UTR5R] += estP;
+//       d->contents[DATA::UTR3R] += estP;
+//     }
     
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
