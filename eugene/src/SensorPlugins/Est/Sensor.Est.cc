@@ -47,7 +47,7 @@ SensorEst :: SensorEst (int n) : Sensor(n)
 {
   HitTable = NULL;
   estP = PAR.getD("Est.estP");
-  estM = PAR.getD("Est.estM");
+  estM = PAR.getI("Est.estM");
 }
 
 // ----------------------
@@ -226,7 +226,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     TheStrand = HitForward | HitReverse;
     Inc = 0;
     ExonInc = 0;
-    WorstSpliceF = WorstSpliceR = 1.0;
+    WorstSpliceF = WorstSpliceR = INFINITY;
         
     // Look for each match in the current Hit
     ThisBlock = ThisEST->Match;
@@ -236,10 +236,10 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       // si ona un gap ?
       if ((ThisBlock->Prev != NULL) && 
 	  abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
-	DonF = 0.0;
-	DonR = 0.0;
-	AccF = 0.0;
-	AccR = 0.0;
+	DonF = NINFINITY;
+	DonR = NINFINITY;
+	AccF = NINFINITY;
+	AccR = NINFINITY;
 	
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
@@ -268,9 +268,11 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       ThisBlock = ThisBlock->Next;
       }
 
+    //    printf("Extreme splices: %e %e\n",WorstSpliceF,WorstSpliceR);
+
     // Tous les blocs ont ete traites
-    if (WorstSpliceF == 0.0) TheStrand &= (~HitForward);
-    if (WorstSpliceR == 0.0) TheStrand &= (~HitReverse);
+    if (WorstSpliceF == NINFINITY) TheStrand &= (~HitForward);
+    if (WorstSpliceR == NINFINITY) TheStrand &= (~HitReverse);
     
     // next iteration on the same EST
     ThisBlock = ThisEST->Match;
@@ -455,34 +457,36 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   int state, stateNext = 0, stateBack = 0;
   int pos,   posNext   = 0, posBack   = 0;
   
-  if (PAR.getI("Est.PostProcess")) {
-    qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
-    // Reset static in EST Support
-    ESTSupport(NULL,100,0,100,0,NULL,0);
-    
-    for(int i=pred->size()-1; i!=-1; i--) {
-      if(i != pred->size()-1) {
-	stateBack = pred->getState(i+1);
-	posBack   = pred->getPos(i+1);
-      }
-      state = pred->getState(i);
-      pos   = pred->getPos(i);
-      if(i != 0) {
-	stateNext = pred->getState(i-1);
-	posNext   = pred->getPos(i-1);
-      }
+  if (!PAR.getI("Est.PostProcess")) return;
 
-      // Demarrage exon extreme. Noter pour verif EST
-      if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
-      if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
-      if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
-      if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
-      
-      if ((state <= ExonR3 && stateNext >= InterGen5) || // fin de gene
-	  (i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
-	ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
-	GStart = TStart = GEnd = TEnd = -1;
-      }
+
+  qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+  
+  // Reset static in EST Support
+  ESTSupport(NULL,100,0,100,0,NULL,0);
+    
+  for(int i=pred->size()-1; i!=-1; i--) {
+    if(i != pred->size()-1) {
+      stateBack = pred->getState(i+1);
+      posBack   = pred->getPos(i+1);
+    }
+    state = pred->getState(i);
+    pos   = pred->getPos(i);
+    if(i != 0) {
+      stateNext = pred->getState(i-1);
+      posNext   = pred->getPos(i-1);
+    }
+    
+    // Demarrage exon extreme. Noter pour verif EST
+    if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
+    if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
+    if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
+    if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
+    
+    if ((state <= ExonR3 && stateNext >= InterGen5) || // fin de gene
+	(i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
+      ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
+      GStart = TStart = GEnd = TEnd = -1;
     }
   }
 }
@@ -508,7 +512,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
     EstIndex = 0;
     return;
   }
-
+  
   Sup = new unsigned char[Tfin-Tdebut+1]; 
   
   for (i=0; i <= Tfin-Tdebut; i++)
@@ -517,6 +521,14 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
   // si la fin du codant n'a pas ete rencontree
   if (fin == -1) fin = Tfin;
   if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
+  
+  //si l'iteration precendete a atteint l'extremite 
+  if (EstIndex >= Size) EstIndex = Size-1;
+    // on rembobine....
+  while ((EstIndex > 0) && (HitTable[EstIndex]->End > Tdebut))
+    EstIndex--;
+  
+  if (HitTable[EstIndex]->End < Tdebut) EstIndex++;
   
   while (EstIndex < Size) {
     // le dernier transcrit exploitable est passe
