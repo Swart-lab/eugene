@@ -274,6 +274,8 @@ int main  (int argc, char * argv [])
   REAL             FsP,StartP,StartB,StopP;
   REAL             AccP,AccB,DonP,DonB,BlastS[3],EstP;
   REAL             ExonPrior,IntronPrior,InterPrior;
+  char *EugDir;
+
   // process args 
   // default values
 
@@ -298,11 +300,10 @@ int main  (int argc, char * argv [])
   *fstname = '\000';                  // no default input    
   errflag = 0;
 
-  if (! (fp = OpenFile("EuGene.par","r")))
-    {
-      fprintf(stderr, "cannot open parameter file EuGene.par\n");
-      exit(2);
-    }
+
+  EugDir = getenv("EUGENEDIR");
+
+  fp = FileOpen(EugDir,"EuGene.par","r");
   
   fprintf(stderr,"Loading parameters file...");
   fflush(stderr);
@@ -378,7 +379,10 @@ int main  (int argc, char * argv [])
     
     case 'p':           /* print opt: short/long/detailed   */
       printopt = optarg[0];
-      if ((printopt != 's') && (printopt != 'l') && (printopt != 'd')&& (printopt != 'h'))
+      if (printopt == 'h') graph = TRUE; // HTML output means graphical output 
+
+      if ((printopt != 's') && (printopt != 'l') && 
+	  (printopt != 'd')&& (printopt != 'h'))
 	errflag++;
       break;
       
@@ -437,7 +441,7 @@ int main  (int argc, char * argv [])
   
   // open matrix
     
-  if (! (fp = OpenFile(matname,  "rb"))) {
+  if (! (fp = FileOpen(EugDir,matname,  "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n",  matname);
     exit(2);
   }
@@ -463,7 +467,7 @@ int main  (int argc, char * argv [])
   Input_Size = INIT_SIZE;
   Data  = (char *) MyMalloc(Input_Size);
   
-  fp = (*fstname ? FileOpen (fstname, "r") : stdin);
+  fp = (*fstname ? FileOpen (NULL,fstname, "r") : stdin);
   
   if (fp == NULL) {
     fprintf(stderr, "cannot open fasta file %s\n",  fstname);
@@ -717,7 +721,7 @@ int main  (int argc, char * argv [])
 
        strcpy(tempname,fstname);
        strcat(tempname,".est");
-       fblast = FileOpen(tempname, "r");
+       fblast = FileOpen(NULL,tempname, "r");
        
        A[0] = B[0]= 0;
        EstId = A;
