@@ -18,12 +18,6 @@ int TestDArg(char *arg)
     return  (sscanf(arg, "%lf", &tmp) == 1) && (tmp >= 0);
 }
 
-// ------------------------
-//  Default constructor.
-// ------------------------
-Parameters :: Parameters ()
-{
-}
 
 // ------------------------
 //  initParam.
@@ -405,12 +399,14 @@ int Parameters :: getUseSensor(char **key, int *val)
 	  *key = (char*)iter->first;
 	  *val = atoi(iter->second);
 	  ++iter;
+	  delete [] s;
 	  return TRUE;
 	}
 	++iter;
       }
     }
   }
+  delete [] s;
   return FALSE;
 }
 
@@ -426,10 +422,9 @@ void Parameters :: setD (const char *key, double n)
 {
   char *buffer = new char[FILENAME_MAX+1];
   sprintf (buffer, "%10f",n);
+  delete [] m[key];
   m[key] = buffer;
 }
-
-
 
 
 // ------------------------
@@ -437,6 +432,11 @@ void Parameters :: setD (const char *key, double n)
 // ------------------------
 Parameters :: ~Parameters ()
 {
+  // Need to be commented, if not segmentation fault
+  // for (iter = m.begin(); iter!=m.end(); ++iter) { 
+  //       delete [] iter->second;
+  //       delete [] iter->first;
+  // }
   m.clear();
 }
 
@@ -488,6 +488,8 @@ std::string Parameters::WriteParam (const char* para_file, std::vector<std::stri
 
   fclose(fp);
   fclose(fp_opti);
+
+  delete [] d;
 
   return (std::string) filename;
 }

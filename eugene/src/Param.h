@@ -51,7 +51,6 @@ class Parameters
  public:
   FILE *fp;
     
-  Parameters  ();
   ~Parameters ();
   void   initParam (int, char *[]);
   int    count(char *key);
