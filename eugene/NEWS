@@ -13,6 +13,17 @@ Version 3.0
 
 * Complete autoconfiscation of the software
 
+Version 3.1
+
+* New plugin, procedures, parameters, argument
+* debug and improvement of the Est and Repeat sensors 
+* update in documentation
+
+
+Version 3.2
+
+* Change the functioning of the software (see the ChangeLog file for more detail)
+
 -------------------------------------------------------
 Copying information:
 

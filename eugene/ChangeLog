@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
-v3.2 released 17 Mar. 2005 
+v3.2 released 1 Apr. 2005 
 -------------------------------------------------------------------------------
 
 * change the use of the software:
 	EUGENEDIR: environment variable updating with the eugene root repertory
-        (default value /usr/share/eugene). This repertory contains repertories:
+        (default value /usr/local/share/eugene). This repertory contains repertories:
 	     - cfg (with eugene.par the default parameter file)
 	     - models (provided models)
 	     - doc (documentation)
@@ -22,7 +22,11 @@ v3.2 released 17 Mar. 2005
 * Optimized parameter file is written in the current directory instead of the directory of the parameter file used.
 
 * New parameter Output.webdir indicating where to find files necessary to vizualize HTML outputs ('LOCAL' value to use the local web directory or a URL)
-	
+
+* debug related to gene number (due to UTR intron)
+
+* debug related of stop just before a splice site
+
 
 -------------------------------------------------------------------------------
 v3.1 released 3 Feb. 2005 
