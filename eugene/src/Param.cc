@@ -312,7 +312,7 @@ char* Parameters :: getC(char *key)
 double Parameters :: getD(char *key)
 {
   if(m.count(key)) {
-    if(m[key] == "NINFINITY")
+    if(!strcmp(m[key], "NINFINITY"))
       return NINFINITY;
     else
       return atof(m[key]);
