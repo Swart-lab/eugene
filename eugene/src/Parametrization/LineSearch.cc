@@ -79,8 +79,6 @@ void LineSearch :: Optimize(bool is_chaining)
   unsigned int i; int c;
   std::string warning_message;
 
-  FitOpt = 0;
-
   // if chains another algo then takes the optimum found as initial point
   if (is_chaining)
     Para = OPTIM.Algorithms[OPTIM.AlgoIndex-1]->Para;
@@ -117,6 +115,8 @@ void LineSearch :: Optimize(bool is_chaining)
 
   Fitness = OPTIM.ParaEvaluate();
   std::cout <<std::endl<< "Fitness of initial point: " << Fitness <<std::endl<<std::endl;
+  FitOpt = Fitness; Optimums.clear(); Optimums.push_back(Para); 
+
 
   // general loop
   n=0; STOP = 0;
