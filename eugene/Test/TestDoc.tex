@@ -76,13 +76,35 @@ The sensors used are MarkovIMM, EuStop, NStart, IfElse, GSplicer, Est, BlastX.\\
 
 
 \section{How to run tests}
+It is first necessary to adapt the context of EuGeneTk/EuGene directory:
+\begin{enumerate}
+\item create a link named EuGeneTest toward EuGeneAS:\\
+         {\sf ln -s EuGeneAS EuGeneTest}
+\item copy the parameter file in EuGeneTest.par:\\ 
+         {\sf cp EuGeneAS.par EuGeneTest.par}
+\item add the following lines in EuGeneTest.par (needed to test separately each sensor):\\
+{\sf NG2.accP[0] 0.903\\ 
+NG2.accB[0] 5.585\\ 
+NG2.donP[0] 0.980\\ 
+NG2.donB[0] 27.670\\ 
+SPred.accP[0] 0.987\\ 
+SPred.accB[0] 3.850\\ 
+SPred.donP[0] 0.929\\ 
+SPred.donB[0] 10.800}
+\item update the EuGene.PluginsDir parameter with the absolute path (EuGeneTest will be called from the EuGeneTk/Test/config directory).
+\end{enumerate}
+\vspace{0.5cm}
 The 'check' target of Makefile lauches all the tests: {\sf make check}.\\
 To specify only some tests, is it possible to use the Makefile TEST variable set with DejaGnu runtest arguments.\\
 For example, to specify only 2 tests, type: \\
 {\sf make check TEST='Units.exp Functionals.exp'} \\
 or to forget a test, type: \\
-{\sf make check TEST='--ignore ``Units.exp'''}
-
+{\sf make check TEST='--ignore ``Units.exp'''}\\
+\vspace{0.5cm}
+If a test has failed, it is possible to examine difference between the coresponding reference file (in EuGeneTk/Test/Outputs directory) and the file obtained during test (in EuGeneTk/Test/TestTrace directory).
+For example, if the EuStop test has failed, type: \\
+{\sf tkdiff -i ../Test/Outputs/Output\_EuStop ../Test/TestTrace/Output\_EuStop}\\
+The -i argument allows to ignore case letter difference (see last section that details Linux and SUN OS difference).
 
 \section{Test software sources organization}
 All the test files are under the EuGeneTk/Test directory.
@@ -106,6 +128,17 @@ To add an other unit or functional test: if 'simple' case, nothing to do else ne
 To add a different test: need to write adapted code.
 \item Run Test/config/GenerateOutputs.tcl
 \end{enumerate}
+
+\section{Notes}
+At the moment, some differences exist between Linux (debian 3.0, gcc 2.95.4) and SUN OS (solaris 2.9, gcc 2.8.1). \\
+\\
+With SUN OS:
+\begin{itemize}
+\item options must be specified before sequences,
+\item a name must be specified after the -g argument,
+\item Inf is written instead of inf, diff is then used with the -i argument to ignore the case of letter,
+\item optimal path value may be a little different (for MarkovProt test after the 4th decimal digit), the display of optimal path has been limited to 4 decimal digits.
+\end{itemize}
 
 \end{document}
 
