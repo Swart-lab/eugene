@@ -200,7 +200,7 @@ while (my $line=<MAKE>) {
    if ($line =~ /clean :/) {
     print NEW_MAKE "$tmp.o : $tmp.cc $tmp.h ../EuGene/Sensor.h\n";
     print NEW_MAKE "\t\$(CXX) \$(CFLAGS) -c $tmp.cc -o \$@\n";
-    print NEW_MAKE "\t\$(CXX) \$(CFLAGS) \$(DLL)  \$@ -o $tmp.\$(DLLEXT)\n";
+    print NEW_MAKE "\t\$(CXX) \$(CFLAGS) \$(DLL)  \$@ -o $tmp\$(DLLEXT)\n";
     print NEW_MAKE "\tmv $tmp\$(DLLEXT) \$(DIR_PLUGINS)\n\n";
     print NEW_MAKE $line."\n"; }
    else { print NEW_MAKE $line."\n"; }
