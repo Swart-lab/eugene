@@ -190,13 +190,13 @@ SpliceWAM.MarkovianOrder	1
 SpliceWAM.donmodelfilename	WAM/WAM.ARA.DON.L9
 SpliceWAM.NbNtBeforeGT		3
 SpliceWAM.NbNtAfterGT		4
-SpliceWAM.DonScaleCoef		2.9004
-SpliceWAM.DonScalePenalty	-7.5877
+SpliceWAM.DonScaleCoef*		2.9004
+SpliceWAM.DonScalePenalty*	-7.5877
 SpliceWAM.accmodelfilename	WAM/WAM.ARA.ACC.L7
 SpliceWAM.NbNtBeforeAG		2
 SpliceWAM.NbNtAfterAG		3
-SpliceWAM.AccScaleCoef		2.9004
-SpliceWAM.AccScalePenalty	-7.5877
+SpliceWAM.AccScaleCoef*		2.9004
+SpliceWAM.AccScalePenalty*	-7.5877
 #
 ##### Sensor StartWAM #####
 #
@@ -204,8 +204,8 @@ StartWAM.modelfilename	WAM/WAM.ARA.START9
 StartWAM.NbNtBeforeATG	3
 StartWAM.NbNtAfterATG	3
 StartWAM.MarkovianOrder	1
-StartWAM.ScaleCoef	0.1594
-StartWAM.ScalePenalty	-3.1439
+StartWAM.ScaleCoef*	0.1594
+StartWAM.ScalePenalty*	-3.1439
 #
 ##### Sensor GCPlot #####
 #
