@@ -305,7 +305,7 @@ void Parameters :: ReadPar(char *argv)
 // ------------------------
 //  getChar param.
 // ------------------------
-char* Parameters :: getC(char *key, int index = 0)
+char* Parameters :: getC(char *key, int index)
 {
   if (!index && m.count(key))
     return (char*)m[key];
@@ -331,7 +331,7 @@ char* Parameters :: getC(char *key, int index = 0)
 // ------------------------
 //  getDouble param.
 // ------------------------
-double Parameters :: getD(char *key, int index = 0)
+double Parameters :: getD(char *key, int index)
 {
   char *res = getC(key,index);
 
@@ -347,7 +347,7 @@ double Parameters :: getD(char *key, int index = 0)
 // ------------------------
 //  getInt param.
 // ------------------------
-int Parameters :: getI(char *key,int index = 0)
+int Parameters :: getI(char *key,int index)
 {
   char *res = getC(key,index);
 
