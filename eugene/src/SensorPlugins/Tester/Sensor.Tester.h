@@ -13,6 +13,14 @@
 #ifndef  SENSOR_TESTER_H_INCLUDED
 #define  SENSOR_TESTER_H_INCLUDED
 
+#ifdef HAVE_CONFIG_H
+#include "../../EuGene/config.h"
+#endif
+
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
 #include "../../EuGene/Sensor.h"
 #include "../../EuGene/Dll.h"
 #include "../../EuGene/Prediction.h"
