@@ -4,7 +4,7 @@
 EuGene.version		3.0
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
-EuGene.sloppy		1
+EuGene.sloppy		0
 #
 ##### Lengths #####
 EuGene.InitExDist	init.dist
@@ -160,7 +160,7 @@ BlastX.level5*	0.0
 BlastX.level6*	0.0
 BlastX.level7*	0.0
 BlastX.level8*	0.0
-#BlastX.level9*	0.0
+BlastX.level9*	0.0
 BlastX.blastxM*	10	
 BlastX.minIn 50
 #
@@ -174,7 +174,7 @@ Est.utrP*	0.35
 Est.utrM	5
 Est.SpliceBoost* 0.0
 Est.StrongDonor 0.95
-Est.MinDangling 18
+Est.MinDangling 10
 Est.MaxIntron   15000
 #
 ##### Homology Sensor parameters #####
