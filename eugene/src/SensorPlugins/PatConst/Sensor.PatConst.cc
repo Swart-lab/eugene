@@ -81,7 +81,7 @@ void SensorPatConst :: Init (DNASeq *X)
   patP   = PAR.getD("PatConst.patP*",  GetNumber());
   patPNo = PAR.getD("PatConst.patPNo*",GetNumber());
 
-  //if (PAR.getI("Output.graph")) Plot(X);
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // ------------------------
@@ -119,6 +119,50 @@ void SensorPatConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorPatConst :: Plot(DNASeq *X)
 {
+  int  i,l;
+  bool isSigF = true;
+  bool isSigR = true;
+ 
+  // Shame on us.Boyer-Moore or KMP needed
+
+  for (l=0; l <= X->SeqLen;l++) {
+    isSigF = true;
+    isSigR = true;
+    
+    for (i=0; i<patLen; i++)
+      if ((*X)[l+i-newStatePos+1] != pattern[i]) {
+	isSigF=false;
+	break;
+      }
+    
+    for (i=patLen-1; i>-1; i--)
+      if ((*X)(l-i+newStatePos-2) != pattern[i]) {
+	isSigR=false;
+	break;
+      }
+    
+    if (isSigF) {
+      if (sigTypeIndex == DATA::Start)
+	PlotStart(l,(l%3)+1,0.5);
+      else if (sigTypeIndex == DATA::Don)
+	PlotDon(l,1,0.5);
+      else if(sigTypeIndex == DATA::Acc)
+	PlotAcc(l,1,0.5);
+      else if(sigTypeIndex = DATA::Stop)
+	PlotStop(l,(l%3)+1,1);
+    }
+
+    if(isSigR) {
+      if (sigTypeIndex == DATA::Start)
+	PlotStart(l,-((X->SeqLen-l)%3)-1,0.5);
+      else if (sigTypeIndex == DATA::Don)
+	PlotDon(l,1,0.5);
+      else if(sigTypeIndex == DATA::Acc)
+	PlotAcc(l,1,0.5);
+      else if(sigTypeIndex = DATA::Stop)
+	PlotStop(l,-((X->SeqLen-l)%3)-1,1);
+    }
+  }
 }
 
 // ------------------
