@@ -3,7 +3,7 @@
 #
 EuGene.key		HVGNNJUDTJDQDF	# Clef
 EuGene.versionPAR	16_10_02	# Version du fichier .par (date)
-EuGene.frameshift	-9999.0		# Penalite de frameshift  (obsolete)
+EuGene.frameshift	-9999.0		# Penalite de frameshift 
 EuGene.minEx		3
 EuGene.minIn		50
 EuGene.minSg		150
@@ -42,7 +42,12 @@ SPred.accP	0.987
 SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
-Markov.matname	default.mat 
+Markov.matname[0]	default.mat 
+Markov.minGC[0]		0
+Markov.maxGC[0]		50
+#Markov.matname[1]	default.mat
+#Markov.minGC[1]		50
+#Markov.maxGC[1]		100
 Markov.transCodant	1.0
 Markov.transIntron	1.0
 Markov.transUTR5	0.999
@@ -64,6 +69,7 @@ Sensor.EuStop.use	TRUE
 Sensor.NStart.use	TRUE
 Sensor.NG2.use		TRUE
 Sensor.SPred.use	TRUE
+#Sensor.Markov.use	2
 Sensor.Markov.use	TRUE
 Sensor.BlastX.use	FALSE
 Sensor.Repeat.use	FALSE
