@@ -51,6 +51,8 @@ SensorEst :: SensorEst (int n) : Sensor(n)
   estM = PAR.getI("Est.estM",n);
   utrP = PAR.getD("Est.utrP",n);
   utrM = PAR.getI("Est.utrM",n);
+  DonorThreshold = PAR.getD("Est.StrongDonor");
+  DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 }
 
 // ----------------------
@@ -285,13 +287,17 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	for (j = -EstM; j <= EstM; j++) {
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
 	  MS.GetInfoSpAt(Type_Splice, X, k, &dTmp);
-	  DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]);
-	  AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]);
+	  DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
+		     dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
+	  AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]-
+		     dTmp.sig[DATA::Acc].weight[Signal::ReverseNo]);
 	  
 	  k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
 	  if(MS.GetInfoSpAt(Type_Splice, X, k, &dTmp)) {
-	    DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]);
-	    AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]);
+	    DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
+		       dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
+	    AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
+		       dTmp.sig[DATA::Acc].weight[Signal::ForwardNo]);
 	  }
 	  else {
 	    fprintf(stderr,"   WARNING: cDNA hits ignored."
@@ -346,20 +352,19 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
           }
       }
 
-      DonF = 0.0;
-      DonR = 0.0;
+      DonF = NINFINITY;
+      DonR = NINFINITY;
       
       // calcul des sites d'epissage internes a l'exon
       for (i = ThisBlock->Start+EstM+1; !Inc && i <= ThisBlock->End-EstM-1; i++) {
 	MS.GetInfoSpAt(Type_Splice, X, i, &dTmp);
-	DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]);
-	DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]);
-	//	Don[0][i] *= 0.99;
-	//	Don[1][i] *= 0.99;
+	DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
+		   dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
+	DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
+		   dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
       }
-      //      printf("Internal splices: %f - %f\n",DonF,DonR);
-      if (DonF > 0.95) ExonInc |= 1;
-      if (DonR > 0.95) ExonInc |= 2;
+      if (DonF > DonorThreshold) ExonInc |= 1;
+      if (DonR > DonorThreshold) ExonInc |= 2;
       if (ExonInc == 3 && !Inc && !ThisEST->NGaps) {
 	fprintf(stderr,"   [%s]: Gapless EST with strong donor [%d-%d]\n",
 		    ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);

@@ -18,6 +18,7 @@ class SensorEst : public Sensor
   Hits **HitTable;
   int NumEST;
   double estP, utrP;
+  double DonorThreshold;
   int    estM, utrM;
   
   Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
