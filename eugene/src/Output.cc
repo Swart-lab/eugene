@@ -36,7 +36,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   int  trunclen  = PAR.getI("Output.truncate");
   int  stepid    = PAR.getI("Output.stepid");
   char nameformat[20];
-
+  
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
   else strcpy(nameformat,"%s");
 
@@ -99,6 +99,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
       int nbExon  = 0;
       int cons = 0, incons = 0;
       int forward,init,term,Lend,Rend,Phase;
+      int PhaseGFF,LenGFF = 0;
       int Don,Acc;
       char seqName[FILENAME_MAX];
       int stateBack = 0, state, stateNext = 0;
@@ -306,9 +307,21 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  else	                      fprintf(f,"Intr");
 	      }
 	  
-	  if (printopt0 == 'g')
-	    printf("\t%d\t%d\t.\t%c\t%d\n",
-		   Lend,Rend,((forward) ? '+' : '-'),abs(PhaseAdapt(state))-1);
+	  if (printopt0 == 'g') {
+	     printf("\t%d\t%d\t.\t%c\t",Lend,Rend,((forward) ? '+' : '-'));
+	     if (term && !forward)
+	       LenGFF = pred->lenCDS(nbGene);
+	     if (init) {
+	       printf("0\n");
+	       if (forward) LenGFF = Rend - Lend +1;
+	     }
+	     else {
+	       if (!forward) LenGFF -= Rend - Lend +1;
+	       PhaseGFF = ( 3 - (LenGFF % 3) ) %3;
+	       if (forward) LenGFF += Rend - Lend +1;
+	       printf("%d\n", PhaseGFF);
+	     }
+	  }
 	  else
 	    if (printopt0 == 'h')
 	      vhtml.push_back(" <td align=\"right\">\n"
