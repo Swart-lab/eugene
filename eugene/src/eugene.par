@@ -77,12 +77,12 @@ Sensor.Riken.use	FALSE
 Sensor.Est.use		FALSE
 Sensor.User.use		FALSE
 Sensor.EuStop	1		#
-Sensor.NStart	3		# Sensor.Name Priority
-Sensor.NG2	4		#
-Sensor.SPred	5		#  Priority 0 -> Ignored
+Sensor.NStart	1		# Sensor.Name Priority
+Sensor.NG2	1		#
+Sensor.SPred	1		#  
 Sensor.Markov	1		#
-Sensor.BlastX	2		#  Priority 1 -> First
-Sensor.Repeat	0		#  Priority 2 -> Second
+Sensor.BlastX	2		#  Priority 0 -> First
+Sensor.Repeat	9		#  Priority 1 -> Second
 Sensor.Riken	7		#  ...
-Sensor.Est	8		#  Priority n -> Last
+Sensor.Est	2		#  Priority n -> Last
 Sensor.User	10		#
