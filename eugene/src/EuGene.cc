@@ -24,6 +24,8 @@
 
 // Fri Mar 16 18:07:10 2001: rel 1.1a: separation du traitement des
 //                             EST et correction BestP sous dimensionne
+// Fri Mar 29 22:17:29 2002: kludge: les penalites de start sont ignorees des UTR
+//                             si l'on a est dans un intron UTR d'apres les hits EST
 
 // TODO:
 // supprimer Choice
@@ -1288,8 +1290,11 @@ int main  (int argc, char * argv [])
     // ----------------------------------------------------------------
     maxi = NINFINITY;
     
-    // On reste 5' direct. On ne prend pas le Start eventuel
-    LBP[UTR5F]->Update(log(1.0-Start[0][i]));
+    // On reste 5' direct. On ne prend pas le Start eventuel.
+    //  Kludge: si on a un EST qui nous dit que l'on est dans un
+    //  intron, on oublie
+    if ((ESTMatch[i] & Gap) == 0)
+      LBP[UTR5F]->Update(log(1.0-Start[0][i]));
 
     LBP[UTR5F]->BestUsable(i,SwitchAny,0,&BestU);
     // Un test tordu pour casser le cou aux NaN
@@ -1365,7 +1370,10 @@ int main  (int argc, char * argv [])
     maxi = NINFINITY;
     
     // On reste 5' reverse
-    LBP[UTR5R]->Update(log(1.0-Start[1][i]));
+    //  Kludge: si on a un EST qui nous dit que l'on est dans un
+    //  intron, on oublie
+    if ((ESTMatch[i] & Gap) == 0)
+      LBP[UTR5R]->Update(log(1.0-Start[1][i]));
 
 
     LBP[UTR5R]->BestUsable(i,SwitchAny,0,&BestU);
