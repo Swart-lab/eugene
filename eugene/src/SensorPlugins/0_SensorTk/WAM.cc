@@ -119,5 +119,7 @@ double WAM :: ScoreTheMotif (char* motif)
     }
     outofalphabet=0; 
   }
+
+  delete  word;
   return score;
 }
