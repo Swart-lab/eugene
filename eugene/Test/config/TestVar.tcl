@@ -29,7 +29,7 @@ if {$action=="Test"} {
 set AllSensorsList {BlastX Est EuStop FrameShift GFF GSplicer Homology IfElse \
 		     MarkovConst MarkovIMM MarkovProt NG2 NStart Repeat  \
 		     Riken SPred SpliceConst SpliceWAM StartConst \
-		     StartWAM Transcript User}
+		     StartWAM Transcript User GCPlot Plotter Tester}
 
 
 ############################################################################

@@ -161,6 +161,7 @@ set NewValue1(Est.estP)	-0.4
 set NewValue1(Est.estM)	6
 set NewValue1(Est.utrP)	0.35
 set NewValue1(Est.utrM)	5
+set NewValue1(Est.StrongDonor)	0.95
 ##### Proteic similarity sensor parameters #####
 set NewValue1(BlastX.PostProcess) FALSE
 set NewValue1(BlastX.levels)	0
@@ -215,9 +216,28 @@ set NewValue1(StartWAM.NbNtAfterATG)	3
 set NewValue1(StartWAM.MarkovianOrder)		1
 set NewValue1(StartWAM.ScaleCoef)		0.1594
 set NewValue1(StartWAM.ScalePenalty)		-3.1439
-
-
-# No sensor
+#
+##### Sensor GCPlot #####
+#
+set NewValue1(GCPlot.Color)	5
+set NewValue1(GCPlot.Zoom)	2.0
+set NewValue1(GCPlot.Zoom3)	1.0
+set NewValue1(GCPlot.Up)	GC
+set NewValue1(GCPlot.Over)	ATGC
+set NewValue1(GCPlot.Smooth)	100
+#
+##### Sensor Plotter
+#
+set NewValue1(Plotter.GC)	 1 
+set NewValue1(Plotter.GC3)	 1 
+set NewValue1(Plotter.A|T/A+T)	 0 
+#
+##### Sensor Tester #####
+#
+set NewValue1(Tester.Test.0)		EuStop
+set NewValue1(Tester.Param.idx.0)	0
+#
+# No sensor used
 foreach sensor $SensorsList {set NewValue1(Sensor.${sensor}.use) FALSE}
 
 ModifyParaValue $FileName  NewValue1
