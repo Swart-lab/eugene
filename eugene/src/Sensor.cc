@@ -42,19 +42,23 @@ void Sensor :: CheckSplices (DNASeq *X,
 {
   for (int i = 0; i<(int)vPosAccF.size(); i++)
     if(((*X)[vPosAccF[i]-2] != 'a') || ((*X)[vPosAccF[i]-1] != 'g'))
-      fprintf(stderr,"WARNING: Non AG acceptor at %d (+ strand) !\n", vPosAccF[i]);
+      fprintf(stderr,"WARNING: Non AG (%c%c) acceptor at %d (+ strand) !\n", 
+	      (*X)[vPosAccF[i]-2], (*X)[vPosAccF[i]-1], vPosAccF[i]);
   
   for (int i = 0; i<(int)vPosAccR.size(); i++)
     if(((*X)(vPosAccR[i]) != 'g') || ((*X)(vPosAccR[i]+1) != 'a'))
-      fprintf(stderr,"WARNING: Non AG acceptor at %d (- strand) !\n", vPosAccR[i]);
+      fprintf(stderr,"WARNING: Non AG (%c%c) acceptor at %d (- strand) !\n",
+	      (*X)(vPosAccR[i]), (*X)(vPosAccR[i]+1),vPosAccR[i]);
   
   for (int i = 0; i<(int)vPosDonF.size(); i++)
     if(((*X)[vPosDonF[i]] != 'g') || 
        (((*X)[vPosDonF[i]+1] != 't') && ((*X)[vPosDonF[i]+1] != 'c')))
-      fprintf(stderr,"WARNING: Non GT/GC donor at %d (+ strand) !\n", vPosDonF[i]);
+      fprintf(stderr,"WARNING: Non GT/GC (%c%c) donor at %d (+ strand) !\n", 
+	      (*X)[vPosDonF[i]],(*X)[vPosDonF[i]+1], vPosDonF[i]);
   
   for (int i = 0; i<(int)vPosDonR.size(); i++)
     if((((*X)(vPosDonR[i]-2) != 't') &&
 	((*X)(vPosDonR[i]-2) != 'c')) || ((*X)(vPosDonR[i]-1) != 'g'))
-      fprintf(stderr,"WARNING: Non GT/GC donor at %d (- strand) !\n", vPosDonR[i]);
+      fprintf(stderr,"WARNING: Non GT/GC (%c%c) donor at %d (- strand) !\n", 
+	      (*X)(vPosDonR[i]-2),(*X)(vPosDonR[i]-2),vPosDonR[i]);
 }
