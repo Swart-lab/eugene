@@ -90,6 +90,13 @@ SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
 #
+##### GeneSplicer parameters #####
+#
+GSplicer.coefAcc	1
+GSplicer.penAcc 	0
+GSplicer.coefDon	1
+GSplicer.penDon 	0
+#
 ##### Interpolated Markov Models parameters #####
 #
 MarkovIMM.matname[0]	Ara2UTR.mat
@@ -180,6 +187,11 @@ StartWAM.order		1
 StartWAM.coef		0.1594
 StartWAM.pen		3.1439
 #
+##### Sensor Tester #####
+#
+Tester.Test.0		GSplicer
+Tester.Param.idx.0	0
+#
 ##### Sensors activation #####
 #
 Sensor.Transcript.use		TRUE
@@ -194,6 +206,7 @@ Sensor.StartWAM.use	FALSE
 # SPLICES SENSORS:
 Sensor.NG2.use		FALSE
 Sensor.SPred.use	FALSE
+Sensor.GSplicer.use	FALSE
 Sensor.SplicePlantWAM.use FALSE
 Sensor.SpliceConst.use	FALSE
 Sensor.IfElse.use		TRUE
@@ -214,6 +227,9 @@ Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
 #
+# TEST
+Sensor.Tester.use	FALSE
+#
 ##### Sensor priorities	 #####
 #         Name       Priority
 Sensor.Transcript	1	#
@@ -226,6 +242,7 @@ Sensor.StartWAM		1	#
 Sensor.IfElse		1	#
 Sensor.NG2		1	#
 Sensor.SPred		1	#
+Sensor.GSplicer		1	#
 Sensor.SpliceConst	1	#
 Sensor.SplicePlantWAM   1       #
 Sensor.MarkovIMM	1	#
@@ -234,6 +251,7 @@ Sensor.MarkovConst	1	#
 Sensor.Est		2	#
 Sensor.BlastX		2	#  Priority 0 -> First
 Sensor.Riken		7	#  Priority 1 -> Second
-Sensor.GFF		9	#
-Sensor.Repeat		9	#  ...
-Sensor.User		10	#  Priority n -> Last
+Sensor.Repeat		8	#  ...
+Sensor.User		9	#  Priority n -> Last
+Sensor.GFF		10	#
+Sensor.Tester		11	#
