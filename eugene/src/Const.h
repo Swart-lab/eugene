@@ -14,16 +14,6 @@ const int TRUE  = 1;
 const int FALSE = 0;
 const double NINFINITY   = log(0.0);
 
-// Les etats
-enum Tracks { 
-  ExonF1 = 0, ExonF2 = 1, ExonF3 = 2,
-  ExonR1 = 3, ExonR2 = 4, ExonR3 = 5,
-  IntronF1 = 6,IntronF2 = 7, IntronF3 = 8,
-  IntronR1 = 9, IntronR2 = 10, IntronR3 = 11,
-  InterGen5 = 12, InterGen3 = 17,
-  UTR5F = 13, UTR5R = 15,
-  UTR3F = 14, UTR3R = 16};
-
 // Les Hits EST
 const unsigned char HitForward    = 0x1;
 const unsigned char MLeftForward  = 0x2;
