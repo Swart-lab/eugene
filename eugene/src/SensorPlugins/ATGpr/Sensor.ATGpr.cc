@@ -156,6 +156,10 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexF = lower_bound(vPosF.begin(), vPosF.end(), pos)-vPosF.begin();
     
     if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
+      // correct read score  to be in ]0 inf[
+      vValF[indexF] = fabs(vValF[indexF]); 
+      if (vValF[indexF]==0) vValF[indexF]=0.001;
+
       f = pow(vValF[indexF], startB) * exp(-startP);
       d->sig[DATA::Start].weight[Signal::Forward] += log(f);
       d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-f);
@@ -169,6 +173,10 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexR = lower_bound(vPosR.begin(),vPosR.end(),pos)-vPosR.begin();
     
     if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
+      // correct read score  to be in ]0 inf[
+      if (vValR[indexR]<0) vValR[indexR] = -vValR[indexR];
+      if (vValR[indexR]==0) vValR[indexR]=0.001;
+
       f = pow(vValR[indexR], startB) * exp(-startP);
       d->sig[DATA::Start].weight[Signal::Reverse]   += log(f);
       d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-f);
