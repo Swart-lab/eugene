@@ -502,11 +502,13 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   
   if (!PAR.getI("Est.PostProcess",GetNumber())) return;
 
+  if (NumEST == 0) return;
+
   qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
   
   // Reset static in EST Support
   ESTSupport(NULL,100,0,100,0,NULL,0);
-    
+
   for(int i=pred->size()-1; i!=-1; i--) {
     if(i != pred->size()-1) {
       stateBack = pred->getState(i+1);
@@ -518,13 +520,13 @@ void SensorEst :: PostAnalyse(Prediction *pred)
       stateNext = pred->getState(i-1);
       posNext   = pred->getPos(i-1);
     }
-    
+
     // Demarrage exon extreme. Noter pour verif EST
     if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
     if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
     if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
     if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
-    
+        
     // Si fin de gene ou fin seq gene en cours
     if ((state <= ExonR3 && stateNext >= InterGen5) ||
 	(i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {

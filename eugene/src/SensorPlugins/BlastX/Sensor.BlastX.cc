@@ -336,15 +336,16 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 
       while ( (index < (int)vPos.size()) && (vPos[index] < posBack)) index++;
       // index=indice du premier match etant > ou = au debut de l'exon
-      //      fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d, index=%d\n",vPos[index],index);
+      // fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d, index=%d\n",vPos[index],index);
 
       if (index < (int)vPos.size()) { // il reste des hits
-	while (vPos[index]<=pos) { // pour chaque nuc de l'exon supporte par un hit
-	  if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc ++;
+	// pour chaque nuc de l'exon supporte par un hit
+	while (vPos[index]<=pos  &&  index < (int)vPos.size()) {
+	  if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
 	  index++;
 	}
       }
-
+      
       if ( ((state <= ExonR3) && (stateNext >= InterGen5)) || // fin de gene
 	   (i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
 	endCDS = pos;
