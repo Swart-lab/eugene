@@ -1,8 +1,8 @@
 #
-# Edité pour EuGeneAS 1.46 (141002)
+# Edité pour EuGeneAS 1.49 (161002)
 #
 EuGene.key		HVGNNJUDTJDQDF	# Clef
-EuGene.versionPAR	14_10_02	# Version du fichier .par (date)
+EuGene.versionPAR	16_10_02	# Version du fichier .par (date)
 EuGene.frameshift	-9999.0		# Penalite de frameshift  (obsolete)
 EuGene.minEx		3
 EuGene.minIn		50
@@ -15,6 +15,23 @@ EuGene.min3Prime	20
 EuGene.stopP		4.155
 EuGene.transStartP	4.155
 EuGene.transStopP	4.155
+EuGene.ExonPrior	0.33		# Prior on the initial states
+EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
+EuGene.InterPrior	0.4
+EuGene.FivePrimePrior	0.03
+EuGene.ThreePrimePrior	0.07
+Output.graph		FALSE		# don't produce a graphical output
+Output.resx		900
+Output.resy		400
+Output.glen		-1
+Output.golap		-1
+Output.gfrom		-1
+Output.gto		-1
+Output.window		48
+Output.format		l
+Output.offset		0
+Output.normopt		1
+Output.Prefix		./
 NStart.startP	0.052
 NStart.startB	0.308
 NG2.accP	0.903
@@ -25,13 +42,16 @@ SPred.accP	0.987
 SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
+Markov.matname	default.mat 
 Markov.transCodant	1.0
 Markov.transIntron	1.0
 Markov.transUTR5	0.999
 Markov.transUTR3	0.999
 Markov.transInter	1.0
+Est.PostProcess		FALSE
 Est.estP	-0.2
 Est.estM	6
+BlastX.levels	123
 BlastX.level0	0.2
 BlastX.level1	0.0
 BlastX.level2	0.0
