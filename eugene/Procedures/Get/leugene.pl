@@ -63,7 +63,7 @@ sub getsites( $ )
 	&flat2fasta("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa", 'tmp', substr($sequence,$i,$MaxLength), 60);
 	
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0]\n", $i, $i + $MaxLength;
-	open(FIN,"rsh ossau 'cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa' |") || die "Can't launch NetStart on $[0]";
+	open(FIN,"cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa |") || die "Can't launch NetStart on $[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -98,7 +98,7 @@ sub getsites( $ )
 	# create temp file with the sequence portion
 	&flat2fasta("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa", 'tmp', substr($rsequence,$i,$MaxLength), 60);
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0] (rev)\n", $i, $i + $MaxLength;
-	open(FIN,"rsh ossau 'cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa' |") || die "Can't launch NetStart on $_[0]";
+	open(FIN,"cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa |") || die "Can't launch NetStart on $_[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -146,21 +146,11 @@ sub getsites( $ )
 
     if ($DoIt) {
       print STDERR "Issuing request to SplicePredictor (direct strand)...\n";
-      system("readseq -f2 $_[0] -o/Annotation/SunSoft/SplicePredictor/tmp/`basename $_[0]`.gb");
       open(FORWARD,">$_[0].spliceP");
-      open(FIN,"rsh ossau 'cd /Annotation/SunSoft/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 ./tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
+      open(FIN,"SplicePredictorLL  -c 1 -s Arabidopsis -p 5 -l $_[0] |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
-	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
-	    {
-	      printf  FORWARD "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-		'->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	    }
-	  elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
-	    {
-	      printf  FORWARD "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-		'<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	    }
+	print FORWARD;
 	}
       close(FIN);
       close(FORWARD);
@@ -174,23 +164,13 @@ sub getsites( $ )
     if ($DoIt) {
       print STDERR "Issuing request to SplicePredictor (reverse strand)...\n";
       open(REVERSE,">$_[0].splicePR");
-      open(FIN,"rsh ossau 'cd /Annotation/SunSoft/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 -r ./tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
+      open(FIN,"SplicePredictorLL -r -c 1 -s Arabidopsis -p 5 -l $_[0] |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
-	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
-	    {
-	      printf  REVERSE "D %-6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-		'->', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	    }
-	  elsif (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\d\s+\(/))
-	    {
-	      printf  REVERSE "A %6s %6d %19s %7.3f %6.3f %6.3f %3d (%d %d %d)  %s\n",
-		'<-', $pos, 'gaga', $P, 0, 0, 0, 0, 0, 0, '-';
-	    }
+	  print REVERSE;
 	}
       close(FIN);
       close(REVERSE);
-      system("rm /Annotation/SunSoft/SplicePredictor/tmp/`basename $_[0]`.gb");
     }
     else {print STDERR "[R on disk]";}
   }
