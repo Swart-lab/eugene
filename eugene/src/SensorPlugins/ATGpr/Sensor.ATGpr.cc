@@ -50,8 +50,6 @@ void SensorATGpr :: Init (DNASeq *X)
 
   type = Type_Start;
   
-  indexR = 0;
-  
   vPosF.clear();
   vValF.clear();
   vPosR.clear();
@@ -72,9 +70,13 @@ void SensorATGpr :: Init (DNASeq *X)
   
   CheckStart(X,vPosF, vPosR);
 
-  if (PAR.getI("Output.graph")) Plot(X);
+  // vectors for reverse are put in the increasing order
+  reverse(vPosR.begin(), vPosR.end()); 
+  reverse(vValR.begin(), vValR.end()); 
 
-  indexF = (int)vPosR.size() - 1;
+  indexF = indexR = 0;
+
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // --------------------------
@@ -164,18 +166,13 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
   
   // Start Reverse
   if (!vPosR.empty()) {
-    if (update) { 
-      indexR = lower_bound(vPosR.begin(),vPosR.end(),pos,std::greater<int>())-vPosR.begin();
-      // if pos is before first site, then point first site
-      if (indexR==(int)vPosR.size()) indexR--;
-      // if pos is after last site, then do not point
-      if (vPosR[indexR]<pos) indexR = -1;
-    }
+    if (update) 
+      indexR = lower_bound(vPosR.begin(),vPosR.end(),pos)-vPosR.begin();
     
-    if((indexR!=-1) && (indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
+    if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
       d->sig[DATA::Start].weight[Signal::Reverse]   += log(vValR[indexR]);
       d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[indexR]);
-      indexR--;
+      indexR++;
     }
   }
 }
