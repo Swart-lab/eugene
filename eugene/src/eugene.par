@@ -1,8 +1,8 @@
 #
-# Edité pour EuGeneAS 1.55 (150203)
+# Edité pour EuGeneAS 1.55 (250403)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	10_01_03        # Parameter file version (date)
+EuGene.versionPAR	25_05_03        # Parameter file version (date)
 EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
 #
 ##### Minimum lengths #####
@@ -116,15 +116,19 @@ Est.estM	6
 #
 ##### Proteic similarity sensor parameters #####
 #
-BlastX.levels	123
+BlastX.levels	012
 BlastX.level0	0.2
-BlastX.level1	0.0
+BlastX.level1	0.05
 BlastX.level2	0.0
 BlastX.level3	0.0
 BlastX.level4	0.0
 BlastX.level5	0.0
 BlastX.level6	0.0
 BlastX.level7	0.0
+BlastX.level8	0.0
+BlastX.level9	0.0
+BlastX.blastxM	10	
+BlastX.PostProcess	0
 #
 ##### Repeat sensor parameters #####
 #
