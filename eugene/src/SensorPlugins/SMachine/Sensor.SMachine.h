@@ -14,10 +14,7 @@
 #define  SENSOR_SMACHINE_H_INCLUDED
 
 #include "../../EuGene/Sensor.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <libgen.h>
+
 
 /*************************************************************
  **                       SensorSMachine                         **
@@ -38,12 +35,9 @@ class SensorSMachine : public Sensor
 
   int indexF, indexR;
   double startP, startB;
-  
-  void ReadSMachineF(char *, int);
-  void ReadSMachineR(char *, int);
 
-  void ReadStartF (char *, int);
-  void ReadStartR (char *, int);
+  void ReadSMachineSplices(char *, int);
+  void ReadSMachineStarts(char *, int);
 
   void SpliceMachine();
   

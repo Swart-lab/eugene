@@ -13,7 +13,7 @@
 #include "Sensor.SMachine.h"
 #include"../../EuGene/System.h"
 
-#define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
+#define NORM(x,n) Max(3.0,(x)+(n))/(n)
 
 /*************************************************************
  **                        SensorSpliceMachine              **
@@ -28,8 +28,6 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
 {
   char *seqname;
   char tempname[FILENAME_MAX+1];
-  struct stat DirStat;
-  int error = 0;
 
   type = Type_Acc|Type_Don|Type_Start;
   
@@ -38,33 +36,11 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
 
   seqname = PAR.getC("fstname");
   strcpy(tempname,seqname);
-  strcat(tempname,".SMachine");
-  if (stat(tempname,&DirStat))
-    error = mkdir(tempname,0755);
-  
-  if (error) {
-    perror("SpliceMachine directory: ");
-    exit(2);
-  }
-
-  strcpy(tempname,seqname);
-  strcat(tempname,".SMachine/");
-  strcat(tempname, BaseName(seqname));
-  strcat(tempname,".splices");
+  strcat(tempname,".spliceMAD");
   if (!ProbeFile(tempname)) SpliceMachine();
     
-  ReadSMachineF(tempname, X->SeqLen);
-  fprintf(stderr,"forward,");
-  fflush(stderr);
-
-  strcpy(tempname,seqname);
-  strcat(tempname,".SMachine/");
-  strcat(tempname, BaseName(seqname));
-  strcat(tempname,".splicesR");
-  if (!ProbeFile(tempname)) SpliceMachine();
-
-  ReadSMachineR(tempname, X->SeqLen);
-  fprintf(stderr," reverse done\n");
+  ReadSMachineSplices(tempname, X->SeqLen);
+  fprintf(stderr,"  done\n");
   
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 
@@ -78,22 +54,11 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
 
   strcpy(tempname,seqname);
-  strcat(tempname,".SMachine/");
-  strcat(tempname, BaseName(seqname));
-  strcat(tempname,".starts");
+  strcat(tempname,".spliceMSt");
   if (!ProbeFile(tempname)) SpliceMachine();
 
-  ReadStartF(tempname, X->SeqLen);
-  fprintf(stderr,"forward,");
-
-  strcpy(tempname,seqname);
-  strcat(tempname,".SMachine/");
-  strcat(tempname, BaseName(seqname));
-  strcat(tempname,".startsR");
-  if (!ProbeFile(tempname)) SpliceMachine();
-
-  ReadStartR(tempname, X->SeqLen);
-  fprintf(stderr," reverse done\n");
+  ReadSMachineStarts(tempname, X->SeqLen);
+  fprintf(stderr,"  done\n");
 
   CheckStart(X,vPosF, vPosR);
 
@@ -135,147 +100,94 @@ void SensorSMachine :: Init (DNASeq *X)
   if (PAR.getI("Output.graph")) Plot(X);
 }
 // -----------------------------
-//  Read NetGene2 forward file.
+//  Read SpliceMachine Splice Site files
 // -----------------------------
-void SensorSMachine :: ReadSMachineF(char name[FILENAME_MAX+1], int SeqLen)
+void SensorSMachine :: ReadSMachineSplices(char *name, int SeqLen)
 {
   FILE *fp;
   char buf[FILENAME_MAX];
-  char sacc[10],sdon[10];
-  char altsacc[10],altsdon[10];
-  int i, j,pos;
-  
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open splice sites file %s\n", name);
-    exit(2);
-  }
-  fgets(buf,FILENAME_MAX-1,fp);
-  
-  for (i = 0; i < SeqLen; i++) {
-    // final value of netgene2 
-    j = fscanf(fp,"%d %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
-	       &pos,altsdon,altsacc,sdon,sacc);
-
-    if ((j < 4) || (pos != i+1)) {
-      fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
-      exit(2);
-    }
-
-    if (sdon[0] == '-') strcpy(sdon,altsdon);
-    if (sacc[0] == '-') strcpy(sacc,altsacc);
-    
-    if( atof(sacc) != 0.0 ) {
-      vPosAccF.push_back( i+1 );
-      vValAccF.push_back( atof(sacc) );
-    }
-    if( atof(sdon) != 0.0 ) {
-      vPosDonF.push_back( i );
-      vValDonF.push_back( atof(sdon) );
-    }
-  }
-  fclose(fp);
-}
-
-// -----------------------------
-//  Read NetGene2 reverse file.
-// -----------------------------
-void SensorSMachine :: ReadSMachineR(char *name, int SeqLen)
-{
-  FILE *fp;
-  char buf[FILENAME_MAX];
-  char sacc[10],sdon[10];
-  char altsacc[10],altsdon[10];
-  int i, j, k,pos;
-  
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open splice sites file %s\n", name);
-    exit(2);
-  }
-  fgets(buf,FILENAME_MAX-1,fp);
-
-  k = SeqLen;
-  for (i = 0; i < SeqLen; i++) {
-    // final value of netgene2 
-    j = fscanf(fp,"%d %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
-	       &pos,altsdon,altsacc,sdon,sacc);
-    if ((j < 4) || (pos != i+1)) {
-      fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
-      exit(2);
-     }
-    if (sdon[0] == '-') strcpy(sdon,altsdon);
-    if (sacc[0] == '-') strcpy(sacc,altsacc);
-
-    if( atof(sacc) != 0.0 ) {
-      vPosAccR.push_back( k-1 );
-      vValAccR.push_back( atof(sacc));
-    }
-    if( atof(sdon) != 0.0 ) {
-      vPosDonR.push_back( k );
-      vValDonR.push_back( atof(sdon));
-    }
-    k--;
-  }
-  fclose(fp);
-}
-// --------------------------
-//  Read start forward file.
-// --------------------------
-void SensorSMachine :: ReadStartF (char *name, int Len)
-{
-  FILE *fp;
-  int i,j = -1;
+  char type[13];  // max len for "acceptor_rev"
+  size_t len = 0;
+  int i,pos,end =0;
   double force;
 
   if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open SpliceMachine start file %s\n", name);
+    fprintf(stderr, "Cannot open splice sites file %s\n", name);
     exit(2);
   }
+  // skip first line
+  fgets(buf, FILENAME_MAX-1, fp);
   
-  while (1) {
-    i = fscanf(fp,"%d %lf %*s\n", &j, &force);
-    if (i == EOF) break;
-    if (i < 2) {
-      fprintf(stderr, "Error in SpliceMachine start file %s, position %d\n", name, j);
-      exit(2);
-    }
-    vPosF.push_back( j-1 );
-    vValF.push_back( force );
-  }
-  if (j == -1) fprintf(stderr,"WARNING: empty SpliceMachine start file !\n");
-  fclose(fp);
-}
+  len =1;
+  while (!end) {
+    i = fscanf(fp,"%d %s %lf\n", &pos, type, &force);
+    len ++;
+    if (i == EOF) { end = 1; break;}
+    if (i < 3) { end =2; break;}
 
+    if (strcmp(type,"acceptor") == 0) {
+      vPosAccF.push_back(pos);
+      vValAccF.push_back(force);
+    } else if (strcmp(type,"donor") == 0) {
+      vPosDonF.push_back(pos-1);
+      vValDonF.push_back(force);
+    } else if (strcmp(type,"acceptor_rev") == 0) {
+      vPosAccR.push_back(pos-1);
+      vValAccR.push_back(force);
+    } else if (strcmp(type,"donor_rev") == 0) {
+      vPosDonR.push_back(pos);
+      vValDonR.push_back(force);
+    } else end = 2;
+  }
+  fclose(fp);
+
+  if (end ==2) {
+    fprintf(stderr, "Error in SpliceMachine splice site file %s, line %d\n", name, len);
+    exit(2);
+  }
+}
 // --------------------------
-//  Read start reverse file.
+//  Read start file.
 // --------------------------
-void SensorSMachine :: ReadStartR (char *name, int Len)
+void SensorSMachine :: ReadSMachineStarts(char *name, int Len)
 {
+  
   FILE *fp;
-  int i,j = -1;
+  char type[10];  // max len for "start_rev"
+  int len = 0;
+  int i,pos,end =0;
   double force;
 
   if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open SpliceMachine start file %s\n", name);
+    fprintf(stderr, "Cannot open splice sites file %s\n", name);
     exit(2);
   }
 
-  while (1) {
-    i = fscanf(fp,"%d %lf %*s\n", &j, &force);
-    if (i == EOF) break;
-    if (i < 2) {
-      fprintf(stderr, "Error in SpliceMachine start file %s, position %d\n", name, j);
-      exit(2);
-    }
-    j = Len-j+2;
-    vPosR.push_back( j-1 );
-    vValR.push_back( force );
+  len =1;
+  while (!end) {
+    i = fscanf(fp,"%d %s %lf\n", &pos, type, &force);
+    len ++;
+    if (i == EOF) {end = 1; break;}
+    if (i < 3) {end =2; break;}
+
+    if (strcmp(type,"start") == 0) {
+      vPosF.push_back(pos-1);
+      vValF.push_back(force);
+    } else if (strcmp(type,"start_rev") == 0) {
+      vPosR.push_back(pos+1);
+      vValR.push_back(force);
+    } else end = 2;
   }
-  if (j == -1) fprintf(stderr,"WARNING: empty SpliceMachine start file !\n");
   fclose(fp);
+  
+  if (end ==2) {
+    fprintf(stderr, "Error in SpliceMachine splice site file %s, line %d\n", name, len);
+    exit(2);
+  }
 }
 
 // ------------------------
-//  GiveInfo signal SMachine.   pow(atof(sdon),  donB)*donP
+//  GiveInfo signal SMachine. 
 // ------------------------
 void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
@@ -393,12 +305,12 @@ void SensorSMachine :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosF.size(); i++) {
     f = pow(vValF[i], startB)*(exp(-startP));
-    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),4.0), 2);
+    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),10.0), 2);
   }
   
   for (int i =0; i < (int)vPosR.size(); i++) {
     f = pow(vValR[i], startB)*(exp(-startP));
-    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),4.0), 2);
+    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),10.0), 2);
   }
 
 }
@@ -417,26 +329,11 @@ void SensorSMachine :: SpliceMachine()
   char *SMcmd=PAR.getC("SMachine.cmd");
   char s1[FILENAME_MAX+1];
 
-  strcpy(s1, PAR.getC("fstname"));
-  strcat(s1, ".SMachine/");
-  strcat(s1, BaseName(PAR.getC("fstname")));
-
-  printf("link %s %s\n",PAR.getC("fstname"),s1);
-  link(PAR.getC("fstname"),s1);
-
   strcpy(s1,SMcmd);
   strcat(s1, " ");
   strcat(s1, PAR.getC("fstname"));
-  strcat(s1, ".SMachine/");
-  strcat(s1, BaseName(PAR.getC("fstname")));
 
-  printf("%s\n",s1);
   system(s1);
-  strcpy(s1, PAR.getC("fstname"));
-  strcat(s1, ".SMachine/");
-  strcat(s1, BaseName(PAR.getC("fstname")));
 
-  printf("unlink %s\n",s1);
-  unlink(s1);
   return;
 }
