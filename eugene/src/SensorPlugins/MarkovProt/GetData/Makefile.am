@@ -17,8 +17,8 @@
 # Contents: compilation of the MarkovProt/GetData directory
 # ------------------------------------------------------------------
 
-bin_PROGRAMS = buildMarkovProt
-buildMarkovProt_SOURCES = buildMarkovProt.cc
+bin_PROGRAMS = egn_buildMarkovProt
+egn_buildMarkovProt_SOURCES = buildMarkovProt.cc
 
 
 CLEANFILES = *~

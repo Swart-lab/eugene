@@ -18,12 +18,12 @@
 # ------------------------------------------------------------------
 
 
-CXXFLAGS = 
+AM_CXXFLAGS = 
 
 
-bin_PROGRAMS = TrainIMM
-TrainIMM_SOURCES = TrainIMM.cc strarray.h 
-TrainIMM_LDADD = 
+bin_PROGRAMS = egn_TrainIMM
+egn_TrainIMM_SOURCES = TrainIMM.cc strarray.h 
+egn_TrainIMM_LDADD = 
 
 
 CLEANFILES = *~
