@@ -163,7 +163,7 @@ int main  (int argc, char * argv []) {
   
   // UTR3
   if (UTR3File) {
-    Infile = FileOpen(NULL,argv [4], "r");
+    Infile = FileOpen(NULL,UTR3File, "r");
     while  (Read_String (Infile, Line, Input_Size, Name)) {
       T = strlen (Line + 1);
       assert (T < Input_Size - 1);
