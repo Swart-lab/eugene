@@ -37,6 +37,7 @@ use gffUtils;
 #    request (> ~95%), in order to obtain with the sim4 alignment the true
 #    exons coordinates.
 #  - eugeneAdapt need :
+#       -> EUGENEDIR        : root directory of the EuGene distribution
 #       -> two EMBOSS tools : extractseq and revseq.
 #       -> Eu-imm2UTR       : Matrices builder
 #       -> WAMbuilder       : WAM builder
@@ -111,6 +112,15 @@ use gffUtils;
 
 =cut
 
+# $EUGENEDIR test
+my $EUGENEDIR = $ENV{EUGENEDIR};
+if (!defined $EUGENEDIR)
+  {
+    print "\n\$EUGENEDIR (root directory of the EuGene distribution) must".
+      " be defined.\n\n";
+    exit();
+  }
+
 # Program used
 my $cmd_sim4       = "sim4";          # cDNA and Genomic DNA Alignment
 my $cmd_gseqer     = "GeneSeqer";     # cDNA and Genomic DNA Alignment
@@ -119,15 +129,15 @@ my $cmd_revseq     = "revseq";        # EMBOSS
 
 # Matrices builder
 my $cmd_IMM =
-  "/usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt/../../../SensorPlugins/MarkovIMM/GetData/TrainIMM -h";
+  "$EUGENEDIR/../SensorPlugins/MarkovIMM/GetData/TrainIMM -h";
 
 # WAM builder
 my $cmd_WAMBuilder =
-  "/usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt/../../../SensorPlugins/0_SensorTk/GetData/WAMbuilder";
+  "$EUGENEDIR/../SensorPlugins/0_SensorTk/GetData/WAMbuilder";
 
 # seqlogo
 my $cmd_seqlogo =
-  "perl -I/usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt /usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt/seqlogo";
+  "perl -I$EUGENEDIR/../Procedures/Format/EuGeneAdapt $EUGENEDIR/../Procedures/Format/EuGeneAdapt/seqlogo";
 
 # For the ouput files (extension or file name)
 my $sim4_out_ext   = ".sim4.A3";
