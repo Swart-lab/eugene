@@ -74,7 +74,7 @@ void Parameters :: initParam (int argc, char * argv[])
   iter = m.begin();  // Cf. : getUseSensor
   
   fprintf(stderr,"- %s -\n",getC("EuGene.organism"));
-  fprintf(stderr,"Parameters file loaded.\n");
+  fprintf(stderr,"Parameters file %s loaded.\n", getC("parameters_file"));
   if (getI("EuGene.sloppy")) fprintf(stderr,"WARNING: Sloppy mode selected.\n");
   strcpy(key2,"web_dir");
   if (!strcmp(getC("Output.webdir"),"LOCAL")) {
@@ -105,7 +105,7 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
   }
   
   if (name == "") 
-    name = ((std::string) getC("eugene_dir"))+"/"+DEFAULT_PARA_FILE;
+    name = ((std::string) getC("eugene_dir"))+DEFAULT_PARA_FILE;
 
   strcpy(key,"parameters_file");
   strcpy(val, name.c_str());
