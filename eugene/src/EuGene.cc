@@ -32,11 +32,6 @@
 // TODO:
 // remettre Frameshifts
 // alignement cds cDNA et proteines sur les splice sites
-
-// supprimer l'approximation longueur single (on peut rater un bon
-// epissage si un meilleur START l'occulte mais qu'il est trop pres
-// pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
-// non single.
  
 #define PAYTOIGNORE 1
 
@@ -337,6 +332,9 @@ int main  (int argc, char * argv [])
       // ----------------------------------------------------------------
       // ------------------ Exons en forward ----------------------------
       // ----------------------------------------------------------------
+      double Submaxi;
+      int Subbest;
+
       for (k = 0; k < 3; k++) {
 	maxi = NINFINITY;     
 	
@@ -345,7 +343,7 @@ int main  (int argc, char * argv [])
 	if ((i % 3 == k))
 	  LBP[k]->Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
 #ifdef PAYTOIGNORE      
-	  LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+	LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 #endif
 	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
 	// Un test tordu pour casser le cou aux NaN
@@ -370,12 +368,20 @@ int main  (int argc, char * argv [])
 	  }
 	}
 	
-	// On recommence a coder (Accepteur)
+	// On recommence a coder (Accepteur). 
 	// Ca vient d'un intron
+	// Pour traiter correctement les contraintes de longueurs
+	// single, on insere un aiguillage meme s'il n'est
+	// pas optimal: sinon, on peut rater un bon epissage si un
+	// meilleur START l'occulte par sa qualite mais qu'il est trop
+	// pres pour etre utilisable in fine.
+
 	BestU = PBest[6+((i-k+3) % 3)]+Data.sig[DATA::Acc].weight[Signal::Forward];
 #ifndef PAYTOIGNORE
 	BestU -= Data.sig[DATA::Acc].weight[Signal::ForwardNo];
 #endif
+	  Submaxi = BestU;
+	  Subbest = 6+((i-k+3) % 3);
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
@@ -402,6 +408,11 @@ int main  (int argc, char * argv [])
 
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
+	
+	// Insertion d'un aiguillage sous-optimal car il peut etre
+	// optimal in fine du fait des contraintes de longueur single
+	if (best != Subbest)
+	  LBP[k]->InsertNew(Subbest,SwitchAcc,i,Submaxi,PrevBP[Subbest],false);
 	LBP[k]->Update(Data.contents[k]);
       }
       
@@ -440,10 +451,17 @@ int main  (int argc, char * argv [])
 	
 	// - on recommence a coder (Donneur)
 	// Ca vient d'un intron
+	// Pour traiter correctement les contraintes de longueurs
+	// single, on insere un aiguillage meme s'il n'est
+	// pas optimal: sinon, on peut rater un bon epissage si un
+	// meilleur START l'occulte par sa qualite mais qu'il est trop
+	// pres pour etre utilisable in fine.
 	BestU = PBest[9+((Data_Len-i-k) % 3)] + Data.sig[DATA::Don].weight[Signal::Reverse];
 #ifndef PAYTOIGNORE
 	BestU -= Data.sig[DATA::Don].weight[Signal::ReverseNo];
 #endif
+	Submaxi = BestU;
+	Subbest = 9+((Data_Len-i-k) % 3);
 	// Un test tordu pour casser le cou aux NaN
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
@@ -469,6 +487,11 @@ int main  (int argc, char * argv [])
 
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
+
+	// Insertion d'un aiguillage sous-optimal car il peut etre
+	// optimal in fine du fait des contraintes de longueur single
+	if (best != Subbest)
+	  LBP[k]->InsertNew(Subbest,SwitchDon,i,Submaxi,PrevBP[Subbest],false);
 	LBP[k]->Update(Data.contents[k]);
       }
       
@@ -600,16 +623,13 @@ int main  (int argc, char * argv [])
       }
 
       // Ca vient d'un exon direct + STOP
-      for (k = 0; k < 3; k++) {
-	if ((i % 3 == k)) {
-	  BestU = PBest[k+12] + Data.sig[DATA::Stop].weight[Signal::Forward];
-	  // Un test tordu pour casser le cou aux NaN
-	  if (isnan(maxi) || (BestU > maxi)) {
-	    maxi = BestU;
-	    best = k+12;
-	    Switch = SwitchStop;
-	  }
-	}
+      k = i % 3;
+      BestU = PBest[k+12] + Data.sig[DATA::Stop].weight[Signal::Forward];
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
+	maxi = BestU;
+	best = k+12;
+	Switch = SwitchStop;
       }
       
       if (best != -1) LBP[UTR3F]->InsertNew(best %12,Switch,i,maxi,PrevBP[best]);
@@ -637,19 +657,16 @@ int main  (int argc, char * argv [])
       }
       
       // Ca vient d'un exon reverse + START
-      for (k = 3; k < 6; k++) {
-	if (((Data_Len-i) % 3 == k-3)) {
-	  BestU = PBest[k+12]+Data.sig[DATA::Start].weight[Signal::Reverse];
+      k = 3+((Data_Len-i) % 3);
+      BestU = PBest[k+12]+Data.sig[DATA::Start].weight[Signal::Reverse];
 #ifndef PAYTOIGNORE
-	  BestU -= Data.sig[DATA::Start].weight[Signal::ReverseNo];
+      BestU -= Data.sig[DATA::Start].weight[Signal::ReverseNo];
 #endif
-	  // Un test tordu pour casser le cou aux NaN
-	  if (isnan(maxi) || (BestU > maxi)) {
-	    maxi = BestU;
-	    best = k+12;
-	  Switch = SwitchStart;
-	  }
-	}
+      // Un test tordu pour casser le cou aux NaN
+      if (isnan(maxi) || (BestU > maxi)) {
+	maxi = BestU;
+	best = k+12;
+	Switch = SwitchStart;
       }
       
       if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
@@ -693,7 +710,7 @@ int main  (int argc, char * argv [])
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
 	best = 25;
-	source = 12;
+	source = 17;
 	Switch = SwitchTransStop;
       }
       
