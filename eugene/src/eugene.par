@@ -172,6 +172,8 @@ Est.utrP*	0.35
 Est.utrM	5
 Est.SpliceBoost* 0.0
 Est.StrongDonor 0.95
+Est.MinDangling 18
+Est.MaxIntron   15000
 #
 ##### Homology Sensor parameters #####
 Homology.TblastxP*	0
@@ -334,24 +336,24 @@ Sensor.StartWAM		1
 Sensor.Transcript	1
 #
 # CONTENT SENSORS
-Sensor.BlastX		1
-Sensor.Est		20
-Sensor.Homology 	1
-Sensor.MarkovConst	1
-Sensor.MarkovIMM	1
-Sensor.MarkovProt	1
-Sensor.Repeat		1
+Sensor.BlastX		10
+Sensor.Est		30
+Sensor.Homology 	10
+Sensor.MarkovConst	5
+Sensor.MarkovIMM	5
+Sensor.MarkovProt	5
+Sensor.Repeat		10
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct     1
 Sensor.IfElse		1
-Sensor.Riken		1
-Sensor.User		10
+Sensor.Riken		10
+Sensor.User		20
 #
 # OTHERS SENSORS
-Sensor.GCPlot		1
-Sensor.GFF		1
-Sensor.Plotter		1
+Sensor.GCPlot		10
+Sensor.GFF		10
+Sensor.Plotter		10
 Sensor.Tester		1
 #
 #
