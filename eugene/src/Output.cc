@@ -80,7 +80,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
       int cons = 0, incons = 0;
       int forward,init,term,Lend,Rend,Phase;
       int Don,Acc;
-      char *position = "";
+      char seqName[FILENAME_MAX];
       int stateBack = 0, state, stateNext = 0;
       int posBack   = 0, pos;
       
@@ -109,6 +109,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 			" <td><font color=\"white\" face=\"monospace\">\n"
 			"  <b>Frame</b></font></td>\n"
 			"</tr>\n");
+	sprintf(seqName, nameformat, X->Name);
       } else 
 	if (printopt0 == 'H') {
 	  printf("<CENTER><LISTING><H2>EuGeneHom prediction</H2>\n");
@@ -214,12 +215,12 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	    lc++;
 	    vhtml.push_back("<tr class=\"A" + to_string(lc%2) + "\">\n"
 			    " <td align=\"center\">\n"
-			    "  <font face=\"monospace\">" + position + "_"
-			    + to_string(nbGene) + "." + to_string(nbExon)
-			    + "</font></td>\n");
+			    "  <font face=\"monospace\">" + seqName + "_"
+			    + to_string(((nbGene-1)*stepid)+1) + "."
+			    + to_string(nbExon) + "</font></td>\n");
 	    vhtml.push_back(" <td align=\"center\">\n"
-			    "  <font face=\"monospace\">");
-	    vhtml.push_back(argv[0]);
+			    "  <font face=\"monospace\">EuGene_");
+	    vhtml.push_back(PAR.getC("EuGene.organism"));
 	    vhtml.push_back("</font></td>\n");
 	  }
 	  else
@@ -229,7 +230,8 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      if(printopt0 == 'H') {
 		lc++;
 		printf("   <TR class=A%d align=center>\n"
-		       "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
+		       "    <TD>%d</TD><TD>%d</TD>",
+		       lc%2, (((nbGene-1)*stepid)+1),nbExon);
 	      }
 	      else {
 		fprintf(f,nameformat,X->Name);
@@ -349,12 +351,12 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      lc++;
 	      vhtml.push_back("<tr class=\"A" + to_string(lc%2) + "\">\n"+
 			      " <td align=\"center\">\n"+
-			      "  <font face=\"monospace\">" + position + "_" + 
-			      to_string(nbGene) + "." + to_string(nbExon) +
-			      "</font></td>\n");
+			      "  <font face=\"monospace\">" + seqName + "_" + 
+			      to_string(((nbGene-1)*stepid)+1) + "." +
+			      to_string(nbExon) + "</font></td>\n");
 	      vhtml.push_back(" <td align=\"center\">\n"
-			      "  <font face=\"monospace\">");
-	      vhtml.push_back(argv[0]);
+			      "  <font face=\"monospace\">EuGene_");
+	      vhtml.push_back(PAR.getC("EuGene.organism"));
 	      vhtml.push_back("</font></td>\n");
 	    }
 	    else
@@ -364,7 +366,8 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		if(printopt0 == 'H') {
 		  lc++;
 		  printf("   <TR class=A%d align=center>\n"
-			 "    <TD>%d</TD><TD>%d</TD>",lc%2,nbGene,nbExon);
+			 "    <TD>%d</TD><TD>%d</TD>",
+			 lc%2,(((nbGene-1)*stepid)+1),nbExon);
 		}
 		else {
 		  fprintf(f,nameformat,X->Name);
