@@ -61,13 +61,13 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   char   tempname[FILENAME_MAX+1];
   FILE * fblast;
 
-  ppNumber      = PAR.getI("BlastX.PPNumber",N);
-  minIn         = PAR.getI("BlastX.minIn");
-  levels  = PAR.getC("BlastX.levels",  N);  
+  N        = n;
   type     = Type_Content;
   HitTable = NULL;
-  N        = n;
-
+  ppNumber = PAR.getI("BlastX.PPNumber",N);
+  minIn    = PAR.getI("BlastX.minIn");
+  levels   = PAR.getC("BlastX.levels",  N);  
+ 
   Hits   *AllProt = NULL;
   NumProt = 0;
   
