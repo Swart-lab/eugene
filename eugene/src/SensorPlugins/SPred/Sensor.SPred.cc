@@ -100,8 +100,7 @@ void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
     }
     else
       {
-	j = sscanf(buf+16,"%d",&k);
-	j += sscanf(buf+42,"%lf %lf %lf", par,par+1,par+2);
+	j = sscanf(buf,"%*d %*s %*s %d %*f %*f %*f %lf %lf %lf",&k, par,par+1,par+2);
 	type = buf+2;
       }
 
@@ -161,8 +160,7 @@ void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
     }
     else
       {
-	j = sscanf(buf+16,"%d",&k);
-	j += sscanf(buf+42,"%lf %lf %lf", par,par+1,par+2);
+	j = sscanf(buf,"%*d %*s %*s %d %*f %*f %*f %lf %lf %lf",&k, par,par+1,par+2);
 	type = buf+2;
       }
 
