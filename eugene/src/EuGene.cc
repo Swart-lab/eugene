@@ -35,7 +35,7 @@
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
 
-#define  VERSION "1.1b (230401)"
+#define  VERSION "1.1d (120701)"
 
 
 #ifdef HAVE_CONFIG_H
@@ -716,7 +716,7 @@ int main  (int argc, char * argv [])
     // read fasta file
     
   fp = (*fstname ? FileOpen (NULL,fstname, "r") : stdin);
-  
+
   if (fp == NULL) {
     fprintf(stderr, "cannot open fasta file %s\n",  fstname);
     exit(3);
@@ -1457,7 +1457,7 @@ int main  (int argc, char * argv [])
       LBP[6+k]->Update(((ESTMatch[i] & Hit ) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
-	LBP[k]->Update(IGPenalty);
+	LBP[6+k]->Update(IGPenalty);
     }
       
     // ----------------------------------------------------------------
@@ -1491,7 +1491,7 @@ int main  (int argc, char * argv [])
       LBP[9+k]->Update(((ESTMatch[i] & Hit) != 0)*EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
-	LBP[k]->Update(IGPenalty);
+	LBP[9+k]->Update(IGPenalty);
     }
   }
 
