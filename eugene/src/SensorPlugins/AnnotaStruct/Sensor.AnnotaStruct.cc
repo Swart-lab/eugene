@@ -211,6 +211,25 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
     }
   }
 
+  // Patch because of non start/stop sites due to non full gene predicted
+  // by fgeneshpasa.  If start stop is non canonical -> remove it
+  for(int i=0; i<(int)vSig.size(); i++) {
+    if (vSig[i]->type == DATA::Start)
+      if(vSig[i]->edge) {
+	if (!X->IsEStart(vSig[i]->pos-1, -1)) { vSig.erase(i+vSig.begin()); }
+      }
+      else {
+	if (!X->IsEStart(vSig[i]->pos, 1))    { vSig.erase(i+vSig.begin()); }
+      }
+    if (vSig[i]->type ==  DATA::Stop)
+      if(vSig[i]->edge) {
+	if (!X->IsStop(vSig[i]->pos+2, -1)) { vSig.erase(i+vSig.begin()); }
+      }
+      else {
+	if (!X->IsStop(vSig[i]->pos-3, 1))  { vSig.erase(i+vSig.begin()); }
+      }
+  }
+
   // FOR DEBUG
   std::vector <int> vPosAccF, vPosAccR;
   std::vector <int> vPosDonF, vPosDonR;
