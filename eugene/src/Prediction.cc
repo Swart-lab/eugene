@@ -1,5 +1,7 @@
 #include "Prediction.h"
 
+#include<iostream>
+
 // ------------------------
 //  Default constructor.
 // ------------------------

@@ -1,5 +1,7 @@
 #include "Sensor.IfElse.h"
 
+#include<iostream>
+
 #include "../../EuGene/MSensor.h"
 
 extern Parameters PAR;

@@ -12,6 +12,7 @@
 
 #include <iomanip>
 #include <fstream>
+#include <iostream>
 #include <algorithm>
 
 
@@ -46,7 +47,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     IsSPSN = true;
 
     if (!IsInitialized) {
-      SensorName = "Sensor." + (string) PAR.getC("Tester.Sensor"); 
+      SensorName = "Sensor." + (std::string) PAR.getC("Tester.Sensor"); 
       SensorInstance = PAR.getI("Tester.Sensor.Instance"); 
       MinNumbers = PAR.getI("Tester.SPSN.MinNumbers");
 
@@ -170,8 +171,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     if (!IsInitialized) {
       std::string OutputFile;
 
-      SensorName = (string) PAR.getC("Tester.Sensor"); 
-      OutputFile = (string)PAR.getC("Output.Prefix")+"test."+SensorName+".gff";
+      SensorName = (std::string) PAR.getC("Tester.Sensor"); 
+      OutputFile = (std::string)PAR.getC("Output.Prefix")+"test."+SensorName+".gff";
       SensorInstance = PAR.getI("Tester.Sensor.Instance"); 
   
       fp = new FILE;
@@ -318,7 +319,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
 
   std::cerr <<"Reading coordinates file......................"; fflush(stderr);
 
-  gff_file_name = (string)PAR.getC("fstname") + ".gff";
+  gff_file_name = (std::string)PAR.getC("fstname") + ".gff";
   if (!(fpCoord = fopen(gff_file_name.c_str(), "r"))) 
     {std::cerr<<"Cannot open gff file " << gff_file_name <<"\n"; exit(2);}
 
@@ -509,14 +510,12 @@ void SensorTester :: AnalyzeSPSN(void)
   sort( Thresholds.begin(), Thresholds.end() );
  
   // Update number of elements for each threshold
-  double* b = Thresholds.begin();
-  double* e = Thresholds.end();
-  for (k=0; k<(int)Scores.size(); k++)
-    for (i=0; i<(int)Scores[k].size(); i++)
-      for (j=0; j<nbj; j++) {
+  for (k=0; k<(int)Scores.size(); k++)       // for all sequences
+    for (i=0; i<(int)Scores[k].size(); i++)  // for all scores of a sequence
+      for (j=0; j<nbj; j++) {                // for all type of information
 	d = Scores[k][i][j];
 	if (d!=0) {
-	  m = find(b,e,d) - b;
+	  m = std::find(Thresholds.begin(),Thresholds.end(),d) - Thresholds.begin();
 	  p = ( (j==DON_F || j==DON_R ) ? 1 : 0 );
 	  Nb[m][p] += 1; 
 	}
@@ -535,10 +534,10 @@ void SensorTester :: AnalyzeSPSN(void)
 	  }
 
   // output specificity and sensibility 
-  f.open((SensorName + ".SpSn").c_str(), ios::out);
+  f.open((SensorName + ".SpSn").c_str(), std::ios::out);
   if (SensorType == Type_Splice) {
-    facc.open((SensorName + ".Acc").c_str(), ios::out);
-    fdon.open((SensorName + ".Don").c_str(), ios::out);
+    facc.open((SensorName + ".Acc").c_str(), std::ios::out);
+    fdon.open((SensorName + ".Don").c_str(), std::ios::out);
   }
 
   std::cout << "Thres.\t\tNb\tTP\tFP\tTN\tFN\tSens.\tSpec.\n";

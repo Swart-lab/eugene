@@ -1,8 +1,10 @@
 #include "Output.h"
 
+#include<iostream>
+
 extern Parameters   PAR;
 
-std::vector <string>  vhtml; // (-ph)
+std::vector <std::string>  vhtml; // (-ph)
 
 void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int argc, char * argv[], FILE* f)
 {
@@ -630,7 +632,7 @@ void StartHTML() {
 //-------------------------------------------------
 void EndHTML() {
   for (int i = 0; i<(int)vhtml.size(); i++)
-    cout << vhtml[i];
+    std::cout << vhtml[i];
   printf("                                              </table>\n"
 	 "					    </td>\n"
 	 "					  </tr>\n"
@@ -658,9 +660,9 @@ void EndHTML() {
 //---------------------------
 // Convertion int en string
 //---------------------------
-string to_string(int i)
+std::string to_string(int i)
 {
-  ostringstream os;  // création du flux
+  std::ostringstream os;  // création du flux
   os << i;           // insertion de l'int dans le flux
   return (os.str()); // extrait la valeur 
 }

@@ -24,7 +24,7 @@ void StartHTML();
 void EndHTML();
 
 // Convertion int en string
-string to_string(int);
+std::string to_string(int);
 
 // Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
 int PhaseAdapt(char);
