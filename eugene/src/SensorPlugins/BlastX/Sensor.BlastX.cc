@@ -71,8 +71,8 @@ void SensorBlastX :: Init (DNASeq *X)
   vPMLevel.clear();
   vPMPhase.clear();
 
-  ProtMatch      = new REAL[Len+1];
-  ProtMatchLevel = new REAL[Len+1];
+  ProtMatch      = new float[Len+1];
+  ProtMatchLevel = new float[Len+1];
   ProtMatchPhase = new int[Len+1];
   for (i = 0; i<= Len; i++) {
     ProtMatch[i]      = 0.0;
@@ -340,7 +340,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 
       if (index < (int)vPos.size()) { // il reste des hits
 	// pour chaque nuc de l'exon supporte par un hit
-	while (vPos[index]<=pos  &&  index < (int)vPos.size()) {
+	while (index < (int)vPos.size() && vPos[index]<=pos) {
 	  if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
 	  index++;
 	}
