@@ -22,29 +22,7 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorATGpr :: SensorATGpr (int n) : Sensor(n)
-{
-  startP = PAR.getD("ATGpr.startP",GetNumber());
-  startB = PAR.getD("ATGpr.startB",GetNumber());
-  
-  PositionGiveInfo = -1;
-}
-
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorATGpr :: ~SensorATGpr ()
-{
-  vPosF.clear();
-  vValF.clear();
-  vPosR.clear();
-  vValR.clear();
-}
-
-// ----------------------
-//  Init start.
-// ----------------------
-void SensorATGpr :: Init (DNASeq *X)
+SensorATGpr :: SensorATGpr (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
 
@@ -73,8 +51,29 @@ void SensorATGpr :: Init (DNASeq *X)
   // vectors for reverse are put in the increasing order
   reverse(vPosR.begin(), vPosR.end()); 
   reverse(vValR.begin(), vValR.end()); 
+}
 
+// ----------------------
+//  Default destructor.
+// ----------------------
+SensorATGpr :: ~SensorATGpr ()
+{
+  vPosF.clear();
+  vValF.clear();
+  vPosR.clear();
+  vValR.clear();
+}
+
+// ----------------------
+//  Init start.
+// ----------------------
+void SensorATGpr :: Init (DNASeq *X)
+{
+  startP = PAR.getD("ATGpr.startP*",GetNumber());
+  startB = PAR.getD("ATGpr.startB*",GetNumber());
+  
   indexF = indexR = 0;
+  PositionGiveInfo = -1;
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -94,16 +93,14 @@ void SensorATGpr :: ReadATGprF (char name[FILENAME_MAX+1], int Len)
   }
   
   while (1) {
-    i = fscanf(fp,"%*s %lf %*s %*s %d %*s %*s %*s\n", &force, &j);
+    i = fscanf(fp,"%*s %lf %*s %*s %d %*s %*s %*s\n", &force, &j); 
     if (i == EOF) break;
     if (i < 2) {
       fprintf(stderr, "Error in ATGpr file %s, position %d\n", name, j);
       exit(2);
     }
-    //if (force > 0.1) {
     vPosF.push_back( j-1 );
-    vValF.push_back( pow(force, startB)*(exp(-startP)) );
-    //}
+    vValF.push_back( force );
   }
   if (j == -1) fprintf(stderr,"WARNING: empty ATGpr file !\n");
   fclose(fp);
@@ -134,7 +131,7 @@ void SensorATGpr :: ReadATGprR (char name[FILENAME_MAX+1], int Len)
     //if (force > 0.1) {
     j = Len-j+2;
     vPosR.push_back( j-1 );
-    vValR.push_back( pow(force, startB)*(exp(-startP)) );
+    vValR.push_back( force );
     //}
   }
   if (j == -1) fprintf(stderr,"WARNING: empty ATGpr file !\n");
@@ -147,6 +144,7 @@ void SensorATGpr :: ReadATGprR (char name[FILENAME_MAX+1], int Len)
 void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
+  double f;
   
   // update indexes on vectors
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true;
@@ -158,8 +156,9 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexF = lower_bound(vPosF.begin(), vPosF.end(), pos)-vPosF.begin();
     
     if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
-      d->sig[DATA::Start].weight[Signal::Forward] += log(vValF[indexF]);
-      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-vValF[indexF]);
+      f = pow(vValF[indexF], startB) * exp(-startP);
+      d->sig[DATA::Start].weight[Signal::Forward] += log(f);
+      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-f);
       indexF++;
     }
   }
@@ -170,8 +169,9 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexR = lower_bound(vPosR.begin(),vPosR.end(),pos)-vPosR.begin();
     
     if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
-      d->sig[DATA::Start].weight[Signal::Reverse]   += log(vValR[indexR]);
-      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-vValR[indexR]);
+      f = pow(vValR[indexR], startB) * exp(-startP);
+      d->sig[DATA::Start].weight[Signal::Reverse]   += log(f);
+      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-f);
       indexR++;
     }
   }

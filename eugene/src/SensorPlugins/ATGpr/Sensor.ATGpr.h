@@ -31,14 +31,14 @@ class SensorATGpr : public Sensor
   void ReadATGprR (char[FILENAME_MAX+1], int);
 
  public:
-  SensorATGpr   (int);
-  virtual ~SensorATGpr   ();
-  virtual void Init       (DNASeq *);
+  SensorATGpr   (int n, DNASeq *X);
+  virtual ~SensorATGpr   (void);
+  virtual void Init       (DNASeq *X);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorATGpr* builder0( int n ) { return new SensorATGpr(n);}
+extern "C" SensorATGpr* builder0( int n, DNASeq *X) { return new SensorATGpr(n, X);}
 
 #endif
