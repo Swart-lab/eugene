@@ -115,20 +115,11 @@ void SensorRiken :: Init (DNASeq *X)
   }
   if(j==(int)RAFLtmp.size()-1) RAFL.push_back(RAFLtmp[j]);
   
-  if (PAR.getI("Output.graph")) {
-    const int HLen = 30;
-    
-    for (j =0; j<(int)RAFL.size() ;j++) {
-      PlotBarF(RAFL[j]->deb, 0, 0.9, 0.2, 2);
-      PlotLine(RAFL[j]->deb, RAFL[j]->deb+HLen, 0, 0, 1.0, 1.0, 2);
-      PlotBarF(RAFL[j]->fin, 0, 0.9, 0.2, 2);
-      PlotLine(RAFL[j]->fin-HLen,RAFL[j]->fin, 0, 0, 1.0, 1.0, 2);
-    }
-  }
-  
   fprintf(stderr,"%d kept\n",RAFL.size());
   fflush(stderr);
   if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
+
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // -----------------------
@@ -221,4 +212,12 @@ void SensorRiken :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorRiken :: Plot(DNASeq *TheSeq)
 {
+  const int HLen = 30;
+  
+  for (int j =0; j<(int)RAFL.size() ;j++) {
+    PlotBarF(RAFL[j]->deb, 0, 0.9, 0.2, 2-RAFL[j]->sens);
+    PlotLine(RAFL[j]->deb, RAFL[j]->deb+HLen, 0, 0, 1.0, 1.0, 2-RAFL[j]->sens);
+    PlotBarF(RAFL[j]->fin, 0, 0.9, 0.2, 2-RAFL[j]->sens);
+    PlotLine(RAFL[j]->fin-HLen,RAFL[j]->fin, 0, 0, 1.0, 1.0, 2-RAFL[j]->sens);
+  }
 }
