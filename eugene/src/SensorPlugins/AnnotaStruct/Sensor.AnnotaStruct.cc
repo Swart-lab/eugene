@@ -190,7 +190,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   
   // Sort vCon by end and by start
   sort(vCon.begin(), vCon.end(), ByConEnd);
-  sort(vCon.begin(), vCon.end(), ByConStart);
+  stable_sort(vCon.begin(), vCon.end(), ByConStart);
 
   // FOR DEBUG
   std::vector <int> vPosAccF, vPosAccR;
@@ -335,7 +335,7 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	  isContents = 1;
 	  cSc        = scoreF;
 	}
-	else if(!strcmp(feature, "intron")) {
+	else if(!strcmp(feature, "intron") || !strcmp(feature, "Intron")) {
 	  vCon.push_back(new Contents(start, end, DATA::IntronF+edge, scoreF));
 	}
 	else if(!strcmp(feature, "utr5")) {
@@ -374,18 +374,6 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	  isContents = 1;
 	  cSc        = cdsPAR;
 	}
-
-	else if(!strcmp(feature, "E.Any")) {
-	  isContents = 1;
-	  cSc        = exonPAR;
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cSc));
-	}
-	else if(!strcmp(feature, "Intron")) {
-	  vSig.push_back(new Signals (start-1, DATA::Don, edge, donPAR));
-	  vSig.push_back(new Signals (end,     DATA::Acc, edge, accPAR));
-	  vCon.push_back(new Contents(start,end,DATA::IntronF+edge,intronPAR));
-	}
 	else if(!strcmp(feature, "UTR5")) {
 	  vSig.push_back(new Signals (start-1, DATA::tStart, edge, tStartPAR));
 	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, exonPAR));
@@ -399,6 +387,39 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	  vSig.push_back(new Signals(end,     DATA::tStop,  edge,tStopPAR));
 	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, exonPAR));
 	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, exonPAR));
+	}
+
+	else if(!strcmp(feature, "E.Any")) {
+	  isContents = 1;
+	  cSc        = exonPAR;
+	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
+	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cSc));
+	}
+	else if(!strcmp(feature, "Intron.Any")) {
+	  vSig.push_back(new Signals (start-1, DATA::Don, edge, donPAR));
+	  vSig.push_back(new Signals (end,     DATA::Acc, edge, accPAR));
+	  vCon.push_back(new Contents(start,end,DATA::IntronF+edge,intronPAR));
+	  vCon.push_back(new Contents(start,end,DATA::IntronUTRF+edge,intronPAR));
+	}
+	else if(!strcmp(feature, "E.First")) {
+	  isContents = 1;
+	  cSc        = exonPAR;
+	  vSig.push_back(new Signals (start-1, DATA::tStart, edge, tStartPAR));
+	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
+	}
+	else if(!strcmp(feature, "E.Last")) {
+	  isContents = 1;
+	  cSc        = exonPAR;
+	  vSig.push_back(new Signals (end,   DATA::tStop, edge, tStopPAR));
+	  vCon.push_back(new Contents(start-1, end-1, DATA::UTR3F+edge, cSc));
+	}
+	else if(!strcmp(feature, "E.Extreme")) {
+	  isContents = 1;
+	  cSc        = exonPAR;
+	  vSig.push_back(new Signals(start-1, DATA::tStart, edge,tStartPAR));
+	  vSig.push_back(new Signals(end,     DATA::tStop,  edge,tStopPAR));
+	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
+	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cSc));
 	}
 	else
 	  fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
