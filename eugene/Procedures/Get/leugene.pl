@@ -6,15 +6,20 @@ use LWP::UserAgent;
 =head1 Description
 
  This program takes as parameter a nucleic acid sequence file in FASTA
- format or a folder containing such files (*.tfa *.fasta) Launch then
- EuGeneAS with HTML output Extra parameter are consider as EuGene
- parameter If you want EuGeneAS to take into account EST or Blast
+ format or a folder containing such files (*.tfa *.fasta). Extra parameters
+ are consider as EuGene additional parameters.
+ For each sequence, launch local NetStart, NetGene2, SplicePredictor
+ and if only the EUGENEDIR environment is defined (ending with '/'), 
+ lauch EuGeneAS with HTML output.
+
+ Beware, if you want EuGeneAS to take into account EST or Blast
  results, the files have to be present (correctly named).
+ Note that used paths correspond to the maubie PC (therefor
+ need to be updated fot others configurations).
 
 =cut
 
 #------------------------------------------------------------
-
 sub usage( $ )
   {
     printf STDERR "%s\n";
@@ -23,8 +28,6 @@ sub usage( $ )
   }
 
 #------------------------------------------------------------
-# just a copy of getsites.pl from EuGene dist
-
 sub getsites( $ )
   {
     local($sequence, $rsequence, $l);
@@ -36,12 +39,14 @@ sub getsites( $ )
     $l = length($sequence);
     $rsequence = &reverse(&complement($sequence));
 
-    $MaxLength = 20000;
-    $Olap = 100;
-    $StepLength =  $MaxLength - 2*$Olap;
-    $DoIt = 0;
 
-    # NetStart on direct strand
+    # NetStart ###############################################
+    $Olap = 100;
+    $MaxLength = 20000;
+    $StepLength =  $MaxLength - 2*$Olap;
+
+    # NetStart on direct strand 
+    $DoIt = 0;
     printf STDERR "NetStart [2*%d request(s)]:",($l-2*$Olap+$StepLength-1)/$StepLength;
     $Last = 0;
 
@@ -55,10 +60,10 @@ sub getsites( $ )
       for ($i = 0; $i + 2*$Olap < $l; $i += $StepLength) {
 
 	# create temp file with the sequence portion
-	&flat2fasta("$$.tfa", 'tmp', substr($sequence,$i,$MaxLength), 60);
+	&flat2fasta("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa", 'tmp', substr($sequence,$i,$MaxLength), 60);
 	
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0]\n", $i, $i + $MaxLength;
-	open(FIN,"netstart -at $$.tfa|") || die "Can't launch NetStart on $[0]";
+	open(FIN,"rsh ossau 'cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa' |") || die "Can't launch NetStart on $[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -73,14 +78,14 @@ sub getsites( $ )
 	    if (/----------------------/) { $flag = 1; }
 	  }
 	close(FIN);
-	unlink("$$.tfa");
+	unlink("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa");
       }
       close(STARTS);
     }
 
+    # NetStart on reverse strand
     $DoIt=0;
 
-    # NetStart on reverse strand
     if (!( -e "$_[0].startsR") || (-s "$_[0].startsR" == 0))  {$DoIt = 1;}
 
     if ($DoIt) { open(RSTARTS,">$_[0].startsR") || die "Can't create $_[0].startsR file\n";}
@@ -91,9 +96,9 @@ sub getsites( $ )
       for ($i = 0; $i + 2*$Olap < $l; $i += $StepLength) {
 
 	# create temp file with the sequence portion
-	&flat2fasta("$$.tfa", 'tmp', substr($rsequence,$i,$MaxLength), 60);
+	&flat2fasta("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa", 'tmp', substr($rsequence,$i,$MaxLength), 60);
 	printf STDERR "Calling netstart on [%d - %d] / $l of $_[0] (rev)\n", $i, $i + $MaxLength;
-	open(FIN,"netstart -at $$.tfa|") || die "Can't launch NetStart on $_[0]";
+	open(FIN,"rsh ossau 'cd /Annotation/SunSoft/netstart-1.0; ./netstart -at ./tmp/$$.tfa' |") || die "Can't launch NetStart on $_[0]";
 	$flag = 0;
 	while (<FIN>)
 	  {
@@ -108,11 +113,12 @@ sub getsites( $ )
 	    if (/----------------------/) { $flag = 1; }
 	  }
 	close(FIN);
-	unlink("$$.tfa");
+	unlink("/Annotation/SunSoft/netstart-1.0/tmp/$$.tfa");
       }
       close(RSTARTS);
     }
-    # NetGene2
+
+    # NetGene2 ##################################################################
 
     $DoIt = 0;
     if (!( -e "$_[0].splices") || (-s "$_[0].splices" == 0))    {$DoIt = 1; }
@@ -132,17 +138,17 @@ sub getsites( $ )
     }
     else {print STDERR "[on disk]";}
 
-    # Splice Predictor
+    # Splice Predictor ######################################################
+    # direct strand
     $DoIt = 0;
     if (!( -e "$_[0].spliceP") || (-s "$_[0].spliceP" == 0))    {$DoIt = 1;}
     printf STDERR "\nSplicePredictor: ";
 
     if ($DoIt) {
-      # direct strand
       print STDERR "Issuing request to SplicePredictor (direct strand)...\n";
-      system("readseq -f2 $_[0] -o/home/thomas/Annotation/netstart-1.0/tmp/`basename $_[0]`.gb");
+      system("readseq -f2 $_[0] -o/Annotation/SunSoft/SplicePredictor/tmp/`basename $_[0]`.gb");
       open(FORWARD,">$_[0].spliceP");
-      open(FIN,"rsh ossau 'cd Linux/Annotation/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 ../netstart-1.0/tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
+      open(FIN,"rsh ossau 'cd /Annotation/SunSoft/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 ./tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
 	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
@@ -168,7 +174,7 @@ sub getsites( $ )
     if ($DoIt) {
       print STDERR "Issuing request to SplicePredictor (reverse strand)...\n";
       open(REVERSE,">$_[0].splicePR");
-      open(FIN,"rsh ossau 'cd Linux/Annotation/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 -r ../netstart-1.0/tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
+      open(FIN,"rsh ossau 'cd /Annotation/SunSoft/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 -r ./tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
 	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
@@ -184,6 +190,7 @@ sub getsites( $ )
 	}
       close(FIN);
       close(REVERSE);
+      system("rm /Annotation/SunSoft/SplicePredictor/tmp/`basename $_[0]`.gb");
     }
     else {print STDERR "[R on disk]";}
   }
@@ -202,15 +209,15 @@ sub reverse ( $ )
 sub complement( $ )
   {
     my ($seq) = @_;
-    
+
     $seq = uc($seq);
     $seq =~ tr/('A','T','G','C')/('T','A','C','G')/;
     return $seq;
   }
-#------------------------------------------------------------
-# reas a FASTA file and return the first flat sequence if no AC is given
-# or the one that have the given AC (empty if none match)
 
+#------------------------------------------------------------
+# read a FASTA file and return the first flat sequence if no AC is given
+# or the one that have the given AC (empty if none match)
 sub fasta2flat
   {
     my($fastaF, $AC);
@@ -237,7 +244,7 @@ sub fasta2flat
 	      {
 		$inseq = 1;
 		next;
-	      }  
+	      }
 	  }
 
 	if ($inseq == 1)
@@ -249,14 +256,14 @@ sub fasta2flat
     close(FF);
     return $seq;
   }
+
 #------------------------------------------------------------
-# append a sequence to a FASTA file
-#
+# Append a sequence to a FASTA file
 sub flat2fasta ( $ $ $ $ )
   {
     my($fname, $AC, $seq, $line_length) = @_;
     my($i);
-    
+
     open(FF,">>$fname") || die "can't write into $fname";
     print FF ">$AC\n";
     for ($i=0; $i < length($seq); $i += $line_length)
@@ -265,38 +272,45 @@ sub flat2fasta ( $ $ $ $ )
       }
     close(FF);
   }
-#------------------------------------------------------------
 
+#------------------------------------------------------------
+# Call preprocessing for a sequence and launch EuGeneAS
 sub eugene( $ @ )
   {
     local($file, @params) = @_;
     local($cmd);
-    
+
     print STDERR "\nprocessing $file\n\n";
     &getsites($file);
-    $cmd = sprintf("EuGeneAS -ph %s -g $file > $file.html 2> $file.trace", join(' ',@params));
-    system($cmd);
+    if (exists($ENV{'EUGENEDIR'}))
+      {
+	$cmd = sprintf("$ENV{'EUGENEDIR'}EuGeneAS -ph %s -g $file > $file.html 2> $file.trace", join(' ',@params));
+	system($cmd);
+      }
   }
 
 #------------------------------------------------------------
-
+# Main procedure
 ($#ARGV != -1) || &usage('usage:');
 
 if (!exists($ENV{'EUGENEDIR'}))
   {
-    $ENV{'EUGENEDIR'} = '/home/thomas/Linux/Annotation/EuGene';
-    $ENV{'PATH'} = "$ENV{'PATH'}:$ENV{'EUGENEDIR'}";
+    system('echo "########################################################"');
+    system('echo "WARNING: Only preprocessing of sequence(s) will be realized,"');
+    system('echo "EuGeneAs will not be launched because"');
+    system('echo "the EUGENEDIR environment variable is not set."');
+    system('echo "########################################################"');
   }
 
-system('echo "started on "`date`');
+system('echo "Started on "`date`');
 
 $param1 = shift @ARGV;
 
-if (-f "$param1") # just launch EuGene on this file
+if (-f "$param1") # just launch  on one file
   {
     &eugene($param1, @ARGV);
   }
-elsif (-d "$param1") # launch EuGene on all fasta files in this folder
+elsif (-d "$param1") # launch on all fasta files in this folder
   {
     $param1 =~ s/\/$//;
     @L = glob("$param1/*.tfa");
@@ -312,4 +326,13 @@ else
     &usage("$param1 is neither a file, nor a folder");
   }
 
-system('echo "finished on "`date`');
+system('echo ""');system('echo ""');
+system('echo "Finished on "`date`');
+if (!exists($ENV{'EUGENEDIR'}))
+  {
+    system('echo "########################################################"');
+    system('echo "WARNING: Only preprocessing of sequence(s) was realized,"');
+    system('echo "EuGeneAs was not launched because"');
+    system('echo "the EUGENEDIR environment variable is not set."');
+    system('echo "########################################################"');
+  }
