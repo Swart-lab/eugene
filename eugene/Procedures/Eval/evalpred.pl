@@ -386,10 +386,11 @@ while($lCOORD=<COORD>) {
       chomp($lPRED=<PRED>);$nlPRED++;
       if($lPRED eq ""){ # pas de gene trouve
 	$j++;
+	$name= ( ($name2) ? $name2 : " -NO_NAME- " );
       }
 
       while($lPRED ne ""){ # tant qu'il y a un exon trouve
-	if ($lPRED =~ /^([^\s]+)\s([a-zA-Z]+)\s+([\+\-])\s+([0-9]+)\s+([0-9]+)\s+[0-9]+\s+[^\s]+\s+[^\s]+\s+([0-9]+)\s+([0-9]+)\s+/) {
+	if ($lPRED =~ /^([^\s]+)\s+([a-zA-Z]+)\s+([\+\-])\s+([0-9]+)\s+([0-9]+)\s+[0-9]+\s+[^\s]+\s+[^\s]+\s+([0-9]+)\s+([0-9]+)\s+/) {
 	  if ( ($setoffset==0) ||
 	       (($5 >= $borneg) && ($4 <= $borned))) {
 	    $name= ( ($name2) ? $name2 : $1);
@@ -400,7 +401,7 @@ while($lCOORD=<COORD>) {
 #	    ($name= $1) =~ s/\.\d+\.\d+\.\d+//;
 	    $gene_en_cours=1;
 	    # Si format ou fichier mauvais:
-	    if (!( ($type eq "Init")||($type eq "Intr")||($type eq "Term")||($type eq "Sngl"))){ die" Pb format fichier predictions $ARGV[1] ligne $nlPRED\n"};
+	    if (!( ($type eq "Init")||($type eq "Intr")||($type eq "Term")||($type eq "Sngl"))){ die" Pb(1) format fichier predictions $ARGV[1] ligne $nlPRED\n"};
 
 	    # Stockage des exons
 	    $signe=( ("$sens" eq '+')? "" : '-');
@@ -408,7 +409,7 @@ while($lCOORD=<COORD>) {
 	    push(@P,"$signe$end");
 	    push(@TMP,"$signe$beg");
 	    push(@TMP,"$signe$end");
-	    
+
 	    ## fin d'un gene
 	    if ( (($type eq "Term")&&("$sens" eq '+'))||(($type eq "Init")&&("$sens" eq '-'))||($type eq "Sngl")){
 	      $j++;
@@ -418,7 +419,7 @@ while($lCOORD=<COORD>) {
 	    }
 	  }
 	}
-	elsif($lPRED !~ /\s+Utr\d\s/) {die"Pb format fichier predictions $ARGV[1] ligne $nlPRED\n"};
+	elsif($lPRED !~ /\s+Utr\d\s/) {die"Pb(2) format fichier predictions $ARGV[1] ligne $nlPRED\n"};
 	chomp($lPRED=<PRED>);
 	$nlPRED++;
       }
@@ -450,7 +451,7 @@ while($lCOORD=<COORD>) {
       @PRED2D=();
     }
     else{
-      die"Pb format fichier coordonnees $ARGV[0] ligne $nlCOORD\n";
+      die"Pb(3) format fichier coordonnees $ARGV[0] ligne $nlCOORD\n";
     }
   }
 }
