@@ -17,12 +17,13 @@
 # Contents: compilation of the BlastX directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.BlastX.so
+noinst_PROGRAMS = Sensor.BlastX.so
 Sensor_BlastX_so_SOURCES = Sensor.BlastX.cc Sensor.BlastX.h
-Sensor_BlastX_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_BlastX_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

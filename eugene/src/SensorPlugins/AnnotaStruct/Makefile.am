@@ -17,12 +17,13 @@
 # Contents: compilation of the AnnotaStruct directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.AnnotaStruct.so
+noinst_PROGRAMS = Sensor.AnnotaStruct.so
 Sensor_AnnotaStruct_so_SOURCES = Sensor.AnnotaStruct.cc Sensor.AnnotaStruct.h 
-Sensor_AnnotaStruct_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_AnnotaStruct_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

@@ -17,12 +17,13 @@
 # Contents: compilation of the MarkovConst directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.MarkovConst.so
+noinst_PROGRAMS = Sensor.MarkovConst.so
 Sensor_MarkovConst_so_SOURCES = Sensor.MarkovConst.cc Sensor.MarkovConst.h 
-Sensor_MarkovConst_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_MarkovConst_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

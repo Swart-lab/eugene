@@ -17,12 +17,13 @@
 # Contents: compilation of the FrameShift directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.FrameShift.so
+noinst_PROGRAMS = Sensor.FrameShift.so
 Sensor_FrameShift_so_SOURCES = Sensor.FrameShift.cc Sensor.FrameShift.h 
-Sensor_FrameShift_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_FrameShift_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

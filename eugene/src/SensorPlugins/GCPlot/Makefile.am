@@ -17,12 +17,13 @@
 # Contents: compilation of the GCPlot directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.GCPlot.so
+noinst_PROGRAMS = Sensor.GCPlot.so
 Sensor_GCPlot_so_SOURCES = Sensor.GCPlot.cc Sensor.GCPlot.h 
-Sensor_GCPlot_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_GCPlot_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

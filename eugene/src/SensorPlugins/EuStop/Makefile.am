@@ -17,12 +17,13 @@
 # Contents: compilation of the EuStop directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.EuStop.so
+noinst_PROGRAMS = Sensor.EuStop.so
 Sensor_EuStop_so_SOURCES = Sensor.EuStop.cc Sensor.EuStop.h 
-Sensor_EuStop_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_EuStop_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

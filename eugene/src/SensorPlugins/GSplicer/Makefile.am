@@ -17,12 +17,13 @@
 # Contents: compilation of the GSplicer directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.GSplicer.so
+noinst_PROGRAMS = Sensor.GSplicer.so
 Sensor_GSplicer_so_SOURCES = Sensor.GSplicer.cc Sensor.GSplicer.h 
-Sensor_GSplicer_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_GSplicer_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

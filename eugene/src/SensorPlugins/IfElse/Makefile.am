@@ -17,12 +17,13 @@
 # Contents: compilation of the IfElse directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.IfElse.so
+noinst_PROGRAMS = Sensor.IfElse.so
 Sensor_IfElse_so_SOURCES = Sensor.IfElse.cc Sensor.IfElse.h
-Sensor_IfElse_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_IfElse_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

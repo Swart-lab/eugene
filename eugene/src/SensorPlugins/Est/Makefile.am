@@ -17,12 +17,13 @@
 # Contents: compilation of the Est directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Est.so
+noinst_PROGRAMS = Sensor.Est.so
 Sensor_Est_so_SOURCES = Sensor.Est.cc Sensor.Est.h 
-Sensor_Est_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_Est_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

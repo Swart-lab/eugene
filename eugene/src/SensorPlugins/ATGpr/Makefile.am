@@ -17,12 +17,13 @@
 # Contents: compilation of the ATGpr directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.ATGpr.so
+noinst_PROGRAMS = Sensor.ATGpr.so
 Sensor_ATGpr_so_SOURCES = Sensor.ATGpr.cc Sensor.ATGpr.h
-Sensor_ATGpr_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_ATGpr_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~
