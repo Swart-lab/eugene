@@ -249,13 +249,13 @@ void SensorSPred :: Plot(DNASeq *X)
     PlotBarF(vPosAccF[i],4,0.5,NORM(log(vValAccF[i]),20.0),4);
   
   for (int i =0; i < (int)vPosDonF.size(); i++)
-    PlotBarF(vPosDonF[i],4,0.5,NORM(log(vValDonF[i]),20.0),5);
+    PlotBarF(vPosDonF[i],4,0.5,NORM(log(vValDonF[i]),20.0),11);
   
   for (int i =0; i < (int)vPosAccR.size(); i++)
     PlotBarF(vPosAccR[i],-4,0.5, NORM(log(vValAccR[i]),20.0),4);
 
   for (int i =0; i < (int)vPosDonR.size(); i++)
-    PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),5);
+    PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),11);
 }
 
 // ------------------
