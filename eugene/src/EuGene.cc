@@ -41,10 +41,10 @@
 #else
 #include "getopt.h"
 #endif
-#ifdef STDC_HEADERS
-#include <string.h>
-#else
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#else
+#include <string.h>
 #endif
 #include "Const.h"
 
@@ -133,8 +133,7 @@ const int MinLength[18] =
 const unsigned char SwitchMask[18] = 
    {SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
     SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
-    SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop,
-    };
+    SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop};
 
 // ------------------ Globals ---------------------
 
@@ -513,7 +512,7 @@ int main  (int argc, char * argv [])
 	   tempname[i] = '0'+level;
 	   tempname[i+1] = 0;
 	   
-	   fblast = fopen(tempname, "r");
+	   fblast = FileOpen(NULL,tempname, "r");
 	   
 	   if (fblast == NULL) continue;
 
@@ -654,21 +653,33 @@ int main  (int argc, char * argv [])
 	   PEstFin = EstFin;
 	 }
 	     
-       deb = 0;
+       brin = 0;
+       // brin utilisee comme tmp.
+
        for (i=0; i<Data_Len; i++) {
 	 if (graph && (ESTMatch[i] & HitForward)) PlotBarI(i, 4,0.6,1,2);
 	 if (graph && (ESTMatch[i] & HitReverse)) PlotBarI(i, -4,0.6,1,2);
 	 if (Inconsistent(ESTMatch[i])) {
 	   // S'il y a un hit et un gap, on efface tout et on laisse Eugene decider
 	   ESTMatch[i] = 0;
-	   deb = 1;
+	   PlotBarI(i, 4,0.9,1,1);
+
+	   if (brin == 0)
+	     {
+	       brin = 1;
+	       deb = i;
+	     }
 	 }
+	 else if (brin)
+	   { 
+	     brin = 0;
+	     fprintf(stderr,"\n  -> Warning: [%d-%d] inconsistent cDNA data !",deb+1,i);
+	   }
        }
        fclose(fblast);
-
+       
        fprintf(stderr,"done\n");
-       if (deb)
-	 fprintf(stderr,"  -> Warning: inconsistent cDNA data !\n");
+
     }
 
   // Data allocation for the shortest path with length constraints algorithm
