@@ -26,7 +26,6 @@
 
 #define EugDir getenv("EUGENEDIR")
 
-#define DEFAULT_PARA_FILE "./eugene.par"
 #define POSSIBLE_ARGUMENTS "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:Z::A:"
 
 const int FASTA_Len = 50;

@@ -61,7 +61,7 @@ class Parameters
 
   void UpdateParametersFileName (int argc, char* argv[]);
   void ReadArg   (int, char *[]);
-  void ReadPar   (char *, std::string para_file_name);
+  void ReadPar   (std::string para_file_name);
   void ShowUsage (void);
   
  public:

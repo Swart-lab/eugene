@@ -48,7 +48,7 @@ void Parameters :: initParam (int argc, char * argv[])
   fflush(stderr);
 
   UpdateParametersFileName(argc, argv);
-  ReadPar(argv[0], (std::string) getC("parameters_file"));
+  ReadPar((std::string) getC("parameters_file"));
   ReadArg(argc, argv);
 
   if (m.count("Param.debug")) 
@@ -71,18 +71,15 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
   char *key, *val;
   key = new char[FILENAME_MAX+1];
   val = new char[FILENAME_MAX+1];
-  std::string name = "";
+  std::string name = (std::string)argv[0] + ".par";
 
   while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
     switch (carg) {
-      
     case 'A': 
       if (optarg) name = optarg;
       else {ShowUsage();  exit(1);}
     }
   }
-  if (name == "") 
-    name = DEFAULT_PARA_FILE;
   
   strcpy(key,"parameters_file");
   strcpy(val, name.c_str());
@@ -322,7 +319,7 @@ void Parameters :: ShowUsage (void)
 // ------------------------
 //  Read parameters file.
 // ------------------------ 
-void Parameters :: ReadPar(char *argv, std::string  para_file_name)
+void Parameters :: ReadPar(std::string  para_file_name)
 {
   char line    [MAX_LINE];
   char *key, *val = NULL;
