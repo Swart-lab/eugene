@@ -148,7 +148,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
       }
 
       if ((strcmp(HitId,PHitId) == 0)      && (phase*Pphase >= 0) &&
-	  (deb + margin > ThisBlock->End)  &&  evalue == Pevalue  &&
+	  (deb + margin > ThisBlock->End)  &&
 	  (phase >= 0  &&  (HSPDeb + margin > ThisBlock->LEnd)    ||
 	   phase < 0   &&  (HSPDeb - margin < ThisBlock->LEnd)))
 	// si HitId et PHitId sont égaux, alors il y a un Hit en cours
