@@ -1,6 +1,8 @@
 #ifndef  SENSOR_H_INCLUDED
 #define  SENSOR_H_INCLUDED
 
+#include <vector>
+#include <algorithm>
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
@@ -29,11 +31,13 @@ class Sensor
   
   Sensor  (int);
   virtual ~Sensor ();
-  virtual void Init     (DNASeq *) = 0;
-  virtual void GiveInfo (DNASeq *, int, DATA *) = 0;
-  void CheckStart   (DNASeq *, REAL **);
-  void CheckSplices (DNASeq *, REAL **, REAL **);
-  int GetNumber() { return instanceNumber; }
+  virtual void Init       (DNASeq *) = 0;
+  virtual void ResetIter  () = 0;
+  virtual void GiveInfo   (DNASeq *, int, DATA *) = 0;
+  virtual void GiveInfoAt (DNASeq *, int, DATA *) = 0;
+  void CheckStart   (DNASeq *, vector<int>, vector<int>);
+  void CheckSplices (DNASeq *, vector<int>, vector<int>, vector<int>, vector<int>);
+  int  GetNumber    () { return instanceNumber; }
 };
 
 #endif
