@@ -172,9 +172,7 @@ else if ((printopt == 'l') || (printopt == 'h'))
   }
   printf("\n");
   if (printopt == 'h')   {
-    pos = rindex(argv[sequence],'/');
-    if (pos == NULL) pos = argv[sequence];
-    else pos++;
+    pos = BaseName(argv[sequence]);
 
     printf("</listing></center>\n");
     printf("<a href=%s.trace>Trace</a><br>",pos);
