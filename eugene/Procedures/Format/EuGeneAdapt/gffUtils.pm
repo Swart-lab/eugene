@@ -101,8 +101,10 @@ sub gffWrite {
   my $cmpFrame = 0;
   my $cmpNuc   = 8;
 
-  open(GFFHDLE, ">$outGffFile") ||die"ERROR: Could not open GFF file $outGffFile\n";
-  open(INFOHDLE,">$outInfoFile")||die"ERROR: Could not open Inof file $outInfoFile\n";
+  open(GFFHDLE, ">$outGffFile") ||
+    die"ERROR: Could not open GFF file $outGffFile\n";
+  open(INFOHDLE,">$outInfoFile")||
+    die"ERROR: Could not open Inof file $outInfoFile\n";
   if ($tab[1] > 0)  {
     $u1 = "UTR5";
     $u2 = "UTR3";
@@ -177,7 +179,7 @@ sub gffWrite {
   print INFOHDLE "ID\t\t$id";
   print INFOHDLE "\nNbExon  \t".$nbExon;
   print INFOHDLE "\nLenExon \t".$nuc[$cmpNuc++];
-  print INFOHDLE "\nGCExon  \t".$nuc[$cmpNuc++];
+  print INFOHDLE "\nGCCDS   \t".$nuc[$cmpNuc++];
   print INFOHDLE "\nGCExonMin\t".$nuc[$cmpNuc++];
   print INFOHDLE "\nGCExonMax\t".$nuc[$cmpNuc++];
   print INFOHDLE "\nNbIntron\t".($nbExon-1);
