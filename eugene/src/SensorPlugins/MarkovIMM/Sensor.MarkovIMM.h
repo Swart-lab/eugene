@@ -10,30 +10,37 @@
 class SensorMarkovIMM : public Sensor
 {
  private:
-  static BString_Array *IMMatrix[7];
-  static double minGC;
-  static double maxGC;
-  static bool IsInitialized;
-  static bool UseM0asIG;
+  // to avoid to reread the IMM matrices, they are stored in the list IMMatrixList
+  // associated to a matrix: 
+  //    - the interval of GC% [minGC maxGC] where it is defined
+  //    - the request of using model M0 for IG
+  // for a given instance, IMMatrix_index allows to know in lists which matrice 
+  // and relative information to consider
+  static std::vector < std::vector <BString_Array*> > IMMatrixList;  
+  static std::vector <double> minGCList;
+  static std::vector <double> maxGCList;
+  static std::vector <bool>   UseM0asIGList;
   const static int  MODEL_LEN = 9;
   const static int  SIMPLE_MODEL_LEN = 6;
   const static int  ALPHABET_SIZE = 4;
+  int IMMatrix_index;
   
 
  public:
-  SensorMarkovIMM  (int n, DNASeq *X);
-  virtual ~SensorMarkovIMM   ();
+  SensorMarkovIMM         (int n, DNASeq *X);
+  virtual ~SensorMarkovIMM();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot(DNASeq *);
+  virtual void Plot       (DNASeq *);
   virtual void PostAnalyse(Prediction *);
 };
 
 extern "C" SensorMarkovIMM * builder0( int n, DNASeq *X) { return new SensorMarkovIMM(n, X);}
 
-BString_Array* SensorMarkovIMM::IMMatrix[7];
-double SensorMarkovIMM::minGC;
-double SensorMarkovIMM::maxGC;
-bool SensorMarkovIMM::IsInitialized = false;
-bool SensorMarkovIMM::UseM0asIG;
+// reserve memory for static variables
+std::vector < std::vector <BString_Array*> > SensorMarkovIMM::IMMatrixList;
+std::vector <double>                         SensorMarkovIMM::minGCList;
+std::vector <double>                         SensorMarkovIMM::maxGCList;
+std::vector <bool>                           SensorMarkovIMM::UseM0asIGList;
+
 #endif

@@ -1,9 +1,10 @@
 #include "Sensor.MarkovIMM.h"
 
+extern Parameters PAR;
+
 /*************************************************************
  **                     SensorMarkovIMM                     **
  *************************************************************/
-extern Parameters PAR;
 
 // ---------------------------------------------------- 
 // Normalisation sur les 6 phases + non codant
@@ -60,19 +61,45 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
 {
   FILE *fp;
   int i;
+  bool UseM0asIG;
+  double minGC = 0;
+  double maxGC = 0;
+  std::vector<BString_Array*> IMMatrix;
+  bool is_initialised = false;
   
   type = Type_Content;
+
+  UseM0asIG = (PAR.getI("MarkovIMM.useM0asIG",GetNumber()) != 0);
   
-  if (!IsInitialized) {
-    minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
-    maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
-    UseM0asIG = (PAR.getI("MarkovIMM.useM0asIG",GetNumber()) != 0);
+  minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
+  maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
+
+  // Look if the matrice(s) are yet loaded
+  // BEWARE just look if a yet loaded matrice have the same minGC and maxGC
+  // DON'T prevent overlapped intervals
+  for (unsigned int k=0; k<IMMatrixList.size(); k++) 
+    if (minGC == minGCList[k])
+      if (maxGC == maxGCList[k]) {
+	IMMatrix_index = k;
+	is_initialised = true;
+      } else {
+	fprintf(stderr, "Mismatch in GC bounds of IMM matrices.\n");
+	exit(2);
+      }
+
+  if (!is_initialised) { 
+    IMMatrix_index = IMMatrixList.size();
+    minGCList.push_back(minGC);
+    maxGCList.push_back(maxGC);
+    UseM0asIGList.push_back(UseM0asIG);
+
+    for (i=0; i<7; i++) IMMatrix.push_back(NULL);  // update a local variable, 
+                                                   // copied in the list when initialized
 
     if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
       fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
       exit(2);
     }
-    
     
     fprintf(stderr,"Reading IMM...");
     fflush(stderr);
@@ -108,21 +135,24 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     fprintf(stderr," ...done\n");
     fclose(fp);
 
-    IsInitialized = true;
+    IMMatrixList.push_back( IMMatrix );
   }
 }
+
 
 // ----------------------
 //  Default destructor.
 // ----------------------
 SensorMarkovIMM :: ~SensorMarkovIMM ()
 {
+  for (unsigned int k=0; k<IMMatrixList.size(); k++) {
   // free remaining used memory
-  if (IMMatrix[5] != IMMatrix[3]) delete  IMMatrix[5];
-  if (IMMatrix[6] != IMMatrix[3]) delete  IMMatrix[6];
+  if (IMMatrixList[k][5] != IMMatrixList[k][3]) delete  IMMatrixList[k][5];
+  if (IMMatrixList[k][6] != IMMatrixList[k][3]) delete  IMMatrixList[k][6];
   
   for  (int i = 0;  i < 5;  i ++)
-    delete  IMMatrix[i];
+    delete  IMMatrixList[k][i];
+  }
 }
 
 // ----------------------
@@ -140,6 +170,14 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int  Rev,FModelLen;
   int  indexF, indexR;
+  std::vector<BString_Array*> IMMatrix; // to locally store the used IMMatrix
+  double minGC, maxGC;                  // to locally store the GC%interval
+  bool UseM0asIG;                       // to locally store the used IG model
+
+  IMMatrix = IMMatrixList[IMMatrix_index];
+  minGC = minGCList[IMMatrix_index]; 
+  maxGC = maxGCList[IMMatrix_index]; 
+  UseM0asIG = UseM0asIGList[IMMatrix_index]; 
 
   // If the model is not in its GC% area, simply do nothing
   if ((X->Markov0[BitG] + X->Markov0[BitC]) <= minGC ||
