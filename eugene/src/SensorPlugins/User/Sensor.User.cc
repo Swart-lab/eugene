@@ -12,7 +12,8 @@ extern Parameters PAR;
 // ----------------------
 SensorUser :: SensorUser (int n, DNASeq *X) : Sensor(n)
 {
-  type = Type_Multiple;
+  // all types are possible.
+  type = Type_Any;
 }
 
 // ----------------------
