@@ -378,9 +378,25 @@ int main  (int argc, char * argv [])
 	  Switch = SwitchAcc;
 	}
 	
+	// Il y a une insertion (frameshift). Pour l'instant, on ne
+	// prend pas en compte le saut de nucléotide.
+	BestU = PBest[(k+2)%3]+PAR.FsP;
+	if (isnan(maxi) || (BestU > maxi)) {
+	  maxi = BestU;
+	  best = (k+2)%3;
+	  Switch = SwitchIns;
+	}
+
+	// Il y a une deletion (frameshift)
+	BestU = PBest[(k+1)%3]+PAR.FsP;
+	if (isnan(maxi) || (BestU > maxi)) {
+	  maxi = BestU;
+	  best = (k+1)%3;
+	  Switch = SwitchDel;
+	}
+
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
-
 	LBP[k]->Update(Data.ContentScore[k]);
       }
       
@@ -430,10 +446,25 @@ int main  (int argc, char * argv [])
 	  best = 9+((Data_Len-i-k) % 3);
 	  Switch =  SwitchDon;
 	}
-	
+
+	// Il y a une insertion (frameshift)
+	BestU = PBest[3+(k+2)%3]+PAR.FsP;
+	if (isnan(maxi) || (BestU > maxi)) {
+	  maxi = BestU;
+	  best = 3+ (k+2)%3;
+	  Switch = SwitchIns;
+	}
+
+	// Il y a une deletion (frameshift)
+	BestU = PBest[3+(k+1)%3]+PAR.FsP;
+	if (isnan(maxi) || (BestU > maxi)) {
+	  maxi = BestU;
+	  best = 3+(k+1)%3;
+	  Switch = SwitchDel;
+	}
+
 	if (best != k) 
 	  LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
-	
 	LBP[k]->Update(Data.ContentScore[k]);
       }
 
