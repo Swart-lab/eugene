@@ -26,8 +26,8 @@ SensorIfElse :: SensorIfElse (int n, DNASeq *X) : Sensor(n)
   sensor_else = new UseSensor(0, c);
 
   // load ".so" of sensors if necessary
-  dll_index_if   = MS->LoadSensor(sensor_if, n);
-  dll_index_else = MS->LoadSensor(sensor_else, n);
+  dll_index_if   = MS->LoadSensor(sensor_if,   n, "Sensor.IfElse :\n If   : ");
+  dll_index_else = MS->LoadSensor(sensor_else, n, " Else : ");
 
   // create instance of sensors
   sensorIf   = MS->dllList[dll_index_if]->MakeSensor(n+1, X);

@@ -771,7 +771,7 @@ DNASeq* ReadSequence (char* sequence_name)
     exit(3);
   }
   
-  fprintf(stderr,"-----------------------------------");
+  fprintf(stderr,"-------------------------------------");
   fprintf(stderr,"--------------------------------\nLoading sequence...");
   fflush(stderr);
   
@@ -799,7 +799,10 @@ int main  (int argc, char * argv [])
   char   *grnameFile = NULL;
   char   grname[FILENAME_MAX+1];
   int    graph;
-  
+
+  fprintf(stderr,"-------------------------------------");
+  fprintf(stderr,"--------------------------------\n");
+
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
 
@@ -908,7 +911,7 @@ int main  (int argc, char * argv [])
 	
       } // fin de traitement de chaque séquence....
   
-      fprintf(stderr,"-----------------------------------");
+      fprintf(stderr,"-------------------------------------");
       fprintf(stderr,"--------------------------------\n");
   
       return  0;
