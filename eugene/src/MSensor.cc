@@ -58,7 +58,7 @@ MasterSensor :: ~MasterSensor ()
 // ------------------------
 void MasterSensor :: InitMaster ()
 {
-  char *key_name;
+  char *key_name,*pluginsDir;
   int  val_prior;
   int i, j, nbSensors = 0;
   
@@ -73,10 +73,11 @@ void MasterSensor :: InitMaster ()
   soList  = new char*[(int)msList.size()];
   // Liste des plugins à utiliser (key pour attaquer PAR)
   useList = new char*[(int)msList.size()];
-  
+  pluginsDir = PAR.getC("EuGene.PluginsDir");
+
   for(i=0; i<(int)msList.size(); i++) {
     soList[i] = new char[FILENAME_MAX+1];
-    strcpy(soList[i], "./PLUGINS/");
+    strcpy(soList[i], pluginsDir);
     strcat(soList[i], msList[i]->Name);
     strcat(soList[i], ".so");
     useList[i] = new char[FILENAME_MAX+1];
@@ -145,13 +146,13 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
   printf("%6d %c", 1+pos, (*X)[pos]);
 
   for(i=0; i<=DATA::UTR3R; i++)
-    printf (" %.2f",d->contents[i]);
+    printf (" %4.2f",d->contents[i]);
 
   for(i=0; i<= Signal::Reverse;  i++) {
 //  for(i=0; i< Signal::LastEdge;  i++) {
     printf (" ||");
     for (j=0; j<= DATA::Del; j++)
-      printf(" %.2f",d->sig[j].weight[i]);
+      printf(" %4.2f",d->sig[j].weight[i]);
   }
   printf("\n");
 }
@@ -166,11 +167,11 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
 {
   int i;
   int info = FALSE;  // Aucune info
-
+  
   for(i=0; i< DATA::Del+1;  i++)
     d->sig[i].Clear();
   
-  for(i=0; i<UTR3R+1; i++) d->contents[i] = 0.0;
+  for(i=0; i<DATA::UTR3R+1; i++) d->contents[i] = 0.0;
   
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
 
