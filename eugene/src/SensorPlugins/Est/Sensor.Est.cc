@@ -87,12 +87,12 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
   vPos.clear();
   vESTMatch.clear();
   
-  estM = PAR.getI("Est.estM",N);
-  utrM = PAR.getI("Est.utrM",N);
+  estM           = PAR.getI("Est.estM",N);
+  utrM           = PAR.getI("Est.utrM",N);
   ppNumber       = PAR.getI("Est.PPNumber",N);
   stepid         = PAR.getI("Output.stepid",N);
-  MinDangling = PAR.getI("Est.MinDangling",N);
-  MaxIntron =  PAR.getI("Est.MaxIntron",N);
+  MinDangling    = PAR.getI("Est.MinDangling",N);
+  MaxIntron      = PAR.getI("Est.MaxIntron",N);
   DonorThreshold = PAR.getD("Est.StrongDonor",N);
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
@@ -102,12 +102,21 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
   for (i = 0; i <= X->SeqLen; i++)
     ESTMatch[i] = 0;
  
+  fprintf(stderr,"Reading cDNA hits............");
+  fflush(stderr);
+
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".est");
-  fEST = FileOpen(NULL, tempname, "r");
+  fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
   NumEST = 0;
-  HitTable = ESTAnalyzer(fEST, ESTMatch, estM, &NumEST, X);
-  fclose(fEST);
+  if (fEST) {
+    HitTable = ESTAnalyzer(fEST, ESTMatch, estM, &NumEST, X);
+    fclose(fEST);
+  }
+  else {
+    fprintf(stderr,"\n");
+    fflush(stderr);
+  }
   
   for (i = 0; i<= X->SeqLen; i++)
     if(ESTMatch[i] != 0) {
@@ -228,17 +237,17 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // Ca merdouille sur SeqAra. A creuser
     // UTR Forward
     // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
-//     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
-//       d->contents[DATA::UTR5F] += estP;
-//       d->contents[DATA::UTR3F] += estP;
-//     }
+    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
+    //       d->contents[DATA::UTR5F] += estP;
+    //       d->contents[DATA::UTR3F] += estP;
+    //     }
     
-//     // UTR Reverse
-//     // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
-//     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
-//       d->contents[DATA::UTR5R] += estP;
-//       d->contents[DATA::UTR3R] += estP;
-//     }
+    //     // UTR Reverse
+    //     // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+    //     if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
+    //       d->contents[DATA::UTR5R] += estP;
+    //       d->contents[DATA::UTR3R] += estP;
+    //     }
     
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
@@ -296,9 +305,6 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   Hits *ThisEST = NULL, *AllEST = NULL;
   Block *ThisBlock = NULL;
   
-  fprintf(stderr,"Reading cDNA hits............");
-  fflush(stderr);
-
   // ReadFromFile (EstFile  EstNumber  Level  Margin)
   AllEST = AllEST->ReadFromFile(ESTFile, NumEST, -1, 0);
   
@@ -478,7 +484,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     
     if (Inc) {
       Rejected++;
-      ThisEST->Rejected = TRUE;
+      ThisEST->Rejected = 1;
       
       ThisBlock = ThisEST->Match;
       while (ThisBlock) {
@@ -737,7 +743,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	  
 	  for (i= from; i <= to; i++) 
 	    if (!Sup[i-Tdebut]) {
-	      Sup[i-Tdebut] = TRUE;
+	      Sup[i-Tdebut] = 1;
 	      supported++;
 	      if ((i >=debut) && (i <=fin)) CDSsupported++;
 	    }
@@ -747,7 +753,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	
 	for (i= from; i <= to; i++) 
 	  if (!Sup[i-Tdebut]) {
-	    Sup[i-Tdebut] = TRUE;
+	    Sup[i-Tdebut] = 1;
 	    supported++;
 	    if ((i >=debut) && (i <=fin)) CDSsupported++;
 	  }
@@ -986,7 +992,7 @@ int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
 
  	for (j=from; j<=to; j++)
  	  if (!Sup[j-beg]) {
- 	    Sup[j-beg] = TRUE;
+ 	    Sup[j-beg] = 1;
  	    supported++;
  	  }
       }
@@ -995,7 +1001,7 @@ int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
       
       for (j=from; j<=to; j++)
 	if (!Sup[j-beg]) {
-	  Sup[j-beg] = TRUE;
+	  Sup[j-beg] = 1;
 	  supported++;
 	}
       ThisBlock = ThisBlock->Next;
