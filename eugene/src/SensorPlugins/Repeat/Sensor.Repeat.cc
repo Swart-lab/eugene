@@ -1,4 +1,4 @@
-#include "SensorRepeat.h"
+#include "Sensor.Repeat.h"
 
 /*************************************************************
  **                        SensorRepeat                     **

@@ -1,4 +1,4 @@
-#include "SensorSPred.h"
+#include "Sensor.SPred.h"
 
 /*************************************************************
  **                     SensorSplicePredictor               **

@@ -1,4 +1,4 @@
-#include "SensorNG2.h"
+#include "Sensor.NG2.h"
 
 /*************************************************************
  **                        SensorNetGene2                   **

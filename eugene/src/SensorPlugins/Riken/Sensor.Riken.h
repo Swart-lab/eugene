@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "Sensor.h"
+#include "../Sensor.h"
 
 /*************************************************************
  **                     SensorRiken                         **
@@ -45,5 +45,24 @@ class SensorRiken : public Sensor
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
+
+/*************************************************************
+ **                  SensorRikenFactory                     **
+ *************************************************************/
+class SensorRikenFactory : public SensorFactory
+{
+ public:
+  SensorRikenFactory()  { }
+  
+  ~SensorRikenFactory() { }
+  
+  virtual Sensor * CreateSensor() {
+    return new SensorRiken;
+  }
+};
+
+extern "C" void * factory0( void ) {
+  return new SensorRikenFactory;
+}
 
 #endif

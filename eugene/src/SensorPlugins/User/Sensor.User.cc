@@ -1,4 +1,4 @@
-#include "SensorUser.h"
+#include "Sensor.User.h"
 
 /*************************************************************
  **                        SensorUser                       **

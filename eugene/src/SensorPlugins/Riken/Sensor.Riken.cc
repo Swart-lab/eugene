@@ -1,4 +1,4 @@
-#include "SensorRiken.h"
+#include "Sensor.Riken.h"
 
 /*************************************************************
  **                        SensorRiken                      **

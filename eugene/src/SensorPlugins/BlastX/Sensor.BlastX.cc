@@ -1,4 +1,4 @@
-#include "SensorBlastX.h"
+#include "Sensor.BlastX.h"
 
 /******************************************************************
  **                          SensorBlastX                        **
@@ -27,6 +27,7 @@ SensorBlastX :: SensorBlastX ()
   keyBXLevel[5] = PAR.getD("BlastX.level5");
   keyBXLevel[6] = PAR.getD("BlastX.level6");
   keyBXLevel[7] = PAR.getD("BlastX.level7");
+  minL8 = PAR.getI("EuGene.minL8");
 }
 
 // ----------------------
@@ -118,11 +119,11 @@ void SensorBlastX :: Init (DNASeq *X)
 	// Detection d'un INTRON
 	overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
 	// overlap >0 : hits chevauchants, overlap <0 : hits espaces
-	if ((deb-Pfin+overlap) >= PAR.getI("eugene.minL8")){
+	if ((deb-Pfin+overlap) >= minL8){
 	  // Le tableau des introns est rempli prudemment: uniquement les bordures,
 	  // et sans serrer pres de l'exon. 
 	  for(i = Pfin - (overlap<0) * overlap ;
-	      i < Pfin + PAR.getI("eugene.minL8") - abs(overlap) ; i++) {
+	      i < Pfin + minL8 - abs(overlap) ; i++) {
 	    // debut de l'intron seulement... (dont le score est fonction de
 	    // l'exon precedent)
 	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {
@@ -141,7 +142,7 @@ void SensorBlastX :: Init (DNASeq *X)
 	    //		     j=((phase < 0)?-4:4);
 	    //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 	  }
-	  for (i = deb - PAR.getI("eugene.minL8") + abs(overlap) ;
+	  for (i = deb - minL8 + abs(overlap) ;
 	       i < deb + (overlap<0) * overlap ; i++) {
 	    // ...et fin de l'intron (score est fonction de l'exon actuel)
 	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {

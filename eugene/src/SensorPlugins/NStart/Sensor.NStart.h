@@ -1,7 +1,7 @@
 #ifndef  SENSOR_NSTART_H_INCLUDED
 #define  SENSOR_NSTART_H_INCLUDED
 
-#include "Sensor.h"
+#include "../Sensor.h"
 
 /*************************************************************
  **                    SensorNStart                         **
@@ -20,5 +20,25 @@ class SensorNStart : public Sensor
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
+
+
+/*************************************************************
+ **                 SensorNStartFactory                     **
+ *************************************************************/
+class SensorNStartFactory : public SensorFactory
+{
+ public:
+  SensorNStartFactory()  { }
+  
+  ~SensorNStartFactory() { }
+  
+  virtual Sensor * CreateSensor() {
+    return new SensorNStart;
+  }
+};
+
+extern "C" void * factory0( void ) {
+  return new SensorNStartFactory;
+}
 
 #endif

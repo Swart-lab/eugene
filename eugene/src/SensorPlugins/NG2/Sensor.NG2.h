@@ -1,7 +1,7 @@
 #ifndef  SENSOR_NG2_H_INCLUDED
 #define  SENSOR_NG2_H_INCLUDED
 
-#include "Sensor.h"
+#include "../Sensor.h"
 
 /*************************************************************
  **                       SensorNG2                         **
@@ -21,5 +21,24 @@ class SensorNG2 : public Sensor
   void Init     (DNASeq *);
   void GiveInfo (DNASeq *, int, DATA *);
 };
+
+/*************************************************************
+ **                   SensorNG2Factory                      **
+ *************************************************************/
+class SensorNG2Factory : public SensorFactory
+{
+public:
+  SensorNG2Factory()  { }
+	
+  ~SensorNG2Factory() { }
+  
+  virtual Sensor * CreateSensor() {
+    return new SensorNG2;
+  }
+};
+
+extern "C" void * factory0( void ) {
+  return new SensorNG2Factory;
+}
 
 #endif
