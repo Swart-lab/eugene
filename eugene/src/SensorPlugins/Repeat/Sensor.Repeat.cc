@@ -51,6 +51,7 @@ void SensorRepeat :: Init (DNASeq *X)
       if (PAR.getI("Output.graph")) PlotBarI(i,0,0.25,2,6);
     }
   }
+  fprintf(stderr,"done\n");
 }
 
 // -----------------------
