@@ -568,18 +568,22 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   if (NumEST == 0) return;
 
   qsort((void *)HitTable, NumEST, sizeof(void *), HitsCompareLex);
-  
+
   // Reset static in EST Support or FEA Support
   if (pprocess == 1)  ESTSupport(NULL,100,0,100,0,NULL,0);
   else                FEASupport(NULL,100,0,100,0,NULL,0,0);
 
+
   for(int i=pred->size()-1; i!=-1; i--) {
+
     if(i != pred->size()-1) {
       stateBack = pred->getState(i+1);
       posBack   = pred->getPos(i+1);
     }
+
     state = pred->getState(i);
     pos   = pred->getPos(i);
+
     if(i != 0) {
       stateNext = pred->getState(i-1);
       posNext   = pred->getPos(i-1);
@@ -593,9 +597,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
         
     // Si fin de gene ou fin seq gene en cours
     if (((state == UTR3F || state == UTR5R) && stateNext == InterGen) ||
-	(i==0 && (state <= IntronR3
-		  || state == UTR3R || state == IntronU3R
-		  || state == UTR5F || state == IntronU5F))) {
+	(i==0 && (state != InterGen))) {
       NumGene++;
       if (pprocess == 1)
 	// Analyse des ESTs par rapport à la prédiction
