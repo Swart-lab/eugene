@@ -115,7 +115,7 @@ void SensorRiken :: Init (DNASeq *X)
   }
   if(j==(int)RAFLtmp.size()-1) RAFL.push_back(RAFLtmp[j]);
   
-  if (PAR.getI("graph")) {
+  if (PAR.getI("Output.graph")) {
     const int HLen = 30;
     
     for (j =0; j<(int)RAFL.size() ;j++) {

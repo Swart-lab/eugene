@@ -52,7 +52,7 @@ void SensorRepeat :: Init (DNASeq *X)
     fin = Min(X->SeqLen,fin)-1;
     for (i = deb; i <= fin; i++) {
        ForcedIG[i] = TRUE;
-       if (PAR.getI("graph")) PlotBarI(i,0,0.25,2,6);
+       if (PAR.getI("Output.graph")) PlotBarI(i,0,0.25,2,6);
     }
   }
 }
