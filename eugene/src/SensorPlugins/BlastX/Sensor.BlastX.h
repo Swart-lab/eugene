@@ -11,6 +11,10 @@ class SensorBlastX : public Sensor
  private:
   REAL *ProtMatch, *ProtMatchLevel;
   int  *ProtMatchPhase;
+  std::vector<int>  vPos,     vPMPhase;
+  std::vector<REAL> vPMLevel, vPMatch;
+  std::vector<int>::iterator iter;
+  int    index;
   double keyBXLevel[8];
   int    minL8;
   

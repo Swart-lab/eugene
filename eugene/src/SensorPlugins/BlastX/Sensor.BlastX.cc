@@ -17,8 +17,6 @@ extern Parameters PAR;
 // ----------------------
 SensorBlastX :: SensorBlastX (int n) : Sensor(n)
 {
-  ProtMatch = NULL;
-
   keyBXLevel[0] = PAR.getD("BlastX.level0");
   keyBXLevel[1] = PAR.getD("BlastX.level1");
   keyBXLevel[2] = PAR.getD("BlastX.level2");
@@ -35,9 +33,10 @@ SensorBlastX :: SensorBlastX (int n) : Sensor(n)
 // ----------------------
 SensorBlastX :: ~SensorBlastX ()
 {
-  delete [] ProtMatch;
-  delete [] ProtMatchLevel;
-  delete [] ProtMatchPhase;
+  vPos.clear();
+  vPMatch.clear();
+  vPMLevel.clear();
+  vPMPhase.clear();
 }
 
 // ----------------------
@@ -62,12 +61,13 @@ void SensorBlastX :: Init (DNASeq *X)
 
   type = Type_Content;
 
-  if(ProtMatch != NULL) {
-    delete [] ProtMatch;
-    delete [] ProtMatchLevel;
-    delete [] ProtMatchPhase;
-  }
-
+  index = 0;
+  
+  vPos.clear();
+  vPMatch.clear();
+  vPMLevel.clear();
+  vPMPhase.clear();
+  
   ProtMatch      = new REAL[Len+1];
   ProtMatchLevel = new REAL[Len+1];
   ProtMatchPhase = new int[Len+1];
@@ -206,7 +206,20 @@ void SensorBlastX :: Init (DNASeq *X)
     
     fclose(fblast);       
   }
-  fprintf(stderr," done\n");
+  
+  for (i = 0; i<= Len; i++)
+    if(ProtMatch[i] != 0.0) {
+      vPos.push_back    ( i );
+      vPMatch.push_back ( ProtMatch[i] );
+      vPMLevel.push_back( ProtMatchLevel[i] );
+      vPMPhase.push_back( ProtMatchPhase[i] );
+    }
+  
+  delete [] ProtMatch;
+  delete [] ProtMatchLevel;
+  delete [] ProtMatchPhase;
+  
+  fprintf(stderr,"done\n");
 }
 
 // -----------------------
@@ -214,6 +227,7 @@ void SensorBlastX :: Init (DNASeq *X)
 // -----------------------
 void SensorBlastX :: ResetIter ()
 {
+  index = 0;
 }
 
 // --------------------------
@@ -222,18 +236,21 @@ void SensorBlastX :: ResetIter ()
 void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int i;
-  for(i=0; i<6; i++)       //exons
-    if(ProtMatch[pos] < 0 || 
-       ((ProtMatch[pos] > 0) && (ProtMatchPhase[pos] != PhaseAdapt(i))))
-      d->ContentScore[i] += -fabs(ProtMatch[pos])*ProtMatchLevel[pos];
-
-  for(i=8; i<13; i++)      //inter & UTRs
-    if(ProtMatch[pos] != 0)
-      d->ContentScore[i] += -fabs(ProtMatch[pos])*ProtMatchLevel[pos];
-
-  for(i=6; i<8; i++)       //introns
-    if(ProtMatch[pos] > 0)
-      d->ContentScore[i] += -ProtMatch[pos]*ProtMatchLevel[pos];
+  if( index <= (int)vPos.size()  &&  vPos[index] == pos ) {
+    for(i=0; i<6; i++)       //exons
+      if(vPMatch[index] < 0 || 
+	 ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
+	d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+    
+    for(i=8; i<13; i++)      //inter & UTRs
+      if(vPMatch[index] != 0)
+	d->ContentScore[i] += -fabs(vPMatch[index])*vPMLevel[index];
+    
+    for(i=6; i<8; i++)       //introns
+      if(vPMatch[index] > 0)
+	d->ContentScore[i] += -vPMatch[index]*vPMLevel[index];
+    index++;
+  }
 }
 
 // ----------------------------
@@ -241,6 +258,22 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorBlastX :: GiveInfoAt(DNASeq *X, int pos, DATA *d)
 {
+  int i;
+  iter = find(vPos.begin(), vPos.end(), pos);
+  if(iter != vPos.end()) {
+    for(i=0; i<6; i++)       //exons
+      if(vPMatch[iter-vPos.begin()] < 0 || 
+	 ((vPMatch[iter-vPos.begin()] > 0) && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
+	d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+    
+    for(i=8; i<13; i++)      //inter & UTRs
+      if(vPMatch[iter-vPos.begin()] != 0)
+	d->ContentScore[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+    
+    for(i=6; i<8; i++)       //introns
+      if(vPMatch[iter-vPos.begin()] > 0)
+	d->ContentScore[i] += -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
+  }
 }
 
 // -----------------------------------------------
