@@ -69,3 +69,28 @@ void Prediction :: resetPred ()
   vPos.clear();
   vState.clear();
 }
+
+// ------------------------
+//  nbExon.
+// ------------------------
+int Prediction :: nbExon (int geneNumber)
+{
+  int i = (int)vPos.size()-1;
+  int nb = 0;
+  
+  while(vState[i] >= InterGen5)
+      i--;
+  
+  for(int j=1; j<geneNumber; j++) {
+    while(vState[i] <= InterGen5)
+      i--;
+    while(vState[i] >= InterGen5)
+      i--;
+  }
+  while(vState[i] <= InterGen5 && i != -1) {
+    if(vState[i] <= ExonR3)
+      nb++;
+    i--;
+  }
+  return nb;
+}

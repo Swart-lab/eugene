@@ -29,6 +29,7 @@ class Prediction
   int  size         ()      { return nb;        } 
   void plotPred     ();
   void resetPred    ();
+  int  nbExon       (int);
 };
 
 #endif
