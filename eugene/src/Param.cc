@@ -318,7 +318,7 @@ char* Parameters :: getC(char *key, int index = 0)
     return key;
   }
   else {
-    fprintf(stderr,"WARNING: Undefined key %s\n",altkey);
+    fprintf(stderr,"Error: Undefined key %s\n",altkey);
     exit(2);
   }
 }
