@@ -25,7 +25,7 @@
 #include <gdfontmb.h>
 #include <gdfontl.h>
 #include <gdfontg.h>
-#ifdef __sun
+#ifdef __sun__
 #include <strings.h>
 #endif
 #ifdef __linux__
@@ -239,7 +239,7 @@ void ClosePNG()
 
 // Parametre = 1 -> toute 1ere image de la 1ere sequence traitée
 // Parametre = 0 -> la suite....*.fasta
-void OutputHTMLFileNames(int firstImg)
+void OutputHTMLFileNames(int firstImg, char* html_dir)
 {
   int i;
   char str[12];
@@ -267,12 +267,12 @@ void OutputHTMLFileNames(int firstImg)
 	   "			      <tr>\n"
 	   "				<td width=\"100\" align=\"center\"\n"
 	   "				    bgcolor=\"#c0dbe2\">\n"
-	   "				  <img src=\"WEB/Images/first.jpg\"\n"
+	   "				  <img src=\"%s/Images/first.jpg\"\n"
 	   "				       onclick=\"first();\"\n"
 	   "				       title=\"Jump to beginning\" "
 	   "align=\"middle\">\n"
 	   "				  &nbsp; &nbsp; &nbsp;\n"
-	   "				  <img src=\"WEB/Images/back.jpg\"\n"
+	   "				  <img src=\"%s/Images/back.jpg\"\n"
 	   "				       onclick=\"previous();\"\n"
 	   "				       title=\"Back\" "
 	   "align=\"middle\">\n"
@@ -280,7 +280,7 @@ void OutputHTMLFileNames(int firstImg)
 	   "				<td align=\"center\" "
 	   "bgcolor=\"#9bc7d0\">\n"
 	   "				  <select name=\"slide\" "
-	   "onChange=\"change();\" size=\"1\">\n");
+	   "onChange=\"change();\" size=\"1\">\n", html_dir, html_dir);
     printf("				    <option value=\"%s\"\n",TName);
     printf("					    selected>%s : %d -> %d"
 	   "</option>\n",TName,From,ImgLen+From);

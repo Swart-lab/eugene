@@ -31,6 +31,6 @@ void PlotLine  (unsigned int nuc1, unsigned int nuc2, signed char phase1,
 void PlotString(unsigned int nuc, signed char phase, double pos,
 		char st[], int col);
 void ClosePNG();
-void OutputHTMLFileNames(int firstImg);
+void OutputHTMLFileNames(int firstImg, char* html_dir);
 
 #endif
