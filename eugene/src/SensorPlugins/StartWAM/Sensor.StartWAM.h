@@ -22,14 +22,16 @@
 class SensorStartWAM : public Sensor
 {
  private:
-  int NbNtBeforeATG;
-  int NbNtAfterATG;
-  int MotifLength;
-  int MarkovianOrder; // order of the markov models in the WAM
   double ScaleCoef; // coefficient for the WAM score scaling
   double ScalePenalty; //  penality for the WAM score scaling
-  double PlotScoreIncrease;
-  WAM* WAModel;
+  static int NbNtBeforeATG;
+  static int NbNtAfterATG;
+  static int MotifLength;
+  static int MarkovianOrder; // order of the markov models in the WAM
+  static double PlotScoreIncrease;
+  static WAM* WAModel;
+  static bool IsInitialized;
+
   double ScaleWAMScore (double WAMScore);  //  (score= coef * WAMscore - pen)
   inline double NormalizePlot (double x, double n);  // normalization for the plot
 
@@ -43,5 +45,14 @@ class SensorStartWAM : public Sensor
 };
 
 extern "C" SensorStartWAM * builder0(int n, DNASeq *X) {  return new SensorStartWAM(n, X); }
+
+int SensorStartWAM::NbNtBeforeATG;
+int SensorStartWAM::NbNtAfterATG;
+int SensorStartWAM::MotifLength;
+int SensorStartWAM::MarkovianOrder; 
+double SensorStartWAM::PlotScoreIncrease;
+WAM* SensorStartWAM::WAModel;
+bool SensorStartWAM::IsInitialized = false;
+
 
 #endif

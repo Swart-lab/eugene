@@ -26,16 +26,19 @@ SensorStartWAM :: SensorStartWAM (int n, DNASeq *X) : Sensor(n)
 {
   type = Type_Start;
 
-  char modelfilename[FILENAME_MAX+1];
-  MarkovianOrder= PAR.getI("StartWAM.MarkovianOrder");
-  NbNtBeforeATG = PAR.getI("StartWAM.NbNtBeforeATG");
-  NbNtAfterATG = PAR.getI("StartWAM.NbNtAfterATG");
-  MotifLength= NbNtBeforeATG + 3 + NbNtAfterATG;
-  strcpy(modelfilename,PAR.getC("EuGene.PluginsDir"));
-  strcat(modelfilename,PAR.getC("StartWAM.modelfilename"));
-  PlotScoreIncrease= 7.0;
+  if (!IsInitialized) {
+    char modelfilename[FILENAME_MAX+1];
+    MarkovianOrder= PAR.getI("StartWAM.MarkovianOrder");
+    NbNtBeforeATG = PAR.getI("StartWAM.NbNtBeforeATG");
+    NbNtAfterATG = PAR.getI("StartWAM.NbNtAfterATG");
+    MotifLength= NbNtBeforeATG + 3 + NbNtAfterATG;
+    strcpy(modelfilename,PAR.getC("EuGene.PluginsDir"));
+    strcat(modelfilename,PAR.getC("StartWAM.modelfilename"));
+    PlotScoreIncrease= 7.0;
 
-  WAModel = new WAM(MarkovianOrder, MotifLength,"ACGT", modelfilename);
+    WAModel = new WAM(MarkovianOrder, MotifLength,"ACGT", modelfilename);
+    IsInitialized = true;
+  }
 }
 
 // ----------------------
@@ -107,6 +110,8 @@ void SensorStartWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
     d->sig[DATA::Start].weight[Signal::Reverse] += 
       ScaleWAMScore (WAModel->ScoreTheMotif(MotifExtnd));
   }
+
+  delete MotifExtnd;
 }
 // ----------------------------
 //  Normalize Score for Plot
