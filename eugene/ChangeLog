@@ -1,4 +1,30 @@
 -------------------------------------------------------------------------------
+v3.2 released 17 Mar. 2005 
+-------------------------------------------------------------------------------
+
+* change the use of the software:
+	EUGENEDIR: environment variable updating with the eugene root repertory
+        (default value /usr/share/eugene). This repertory contains repertories:
+	     - cfg (with eugene.par the default parameter file)
+	     - models (provided models)
+	     - doc (documentation)
+	     - plugins 
+	     - web (to vizualize eugene HTML outputs)
+
+* Allow MAC compilation
+
+* no more need to call the CREATE_LINKS procedure.
+
+* Tests as compilation are called in the root directory.
+
+* HTML outputs reference local web directory and no more WEB in the current directory.
+
+* Optimized parameter file is written in the current directory instead of the directory of the parameter file used.
+
+* New parameter Output.webdir indicating where to find files necessary to vizualize HTML outputs ('LOCAL' value to use the local web directory or a URL)
+	
+
+-------------------------------------------------------------------------------
 v3.1 released 3 Feb. 2005 
 -------------------------------------------------------------------------------
 	
