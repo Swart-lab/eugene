@@ -55,7 +55,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   m["fstname"] = "\000";        // no default input
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::")) != -1) {
     
     switch (carg) {
       
@@ -217,6 +217,13 @@ void Parameters :: ReadArg(int argc, char * argv[])
 
       break;
       
+    case 't':           // -t use tblastx results   
+      m["Sensor.Homology.use"] = "TRUE";
+      if (optarg) {
+	m["Homology.protmatname"] = optarg;
+      }
+      break;
+
     case '?':           /* bad option                       */
       errflag++;
     }
