@@ -162,6 +162,10 @@ Homology.TblastxP*	0
 Homology.TblastxB* 	0.0595
 Homology.protmatname	BLOSUM80
 #
+##### GFF sensor parameters #####
+#
+GFF.PostProcess		TRUE
+#
 ##### Sensors with uniform penalties #####
 #
 SpliceConst.accP*	1e-9
@@ -220,7 +224,7 @@ Plotter.A|T/A+T	 0   # T/A+T -> IntronF - A/A+T -> IntronR
 #
 ##### Sensor Tester #####
 #
-Tester.Test.0		GSplicer
+Tester.Test.0		EuStop
 Tester.Param.idx.0	0
 #
 ##### Sensors activation #####
@@ -247,7 +251,7 @@ Sensor.IfElse.use		TRUE
 Sensor.MarkovIMM.use		TRUE
 #Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	FALSE
-Sensor.MarkovConst.use	TRUE
+Sensor.MarkovConst.use		TRUE
 #
 # SIMILARITIES:
 Sensor.Est.use		FALSE
@@ -259,7 +263,7 @@ Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
 Sensor.GCPlot.use	FALSE
-Sensor.Plotter.use	FALSE
+Sensor.Plotter.use		TRUE
 #
 # TEST
 Sensor.Tester.use	FALSE
@@ -355,7 +359,7 @@ Genetic.Elitism 0.9
 #				  n: elitism; keeps the best elt if no sharing,
 #	                             and keeps the best elt of each cluster 
 #				     which best_elt fitness is at
-#	                             least n% of the overallbest elt if sharing 
+#	                             least n% of the overallbest elt if sharing
 Genetic.SA.Mutation FALSE
 Genetic.SA.CrossOver FALSE
 Genetic.Seed 4
