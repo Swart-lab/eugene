@@ -42,13 +42,9 @@ EXTRA_DIST = reconf configure  config/* CREATE_LINKS \
 	     src/PLUGINS/exon.dist src/PLUGINS/intergenic.dist src/PLUGINS/intron.dist \
 	     src/PLUGINS/term.dist src/PLUGINS/init.dist       src/PLUGINS/intr.dist \
              src/PLUGINS/sngl.dist src/PLUGINS/utr.dist \
-	     src/WEB/Images/back.jpg src/WEB/Images/eg.jpg src/WEB/Images/euGpred_on.jpg \
+	     src/WEB/Images/back.jpg src/WEB/Images/euGpred_on.jpg \
              src/WEB/Images/first.jpg src/WEB/Images/last.jpg src/WEB/Images/left.jpg \
-	     src/WEB/Images/m_doc.jpg src/WEB/Images/m_download.jpg src/WEB/Images/m_home.jpg \
-	     src/WEB/Images/m_links_contacts.jpg src/WEB/Images/m_orga.jpg \
-	     src/WEB/Images/m_plugins.jpg src/WEB/Images/next.jpg src/WEB/Images/top.jpg \
-	     src/WEB/Javascripts/cm_addins.js src/WEB/Javascripts/coolmenus4.js \
-	     src/WEB/Javascripts/diap.js src/WEB/Javascripts/euG_menu.js \
+	     src/WEB/Javascripts/diap.js \
 	     src/WEB/Style/eugene.css 
 
 SUBDIRS = src doc
