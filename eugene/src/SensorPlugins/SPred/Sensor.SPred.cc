@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2002 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted without                   */
+/*                 the express written permission of INRA.                   */
+/*                     Mail : tschiex@toulouse.inra.fr                       */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/SPred/Sensor.SPred.cc               */
+/* Description  : Sensor SplicerPredictor                                    */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : May 2003                                                   */
+/*****************************************************************************/
+
 #include "Sensor.SPred.h"
 #define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 

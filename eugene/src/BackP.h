@@ -38,13 +38,15 @@ class BackPoint
     BackPoint ();
     BackPoint  (char state, int pos, double cost);
     ~BackPoint();
-    void InsertNew(char state, unsigned char Switch,int pos, double cost,BackPoint *Or,bool opt = true);
+    void InsertNew(char state, unsigned char Switch, int pos,
+		   double cost, BackPoint *Or,bool opt = true);
     void Print();
     void Dump();
     Prediction* BackTrace();
     inline void Update(double cost) {  Next->Additional += cost; };
-    BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost, int len2 = 0);
-    BackPoint *StrictBestUsable(int pos, int len,REAL *cost);
+    BackPoint *BestUsable(int pos, unsigned char mask, int len,
+			  double *cost, int len2 = 0);
+    BackPoint *StrictBestUsable(int pos, int len, double *cost);
     void Zap();
   };
 

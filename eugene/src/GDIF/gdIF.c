@@ -12,8 +12,6 @@
 #include <string.h>
 #endif
 
-#define REAL double
-
 #define LMargin 20
 #define RMargin 20
 #define TMargin 20
@@ -42,7 +40,7 @@ char TName[1024];
 #define Ystretch 1.2
 
 #define ToX(nuc) ((int)(((nuc)*rx)/ImgLen+LMargin))
-#define ToY(ph,pos) ((int)(((((NLigne-(REAL)(ph))*Ystretch) - (pos)+1.0)/((2*NLigne+1)*Ystretch))*ry+TMargin))
+#define ToY(ph,pos) ((int)(((((NLigne-(double)(ph))*Ystretch) - (pos)+1.0)/((2*NLigne+1)*Ystretch))*ry+TMargin))
 
 
 void InitImg(struct Image *image, int n)
@@ -67,8 +65,10 @@ void InitImg(struct Image *image, int n)
   
   gdImageColorTransparent(image->im, Col[0]);
   
-  gdImageLine(image->im, LMargin-1, TMargin-1, LMargin-1, ry+TMargin+5, Col[3]);
-  gdImageLine(image->im, rx+LMargin, TMargin-1, rx+LMargin, ry+TMargin+5, Col[3]);
+  gdImageLine(image->im, LMargin-1,  TMargin-1, LMargin-1,
+	      ry+TMargin+5, Col[3]);
+  gdImageLine(image->im, rx+LMargin, TMargin-1, rx+LMargin,
+	      ry+TMargin+5, Col[3]);
   
   for (i = -NLigne; i <= NLigne; i++) {
     gdImageString(image->im,gdFontTiny,5, ToY(i,0.6),Ylab[i+4],Col[3]);
@@ -168,7 +168,7 @@ int CheckIn(unsigned int nuc, struct Image *image)
   return ((nuc >= image->Left) && (nuc < image->Right));
 }
 
-void PlotBarI(unsigned int nuc, signed char phase, REAL pos, int width, int col)
+void PlotBarI(unsigned int nuc, signed char phase, double pos, int width, int col)
 {
   int i;
 
@@ -177,7 +177,7 @@ void PlotBarI(unsigned int nuc, signed char phase, REAL pos, int width, int col)
       gdImageLine(images[i].im,ToX(nuc-images[i].Left),ToY(phase, pos)-width,ToX(nuc-images[i].Left),ToY(phase, pos)+width, Col[col]);
 }
 
-void PlotBarF(unsigned int nuc, signed char phase, REAL pos, REAL width, int col)
+void PlotBarF(unsigned int nuc, signed char phase, double pos, double width, int col)
 {
   int i;
 
@@ -186,9 +186,9 @@ void PlotBarF(unsigned int nuc, signed char phase, REAL pos, REAL width, int col
       gdImageLine(images[i].im,ToX(nuc-images[i].Left),ToY(phase, pos-(width/2)),ToX(nuc-images[i].Left),ToY(phase, pos+(width/2)), Col[col]);
 }
 
-void PlotLine(unsigned int nuc1, unsigned int nuc2,
+void PlotLine(unsigned int nuc1,  unsigned int nuc2,
 	      signed char phase1, signed char phase2,
-	      REAL pos1,          REAL pos2, int col)
+	      double pos1,        double pos2, int col)
 {
   int i;
 
@@ -197,7 +197,7 @@ void PlotLine(unsigned int nuc1, unsigned int nuc2,
       gdImageLine(images[i].im,ToX(nuc1-images[i].Left),ToY(phase1, pos1),ToX(nuc2-images[i].Left),ToY(phase2, pos2), Col[col]);
 }
 
-void PlotString(unsigned int nuc, signed char phase, REAL pos, char st[], int col)
+void PlotString(unsigned int nuc, signed char phase, double pos, char st[], int col)
 {
   int i;
   for (i=0; i< NbIm; i++)

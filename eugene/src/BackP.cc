@@ -123,7 +123,8 @@ Prediction* BackPoint :: BackTrace ()
 // given, then the BackPoint MUST BE at least len nuc. far from pos
 // else it must be at least len2 nuc. far
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost, int len2)
+BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask,
+				   int len, double *cost, int len2)
 {
   BackPoint *It = this->Next;
   BackPoint *BestBP = NULL;
@@ -132,8 +133,11 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *c
 
   do {
     add += It->Additional;
-    // la condition filtre les aiguillages interdits: trop pres (len2) ou trop pres (len) et de mauvais type
-    if ((It->StartPos <= pos-len) || ( (!(It->SwitchType & mask))&& (It->StartPos <= pos-len2)) || (It->StartPos < 0)) {
+    // la condition filtre les aiguillages interdits: trop pres (len2)
+    // ou trop pres (len) et de mauvais type
+    if ((It->StartPos <= pos-len) ||
+	( (!(It->SwitchType & mask)) && (It->StartPos <= pos-len2)) ||
+	(It->StartPos < 0)) {
       // on regarde si on ameliore
       if ((add+It->Cost) > BestScore) {
 	BestScore = add+It->Cost;
@@ -155,7 +159,7 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *c
 // Returns the best BackPoint and the BackPoint is at least len
 // nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: StrictBestUsable(int pos, int len, REAL *cost)
+BackPoint *BackPoint :: StrictBestUsable(int pos, int len, double *cost)
 {
   BackPoint *It = this->Next;
   double add = 0.0;

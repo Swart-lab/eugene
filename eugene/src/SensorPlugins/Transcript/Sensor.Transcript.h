@@ -10,8 +10,8 @@ class SensorTranscript : public Sensor
 {
  private:
   // proba. of transcription Start/Stop
-  REAL transStart;
-  REAL transStop;
+  double transStart;
+  double transStop;
 
  public:
   SensorTranscript  (int n, DNASeq *X);

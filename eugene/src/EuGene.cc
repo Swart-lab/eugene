@@ -122,7 +122,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   
   Prediction *pred;
   BackPoint  *LBP[18];
-  REAL BestU;
+  double BestU;
   double NormalizingPath = 0.0;
   signed   char best   = 0;
   unsigned char Switch = 0;
@@ -167,7 +167,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     
   // Les PrevBP sont des pointeurs sur les "opening edges"
   // Les PBest correspondent au cout du chemin correspondant
-  REAL  maxi, PBest[26];
+  double  maxi, PBest[26];
   BackPoint *PrevBP[26];
   int source = 0;
   
@@ -819,21 +819,21 @@ int main  (int argc, char * argv [])
       for (sequence = optind; sequence < argc ; sequence++) {
 	
 	PAR.set("fstname", argv[sequence]);
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	// Lecture de la sequence    
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	TheSeq = ReadSequence( PAR.getC("fstname") );
 	Data_Len = TheSeq->SeqLen;
     
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	// Init MasterSensor
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	MS = new MasterSensor();
 	MS->InitMaster(TheSeq);
 
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	// Preparation sortie graphique + Scores
-	// ------------------------------------------------------------------------
+	// --------------------------------------------------------------------
 	if (graph) {
 	  int gto       = PAR.getI("Output.gto");
 	  int gfrom     = PAR.getI("Output.gfrom");
@@ -845,8 +845,8 @@ int main  (int argc, char * argv [])
 	  // Construction du nom de sortie (*.png)
 	  strcpy(grname, PAR.getC("Output.Prefix"));
 	  strcat(grname, grnameFile);
-	  *rindex(grname, '.') = 0;             // on enleve l'extension
-	  if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'arg
+	  *rindex(grname, '.') = 0;           // on enleve l'extension
+	  if(PAR.getC("grnameArg")[0]!='0') { // -ph sans -g ou -g NO pas d'arg
 	    strcat(grname,".");
 	    strcat(grname,PAR.getC("grnameArg"));
 	  }
@@ -856,7 +856,7 @@ int main  (int argc, char * argv [])
 	  if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
 	    gto = Data_Len;
 	  
-	  if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
+	  if ((PAR.getI("Output.gfrom")!=-1) || PAR.getI("Output.gto")!=-1) {
 	    sprintf(grname+strlen(grname), ".%d", gfrom);
 	    sprintf(grname+strlen(grname), "-%d", gto);
 	  }

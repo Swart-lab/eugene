@@ -5,9 +5,6 @@
 
 #define EugDir getenv("EUGENEDIR")
 
-#define REAL double
-//#define REAL float
-
 const int FASTA_Len = 50;
 const int MAX_LINE = 300;
 const int TRUE  = 1;
