@@ -209,8 +209,8 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   for (int index = 0; index < *NumEST; index++) {
     int Inc;
     int ExonInc,TheStrand;
-    REAL WorstSpliceF, WorstSpliceR;
-    REAL DonF,AccF,DonR,AccR;
+    double WorstSpliceF, WorstSpliceR;
+    double DonF,AccF,DonR,AccR;
     DATA dTmp;
     
     ThisEST = HitTable[index];
@@ -433,4 +433,10 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   if (Rejected)
     fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,*NumEST);
   return HitTable;
+}
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorEst :: Plot(DNASeq *TheSeq)
+{
 }
