@@ -18,17 +18,17 @@ extern Parameters PAR;
 // ----------------------
 SensorBlastX :: SensorBlastX (int n) : Sensor(n)
 {
-  keyBXLevel[0] = PAR.getD("BlastX.level0");
-  keyBXLevel[1] = PAR.getD("BlastX.level1");
-  keyBXLevel[2] = PAR.getD("BlastX.level2");
-  keyBXLevel[3] = PAR.getD("BlastX.level3");
-  keyBXLevel[4] = PAR.getD("BlastX.level4");
-  keyBXLevel[5] = PAR.getD("BlastX.level5");
-  keyBXLevel[6] = PAR.getD("BlastX.level6");
-  keyBXLevel[7] = PAR.getD("BlastX.level7");
-  keyBXLevel[8] = PAR.getD("BlastX.level8");
-  keyBXLevel[9] = PAR.getD("BlastX.level9");
-  blastxM = PAR.getI("BlastX.blastxM");
+  keyBXLevel[0] = PAR.getD("BlastX.level0",n);
+  keyBXLevel[1] = PAR.getD("BlastX.level1",n);
+  keyBXLevel[2] = PAR.getD("BlastX.level2",n);
+  keyBXLevel[3] = PAR.getD("BlastX.level3",n);
+  keyBXLevel[4] = PAR.getD("BlastX.level4",n);
+  keyBXLevel[5] = PAR.getD("BlastX.level5",n);
+  keyBXLevel[6] = PAR.getD("BlastX.level6",n);
+  keyBXLevel[7] = PAR.getD("BlastX.level7",n);
+  keyBXLevel[8] = PAR.getD("BlastX.level8",n);
+  keyBXLevel[9] = PAR.getD("BlastX.level9",n);
+  blastxM = PAR.getI("BlastX.blastxM",n);
   minIn = PAR.getI("EuGene.minIn");
 }
 
@@ -83,13 +83,13 @@ void SensorBlastX :: Init (DNASeq *X)
   fprintf(stderr,"Reading Blastx data, level...");
   fflush(stderr);
 
-  for( k=0; k<(int)strlen(PAR.getC("BlastX.levels")); k++ ) {
+  for( k=0; k<(int)strlen(PAR.getC("BlastX.levels",GetNumber())); k++ ) {
   // for each level given in arg: 
   // e.g. with -b09 : 1st: level 0 (k=0), 2nd: level 9 (k=1)
     strcpy(tempname,PAR.getC("fstname"));
     strcat(tempname,".blast");
     i = strlen(tempname);
-    tempname[i]   = PAR.getC("BlastX.levels")[k];
+    tempname[i]   = PAR.getC("BlastX.levels",GetNumber())[k];
     tempname[i+1] = 0;
     // check the corresponding .blastN file (N=level given in arg)
     fblast = FileOpen(NULL,tempname, "r");
@@ -98,7 +98,7 @@ void SensorBlastX :: Init (DNASeq *X)
       exit(1);
     }
 
-    level      = (PAR.getC("BlastX.levels")[k] - '0');
+    level      = (PAR.getC("BlastX.levels",GetNumber())[k] - '0');
     A[0]     = B[0]= 0;
     ProtId   = A;
     PProtId  = B;
@@ -309,7 +309,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
   int CodingNuc = 0;
   int SupportedNuc = 0;
 
-  if (!PAR.getI("BlastX.PostProcess")) return;
+  if (!PAR.getI("BlastX.PostProcess",GetNumber())) return;
 
   index=0;
   for(int i=pred->size()-1; i!=-1; i--) {
