@@ -1,3 +1,22 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     markov.cc
+// Contents: class Chaine, template TabChaine
+// ------------------------------------------------------------------
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,6 +24,12 @@
 #include <typeinfo>
 #include <ctype.h>
 #include <assert.h>
+#include <string>
+
+#include "EndianConv.h"
+
+#include "markov.h"
+
 
 char* CODEGENETIQUE = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
 const int NBRECODONS[64]     = {2,2,2,2,4,4,4,4,6,6,6,6,3,3,1,3,2,2,2,2,4,4,4,4,6,6,6,6,6,6,6,6,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,3,2,3,2,6,6,6,6,3,2,1,2,6,2,6,2};
@@ -22,7 +47,7 @@ Chaine :: Chaine()
 
 // destructeur par defaut
 Chaine :: ~Chaine() {
-  if (lettre != NULL) delete (lettre); 
+  if (lettre != NULL) delete [] lettre; 
 }
 
 // constructeur
@@ -93,7 +118,7 @@ char* Chaine :: code2mot(int code, int lgr) const
   }
   tampon[lgr-1]=lettre[reste];
   tampon[lgr]=0;
-  delete clef;
+  delete [] clef;
   //printf("fonction code2mot:\n lgr=%d,lgr du tampon=%d tampon=%s\n",
   //lgr,strlen(tampon),tampon);
   return tampon;
@@ -168,8 +193,8 @@ template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine()
 }
 template<class CHAINE, typename T> TabChaine<CHAINE,T> :: ~TabChaine()
 {
-  if(indexlgrmots!=NULL) delete indexlgrmots;
-  if(VAL!=NULL) delete VAL;
+  if(indexlgrmots!=NULL) delete [] indexlgrmots;
+  if(VAL!=NULL) delete [] VAL;
 }
 template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine(int ordre, CHAINE* _chaine)
   : lgrmax(ordre+1), alphabet(_chaine)
@@ -205,21 +230,17 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l)
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l) 
 {
   int i;
-  char* affiche;
-  printf("affichage des valeurs:\n");
-  
-  if ( ( typeid(T) == typeid(int) ) || ( typeid(T) == typeid(unsigned)) )
-    affiche= "%3d %s : %3d\n";
-  else 
-    affiche= "%3d %s : %5.4lf\n";
-  
-  //  affiche= ( ( (typeid(T)==typeid(int))||(typeid(T)==typeid(unsigned)) ) ? "%3d %s : %3d\n" : "%3d %s : %5.4lf\n" ); // POURQUOI NE MARCHE PAS???!!!
-  
-  for(i=0; i<nbrevaleurs;i++) {
+  std::string affiche;
+  //  char* affiche = new char[20];
+
+  printf("affichage des valeurs:\n");  
+  if ( ( typeid(T) == typeid(int) ) || ( typeid(T) == typeid(unsigned)) ) affiche= "%3d %s : %3d\n";
+  else affiche= "%3d %s : %5.4lf\n";
+
+  for(i=1; i<nbrevaleurs;i++) {
     if ((l==0) || (indice2lgrmot(i) == l)) {
-      if (typeid(T) == typeid(unsigned short int)) printf(affiche,i,indice2mot(i),usi2real(VAL[i]));
-      else printf(affiche,i,indice2mot(i),VAL[i]);
-      //  printf (affiche,i,indice2mot(i),( (typeid(T) == typeid(unsigned short int)) ? usi2real(VAL[i]) : VAL[i] )); // POURQUOI NE MARCHE PAS???!!
+      if (typeid(T) == typeid(unsigned short int)) printf(affiche.c_str(),i,indice2mot(i),usi2real(VAL[i]));
+      else printf(affiche.c_str(),i,indice2mot(i),VAL[i]);
     }
   }
 }
@@ -467,7 +488,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
   return  1;
 }
 
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon)
 {
   char* Sequence=NULL;
   while (fichier2seq(fp,Sequence)) {
@@ -477,7 +498,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FI
   };
 }
 
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
 {
   char* Sequence=NULL;
   while (fichier2seq(fp,Sequence)) {
@@ -504,22 +525,6 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: sauve2fichier (FI
   return;
 }
 
-// ---------------------------------------------------------------------
-//  Dealing with endianness
-// ---------------------------------------------------------------------
-inline unsigned int LEndianReverse (unsigned int N)
-{
-  return ((N & 0x000000FF) << 24) |
-    ((N & 0x0000FF00) << 8)  |
-    ((N & 0x00FF0000) >> 8)  |
-    ((N & 0xFF000000) >> 24);
-}
-
-inline unsigned short int SEndianReverse (unsigned short int N)
-{
-  return ((N & 0x00FF) << 8) |
-    ((N & 0xFF00) >> 8);
-}
 
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: chargefichier (FILE *fp)
 {
@@ -601,11 +606,11 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: usi() const
 
 // necessite en argument une classe de meme type chaine et de meme taille
 // pour passer des frequences aux probabilites
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (const TabChaine<CHAINE, int>& comptage, int occurence_min)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (const TabChaine<CHAINE, int>* comptage, int occurence_min)
 {
   int i,j,cumul,indicedeclinant;
   char* mot= new char[lgrmax];
-  if (nbrevaleurs == comptage.nbrevaleurs) {
+  if (nbrevaleurs == comptage->nbrevaleurs) {
     if ((typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) ) VAL[0] = 1;
     else VAL[0] = 1.0;
     for(i=1;i<nbrevaleurs;i++) {
@@ -613,11 +618,11 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
       mot= indice2mot(i);
       indicedeclinant=indiceprefixe(indice2mot(i),indice2lgrmot(i),0,indice2lgrmot(i)-2);
       for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) {
-	cumul+= comptage.VAL[j];
+	cumul+= comptage->VAL[j];
 	// Ex. avec adn: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
       }
       //      if (indice2lgrmot(i) == lgrmax) {
-      //	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage.VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(double)comptage.VAL[i] / (double)cumul);
+      //	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage->VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(double)comptage->VAL[i] / (double)cumul);
       //	fflush(stdout);
       //    }
       if (cumul < occurence_min) { // pas assez d'info pour calculer une proba
@@ -631,16 +636,16 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
       }
       else {
 	if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
-	  VAL[i]= ((cumul==0) ? 0 : real2usi( (double)comptage.VAL[i] / (double)cumul) );
+	  VAL[i]= ((cumul==0) ? 0 : real2usi( (double)comptage->VAL[i] / (double)cumul) );
 	else
-	  VAL[i]=((cumul==0) ? 0 : (double)comptage.VAL[i] / (double)cumul ) ;
+	  VAL[i]=((cumul==0) ? 0 : (double)comptage->VAL[i] / (double)cumul ) ;
       }
     }
   }
   else{
     fprintf(stderr,"\n\n\nERROR !!\n\n\nError in markov.cc (method compte2probas)\n\n\nERROR !!\n\n\n");
   }
-  delete mot;
+  delete [] mot;
 }
 
 // Convertisseurs de types double/USI (double/unsigned short int)

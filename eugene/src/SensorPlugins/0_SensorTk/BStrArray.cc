@@ -1,20 +1,29 @@
-// ---------------------------------------------------------------
-//   T. Schiex
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
-//     File:  BStrArray.cc
-//     Version:  1.0
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
 //
-//    Copyright (c) 2000 by Thomas Schiex All rights reserved.
-//    Redistribution is not permitted without the express written
-//    permission of the author.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 //
-//  Access to binary IMM model
-// ---------------------------------------------------------------
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     BStrArray.cc
+// Contents: Access to binary IMM model
+// ------------------------------------------------------------------
+
 
 #include <math.h>
-#include "../../EuGene/Const.h"
-#include "../../EuGene/System.h"
+
+#include "../../Const.h"
+#include "../../System.h"
 #include "BStrArray.h"
+#include "EndianConv.h"
 
 // ---------------------------------------------------------------------
 //  Default constructor.
@@ -61,22 +70,7 @@ BString_Array :: ~ BString_Array  ()
   free (Val);
 }
 
-// ---------------------------------------------------------------------
-//  Dealing with endianness
-// ---------------------------------------------------------------------
-inline unsigned int LEndianReverse (unsigned int N)
-{
-  return ((N & 0x000000FF) << 24) |
-         ((N & 0x0000FF00) << 8)  |
-         ((N & 0x00FF0000) >> 8)  |
-         ((N & 0xFF000000) >> 24);
-}
 
-inline unsigned short int SEndianReverse (unsigned short int N)
-{
-  return ((N & 0x00FF) << 8) |
-         ((N & 0xFF00) >> 8);
-}
 // ---------------------------------------------------------------------
 // ead a BString_Array from file. Returns non zero if a problem occurs
 // ---------------------------------------------------------------------

@@ -13,36 +13,26 @@
 //
 // $Id$
 // ------------------------------------------------------------------
-// File:     BStrArray.h
-// Contents: Access to binary IMM model
+// File:     EndianConv.h
+// Contents: utilitary functions
 // ------------------------------------------------------------------
 
-#ifndef  BSTRARRAY_H_INCLUDED
-#define  BSTRARRAY_H_INCLUDED
+#ifndef  ENDIAN_CONV_H_INCLUDED
+#define ENDIAN_CONV_H_INCLUDED
 
-#include "../../DNASeq.h"
-
-class  BString_Array
+inline unsigned int LEndianReverse (unsigned int N)
 {
- private:
-  unsigned int  Max_Str_Len;
-  int  Alphabet_Size;
-  int  Num_Entries;
-  unsigned short  * Val;
-  
- public:
-  int *Offset;
-  BString_Array  ();
-  BString_Array  (int, int);
-  ~ BString_Array  ();
-  int  Read  (FILE *);    
-  int  String_To_Sub  (DNASeq  *, unsigned int, unsigned int);
-  int  AntiString_To_Sub  (DNASeq  *, unsigned int, unsigned int);
+  return ((N & 0x000000FF) << 24) |
+         ((N & 0x0000FF00) << 8)  |
+         ((N & 0x00FF0000) >> 8)  |
+         ((N & 0xFF000000) >> 24);
+}
 
-  unsigned short operator [] (int i) {
-    return  Val[i];
-  }
-  unsigned short &  operator ()  (DNASeq *, unsigned int, unsigned int);
-};
+inline unsigned short int SEndianReverse (unsigned short int N)
+{
+  return ((N & 0x00FF) << 8) |
+         ((N & 0xFF00) >> 8);
+}
 
 #endif
+

@@ -82,7 +82,7 @@ cat acceptor.fp.mammals.exons.fasta acceptor.fp.mammals.introns.fasta > acceptor
 
 1.2 Build binary models from multifasta
 
-in Annotation/EuGeneTk/SensorPlugins/SplicePlantWAM/GetData, use WAMbuilder.cc:
+in eugene/src/SensorPlugins/0_SensorTk/GetData, use WAMbuilder.cc:
 WAMbuild 1 22 31 SpliceDB.mamm.don.fasta WAM.MAM.DON.L22.TP.  >  WAM.mam.don.l22.countinfo.txt
 WAMbuild 1 22 31 SpliceDB.mamm.acc.fasta WAM.MAM.ACC.L22.TP. > WAM.mam.acc.l22.countinfo.txt
 WAMbuild 1 22 11 /Annotation/ExternalData/EID/donor.fp.mammals.fasta WAM.MAM.DON.L22.FP. > WAM.mam.don.l22.fp.countinfo.txt
@@ -116,7 +116,7 @@ concatenation de tous les sites et sites fauxpositifs:
 e.g. cat araclean.acc.fp.exons araclean.acc.fp.introns araset.acc.fp.exons araset.acc.fp.introns > ARA.ACC6.FP.fasta
 
 construction des matrices:
-(dans repertoire Annotation/EuGene/PLUGINS/WAMsensor)
+(dans repertoire eugene/src/PLUGINS/WAMsensor)
  WAMbuild ARA.ACC6.fasta
 non non, sans argument, WAMbuild tout court!
 (modifier le WAMbuilder.cc, et recompiler a chq fois... pas beau mais pour l'instant c'est comme ca!)

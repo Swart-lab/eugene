@@ -1,3 +1,22 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     markov.h
+// Contents: class Chaine, template TabChaine
+// ------------------------------------------------------------------
+
 #ifndef MARKOV
 #define MARKOV
 
@@ -5,7 +24,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "../../EuGene/Const.h"
+
+#include "../../Const.h"
 
 #ifndef CLASSchaine
 #define CLASSchaine
@@ -103,17 +123,13 @@ template<class CHAINE, typename T> class TabChaine
   // char* Sequence;
   // "while (fichier2seq(fp,Sequence)){
   // seq2compte(Sequence);free(Sequence) }"
-  // attention: pour <int>, modifie VAL
   void seq2compte(char* seq, int parcodon=0);
-  // attention: pour <int>, modifie VAL
   void seq2compte(char* seq, int debut, int fin, int parcodon=0);
   //  void seq2compte(char* seq, int debut, int fin, int parcodon=0);
   //  void seq2compte(char* seq, int debut, int fin, int phase,
   //                  int parcodon=0); A faire...
-  // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
-  int fichier2compte (FILE *fp, int parcodon=0);
-  // attention: pour <int>, modifie VAL; fasta ou multifasta necessaire
-  int fichier2compte (FILE *fp, int debut, int fin, int parcodon=0);
+  void fichier2compte (FILE *fp, int parcodon=0);
+  void fichier2compte (FILE *fp, int debut, int fin, int parcodon=0);
   // sauvegarde; ATTENTION! uniquement pour <double>
   void sauve2fichier (FILE *fp);
   // lecture d'un fichier contenant un modele sauvegarde
@@ -121,8 +137,7 @@ template<class CHAINE, typename T> class TabChaine
   int indiceprefixe (char* mot) const;
   int indiceprefixe (char* seq, int lgr, int deb, int fin) const;
   int indiceprefixe (int indice) const;
-  // attention: pour <double> ou <unsigned short>, modifie VAL
-  void compte2probas (const TabChaine<CHAINE, int>& comptage,
+  void compte2probas (const TabChaine<CHAINE, int>* comptage,
 		      int occurence_min=100);
   int nombredegc (int indice) const;
   
