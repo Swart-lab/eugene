@@ -96,10 +96,12 @@ void LineSearch :: Optimize(bool is_chaining)
   std::cout << "Trace: " << ((IsTracing) ? "TRUE" : "FALSE") <<std::endl<<std::endl;
 
   std::cout << "NbParameter: " << (int) Para.size() << "\tNbCluster: " << NbParaCluster <<std::endl;
-  std::cout << "Param: \t"; for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
-  std::cout << "Init: \t"; for (i=0; i<Para.size(); i++) std::cout << Para[i] << "\t"; std::cout <<std::endl;
-  std::cout << "Min: \t"; for (i=0; i<ParaMin.size(); i++) std::cout << ParaMin[i] << "\t"; std::cout <<std::endl;
-  std::cout << "Max: \t"; for (i=0; i<ParaMax.size(); i++) std::cout << ParaMax[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Param  : \t"; for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+  std::cout << "Init   : \t"; for (i=0; i<Para.size(); i++) std::cout << Para[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Min    : \t"; for (i=0; i<ParaMin.size(); i++) std::cout << ParaMin[i] << "\t"; std::cout <<std::endl;
+  std::cout << "Max    : \t"; for (i=0; i<ParaMax.size(); i++) std::cout << ParaMax[i] << "\t"; std::cout <<std::endl;
+  std::cout << "MinInit: \t"; for (i=0; i<ParaMinInter.size(); i++) std::cout << ParaMinInter[i] << "\t"; std::cout <<std::endl;
+  std::cout << "MaxInit: \t"; for (i=0; i<ParaMaxInter.size(); i++) std::cout << ParaMaxInter[i] << "\t"; std::cout <<std::endl;
   std::cout << "MinStep: \t"; for (i=0; i<ParaMinStep.size(); i++) std::cout << ParaMinStep[i] << "\t"; std::cout <<std::endl;
 
   std::cout <<std::endl;
@@ -113,7 +115,7 @@ void LineSearch :: Optimize(bool is_chaining)
       std::cout << "   LINKED"<<std::endl;
   }
 
-  Fitness = OPTIM.ParaEvaluate();
+  Fitness = OPTIM.ParaEvaluate(false);
   std::cout <<std::endl<< "Fitness of initial point: " << Fitness <<std::endl<<std::endl;
   FitOpt = Fitness; Optimums.clear(); Optimums.push_back(Para); 
 
@@ -129,7 +131,7 @@ void LineSearch :: Optimize(bool is_chaining)
       ScanCluster(k);
       ChooseOptimal();
 
-      if (IsTracing) { std::cout << "Local optimal point:" <<std::endl; PrintParam(); std::cout <<std::endl;}
+      if (IsTracing) {std::cout <<"Local optimal point:"<<std::endl; PrintParam();std::cout <<std::endl;}
     }
     
     if ( (n!=0) && ((FitOpt - FitOptPrec) < EvolutionMini) )
@@ -146,6 +148,7 @@ void LineSearch :: Optimize(bool is_chaining)
     for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
     for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
     std::cout <<"Fitness="<<FitOpt<<std::endl;
+    if (IsTracing) {OPTIM.ParaEvaluate(true); std::cout <<OPTIM.DetailedEvaluation;}
     fflush(stdout); fflush(stderr);
   }
   
@@ -200,7 +203,7 @@ void LineSearch :: ScanCluster(int k)
 	Para[m] = t;
       }
       
-      Fitness = OPTIM.ParaEvaluate();
+      Fitness = OPTIM.ParaEvaluate(false);
       if (IsTracing) PrintParam();
       UpdateOpt(); 
     }
@@ -219,7 +222,7 @@ void LineSearch :: CartesianProduct(int j, int k)
   if ( j == ((int) ParaClusters[k].size()) - 1 ) 
     for (int q=0; q<=DivInter; q++) {
       Para[m] = ParaMinInter[m] + q*ParaStep[m];
-      Fitness = OPTIM.ParaEvaluate();
+      Fitness = OPTIM.ParaEvaluate(false);
       UpdateOpt();
       if (IsTracing) PrintParam();
     }

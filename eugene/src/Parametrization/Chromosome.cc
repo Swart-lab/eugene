@@ -113,7 +113,7 @@ void Chromosome::Evaluate(void)
   
   algo->Par = data->P;
   for (unsigned int k=0; k<algo->Para.size(); k++) algo->Para[k] = algo->Par[algo->ParaPar[k]];
-  RawFitness = OPTIM.ParaEvaluate();
+  RawFitness = OPTIM.ParaEvaluate(false);
 
   IsEvaluated = true;
 }

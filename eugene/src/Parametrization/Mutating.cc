@@ -73,7 +73,7 @@ void Mutating::Muteval (void)
       Mutation(ChildrenPopulation[0]) ;
       algo->Par = ChildrenPopulation[0]->data->P;
       for (k=0; k<(int)algo->Para.size(); k++) algo->Para[k] = algo->Par[algo->ParaPar[k]];
-      ChildrenPopulation[0]->RawFitness = OPTIM.ParaEvaluate();
+      ChildrenPopulation[0]->RawFitness = OPTIM.ParaEvaluate(false);
       /* Here everything as been calculated, we just have to crossover */
       algo->SA->SATournament2(ChildrenPopulation[0], algo->Population[j]);
       algo->Population[j]->IsEvaluated = true;

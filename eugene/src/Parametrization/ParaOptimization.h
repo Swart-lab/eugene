@@ -25,10 +25,12 @@ class ParaOptimization {
  public:
   std::vector <OptiAlgorithm*> Algorithms;
   int                          AlgoIndex;     // index of running algorithm
+  std::string  DetailedEvaluation;            // text of detailed evaluation of Para
+                                              // updated by ParaEvaluate
 
   ~ParaOptimization(void);
   void ParaOptimize (int argc, char* argv[]);
-  double ParaEvaluate (void);  
+  double ParaEvaluate (bool is_detail_required);  
 
  private:
   std::vector <MasterSensor*>  MSensors;

@@ -128,18 +128,20 @@ void ParaOptimization::Init(int argc, char * argv [])
 //-------------------------------------------------------
 // ParaEvaluate : Evaluate the parameters Algorithms[AlgoIndex]->Para
 //-------------------------------------------------------
-double ParaOptimization::ParaEvaluate (void)
+double ParaOptimization::ParaEvaluate (bool is_detail_required)
 {
   OptiAlgorithm* algo = Algorithms[AlgoIndex];
 
   double fitness = 0;
   unsigned int i;
-  std::string cmde, fic_pred, fic_eval;
+  std::string cmde, fic_pred, fic_eval, eval_options;
   std::ifstream feval;
   double spg, sng, spe, sne;
   Prediction* pred;
   char* c = "sequence"; char ** cc = &c;
   FILE   *fp;
+
+  DetailedEvaluation = "";
 
   if (algo->Para.size() > 0) {
     if (!IsTest) {
@@ -167,15 +169,23 @@ double ParaOptimization::ParaEvaluate (void)
       }
       fclose(fp);
       fic_eval = "tmp%eval%" + ExecutableName;
+      if (!is_detail_required) eval_options = " -ps -o1";
+      else eval_options = " -o1";
       cmde = "rm -f " + fic_eval; system(cmde.c_str());
       cmde =  "../Procedures/Eval/evalpred.pl " + TrueCoordFile + " " +
-	 fic_pred + " -ps -o1 > " + fic_eval; system(cmde.c_str());
+	 fic_pred + eval_options + " > " + fic_eval; system(cmde.c_str());
 
       feval.open(fic_eval.c_str(), std::ios::in);
-      feval >> spg >> sng >> spe >> sne;
+      if (!is_detail_required) feval >> spg >> sng >> spe >> sne;
+      else { 
+	char line[256]; 
+	for (i=0; i<4; i++) feval.getline(line,256); // ignore the 4th lines
+	for (i=0; i<3; i++) {feval.getline(line,256);DetailedEvaluation=DetailedEvaluation+"** "+line+"\n";}
+      }
       feval.close(); 
 
-      fitness = pow(spg*sng*spe*sne,0.25);
+      if (!is_detail_required)  fitness = pow(spg*sng*spe*sne,0.25);
+      else fitness = 0;
     } else {
       fitness = 1;
       for (i=0; i<algo->Para.size(); i++)
