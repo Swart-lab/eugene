@@ -1,4 +1,4 @@
-#!/usr/bin/tcsh
+#!/bin/csh
 
 # ------------------------------------------------------------------
 # Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
