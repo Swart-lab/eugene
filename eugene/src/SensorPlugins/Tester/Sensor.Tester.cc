@@ -17,6 +17,11 @@
 // Contents: Sensor Tester
 // ------------------------------------------------------------------
 
+// MacOS-X kludge. cmath undefines these macros. Turn them into inlines 
+#include <math.h>
+inline int (isinf)(double r) { return isinf(r); }
+inline int (isnan)(double r) { return isnan(r); }
+
 #include <iomanip>
 #include <fstream>
 #include <iostream>
