@@ -18,10 +18,6 @@
 // ------------------------------------------------------------------
 
 
-#ifdef HAVE_CONFIG_H
-#include "../../config.h"
-#endif
-
 #include <iostream>
 #include <string>
 
@@ -111,7 +107,7 @@ void LineSearch :: Optimize(bool is_chaining)
 
   // Display parametrization of the algorithm
   std::cout <<std::endl << "---------------------------------------------------------------"<<std::endl;
-  std::cout << "Optimization of EuGène parameters with the LineSearch algorithm"<<std::endl<<std::endl;
+  std::cout << "Optimization of eugene parameters with the LineSearch algorithm"<<std::endl<<std::endl;
   std::cout << "---------------------------------------------------------------"<<std::endl;
   std::cout << "Parametrisation of the algorithm:"<<std::endl<<std::endl;
   std::cout << "NbMaxCycle: " << NbMaxCycle << "\tNbMinCycle: " << NbMinCycle 

@@ -17,7 +17,7 @@
 # Contents: compilation of the Parametrization directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
 
 noinst_LIBRARIES = libParametrization.a
 libParametrization_a_SOURCES = ParaOptimization.cc ParaOptimization.h \

@@ -17,10 +17,6 @@
 // Contents: The ParaOptimization class optimizes eugene parameters
 // ------------------------------------------------------------------
 
-#ifdef HAVE_CONFIG_H
-#include "../../config.h"
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -191,7 +187,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       if (!is_detail_required) eval_options = " -ps -o1";
       else eval_options = " -o1";
       cmde = "rm -f " + fic_eval; system(cmde.c_str());
-      cmde =  EvalPredDir + "/evalpred.pl " + TrueCoordFile + " " +
+      cmde =  EvalPredDir + "/egn_evalpred.pl " + TrueCoordFile + " " +
 	 fic_pred + eval_options + " > " + fic_eval; system(cmde.c_str());
 
       feval.open(fic_eval.c_str(), std::ios::in);

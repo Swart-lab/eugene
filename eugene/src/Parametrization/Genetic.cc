@@ -17,10 +17,6 @@
 // Contents: Class of the Genetic algorithm
 // ------------------------------------------------------------------
 
-#ifdef HAVE_CONFIG_H
-#include "../../config.h"
-#endif
-
 #include <iostream>
 
 #include "Genetic.h"
@@ -168,7 +164,7 @@ void Genetic::Optimize(bool is_chaining)
  // Display parametrization of the algorithm
   std::cout <<std::endl;
   std::cout << "---------------------------------------------------------------"<<std::endl;
-  std::cout<< "Optimization of EuGène parameters with the Genetic algorithm"<<std::endl<<std::endl;
+  std::cout<< "Optimization of eugene parameters with the Genetic algorithm"<<std::endl<<std::endl;
   std::cout << "---------------------------------------------------------------"<<std::endl;
   std::cout << "Parametrisation of the algorithm:"<<std::endl<<std::endl;
   std::cout << "NbRun: " << NbRun <<std::endl;
