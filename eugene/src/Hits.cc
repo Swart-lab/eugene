@@ -132,7 +132,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
   while ((read=fscanf(HitFile,"%d %d %d %lf %d %s %d %d\n", &deb, &fin, 
 		      &poids, &evalue, &phase, HitId, &HSPDeb, &HSPFin)) == 8)
     {
-      if (phase < 0) {
+      if (phase < 0  &&  deb > fin) {
 	int tmp = deb;
 	deb     = fin;
 	fin     = tmp;
