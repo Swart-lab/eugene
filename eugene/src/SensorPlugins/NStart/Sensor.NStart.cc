@@ -64,8 +64,8 @@ SensorNStart :: ~SensorNStart ()
 // ----------------------
 void SensorNStart :: Init (DNASeq *X)
 {
-  startP = PAR.getD("NStart.startP*");
-  startB = PAR.getD("NStart.startB*");
+  startP = PAR.getD("NStart.startP*",GetNumber());
+  startB = PAR.getD("NStart.startB*",GetNumber());
 
   indexR = indexF = 0;
   PositionGiveInfo = -1;
