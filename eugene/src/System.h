@@ -8,6 +8,8 @@
 #define myassert(x) assert(x)
 //#define myassert(x)
 
+int isinf(double x);
+
 char * BaseName(char *path);
 int ProbeFile(char *path);
 

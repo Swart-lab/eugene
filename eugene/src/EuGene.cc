@@ -27,6 +27,7 @@
 #endif
 
 #include "Const.h"
+#include "System.h"
 #include "SensorIF.h"
 #include "MSensor.h"
 #include "Param.h"
