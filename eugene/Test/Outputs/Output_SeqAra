@@ -18,16 +18,21 @@ Reading Blastx data, level...0 done
 Reading cDNA hits............13 sequences read
    [AV547209]: no matching splice site
 A total of 1/13 sequences rejected
-Optimal path length = 20345.5632
+Optimal path length = 20224.5594
 
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
 
 
 Dumping images ("./seq25ab005234g10g11.test.---.png")...done
 ---------------------------------------------------------------------
-SEQ25.1.0	Utr5    +          1    2918     2918     NA      NA      NA      NA    55.26 
-SEQ25.1.1	Init    +       2919    2942       24     +1      +3    2918    2943     0.0  
-SEQ25.1.2	Intr    +       6068    6116       49     +1      +2    6067    6117     0.0  
+SEQ25.1.0	Utr5    +          1     387      387     NA      NA      NA      NA    33.0  
+SEQ25.1.0	Utr5    +        470     545       76     NA      NA      NA      NA   100.0  
+SEQ25.1.0	Utr5    +        665     750       86     NA      NA      NA      NA   100.0  
+SEQ25.1.0	Utr5    +        835    1125      291     NA      NA      NA      NA   100.0  
+SEQ25.1.0	Utr5    +       1255    1797      543     NA      NA      NA      NA   100.0  
+SEQ25.1.0	Utr5    +       4094    4152       59     NA      NA      NA      NA     0.0  
+SEQ25.1.1	Init    +       4153    4178       26     +1      +1    4152    4179     0.0  
+SEQ25.1.2	Intr    +       5989    6116      128     +3      +2    5988    6117     0.0  
 SEQ25.1.3	Intr    +       8356    8471      116     +2      +3    8355    8472    69.0  
 SEQ25.1.4	Intr    +       8576    8667       92     +1      +2    8575    8668   100.0  
 SEQ25.1.5	Intr    +       9006    9061       56     +3      +1    9005    9062   100.0  
@@ -36,9 +41,8 @@ SEQ25.1.7	Intr    +      10520   10535       16     +1      +2   10519   10536  
 SEQ25.1.8	Intr    +      10896   11134      239     +2      +2   10895   11135     0.0  
 SEQ25.1.9	Intr    +      11544   12005      462     +1      +3   11543   12006    42.0  
 SEQ25.1.10	Term    +      12088   12900      813     +1      +1   12087   12901    20.0  
-SEQ25.1.0	Utr3    +      12901   14900     2000     NA      NA      NA      NA    11.0  
-      CDS (prot.)     2919   12900     9982     supported on 1559/1929 coding.
-cDNA  AV559654         261    1280      606      4 introns    Support
+SEQ25.1.0	Utr3    +      12901   14800     1900     NA      NA      NA      NA    11.0  
+      CDS (prot.)     4153   12900     8748     supported on 1559/2010 coding.
 cDNA  AV520544        1053    1774      593      1 introns    Support
 cDNA  W43583          1363    1814      450      0 introns    Support
 cDNA  AV541414        1409    1807      399      0 introns    Support
@@ -51,5 +55,5 @@ cDNA  AV565242       11812   12011      202      0 introns    Inconsistent
 cDNA  AI996648       12739   13099      362      0 introns    Support
 cDNA  AA713204       12760   13114      359      0 introns    Support
 cDNA  AV547209       14087   14781      505      2 introns    Filtered 
-      CDS             2919   12900     9982     supported on 162 bases
-      Gene               1   14900    14900     supported on 2721 bases
+      CDS             4153   12900     8748     supported on 162 bases
+      Gene            4094   14800    10707     supported on 376 bases
