@@ -100,8 +100,7 @@ void Mutating::ChooseChromosome(int* n)
   /* in the population */
   if (algo->IsElitist) {
     k=0;
-    do
-      *n = (int)(algo->Rand->RandUniform()*(double)algo->NbElement);
+    do *n = (int)(algo->Rand->RandUniform()*(double)algo->NbElement);
     while ( ((algo->Population[*n] == algo->BestChromosome)
 	     ||(algo->Population[*n]->IsNew)
 	     ||(algo->Population[*n]->IsBestInCluster) )
@@ -109,15 +108,13 @@ void Mutating::ChooseChromosome(int* n)
     /* If we went over limit then we must choose one but we */
     /* refuse best_chrom, we accept best_of_cluster to be   */
     /* choosen and then deleted */
-    if (k>1000) {
-      do
-	*n = (int)(algo->Rand->RandUniform()*(double)algo->NbElement);
+    if (k>1000) { 
+      do *n = (int)(algo->Rand->RandUniform()*(double)algo->NbElement);
       while ( (algo->Population[*n] == algo->BestChromosome)
 	      ||(algo->Population[*n]->IsNew) ) ;
     }
   } else
-    do
-      *n = (int)(algo->Rand->RandUniform()*algo->NbElement);
+    do *n = (int)(algo->Rand->RandUniform()*algo->NbElement);
     while (algo->Population[*n]->IsNew);
 }
 

@@ -186,7 +186,7 @@ void Genetic::Optimize(bool is_chaining)
     for (gen=0; gen<NbGeneration; gen++) {
       std::cout <<std::endl<< "Run: " <<run<< "\tGen: " << gen 
 	   << "--------------------------------------------"<<std::endl;
-      EvalPopulation() ;
+      EvalPopulation(); 
 
       if ((IsSharing) && (IsClustering)) NbCluster = MakeClusters();
 
@@ -198,61 +198,65 @@ void Genetic::Optimize(bool is_chaining)
 
      if (BestFitness == 0.0)
 	std::cout << "No admissible element." <<std::endl;
-      else {
-	std::cout << "Fitness: " << BestChromosome->RawFitness 
-	     << "\tAvgFitness: " << AvgFitness
-	     << "\tSigmaFitness: " << SigmaFitness <<std::endl;
-	for (i=0; i<BestChromosome->data->P.size(); i++) 
-	  std::cout << BestChromosome->data->P[i] << "\t"; 
-	std::cout<<std::endl;
-	if (BestChromosome->RawFitness > 999999999999.0) gen=NbGeneration;
-      }
-
-      /* Gather every element which are best of cluster and mark */
-      /* them with the flag best of cluster */
-      if ((IsSharing) && (IsClustering))   MarkBestOfClusters();
- 
-      if ((IsSharing) && (IsClustering) && (gen==(NbGeneration-1))) {
-	max = BestChromosome->RawFitness * Share->Value ;
-	/* Get elements of the population that are the best of */
-	/* each optimal cluster, then print optimal clusters   */
-	/* and corresponding best fitness */
-	std::cout <<std::endl<< "Optimum for the run "<< run <<"-------------------------------------"<<std::endl;
-	for (j=0; j<NbCluster; j++) {
-	  /* Put index of best element from cluster j in k if this */
-	  /* cluster is optimal else put -1 in it */
-	  if (Clusters[j]->NbChrom!=0) {
-	    k = GetOptimalInCluster(j, max) ;
-	    if (k != -1) {
-	      std::cout << "Cluster " << j << ": ";
-	      for (i=0; i<Population[k]->data->P.size(); i++) 
-		std::cout << Population[k]->data->P[i] << "\t"; 
-	      std::cout << "Fitness="<<Population[k]->RawFitness <<"\t";
-	      if (BestChromosome == Population[k]) {
-		std::cout <<"(Best element)";
-		// Remenber the optimum of the run if it is better than the previous ones
-		if ((ParOpti.size()==0) || (BestFitness > FitnessOpti))
-		  { ParOpti = Population[k]->data->P; FitnessOpti = Population[k]->RawFitness;}
-	      }
-	      std::cout <<std::endl;
-	    }
-	  }
-	}
-      }
+     else {
+       std::cout << "Fitness: " << BestChromosome->RawFitness 
+		 << "\tAvgFitness: " << AvgFitness
+		 << "\tSigmaFitness: " << SigmaFitness <<std::endl;
+       for (i=0; i<BestChromosome->data->P.size(); i++) 
+	 std::cout << BestChromosome->data->P[i] << "\t"; 
+       std::cout<<std::endl;
+       if (BestChromosome->RawFitness > 999999999999.0) gen=NbGeneration;
+     }
+     
+     /* Gather every element which are best of cluster and mark */
+     /* them with the flag best of cluster */
+     if ((IsSharing) && (IsClustering))   MarkBestOfClusters();
+     
+     // if last generation of the run then print the best elt found
+     // update the best elt of the runs
+     if (gen==(NbGeneration-1)) {
+       std::cout <<std::endl<< "Optimum for the run "<< run <<"-------------------------------------"<<std::endl;
+       if ((IsSharing) && (IsClustering) ) {
+	 max = BestChromosome->RawFitness * Share->Value ;
+	 /* Get elements of the population that are the best of */
+	 /* each optimal cluster, then print optimal clusters   */
+	 /* and corresponding best fitness */
+	 for (j=0; j<NbCluster; j++) {
+	   /* Put index of best element from cluster j in k if this */
+	   /* cluster is optimal else put -1 in it */
+	   if (Clusters[j]->NbChrom!=0) {
+	     k = GetOptimalInCluster(j, max) ;
+	     if (k != -1) {
+	       std::cout << "Cluster " << j << ": "; Population[k]->Print("");
+	       if (BestChromosome == Population[k]) {
+		 std::cout <<"(Best element)";
+		 // Remenber the optimum of the run if it is better than the previous ones
+		 if ((ParOpti.size()==0) || (BestFitness > FitnessOpti))
+		   { ParOpti = Population[k]->data->P; FitnessOpti = Population[k]->RawFitness;}
+	       }
+	       std::cout <<std::endl;
+	     }
+	   }
+	 }
+       } else {
+	 BestChromosome->Print("\n");
+	 if ((ParOpti.size()==0) || (BestChromosome->RawFitness > FitnessOpti))
+	   {ParOpti = BestChromosome->data->P; FitnessOpti = BestChromosome->RawFitness;}
+       }
+     }
+     
+     /* If last generation then everything is finished so skip following code */
+     if (gen < NbGeneration-1) {
+       if ((IsSACrossingOver)||(IsSAMutating)) 	SA->SAUpdate(gen);
+       
+       // For next generation, we select elements then crossover and mutate them
+       Select->Selection();
+       CrossOver->Crosseval();
+       Mutate->Muteval();
+     } 
+     
     } // gen
-
-    /* If last generation then everything is finished so skip following code */
-    if (gen < NbGeneration-1) {
-      if ((IsSACrossingOver)||(IsSAMutating)) 	SA->SAUpdate(gen);
-	
-      // For next generation, we select elements then crossover and mutate them
-      Select->Selection();
-
-      CrossOver->Crosseval();
-
-      Mutate->Muteval();
-    } 
-    std::cout <<std::endl;
+    
   } /*run*/
 
   // Put the best optimum of the runs in Para
@@ -269,13 +273,15 @@ void Genetic::Optimize(bool is_chaining)
 }
 
 
-
 //-------------------------------------------------------
 // Init the Population of chromosome
 //-------------------------------------------------------
 void Genetic::InitPopulation (void)
 {
   Chromosome* c;
+
+  for (unsigned int k=0; k<Population.size(); k++) delete Population[k];
+  Population.clear();
 
   for (int i=0; i<NbElement; i++) {
     c = new Chromosome(ParName.size());
@@ -295,6 +301,7 @@ void Genetic::EvalPopulation (void)
 
   for (int i=0; i<NbElement; i++) {
     if (!Population[i]->IsEvaluated) Population[i]->Evaluate();
+    if (IsTracing) Population[i]->Print("\n");
 
     /* Update BestChromosome */
     if (Population[i]->RawFitness > maxfit) {

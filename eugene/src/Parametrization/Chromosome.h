@@ -14,7 +14,7 @@
 
 
 #include <vector>
-
+#include <string>
 
 class Data {
  public:
@@ -41,6 +41,7 @@ class Chromosome {
   Chromosome(int n);
   ~Chromosome(void);
   void Evaluate(void);
+  void Print(std::string msg);
 };
 
 

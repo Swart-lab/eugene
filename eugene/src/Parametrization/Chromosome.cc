@@ -117,6 +117,15 @@ void Chromosome::Evaluate(void)
   IsEvaluated = true;
 }
 
+//-------------------------------------------------------
+// Print values of parameters and RawFitness
+//-------------------------------------------------------
+void Chromosome::Print(std::string msg)
+{
+  for (unsigned int i=0; i<data->P.size(); i++) 
+    std::cout << data->P[i] << "\t"; 
+  std::cout << "Fitness="<<RawFitness <<"\t"<<msg;
+}
 
 //-------------------------------------------------------
 // Constructor

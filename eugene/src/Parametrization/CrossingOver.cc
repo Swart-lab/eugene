@@ -71,7 +71,7 @@ void CrossingOver::Crosseval (void)
       algo->Population[n2]->IsNew = true; algo->Population[n2]->IsEvaluated = false;
     } 
   else
-    for (i=0; i<max_elems; i+=2){
+    for (i=0; i<max_elems; i+=2){ 
       ChooseCouple(&n1,&n2);
       ChildrenPopulation[0]->data->P = algo->Population[n1]->data->P;
       ChildrenPopulation[1]->data->P = algo->Population[n2]->data->P;
@@ -99,20 +99,21 @@ void CrossingOver::Crossover(Chromosome* c1, Chromosome* c2)
   Genetic* algo = (Genetic*) OPTIM.Algorithms[OPTIM.AlgoIndex];
 
   double alpha;
+
   Chromosome tmpc1(algo->ParName.size());
   Chromosome tmpc2(algo->ParName.size());
-  
+
   for (unsigned int i=0; i<c1->data->P.size(); i++) {
     alpha = algo->Rand->RandUniform() * 2.0 - 0.5;
-    tmpc1.data->P.push_back( (1.0-alpha)*c1->data->P[i] + alpha*c2->data->P[i] );
-    tmpc2.data->P.push_back( alpha*c1->data->P[i] + (1.0-alpha)*c2->data->P[i] );
+    tmpc1.data->P[i] = (1.0-alpha)*c1->data->P[i] + alpha*c2->data->P[i] ;
+    tmpc2.data->P[i] = alpha*c1->data->P[i] + (1.0-alpha)*c2->data->P[i] ;
   }
 
   tmpc1.data->Recenter();
   tmpc2.data->Recenter();
 
   c1->data->P = tmpc1.data->P;
-  c2->data->P = tmpc2.data->P;
+  c2->data->P = tmpc2.data->P; 
 }
 
 //-------------------------------------------------------
@@ -123,15 +124,13 @@ void CrossingOver::ChooseCouple(int* n1, int* n2)
 
   int k;
 
-  if (algo->IsElitist) {
+  if (algo->IsElitist) { 
     /* If we use an elitist strategy, we can not mutate the overall */
     /* best chromosom (we keep at least one best overall) */
     /* Anyway, we do not mutate an element which has just been added */
     /* in the population */
     k=0;
-    do 
-      algo->Population[*n1] = 
-	algo->Population[((int)(algo->Rand->RandUniform()*algo->NbElement))];
+    do *n1 = (int)( algo->Rand->RandUniform() * algo->NbElement ); 
     while ( ((algo->Population[*n1]->IsNew) ||
 	     (algo->Population[*n1]->IsBestInCluster)||
 	     (algo->Population[*n1] == algo->BestChromosome)) 
@@ -140,39 +139,30 @@ void CrossingOver::ChooseCouple(int* n1, int* n2)
     /* refuse best_chrom, we accept best_of_cluster to be   */
     /* choosen and then deleted */
     if (k>1000) {
-      do 
-	algo->Population[*n1] = 
-	  algo->Population[(int)(algo->Rand->RandUniform()*(double)algo->NbElement)];
-      while ((algo->Population[*n1] == (algo->BestChromosome)) || 
-	     (algo->Population[*n1]->IsNew)) ;
+      do *n1 = (int)( algo->Rand->RandUniform() * (double)algo->NbElement ); 
+      while ( (algo->Population[*n1] == algo->BestChromosome) || 
+	      (algo->Population[*n1]->IsNew) ) ;  // on en sort pas
     } 
     k=0;
-    do 
-      algo->Population[*n2] = algo->Population[(int)(algo->Rand->RandUniform()*algo->NbElement)];
-    while (((algo->Population[*n2]->IsNew) 
-	    || (algo->Population[*n2] == algo->Population[*n1])
-	    ||(algo->Population[*n2]->IsBestInCluster)
-	    ||(algo->Population[*n2] == algo->BestChromosome))
-	   &&(k++<1000));
+    do *n2 = (int)( algo->Rand->RandUniform() * algo->NbElement ); 
+    while ( ((algo->Population[*n2]->IsNew) 
+	     || (*n2 == *n1)
+	     ||(algo->Population[*n2]->IsBestInCluster)
+	     ||(algo->Population[*n2] == algo->BestChromosome))
+	    && (k++<1000));
     /* If we went over limit then we must choose one but we */
     /* refuse best_chrom, we accept best_of_cluster to be   */
     /* choosen and then deleted */
     if (k>1000) {
-      do 
-	algo->Population[*n2] = 
-	  algo->Population[(int)(algo->Rand->RandUniform()*(double)algo->NbElement)];
-      while ((algo->Population[*n2] == algo->BestChromosome) || 
-	     (algo->Population[*n2]->IsNew)) ;
-    } 
+      do *n2 = (int)( algo->Rand->RandUniform() * (double)algo->NbElement );
+      while ( (algo->Population[*n2] == algo->BestChromosome) || 
+	      (algo->Population[*n2]->IsNew) ) ;
+    }  
   } else {
-    do 
-      algo->Population[*n1] = 
-	algo->Population[(int)(algo->Rand->RandUniform()*algo->NbElement)];
+    do  *n1 = (int)( algo->Rand->RandUniform() * algo->NbElement );
     while (algo->Population[*n1]->IsNew);
-    do 
-      algo->Population[*n2] = 
-	algo->Population[(int)(algo->Rand->RandUniform()*algo->NbElement)];
-    while ((algo->Population[*n2]->IsNew) || 
-	   (algo->Population[*n2] == algo->Population[*n1]));
+    do  *n2 = (int)( algo->Rand->RandUniform() * algo->NbElement );
+    while ( (algo->Population[*n2]->IsNew) || 
+	    (*n2 == *n1) );
   } 
 }
