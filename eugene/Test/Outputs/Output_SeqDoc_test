@@ -14,7 +14,7 @@ Reading splice site file \(NetGene2\)...........forward, reverse done.
 Reading splice site file \(Splice Predictor\)...forward, reverse done.
 Reading start file \(NetStart\).................forward, reverse done.
 Loading user data............done.
-Optimal path length = 4874.7717.
+Optimal path length = 4874.7719.
 .
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
 .
