@@ -21,7 +21,7 @@ int HitsCompare(const void *A, const void *B)
   if ((*UA)->NGaps < (*UB)->NGaps)   return  1;
   if ((*UA)->Length > (*UB)->Length) return -1;
   if ((*UA)->Length < (*UB)->Length) return  1;
-  return 0;
+  return strcmp((*UA)->Name,(*UB)->Name); //pour un tri sans ambiguité
 }
 
 int HitsCompareLex(const void *A, const void *B)
