@@ -24,9 +24,7 @@
 # definition of variables related to I/O
 
 set SEQ Sequences/SYNO_ARATH.fasta
-set EUGENE_DIR ../src/
-set EUGENE eugene
-exec cp ${EUGENE_DIR}${EUGENE}.par .
+set EUGENE ../src/eugene
 
 set FIC_TEX "Doc.tex"
 set FIC_TEX_TMP "EuGeneDoc"
@@ -67,7 +65,7 @@ for {set i 1} {$i<= $nbflags} {incr i} {
 	    eval exec $Cmd_begin($i)
 	}
 
-	eval exec $EUGENE_DIR$Cmd($i) $Cmd_end
+	eval exec $Cmd($i) $Cmd_end
 
 	# write the executed command in the documentation before the result
 	set new_content "$new_content >$Cmd($i)\n"
@@ -84,7 +82,7 @@ puts $f $new_content
 close $f
 
 # clean directory (beware except image .png)
-exec rm ${EUGENE}.par  $FIC_TMP
+exec rm  $FIC_TMP
 
 # ask for compilation
 exec pdflatex $FIC_TEX_TMP.tex
