@@ -206,7 +206,12 @@ void Genetic::Optimize(bool is_chaining)
        for (i=0; i<BestChromosome->data->P.size(); i++) 
 	 std::cout << BestChromosome->data->P[i] << "\t"; 
        std::cout<<std::endl;
-       if (IsTracing) {OPTIM.ParaEvaluate(true); std::cout <<OPTIM.DetailedEvaluation;}
+       if (IsTracing) {
+	 Par = BestChromosome->data->P;
+	 for (unsigned int k=0; k<Para.size(); k++) Para[k] = Par[ParaPar[k]];
+	 OPTIM.ParaEvaluate(true); 
+	 std::cout <<OPTIM.DetailedEvaluation;
+       }
        if (BestChromosome->RawFitness > 999999999999.0) gen=NbGeneration;
      }
      
