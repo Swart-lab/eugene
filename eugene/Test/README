@@ -39,13 +39,15 @@ This directory contains the output files of the command runtest (DejaGnu) and th
 ->config (compulsory name by DejaGnu)
 This directory contains all the scripts
 	-GenerateOutputs.tcl (Generates the reference files)
-	-Default.exp (First file executed by runtest)
+	-default.exp (First file executed by runtest)
 	-TestVar.tcl (Contains all the environment variables)
 	-TestProc.tcl (Contains procedures called by GenerateOutputs.tcl and the files in TestSuite directory)
 
 ->Outputs
 This directory contains the reference files of EuGene outputs. 
-For functional tests Reference files (Output_<name>) are in test format (some caracters are added) and use for test. In order to be able to compare directely EuGene outputs when tests fail, files with the extension '_std' store the EuGene output.
+    - Output_<test name> : text output file
+    - Output_<test name>.png : graph file
+    - Output_<test name>_test : text output file formatted (some caracters are added) to be used with the spawn command.
 
 ->TestSuite
 This directory contains the test scripts. For example :
