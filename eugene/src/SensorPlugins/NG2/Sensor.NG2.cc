@@ -26,7 +26,7 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
 
-  type = Type_Splice;
+  type = Type_Acc|Type_Don;
     
   fprintf(stderr, "Reading splice site file (NetGene2)...........");  
   fflush(stderr);

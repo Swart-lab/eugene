@@ -26,7 +26,7 @@ extern Parameters PAR;
 // ----------------------
 SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
 {
-  type = Type_Splice;
+  type = Type_Acc|Type_Don;
 
   if (!IsInitialized) {
     char donmodelfilename[FILENAME_MAX+1];
