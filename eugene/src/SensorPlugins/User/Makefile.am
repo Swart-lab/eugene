@@ -17,13 +17,14 @@
 # Contents: compilation of the User directory
 # ------------------------------------------------------------------
 
-AM_CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 CC = $(CXX)
-AM_YFLAGS = -d
+YFLAGS = -d
 
 
-bin_PROGRAMS = Sensor.User.so
+noinst_PROGRAMS = Sensor.User.so
 Sensor_User_so_SOURCES = yacc.y lex.l Sensor.User.cc Sensor.User.h structure.h
-Sensor_User_so_LDFLAGS = $(eugene_LDFLAGS)
+Sensor_User_so_LDFLAGS = $(sensors_ldflags)
 
 CLEANFILES = lex.c yacc.h yacc.c *~

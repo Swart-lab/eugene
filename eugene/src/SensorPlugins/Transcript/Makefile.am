@@ -17,12 +17,13 @@
 # Contents: compilation of the Transcript directory
 # ------------------------------------------------------------------
 
-AM_CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Transcript.so
+noinst_PROGRAMS = Sensor.Transcript.so
 Sensor_Transcript_so_SOURCES = Sensor.Transcript.cc Sensor.Transcript.h 
-Sensor_Transcript_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_Transcript_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~

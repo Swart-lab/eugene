@@ -17,12 +17,13 @@
 # Contents: compilation of the Riken directory
 # ------------------------------------------------------------------
 
-AM_CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 
-bin_PROGRAMS = Sensor.Riken.so
+noinst_PROGRAMS = Sensor.Riken.so
 Sensor_Riken_so_SOURCES = Sensor.Riken.cc  Sensor.Riken.h
-Sensor_Riken_so_LDFLAGS = $(eugene_LDFLAGS) 
+Sensor_Riken_so_LDFLAGS = $(sensors_ldflags) 
 
 
 CLEANFILES = *~
