@@ -1,20 +1,19 @@
 Loading sequence...SEQ25AB005234G10G11, 14900 bases read, GC Proportion = 36.4%.
-Loading Sensor.EuStop.........0.
-Loading Sensor.GSplicer.......0.
-Loading Sensor.IfElse.........0.
-Loading Sensor.MarkovConst....0.
-Loading Sensor.MarkovIMM......0.
-Loading Sensor.NStart.........0.
-Loading Sensor.BlastX.........0.
-Loading Sensor.Est............0.
+Loading Sensor.EuStop.........done.
+Loading Sensor.GSplicer.......done.
 Reading splice site file \(GeneSplicer\)........forward, reverse done.
-Sensor.IfElse :.
- If   : Loading Sensor.NG2............0.
- Else : Loading Sensor.SPred..........0.
+Loading Sensor.IfElse.........done.
+Loading Sensor.NG2............done.
 Reading splice site file \(NetGene2\)...........forward, reverse done.
+Loading Sensor.SPred..........done.
 Reading splice site file \(Splice Predictor\)...forward, reverse done.
+Loading Sensor.MarkovConst....done.
+Loading Sensor.MarkovIMM......done.
 Reading IMM... 1 2 3 4 5 6 7 ...done.
+Loading Sensor.NStart.........done.
 Reading start file \(NetStart\).................forward, reverse done.
+Loading Sensor.BlastX.........done.
+Loading Sensor.Est............done.
 Reading Blastx data, level...0 done.
 Reading cDNA hits............13 sequences read.
    \[AV547209\]: no matching splice site.

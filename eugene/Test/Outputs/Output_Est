@@ -1,7 +1,7 @@
 Loading sequence...SEQ14AC002535G4G5, 7972 bases read, GC Proportion = 38.0%
-Loading Sensor.NG2............0
-Loading Sensor.Est............0
+Loading Sensor.NG2............done
 Reading splice site file (NetGene2)...........forward, reverse done
+Loading Sensor.Est............done
 Reading cDNA hits............18 sequences read
    [AV533768]: inconsistent hit [3571-3657]
    [AI992875]: no matching splice site

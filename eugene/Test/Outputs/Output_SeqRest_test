@@ -1,12 +1,12 @@
 Loading sequence...SEQ25AB005234G10G11, 14900 bases read, GC Proportion = 36.4%.
-Loading Sensor.EuStop.........0.
-Loading Sensor.MarkovIMM......0.
-Loading Sensor.SpliceConst....0.
-Loading Sensor.StartConst.....0.
-Loading Sensor.Riken..........0.
-Loading Sensor.Repeat.........0.
+Loading Sensor.EuStop.........done.
+Loading Sensor.MarkovIMM......done.
 Reading IMM... 1 2 3 4 5 6 7 ...done.
+Loading Sensor.SpliceConst....done.
+Loading Sensor.StartConst.....done.
+Loading Sensor.Riken..........done.
 Reading RAFL gene............2 RAFL EST pairs read, fusion fsdf-fsdf...resulting 1.
+Loading Sensor.Repeat.........done.
 Reading Intergenic regions...done.
 Optimal path length = 19680.0290.
 .

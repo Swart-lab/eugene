@@ -1,20 +1,20 @@
 Loading sequence...GHU53701, 2626 bases read, GC Proportion = 40.3%
-Loading Sensor.EuStop.........0
-Loading Sensor.Homology.......0
-Loading Sensor.MarkovConst....0
-Loading Sensor.MarkovProt.....0
-Loading Sensor.SpliceWAM......0
-Loading Sensor.StartWAM.......0
-Loading Sensor.Transcript.....0
-Loading Sensor.User...........0
-Loading Sensor.GFF............0
-Loading protmat file.........done
+Loading Sensor.EuStop.........done
+Loading Sensor.Homology.......done
+Reading protmat file.........done
 Reading tblastx data.........done
-Loading MarkovProt model...done
+Loading Sensor.MarkovConst....done
+Loading Sensor.MarkovProt.....done
+Reading MarkovProt model...done
+Loading Sensor.SpliceWAM......done
 Reading WAM models...  0 1 2 3 4 5 6 7 8 ... done
 Reading WAM models...  0 1 2 3 4 ... done
+Loading Sensor.StartWAM.......done
 Reading WAM models...  0 1 2 3 4 5 6 7 8 ... done
-Loading user data............done
+Loading Sensor.Transcript.....done
+Loading Sensor.User...........done
+Loading Sensor.GFF............done
+Reading user data............done
 Reading GFF file.............done
 Optimal path length = 1875.4084
 
