@@ -45,7 +45,8 @@
 //#define STAND 1
 
 #define DFT_MATRIX          "default.mat"
-#define REAL double
+//#define REAL double
+#define REAL float
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
@@ -59,7 +60,7 @@
 const int  MODEL_LEN = 9;
 const int  SIMPLE_MODEL_LEN = 6;
 const int  ALPHABET_SIZE = 4;
-const REAL NINFINITY = log(0.0);
+const double NINFINITY = log(0.0);
 const int PredWidth = 2;
 
 // Les Hits EST
@@ -86,7 +87,7 @@ const char NotAHit       = MLeft | MRight | Gap;
 
 const short int State2Phase[13] = {1,2,3,-1,-2,-3,4,4,4,-4,-4,-4,0};
 
-REAL Score [9],NScore[9];
+double Score [9],NScore[9];
 long int Data_Len;
 int normopt,blastopt,estopt;
 int window, offset,graph,resx,resy;
@@ -264,7 +265,7 @@ int main  (int argc, char * argv [])
   unsigned char    *Stop[2];
   unsigned char    *ESTMatch;
   long int         Input_Size;
-  REAL             Ch_Ct[ALPHABET_SIZE] = {0.0};
+  double           Ch_Ct[ALPHABET_SIZE] = {0.0};
   BString_Array    *IMMatrix[5];
   char             clef[20];
   char             *Data;
@@ -273,9 +274,9 @@ int main  (int argc, char * argv [])
   char             grname[FILENAME_MAX+1];
   char             seqname[MAX_LINE];
   int              EstM;
-  REAL             FsP,StartP,StartB,StopP;
-  REAL             AccP,AccB,DonP,DonB,BlastS[3],EstP;
-  REAL             ExonPrior,IntronPrior,InterPrior;
+  double           FsP,StartP,StartB,StopP;
+  double           AccP,AccB,DonP,DonB,BlastS[3],EstP;
+  double           ExonPrior,IntronPrior,InterPrior;
   char *EugDir;
 
   // process args 
@@ -804,7 +805,7 @@ int main  (int argc, char * argv [])
   
   char *Choice;
   BackPoint *LBP[14];
-  double BestU;
+  REAL BestU;
   char best;
   unsigned char Switch;
 
