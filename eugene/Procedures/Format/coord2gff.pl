@@ -40,7 +40,7 @@ while (<COORD>){
     $strand= ( ($coord[0] <0) ? '-' : '+' );
     $coord =~ s/-//;
     foreach (@coord) { s/-// }
-    for ($i=0;$i<$#coord;$i++) {
+    for ($i=0;$i<$#coord;$i+=2) {
       if ($#coord==2) {
 	$feature="$Single";
       }
