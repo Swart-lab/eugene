@@ -725,7 +725,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	   debut+1,fin+1,fin-debut+1,CDSsupported);
   printf("      Gene         %7d %7d    %5d     supported on %d bases\n",
 	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
-  delete Sup;
+  delete [] Sup;
   return;
 }
 
