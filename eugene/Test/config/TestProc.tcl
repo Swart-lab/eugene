@@ -94,12 +94,6 @@ set NewValue1(EuGene.IntronPrior)	0.17
 set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
-##### States penalties #####
-set NewValue1(MarkovConst.Codant)	1.0
-set NewValue1(MarkovConst.Intron)	1.0
-set NewValue1(MarkovConst.UTR5)	0.999
-set NewValue1(MarkovConst.UTR3)	0.999
-set NewValue1(MarkovConst.Inter)	1.0
 ##### Output control ######
 set NewValue1(Output.graph)		FALSE	
 set NewValue1(Output.resx)		900
@@ -114,37 +108,45 @@ set NewValue1(Output.offset)		0
 set NewValue1(Output.normopt)		1
 set NewValue1(Output.Prefix)		./
 ##### Transcript parameters #####
-set NewValue1(Transcript.Start)	4.155
-set NewValue1(Transcript.Stop)		4.155
+set NewValue1(Transcript.Start*)	4.155
+set NewValue1(Transcript.Stop*)		4.155
 ##### EuStop parameters #####
-set NewValue1(EuStop.stopP)            4.155
+set NewValue1(EuStop.stopP*)            4.155
 ##### FrameShift parameters #####
-set NewValue1(FrameShift.Ins)	1e999.0
-set NewValue1(FrameShift.Del)	1e999.0
+set NewValue1(FrameShift.Ins*)	1e999.0
+set NewValue1(FrameShift.Del*)	1e999.0
 ##### NetStart parameters #####
-set NewValue1(NStart.startP)	0.052
-set NewValue1(NStart.startB)	0.308
+set NewValue1(NStart.startP*)	0.052
+set NewValue1(NStart.startB*)	0.308
+##### ATGpr parameters #####
+set NewValue1(ATGpr.startP*) 0.052
+set NewValue1(ATGpr.startB*) 0.308
 ##### IfElse #####
 set NewValue1(IfElse.SensorIf)		NG2
 set NewValue1(IfElse.SensorElse)	SPred
 # NetGene2 parameters #####
-set NewValue1(NG2.accP\[0\])     0.903
-set NewValue1(NG2.accB\[0\])     5.585
-set NewValue1(NG2.donP\[0\])     0.980
-set NewValue1(NG2.donB\[0\])     27.670
-set NewValue1(NG2.accP\[1\])	0.903
-set NewValue1(NG2.accB\[1\])	5.585
-set NewValue1(NG2.donP\[1\])	0.980
-set NewValue1(NG2.donB\[1\])	27.670
+set NewValue1(NG2.accP*\[0\])     0.903
+set NewValue1(NG2.accB*\[0\])     5.585
+set NewValue1(NG2.donP*\[0\])     0.980
+set NewValue1(NG2.donB*\[0\])     27.670
+set NewValue1(NG2.accP*\[1\])	0.903
+set NewValue1(NG2.accB*\[1\])	5.585
+set NewValue1(NG2.donP*\[1\])	0.980
+set NewValue1(NG2.donB*\[1\])	27.670
 ##### SplicePredictor parameters #####
-set NewValue1(SPred.accP\[0\])   0.987
-set NewValue1(SPred.accB\[0\])  3.850
-set NewValue1(SPred.donP\[0\])   0.929
-set NewValue1(SPred.donB\[0\])   10.800
-set NewValue1(SPred.accP\[1\])	0.987
-set NewValue1(SPred.accB\[1\])	3.850
-set NewValue1(SPred.donP\[1\])	0.929
-set NewValue1(SPred.donB\[1\])	10.800
+set NewValue1(SPred.accP*\[0\])   0.987
+set NewValue1(SPred.accB*\[0\])  3.850
+set NewValue1(SPred.donP*\[0\])   0.929
+set NewValue1(SPred.donB*\[0\])   10.800
+set NewValue1(SPred.accP*\[1\])	0.987
+set NewValue1(SPred.accB*\[1\])	3.850
+set NewValue1(SPred.donP*\[1\])	0.929
+set NewValue1(SPred.donB*\[1\])	10.800
+##### GeneSplicer parameters #####
+set NewValue1(GSplicer.coefAcc*)	1
+set NewValue1(GSplicer.penAcc*)	0
+set NewValue1(GSplicer.coefDon*)	1
+set NewValue1(GSplicer.penDon*) 	0
 ##### Interpolated Markov Models parameters #####
 set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
 set NewValue1(MarkovIMM.minGC\[0\])	0
@@ -157,45 +159,58 @@ set NewValue1(MarkovProt.maxorder)    2
 set NewValue1(MarkovProt.order)        2
 ##### Est sensor parameters #####
 set NewValue1(Est.PostProcess)	FALSE
-set NewValue1(Est.estP)	-0.4
+set NewValue1(Est.estP*)	-0.4
 set NewValue1(Est.estM)	6
-set NewValue1(Est.utrP)	0.35
+set NewValue1(Est.utrP*)	0.35
 set NewValue1(Est.utrM)	5
-set NewValue1(Est.StrongDonor)	0.95
+set NewValue1(Est.StrongDonor*)	0.95
+##### Riken sensor parameters #####
+set NewValue1(Riken.StrandRespect)		0
+set NewValue1(Riken.Min\_est\_diff)		100
+set NewValue1(Riken.Max\_overlap		60
+set NewValue1(Riken.Max\_riken\_length)		60000
+set NewValue1(Riken.Max\_riken\_est\_length)	3000
+set NewValue1(Riken.Min\_riken\_length)		120 
+set NewValue1(Riken.Min\_riken\_est\_length)	10
+set NewValue1(Riken.RAFLPenalty*)		-120.0
 ##### Proteic similarity sensor parameters #####
 set NewValue1(BlastX.PostProcess) FALSE
 set NewValue1(BlastX.levels)	0
-set NewValue1(BlastX.level0)	0.2
-set NewValue1(BlastX.level1)	0.05
-set NewValue1(BlastX.level2)	0.0
-set NewValue1(BlastX.level3)	0.0
-set NewValue1(BlastX.level4)	0.0
-set NewValue1(BlastX.level5)	0.0
-set NewValue1(BlastX.level6)	0.0
-set NewValue1(BlastX.level7)	0.0
-set NewValue1(BlastX.level8)	0.0
-set NewValue1(BlastX.level9)	0.0
-set NewValue1(BlastX.blastxM)	10	
+set NewValue1(BlastX.level0*)	0.2
+set NewValue1(BlastX.level1*)	0.05
+set NewValue1(BlastX.level2*)	0.0
+set NewValue1(BlastX.level3*)	0.0
+set NewValue1(BlastX.level4*)	0.0
+set NewValue1(BlastX.level5*)	0.0
+set NewValue1(BlastX.level6*)	0.0
+set NewValue1(BlastX.level7*)	0.0
+set NewValue1(BlastX.level8*)	0.0
+set NewValue1(BlastX.level9*)	0.0
+set NewValue1(BlastX.blastxM*)	10	
 ##### Repeat sensor parameters #####
-set NewValue1(Repeat.UTRPenalty)	0.0
-set NewValue1(Repeat.IntronPenalty)	0.1
-set NewValue1(Repeat.ExonPenalty)	1.0
+set NewValue1(Repeat.UTRPenalty*)	0.0
+set NewValue1(Repeat.IntronPenalty*)	0.1
+set NewValue1(Repeat.ExonPenalty*)	1.0
 ##### Homology Sensor parameters #####
-set NewValue1(Homology.TblastxP) 	0
-set NewValue1(Homology.TblastxB) 	0.0595
+set NewValue1(Homology.TblastxP*) 	0
+set NewValue1(Homology.TblastxB*) 	0.0595
 set NewValue1(Homology.protmatname	BLOSUM80
 ##### Sensors with uniform penalties #####
-set NewValue1(SpliceConst.accP$space)	1e-9
-set NewValue1(SpliceConst.accPNo)       0
-set NewValue1(SpliceConst.donP$space)    1e-9
-set NewValue1(SpliceConst.donPNo)       0
-set NewValue1(StartConst.startP$space)	2.897949
-set NewValue1(StartConst.startPNo)	0
+set NewValue1(SpliceConst.accP*)	1e-9
+set NewValue1(SpliceConst.accPNo*)       0
+set NewValue1(SpliceConst.donP*)    1e-9
+set NewValue1(SpliceConst.donPNo*)       0
+set NewValue1(StartConst.startP*)	2.897949
+set NewValue1(StartConst.startPNo*)	0
+##### State penalties (exp length distributions) #####
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
-#
+set NewValue1(MarkovConst.Coding*) 	1.0
+set NewValue1(MarkovConst.Intron*) 	1.0
+set NewValue1(MarkovConst.UTR5*)	0.999
+set NewValue1(MarkovConst.UTR3*) 	0.999
+set NewValue1(MarkovConst.Inter*) 	1.0
 ##### Sensor SpliceWAM #####
-#
 set NewValue1(SpliceWAM.MarkovianOrder)	1
 set NewValue1(SpliceWAM.donmodelfilename)	WAM/WAM.ARA.DON.L9
 set NewValue1(SpliceWAM.NbNtBeforeGT)	3
@@ -207,33 +222,25 @@ set NewValue1(SpliceWAM.NbNtBeforeAG)		2
 set NewValue1(SpliceWAM.NbNtAfterAG)		1
 set NewValue1(SpliceWAM.AccScaleCoef)		2.9004
 set NewValue1(SpliceWAM.AccScalePenalty)		-7.5877
-#
 ##### Sensor StartWAM #####
-#
 set NewValue1(StartWAM.modelfilename)	WAM/WAM.ARA.START9
 set NewValue1(StartWAM.NbNtBeforeATG)	3
 set NewValue1(StartWAM.NbNtAfterATG)	3
 set NewValue1(StartWAM.MarkovianOrder)		1
 set NewValue1(StartWAM.ScaleCoef)		0.1594
 set NewValue1(StartWAM.ScalePenalty)		-3.1439
-#
 ##### Sensor GCPlot #####
-#
 set NewValue1(GCPlot.Color)	5
 set NewValue1(GCPlot.Zoom)	2.0
 set NewValue1(GCPlot.Zoom3)	1.0
 set NewValue1(GCPlot.Up)	GC
 set NewValue1(GCPlot.Over)	ATGC
 set NewValue1(GCPlot.Smooth)	100
-#
 ##### Sensor Plotter
-#
 set NewValue1(Plotter.GC\[0\])	 1 
 set NewValue1(Plotter.GC3\[0\])	 1 
 set NewValue1(Plotter.A|T/A+T\[0\])	 0 
-#
 ##### Sensor Tester #####
-#
 set NewValue1(Tester.Test.0)		EuStop
 set NewValue1(Tester.Param.idx.0)	0
 #
@@ -256,27 +263,27 @@ set NewValue1(ParaOptimization.Cluster\[2\]) IDENTICAL
 #
 set NewValue1(ParaOptimization.NbParameter)   	5
 #
-set NewValue1(ParaOptimization.Para.Name\[0\])	para1
+set NewValue1(ParaOptimization.Para.Name\[0\])	para1*
 set NewValue1(ParaOptimization.Para.Max\[0\])	1	
 set NewValue1(ParaOptimization.Para.Min\[0\])	0
 set NewValue1(ParaOptimization.Para.Cluster\[0\]) 0
 #
-set NewValue1(ParaOptimization.Para.Name\[1\])	para2
+set NewValue1(ParaOptimization.Para.Name\[1\])	para2*
 set NewValue1(ParaOptimization.Para.Max\[1\])	1	
 set NewValue1(ParaOptimization.Para.Min\[1\])	0
 set NewValue1(ParaOptimization.Para.Cluster\[1\]) 0
 #
-set NewValue1(ParaOptimization.Para.Name\[2\])	para3
+set NewValue1(ParaOptimization.Para.Name\[2\])	para3*
 set NewValue1(ParaOptimization.Para.Max\[2\])	1	
 set NewValue1(ParaOptimization.Para.Min\[2\])	0
 set NewValue1(ParaOptimization.Para.Cluster\[2\]) 1
 #
-set NewValue1(ParaOptimization.Para.Name\[3\])	para4
+set NewValue1(ParaOptimization.Para.Name\[3\])	para4*
 set NewValue1(ParaOptimization.Para.Max\[3\])	1	
 set NewValue1(ParaOptimization.Para.Min\[3\])	0
 set NewValue1(ParaOptimization.Para.Cluster\[3\]) 1
 #
-set NewValue1(ParaOptimization.Para.Name\[4\])	para5
+set NewValue1(ParaOptimization.Para.Name\[4\])	para5*
 set NewValue1(ParaOptimization.Para.Max\[4\])	1	
 set NewValue1(ParaOptimization.Para.Min\[4\])	0
 set NewValue1(ParaOptimization.Para.Cluster\[4\]) 2
@@ -326,7 +333,7 @@ set NewValue1(LineSearch.Para.Init\[3\])	0.5
 set NewValue1(LineSearch.Para.MaxInit\[3\])	1
 set NewValue1(LineSearch.Para.MinInit\[3\])	0
 #
-set NewValue1(LineSearch.Para.Step\[4\)]	0.01
+set NewValue1(LineSearch.Para.Step\[4\])	0.01
 set NewValue1(LineSearch.Para.Init\[4\])	0.5
 set NewValue1(LineSearch.Para.MaxInit\[4\])	1
 set NewValue1(LineSearch.Para.MinInit\[4\])	0
