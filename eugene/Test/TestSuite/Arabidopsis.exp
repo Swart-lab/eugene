@@ -1,0 +1,43 @@
+#============================================================================
+#=             Copyright (c) 2002 by INRA. All rights reserved.             
+#=                 Redistribution is not permitted without                  
+#=                 the express written permission of INRA.                 
+#=                     Mail : tschiex@toulouse.inra.fr                     
+#=-------------------------------------------------------------------------
+#= File         : EuGeneTk/Test/TestSuite/Arabidopsis.exp
+#= Description  : Test stdout for all sequences in araset base
+#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
+#===========================================================================
+
+
+foreach TEST $ArabidopsisTestList {
+
+    # To follow execution
+    puts "Performing $TEST Arabidopsis test"
+
+    set test 0
+
+    # Preparation of the parameter file with the correct sensors
+    foreach sensor $SensorsList($TEST) \
+	{set NewValueBase(Sensor.${sensor}.use) TRUE}
+    ModifyParaValue ${EUGENE}.par  NewValueBase
+    
+    # Run EuGene
+    catch {eval exec $EUGENE_DIR/$EUGENE $SEQ($TEST) > tmp%stdout}
+    
+    # Checking the output
+    set test [diff $OUTPUT_DIR/$FILE_REF($TEST) tmp%stdout]
+    if {$test == 1} {
+	pass $TEST
+    } else {
+	fail $TEST
+	catch {exec mv tmp%stdout $TRACE_DIR/$FILE_REF($TEST)}
+    }
+    
+    # Remove temporary file
+    catch {exec rm tmp%stdout}
+    
+    # Restore initial parameters values
+    InitParameterFile ${EUGENE}.par $AllSensorsList
+
+}
