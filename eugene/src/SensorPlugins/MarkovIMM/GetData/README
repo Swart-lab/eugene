@@ -1,0 +1,15 @@
+/Annotation/EuGeneTk/SensorPlugins/MarkovIMM/GetData directory content
+----------------------------------------------------------------------
+
+Eu-immUTR.cc  
+	create binary IMM from exons, introns, UTR 3'
+Eu-imm2UTR.cc
+	create binary IMM from exons, introns, UTR 3', UTR 5'     
+EuglimAS2bin.cc
+	convert glimmer matrix ascii -> binary
+Eu-immAS.cc
+     	create glimmer matrix ascii
+context.h
+strarray.h
+delcher.h
+gene.h
