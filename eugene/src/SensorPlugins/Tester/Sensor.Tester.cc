@@ -109,7 +109,7 @@ void SensorTester :: Init (DNASeq *X)
   fprintf(stderr," Reading coordinates file......................");
   fflush(stderr);
   strcpy(seqName,PAR.getC("fstname"));
-  strcat(seqName,".coord");
+  strcat(seqName,".gff");
   ReadCoord(seqName);
   fprintf(stderr,"done\n");
 
@@ -128,10 +128,10 @@ void SensorTester :: Init (DNASeq *X)
 // -----------------
 void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
 {
-  // Lecture du fichier .coord (format gff) pour charger un objet
+  // Lecture du fichier .gff (format gff) pour charger un objet
   // prediction "simplifié" (on distingue 6 états : IG, UTR, ExonF,
   // ExonR, IntronF et IntronR) -> but quel état réel à telle pos ?
-  // Mots clefs pour le .coord : Features UTR5, UTR3, E.Init, E.Intr,
+  // Mots clefs pour le .gff : Features UTR5, UTR3, E.Init, E.Intr,
   // E.Term, E.Sngl
 
   FILE *fpCoord;
@@ -142,7 +142,7 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
   gene = new Prediction();
 
   if (!(fpCoord = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open coord file %s\n", name);
+    fprintf(stderr, "cannot open gff file %s\n", name);
     exit(2);
   }
   int j=0;
@@ -153,10 +153,10 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
     if (i < 5) {
       if (i==-1) {
 	if(j==1)
-	  fprintf(stderr,"WARNING: empty coord file !...");
+	  fprintf(stderr,"WARNING: empty gff file !...");
       }
       else {
-	fprintf(stderr, "\nError in coord file %s, line %d.\n", name, j);
+	fprintf(stderr, "\nError in gff file %s, line %d.\n", name, j);
 	exit(2);
       }
     }
@@ -173,9 +173,9 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
 	  if (strand == '+') gene->add(end, ExonF1);
 	  else               gene->add(end, ExonR1);
 	else {
-	  fprintf(stderr, "\n Error in coord file %s, line %d.\n", name, j);
+	  fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
 	  fprintf(stderr, " WARNING :\n"
-		  "   - Complete genes only in coord file.\n"
+		  "   - Complete genes only in gff file.\n"
 		  "   - Feature must be UTR5, UTR3, E.Init,"
 		  " E.Intr, E.Term or E.Sngl.\n");
 	  exit(2);
@@ -210,7 +210,7 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
 	  }
 	}
 	else {
-	  fprintf(stderr, "\n Error in coord file %s, line %d.\n", name, j);
+	  fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
 	  fprintf(stderr, " %s : unknown feature (UTR5, UTR3, E.Init,"
 		  " E.Intr, E.Term or E.Sngl).\n",feature);
 	  exit(2);
@@ -228,8 +228,8 @@ void SensorTester :: ReadCoord(char name[FILENAME_MAX+1])
       (strcmp(feature, "E.Init") == 0  &&  strand == '+')  ||
       (strcmp(feature, "E.Term") == 0  &&  strand == '-'))
     {
-      fprintf(stderr, "\n Error in coord file %s, line %d.\n", name, j);
-      fprintf(stderr, " WARNING : complete genes only in coord file.\n");
+      fprintf(stderr, "\n Error in gff file %s, line %d.\n", name, j);
+      fprintf(stderr, " WARNING : complete genes only in gff file.\n");
       exit(2);
     }
   
