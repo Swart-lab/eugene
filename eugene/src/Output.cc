@@ -17,7 +17,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   int  trunclen  = PAR.getI("Output.truncate");
   char nameformat[20];
 
-  if (trunclen) sprintf(nameformat,"%%.%ds",trunclen);
+  if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
   else strcpy(nameformat,"%s");
 
   if (printopt0 == 'h') {
