@@ -59,8 +59,10 @@ class Parameters
   std::map <const char*, const char*, ltstr> m;
   std::map <const char*, const char*, ltstr>::iterator iter;
 
-  void ReadArg(int, char *[]);
-  void ReadPar(char *);
+  void UpdateParametersFileName (int argc, char* argv[]);
+  void ReadArg   (int, char *[]);
+  void ReadPar   (char *, std::string para_file_name);
+  void ShowUsage (void);
   
  public:
   FILE *fp;
@@ -69,13 +71,13 @@ class Parameters
   void   initParam (int, char *[]);
   int    count(char *key);
   bool   probeKey(char *key, int index = 0);
-  char*  getC (char *key, int index = 0);
-  double getD (char *key, int index = 0);
-  int    getI (char *key, int index = 0);
+  char*  getC    (char *key, int index = 0, int sloppy = 0);
+  double getD    (char *key, int index = 0, int sloppy = 0);
+  int    getI    (char *key, int index = 0, int sloppy = 0);
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
   void   setD (const char *key, double n);
-  std::string WriteParam (const char* para_file, std::vector<std::string> para_name, 
+  std::string WriteParam (std::vector<std::string> para_name, 
 			  std::vector<double> para_val);
 
   void ResetIter(void);

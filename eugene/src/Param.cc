@@ -19,6 +19,7 @@
 
 #include "Param.h"
 
+
 // -----------------------------------------------
 //  Gestion des arguments (integer)
 // -----------------------------------------------
@@ -46,7 +47,8 @@ void Parameters :: initParam (int argc, char * argv[])
   fprintf(stderr,"EuGene rel. %s ",VERSION);
   fflush(stderr);
 
-  ReadPar(argv[0]);
+  UpdateParametersFileName(argc, argv);
+  ReadPar(argv[0], (std::string) getC("parameters_file"));
   ReadArg(argc, argv);
 
   if (m.count("Param.debug")) 
@@ -55,8 +57,36 @@ void Parameters :: initParam (int argc, char * argv[])
 
   iter = m.begin();  // Cf. : getUseSensor
   
-  fprintf(stderr,"- %s\n",getC("EuGene.organism"));
+  fprintf(stderr,"- %s -\n",getC("EuGene.organism"));
   fprintf(stderr,"Parameters file loaded.\n");
+  if (getI("EuGene.sloppy")) fprintf(stderr,"WARNING: Sloppy mode selected.\n");
+}
+
+// ---------------------------------------------------
+// check if a parameters file name is set in arguments
+// ---------------------------------------------------
+void Parameters :: UpdateParametersFileName(int argc, char * argv[])
+{
+  int carg;
+  char *key, *val;
+  key = new char[FILENAME_MAX+1];
+  val = new char[FILENAME_MAX+1];
+  std::string name = "";
+
+  while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
+    switch (carg) {
+      
+    case 'A': 
+      if (optarg) name = optarg;
+      else {ShowUsage();  exit(1);}
+    }
+  }
+  if (name == "") 
+    name = DEFAULT_PARA_FILE;
+  
+  strcpy(key,"parameters_file");
+  strcpy(val, name.c_str());
+  m[key] = val;
 }
 
 // ------------------------
@@ -68,9 +98,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
   char *key, *val = NULL;
   char* indexPos = NULL;
   
-  m["fstname"] = "\000";        // no default input
-
-  while ((carg = getopt(argc, argv, "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:Z")) != -1) {
+  m["fstname"] = "\000"; // no default input
+  optind = 1;            // reinit this getopt static variable
+ 
+  while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
     switch (carg) {
       
     case 'D':           /* Definition of any parameter */
@@ -89,64 +120,64 @@ void Parameters :: ReadArg(int argc, char * argv[])
       }
       break;
 
-    case 'n':           /* -n normalize across frames      */
+    case 'n':           /* -n normalize across frames */
       if (!TestIArg(optarg))
 	errflag++;
       else m["Output.normopt"] = optarg;
       break;
       
-    case 'h':           /* help                             */
+    case 'h':           /* help */
       errflag++;
       break;
       
-    case 's':           /* Single gene mode. Start/End on IG only   */
-      m["EuGene.ExonPrior"]   = "0.0";
-      m["EuGene.IntronPrior"] = "0.0";
+    case 's':           /* Single gene mode. Start/End on IG only */
+      m["EuGene.ExonPrior"]       = "0.0";
+      m["EuGene.IntronPrior"]     = "0.0";
       m["EuGene.FivePrimePrior"]  = "0.0";
       m["EuGene.ThreePrimePrior"] = "0.0";
       break;
 
     case 'r':    /* RepeatMasker input */
-      m["Sensor.Repeat.use"] = "TRUE";
+      m["Sensor.Repeat.use"] = "1";
       break;
       
-    case 'c':           /* -c couverture      */
+    case 'c':           /* -c couverture */
       if (! TestIArg(optarg))
         errflag++;
       else m["Output.golap"] = optarg;
       break;
       
-    case 'l':           /* -l imglen      */
+    case 'l':           /* -l imglen */
       if (! TestIArg(optarg))
         errflag++;
       else m["Output.glen"] = optarg;
       break;
       
-    case 'u':           /* -u From      */
+    case 'u':           /* -u From */
       if (! TestIArg(optarg))
 	errflag++;
       else m["Output.gfrom"] = optarg;
       break;
       
-    case 'v':           /* -v To      */
+    case 'v':           /* -v To */
       if (! TestIArg(optarg))
 	errflag++;
       else m["Output.gto"] = optarg;
       break;
       
-    case 'x':           /* -x resx      */
+    case 'x':           /* -x resx */
       if (! TestIArg(optarg))
         errflag++;
       else m["Output.resx"] = optarg;
       break;
       
-    case 'y':           /* -y resy      */
+    case 'y':           /* -y resy */
       if (! TestIArg(optarg))
         errflag++;
       else m["Output.resy"] = optarg;
       break;
       
-    case 'g':          /* -g "Graphic File"                */
+    case 'g':          /* -g "Graphic File" */
       if (optarg) {
 	if (strspn(".fasta", optarg)    != 6 
 	    && strspn(".fsa", optarg)   != 4
@@ -157,26 +188,26 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	    m["grnameArg"] = optarg;   // != NO pris en compte
 	  else 
 	    m["grnameArg"] = "0";      // == NO non pris en compte
-	  m["Output.graph"] = "TRUE";
+	  m["Output.graph"] = "1";
 	}
 	else errflag++;
       }
       else {
-	m["Output.graph"] = "TRUE";
+	m["Output.graph"] = "1";
 	m["grnameArg"] = "0";
       }
       break;
 
-    case 'O':           /* -O output                        */
+    case 'O':           /* -O output */
       m["Output.Prefix"] = optarg;
       break;
       
     case 'p':           /* -p print opt: s -> short, l -> long, d -> detailed
                                          h -> html,  H -> HTML(EuGeneHom)
-                                         g -> GFF,   a -> araset  */
+                                         g -> GFF,   a -> araset */
       m["Output.format"] = optarg;
       if ((optarg[0] == 'h') && getI("Output.graph") == 0) {
-	m["Output.graph"] = "TRUE"; // HTML output means graphical output 
+	m["Output.graph"] = "1"; // HTML output means graphical output 
 	m["grnameArg"]    = "0";
       }
       if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
@@ -185,30 +216,30 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	errflag++;
       break;
       
-    case 'm':           /* -m IMM matrix                    */
-      m["Sensor.MarkovIMM.use"] = "TRUE" ;
+    case 'm':           /* -m IMM matrix */
+      m["Sensor.MarkovIMM.use"] = "1" ;
       m["MarkovIMM.matname"] = optarg;
       break;
 
-    case 'M':           /* -M proteic markovian matrix      */
-      m["Sensor.MarkovProt.use"] = "TRUE";
+    case 'M':           /* -M proteic markovian matrix */
+      m["Sensor.MarkovProt.use"] = "1";
       m["MarkovProt.matname"] = optarg;
       break;
 
-    case 'o':           /* -o offset                        */
+    case 'o':           /* -o offset */
       if (! TestIArg(optarg))
 	errflag++;
       else m["Output.offset"] = optarg;
       break;
       
-    case 'w':           /* -w window                        */
+    case 'w':           /* -w window */
       if (! TestIArg(optarg))
 	errflag++;
       else m["Output.window"] = optarg;
       break;
 
-    case 'b':           /* -b  use blastx result            */
-      m["Sensor.BlastX.use"] = "TRUE";
+    case 'b':           /* -b  use blastx result */
+      m["Sensor.BlastX.use"] = "1";
       if (optarg) {
 	m["BlastX.levels"] = optarg;
 	if(strlen(optarg) > 10)
@@ -217,49 +248,49 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
 
     case 'E':
-      m["Est.PostProcess"] = "TRUE";
+      m["Est.PostProcess"] = "1";
       break;
 
     case 'B':
-      m["BlastX.PostProcess"] = "TRUE";
+      m["BlastX.PostProcess"] = "1";
       break;
 
     case 'U':
-      m["Sensor.User.use"] = "TRUE";
+      m["Sensor.User.use"] = "1";
       break;
 
     case 'G':           /* -G use sensor GFF */
-      m["Sensor.GFF.use"] = "TRUE";
+      m["Sensor.GFF.use"] = "1";
       break;
 
     case 'd':           /* -d  use cDNA blastn results      */
-      m["Sensor.Est.use"] = "TRUE";
+      m["Sensor.Est.use"] = "1";
       break; 
 
-    case 'R':           /* -R use RAFL-like EST*/
-      m["Sensor.Riken.use"] = "TRUE";
+    case 'R':           /* -R use RAFL-like EST */
+      m["Sensor.Riken.use"] = "1";
       break;
 
-    case 'f':           /* -f frameshift loglike            */
+    case 'f':           /* -f frameshift loglike */
       if (! TestDArg(optarg))
 	errflag++;
       else m["EuGene.frameshift"] = optarg;
 
       break;
       
-    case 't':           // -t use tblastx results   
-      m["Sensor.Homology.use"] = "TRUE";
+    case 't':           /* -t use tblastx results */
+      m["Sensor.Homology.use"] = "1";
       if (optarg) {
 	m["Homology.protmatname"] = optarg;
       }
       break;
 
-    case 'Z':           // parameters optimization
-      m["ParaOptimization.Use"] = "TRUE";
+    case 'Z':           /* parameters optimization */
+      m["ParaOptimization.Use"] = "1";
       if (optarg) m["ParaOptimization.TrueCoordFile"] = optarg;
       break;
 
-    case '?':           /* bad option                       */
+    case '?':           /* bad option */
       errflag++;
     }
   }
@@ -269,32 +300,36 @@ void Parameters :: ReadArg(int argc, char * argv[])
     errflag++;
   
   // check usage
-  if (errflag) {
-    fprintf(stderr, "\nUsage: EuGene [-b [levels] ] [-B] [-c olap] [-d] [-D<parameter>=<value>] [-E] [-f]\n"
-	            "              [-g [graph_name]] [G  [-h] [-l len] [-m matrix] [-M matrix] [-n 0|1|2]]\n"
-                    "              [-o offset] [-O] [-p a|d|g|h|H|l|s] [-r] [-R] [-s] [-t] [-u start]\n"
-                    "              [-v end] [-w window] [-x xres] [-y yres] [-Z coord] FASTA files\n");
-    exit(1);
-  }
-
+  if (errflag) { ShowUsage();  exit(1); }
+  
   // Set number of sequences given in arguments in the map
   setD("NbSequence", argc - optind); 
 }
 
 // ------------------------
+// Show usage
+// ------------------------
+void Parameters :: ShowUsage (void)
+{
+  fprintf(stderr, "\nUsage: EuGene [-A] [-b levels] [-B] [-c olap]  [-d]  [-D<parameter>=<value>] [-E] [-f]\n"
+	  "              [-g graph_name]  [-G]  [-h] [-l len] [-m matrix] [-M matrix] [-n 0|1|2]]\n"
+	  "              [-o offset]  [-O]  [-p a|d|g|h|H|l|s]  [-r]  [-R]  [-s]  [-t] [-u start]\n"
+	  "              [-v end]  [-w window]  [-x xres]  [-y yres]  [-Z coord]      FASTA files\n");
+  fprintf(stderr, "---------------------------------------------------------------------\n");
+  exit(1);
+}
+
+// ------------------------
 //  Read parameters file.
 // ------------------------ 
-void Parameters :: ReadPar(char *argv)
+void Parameters :: ReadPar(char *argv, std::string  para_file_name)
 {
   char line    [MAX_LINE];
-  char tempname[FILENAME_MAX+1];
   char *key, *val = NULL;
   int  n=0;
 
-  strcpy(tempname, argv);
-  strcat(tempname, ".par");
-  fp = FileOpen(EugDir, BaseName(tempname),"r");
-
+  fp = FileOpen(NULL,para_file_name.c_str(),"r");
+  
   while(fgets (line, MAX_LINE, fp) != NULL) {
     n++;
     if (line[0] != '#') {
@@ -306,7 +341,7 @@ void Parameters :: ReadPar(char *argv)
 	  char *to = rindex(from,'"');
 	  if (from == to) {
 	    fprintf(stderr, "\nIncorrect parameter file %s line %d\n",
-		    BaseName(tempname),n);
+		    para_file_name.c_str(),n);
 	    exit(2);
 	  }
 	  *to = 0;
@@ -315,10 +350,8 @@ void Parameters :: ReadPar(char *argv)
 	m[key] = val;
       }
       else {
-	if (EugDir != NULL)
-	  fprintf(stderr, "\nIncorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
-	else
-	  fprintf(stderr, "\nIncorrect parameter file %s line %d\n",BaseName(tempname),n);
+	fprintf(stderr, "\nIncorrect parameter file %s line %d\n",
+		para_file_name.c_str(),n);
 	exit(2);
       }
     }
@@ -328,7 +361,7 @@ void Parameters :: ReadPar(char *argv)
 
   if(strcmp(getC("EuGene.version"), VERSION)) {
     fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.version"));
-    fprintf(stderr,"Version %s required\n", VERSION    );
+    fprintf(stderr,"Version %s required\n", VERSION);
     exit(2);
   }
 }
@@ -366,7 +399,7 @@ bool Parameters::probeKey(char *key, int index){
 // ------------------------
 //  getChar param.
 // ------------------------
-char* Parameters :: getC(char *key, int index)
+char* Parameters :: getC(char *key, int index, int sloppy)
 {
   if (!index && m.count(key))
     return (char*)m[key];
@@ -384,17 +417,20 @@ char* Parameters :: getC(char *key, int index)
     return key;
   }
   else {
-    fprintf(stderr,"\nError: Undefined key %s\n",altkey);
-    exit(2);
+    if (sloppy) { return 0; }
+    else {
+      fprintf(stderr,"\nError: Undefined key %s\n",altkey);
+      exit(2);
+    }
   }
 }
 
 // ------------------------
 //  getDouble param.
 // ------------------------
-double Parameters :: getD(char *key, int index)
+double Parameters :: getD(char *key, int index, int sloppy)
 {
-  char *res = getC(key,index);
+  char *res = getC(key,index,sloppy);
 
   if (res) {
     if(!strcmp(res, "NINFINITY"))
@@ -408,19 +444,19 @@ double Parameters :: getD(char *key, int index)
 // ------------------------
 //  getInt param.
 // ------------------------
-int Parameters :: getI(char *key,int index)
+int Parameters :: getI(char *key, int index, int sloppy)
 {
-  char *res = getC(key,index);
-
+  char *res = getC(key,index,sloppy);
+  
   if(res) {
     if(!strcmp(res, "TRUE"))
-      return TRUE;
+      return 1;
     else if(!strcmp(res, "FALSE"))
-      return FALSE;
+      return 0;
     else
       return atoi(res);
   }
-  return 0; 
+  return 0;
 }
   
 // ------------------------
@@ -443,17 +479,17 @@ int Parameters :: getUseSensor(char **key, int *val)
 	++iter;
       else {
 	strcpy(s,iter->first); strcat(s,".use"); 
-	if (m[s] && strcmp(m[s],"FALSE")) {
+	if (getI(s,0,getI("EuGene.sloppy"))) {
 	  *key = (char*)iter->first;
 	  *val = atoi(iter->second);
 	  ++iter;
-	  return TRUE;
+	  return 1;
 	}
 	++iter;
       }
     }
   }
-  return FALSE;
+  return 0;
 }
 
 // ------------------------
@@ -487,14 +523,14 @@ Parameters :: ~Parameters ()
 }
 
 // ----------------------------------------------------------
-// WriteParam: write a new parameter file, named <para_file>.<date>.OPTI.par,
+// WriteParam: write a new parameter file, named <parameters_file>.<date>.OPTI,
 //             modifying the value of parameters in para_name
 //             with the new value in para_val
 // BEWARE: the comments after a parameter value change are not kept
 //         in case of no comment the result of strchr(line,'#') was: (null).
 // Evaluation: the name of the written parameter file 
 // -----------------------------------------------------------
-std::string Parameters::WriteParam (const char* para_file, std::vector<std::string> para_name, 
+std::string Parameters::WriteParam (std::vector<std::string> para_name, 
 				    std::vector<double> para_val)
 {
   FILE   *fp, *fp_opti;
@@ -505,17 +541,14 @@ std::string Parameters::WriteParam (const char* para_file, std::vector<std::stri
   bool find_para;
   char *d = new char[MAX_LINE];
 
-  strcpy(filename, para_file);
-  strcat(filename, ".par");
-  fp = FileOpen(EugDir, BaseName(filename),"r");
+  strcpy(filename, getC("parameters_file"));
+  fp = FileOpen(NULL,filename,"r");
 
-  strcpy(filename, para_file);
   strcat(filename, ".");
   GetStrDate(d);
   strcat(filename, d);
   strcat(filename, ".OPTI");
-  strcat(filename, ".par");
-  fp_opti = FileOpen(EugDir, BaseName(filename),"w");
+  fp_opti = FileOpen(NULL,filename,"w");
   
   while(fgets (line, MAX_LINE, fp) != NULL) {
     find_para = false;
