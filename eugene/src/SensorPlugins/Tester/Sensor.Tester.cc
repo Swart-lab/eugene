@@ -550,7 +550,7 @@ void SensorTester :: AnalyzeSPSN(void)
     std::cout <<Thresholds[n]<<"\t"<<nb<<"\t"
 	      <<tp<<"\t"<<fp<<"\t"<<tn<<"\t"<<fn<<"\t"
 	      <<sp<<"\t"<<sn<<"\n";
-    if ((TP[n][0]+FP[n][0] > MinNumbers) && (TP[n][0]+FN[n][0] > MinNumbers))  
+    if ((tp+fp > MinNumbers) && (tp+fn > MinNumbers))  
       f <<sp<<"\t"<<sn<<"\n";
   }
 
