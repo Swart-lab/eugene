@@ -19,6 +19,7 @@ class SensorUser : public Sensor
   virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void GiveInfoAt (DNASeq *, int, DATA *);
+  virtual void Plot(DNASeq *);
 };
 
 extern "C" SensorUser * builder0( int n ) {  return new SensorUser(n);}

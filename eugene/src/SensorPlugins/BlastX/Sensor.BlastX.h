@@ -29,6 +29,7 @@ class SensorBlastX : public Sensor
   virtual void ResetIter  ();
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void GiveInfoAt (DNASeq *, int, DATA *);
+  virtual void Plot(DNASeq *);
 };
 
 extern "C" SensorBlastX * builder0( int n ) {  return new SensorBlastX(n);}
