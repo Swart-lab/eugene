@@ -90,7 +90,6 @@ void SensorRiken :: Init (DNASeq *X)
       tmp.sens = 0;
       fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s has no significative orientation\n",
 	      name);
-      continue;
     }
 
     if (abs(tmp.deb-tmp.fin) > MAX_RIKEN_LENGTH) {
