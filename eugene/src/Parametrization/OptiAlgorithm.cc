@@ -56,8 +56,11 @@ OptiAlgorithm::OptiAlgorithm(void)
     ParaClusters[c].push_back( i );
   }
   for (int i=0; i<n; i++) 
-    if ( ParaName[i][ParaName[i].size()-1] != '*' ) {
-      std::cerr <<"ERROR: Parameters to optimize must have a name finishing by '*'."<<std::endl;
+    // Name of parameters to optimize must be <name>* or <name>*[<nn>], 
+    if (!( (ParaName[i][ParaName[i].size()-1] == '*') ||
+	 (ParaName[i][ParaName[i].size()-1] == ']' &&  
+	  (ParaName[i][ParaName[i].size()-4] == '*' || ParaName[i][ParaName[i].size()-5] == '*')) )) {
+      std::cerr <<"ERROR "<<ParaName[i]<<": Parameters to optimize must have a name finishing by '*' and a number of instance < 100."<<std::endl;
       exit(100);
     }
 
