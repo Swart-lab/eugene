@@ -52,8 +52,8 @@ void SensorRepeat :: Init (DNASeq *X)
   while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
     deb = Max(1,deb)-1;
     fin = Min(X->SeqLen,fin)-1;
-      vDeb.push_back( deb );
-      vFin.push_back( fin );
+    vDeb.push_back( deb );
+    vFin.push_back( fin );
   }
 
   fprintf(stderr,"done\n");
@@ -65,41 +65,36 @@ void SensorRepeat :: Init (DNASeq *X)
 // --------------------------
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  // if((index!=0               && vDeb[index-1]>pos) ||
-//      (index<(int)vFin.size() && vDeb[index+1]<pos))
-//     {
-//       iter = lower_bound(v.begin(), vPosF.end(), pos);
-//       if(*iter == pos)
-// 	d->Stop[0] += vValF[iter-vPosF.begin()];
-//       indexF = 0;
-//     }
-//   else
-//     { 
-//       // si le bloc courant est depasse, il faut avancer !
-//       if (index < (int)vDeb.size()  && vFin[index] < pos) index++;
-      
-//       // est on dedans ?
-//       if (index < (int)vDeb.size()  &&  vDeb[index] <= pos && vFin[index] >= pos) {
-// 	// penaliser !
-// 	for(int i=0; i<6; i++)   // Exon(6)
-// 	  d->ContentScore[i] += exonPenalty;
-// 	for(int i=7; i<8; i++)   // Intron (2)
-// 	  d->ContentScore[i] += intronPenalty; 
-// 	for(int i=9; i<13; i++)  // UTR (4)
-// 	  d->ContentScore[i] += UTRPenalty; 
-//       }
-//     }
+  // si le bloc courant est depasse, il faut avancer !
+  if (index < (int)vDeb.size()  &&  vFin[index] < pos) index++;
 
-  ///////GiveInfoA t
- //  iter = lower_bound(vFin.begin(), vFin.end(), pos);
-//   if (vDeb[iter-vFin.begin()] <= pos) {
-//     for(int i=0; i<6; i++)   // Exon(6)
-//       d->ContentScore[i] += exonPenalty;
-//     for(int i=7; i<8; i++)   // Intron (2)
-//       d->ContentScore[i] += intronPenalty; 
-//     for(int i=9; i<13; i++)  // UTR (4)
-//       d->ContentScore[i] += UTRPenalty; 
-//   }
+  // index cohérent ?
+  if ((index == 0 && pos > vFin[index]) ||
+      (index != 0 && (pos <= vFin[index-1] || pos > vFin[index]))) {
+    iter = lower_bound(vFin.begin(), vFin.end(), pos);
+    if (vDeb[iter-vFin.begin()] <= pos) {
+      for(int i=0; i<6; i++)   // Exon(6)
+ 	d->contents[i] -= exonPenalty;
+      for(int i=6; i<8; i++)   // Intron (2)
+	d->contents[i] -= intronPenalty; 
+      for(int i=9; i<13; i++)  // UTR (4)
+	d->contents[i] -= UTRPenalty; 
+    }
+    index = iter-vFin.begin();
+  }
+  else {
+    // est on dedans ?
+    if (index < (int)vDeb.size()  &&
+	vDeb[index] <= pos  &&  vFin[index] >= pos) {
+      // penaliser !
+      for(int i=0; i<6; i++)   // Exon(6)
+	d->contents[i] -= exonPenalty;
+      for(int i=6; i<8; i++)   // Intron (2)
+	d->contents[i] -= intronPenalty; 
+      for(int i=9; i<13; i++)  // UTR (4)
+ 	d->contents[i] -= UTRPenalty; 
+    }
+  }
 }
 
 // ----------------------------
