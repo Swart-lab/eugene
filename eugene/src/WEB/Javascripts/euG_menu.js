@@ -91,8 +91,9 @@ oCMenu.makeMenu('sub13','top1','Others','plug_others.html')
   
 oCMenu.makeMenu('top2','','<img src="WEB/Images/m_orga.jpg">','orga_all.html')
 oCMenu.makeMenu('sub20','top2','All organisms','orga_all.html')
-oCMenu.makeMenu('sub21','top2','Arabidopsis Thaliana','orga_ara.html')
-oCMenu.makeMenu('sub22','top2','Oryza Sativa','orga_ory.html')
+oCMenu.makeMenu('sub21','top2','Arabidopsis thaliana','orga_ara.html')
+oCMenu.makeMenu('sub22','top2','Oryza sativa','orga_ory.html')
+oCMenu.makeMenu('sub23','top2','Medicago truncatula','orga_medi.html')
     
 oCMenu.makeMenu('top3','','<img src="WEB/Images/m_doc.jpg">','doc.html')
 oCMenu.makeMenu('sub30','top3','EuGène documentation','doc.html#top')
