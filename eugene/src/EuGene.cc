@@ -37,7 +37,7 @@
 // epissage si un meilleur START l'occulte mais qu'il est trop pres
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
-
+ 
 #define PAYTOIGNORE 1
 
 #ifdef HAVE_CONFIG_H
