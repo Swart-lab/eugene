@@ -71,6 +71,6 @@ class  DNASeq
   char operator [] (int i);
   char operator () (int i);
   unsigned short operator () (int i, int mode);
-
+  char AA(int i, int sens);
 };
 #endif

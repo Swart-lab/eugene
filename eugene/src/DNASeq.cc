@@ -234,6 +234,30 @@ void  DNASeq :: Print (FILE * fp)
   }
 }
 // ---------------------------------------------------------------------
+// Translate the codon at position i in the given sense and 
+// return the corresponding amino acid
+// ---------------------------------------------------------------------
+char DNASeq :: AA(int i, int sens)
+{
+  int codon,c1,c2,c3;
+  if (sens < 0) {
+    c3 = (*this)(i-1,1);
+    c2 = (*this)(i-2,1);
+    c1 = (*this)(i-3,1);
+  }
+  else{
+    c1 = (*this)(i+2,0);
+    c2 = (*this)(i+1,0);
+    c3 = (*this)(i,0);
+  }
+  if (Code2NumOne[c1]*Code2NumOne[c2]*Code2NumOne[c3] != 1) 
+    return('X');
+  else {
+    codon = Code2Bit[c1]+Code2Bit[c2]*4+Code2Bit[c3]*16; 
+    return(Trad[codon]);
+  }
+}
+// ---------------------------------------------------------------------
 // Print a subseq of the DNASeq translated.  Ambiguous codons are
 // translated to X. The from-to is not necessarily the start/end of a
 // codon (partial gene) and the frame of the gene is given.
