@@ -120,14 +120,14 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
 	{
 	  printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
 	  printf("<center><listing>\n");
-	  printf("\n      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+	  printf("\n    Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
 	}
 
       // Starting condition: 0  = started,  -1 = nothing started yet
       for (j = 0; j<18; j++)
 	Starts[j] = ((Choice[0] == j) ? 0 : -1);
       
-      fprintf(stderr,"\nSeq     Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+      fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
       
       if (PAR.printopt == 'g' && sequence == optind)
 	printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
@@ -135,14 +135,14 @@ void Output (DNASeq *X, char *Choice, int sequence, int argc, char * argv[])
       //  pos = strstr(argv[sequence],"/seq");
       pos = BaseName(argv[sequence]);
       if (pos  == NULL)
-	strcpy(seqn,"          ");
+	strcpy(seqn,"     ");
       else {
 	*rindex(pos,'.') = 0; // on enleve l'extension (.fasta)
-	strncpy(seqn,pos,7);
-	if(strlen(seqn) < 7 && PAR.printopt != 'g')
-	  for(i=strlen(seqn); i<7; i++)
+	strncpy(seqn,pos,5);
+	if(strlen(seqn) < 5 && PAR.printopt != 'g')
+	  for(i=strlen(seqn); i<5; i++)
 	    strcat(seqn, " ");
-	seqn[7] = '\0';
+	seqn[5] = '\0';
       }
       
       // Kludge = a non existing choice to force exon termination
