@@ -34,7 +34,6 @@ class SensorTester : public Sensor
   int  nbTest;
   char **source;
   char seqName[FILENAME_MAX+1];
-  SensorLoader **sensorL;
   Sensor       **sensor;
   FILE         **fp;
   Prediction   * gene;

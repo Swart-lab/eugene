@@ -1,7 +1,9 @@
 #include "Sensor.IfElse.h"
 #include "../../EuGene/Dll.h"
+#include "../../EuGene/MSensor.h"
 
 extern Parameters PAR;
+extern MasterSensor* MS;
 
 /*************************************************************
  **                      SensorIfElse                       **
@@ -11,42 +13,25 @@ extern Parameters PAR;
 // ----------------------
 SensorIfElse :: SensorIfElse (int n, DNASeq *X) : Sensor(n)
 {
-  char * sensorName = new char[FILENAME_MAX+1];
-  char * pluginsDir;
+  UseSensor *sensor_if, *sensor_else;
+  int dll_index_if, dll_index_else;
+  char *c = new char [FILENAME_MAX+1];
 
   type = Type_Multiple;
 
-  pluginsDir = PAR.getC("EuGene.PluginsDir");
+  // read sensors to use
+  strcpy(c,"Sensor."); strcat(c, PAR.getC("IfElse.SensorIf",n));
+  sensor_if = new UseSensor(0, c);
+  strcpy(c,"Sensor."); strcat(c, PAR.getC("IfElse.SensorElse",n));
+  sensor_else = new UseSensor(0, c);
 
-  strcpy(sensorName, pluginsDir);
-  strcat(sensorName, "Sensor.");
-  strcat(sensorName, PAR.getC("IfElse.SensorIf",n));
-  strcat(sensorName, ".so");
-  sensorLIf =  new SensorLoader (sensorName);
-  if (!sensorLIf->LastError()) {
-    fprintf(stderr," -If  : Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf",n),n+1);
-    sensorIf = sensorLIf->MakeSensor(n+1, X);
-  }
-  else {
-    fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
-	    PAR.getC("IfElse.SensorIf"));
-    exit(2);
-  }
-  
-  strcpy(sensorName, pluginsDir);
-  strcat(sensorName, "Sensor.");
-  strcat(sensorName, PAR.getC("IfElse.SensorElse",n) );
-  strcat(sensorName, ".so");
-  sensorLElse = new SensorLoader (sensorName);
-  if (!sensorLElse->LastError()) {
-    fprintf(stderr," -Else: Sensor.%s\t%d\n",PAR.getC("IfElse.SensorElse",n),n+1);
-    sensorElse = sensorLElse->MakeSensor(n+1, X);
-  }
-  else { 
-    fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
-	    PAR.getC("IfElse.SensorElse"));
-    exit(2);
-  }
+  // load ".so" of sensors if necessary
+  dll_index_if   = MS->LoadSensor(sensor_if, n);
+  dll_index_else = MS->LoadSensor(sensor_else, n);
+
+  // create instance of sensors
+  sensorIf   = MS->dllList[dll_index_if]->MakeSensor(n+1, X);
+  sensorElse = MS->dllList[dll_index_else]->MakeSensor(n+1, X);
 }
 
 // ----------------------

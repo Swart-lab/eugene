@@ -1,5 +1,6 @@
 #ifndef  MSENSOR_H_INCLUDED
 #define  MSENSOR_H_INCLUDED
+
 #include <cstdio>
 #include <vector>
 #include <algorithm>
@@ -41,13 +42,15 @@ class UseSensor
 class MasterSensor
 {
  private:
-  std::vector <UseSensor*> msList;
   std::vector <Sensor*>    theSensors;
-  char **soList;
-  char **useList;
-  SensorLoader **dllList;
   
  public:
+  static bool IsInitialized;
+  static std::vector <UseSensor*> LoadedSensorsList;
+  static std::vector <std::string> soList;
+  static std::vector <std::string> useList;
+  static std::vector <SensorLoader*> dllList;
+
   ~MasterSensor (void);
   void InitMaster   (DNASeq *X);
   void InitSensors  (DNASeq *X);
@@ -55,6 +58,9 @@ class MasterSensor
   void PrintDataAt  (DNASeq *X, int pos, DATA *d);
   int  GetInfoSpAt  (TYPE_SENSOR type, DNASeq *X, int pos, DATA *d);
   void PostAnalyse  (Prediction *pred);
+  int LoadSensor (UseSensor* s, int j);
 };
+
+
 
 #endif

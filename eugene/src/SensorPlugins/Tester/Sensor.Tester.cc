@@ -12,7 +12,11 @@
 
 #include "Sensor.Tester.h"
 
+#include "../../EuGene/MSensor.h"
+
 extern Parameters PAR;
+extern MasterSensor* MS;
+
 
 /*************************************************************
  **                      SensorTester                       **
@@ -22,6 +26,9 @@ extern Parameters PAR;
 // ----------------------
 SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 {
+  int dll_index;
+  UseSensor* used_sensor;
+
   type = Type_Unknown;
   
   char * sensorName = new char[FILENAME_MAX+1];
@@ -40,7 +47,6 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     sprintf(paramKey,"%s%d",paramT,nbTest);
   }
 
-  sensorL = new (SensorLoader *)[nbTest];
   sensor  = new (Sensor *)[nbTest];
   fp      = new (FILE *)[nbTest];
   source  = new (char *)[nbTest];
@@ -48,22 +54,18 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
   for(int i=0; i<nbTest; i++) {
     sprintf(paramKey,"%s%d",paramT,i);
     source[i] = PAR.getC(paramKey);
-    sprintf(sensorName,"%sSensor.%s.so",pluginsDir,source[i]);
+    sprintf(sensorName,"Sensor.%s",source[i]);
 
-    sensorL[i] =  new SensorLoader (sensorName);
+    used_sensor = new UseSensor(0, sensorName);
 
     // On récupère le numéro d'instance
     sprintf(paramKey,"%s%d",paramI,i);
     int nbIdx = PAR.getI(paramKey);
-    if (!sensorL[i]->LastError()) {
+
+    // load ".so" of sensor if necessary
+    dll_index   = MS->LoadSensor(used_sensor, nbIdx);
     fprintf(stderr," -Test.%d : Sensor.%.5s\t%d\n",i,source[i],nbIdx);
-    sensor[i] = sensorL[i]->MakeSensor(nbIdx, X);
-    }
-    else {
-      fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
-	      source[i]);
-      exit(2);
-    }
+    sensor[i] = MS->dllList[dll_index]->MakeSensor(nbIdx, X);
     
     char * outputFile = new char[FILENAME_MAX+1];
     sprintf(outputFile,"%stest.%s.gff",PAR.getC("Output.Prefix"),source[i]);
@@ -111,10 +113,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 // --------------------
 SensorTester :: ~SensorTester ()
 {
-  for(int i=0; i<nbTest; i++) {
-    delete sensorL[i];
+  for(int i=0; i<nbTest; i++)
     fclose(fp[i]);
-  }
 }
 
 // -------------------
