@@ -10,8 +10,10 @@
 //=======================================================================
 
 #include <iostream>
+
 #include "Genetic.h"
 
+#include "../../EuGene/config.h"
 #include "../../EuGene/Param.h"
 #include "../ParaOptimization.h"
 #include "../Random.h"

@@ -77,7 +77,7 @@ void Selecting::Selection(void)
       a=algo->Rand->RandUniform();
       n=algo->NbElement/2;
       p=(n+1)/2;
-      while(TRUE) {
+      while(true) {
 	if (a<tab[n]) {
 	  if ((n==0) || (a> tab[n-1])) break;
 	  n=n-p;

@@ -10,6 +10,8 @@
 //=======================================================================
 
 #include <iostream>
+#include <math.h>
+
 #include "Scaling.h"
 
 #include "../ParaOptimization.h"
