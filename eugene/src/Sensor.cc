@@ -52,6 +52,20 @@ void Sensor :: CheckStart(DNASeq *X, std::vector<int> vPosF, std::vector<int> vP
       fprintf(stderr,"WARNING: Non ATG start predicted at %d on - strand!\n", vPosR[i]+1);
 }
 
+// ---------------------------------------
+//  Sanity check : stop site check.
+// ---------------------------------------
+void Sensor :: CheckStop(DNASeq *X, std::vector<int> vPosF, std::vector<int> vPosR)
+{
+  for (int i = 0; i<(int)vPosF.size(); i++)
+    if (!X->IsStop(vPosF[i]-3,1))
+      fprintf(stderr,"WARNING: Non T{AA,AG,GA} stop predicted at %d on + strand!\n", vPosF[i]+1);
+  
+  for (int i = 0; i<(int)vPosR.size(); i++)
+    if (!X->IsStop(vPosR[i]+2,-1))
+      fprintf(stderr,"WARNING: Non T{AA,AG,GA} stop predicted at %d on - strand!\n", vPosR[i]+1);
+}
+
 // -----------------------------------------------
 //  Sanity check; AG/GT or GC  splice site check.
 // -----------------------------------------------

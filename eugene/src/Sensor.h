@@ -46,6 +46,7 @@ class Sensor
 
  protected:
   void CheckStart   (DNASeq *,std::vector<int> a, std::vector<int> b);
+  void CheckStop    (DNASeq *,std::vector<int> a, std::vector<int> b);
   void CheckSplices (DNASeq *,std::vector<int> a, std::vector<int> b, std::vector<int> c, std::vector<int> d);
   int  GetNumber    (void) { return instanceNumber; }
 
