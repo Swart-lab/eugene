@@ -95,11 +95,11 @@ set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
 ##### States penalties #####
-set NewValue1(EuGene.transCodant)	1.0
-set NewValue1(EuGene.transIntron)	1.0
-set NewValue1(EuGene.transUTR5)	0.999
-set NewValue1(EuGene.transUTR3)	0.999
-set NewValue1(EuGene.transInter)	1.0
+set NewValue1(MarkovConst.Codant)	1.0
+set NewValue1(MarkovConst.Intron)	1.0
+set NewValue1(MarkovConst.UTR5)	0.999
+set NewValue1(MarkovConst.UTR3)	0.999
+set NewValue1(MarkovConst.Inter)	1.0
 ##### Output control ######
 set NewValue1(Output.graph)		FALSE	
 set NewValue1(Output.resx)		900
@@ -119,8 +119,8 @@ set NewValue1(Transcript.Stop)		4.155
 ##### EuStop parameters #####
 set NewValue1(EuStop.stopP)            4.155
 ##### FrameShift parameters #####
-set NewValue1(FrameShift.Ins)	999.0
-set NewValue1(FrameShift.Del)	999.0
+set NewValue1(FrameShift.Ins)	1e999.0
+set NewValue1(FrameShift.Del)	1e999.0
 ##### NetStart parameters #####
 set NewValue1(NStart.startP)	0.052
 set NewValue1(NStart.startB)	0.308
@@ -190,7 +190,6 @@ set NewValue1(SpliceConst.donP$space)    1e-9
 set NewValue1(SpliceConst.donPNo)       0
 set NewValue1(StartConst.startP$space)	2.897949
 set NewValue1(StartConst.startPNo)	0
-set NewValue1(MarkovConst.val)		0.25
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
 #
