@@ -13,8 +13,8 @@ Loading Sensor.StartWAM.......done.
 Reading WAM models...  0 1 2 3 4 5 6 7 8 ... done.
 Loading Sensor.Transcript.....done.
 Loading Sensor.User...........done.
-Loading Sensor.GFF............done.
 Reading user data............done.
+Loading Sensor.GFF............done.
 Reading GFF file.............done.
 Optimal path length = 1875.4074.
 .

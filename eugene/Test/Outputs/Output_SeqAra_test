@@ -13,8 +13,8 @@ Reading IMM... 1 2 3 4 5 6 7 ...done.
 Loading Sensor.NStart.........done.
 Reading start file \(NetStart\).................forward, reverse done.
 Loading Sensor.BlastX.........done.
+Reading BlastX data, level...0 done.
 Loading Sensor.Est............done.
-Reading Blastx data, level...0 done.
 Reading cDNA hits............13 sequences read.
    \[AV547209\]: no matching splice site.
 A total of 1/13 sequences rejected.
@@ -39,7 +39,7 @@ SEQ25.1.8	Intr    \+      10896   11134      239     \+2      \+2   10895   1113
 SEQ25.1.9	Intr    \+      11544   12005      462     \+1      \+3   11543   12006    42.0  .
 SEQ25.1.10	Term    \+      12088   12900      813     \+1      \+1   12087   12901    20.0  .
 SEQ25.1.0	Utr3    \+      12901   14800     1900     NA      NA      NA      NA    11.0  .
-      CDS \(prot.\)     4153   12900     8748     supported on 1559/2010 coding..
+      CDS \(prot.\)     4153   12900     8748     supported on 1557/2010 coding..
 cDNA  AV520544        1053    1774      593      1 introns    Support.
 cDNA  W43583          1363    1814      450      0 introns    Support.
 cDNA  AV541414        1409    1807      399      0 introns    Support.
@@ -53,7 +53,7 @@ cDNA  AI996648       12739   13099      362      0 introns    Support.
 cDNA  AA713204       12760   13114      359      0 introns    Support.
 cDNA  AV547209       14087   14781      505      2 introns    Filtered .
       CDS             4153   12900     8748     supported on 162 bases.
-      Gene            4094   14800    10707     supported on 376 bases.
+      Gene            4094   14900    10807     supported on 376 bases.
 .
 Dumping images \("./seq25ab005234g10g11.test.---.png"\)...done.
 ---------------------------------------------------------------------.
