@@ -37,6 +37,7 @@ class ParaOptimization {
   std::vector <DNASeq*>        Sequences;
   std::vector<std::string>     SeqNames;
   std::string                  TrueCoordFile;
+  std::string                  EvalPredDir;
   std::string                  ExecutableName; // first part of parameter file
   bool                         IsTest;         // if true then test mode: 
                                       // do not read sequences and related info
