@@ -24,12 +24,6 @@ SUBDIRS = Parametrization GDIF . SensorPlugins
 
 CXXFLAGS = $(eugene_CXXFLAGS)
 
-LIBS = `if [ "$$MACHTYPE" = "sparc" ] ; then \
-	echo "../lib/gd-2.0.22/libgd.a ../lib/libpng-1.2.5/libpng.a ../lib/zlib-1.2.1/libz.a"; \
-else \
-	echo "-lgd -lpng -lz"; \
-fi`
-
 bin_PROGRAMS = eugene
 eugene_SOURCES = EuGene.cc Output.cc Output.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h
 eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl -lnsl
