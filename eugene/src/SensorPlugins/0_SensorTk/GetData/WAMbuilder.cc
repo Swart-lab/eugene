@@ -46,7 +46,7 @@ This program build a Weight Array Model (WAM) for a WAM EuGene sensor.
 The goal is to model a signal in a genomic sequence (e.g. splice sites).
 Build the model from a file containing short signal sequences (multi-fasta format).
 Stock results in L (L=WAM length) binary files : one per position in the signal.
-\nusage (5 arguments) : %s WAMorder  WAMlength  ConsensusStart  signalinputfile  outname\nexemple: %s 1 9 2 ARA.DON.12.fasta WAM.ARA.DON.L9.TP.\n",argv[0],argv[0]);
+\nusage (5 arguments) : %s WAMorder  WAMlength  ConsensusStartPosition  signalinputfile  outname\nexemple: %s 1 9 2 ARA.DON.12.fasta WAM.ARA.DON.L9.TP.\n",argv[0],argv[0]);
     exit(1);
   }
   int WAMorder= atoi(argv[1]);
@@ -75,22 +75,22 @@ Stock results in L (L=WAM length) binary files : one per position in the signal.
       exit(1);
     }
     fprintf(stderr,"%d...",i);
-    WAMCOUNT[i].fichier2compte(file,consbeg+i-1,consbeg+i);
+    WAMCOUNT[i].fichier2compte(file,consbeg+i-1,consbeg+i-1);
     fclose(file);
   }
   fprintf(stderr,"done\n");
 
-//  for (i=0;i<WAMlength;i++){
-//    printf("position %d:\n",i);
-//    WAMCOUNT[i].affichage(0);
-//  }
+//   for (i=0;i<WAMlength;i++){
+//     printf("position %d:\n",i);
+//     WAMCOUNT[i].affichage(0);
+//   }
 
   //----------------------------------------------------------------//
   // ADD pseudocount to each word occurence (to avoid null probs)
-  fprintf(stderr," - adding pseudocounts...");
-  for (i=0;i<WAMlength;i++){
-    WAMCOUNT[i].pseudocount();
-  }
+   fprintf(stderr," - adding pseudocounts...");
+   for (i=0;i<WAMlength;i++){
+     WAMCOUNT[i].pseudocount();
+   }
   fprintf(stderr,"done\n");
   //  WAMCOUNT.affichage(0);
 
@@ -130,13 +130,13 @@ Stock results in L (L=WAM length) binary files : one per position in the signal.
 
   //----------------------------------------------------------------//
   // PRINT data (stdout)
-  printf("----- WAM COUNT -----\n");
+  printf("----- WAM COUNTS -----\n");
   for (i=0;i<WAMlength;i++) {
     printf("WAMCOUNT[%d]:\n",i);
     WAMCOUNT[i].affichagevaleurs();
   }
 
-/*
+
   //----------------------------------------------------------------//
   // LOAD data from a matrix file
   //  WAMMOD.initialisation();
@@ -146,7 +146,7 @@ Stock results in L (L=WAM length) binary files : one per position in the signal.
   //fclose (file);
   //WAMMOD.affichage(0);
   // g++ WAMbuilder.cc -o WAMbuild
-*/  
+
 for (i=0;i<WAMlength;i++){
   WAMCOUNT[i].~TabChaine();
   WAMMOD[i].~TabChaine();
