@@ -306,7 +306,7 @@ int main  (int argc, char * argv [])
     
     // Les PrevBP sont des pointeurs sur les "opening edges"
     // Les PBest correspondent au cout du chemin correspondant
-    double  maxi, PBest[26];
+    REAL  maxi, PBest[26];
     BackPoint *PrevBP[26];
     int source = 0;
     
