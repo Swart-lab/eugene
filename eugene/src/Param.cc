@@ -338,7 +338,7 @@ char* Parameters :: getC(char *key, int index)
 
   if (m.count(altkey)) {
     key = (char*)m[altkey];
-    delete altkey;
+    delete [] altkey;
     return key;
   }
   else {
