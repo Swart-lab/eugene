@@ -222,9 +222,9 @@ int main  (int argc, char * argv []) {
   return  0;
 }
 
-//  Set  Stop [0 .. 6]  TRUE  or  FALSE   according to whether
+//  Set  Stop [0 .. 6]  1  or  0   according to whether
 //  X [1 .. T] has a stop codon in the corresponding reading frame.
-//  Stop [6]  is always set  FALSE .
+//  Stop [6]  is always set  0 .
 void  Find_Stop_Codons  (char X [], int T, int Stop [])  {
   static int  Next [10] [4] =
     {{ 0,  2,  0,  1},     //  0  a, g
@@ -262,9 +262,9 @@ void  Find_Stop_Codons  (char X [], int T, int Stop [])  {
       State = 0;
     }
     if  (State == 7)
-      Stop [i % 3] = TRUE;
+      Stop [i % 3] = 1;
     else if  (State > 7)
-      Stop [3 + i % 3] = TRUE;
+      Stop [3 + i % 3] = 1;
   }
   
   return;
@@ -273,7 +273,7 @@ void  Find_Stop_Codons  (char X [], int T, int Stop [])  {
 /* Read next string from  fp  (assuming one string per line with each string
 *  preceded by a name tag) into  T [1 ..]
 *  which has  Size  characters.  Allocate extra memory if needed
-*  and adjust  Size  accordingly.  Return  TRUE  if successful,  FALSE
+*  and adjust  Size  accordingly.  Return  1  if successful,  0
 *  otherwise (e.g., EOF). */
 int  Read_String  (FILE * fp, char * & T, long int & Size, char Name []) {
   
@@ -281,12 +281,12 @@ int  Read_String  (FILE * fp, char * & T, long int & Size, char Name []) {
   int  Ch;
   
   if  (fscanf (fp, "%s", Name) == EOF)
-    return  FALSE;
+    return  0;
   
   while  ((Ch = fgetc (fp)) != EOF && (Ch == ' ' || Ch == '\t'))
     ;
   if  (Ch == EOF)
-    return  FALSE;
+    return  0;
 
   ungetc (Ch, fp);
   T [0] = '\0';
@@ -350,5 +350,5 @@ int  Read_String  (FILE * fp, char * & T, long int & Size, char Name []) {
   
   T [Len] = '\0';
   
-  return  TRUE;
+  return  1;
 }
