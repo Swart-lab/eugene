@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +34,6 @@ class UseSensor
 
   UseSensor  ();
   UseSensor  (int, char[FILENAME_MAX+1]);
-  ~UseSensor ();
 };
 
 /*************************************************************
@@ -42,15 +42,16 @@ class UseSensor
 class MasterSensor
 {
  private:
-  std::vector <Sensor*>    theSensors;
+  std::vector <Sensor*>    theSensors;          // list of created instances of sensors
+  static bool              IsInitialized;       // when true MSSensorsList is initialized
+  static std::string       PluginsDir;          // path of the plugins dir
+  static std::vector <std::string>   MSSensorsList;    // list of sensors defined at top level
+  static std::vector <std::string>   LoadedSensorsList;// list of all loaded sensors (included 
+                                                       // sensors loaded for IfElse, Tester)
+  static std::vector <SensorLoader*> dllList;   // list of dll (loaded .so)
+  int  LoadSensor   (std::string name);         // load the .so if it is not yet loaded
   
  public:
-  static bool IsInitialized;
-  static std::vector <UseSensor*> LoadedSensorsList;
-  static std::vector <std::string> soList;
-  static std::vector <std::string> useList;
-  static std::vector <SensorLoader*> dllList;
-
   ~MasterSensor (void);
   void InitMaster   (DNASeq *X);
   void InitSensors  (DNASeq *X);
@@ -58,7 +59,8 @@ class MasterSensor
   void PrintDataAt  (DNASeq *X, int pos, DATA *d);
   int  GetInfoSpAt  (TYPE_SENSOR type, DNASeq *X, int pos, DATA *d);
   void PostAnalyse  (Prediction *pred);
-  int  LoadSensor   (UseSensor* s, int j, char *stdErr);
+  Sensor* MakeSensor (std::string name, int n, DNASeq *X);  // create an instance of a sensor and 
+                                      // load before the corresponding .so if it is not yet loaded
 };
 
 

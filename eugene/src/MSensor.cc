@@ -2,11 +2,10 @@
 
 
 // reserve memory for static variables
-bool MasterSensor::IsInitialized = false;
-std::string PluginsDir;
-std::vector <UseSensor*> MasterSensor::LoadedSensorsList;
-std::vector <std::string> MasterSensor::soList;
-std::vector <std::string> MasterSensor::useList;
+bool                        MasterSensor::IsInitialized = false;
+std::string                 MasterSensor::PluginsDir;
+std::vector <std::string>   MasterSensor::LoadedSensorsList;
+std::vector <std::string>   MasterSensor::MSSensorsList;
 std::vector <SensorLoader*> MasterSensor::dllList;
 
 
@@ -36,10 +35,6 @@ UseSensor :: UseSensor (int priority, char name[FILENAME_MAX+1])
   strcpy(Name,name);
 }
 
-// -------------------------
-//  Default destructor.
-// -------------------------
-UseSensor :: ~UseSensor () {}
 
 
 
@@ -55,14 +50,14 @@ extern Parameters PAR;
 // ------------------------
 MasterSensor :: ~MasterSensor (void)
 {
-  ///////////////////  Need to comment ///////////////////////
-  // Create a segmentation fault when asking to delete a second sensor instance 
-  // of sensor with static attributs; for example MarkovIMM.
-  //  for(int i=0; i<(int)theSensors.size(); i++) delete theSensors[i];
-  //  theSensors.clear();
-  ////////////////////////////////////////////////////////////
-  //  for(int i=0; i<(int)msList.size(); i++) delete msList[i];
-  //  msList.clear();
+  // Need to be commented because a segmentation fault sometimes occured 
+  // for example in Units tests
+  // delete created instances with new
+  //unsigned int i;
+  //for(i=0; i<theSensors.size(); i++) delete theSensors[i];
+  //theSensors.clear();
+  //for(i=0; i<dllList.size(); i++) delete dllList[i];
+  //dllList.clear();
 }
 
 // ------------------------
@@ -72,75 +67,90 @@ void MasterSensor :: InitMaster (DNASeq *X)
 {
   char *key_name;
   int  val_prior;
-  int i, j;
+  int  j;
+  unsigned int i;
   char* c = new char[FILENAME_MAX+1];
-  vector <UseSensor*> msList;
+  std::vector <UseSensor*> msList;
+  std::string use_name;
 
   if (!IsInitialized) {
     PluginsDir = PAR.getC("EuGene.PluginsDir");
 
     // On récupère les couples nom de sensor/priorité du .par
     PAR.ResetIter();
-    while(PAR.getUseSensor(&key_name, &val_prior)) 
-      msList.push_back(new UseSensor(val_prior, key_name));
+    while( PAR.getUseSensor(&key_name, &val_prior) ) 
+      msList.push_back( new UseSensor(val_prior, key_name) );
 
     // On les tri
     sort(msList.begin(), msList.end(), Prior);
+    
+    // Update the list of sensors defined at the top level
+    for (i=0; i<msList.size(); i++)  MSSensorsList.push_back( (std::string) msList[i]->Name );
 
-    // Load used sensors
-    for(i=0; i<(int)msList.size(); i++) {
-      strcpy(c, msList[i]->Name); 
-      strcat(c, ".use");
-      for (j=0; j<PAR.getI(c); j++)
-	LoadSensor( msList[i], j, "" );
-    }
-
+    // delete instances of UseSensor
+    for (i=0; i<msList.size(); i++)  delete msList[i];
+    
     IsInitialized = true;
-  }
+  } 
 
   // create instance(s) of used sensors
-  for(i=0; i<(int)LoadedSensorsList.size(); i++) {
-    strcpy(c, useList[i].c_str()); // to avoid passing a const as argument to PAR.getI
+  for (i=0; i<MSSensorsList.size(); i++) {
+    use_name = MSSensorsList[i] + ".use";
+    strcpy(c, use_name.c_str()); // to avoid passing a const as argument to PAR.getI
     for (j=0; j<PAR.getI(c); j++) 
-      theSensors.push_back( dllList[i]->MakeSensor(j, X));
+      theSensors.push_back( MakeSensor( MSSensorsList[i].c_str(),j, X) );
   }
 }
+
+
+// ------------------------
+// Create an instance of a sensor and load the .so before if necessary
+// ------------------------
+Sensor* MasterSensor :: MakeSensor (std::string name, int n, DNASeq *X)
+{
+  Sensor* s = NULL;
+  int dll_index;
+
+  dll_index = LoadSensor (name);
+  s = dllList[dll_index]->MakeSensor( n, X);
+
+  return s;
+}
+
 
 // ------------------------
 // load the sensor s  if no yet done (j is just for print)
 // return index of sensor in dllList
 // ------------------------
-int MasterSensor :: LoadSensor (UseSensor* s, int j, char *stdErr)
+int MasterSensor :: LoadSensor (std::string name)
 {
   bool is_loaded = false;
   int dll_index = 0;
+  std::string complete_name;
 
   // is the sensor yet loaded
   for (unsigned int i=0; i< LoadedSensorsList.size(); i++)
-    if ( ((string) s->Name) == ((string) LoadedSensorsList[i]->Name) ) {
+    if ( name == LoadedSensorsList[i] ) {
       is_loaded = true;
       dll_index = i;
       i = LoadedSensorsList.size();
     }
 
   if (!is_loaded) {
-    fprintf(stderr, "%s", stdErr);
-    soList.push_back ( PluginsDir + s->Name + ".so" );
-    useList.push_back ( ((string) s->Name) + ".use" );
-    LoadedSensorsList.push_back( s );
-
-    dll_index = soList.size() - 1; 
-
-    dllList.push_back( new SensorLoader ( soList[dll_index].c_str() ) );
+    LoadedSensorsList.push_back( name );
+    dll_index = LoadedSensorsList.size() - 1; 
+    complete_name = PluginsDir + name + ".so";
+    dllList.push_back( new SensorLoader ( complete_name.c_str() ) );
     if(!dllList[dll_index]->LastError()) {
-      fprintf(stderr,"Loading %.21s", s->Name);
-      for(int k=strlen(s->Name); k < 22; k++) fprintf(stderr,".");
-      fprintf(stderr,"%d\n",j);
+      fprintf(stderr,"Loading %.21s", name.c_str());
+      for(int k=name.size(); k < 22; k++) fprintf(stderr,".");
+      fprintf(stderr,"done\n");
     } else {
-      fprintf(stderr,"Error: ignored plugin (invalid or not found) : %s\n",soList[dll_index].c_str());
+      fprintf(stderr,"Error: ignored plugin (invalid or not found) : %s\n",complete_name.c_str());
       exit(2);
     }
   }
+
   return dll_index;
 }
 
