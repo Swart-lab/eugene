@@ -1,5 +1,4 @@
 #include "MSensor.h"
-#include <strings.h>
 
 inline bool Prior(const UseSensor *A, const UseSensor *B)
 { return(A->Priority < B->Priority); }
@@ -88,9 +87,9 @@ void MasterSensor :: InitMaster ()
   for(i=0; i<(int)msList.size(); i++) 
     nbSensors += PAR.getI(useList[i]);
   
-   dllList = new (SensorLoader *)[nbSensors];
+  dllList = new (SensorLoader *)[nbSensors];
   
-   nbSensors = 0;
+  nbSensors = 0;
 
   for(i=0; i<(int)msList.size(); i++) 
     for (j=0; j<PAR.getI(useList[i]); j++) {
@@ -99,7 +98,7 @@ void MasterSensor :: InitMaster ()
 	fprintf(stderr,"Loading %s, %d\n",msList[i]->Name,j);
 	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
       }
-      else fprintf(stderr,"WARNING: ingored plugin (invalid or not found) : %s\n",soList[i]);
+      else fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",soList[i]);
       nbSensors++;
     }
 }
@@ -130,7 +129,7 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 }
 
 // --------------------------------------------
-//  Get special info at pos.
+//  Get special info at special pos.
 //  Retourne TRUE si les sensors sont porteurs
 //  d'infos de type "type" FALSE sinon.
 // --------------------------------------------
@@ -147,13 +146,22 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
 
   for(i=0; i<(int)theSensors.size(); i++) {
     if(theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
-      theSensors[i]->GiveInfo(X, pos, d);
+      theSensors[i]->GiveInfoAt(X, pos, d);
       info = TRUE;
     }
     else if(theSensors[i]->type == Type_Unknown)
       return info;  // Aucune info pour ce type
   }
   return info;
+}
+
+// --------------------------
+//  Reset iterator.
+// --------------------------
+void MasterSensor :: ResetIterator ()
+{
+  for(int i=0; i<(int)theSensors.size(); i++)
+    theSensors[i]->ResetIter();
 }
 
 // --------------------------

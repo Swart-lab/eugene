@@ -3,6 +3,16 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+
 #include "Sensor.h"
 #include "DNASeq.h"
 #include "BStrArray.h"
@@ -43,6 +53,7 @@ class MasterSensor
   ~MasterSensor ();
   void InitMaster   ();
   void InitSensors  (DNASeq *);
+  void ResetIterator();
   void ResetType    ();
   void GetInfoAt    (DNASeq *, int, DATA *);
   int  GetInfoSpAt  (TYPE_SENSOR, DNASeq *, int, DATA *);
