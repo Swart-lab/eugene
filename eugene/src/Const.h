@@ -17,11 +17,11 @@ const double NINFINITY   = log(0.0);
 const REAL DontCrossStop = NINFINITY;
 
 typedef struct DATA {
-  REAL Stop[2];
-  REAL Start[2];
-  REAL Acc[2];
-  REAL Don[2];
-  REAL ContentScore[13];
+  double Stop[2];
+  double Start[2];
+  double Acc[2];
+  double Don[2];
+  double  ContentScore[13];
   unsigned char ESTMATCH_TMP; // WARNING temporaire : EST -> on est dans intron
 }DATA;
 
