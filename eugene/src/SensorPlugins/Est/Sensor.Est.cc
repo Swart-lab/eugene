@@ -284,7 +284,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	  if (TheStrand & HitReverse) PlotBarI(i,-4,0.9,1,7);
 	}
 	
-	if (PAR.getI("graph") && (ThisBlock->Prev != NULL) && 
+	if (PAR.getI("Output.graph") && (ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  if (TheStrand & HitForward) 
 	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.9,0.9,7);
@@ -353,7 +353,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	      ESTMatch[i] |= TheStrand << HitToMRight;
 
 	  
-	  if (PAR.getI("graph")) {
+	  if (PAR.getI("Output.graph")) {
 	    if (TheStrand & HitForward) 
 	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.6,0.6,2);
 	    if (TheStrand & HitReverse) 
@@ -366,7 +366,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     }
   }
   
-  if (PAR.getI("graph"))
+  if (PAR.getI("Output.graph"))
     for (i = 0; i < X->SeqLen; i++) {
       if (ESTMatch[i] & HitForward) 
 	PlotBarI(i, 4,0.6,1,2);
