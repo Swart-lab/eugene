@@ -15,7 +15,6 @@
 
 #include "Sensor.h"
 #include "DNASeq.h"
-#include "BStrArray.h"
 #include "Param.h"
 #include "Const.h"
 #include "Dll.h"
