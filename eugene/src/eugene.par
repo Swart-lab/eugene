@@ -125,7 +125,7 @@ Est.utrM	5
 #
 ##### Riken sensor parameters #####
 #
-Riken.StrandRespect			1
+Riken.StrandRespect			0
 Riken.Min_est_diff			100
 Riken.Max_overlap			60
 Riken.Max_riken_length			60000
