@@ -32,6 +32,7 @@ AC_PROG_AWK
 AC_PROG_LN_S 
 AC_PROG_RANLIB
 
+
 # Checks for libraries.
 AC_CHECK_LIB([c], [main], [], [ \
 	echo "Error! You need to have the c library to compile eugene."
@@ -52,10 +53,6 @@ AC_CHECK_LIB([gd], [main], [], [ \
         ])
 AC_CHECK_LIB([m], [main], [], [ \
 	echo "Error! You need to have the m library to compile eugene."
-        exit -1
-        ])
-AC_CHECK_LIB([nsl], [main], [], [ \
-	echo "Error! You need to have the nsl library to compile eugene."
         exit -1
         ])
 AC_CHECK_LIB([png], [main], [], [ \
@@ -81,6 +78,12 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([floor gethostbyname gethostname inet_ntoa pow sqrt strchr strspn uname getopt])
+
+#check for OS
+AM_CONDITIONAL(LINUX_OS, test "$OSTYPE" = linux)
+AM_CONDITIONAL(SOLARIS_OS, test "$OSTYPE" = solaris)
+AM_CONDITIONAL(MACOS_OS, test "$OSTYPE" = darwin)
+
 
 AC_CONFIG_FILES([ 
 	Makefile
