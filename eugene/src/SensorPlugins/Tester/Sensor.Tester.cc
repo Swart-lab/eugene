@@ -55,7 +55,12 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     if (!IsInitialized) {
       SensorName = "Sensor." + (std::string) PAR.getC("Tester.Sensor"); 
       SensorInstance = PAR.getI("Tester.Sensor.Instance"); 
-      MinNumbers = PAR.getI("Tester.SPSN.MinNumbers");
+      MinNumbers = PAR.getI("Tester.SPSN.MinNumbers"); 
+      std::string evaluated_name = (std::string) PAR.getC("Tester.SPSN.Eval");
+      if (evaluated_name == "START")  EvaluatedType = EVALUATED_START; 
+      else if (evaluated_name == "STOP") EvaluatedType = EVALUATED_STOP;
+      else if (evaluated_name == "SPLICE") EvaluatedType = EVALUATED_SPLICE;
+      else {std::cerr<<"ERROR: The value "<<evaluated_name<<" set to the Tester.SPSN.Eval parameter is not accepted.\n"; exit(2);}
 
       // initialize once some class (static) attributs
       NbToDoSequence = (int) PAR.getD("NbSequence");
@@ -80,7 +85,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
       for(int j=0; j<DATA::LastSigType; j++) Data.sig[j].Clear();
       sensor->GiveInfo(X,i,&Data);
 
-      if (sensor->type & Type_Start) {
+      if (EvaluatedType == EVALUATED_START) {
 	dF = Data.sig[DATA::Start].weight[Signal::Forward];
 	dR = Data.sig[DATA::Start].weight[Signal::Reverse];
 	is_posF = ( X->IsEStart(i,1) != 0 );
@@ -100,7 +105,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	  if (is_annotF) NbNonCanonicalAnnotated += 1; if (is_annotR) NbNonCanonicalAnnotated += 1;
 	}
 
-      } else if (sensor->type & Type_Stop) {
+      } else if (EvaluatedType == EVALUATED_STOP) {
 	dF = Data.sig[DATA::Stop].weight[Signal::Forward];
 	dR = Data.sig[DATA::Stop].weight[Signal::Reverse];
 	is_posF = ( X->IsStop(i-3,1) != 0 );
@@ -120,7 +125,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	  if (is_annotF) NbNonCanonicalAnnotated += 1; if (is_annotR) NbNonCanonicalAnnotated += 1;
 	}
 
-      } else if (sensor->type & (Type_Acc|Type_Don)) {
+      } else if (EvaluatedType == EVALUATED_SPLICE) {
 	dF = Data.sig[DATA::Acc].weight[Signal::Forward];
 	dR = Data.sig[DATA::Acc].weight[Signal::Reverse];
 	dFdon = Data.sig[DATA::Don].weight[Signal::Forward];
@@ -500,7 +505,7 @@ void SensorTester :: AnalyzeSPSN(void)
   bool is_don;
   std::ofstream f, facc, fdon;
 
-  if (SensorType & (Type_Acc |Type_Don)) {
+  if (EvaluatedType == EVALUATED_SPLICE) {
     nbj = 4; // 4 columns for acc/don, F/R (Scores, IsAPositons, IsAnnotateds)
     nbl = 2; // 2 cumns for acc/don (TP,FP,TN,FN,Nb)
   } else {
@@ -551,7 +556,7 @@ void SensorTester :: AnalyzeSPSN(void)
 
   // output specificity and sensibility 
   f.open((SensorName + ".SpSn").c_str(), std::ios::out);
-  if (SensorType & (Type_Acc|Type_Don)) {
+  if (EvaluatedType == EVALUATED_SPLICE) {
     facc.open((SensorName + ".Acc").c_str(), std::ios::out);
     fdon.open((SensorName + ".Don").c_str(), std::ios::out);
   }
@@ -559,7 +564,7 @@ void SensorTester :: AnalyzeSPSN(void)
   std::cout << "Thres.\t\tNb\tTP\tFP\tTN\tFN\tSpec.\tSens.\n";
   for (n=0; n<(int)Thresholds.size(); n++) {
     nb = Nb[n][0]; tp = TP[n][0]; fn = FN[n][0]; fp = FP[n][0]; tn = TN[n][0];
-    if (SensorType & (Type_Acc|Type_Don)) 
+    if (EvaluatedType == EVALUATED_SPLICE) 
       {nb += Nb[n][1]; tp += TP[n][1]; fn += FN[n][1]; fp += FP[n][1]; tn += TN[n][1];}
     sn = 100* (tp/(tp+fn));
     sp = 100* (tp/(tp+fp));
@@ -570,7 +575,7 @@ void SensorTester :: AnalyzeSPSN(void)
       f <<sp<<"\t"<<sn<<"\n";
   }
 
-  if (SensorType & (Type_Acc|Type_Don)) {
+  if (EvaluatedType == EVALUATED_SPLICE) {
     std::cout << "\nThres.\t\tNbacc\tTPacc\tFPacc\tTNacc\tFNacc\tSpec.\tSens.\n";
     for (n=0; n<(int)Thresholds.size(); n++) {
       sn = 100* (TP[n][0]/(double)(TP[n][0]+FN[n][0]));
@@ -594,7 +599,7 @@ void SensorTester :: AnalyzeSPSN(void)
   }
 
   f.close();
-  if (SensorType & (Type_Acc|Type_Don)) {
+  if (EvaluatedType == EVALUATED_SPLICE) {
     facc.close();
     fdon.close();
   }
@@ -628,7 +633,7 @@ void SensorTester :: UpdateTP_FP_TN_FN( int no_threshold,
 }
 
 
-// -------------------------------------------
+// ----------------------------------------------
 // Update the list of threshold
 // -------------------------------------------
 void SensorTester :: UpdateThreshold( double t )
@@ -640,4 +645,3 @@ void SensorTester :: UpdateThreshold( double t )
     if( find( Thresholds.begin(), Thresholds.end(), t ) == Thresholds.end() )
       Thresholds.push_back( t );
 }
-

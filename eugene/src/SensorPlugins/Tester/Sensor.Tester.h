@@ -37,10 +37,13 @@
 /*************************************************************
  **                     SensorTester                        **
  *************************************************************/
+enum EVALUATED_TYPE {EVALUATED_START, EVALUATED_STOP, EVALUATED_SPLICE};
+
 class SensorTester : public Sensor
 {
  private:
 
+  static EVALUATED_TYPE EvaluatedType;
   static bool IsSPSN;
   static int MinNumbers;
   static std::string SensorName;
@@ -94,6 +97,7 @@ extern "C" SensorTester * builder0(int n, DNASeq *X) { return new SensorTester(n
 
 
 // declare static variables
+EVALUATED_TYPE SensorTester::EvaluatedType;
 bool SensorTester::IsSPSN;
 int  SensorTester::MinNumbers;
 std::string SensorTester::SensorName;
