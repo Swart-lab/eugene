@@ -29,9 +29,7 @@ int HitsCompare(const void *A, const void *B)
 // ----------------------
 SensorEst :: SensorEst (int n) : Sensor(n)
 {
-  ESTMatch = NULL;
   HitTable = NULL;
-
   estP = PAR.getD("Est.estP");
   estM = PAR.getD("Est.estM");
 }
@@ -41,9 +39,8 @@ SensorEst :: SensorEst (int n) : Sensor(n)
 // ----------------------
 SensorEst :: ~SensorEst ()
 {
-  if(ESTMatch != NULL)
-    delete [] ESTMatch;
-  
+  vPos.clear();
+  vESTMatch.clear();
   if(HitTable != NULL) {
     delete HitTable[NumEST];
     delete HitTable;
@@ -64,9 +61,11 @@ void SensorEst :: Init (DNASeq *X)
  
   type = Type_Content;
   
-  if(ESTMatch != NULL)
-    delete [] ESTMatch;
-  
+  index = 0;
+
+  vPos.clear();
+  vESTMatch.clear();
+
   if(HitTable != NULL) {
     delete HitTable[NumEST];
     delete HitTable;
@@ -83,6 +82,13 @@ void SensorEst :: Init (DNASeq *X)
   NumEST = 0;
   HitTable = ESTAnalyzer(fEST, ESTMatch, estM, &NumEST, X);
   fclose(fEST);
+  
+  for (i = 0; i<= X->SeqLen; i++)
+    if(ESTMatch[i] != 0) {
+      vPos.push_back      ( i );
+      vESTMatch.push_back ( ESTMatch[i] );
+    }
+  delete [] ESTMatch;
 }
 
 // -----------------------
@@ -90,6 +96,7 @@ void SensorEst :: Init (DNASeq *X)
 // -----------------------
 void SensorEst :: ResetIter ()
 {
+  index = 0;
 }
 
 // -----------------------
@@ -97,31 +104,34 @@ void SensorEst :: ResetIter ()
 // -----------------------
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  for(int i=0; i<3; i++)              // Exon F
-    // Si on a un Gap EST ou si l'on connait le sens du match EST
-    if ((ESTMatch[pos] & Gap) || 
-	((ESTMatch[pos] & Hit) && !(ESTMatch[pos] & HitForward)))
-      d->ContentScore[i] += estP;
-
-  for(int i=3; i<6; i++)              // Exon R
-    // Si on a un Gap EST ou si l'on connait le sens du match EST
-    if ((ESTMatch[pos] & Gap) ||
-	((ESTMatch[pos] & Hit) && !(ESTMatch[pos] & HitReverse)))
-      d->ContentScore[i] += estP;
-
-  // Si on a un Hit EST ou si l'on connait le sens du match EST
-  if((ESTMatch[pos] & Hit) ||
-     ((ESTMatch[pos] & Gap) && !(ESTMatch[pos] & GapForward)))
-    d->ContentScore[6] += estP;       // IntronF
-
-  // Si on a un Hit EST ou si l'on connait le sens du match EST
-  if((ESTMatch[pos] & Hit) ||
-     ((ESTMatch[pos] & Gap) && !(ESTMatch[pos] & GapReverse)))
-    d->ContentScore[7] += estP;       // IntronR
-
-  d->ContentScore[8] += ((ESTMatch[pos] & (Gap|Hit)) != 0)*estP;  //InterG
-
-  d->ESTMATCH_TMP = ESTMatch[pos];  // WARNING : EST -> on est dans intron
+  if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
+    for(int i=0; i<3; i++)              // Exon F
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((vESTMatch[index] & Gap) || 
+	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitForward)))
+	d->ContentScore[i] += estP;
+    
+    for(int i=3; i<6; i++)              // Exon R
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((vESTMatch[index] & Gap) ||
+	  ((vESTMatch[index] & Hit) && !(vESTMatch[index] & HitReverse)))
+	d->ContentScore[i] += estP;
+    
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((vESTMatch[index] & Hit) ||
+       ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapForward)))
+      d->ContentScore[6] += estP;       // IntronF
+    
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((vESTMatch[index] & Hit) ||
+       ((vESTMatch[index] & Gap) && !(vESTMatch[index] & GapReverse)))
+      d->ContentScore[7] += estP;       // IntronR
+    
+    d->ContentScore[8] += ((vESTMatch[index] & (Gap|Hit)) != 0)*estP;  //InterG
+    
+    d->ESTMATCH_TMP = vESTMatch[index];  // WARNING : EST -> on est dans intron
+    index++;
+  }
 }
 
 // -------------------------
@@ -129,6 +139,38 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // -------------------------
 void SensorEst :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
+  iter = find(vPos.begin(), vPos.end(), pos);
+  if(iter != vPos.end()) {
+    for(int i=0; i<3; i++)              // Exon F
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((vESTMatch[iter-vPos.begin()] & Gap) || 
+	  ((vESTMatch[iter-vPos.begin()] & Hit) &&
+	   !(vESTMatch[iter-vPos.begin()] & HitForward)))
+	d->ContentScore[i] += estP;
+    
+    for(int i=3; i<6; i++)              // Exon R
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((vESTMatch[iter-vPos.begin()] & Gap) ||
+	  ((vESTMatch[iter-vPos.begin()] & Hit) &&
+	   !(vESTMatch[iter-vPos.begin()] & HitReverse)))
+	d->ContentScore[i] += estP;
+    
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((vESTMatch[iter-vPos.begin()] & Hit) ||
+       ((vESTMatch[iter-vPos.begin()] & Gap) &&
+	!(vESTMatch[iter-vPos.begin()] & GapForward)))
+      d->ContentScore[6] += estP;       // IntronF
+    
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((vESTMatch[iter-vPos.begin()] & Hit) ||
+       ((vESTMatch[iter-vPos.begin()] & Gap) &&
+	!(vESTMatch[iter-vPos.begin()] & GapReverse)))
+      d->ContentScore[7] += estP;       // IntronR
+    
+    d->ContentScore[8] += ((vESTMatch[iter-vPos.begin()] & (Gap|Hit)) != 0)*estP;  //InterG
+    
+    d->ESTMATCH_TMP = vESTMatch[iter-vPos.begin()];  // WARNING : EST -> on est dans intron
+  }
 }
 
 // -----------------------

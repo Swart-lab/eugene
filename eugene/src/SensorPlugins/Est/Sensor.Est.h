@@ -10,6 +10,10 @@
 class SensorEst : public Sensor
 {
  private:
+  std::vector<int>  vPos;
+  std::vector<unsigned char> vESTMatch;
+  std::vector<int>::iterator iter;
+  int index;
   unsigned char *ESTMatch;
   Hits **HitTable;
   int NumEST;
