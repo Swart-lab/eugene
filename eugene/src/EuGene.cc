@@ -839,7 +839,7 @@ int main  (int argc, char * argv [])
 
     delete TheSeq;
     pred->resetPred();
-    MS.ResetType();
+    //    MS.ResetType();
 
   }// fin de traitement de chaque séquence....
  
