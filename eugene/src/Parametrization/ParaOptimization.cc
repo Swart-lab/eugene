@@ -77,7 +77,7 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
 
   // Write new parameters file
   algo = Algorithms.back();
-  filename = PAR.WriteParam( ExecutableName.c_str(), algo->ParaName, algo->Para);
+  filename = PAR.WriteParam(algo->ParaName, algo->Para);
   std::cerr <<std::endl << "A new parameter file " << filename << " is written." << std::endl;
 }
 
