@@ -4,7 +4,7 @@
 /*                 the express written permission of INRA.                   */
 /*                     Mail : tschiex@toulouse.inra.fr                       */
 /*---------------------------------------------------------------------------*/
-/* File         : EuGeneTk/SensorPlugins/Tester/Sensor.GSplicer.h            */
+/* File         : EuGeneTk/SensorPlugins/GSplicer/Sensor.GSplicer.h          */
 /* Description  : Sensor Gene Splicer                                        */
 /* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
 /* History      : May 2003         	   		                     */
@@ -23,8 +23,8 @@ class SensorGSplicer : public Sensor
  private:
   int PositionGiveInfo;
 
-  std::vector<int>  vPosAccF, vPosAccR, vPosDonF, vPosDonR;
-  std::vector<REAL> vValAccF, vValAccR, vValDonF, vValDonR;
+  std::vector<int>    vPosAccF, vPosAccR, vPosDonF, vPosDonR;
+  std::vector<double> vValAccF, vValAccR, vValDonF, vValDonR;
 
   int iAccF, iAccR, iDonF, iDonR;
   double coefAcc, penAcc, coefDon, penDon;

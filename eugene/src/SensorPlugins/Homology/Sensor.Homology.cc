@@ -9,7 +9,8 @@
 // Nouveau parametre TblastxP dans le fichier .par
 // FORMATS necessaire:
 // fichier matrice proteique: fichier BLOSUM ou PAM classique
-// fichier .tblastx : comme les .blast, mais derniere colonne= seq prot. du hit subject.
+// fichier .tblastx : comme les .blast, mais derniere colonne= seq prot. du
+// hit subject.
 // Ex:
 // 802 864 104 0.0 +1 AB015498_354_416 354 416 PQGQTPLFPRIFGHEAGG*EKVGLWRVLEKV*LILHQEI
 
@@ -19,17 +20,18 @@ extern Parameters PAR;
 // fonction temporaire
 // etude de la prise en compte possible des tblastx
 // ----------------------
-REAL SensorHomology :: tblastxupdate (int hitnb, REAL hitscore, double pen, double base) {
-//  return (pen); // test avec score constant pour chq nt d'un hit
-	// test d'integration de la donnee nbre de hits:
-//	return (hitnb);    
-//	return (hitnb+pen);
-//	return (hitnb*base +pen);
-	// test d'integration de la donnee score du hit:
-//	return (hitscore);
-//	return (hitscore +pen);
-	return (hitscore*base +pen);
-//	return (hitscore*base);
+double SensorHomology :: tblastxupdate (int hitnb, double hitscore,
+				      double pen, double base) {
+  // return (pen); // test avec score constant pour chq nt d'un hit
+  // test d'integration de la donnee nbre de hits:
+  //	return (hitnb);    
+  //	return (hitnb+pen);
+  //	return (hitnb*base +pen);
+  // test d'integration de la donnee score du hit:
+  //	return (hitscore);
+  //	return (hitscore +pen);
+  return (hitscore*base +pen);
+  //	return (hitscore*base);
 }
 
 // --------------------------------------------------
@@ -59,7 +61,7 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int deb,fin,phase,ProtDeb,ProtFin,sens;
   int score = 0;
   double bits;
-  REAL GlobalBits;
+  double GlobalBits;
   const int MaxHitLen  = 15000;
   char tampon;
   char* paire= new char[3];
@@ -71,12 +73,12 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int contigbeg;
 
   TblastxNumber = new int*[6];
-  TblastxScore = new REAL*[6];
-  TblastxGlobalScore = new REAL*[6];
+  TblastxScore = new double*[6];
+  TblastxGlobalScore = new double*[6];
   for (j = 0; j < 6; j++) {
     TblastxNumber[j]= new int[Len+1];
-    TblastxScore[j] = new REAL[Len+1];
-    TblastxGlobalScore[j] = new REAL[Len+1];
+    TblastxScore[j] = new double[Len+1];
+    TblastxGlobalScore[j] = new double[Len+1];
     for (i = 0; i<= Len; i++) {
       TblastxNumber[j][i]=0;
       TblastxScore[j][i]=0.0;
@@ -88,7 +90,8 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   // Lecture de la matrice proteique ("BLOSUM62" par defaut)
   protmatfile=FileOpen(PAR.getC("EuGene.PluginsDir"), tempname, "rt");
   if (protmatfile == NULL) {
-    fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname); exit (2);
+    fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname);
+    exit (2);
   }
   // chargement classe protmat
   fprintf(stderr,"Reading protmat file.........");
@@ -99,7 +102,7 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   fclose(protmatfile);
   //   PROTMAT->affichage(2);
   fprintf(stderr,"done\n");
-
+  
   fprintf(stderr,"Reading tblastx data.........");
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
@@ -127,10 +130,12 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     j=deb;
     deb= Min (deb,fin);
     fin= Max (j,fin);
-    GlobalBits=((REAL)bits)/((REAL)abs(fin-deb));
+    GlobalBits=((double)bits)/((double)abs(fin-deb));
     
-    tampon=fgetc(ftblastx); // lecture de la suite (sequence hit subject)
-    while (isspace(tampon)) tampon=fgetc(ftblastx); // en cas de plsrs separateurs avant la derniere colonne
+    // lecture de la suite (sequence hit subject)
+    tampon=fgetc(ftblastx);
+    // en cas de plsrs separateurs avant la derniere colonne
+    while (isspace(tampon)) tampon=fgetc(ftblastx);
     for (i = deb-1; i < fin; i++)  {
       if ( (feof(ftblastx)) ||
 	   ( (isspace(tampon)) && (i != (fin)) ) ) {
@@ -142,12 +147,13 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
 	paire[1]=tampon;
 	paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
 	score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
-	//  printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
+	//printf("i:%d query-subject:  %c-%c score: %d\n",
+	//i,paire[0],paire[1],score);
       }
       TblastxNumber[phase][i] ++;
       
       TblastxScore[phase][i]  += score;
-
+      
       // if (GlobalBits>TblastxGlobalScore[phase][i]) {
       //    TblastxGlobalScore[phase][i] = GlobalBits;
       //    TblastxScore[phase][i]= score;
@@ -238,6 +244,7 @@ char SensorHomology :: ph06(char p)
   else if (p > 0) return (p-1);
   else return 2-p;   
 }
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
@@ -246,7 +253,7 @@ void SensorHomology :: Plot(DNASeq *X)
   for (int pos =0; pos < X->SeqLen ; pos++){
     for(int j=0;j<6;j++) {
       if (TblastxNumber[j][pos]>0) {
-//      PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
+	//      PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
 	PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,1+(int)TblastxScore[j][pos]/4)) : 8 ) );
       }
     }
@@ -261,8 +268,8 @@ void SensorHomology :: PlotAt(int pos)
   //  if (PAR.getI("Output.graph")) {
   for(int j=0;j<6;j++) {
     if (TblastxNumber[j][pos]>0) {
-      //	  PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos]/2 , 8- (int)(1.7*TblastxScore[j][pos]) );
-//      PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
+      //PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos]/2 , 8- (int)(1.7*TblastxScore[j][pos]) );
+      //PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
       PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,1+(int)TblastxScore[j][pos]/4)) : 8 ) );
     }
   }

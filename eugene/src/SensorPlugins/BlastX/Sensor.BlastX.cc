@@ -47,8 +47,8 @@ void SensorBlastX :: Init (DNASeq *X)
   int   Pfin = 0, Pphase = 0;
   char  A[128], B[128];
   char *ProtId, *PProtId, *tmp;
-  REAL GlobalScore;
-  REAL PGlobalScore = 0;
+  double GlobalScore;
+  double PGlobalScore = 0;
   const int MaxHitLen  = 15000;
   char tempname[FILENAME_MAX+1];
 
@@ -64,8 +64,8 @@ void SensorBlastX :: Init (DNASeq *X)
   keyBXLevel[9] = PAR.getD("BlastX.level9*",N);
   blastxM = PAR.getI("BlastX.blastxM*",N);
   minIn = PAR.getI("EuGene.minIn");
-  ProtMatch      = new REAL[Len+1];
-  ProtMatchLevel = new REAL[Len+1];
+  ProtMatch      = new double[Len+1];
+  ProtMatchLevel = new double[Len+1];
   ProtMatchPhase = new int[Len+1];
   for (i = 0; i<= Len; i++) {
     ProtMatch[i]      = 0.0;
@@ -98,11 +98,12 @@ void SensorBlastX :: Init (DNASeq *X)
     PProtFin = -10000;
 
     // Read the blast file
-    while (fscanf(fblast,"%d %d %f %*s %d %s %d %d\n", 
-		  &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
+    while (fscanf(fblast,"%d %d %f %*s %d %s %d %d\n", &deb, &fin, &score,
+		  &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
       // for each HSP
       if (abs(fin-deb) > MaxHitLen) {
-	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",ProtId);
+	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",
+		ProtId);
 	continue;
       }
 
@@ -118,11 +119,14 @@ void SensorBlastX :: Init (DNASeq *X)
 	ProtDeb = ProtFin;
 	ProtFin = j;
       }
-      GlobalScore=((REAL)score)/((REAL)abs(fin-deb));
+      GlobalScore=((double)score)/((double)abs(fin-deb));
 
       // GAPS -> INTRONS ; the "intron" consideration between 2 HSP requires:
-      // 1: same prot ID, 2: close prot boundaries (blastxM param), 3: same nucleotidic strand...
-      if ( (strcmp(ProtId,PProtId) == 0) && (abs(PProtFin-ProtDeb)<=(blastxM)) && (phase*Pphase>0) ) {
+      // 1: same prot ID
+      // 2: close prot boundaries (blastxM param)
+      // 3: same nucleotidic strand...
+      if ( (strcmp(ProtId,PProtId) == 0) && 
+	   (abs(PProtFin-ProtDeb)<=(blastxM)) && (phase*Pphase>0) ) {
 	// INTRON
 	if ((deb-Pfin) >= minIn) {
 	  for(i = Pfin;  i < Pfin+(minIn)/2;i++) {
@@ -156,17 +160,17 @@ void SensorBlastX :: Init (DNASeq *X)
 		  ProtMatchPhase[i]= 0;
 		}
 	    }
-	    //		     j=((phase < 0)?-4:4);
-	    //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
+	    //	j=((phase < 0)?-4:4);
+	    //	PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 	  }
 	}
 	if (PAR.getI("Output.graph") && k <3) {
 	  PlotLine(Pfin,deb,Pphase,phase,0.6+(k/8.0),0.6+(k/8.0),
 		   LevelColor[k]);
-	  // for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
+	  //for(i=Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
 	  //   j=((phase < 0)?-4:4);
 	  //   PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
-	  // }
+	  //}
 	}
       }
 
@@ -237,8 +241,9 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
       if(*iter == pos) {
 	for(i=0; i<6; i++)       //exons
 	  if(vPMatch[iter-vPos.begin()] < 0 ||
-	     ((vPMatch[iter-vPos.begin()] > 0) && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
-	    d->contents[i] +=  -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
+	     ((vPMatch[iter-vPos.begin()] > 0) &&
+	      (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
+	    d->contents[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
 	
 	for(i=8; i<13; i++)      //inter & UTRs
 	  if(vPMatch[iter-vPos.begin()] != 0)
@@ -336,7 +341,8 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 
       while ( (index < (int)vPos.size()) && (vPos[index] < posBack)) index++;
       // index=indice du premier match etant > ou = au debut de l'exon
-      // fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d, index=%d\n",vPos[index],index);
+      // fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d,
+      // index=%d\n",vPos[index],index);
 
       if (index < (int)vPos.size()) { // il reste des hits
 	// pour chaque nuc de l'exon supporte par un hit
@@ -347,7 +353,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
       }
       
       if ( ((state <= ExonR3) && (stateNext >= InterGen5)) || // fin de gene
-	   (i==0 && state <= IntronR3)) {                 // ou fin seq(gene en cours)
+	   (i==0 && state <= IntronR3)) {       // ou fin seq(gene en cours)
 	endCDS = pos;
 	printf("      CDS (prot.)  %7d %7d    %5d     supported on %d/%d coding.\n",begCDS,endCDS,endCDS-begCDS+1,SupportedNuc,CodingNuc);
       }

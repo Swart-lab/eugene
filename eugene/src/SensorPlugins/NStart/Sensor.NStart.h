@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2002 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted without                   */
+/*                 the express written permission of INRA.                   */
+/*                     Mail : tschiex@toulouse.inra.fr                       */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/NStart/Sensor.NStart.cc             */
+/* Description  : Sensor Netstart                                            */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : May 2003                                                   */
+/*****************************************************************************/
+
 #ifndef  SENSOR_NSTART_H_INCLUDED
 #define  SENSOR_NSTART_H_INCLUDED
 
@@ -11,8 +23,8 @@ class SensorNStart : public Sensor
  private:
   int PositionGiveInfo;
 
-  std::vector<int>  vPosF, vPosR;
-  std::vector<REAL> vValF, vValR;
+  std::vector<int>    vPosF, vPosR;
+  std::vector<double> vValF, vValR;
 
   int indexF, indexR;
   double startP, startB;

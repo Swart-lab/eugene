@@ -11,9 +11,9 @@
 class SensorHomology : public Sensor
 {
  private:
-  int   **TblastxNumber;
-  REAL  **TblastxScore;
-  REAL  **TblastxGlobalScore;
+  int    **TblastxNumber;
+  double **TblastxScore;
+  double **TblastxGlobalScore;
   double TblastxP;
   double TblastxB;
 
@@ -22,10 +22,10 @@ class SensorHomology : public Sensor
   virtual ~SensorHomology ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  REAL tblastxupdate (int hitnb, REAL hitscore, double pen, double base);
-  int hitsmaxnumber (int position, int frame, int maxlen);
-  int  PhaseAdapt (char);
-  char ph06       (char);
+  double tblastxupdate (int hitnb, double hitscore, double pen, double base);
+  int    hitsmaxnumber (int position, int frame, int maxlen);
+  int    PhaseAdapt  (char);
+  char   ph06        (char);
   virtual void Plot  (DNASeq *);
   virtual void PlotAt(int pos);
   virtual void PostAnalyse(Prediction *);

@@ -22,8 +22,8 @@ class SensorATGpr : public Sensor
 {
  private:
   int PositionGiveInfo;
-  std::vector<int>  vPosF, vPosR;
-  std::vector<REAL> vValF, vValR;
+  std::vector<int>    vPosF, vPosR;
+  std::vector<double> vValF, vValR;
   int indexF, indexR;
   double startP, startB;
   

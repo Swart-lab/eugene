@@ -10,8 +10,8 @@ class SensorFrameShift : public Sensor
 {
  private:
   // Probability of deletion/insertion
-  REAL insProb;
-  REAL delProb;
+  double insProb;
+  double delProb;
 
  public:
   SensorFrameShift  (int n, DNASeq *X);
