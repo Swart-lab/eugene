@@ -22,7 +22,7 @@
 
 
 #include <vector>
-#include <values.h>
+#include <float.h>
 
 #include "Chromosome.h"
 
