@@ -4,3 +4,4 @@ extern "C" void PlotBarI(unsigned int nuc, signed char phase, REAL pos, int widt
 extern "C" void PlotLine(unsigned int nuc1, unsigned int nuc2, 
 			 signed char phase1, signed char phase2, REAL pos1, REAL pos2, int col);
 extern "C" void ClosePNG();
+extern "C" void OutputHTMLFileNames();
