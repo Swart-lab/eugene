@@ -20,7 +20,7 @@ const unsigned char SwitchAny        = 0x3F;
 class BackPoint
   {
   private:
-    char State;
+    signed char State;
     unsigned char SwitchType;
     int StartPos;  
     double Cost;
