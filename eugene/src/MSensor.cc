@@ -128,6 +128,19 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
   }
 }
 
+// --------------------------
+//  Print informations at pos.
+// --------------------------
+void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
+{
+  int i;
+  printf("%6d %c ", 1+pos, (*X)[pos]);
+  for(i=0; i<13; i++)
+    printf (" %.2f",d->ContentScore[i]);
+  for(i=0; i<2;  i++)
+    printf (" || %1.0f %.2f %.2f %.2f",d->Stop[i],d->Start[i],d->Acc[i],d->Don[i]);
+  printf("\n");
+}
 // --------------------------------------------
 //  Get special info at special pos.
 //  Retourne TRUE si les sensors sont porteurs
