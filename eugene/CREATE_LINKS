@@ -33,7 +33,7 @@ ln -s eugene eugeneTest
 # Plugins are expected to be in src/PLUGINS but are created in src/SensorPlugins/X
 # To avoid move or copy, links are defined
 cd SensorPlugins
-foreach f ( ` ls | awk '{if ($0 ~ /\//) {print substr($0,1,index($0,"/")-1)} else {print $0}}' ` )
+foreach f ( ` \ls | awk '{if ($0 ~ /\//) {print substr($0,1,index($0,"/")-1)} else {print $0}}' ` )
   if ( $f != 0_SensorTk && $f != Makefile.am && $f != Makefile.in && $f != Makefile ) then
     cd ../PLUGINS
     ln -s ../SensorPlugins/$f/Sensor.$f.so Sensor.$f.so 
