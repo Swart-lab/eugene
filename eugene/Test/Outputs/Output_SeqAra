@@ -7,21 +7,21 @@ Loading Sensor.MarkovConst....0
 Loading Sensor.MarkovIMM......0
 Loading IMM...1 2 3 4 5 6 7 done
 Loading Sensor.NStart.........0
-Loading Sensor.Est............0
 Loading Sensor.BlastX.........0
+Loading Sensor.Est............0
 -------------------------------------------------------------------
 Loading sequence...SEQ25AB005234G10G11, 14900 bases read, GC Proportion = 36.4%
 Reading splice site file (GeneSplicer)........forward, reverse done
 Reading splice site file (NetGene2)...........forward, reverse done
 Reading splice site file (Splice Predictor)...forward, reverse done
 Reading start file (NetStart).................forward, reverse done
+Reading Blastx data, level...0 done
 Reading cDNA hits............13 sequences read
    [AV547209]: no matching splice site
    [W43583]: Gapless EST with strong donor [1363-1814]
    [AV541414]: Gapless EST with strong donor [1409-1807]
    [AV565933]: Gapless EST with strong donor [1510-1854]
 A total of 4/13 sequences rejected
-Reading Blastx data, level...0 done
 Optimal path length = 20345.5632
 
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
@@ -41,6 +41,7 @@ seq25.1.1.8	Intr    +      10896   11134      239     +2      +2   10895   11135
 seq25.1.1.9	Intr    +      11544   12005      462     +1      +3   11543   12006    42.0  
 seq25.1.1.10	Term    +      12088   12900      813     +1      +1   12087   12901    20.0  
 seq25.1.1.0	Utr3    +      12901   14900     2000     NA      NA      NA      NA    11.0  
+      CDS (prot.)     2919   12900     9982     supported on 1559/1929 coding.
 cDNA  AV559654         261    1280      606      4 introns    Support
 cDNA  AV520544        1053    1774      593      1 introns    Support
 cDNA  W43583          1363    1814      450      0 introns    Filtered 
@@ -56,4 +57,3 @@ cDNA  AA713204       12760   13114      359      0 introns    Support
 cDNA  AV547209       14087   14781      505      2 introns    Filtered 
       CDS             2919   12900     9982     supported on 162 bases
       Gene               1   14900    14900     supported on 2641 bases
-      CDS (prot.)     2919   12900     9982     supported on 1559/1929 coding.
