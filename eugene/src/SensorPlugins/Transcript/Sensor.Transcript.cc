@@ -38,7 +38,7 @@ void SensorTranscript :: Init (DNASeq *X)
 // -----------------------
 void SensorTranscript :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  for (int i =0; i <= Signal::Reverse; i++) {
+  for (int i = Signal::Forward; i <= Signal::Reverse; i++) {
     d->sig[DATA::tStart].weight[i] -= transStart;
     d->sig[DATA::tStop].weight[i] -= transStop;
   }
