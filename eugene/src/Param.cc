@@ -1,17 +1,17 @@
 #include "Param.h"
-// -----------------------------------------------
-// Gestion des arguments (integer)
-// -----------------------------------------------
 
+// -----------------------------------------------
+//  Gestion des arguments (integer)
+// -----------------------------------------------
 int TestIArg(char *arg)
 {
   int tmp;
   return (sscanf(arg, "%d", &tmp) == 1) && (tmp >= 0);
 }
-// -----------------------------------------------
-// Gestion des arguments (double)
-// -----------------------------------------------
 
+// -----------------------------------------------
+//  Gestion des arguments (double)
+// -----------------------------------------------
 int TestDArg(char *arg)
 {
     double tmp;
@@ -228,7 +228,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   // check usage
   if (errflag) {
-    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-P .par] [-n 0|1|2] [-s] [-p h|g|s|l|d]\n"
+    fprintf(stderr, "Usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d]\n"
 	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
 	    "              [-g {graphArg}] [-u start] [-v end] [-l len] [-c olap]\n"
 	    "              [-x xres] [-y yres] FASTA files\n");
