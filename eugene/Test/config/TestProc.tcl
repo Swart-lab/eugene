@@ -314,7 +314,7 @@ set NewValue1(Tester.Make)		SPSN
 set NewValue1(Tester.Sensor)		EuStop
 set NewValue1(Tester.Sensor.Instance)	0
 set NewValue1(Tester.SPSN.MinNumbers)	100
-#
+set NewValue1(Tester.SPSN.Eval)         STOP
 #################################################################
 ################# SENSORS CONFIGURATION PARAMETERS ##############
 #################################################################
