@@ -68,9 +68,10 @@ PepSignal.startB*	0
 #
 ##### SpliceMachine parameters #####
 SMachine.cmd		"/homes/thomas/Annotation/SpliceMachine/splicemachine.pl "
-SMachine.accP*		0.903
+SMachine.isScaled	1
+SMachine.accP*		0.102032725565
 SMachine.accB*		5.585
-SMachine.donP*		0.980
+SMachine.donP*		0.020202707318
 SMachine.donB*		27.670
 SMachine.startP*	0.052
 SMachine.startB*	0.308
@@ -288,7 +289,7 @@ Sensor.ATGpr.use	0
 Sensor.EuStop.use	1
 Sensor.FrameShift.use	0
 Sensor.GSplicer.use	0
-Sensor.SMachine.use	0
+Sensor.SMachine.use	1
 Sensor.NG2.use		0
 Sensor.NStart.use	1
 Sensor.PatConst.use	0
@@ -310,7 +311,7 @@ Sensor.Repeat.use	0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
-Sensor.IfElse.use	1
+Sensor.IfElse.use	0
 Sensor.Riken.use	0
 Sensor.User.use		0
 #
