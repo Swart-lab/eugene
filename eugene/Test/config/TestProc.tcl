@@ -151,6 +151,8 @@ set NewValue1(GSplicer.penDon*) 	0
 set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
 set NewValue1(MarkovIMM.minGC\[0\])	0
 set NewValue1(MarkovIMM.maxGC\[0\])	100
+set NewValue1(MarkovIMM.useM0asIG\[0\])	0
+set NewValue1(MarkovIMM.maxOrder\[0\])	8
 ##### Markov proteic model parameters #####
 set NewValue1(MarkovProt.matname\[0\])	swissprot.maxorder2.bin
 set NewValue1(MarkovProt.minGC\[0\])	0
