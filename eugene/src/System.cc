@@ -74,34 +74,4 @@ void *  Safe_realloc  (void * Q, size_t Len)
   return  P;
 }
 
-// -----------------------------------------------
-// Gestion des arguments (integer)
-// -----------------------------------------------
-
-int GetIArg(char *arg, int *value, int dft)
-{
-    int varg;
-    int ok;
-
-    ok = (sscanf(arg, "%d", &varg) == 1) && (varg >= 0);
-
-    *value = (ok ? varg : dft);
- 
-    return ok;
-}
-// -----------------------------------------------
-// Gestion des arguments (double)
-// -----------------------------------------------
-
-int GetDArg(char *arg, double *value, double dft)
-{
-    double varg;
-    int ok;
-
-    ok = (sscanf(arg, "%lf", &varg) == 1) && (varg >= 0);
-
-    *value = (ok ? -varg : dft);
- 
-    return ok;
-}
 
