@@ -767,12 +767,6 @@ int main  (int argc, char * argv [])
 	Data_Len = TheSeq->SeqLen;
     
 	// --------------------------------------------------------------------
-	// Init MasterSensor
-	// --------------------------------------------------------------------
-	MS = new MasterSensor();
-	MS->InitMaster(TheSeq);
-
-	// --------------------------------------------------------------------
 	// Preparation sortie graphique + Scores
 	// --------------------------------------------------------------------
 	if (graph) {
@@ -813,6 +807,12 @@ int main  (int argc, char * argv [])
 		  PAR.getI("Output.golap"), glen, grname);
 	}
 	
+	// --------------------------------------------------------------------
+	// Init MasterSensor
+	// --------------------------------------------------------------------
+	MS = new MasterSensor();
+	MS->InitMaster(TheSeq);
+
 	pred = Predict(TheSeq, MS);
     
 	fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
