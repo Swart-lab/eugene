@@ -788,8 +788,12 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	  strcpy(fea, "Exon");
 	  numF = NumFEA;
 	}
-	if(state >= UTR5F  &&  state <= UTR3R) {
-	  strcpy(fea, "UTR");
+	else if(state == UTR5F  ||  state == UTR5R) {
+	  strcpy(fea, "UTR5");
+	  numF = 0;
+	}
+	else if(state == UTR3F  ||  state == UTR3R) {
+	  strcpy(fea, "UTR3");
 	  numF = 0;
 	}
 
