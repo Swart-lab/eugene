@@ -222,7 +222,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	    vhtml.push_back("</font></td>\n");
 	  }
 	  else
-	    if(printopt0 == 'g' || printopt0 == 'a')
+	    if(printopt0 == 'a')
 	      fprintf(f,nameformat,X->Name);
 	    else
 	      if(printopt0 == 'H') {
@@ -357,7 +357,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      vhtml.push_back("</font></td>\n");
 	    }
 	    else
-	      if(printopt0 == 'g' || printopt0 == 'a')
+	      if(printopt0 == 'a')
 		fprintf(f,nameformat,X->Name);
 	      else
 		if(printopt0 == 'H') {
