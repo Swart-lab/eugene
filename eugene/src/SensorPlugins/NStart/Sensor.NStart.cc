@@ -1,4 +1,5 @@
 #include "Sensor.NStart.h"
+#define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 
 /*************************************************************
  **                       SensorNStart                      **
@@ -56,6 +57,8 @@ void SensorNStart :: Init (DNASeq *X)
   fprintf(stderr," reverse done\n");
   
   CheckStart(X, vPosF, vPosR);
+
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // --------------------------
@@ -145,12 +148,23 @@ void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // --------------------------
 void SensorNStart :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
-  iter = find(vPosF.begin(), vPosF.end(), pos);
-  if(iter != vPosF.end())
+  iter = lower_bound(vPosF.begin(), vPosF.end(), pos);
+  if(*iter == pos)
     d->Start[0] += vValF[iter-vPosF.begin()];
   
-  iter = find(vPosR.begin(), vPosR.end(), pos);
-  if(iter != vPosR.end())
+  iter = lower_bound(vPosR.begin(), vPosR.end(), pos);
+  if(iter == pos)
     d->Start[1] += vValR[iter-vPosR.begin()];
 }
 
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorNStart :: Plot(DNASeq *X)
+{
+  for (int i =0; i < (int)vPosF.size(); i++)
+    PlotBarF(vPosF[i],(vPosF[i]%3)+1,0.5,NORM(log(vValF[i]),4.0),2);
+
+  for (int i =0; i < (int)vPosR.size(); i++)
+    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i]-1)%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
+}

@@ -88,7 +88,7 @@ void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorRepeat :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   iter = find(vPos.begin(), vPos.end(), pos);
-  if(iter != vPos.end()) {
+  if (iter != vPos.end()) {
     for(int i=0; i<6; i++)   // Exon(6)
       d->ContentScore[i] += exonPenalty;
     for(int i=7; i<8; i++)   // Intron (2)

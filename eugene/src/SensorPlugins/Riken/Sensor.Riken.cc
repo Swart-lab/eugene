@@ -216,3 +216,9 @@ void SensorRiken :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   GiveInfo(X, pos, d);
 }
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorRiken :: Plot(DNASeq *TheSeq)
+{
+}

@@ -1,4 +1,5 @@
 #include "Sensor.NG2.h"
+#define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 
 /*************************************************************
  **                        SensorNetGene2                   **
@@ -58,6 +59,7 @@ void SensorNG2 :: Init (DNASeq *X)
   fprintf(stderr," reverse done\n");
   
   CheckSplices(X, vPosAccF, vPosDonF, vPosAccR, vPosDonR);
+  if (PAR.getI("Output.graph")) Plot(X);
 }
 
 // -----------------------------
@@ -185,19 +187,36 @@ void SensorNG2 :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ------------------------
 void SensorNG2 :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
-  iter = find(vPosAccF.begin(), vPosAccF.end(), pos);
-  if(iter != vPosAccF.end() && d->Acc[0] == 0.0)
+  iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
+  if(*iter == pos && d->Acc[0] == 0.0)
     d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
 
-  iter = find(vPosAccR.begin(), vPosAccR.end(), pos);
-  if(iter != vPosAccR.end() && d->Acc[1] == 0.0)
+  iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos);
+  if(*iter == pos && d->Acc[1] == 0.0)
     d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
 
-  iter = find(vPosDonF.begin(), vPosDonF.end(), pos);
-  if(iter != vPosDonF.end() && d->Don[0] == 0.0)
+  iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
+  if(*iter == pos && d->Don[0] == 0.0)
     d->Don[0] = vValDonF[iter-vPosDonF.begin()];
 
-  iter = find(vPosDonR.begin(), vPosDonR.end(), pos);
-  if(iter != vPosDonR.end() && d->Don[0] == 0.0)
+  iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos);
+  if(*iter == pos && d->Don[0] == 0.0)
     d->Don[1] = vValDonR[iter-vPosDonR.begin()];
+}
+// ----------------------------
+//  Plot Sensor information
+// ----------------------------
+void SensorNG2 :: Plot(DNASeq *X)
+{
+  for (int i =0; i < (int)vPosAccF.size(); i++)
+    PlotBarF(vPosAccF[i],4,0.5,NORM(log(vValAccF[i]),20.0),4);
+  
+  for (int i =0; i < (int)vPosDonF.size(); i++)
+    PlotBarF(vPosDonF[i],4,0.5,NORM(log(vValDonF[i]),20.0),5);
+  
+  for (int i =0; i < (int)vPosAccR.size(); i++)
+    PlotBarF(vPosAccR[i],-4,0.5, NORM(log(vValAccR[i]),20.0),4);
+
+  for (int i =0; i < (int)vPosDonR.size(); i++)
+    PlotBarF(vPosDonR[i],-4,0.5,NORM(log(vValDonR[i]),20.0),5);
 }
