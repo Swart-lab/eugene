@@ -26,7 +26,7 @@ if {$action=="Test"} {
 }
 
 ############################################################################
-set AllSensorsList {BlastX Est EuStop FrameShift GFF GSplicer Homology IfElse \
+set AllSensorsList {ATGpr BlastX Est EuStop FrameShift GFF GSplicer Homology IfElse \
 		     MarkovConst MarkovIMM MarkovProt NG2 NStart Repeat  \
 		     Riken SPred SpliceConst SpliceWAM StartConst \
 		     StartWAM Transcript User GCPlot Plotter Tester}
@@ -63,10 +63,10 @@ set SEQ(SeqHom) {exSeqHom.fasta}
 set IMG(SeqHom) {exSeqHom.test.000.png}
 set FILE_REF(SeqHom) Output_SeqHom
 set OPTIONS(SeqHom) "-gtest"
-set NewValueSeqHom(Transcript.Start) 1e-9
-set NewValueSeqHom(Transcript.Stop)  1e-9
-set NewValueSeqHom(EuStop.stopP)     3.1439
-set NewValueSeqHom(BlastX.level1)    0.0
+set NewValueSeqHom(Transcript.Start*) 1e-9
+set NewValueSeqHom(Transcript.Stop*)  1e-9
+set NewValueSeqHom(EuStop.stopP*)     3.1439
+set NewValueSeqHom(BlastX.level1*)    0.0
 
 ##################### SeqRest test variables #################################
 set SensorsList(SeqRest) {MarkovIMM EuStop StartConst SpliceConst Riken Repeat}
