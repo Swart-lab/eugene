@@ -1,41 +1,40 @@
-Loading Sensor.Transcript.....0.
-Loading Sensor.EuStop.........0.
-Loading Sensor.FrameShift.....0.
-Loading Sensor.IfElse.........0.
- -If  : Sensor.NG2	1.
- -Else: Sensor.SPred	1.
-Loading Sensor.MarkovIMM......0.
-Loading IMM...1 2 3 4 5 6 7 done.
-Loading Sensor.NStart.........0.
-Loading Sensor.User...........0.
--------------------------------------------------------------------.
-Loading sequence...SYNO_ARATH, 3699 bases read, GC Proportion = 38.8%.
-Reading splice site file \(NetGene2\)...........forward, reverse done.
-Reading splice site file \(Splice Predictor\)...forward, reverse done.
-Reading start file \(NetStart\).................forward, reverse done.
-Loading user data............done.
-Optimal path length = 4874.771676.
-.
-    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
-.
-SYNO_.1.1.1	Intr    \+          1     421      421   Unk.      \+2       0     422     0.0  .
-SYNO_.1.1.2	Intr    \+        514     582       69     \+1      \+1     513     583     0.0  .
-SYNO_.1.1.3	Intr    \+        699     809      111     \+1      \+3     698     810     0.0  .
-SYNO_.1.1.4	Intr    \+        914    1018      105     \+1      \+2     913    1019     0.0  .
-SYNO_.1.1.5	Intr    \+       1271    1408      138     \+1      \+2    1270    1409     0.0  .
-SYNO_.1.1.6	Intr    \+       1522    1602       81     \+1      \+1    1521    1603     0.0  .
-SYNO_.1.1.7	Intr    \+       1694    1801      108     \+1      \+2    1693    1802     0.0  .
-SYNO_.1.1.8	Intr    \+       1853    1921       69     \+1      \+2    1852    1922     0.0  .
-SYNO_.1.1.9	Intr    \+       2014    2088       75     \+1      \+1    2013    2089     0.0  .
-SYNO_.1.1.10	Intr    \+       2181    2264       84     \+1      \+3    2180    2265     0.0  .
-SYNO_.1.1.11	Intr    \+       2360    2446       87     \+1      \+2    2359    2447     0.0  .
-SYNO_.1.1.12	Term    \+       2672    2740       69     \+1      \+2    2671    2741     0.0  .
-SYNO_.1.1.0	Utr3    \+       2741    2849      109     NA      NA      NA      NA     0.0  .
-SYNO_.1.2.0	Utr5    \+       2905    2929       25     NA      NA      NA      NA     0.0  .
-SYNO_.1.2.1	Init    \+       2930    3092      163     \+1      \+2    2929    3093     0.0  .
-SYNO_.1.2.2	Term    \+       3189    3304      116     \+2      \+2    3188    3305     0.0  .
-SYNO_.1.2.0	Utr3    \+       3305    3362       58     NA      NA      NA      NA     0.0  .
-.
-Dumping images \("./SYNO_ARATH.---.png"\)...done.
--------------------------------------------------------------------.
+Loading Sensor.Transcript.....0
+Loading Sensor.EuStop.........0
+Loading Sensor.FrameShift.....0
+Loading Sensor.IfElse.........0
+ -If  : Sensor.NG2	1
+ -Else: Sensor.SPred	1
+Loading Sensor.MarkovIMM......0
+Loading IMM...1 2 3 4 5 6 7 done
+Loading Sensor.NStart.........0
+Loading Sensor.User...........0
+-------------------------------------------------------------------
+Loading sequence...SYNO_ARATH, 3699 bases read, GC Proportion = 38.8%
+Reading splice site file (NetGene2)...........forward, reverse done
+Reading splice site file (Splice Predictor)...forward, reverse done
+Reading start file (NetStart).................forward, reverse done
+Loading user data............done
+Optimal path length = 4874.7717
 
+    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
+
+
+Dumping images ("./SYNO_ARATH.test.---.png")...done
+-------------------------------------------------------------------
+SYNO_.1.1.1	Intr    +          1     421      421   Unk.      +2       0     422     0.0  
+SYNO_.1.1.2	Intr    +        514     582       69     +1      +1     513     583     0.0  
+SYNO_.1.1.3	Intr    +        699     809      111     +1      +3     698     810     0.0  
+SYNO_.1.1.4	Intr    +        914    1018      105     +1      +2     913    1019     0.0  
+SYNO_.1.1.5	Intr    +       1271    1408      138     +1      +2    1270    1409     0.0  
+SYNO_.1.1.6	Intr    +       1522    1602       81     +1      +1    1521    1603     0.0  
+SYNO_.1.1.7	Intr    +       1694    1801      108     +1      +2    1693    1802     0.0  
+SYNO_.1.1.8	Intr    +       1853    1921       69     +1      +2    1852    1922     0.0  
+SYNO_.1.1.9	Intr    +       2014    2088       75     +1      +1    2013    2089     0.0  
+SYNO_.1.1.10	Intr    +       2181    2264       84     +1      +3    2180    2265     0.0  
+SYNO_.1.1.11	Intr    +       2360    2446       87     +1      +2    2359    2447     0.0  
+SYNO_.1.1.12	Term    +       2672    2740       69     +1      +2    2671    2741     0.0  
+SYNO_.1.1.0	Utr3    +       2741    2849      109     NA      NA      NA      NA     0.0  
+SYNO_.1.2.0	Utr5    +       2905    2929       25     NA      NA      NA      NA     0.0  
+SYNO_.1.2.1	Init    +       2930    3092      163     +1      +2    2929    3093     0.0  
+SYNO_.1.2.2	Term    +       3189    3304      116     +2      +2    3188    3305     0.0  
+SYNO_.1.2.0	Utr3    +       3305    3362       58     NA      NA      NA      NA     0.0  

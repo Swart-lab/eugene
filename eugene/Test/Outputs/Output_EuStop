@@ -1,7 +1,7 @@
 Loading Sensor.EuStop.........0
 -------------------------------------------------------------------
 Loading sequence...SEQ14AC002535G4G5, 7972 bases read, GC Proportion = 38.0%
-Optimal path length = 0.916291
+Optimal path length = 0.9163
 -------------------------------------------------------------------
    pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del
      1 t 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 || -inf -inf -inf -7.22 -inf -inf -inf -inf || -inf -inf -inf -inf -inf -inf -inf -inf || 0.00 0.00 0.00 -0.05 0.00 0.00 0.00 0.00 || 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
