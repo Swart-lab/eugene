@@ -11,7 +11,7 @@ Loading Sensor.PatConst.......done.
 Loading Sensor.Riken..........done.
 Reading RAFL gene............2 RAFL EST pairs read, fusion fsdf-fsdf...resulting 1.
 Loading Sensor.Repeat.........done.
-Reading Intergenic regions...done.
+Reading Intergenic regions....done.
 Optimal path length = 19792.4432.
 .
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
