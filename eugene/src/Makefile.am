@@ -20,7 +20,7 @@
 
 SUBDIRS = Parametrization GDIF . SensorPlugins
 
-AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CXXFLAGS = $(eugene_cxxflags) -DDEFAULT_EUGENE_DIR=\"${pkgdatadir}\"
 AM_CFLAGS = 
 
 bin_PROGRAMS = eugene

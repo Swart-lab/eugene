@@ -25,7 +25,6 @@
 #include <stdlib.h>
 
 #define EUGENE_DIR getenv("EUGENEDIR")
-#define DEFAULT_EUGENE_DIR "/usr/share/eugene"
 #define DEFAULT_PARA_FILE "cfg/eugene.par"
 #define PLUGINS_DIR "plugins"
 #define MODELS_DIR "models"
