@@ -39,6 +39,7 @@ class SensorSMachine : public Sensor
 
   int iAccF, iAccR, iDonF, iDonR;
   double accB, accP, donB, donP;
+  char isScaled;
 
   int indexF, indexR;
   double startP, startB;

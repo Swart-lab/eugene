@@ -37,7 +37,9 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   char tempname[FILENAME_MAX+1];
 
   type = Type_Acc|Type_Don|Type_Start;
-  
+
+  isScaled = (PAR.getI("SMachine.isScaled",GetNumber()) != 0);
+
   fprintf(stderr, "Probing SpliceMachine (splice sites)..........");  
   fflush(stderr);
 
@@ -77,6 +79,26 @@ SensorSMachine :: ~SensorSMachine ()
 
   vPosF.clear();     vValF.clear();
   vPosR.clear();     vValR.clear();
+}
+
+// -------------------------------------
+//  Scaling modes for the 2 signal edges
+// -------------------------------------
+inline double ScaleIt(double w, double B, double P, char Scaled)
+{
+	if (Scaled) {
+		return B*log(w)-P;
+	}
+	else 
+		return B*w-P;
+}
+
+inline double ScaleItNo(double w, double B,double P, char Scaled)
+{
+	if (Scaled)
+		return log(1.0-pow(w,B)*exp(-P));
+	else
+		return 0.0;
 }
 // ----------------------
 //  Init SMachine.
@@ -190,7 +212,6 @@ void SensorSMachine :: ReadSMachineStarts(char *name, int Len)
 void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
-  double f;
 
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
   PositionGiveInfo = pos;
@@ -201,9 +222,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
     
     if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
-      f = pow( vValAccF[iAccF], accB) * accP;
-      d->sig[DATA::Acc].weight[Signal::Forward] += log(f);
-      d->sig[DATA::Acc].weight[Signal::ForwardNo] += log(1.0-f);
+      d->sig[DATA::Acc].weight[Signal::Forward] += ScaleIt(vValAccF[iAccF],accB,accP,isScaled);
+      d->sig[DATA::Acc].weight[Signal::ForwardNo] += ScaleItNo(vValAccF[iAccF],accB,accP,isScaled);
       iAccF++;
     }
   }
@@ -214,9 +234,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iAccR = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos)-vPosAccR.begin();
 
     if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
-      f = pow( vValAccR[iAccR], accB) * accP;
-      d->sig[DATA::Acc].weight[Signal::Reverse] += log(f);
-      d->sig[DATA::Acc].weight[Signal::ReverseNo] += log(1.0-f);
+      d->sig[DATA::Acc].weight[Signal::Reverse] += ScaleIt(vValAccR[iAccR], accB, accP, isScaled);
+      d->sig[DATA::Acc].weight[Signal::ReverseNo] += ScaleItNo(vValAccR[iAccR], accB, accP, isScaled);
       iAccR++;
     }
   }
@@ -227,9 +246,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iDonF = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos)-vPosDonF.begin();
 
     if ((iDonF<(int)vPosDonF.size()) && (vPosDonF[iDonF] == pos)) {
-      f = pow( vValDonF[iDonF], donB) * donP;
-      d->sig[DATA::Don].weight[Signal::Forward] += log(f);
-      d->sig[DATA::Don].weight[Signal::ForwardNo] += log(1.0-f);
+      d->sig[DATA::Don].weight[Signal::Forward] += ScaleIt(vValDonF[iDonF], donB, donP,isScaled);
+      d->sig[DATA::Don].weight[Signal::ForwardNo] += ScaleItNo(vValDonF[iDonF], donB, donP,isScaled);
       iDonF++;
     }
   }
@@ -240,9 +258,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       iDonR = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos)-vPosDonR.begin();
 
     if((iDonR<(int)vPosDonR.size()) && (vPosDonR[iDonR] == pos)) {
-      f = pow( vValDonR[iDonR], donB) * donP;
-      d->sig[DATA::Don].weight[Signal::Reverse] += log(f);
-      d->sig[DATA::Don].weight[Signal::ReverseNo] += log(1.0-f);
+      d->sig[DATA::Don].weight[Signal::Reverse] += ScaleIt(vValDonR[iDonR], donB, donP,isScaled);
+      d->sig[DATA::Don].weight[Signal::ReverseNo] += ScaleItNo(vValDonR[iDonR], donB, donP,isScaled);
       iDonR++;
     }
   }
@@ -253,9 +270,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexF = lower_bound(vPosF.begin(), vPosF.end(), pos)-vPosF.begin();
     
     if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
-      f = pow(vValF[indexF], startB)*(exp(-startP));
-      d->sig[DATA::Start].weight[Signal::Forward] += log(f);
-      d->sig[DATA::Start].weight[Signal::ForwardNo] += log(1.0-f);
+      d->sig[DATA::Start].weight[Signal::Forward] += ScaleIt(vValF[indexF], startB,startP,isScaled);
+      d->sig[DATA::Start].weight[Signal::ForwardNo] += ScaleItNo(vValF[indexF], startB,startP,isScaled);
       indexF++;
     }
   }
@@ -266,9 +282,8 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
       indexR = lower_bound(vPosR.begin(), vPosR.end(), pos)-vPosR.begin();
     
     if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
-      f = pow(vValR[indexR], startB)*(exp(-startP));
-      d->sig[DATA::Start].weight[Signal::Reverse] += log(f);
-      d->sig[DATA::Start].weight[Signal::ReverseNo] += log(1.0-f);
+      d->sig[DATA::Start].weight[Signal::Reverse] += ScaleIt(vValR[indexR], startB,startP,isScaled);
+      d->sig[DATA::Start].weight[Signal::ReverseNo] += ScaleItNo(vValR[indexR], startB,startP,isScaled);
       indexR++;
     }
   }
@@ -282,32 +297,32 @@ void SensorSMachine :: Plot(DNASeq *X)
   double f;
 
   for (int i =0; i < (int)vPosAccF.size(); i++) {
-    f = pow(vValAccF[i], accB) * accP;
+	  f = ScaleIt(vValAccF[i], accB, accP, isScaled);
     PlotAcc(vPosAccF[i], 1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosDonF.size(); i++) {
-    f = pow( vValDonF[i], donB) * donP;
+    f = ScaleIt(vValDonF[i], donB, donP, isScaled);
     PlotDon(vPosDonF[i], 1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosAccR.size(); i++) {
-    f = pow( vValAccR[i], accB) * accP;
+    f = ScaleIt(vValAccR[i], accB, accP, isScaled);
     PlotAcc(vPosAccR[i], -1, NORM(log(f),20.0));
   }
 
   for (int i =0; i < (int)vPosDonR.size(); i++) {
-    f = pow( vValDonR[i], donB) * donP;
+    f = ScaleIt(vValDonR[i], donB, donP, isScaled);
     PlotDon(vPosDonR[i], -1, NORM(log(f),20.0));
   }
 
   for (int i =0; i < (int)vPosF.size(); i++) {
-    f = pow(vValF[i], startB)*(exp(-startP));
+    f = ScaleIt(vValF[i], startB,startP,isScaled);
     PlotStart(vPosF[i], (vPosF[i]%3)+1, NORM(log(f),10.0));
   }
   
   for (int i =0; i < (int)vPosR.size(); i++) {
-    f = pow(vValR[i], startB)*(exp(-startP));
+    f = ScaleIt(vValR[i], startB,startP,isScaled);
     PlotStart(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, NORM(log(f),10.0));
   }
 }
