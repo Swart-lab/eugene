@@ -83,6 +83,11 @@ const unsigned char MLeftForward  = 0x2;
 const unsigned char GapForward    = 0x4;
 const unsigned char MRightForward = 0x8; 
 
+// shift to go from Hits to ...
+const  unsigned int HitToMLeft = 1;
+const  unsigned int HitToGap = 2;
+const  unsigned int HitToMRight = 3;
+
 const unsigned char HitReverse    = 0x10;
 const unsigned char MLeftReverse  = 0x20;
 const unsigned char GapReverse    = 0x40;
@@ -97,7 +102,6 @@ const unsigned char Margin        = MRight        | MLeft;
 const  unsigned char NotAHit       = MLeft | MRight | Gap;
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
-
 
 double Score [9],NScore[9];
 int Data_Len;
@@ -241,6 +245,14 @@ void PrintPhase(char p)
   case 16:
     printf("u3 ");
     return;
+
+  case 17:
+    printf("IG ");
+    return;
+
+  default:
+    fprintf(stderr,"ERROR: unexpected Choice value\n");
+    exit(1);
   }
   return;
 }
@@ -320,40 +332,27 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
   for (int index = 0; index < NumEST; index++) {
     
     int Inc;
+    int ExonInc,TheStrand;
     REAL WorstSpliceF, WorstSpliceR;
     REAL DonF,AccF,DonR,AccR;
     
     ThisEST = HitTable[index];
-    
+
+    // Le vertibale  brin est a priori indetermine
+    TheStrand = HitForward | HitReverse;
     Inc = 0;
+    ExonInc = 0;
     WorstSpliceF = WorstSpliceR = 1.0;
     
     
     // Look for each match in the current Hit
     ThisBlock = ThisEST->Match;
-    
+
+    // First Step: tries to determine strand
     while (ThisBlock) {
-      // Check for consistency with already read Hits
-      
-      for (i = ThisBlock->Start+EstM; !Inc && i <= ThisBlock->End-EstM; i++)
-	if (Inconsistent(ESTMatch[i] | (HitForward << (ThisEST->Strand*4)))) {
-	  fprintf(stderr,"   [%s]: inconsistent hit [%d-%d]\n",
-		  ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
-	  Inc = 1;
-	}
-      
-      // si on a un gap
-      if ((ThisBlock->Prev != NULL) && abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
-	
-	for (i = ThisBlock->Prev->End+1+EstM; !Inc && i < ThisBlock->Start-EstM; i++) 
-	  if (Inconsistent(ESTMatch[i] | (GapForward << (ThisEST->Strand*4)))) {
-	    fprintf(stderr,"   [%s]: inconsistent gap [%d-%d]\n",
-		    ThisEST->Name,ThisBlock->Prev->End+2,ThisBlock->Start);
-	    Inc = 1;
-	  }
-	
-	// Verification de la presence de site de splicing aux frontieres
-	
+      // si ona un gap ?
+      if ((ThisBlock->Prev != NULL) && 
+	  abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
 	DonF = 0.0;
 	DonR = 0.0;
 	AccF = 0.0;
@@ -368,6 +367,8 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
 	  DonR = Max(DonR,Don[1][k]);
 	  AccF = Max(AccF, Acc[0][k]);
 	}
+
+	//	printf("Extreme splices: %f %f - %f %f\n",DonF,AccF,DonR,AccR);
 	WorstSpliceF = Min(WorstSpliceF,DonF);
 	WorstSpliceF = Min(WorstSpliceF,AccF);
 	WorstSpliceR = Min(WorstSpliceR,DonR);
@@ -375,11 +376,68 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
       }
       
       ThisBlock = ThisBlock->Next;
-    }
+      }
     
     // Tous les blocs ont ete traites
+    if (WorstSpliceF == 0.0) TheStrand &= (~HitForward);
+    if (WorstSpliceR == 0.0) TheStrand &= (~HitReverse);
+
+    //    printf("Strand %d\n",TheStrand);
+
+    // next iteration on the same EST
+    ThisBlock = ThisEST->Match;
+    while (TheStrand && ThisBlock) {
+      // Check for consistency with already read Hits
+      // The Inc flag will keep the Inconsistency status
+      // 1 - inconsistent with a previous EST
+      // 2 - no splice site on the borders of a gap
+      // 3 - an exon contains STRONG donor on both strands
+
+      for (i = ThisBlock->Start+EstM; !Inc && i <= ThisBlock->End-EstM; i++) {
+
+	if (((ESTMatch[i] & Hit) && !(ESTMatch[i] & TheStrand)) |
+	    (Inconsistent(ESTMatch[i] | TheStrand))) {
+	  fprintf(stderr,"   [%s]: inconsistent hit [%d-%d]\n",
+		  ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+	  Inc = 1;
+	}
+      }
+      
+      // si on a un gap
+      if ((ThisBlock->Prev != NULL) && abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6) {
+        
+        for (i = ThisBlock->Prev->End+1+EstM; !Inc && i < ThisBlock->Start-EstM; i++) 
+	  if (((ESTMatch[i] & Gap) && !(ESTMatch[i] & (TheStrand << HitToGap))) |
+	    (Inconsistent(ESTMatch[i] | (TheStrand << HitToGap)))) {
+            fprintf(stderr,"   [%s]: inconsistent gap [%d-%d]\n",
+                    ThisEST->Name,ThisBlock->Prev->End+2,ThisBlock->Start);
+            Inc = 1;
+          }
+      }
+
+      DonF = 0.0;
+      DonR = 0.0;
+      
+      // calcul des sites d'epissage internes a l'exon
+      for (i = ThisBlock->Start+EstM+1; !Inc && i <= ThisBlock->End-EstM-1; i++) {
+	DonF = Max(DonF,Don[0][i]);
+	DonR = Max(DonR,Don[1][i]);
+	//	Don[0][i] *= 0.99;
+	//	Don[1][i] *= 0.99;
+      }
+      //      printf("Internal splices: %f - %f\n",DonF,DonR);
+      if (DonF > 0.95) ExonInc |= 1;
+      if (DonR > 0.95) ExonInc |= 2;
+      if (ExonInc == 3 && !Inc && !ThisEST->NGaps) {
+	fprintf(stderr,"   [%s]: Gapless EST with strong donor [%d-%d]\n",
+		    ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+	Inc = 3;
+      }
+      
+      ThisBlock = ThisBlock->Next;
+    }
     
-    if ((WorstSpliceF == 0.0) && (WorstSpliceR == 0.0)) {
+    if (!TheStrand) {
       fprintf(stderr, "   [%s]: no matching splice site\n",ThisEST->Name);
       Inc =2;
     }
@@ -392,14 +450,16 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
       ThisBlock = ThisEST->Match;
       while (ThisBlock) {
 	for (i = ThisBlock->Start; i<= ThisBlock->End; i++) {
-	  PlotBarI(i, 4,0.9,1,7);
-	  PlotBarI(i,-4,0.9,1,7);
+	  if (TheStrand & HitForward) PlotBarI(i, 4,0.9,1,7);
+	  if (TheStrand & HitReverse) PlotBarI(i,-4,0.9,1,7);
 	}
 	
 	if (graph && (ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
-	  PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.9,0.9,7);
-	  PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.9,0.9,7);
+	  if (TheStrand & HitForward) 
+	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.9,0.9,7);
+	  if (TheStrand & HitReverse) 
+	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.9,0.9,7);
 	}
 	ThisBlock = ThisBlock->Next;
       }
@@ -424,26 +484,42 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
 		     Max(0,ThisBlock->End-EstM) :
 		     ThisBlock->End);
 	
-	for (i = LBoundary; i <= RBoundary; i++)
-	  ESTMatch[i] |= (HitForward << (ThisEST->Strand*4));
-	
+	for (i = LBoundary; i <= RBoundary; i++) {
+	  if (ESTMatch[i] & Hit)
+	    ESTMatch[i] |= (ESTMatch[i] & TheStrand);
+	  else
+	    ESTMatch[i] |= TheStrand;
+	}
+
 	if ((ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  
 	  for (i = Max(0,ThisBlock->Prev->End+1-EstM); 
 	       i < Min(Data_Len, ThisBlock->Prev->End+1+EstM); i++) 
-	    ESTMatch[i] |= (MLeftForward << (ThisEST->Strand*4));
+	    if (ESTMatch[i] & MLeft)
+	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToMLeft));
+	    else
+	      ESTMatch[i] |= TheStrand << HitToMLeft;
 	  
 	  for (i = ThisBlock->Prev->End+1; i < ThisBlock->Start-1; i++)
-	    ESTMatch[i] |= (GapForward << (ThisEST->Strand*4));
+	    if (ESTMatch[i] & Gap)
+	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToGap));
+	    else
+	    ESTMatch[i] |= TheStrand << HitToGap;
 	  
 	  for (i =  Max(0,ThisBlock->Start-1-EstM);
 	       i <  Min(Data_Len, ThisBlock->Start-1+EstM); i++)
-	    ESTMatch[i] |= (MRightForward << (ThisEST->Strand*4));
+	    if (ESTMatch[i] & MRight)
+	      ESTMatch[i] |= (ESTMatch[i] & (TheStrand << HitToMRight));
+	    else
+	      ESTMatch[i] |= TheStrand << HitToMRight;
+
 	  
 	  if (graph) {
-	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.6,0.6,2);
-	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.6,0.6,2);
+	    if (TheStrand & HitForward) 
+	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.6,0.6,2);
+	    if (TheStrand & HitReverse) 
+	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,-4,-4,0.6,0.6,2);
 	  }
 	  
 	}
@@ -452,11 +528,14 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
     }
   }
   
-  for (i = 0; i < Data_Len; i++) 
-    if (graph && (ESTMatch[i] & Hit)) {
-      PlotBarI(i, 4,0.6,1,2);
-      PlotBarI(i, -4,0.6,1,2);
+  if (graph)
+    for (i = 0; i < Data_Len; i++) {
+      if (ESTMatch[i] & HitForward) 
+	PlotBarI(i, 4,0.6,1,2);
+      if (ESTMatch[i] & HitReverse) 
+	PlotBarI(i, -4,0.6,1,2);
     }
+
   if (Rejected)
     fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,NumEST);
   delete AllEST;
@@ -573,12 +652,12 @@ int main  (int argc, char * argv [])
       errflag++;
       break;
 
-    case 's':           /* Single gene mode. Start/End on UTR or IG only   */
+    case 's':           /* Single gene mode. Start/End on IG only   */
       ExonPrior = 0.0;
       IntronPrior = 0.0;
-      InterPrior = 1.0;
-      FivePrimePrior = 1.0;
-      ThreePrimePrior = 1.0;
+      //      InterPrior = 1.0;
+      FivePrimePrior = 0.0;
+      ThreePrimePrior = 0.0;
       break;
 
     case 'r':    /* RepeatMasker input */
@@ -1116,7 +1195,7 @@ int main  (int argc, char * argv [])
     for (k = 0; k < 3; k++) {
       
       maxi = NINFINITY;     
-
+      
       // S'il y  a un STOP en phase on ne peut continuer
       if ((i % 3 == k) && Stop[0][i]) 
 	LBP[k]->Update(DontCrossStop); 
@@ -1159,7 +1238,11 @@ int main  (int argc, char * argv [])
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
       LBP[k]->Update(log(BaseScore[k][i])+log(4));
-      LBP[k]->Update(((ESTMatch[i] & Gap) != 0)*EstP);
+
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((ESTMatch[i] & Gap) ||
+      	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitForward)))
+      	LBP[k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
@@ -1214,7 +1297,11 @@ int main  (int argc, char * argv [])
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
       LBP[k]->Update(log(BaseScore[k][i])+log(4)) ;
-      LBP[k]->Update(((ESTMatch[i] & Gap ) != 0)*EstP);
+
+      // Si on a un Gap EST ou si l'on connait le sens du match EST
+      if ((ESTMatch[i] & Gap) ||
+      	  ((ESTMatch[i] & Hit) && !(ESTMatch[i] & HitReverse)))
+      	LBP[k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
@@ -1333,8 +1420,7 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5F]->Update(log(BaseScore[8][i])+log(4));
-
+    LBP[UTR5F]->Update(log(BaseScore[8][i])+log(3.999));
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
     // ----------------------------------------------------------------
@@ -1398,8 +1484,7 @@ int main  (int argc, char * argv [])
 
     if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
 
-    LBP[UTR5R]->Update(log(BaseScore[8][i])+log(4));
-
+    LBP[UTR5R]->Update(log(BaseScore[8][i])+log(3.999));
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
@@ -1472,7 +1557,12 @@ int main  (int argc, char * argv [])
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
       LBP[6+k]->Update(log(BaseScore[6][i])+log(4));
-      LBP[6+k]->Update(((ESTMatch[i] & Hit ) != 0)*EstP);
+
+
+      // Si on a un Hit EST ou si l'on connait le sens du match EST
+      if ((ESTMatch[i] & Hit) ||
+	  ((ESTMatch[i] & Gap) && !(ESTMatch[i] & GapForward)))
+	LBP[6+k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[6+k]->Update(IGPenalty);
@@ -1506,7 +1596,11 @@ int main  (int argc, char * argv [])
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
       LBP[9+k]->Update(log(BaseScore[7][i])+log(4));
-      LBP[9+k]->Update(((ESTMatch[i] & Hit) != 0)*EstP);
+
+      // Si on a un Hit EST ou si l'on connait le sens du match EST
+      if ((ESTMatch[i] & Hit) ||
+      	  ((ESTMatch[i] & Gap) && !(ESTMatch[i] & GapReverse)))
+      	LBP[9+k]->Update(EstP);
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[9+k]->Update(IGPenalty);
@@ -1533,10 +1627,10 @@ int main  (int argc, char * argv [])
   LBP[InterGen3]->Update(log(InterPrior)/2.0); 
 
   // UTR 5' et 3'
-  LBP[UTR5F]->Update(log(InterPrior)/2.0);
-  LBP[UTR3F]->Update(log(InterPrior)/2.0);  
-  LBP[UTR5R]->Update(log(InterPrior)/2.0);
-  LBP[UTR3R]->Update(log(InterPrior)/2.0);
+  LBP[UTR5F]->Update(log(FivePrimePrior/2.0)/2.0);
+  LBP[UTR3F]->Update(log(ThreePrimePrior/2.0)/2.0);  
+  LBP[UTR5R]->Update(log(FivePrimePrior/2.0)/2.0);
+  LBP[UTR3R]->Update(log(ThreePrimePrior/2.0)/2.0);
 
   for (i = 0; i < 18; i++) {
     PrevBP[i] = LBP[i]->BestUsable(Data_Len+1,SwitchAny,0,&BestU);    
