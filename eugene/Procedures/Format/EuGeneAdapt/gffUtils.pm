@@ -127,52 +127,53 @@ sub gffWrite {
   }
 
   my $nbTab = "";
-  if (length($id) > 7) { $nbTab = "\t"; }
+  if (length($id) > 7)  { $nbTab =  "\t"; }
+  if (length($id) > 14) { $nbTab .= "\t"; }
   print GFFHDLE "#S.Name$nbTab\tSource\tFeature\tStart\tEnd\t".
     "Score\tStrand\tFrame\tA\tT\tC\tG\tOthers\tGC%\tLength\t%3\tRank\n";
 
   if ($tab[0] != 0) {
     print GFFHDLE "$id\teugAdap\t$u1\t".abs($tab[0])."\t".($tab[1]-1).
-      "\t.\t$st\t.\t$nuc[0]\t$nuc[1]\t$nuc[2]\t$nuc[3]\t$nuc[4]\t$nuc[5]".
+      "\t.\t$st\t.\t#$nuc[0]\t$nuc[1]\t$nuc[2]\t$nuc[3]\t$nuc[4]\t$nuc[5]".
 	"\t$nuc[6]\t$nuc[7]\tU0\n";
   }
 
   print GFFHDLE "$id\teugAdap\t$ne1\t".$tab[1]."\t".$tab[2].
-    "\t.\t$st\t".$frame[$cmpFrame];
-  for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
-  print GFFHDLE "\tE".$rank;
+    "\t.\t$st\t".$frame[$cmpFrame]."\t#";
+  for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
+  print GFFHDLE "E$rank";
 
   for (my $i=3; $i+1<$#tab-1; $i+=2) {
     print GFFHDLE "\n$id\teugAdap\tIntron\t".($tab[$i-1]+1)."\t".($tab[$i]-1).
-      "\t.\t$st\t.";
-    for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
+      "\t.\t$st\t.\t#";
+    for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
     if ($st eq "-") { $rank--; }
-    print GFFHDLE "\tI".$rank;
+    print GFFHDLE "I$rank";
     print GFFHDLE "\n$id\teugAdap\tE.Intr\t".$tab[$i]."\t".$tab[$i+1].
-      "\t.\t$st\t".$frame[++$cmpFrame];
-    for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
+      "\t.\t$st\t".$frame[++$cmpFrame]."\t#";
+    for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
     if ($st eq "+") { $rank++; }
-    print GFFHDLE "\tE".$rank;
+    print GFFHDLE "E$rank";
   }
 
   if ($nbExon != 1) {
     print GFFHDLE "\n$id\teugAdap\tIntron\t".($tab[-4]+1)."\t".($tab[-3]-1).
-      "\t.\t$st\t.";
-    for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
+      "\t.\t$st\t.\t#";
+    for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
     if ($st eq "-") { $rank--; }
-    print GFFHDLE "\tI".$rank;
+    print GFFHDLE "I$rank";
     print GFFHDLE "\n$id\teugAdap\t$ne2\t".$tab[-3]."\t".$tab[-2].
-      "\t.\t$st\t".$frame[++$cmpFrame];
-    for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
-    if ($st eq "+") { print GFFHDLE "\tE".++$rank; }
-    else            { print GFFHDLE "\tE".$rank;   }
+      "\t.\t$st\t".$frame[++$cmpFrame]."\t#";
+    for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
+    if ($st eq "+") { print GFFHDLE "E".++$rank; }
+    else            { print GFFHDLE "E$rank";    }
   }
 
   if ($tab[-1] != 0) {
     print GFFHDLE "\n$id\teugAdap\t$u2\t".($tab[-2]+1)."\t".abs($tab[-1]).
-      "\t.\t$st\t.";
-    for (my $c=0; $c<8; $c++) { print GFFHDLE "\t".$nuc[$cmpNuc++]; }
-    print GFFHDLE "\tU0";
+      "\t.\t$st\t.\t#";
+    for (my $c=0; $c<8; $c++) { print GFFHDLE $nuc[$cmpNuc++]."\t"; }
+    print GFFHDLE "U0";
   }
   else { $cmpNuc += 8; }
 
