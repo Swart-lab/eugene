@@ -13,6 +13,7 @@ class SensorEst : public Sensor
   unsigned char *ESTMatch;
   Hits **HitTable;
   int NumEST;
+  double estP, estM;
 
  public:
   SensorEst  ();

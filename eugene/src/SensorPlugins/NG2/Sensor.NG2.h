@@ -11,6 +11,8 @@ class SensorNG2 : public Sensor
  private:
   REAL *Acc[2];
   REAL *Don[2];
+  double accB, accP, donB, donP;
+
   void ReadNG2(char[FILENAME_MAX+1], int, int);
 
  public:

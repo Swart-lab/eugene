@@ -10,6 +10,8 @@ class SensorNStart : public Sensor
 {
  private:
   REAL *Start[2];
+  double startP, startB;
+  
   void ReadNStart (char[FILENAME_MAX+1], int, int);
 
  public:

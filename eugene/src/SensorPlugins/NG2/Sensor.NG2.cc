@@ -12,6 +12,11 @@ extern Parameters PAR;
 SensorNG2 :: SensorNG2 ()
 {
   *Acc = NULL;
+  
+  accB = PAR.getD("NG2.accB");
+  accP = PAR.getD("NG2.accP");
+  donB = PAR.getD("NG2.donB");
+  donP = PAR.getD("NG2.donP");
 }
 
 // ----------------------
@@ -50,13 +55,13 @@ void SensorNG2 :: Init (DNASeq *X)
 
   fprintf(stderr, "Reading splice site file (NetGene2)...........");  
   fflush(stderr);
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".splices");
   ReadNG2(tempname, 1, X->SeqLen);
   fprintf(stderr,"forward,");
   fflush(stderr);
 
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".splicesR");
   ReadNG2(tempname, -1, X->SeqLen);
   fprintf(stderr," reverse done\n");
@@ -98,10 +103,10 @@ void SensorNG2 :: ReadNG2(char name[FILENAME_MAX+1], int dir, int SeqLen)
     if (sacc[0] == '-') strcpy(sacc,altsacc);
 
     Acc[rev][k+dir] = atof(sacc);
-    Acc[rev][k+dir] = pow(Acc[rev][k+dir],PAR.AccB[0])*PAR.AccP[0];
+    Acc[rev][k+dir] = pow(Acc[rev][k+dir], accB)*accP;
     
     Don[rev][k] = atof(sdon);
-    Don[rev][k] = pow(Don[rev][k],PAR.DonB[0])*PAR.DonP[0];
+    Don[rev][k] = pow(Don[rev][k], donB)*donP;
     
     k += dir;
   }

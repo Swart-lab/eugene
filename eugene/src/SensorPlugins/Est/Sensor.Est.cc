@@ -30,6 +30,10 @@ int HitsCompare(const void *A, const void *B)
 SensorEst :: SensorEst ()
 {
   ESTMatch = NULL;
+  HitTable = NULL;
+
+  estP = PAR.getD("Est.estP");
+  estM = PAR.getD("Est.estM");
 }
 
 // ----------------------
@@ -37,9 +41,14 @@ SensorEst :: SensorEst ()
 // ----------------------
 SensorEst :: ~SensorEst ()
 {
-  delete HitTable[NumEST];
-  delete HitTable;
-  delete [] ESTMatch;
+  if(ESTMatch != NULL)
+    delete [] ESTMatch;
+  
+  if(HitTable != NULL) {
+    delete HitTable[NumEST];
+    delete HitTable;
+  }
+  HitTable = NULL;
 }
 
 // --------------------------------
@@ -55,21 +64,24 @@ void SensorEst :: Init (DNASeq *X)
  
   type = Type_Content;
   
-  if(ESTMatch != NULL) {
+  if(ESTMatch != NULL)
+    delete [] ESTMatch;
+  
+  if(HitTable != NULL) {
     delete HitTable[NumEST];
     delete HitTable;
-    delete [] ESTMatch;
   }
+  HitTable = NULL;
  
   ESTMatch = new unsigned char[X->SeqLen+1];
   for (i = 0; i <= X->SeqLen; i++)
     ESTMatch[i] = 0;
  
-  strcpy(tempname, PAR.fstname);
+  strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".est");
   fEST = FileOpen(NULL, tempname, "r");
   NumEST = 0;
-  HitTable = ESTAnalyzer(fEST, ESTMatch, PAR.EstM, &NumEST, X);
+  HitTable = ESTAnalyzer(fEST, ESTMatch, estM, &NumEST, X);
   fclose(fEST);
 }
 
@@ -82,25 +94,25 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // Si on a un Gap EST ou si l'on connait le sens du match EST
     if ((ESTMatch[pos] & Gap) || 
 	((ESTMatch[pos] & Hit) && !(ESTMatch[pos] & HitForward)))
-      d->ContentScore[i] += PAR.EstP;
+      d->ContentScore[i] += estP;
 
   for(int i=3; i<6; i++)              // Exon R
     // Si on a un Gap EST ou si l'on connait le sens du match EST
     if ((ESTMatch[pos] & Gap) ||
 	((ESTMatch[pos] & Hit) && !(ESTMatch[pos] & HitReverse)))
-      d->ContentScore[i] += PAR.EstP;
+      d->ContentScore[i] += estP;
 
   // Si on a un Hit EST ou si l'on connait le sens du match EST
   if((ESTMatch[pos] & Hit) ||
      ((ESTMatch[pos] & Gap) && !(ESTMatch[pos] & GapForward)))
-    d->ContentScore[6] += PAR.EstP;    // IntronF
+    d->ContentScore[6] += estP;       // IntronF
 
   // Si on a un Hit EST ou si l'on connait le sens du match EST
   if((ESTMatch[pos] & Hit) ||
      ((ESTMatch[pos] & Gap) && !(ESTMatch[pos] & GapReverse)))
-    d->ContentScore[7] += PAR.EstP;    // IntronR
+    d->ContentScore[7] += estP;       // IntronR
 
-  d->ContentScore[8] += ((ESTMatch[pos] & (Gap|Hit)) != 0)*PAR.EstP;  //InterG
+  d->ContentScore[8] += ((ESTMatch[pos] & (Gap|Hit)) != 0)*estP;  //InterG
 
   d->ESTMATCH_TMP = ESTMatch[pos];  // WARNING : EST -> on est dans intron
 }
@@ -272,7 +284,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	  if (TheStrand & HitReverse) PlotBarI(i,-4,0.9,1,7);
 	}
 	
-	if (PAR.graph && (ThisBlock->Prev != NULL) && 
+	if (PAR.getI("graph") && (ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  if (TheStrand & HitForward) 
 	    PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.9,0.9,7);
@@ -341,7 +353,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	      ESTMatch[i] |= TheStrand << HitToMRight;
 
 	  
-	  if (PAR.graph) {
+	  if (PAR.getI("graph")) {
 	    if (TheStrand & HitForward) 
 	      PlotLine(ThisBlock->Prev->End,ThisBlock->Start,4,4,0.6,0.6,2);
 	    if (TheStrand & HitReverse) 
@@ -354,7 +366,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     }
   }
   
-  if (PAR.graph)
+  if (PAR.getI("graph"))
     for (i = 0; i < X->SeqLen; i++) {
       if (ESTMatch[i] & HitForward) 
 	PlotBarI(i, 4,0.6,1,2);

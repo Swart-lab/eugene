@@ -12,6 +12,11 @@ extern Parameters PAR;
 SensorSPred :: SensorSPred ()
 {
   *Acc = NULL;
+
+  accP = PAR.getD("SPred.accP");
+  accB = PAR.getD("SPred.accB");
+  donP = PAR.getD("SPred.donP");
+  donB = PAR.getD("SPred.donB");
 }
 
 // ----------------------
@@ -50,13 +55,13 @@ void SensorSPred :: Init (DNASeq *X)
 
   fprintf(stderr, "Reading splice site file (Splice Predictor)...");  
   fflush(stderr);
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".spliceP");
   ReadSPred(tempname, 1, X->SeqLen);
   fprintf(stderr,"forward,");
   fflush(stderr);
 
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".splicePR");
   ReadSPred(tempname, -1, X->SeqLen);
   fprintf(stderr," reverse done\n");
@@ -100,11 +105,11 @@ void SensorSPred :: ReadSPred(char name[FILENAME_MAX+1], int dir, int SeqLen)
         
     if (buf[0] == 'D') {
       if (Don[rev][k-(dir+1)/2] == 0.0)
-	Don[rev][k-(dir+1)/2] = pow(strength,PAR.DonB[1])*PAR.DonP[1];
+	Don[rev][k-(dir+1)/2] = pow(strength, donB)*donP;
     }
     else
       if (Acc[rev][k+(dir-1)/2] == 0.0)
-	Acc[rev][k+(dir-1)/2] = pow(strength,PAR.AccB[1])*PAR.AccP[1];
+	Acc[rev][k+(dir-1)/2] = pow(strength, accB)*accP;
   }
   
   if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");

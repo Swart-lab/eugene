@@ -63,7 +63,7 @@ void SensorRiken :: Init (DNASeq *X)
   
   fprintf(stderr, "Reading RAFL gene...");
   fflush(stderr);
-  strcpy(tempname, PAR.fstname);
+  strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".riken");
   fRAFL = FileOpen(NULL, tempname, "r");
   while ((j=fscanf (fRAFL,"%d %d %*s %d %d %*s %s",
@@ -115,7 +115,7 @@ void SensorRiken :: Init (DNASeq *X)
   }
   if(j==(int)RAFLtmp.size()-1) RAFL.push_back(RAFLtmp[j]);
   
-  if (PAR.graph) {
+  if (PAR.getI("graph")) {
     const int HLen = 30;
     
     for (j =0; j<(int)RAFL.size() ;j++) {

@@ -12,6 +12,9 @@ extern Parameters PAR;
 SensorNStart :: SensorNStart ()
 {
   *Start = NULL;
+
+  startP = PAR.getD("NStart.startP");
+  startB = PAR.getD("NStart.startB");
 }
 
 // ----------------------
@@ -42,13 +45,13 @@ void SensorNStart :: Init (DNASeq *X)
   
   fprintf(stderr, "Reading start file (NetStart).................");
   fflush(stderr);
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".starts");
   ReadNStart(tempname, X->SeqLen, 0);
   fprintf(stderr,"forward,");
   fflush(stderr);
   
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".startsR");
   ReadNStart(tempname, X->SeqLen, 1);
   fprintf(stderr," reverse done\n");
@@ -81,7 +84,7 @@ void SensorNStart :: ReadNStart (char name[FILENAME_MAX+1], int Len, int rev)
       exit(2);
     }
     if (rev) j = Len-j+2;
-    Start[rev][j-1] = pow(force,PAR.StartB)*(exp(-PAR.StartP));
+    Start[rev][j-1] = pow(force, startB)*(exp(-startP));
   }
   if (j == -1) fprintf(stderr,"WARNING: empty NetStart file !\n");
   fclose(fp);

@@ -32,7 +32,7 @@ void SensorUser :: Init (DNASeq *X)
 
   fprintf(stderr,"Loading user data...");
   
-  strcpy(tempname, PAR.fstname);
+  strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".user");
   errflag = Utilisateur(tempname);   //prise en compte de donnees utilisateur
     

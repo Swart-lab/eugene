@@ -18,6 +18,15 @@ extern Parameters PAR;
 SensorBlastX :: SensorBlastX ()
 {
   ProtMatch = NULL;
+
+  keyBXLevel[0] = PAR.getD("BlastX.level0");
+  keyBXLevel[1] = PAR.getD("BlastX.level1");
+  keyBXLevel[2] = PAR.getD("BlastX.level2");
+  keyBXLevel[3] = PAR.getD("BlastX.level3");
+  keyBXLevel[4] = PAR.getD("BlastX.level4");
+  keyBXLevel[5] = PAR.getD("BlastX.level5");
+  keyBXLevel[6] = PAR.getD("BlastX.level6");
+  keyBXLevel[7] = PAR.getD("BlastX.level7");
 }
 
 // ----------------------
@@ -49,7 +58,7 @@ void SensorBlastX :: Init (DNASeq *X)
   const int MaxOverlap = 10; 
   const int MaxHitLen  = 15000;
   char tempname[FILENAME_MAX+1];
-  
+
   type = Type_Content;
 
   if(ProtMatch != NULL) {
@@ -70,17 +79,17 @@ void SensorBlastX :: Init (DNASeq *X)
   fprintf(stderr,"Reading Blastx data, level... ");
   fflush(stderr);
   
-  for( k=0; k<(int)strlen(PAR.blastArg); k++ ) {
-    strcpy(tempname,PAR.fstname);
+  for( k=0; k<(int)strlen(PAR.getC("blastArg")); k++ ) {
+    strcpy(tempname,PAR.getC("fstname"));
     strcat(tempname,".blast");
     i = strlen(tempname);
-    tempname[i]   = PAR.blastArg[k] - 1;
+    tempname[i]   = PAR.getC("blastArg")[k] - 1;
     tempname[i+1] = 0;
-    
+
     fblast = FileOpen(NULL,tempname, "r");
     if (fblast == NULL) continue;
     
-    level    = (PAR.blastArg[k] - '0') - 1;
+    level      = (PAR.getC("blastArg")[k] - '0') - 1;
     A[0]     = B[0]= 0;
     ProtId   = A;
     PProtId  = B;
@@ -109,16 +118,16 @@ void SensorBlastX :: Init (DNASeq *X)
 	// Detection d'un INTRON
 	overlap= (PProtFin+1-ProtDeb)*3; // *3 car coord.nucleique
 	// overlap >0 : hits chevauchants, overlap <0 : hits espaces
-	if ((deb-Pfin+overlap) >= PAR.MinLength[8] ){
+	if ((deb-Pfin+overlap) >= PAR.getI("eugene.minL8")){
 	  // Le tableau des introns est rempli prudemment: uniquement les bordures,
 	  // et sans serrer pres de l'exon. 
 	  for(i = Pfin - (overlap<0) * overlap ;
-	      i < Pfin + PAR.MinLength[8] - abs(overlap) ; i++) {
+	      i < Pfin + PAR.getI("eugene.minL8") - abs(overlap) ; i++) {
 	    // debut de l'intron seulement... (dont le score est fonction de
 	    // l'exon precedent)
-	    if (PAR.BlastS[level] >= ProtMatchLevel[i]) {
-	      if (PAR.BlastS[level] > ProtMatchLevel[i]) {
-		ProtMatchLevel[i]= PAR.BlastS[level];
+	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {
+	      if (keyBXLevel[level] > ProtMatchLevel[i]) {
+		ProtMatchLevel[i]= keyBXLevel[level];
 		ProtMatch[i]= -PGlobalScore;
 		ProtMatchPhase[i]=0;
 	      }
@@ -132,12 +141,12 @@ void SensorBlastX :: Init (DNASeq *X)
 	    //		     j=((phase < 0)?-4:4);
 	    //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 	  }
-	  for (i = deb - PAR.MinLength[8] + abs(overlap) ;
+	  for (i = deb - PAR.getI("eugene.minL8") + abs(overlap) ;
 	       i < deb + (overlap<0) * overlap ; i++) {
 	    // ...et fin de l'intron (score est fonction de l'exon actuel)
-	    if (PAR.BlastS[level] >= ProtMatchLevel[i]) {
-	      if (PAR.BlastS[level] > fabs(ProtMatchLevel[i])) {
-		ProtMatchLevel[i]= PAR.BlastS[level];
+	    if (keyBXLevel[level] >= ProtMatchLevel[i]) {
+	      if (keyBXLevel[level] > fabs(ProtMatchLevel[i])) {
+		ProtMatchLevel[i]= keyBXLevel[level];
 		ProtMatch[i]= -GlobalScore;
 		ProtMatchPhase[i]=0;
 	      }
@@ -151,7 +160,7 @@ void SensorBlastX :: Init (DNASeq *X)
 	    //		     PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
 	  }
 	}
-	if (PAR.graph && level<3) {
+	if (PAR.getI("graph") && level<3) {
 	  PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),
 		   LevelColor[level]);
 	  // for(i= Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
@@ -172,16 +181,16 @@ void SensorBlastX :: Init (DNASeq *X)
       phase = ph06(phase);
       
       // HITS -> CODANT
-      if (PAR.graph && level<3) {
+      if (PAR.getI("graph") && level<3) {
 	for (i = deb-1; i < fin; i++) {
 	  PlotBarI(i,PhaseAdapt(phase),0.6+(level/8.0),1,LevelColor[level]);
 	}
       }
       
       for (i = deb-1; i < fin; i++)
-	if (PAR.BlastS[level] >= ProtMatchLevel[i])
-	  if (PAR.BlastS[level] > ProtMatchLevel[i]) {
-	    ProtMatchLevel[i] = PAR.BlastS[level];
+	if (keyBXLevel[level] >= ProtMatchLevel[i])
+	  if (keyBXLevel[level] > ProtMatchLevel[i]) {
+	    ProtMatchLevel[i] = keyBXLevel[level];
 	    ProtMatch[i]= GlobalScore;
 	    ProtMatchPhase[i]= PhaseAdapt(phase);
 	  }

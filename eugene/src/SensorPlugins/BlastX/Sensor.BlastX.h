@@ -11,6 +11,8 @@ class SensorBlastX : public Sensor
  private:
   REAL *ProtMatch, *ProtMatchLevel;
   int  *ProtMatchPhase;
+  double keyBXLevel[8];
+
   void LoadContentScore (DNASeq *);
   int  PhaseAdapt (char);
   char ph06       (char);

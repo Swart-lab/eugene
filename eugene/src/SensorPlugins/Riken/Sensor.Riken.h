@@ -29,6 +29,8 @@ class RAFLgene
 // ****************
 // * Sensor Riken *
 // ****************
+const REAL RAFLPenalty = NINFINITY; 
+
 class SensorRiken : public Sensor
 {
  private:

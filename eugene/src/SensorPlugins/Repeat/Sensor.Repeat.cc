@@ -40,7 +40,7 @@ void SensorRepeat :: Init (DNASeq *X)
   fprintf(stderr,"Reading Intergenic regions... ");
   fflush(stderr);
   
-  strcpy(tempname,PAR.fstname);
+  strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".ig");
   ncfile = FileOpen(NULL,tempname, "r");
   
@@ -52,7 +52,7 @@ void SensorRepeat :: Init (DNASeq *X)
     fin = Min(X->SeqLen,fin)-1;
     for (i = deb; i <= fin; i++) {
        ForcedIG[i] = TRUE;
-       if (PAR.graph) PlotBarI(i,0,0.25,2,6);
+       if (PAR.getI("graph")) PlotBarI(i,0,0.25,2,6);
     }
   }
 }
