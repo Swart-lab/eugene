@@ -53,9 +53,9 @@ LineSearch::LineSearch (void) : OptiAlgorithm()
   Rand = new Random(PAR.getC("LineSearch.Seed"));
 
   // Update de names of parameters with just the first elt of clusters IDENTICAL
-  for (i=0; i<ParaClusters.size(); i++) FirstEltCluster.push_back( true );
+  for (i=0; i<(int)ParaClusters.size(); i++) FirstEltCluster.push_back( true );
   MsgParaNames="";
-  for (i=0; i<ParaName.size(); i++) 
+  for (i=0; i<(int)ParaName.size(); i++) 
     if (ParaClusterRelations[ParaCluster[i]] == IDENTICAL) {
       if ( FirstEltCluster[ParaCluster[i]] ) {
 	MsgParaNames += ReduceName(ParaName[i]) + "\t";
@@ -268,7 +268,7 @@ void LineSearch :: ReduceSearch(void) {
 //-------------------------------------------------------
 void LineSearch::PrintParam(void)
 {
-  int i;
+  unsigned int i;
   vector <bool> FirstEltCluster;
 
   // parameters value with just the first elt of clusters IDENTICAL
