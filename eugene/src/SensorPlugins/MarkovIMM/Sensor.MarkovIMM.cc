@@ -66,11 +66,13 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   if (!IsInitialized) {
     minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
     maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
-    
+    UseM0asIG = (PAR.getI("MarkovIMM.useM0asIG",GetNumber()) != 0);
+
     if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
       fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
       exit(2);
     }
+    
     
     fprintf(stderr,"Loading IMM...");
     fflush(stderr);
@@ -178,8 +180,9 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[7] += log((double)(*IMMatrix[3])[indexR]/65535.0);
     
   // InterG
-  d->contents[8] += 
-    log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
+  d->contents[8] += (UseM0asIG ?
+		     log(X->GC_AT(pos))
+		     : log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0));
     
   // UTR 5' F/R
   d->contents[9] += log((double)(*IMMatrix[6])[indexF]/65535.0);

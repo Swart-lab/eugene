@@ -14,9 +14,11 @@ class SensorMarkovIMM : public Sensor
   static double minGC;
   static double maxGC;
   static bool IsInitialized;
+  static bool UseM0asIG;
   const static int  MODEL_LEN = 9;
   const static int  SIMPLE_MODEL_LEN = 6;
   const static int  ALPHABET_SIZE = 4;
+  
 
  public:
   SensorMarkovIMM  (int n, DNASeq *X);
@@ -31,12 +33,9 @@ class SensorMarkovIMM : public Sensor
 
 extern "C" SensorMarkovIMM * builder0( int n, DNASeq *X) { return new SensorMarkovIMM(n, X);}
 
-
-
 BString_Array* SensorMarkovIMM::IMMatrix[7];
 double SensorMarkovIMM::minGC;
 double SensorMarkovIMM::maxGC;
 bool SensorMarkovIMM::IsInitialized = false;
-
-
+bool SensorMarkovIMM::UseM0asIG;
 #endif
