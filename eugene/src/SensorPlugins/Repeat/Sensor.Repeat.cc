@@ -36,7 +36,7 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
 
   type = Type_Content;
 
-  fprintf(stderr,"Reading Intergenic regions...");
+  fprintf(stderr,"Reading Intergenic regions....");
   fflush(stderr);
   
   strcpy(tempname,PAR.getC("fstname"));
@@ -44,8 +44,17 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   ncfile = FileOpen(NULL,tempname, "r");
   
   while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
-    deb = Max(1,deb)-1;
-    fin = Min(X->SeqLen,fin)-1;
+    int s = (int)vDeb.size();
+    deb   = Max(1,deb)-1;
+    fin   = Min(X->SeqLen,fin)-1;
+    printf("Deb:%d\tFin:%d\n",deb,fin);
+    for(int j=0;j<s;j++)
+      printf("%d\tVDeb:%d\tVFin:%d\n",j,vDeb[j],vFin[j]);
+    if(deb > fin  ||
+       (s != 0  &&  vFin[s-1] >= deb)) {
+      fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
+      exit(2);
+    }
     vDeb.push_back( deb );
     vFin.push_back( fin );
   }
@@ -93,13 +102,13 @@ void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
     if (index < (int) vFin.size())
       if (pos >= vDeb[index]) { 
-	for(int i=0; i<6; i++)   // Exon(6)
+	for(int i=DATA::ExonF1; i<=DATA::ExonR3; i++)	 // Exon(6)
 	  d->contents[i] -= exonPenalty;
-	for(int i=6; i<8; i++)   // Intron (2)
+	for(int i=DATA::IntronF; i<=DATA::IntronR; i++)  // Intron(2)
 	  d->contents[i] -= intronPenalty; 
-	for(int i=9; i<13; i++)  // UTR (4)
-	  d->contents[i] -= UTRPenalty; 
-	if (pos == vFin[index]) index++;
+	for(int i=DATA::UTR5F; i<=DATA::IntronUTRR; i++) // UTR(4)+IntronUTR(2)
+	  d->contents[i] -= UTRPenalty;
+ 	if (pos == vFin[index]) index++;
       }
   }
 }
