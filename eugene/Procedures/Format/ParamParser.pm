@@ -72,6 +72,14 @@ ParamParser - parse parameters from different sources (CGI.pm, GetOpt, cgi-lib, 
 	to use the same options with the current module you must write
 	$rh_param = New ParamParser('GETOPTLONG',("length=i","file=s","verbose"));
 
+    8. automatic detection of the source
+	$rh_param = New ParamParser('AUTO');
+
+			1. ARGV
+			2. CGIPM
+			3. CGILIB
+			4. ENV
+
 =head1 DESCRIPTION
 
 24-Jun-2004
@@ -81,6 +89,10 @@ creation of Dump methods in order to export paramparser to a file or %ENV
 29-Oct-2004
 add the capability to define/select a NameSpace : SelectNameSpace
 add a fonction to get all keys matching a given pattern : GetKeys
+28-Dec-2004
+remove a bug added to the Get function in the 29-Oct-2004 release
+remove a bug in the __ToFile method where namespace was not used
+the automatic detection is now an explicit parameter of the constructor and not the defaut
 
 =cut
 
@@ -93,7 +105,7 @@ use Carp;
 
 BEGIN
 {
-    our $VERSION="0.35"; 
+    our $VERSION="0.36"; 
 }
 
 =item New
@@ -158,8 +170,7 @@ my $opt = ( defined($a_opt[0]) ) ? $a_opt[0] :  "";
 		return;
 	}
 
-
-	if ( ! defined($source) )
+	if ( $source =~ /AUTO/i )
 	{
 		# the module tries to find automaticaly the source of parameter
 		# (the source cannot be neither GetOpt* nor filename)
@@ -358,7 +369,7 @@ my($self,$opt) = @_;
 	my $key = $$self{'__name_space'}.$opt;
 	if ( defined($$self{'__h_opt'}{$key})  )
 	{
-		return "$$self{'__h_opt'}{$key}";
+		return $$self{'__h_opt'}{$key};
 	}
 	else
 	{
@@ -1004,16 +1015,24 @@ my($self)=@_;
 
 sub __ToFile
 {
-my($self,$target)=@_;
+my($self,$target,$prefix)=@_;
+my $ns = $$self{'__name_space'};
 
-	open(PARAMPARSERCFG,">$target") or &Carp::croak("ERROR >$target<\n");
+    open(PARAMPARSERCFG,">$target") or &Carp::croak("ERROR >$target<\n");
 	foreach my $key (sort keys (%{$$self{'__h_opt'}}))
 	{
-		my $ns = $$self{'__name_space'};
-		if ( defined($key) && defined($$self{'__h_opt'}{$key}) && $key =~ /^$ns/ )
-		{
-			print PARAMPARSERCFG "$key=".$$self{'__h_opt'}{$key}."\n";
-		}
+			if ( defined($key) && defined($$self{'__h_opt'}{$key}) && $key =~ /^$ns/ )
+			{
+					if ( $prefix ne "" && $key !~ /^$prefix/ )
+					{
+							my $nkey="$prefix$key";
+							print PARAMPARSERCFG "$nkey=".$$self{'__h_opt'}{$key}."\n";
+					}
+					else
+					{
+							print PARAMPARSERCFG "$key=".$$self{'__h_opt'}{$key}."\n";
+					}
+			}
 	}
 	close(PARAMPARSERCFG);
 }
@@ -1027,10 +1046,10 @@ my($self,$target)=@_;
 sub __ToENV
 {
 my($self,$prefix)=@_;
+my $ns = $$self{'__name_space'};
 
 	foreach my $key (sort keys (%{$$self{'__h_opt'}}))
 	{
-		my $ns = $$self{'__name_space'};
 		next if ( $key !~ /^$ns/ );
 		if ( defined($key) && defined($$self{'__h_opt'}{$key}) )
 		{
