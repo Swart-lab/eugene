@@ -19,7 +19,7 @@
 // arriere pour le plus court chemin avec contrainte de duree minimum.
 // Le premier element Path (dans Track) ne doit pas etre
 // efface. Path.Next est le dernier insere, Path.Prev est le plus vieux
-// ??? A t on vraimen t besoin de Prev ?
+// ??? A t'on vraiment besoin de Prev ?
 // ------------------------------------------------------------------
 
 #ifndef  BACKP_H_INCLUDED
