@@ -19,8 +19,10 @@
 #include "../../../EuGene/DNASeq.cc"
 
 int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
-char* DBfile     = "/www/db/sp";                 // infile (on maladeta)
-char* MATRIXfile = "swissprot.ordre2.usi.bin";  // outfile
+//char* DBfile     = "/www/db/sp";                 // infile (on maladeta)
+//char* MATRIXfile = "swissprot.ordre2.usi.bin";  // outfile
+char* DBfile     = "/Annotation/ExternalData/SwissProt/sprot.fas"; //(database infile on MAUBIE)
+char* MATRIXfile = "SwissProt_rel41.order2.usi.bin";  // outfile
 
 int main()
 {
@@ -54,14 +56,14 @@ int main()
   fprintf(stderr," - adding pseudocounts...");
   COUNT.pseudocount(1);
   fprintf(stderr,"done\n");
-  //  COUNT.affichage(0);  (verbose, displays the counts)
+  COUNT.affichage(0);  //(verbose, displays the counts)
 
   //----------------------------------------------------------------//
   // COMPUTE PROBS (store results in matrix MOD)
   fprintf(stderr," - computing probs...");
   MOD.compte2probas(COUNT);
   fprintf(stderr,"done\n");
-  //  MOD.affichage(0);  (verbose, displays the probs)
+  MOD.affichage(0);  //(verbose, displays the probs)
 
   //----------------------------------------------------------------//
   // SAVE data in the matrix file
