@@ -101,7 +101,7 @@ Hits* Hits::ReadFromFile(FILE* ESTFile, int *NumEST)
   int deb,fin,brin,EstDeb,EstFin,poids,read;
   char A[128],B[128];
   Block *ThisBlock = NULL;
-  Hits *OneEST = NULL,*ThisEST,*AllEST = NULL;
+  Hits *OneEST = NULL, *ThisEST = NULL, *AllEST = NULL;
 
   A[0] = B[0]= 0;
   EstId = A;
