@@ -114,7 +114,7 @@ void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorRepeat :: Plot(DNASeq *TheSeq)
 {
-  int i,j;
+  int i;
   
   for (i =0; i < (int)vDeb.size(); i++)
     PlotRepeat(vDeb[i],vFin[i]);
