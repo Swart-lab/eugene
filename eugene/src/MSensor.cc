@@ -118,8 +118,10 @@ void MasterSensor :: InitSensors (DNASeq *X)
 void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 {
   int i;
-  for(i=0; i<2;  i++) d->Stop[i] = d->Start[i] = d->Acc[i] = d->Don[i] = 0.0;
+  for(i=0; i<2;  i++) 
+    d->tStart [i] = d->tStop[i] = d->Stop[i] = d->Start[i] = d->Acc[i] = d->Don[i] = 0.0;
   for(i=0; i<13; i++) d->ContentScore[i] = 0.0;
+  d->Ins = d->Del = 0.0;
 
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
   
@@ -138,8 +140,9 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
   for(i=0; i<13; i++)
     printf (" %.2f",d->ContentScore[i]);
   for(i=0; i<2;  i++)
-    printf (" || %1.0f %.2f %.2f %.2f",d->Stop[i],d->Start[i],d->Acc[i],d->Don[i]);
-  printf("\n");
+    printf (" || %.2f %.2f %1.0f %.2f %.2f %.2f",
+	    d->tStart[i],d->tStop[i],d->Stop[i],d->Start[i],d->Acc[i],d->Don[i]);
+  printf(" || %.2f %.2f\n",d->Ins,d->Del);
 }
 
 // --------------------------------------------
