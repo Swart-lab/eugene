@@ -25,7 +25,7 @@ class Sensor
   
  public:
   TYPE_SENSOR type;
-
+  
   Sensor  ();
   virtual ~Sensor ();
   virtual void Init     (DNASeq *) = 0;
@@ -34,11 +34,5 @@ class Sensor
   void CheckSplices (DNASeq *, REAL **, REAL **);
 };
 
-class SensorFactory
-{
- public:
-  SensorFactory() { }
-  virtual ~SensorFactory() { }
-  virtual Sensor * CreateSensor() = 0;
-};
 #endif
+
