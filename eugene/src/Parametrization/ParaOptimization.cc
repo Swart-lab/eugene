@@ -88,11 +88,13 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
 void ParaOptimization::Init(int argc, char * argv [])
 {
   std::string algo_name;
+  std::string para_optimization_test;
 
   ExecutableName = argv[0];
-  IsTest = (((std::string) PAR.getC("ParaOptimization.Test") == "TRUE") ? true : false);
+  para_optimization_test = (std::string) PAR.getC("ParaOptimization.Test");
+  IsTest = ( ( (para_optimization_test == "1") || (para_optimization_test == "TRUE") )  ? true : false);
   // Inhibit graphic mode
-  PAR.set("Output.graph", "FALSE");
+  PAR.set("Output.graph", "0");
 
   // Creation of required instances of optimization algorithms  
   algo_name = PAR.getC("ParaOptimization.Algorithm");

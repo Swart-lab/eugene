@@ -39,8 +39,10 @@ OptiAlgorithm::OptiAlgorithm(void)
   int n, c;
   std::string relation;
   std::vector <int> v;
+  std::string para_optimization_trace;
 
-  IsTracing = ( (((std::string) PAR.getC("ParaOptimization.Trace")) == "TRUE") ? true : false );
+  para_optimization_trace = (std::string) PAR.getC("ParaOptimization.Trace");
+  IsTracing = ( ( (para_optimization_trace == "1") || (para_optimization_trace == "TRUE") ) ? true : false );
 
   NbParaCluster = PAR.getI("ParaOptimization.NbCluster");
   for (int i = 0; i < NbParaCluster; i++) {

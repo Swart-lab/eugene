@@ -945,6 +945,7 @@ int main  (int argc, char * argv [])
   char   grnameFile[FILENAME_MAX+1];
   char   grname[FILENAME_MAX+1];
   int    graph;
+  std::string para_optimization_use;
 
   fprintf(stderr,"-------------------------------------");
   fprintf(stderr,"--------------------------------\n");
@@ -952,7 +953,8 @@ int main  (int argc, char * argv [])
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
 
-  if ((std::string) PAR.getC("ParaOptimization.Use") ==  "TRUE") 
+  para_optimization_use = PAR.getC("ParaOptimization.Use");
+  if ((para_optimization_use == "1") || (para_optimization_use == "TRUE")) 
     OPTIM.ParaOptimize(argc, argv);
   else 
     {

@@ -40,6 +40,7 @@ Genetic::Genetic (void) : OptiAlgorithm()
 {
   int n;
   double d;
+  std::string eugene_para;
 
   NbRun = PAR.getI("Genetic.NbRun");
   NbGeneration = PAR.getI("Genetic.NbGeneration");
@@ -69,10 +70,12 @@ Genetic::Genetic (void) : OptiAlgorithm()
     IsSharing = true;
     Share = new Sharing (d);
   }
-  IsClustering =  ( ((std::string) PAR.getC("Genetic.Clustering")) == "TRUE") ? true : false;
-
-  IsSAMutating =  ( ((std::string) PAR.getC("Genetic.SA.Mutation")) == "TRUE") ? true : false;
-  IsSACrossingOver =  ( ((std::string) PAR.getC("Genetic.SA.CrossOver")) == "TRUE") ? true : false;
+  eugene_para = (std::string) PAR.getC("Genetic.Clustering");
+  IsClustering =  ( (eugene_para == "1") || (eugene_para == "TRUE") ) ? true : false;
+  eugene_para = (std::string) PAR.getC("Genetic.SA.Mutation");
+  IsSAMutating =  ( (eugene_para == "1") || (eugene_para == "TRUE") ) ? true : false;
+  eugene_para = (std::string) PAR.getC("Genetic.SA.CrossOver");
+  IsSACrossingOver =  ( (eugene_para == "1") || (eugene_para == "TRUE") ) ? true : false;
 
   d_mean=0.0;
   minmaxfactor= 2.0;
