@@ -193,7 +193,7 @@ template<class CHAINE, typename T> TabChaine<CHAINE,T> :: TabChaine(int ordre, C
 }
 
 // POURQUOI NE COMPILE PAS AVEC "CONST"?!!!
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l=-1)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l)
 {
   printf("Affichage de la classe template TabChaine:\n");
   if(alphabet != NULL) alphabet->affichage();
@@ -201,7 +201,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichage(int l=-
   if(l>=0) affichagevaleurs(l);
 }
 
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l=0) 
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(int l) 
 {
   int i;
   char* affiche;
@@ -280,7 +280,7 @@ template<class CHAINE, typename T> char* TabChaine<CHAINE,T> :: indice2mot(int i
   return (alphabet->code2mot((indice-index),lgr));
 }
 
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice, int n=1)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: incremente(int indice, int n)
 {
   if (indice < nbrevaleurs) VAL[indice] += n;
   if (indice2lgrmot(indice)==1) VAL[0]  += n;
@@ -310,13 +310,13 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: initialisation(do
 }
 
 // permet d'eviter des probas de 0 (et du coup des log de 0...)
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes=1)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: pseudocount (int pseudocomptes)
 {
   for (int i=0;i<nbrevaleurs;i++)
     incremente(i,pseudocomptes);
 }
 
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int parcodon=0)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int parcodon)
 {
   int i,j;
   if ( (seq!=NULL)&&(strlen(seq)>lgrmax)) {
@@ -332,7 +332,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
   }
 }
 
-template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int debut, int fin, int parcodon=0)
+template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int debut, int fin, int parcodon)
 {
   int i,j;
   if ((seq!=NULL)&&(strlen(seq)>lgrmax)) {
@@ -456,7 +456,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2seq (FILE 
   return  1;
 }
 
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon=0)
+template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int parcodon)
 {
   char* Sequence;
   while (fichier2seq(fp,Sequence)) {
@@ -465,7 +465,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FI
   };
 }
 
-template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon=0)
+template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
 {
   char* Sequence;
   while (fichier2seq(fp,Sequence)) {
