@@ -3,17 +3,17 @@ Loading sequence...SYNO_ARATH, 3699 bases read, GC Proportion = 38.8%
 Loading Sensor.EuStop.........0
 Loading Sensor.FrameShift.....0
 Loading Sensor.IfElse.........0
- -If  : Sensor.NG2	1
-Reading splice site file (NetGene2)...........forward, reverse done
- -Else: Sensor.SPred	1
-Reading splice site file (Splice Predictor)...forward, reverse done
 Loading Sensor.MarkovConst....0
 Loading Sensor.MarkovIMM......0
-Loading IMM...1 2 3 4 5 6 7 done
 Loading Sensor.NStart.........0
-Reading start file (NetStart).................forward, reverse done
 Loading Sensor.Transcript.....0
 Loading Sensor.User...........0
+Loading Sensor.NG2............0
+Loading Sensor.SPred..........0
+Reading splice site file (NetGene2)...........forward, reverse done
+Reading splice site file (Splice Predictor)...forward, reverse done
+Loading IMM...1 2 3 4 5 6 7 done
+Reading start file (NetStart).................forward, reverse done
 Loading user data............done
 Optimal path length = 4874.7719
 
