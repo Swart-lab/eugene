@@ -77,7 +77,7 @@ void SensorNG2 :: ReadNG2F(char name[FILENAME_MAX+1], int SeqLen)
   char buf[FILENAME_MAX];
   char sacc[10],sdon[10];
   char altsacc[10],altsdon[10];
-  int i = 0, j;
+  int i, j,pos;
   
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
@@ -87,12 +87,14 @@ void SensorNG2 :: ReadNG2F(char name[FILENAME_MAX+1], int SeqLen)
   
   for (i = 0; i < SeqLen; i++) {
     // final value of netgene2 
-    j = fscanf(fp,"%*s %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
-	       altsdon,altsacc,sdon,sacc);
-    if (j < 4) {
+    j = fscanf(fp,"%d %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
+	       &pos,altsdon,altsacc,sdon,sacc);
+
+    if ((j < 4) || (pos != i+1)) {
       fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
       exit(2);
-     }
+    }
+
     if (sdon[0] == '-') strcpy(sdon,altsdon);
     if (sacc[0] == '-') strcpy(sacc,altsacc);
     
@@ -117,7 +119,7 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
   char buf[FILENAME_MAX];
   char sacc[10],sdon[10];
   char altsacc[10],altsdon[10];
-  int i = 0, j, k;
+  int i, j, k,pos;
   
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
@@ -128,9 +130,9 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
   k = SeqLen;
   for (i = 0; i < SeqLen; i++) {
     // final value of netgene2 
-    j = fscanf(fp,"%*s %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
-	       altsdon,altsacc,sdon,sacc);
-    if (j < 4) {
+    j = fscanf(fp,"%d %*s %s %s %*s %*s %*s %*s %s %s %*s %*s",
+	       &pos,altsdon,altsacc,sdon,sacc);
+    if ((j < 4) || (pos != i+1)) {
       fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
       exit(2);
      }
