@@ -28,8 +28,6 @@ SensorStartWAM :: SensorStartWAM (int n, DNASeq *X) : Sensor(n)
 
   char modelfilename[FILENAME_MAX+1];
   MarkovianOrder= PAR.getI("StartWAM.MarkovianOrder");
-  ScaleCoef = PAR.getD("StartWAM.ScaleCoef");
-  ScalePenalty= PAR.getD("StartWAM.ScalePenalty");
   NbNtBeforeATG = PAR.getI("StartWAM.NbNtBeforeATG");
   NbNtAfterATG = PAR.getI("StartWAM.NbNtAfterATG");
   MotifLength= NbNtBeforeATG + 3 + NbNtAfterATG;
@@ -53,6 +51,9 @@ SensorStartWAM :: ~SensorStartWAM ()
 // ----------------------
 void SensorStartWAM :: Init (DNASeq *X)
 {
+  ScaleCoef = PAR.getD("StartWAM.ScaleCoef*");
+  ScalePenalty= PAR.getD("StartWAM.ScalePenalty*");
+
   if (PAR.getI("Output.graph")) Plot(X);
 }
 

@@ -31,13 +31,9 @@ SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
   char donmodelfilename[FILENAME_MAX+1];
   char accmodelfilename[FILENAME_MAX+1];
   MarkovianOrder= PAR.getI("SpliceWAM.MarkovianOrder");
-  DonScaleCoef = PAR.getD("SpliceWAM.DonScaleCoef");
-  DonScalePenalty= PAR.getD("SpliceWAM.DonScalePenalty");
   NbNtBeforeGT = PAR.getI("SpliceWAM.NbNtBeforeGT");
   NbNtAfterGT = PAR.getI("SpliceWAM.NbNtAfterGT");
   DonorSiteLength= NbNtBeforeGT + 2 + NbNtAfterGT;
-  AccScaleCoef = PAR.getD("SpliceWAM.AccScaleCoef");
-  AccScalePenalty= PAR.getD("SpliceWAM.AccScalePenalty");
   NbNtBeforeAG = PAR.getI("SpliceWAM.NbNtBeforeAG");
   NbNtAfterAG = PAR.getI("SpliceWAM.NbNtAfterAG");
   AcceptorSiteLength= NbNtBeforeAG + 2 + NbNtAfterAG;
@@ -65,6 +61,11 @@ SensorSpliceWAM :: ~SensorSpliceWAM ()
 // ----------------------
 void SensorSpliceWAM :: Init (DNASeq *X)
 {
+  AccScaleCoef = PAR.getD("SpliceWAM.AccScaleCoef*");
+  AccScalePenalty= PAR.getD("SpliceWAM.AccScalePenalty*");
+  DonScaleCoef = PAR.getD("SpliceWAM.DonScaleCoef*");
+  DonScalePenalty= PAR.getD("SpliceWAM.DonScalePenalty*");
+
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
