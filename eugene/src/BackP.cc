@@ -21,6 +21,7 @@ BackPoint :: BackPoint  ()
   {
    State = -1;
    StartPos = -1;
+   SwitchType = SwitchAny;
    Cost = Additional = 0.0;
    Next = Prev = Origin = NULL;
   }
@@ -32,6 +33,7 @@ BackPoint :: BackPoint  (char state, int pos, double cost)
 {
   State = state;
   StartPos = pos;
+  SwitchType = SwitchAny;
   Cost = cost;
   Additional = 0.0;
   Next = Prev = Origin = NULL;
@@ -96,13 +98,13 @@ void BackPoint :: BackTrace (char *Choix)
   char etat;
   
   pos = It->StartPos;
-  etat =(It->State >= 12 ? 12 : It->State);
+  etat =It->State;
   It  = It->Origin;
   
   do {
     for (i = pos; i > It->StartPos; i--) Choix[i] = etat;
     pos = It->StartPos;
-    etat = (It->State >= 12 ? 12 : It->State);
+    etat = It->State;
     It = It->Origin;
   }  while (It != NULL);
 }
