@@ -26,10 +26,11 @@
 
 #define EugDir getenv("EUGENEDIR")
 
+#define DEFAULT_PARA_FILE "./eugene.par"
+#define POSSIBLE_ARGUMENTS "GUREBdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:Z::A:"
+
 const int FASTA_Len = 50;
-const int MAX_LINE = 300;
-const int TRUE  = 1;
-const int FALSE = 0;
+const int MAX_LINE  = 300;
 const double NINFINITY   = log(0.0);
 
 // Les Hits EST
