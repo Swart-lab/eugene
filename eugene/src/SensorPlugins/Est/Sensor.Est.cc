@@ -120,73 +120,69 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   unsigned char cESTMatch = 0; // current ESTMatch
   
+  // Peut on faire un bete acces sequentiel ?
   if((index != 0                &&  vPos[index-1] >= pos) ||
-     (index < (int)vPos.size()  &&  vPos[index]   <  pos))
-    {
-      iter = lower_bound(vPos.begin(), vPos.end(), pos);
-      if(*iter == pos) {
-	cESTMatch = vESTMatch[iter-vPos.begin()];
-	for(int i=0; i<3; i++)              // Exon F
-	  // Si on a un Gap EST ou si l'on connait le sens du match EST
-	  if ((cESTMatch & Gap) || 
-	      ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
-	    d->contents[i] += estP;
-	
-	for(int i=3; i<6; i++)              // Exon R
-	  // Si on a un Gap EST ou si l'on connait le sens du match EST
-	  if ((cESTMatch & Gap) ||
-	      ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
-	    d->contents[i] += estP;
-	
-	// Si on a un Hit EST ou si l'on connait le sens du match EST
-	if((cESTMatch & Hit) ||
-	   ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
-	  d->contents[DATA::IntronF] += estP;
-	
-	// Si on a un Hit EST ou si l'on connait le sens du match EST
-	if((cESTMatch & Hit) ||
-	   ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
-	  d->contents[DATA::IntronR] += estP;
-	
-	d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
-	
-	d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
-	index = iter-vPos.begin() + 1;
-      }
-      else index = iter-vPos.begin();
-    }
-  else
-    if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
-      cESTMatch = vESTMatch[index];
-      for(int i=0; i<3; i++)              // Exon F
-	// Si on a un Gap EST ou si l'on connait le sens du match EST
-	if ((cESTMatch & Gap) || 
-	    ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
-	  d->contents[i] += estP;
-      
-      for(int i=3; i<6; i++)              // Exon R
-	// Si on a un Gap EST ou si l'on connait le sens du match EST
-	if ((cESTMatch & Gap) ||
-	    ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
-	  d->contents[i] += estP;
-      
-      // Si on a un Hit EST ou si l'on connait le sens du match EST
-      if((cESTMatch & Hit) ||
-	 ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
-	d->contents[DATA::IntronF] += estP;
-      
-      // Si on a un Hit EST ou si l'on connait le sens du match EST
-      if((cESTMatch & Hit) ||
-	 ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
-	d->contents[DATA::IntronR] += estP;
-      
-      d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
-      
-      d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
-      index++;
+     (index < (int)vPos.size()  &&  vPos[index]   <  pos))  {
+    // Non... on se repositionne en temps logarithmique
+    iter = lower_bound(vPos.begin(), vPos.end(), pos);
+    index = iter-vPos.begin();
+  }
+  // On est juste avant ou sur pos
+  
+   // Si on est dessus
+  if (index < (int)vPos.size()  &&  vPos[index] == pos) {
+
+    cESTMatch = vESTMatch[index];
+    
+    // Exon Forward
+    // Si on a un Gap EST ou si l'on connait le sens du match EST
+    for(int i=0; i<3; i++)
+      if ((cESTMatch & Gap) || 
+	  ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
+	d->contents[i] += estP;
+    
+    // Exon Reverse
+    // Si on a un Gap EST ou si l'on connait le sens du match EST
+    for(int i=3; i<6; i++)              
+      if ((cESTMatch & Gap) ||
+	  ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
+	d->contents[i] += estP;
+    
+    // Intron Forward
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((cESTMatch & Hit) ||
+       ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
+      d->contents[DATA::IntronF] += estP;
+    
+    // Intron Reverse
+    // Si on a un Hit EST ou si l'on connait le sens du match EST
+    if((cESTMatch & Hit) ||
+       ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
+      d->contents[DATA::IntronR] += estP;
+    
+    // UTR Forward
+    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
+      d->contents[DATA::UTR5F] += estP;
+      d->contents[DATA::UTR3F] += estP;
     }
 
-  // Pour que les UTR soient supportés par un EST
+    // UTR Reverse
+    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
+      d->contents[DATA::UTR5F] += estP;
+      d->contents[DATA::UTR3F] += estP;
+    }
+
+    // Intergenique: tout le temps si on a un match
+    d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
+    
+    d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
+
+    index++;
+  }
+
+   // Pour que les UTR soient supportés par un EST
   if ( cESTMatch == 0  &&  (int)vPos.size() != 0) {
     // Left
     for (int k=1; k<=utrM; k++) {
@@ -221,6 +217,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       }
     }
   }
+
 }
 
 // -----------------------
