@@ -48,14 +48,13 @@ class MasterSensor
   SensorLoader **dllList;
   
  public:
-  MasterSensor  ();
-  ~MasterSensor ();
-  void InitMaster   (void);
-  void InitSensors  (DNASeq *);
-  void GetInfoAt    (DNASeq *, int, DATA *);
-  void PrintDataAt  (DNASeq *X, int, DATA *);
-  int  GetInfoSpAt  (TYPE_SENSOR, DNASeq *, int, DATA *);
-  void PostAnalyse  (Prediction *);
+  ~MasterSensor (void);
+  void InitMaster   (DNASeq *X);
+  void InitSensors  (DNASeq *X);
+  void GetInfoAt    (DNASeq *X, int pos, DATA *d);
+  void PrintDataAt  (DNASeq *X, int pos, DATA *d);
+  int  GetInfoSpAt  (TYPE_SENSOR type, DNASeq *X, int pos, DATA *d);
+  void PostAnalyse  (Prediction *pred);
 };
 
 #endif

@@ -37,20 +37,18 @@ UseSensor :: ~UseSensor () {}
 
 extern Parameters PAR;
 
-// ------------------------
-// Default constructor.
-// ------------------------
-MasterSensor :: MasterSensor ()
-{
-}
 
 // ------------------------
 //  Default destructor.
 // ------------------------
-MasterSensor :: ~MasterSensor ()
+MasterSensor :: ~MasterSensor (void)
 {
-  for(int i=0; i<(int)theSensors.size(); i++) delete theSensors[i];
-  theSensors.clear();
+  ///////////////////  Need to comment ///////////////////////
+  // Create a segmentation fault when asking to delete a second sensor instance 
+  // of sensor with static attributs; for example MarkovIMM.
+  //  for(int i=0; i<(int)theSensors.size(); i++) delete theSensors[i];
+  //  theSensors.clear();
+  ////////////////////////////////////////////////////////////
 
   for(int i=0; i<(int)msList.size(); i++) {
     delete msList[i];
@@ -62,7 +60,7 @@ MasterSensor :: ~MasterSensor ()
 // ------------------------
 //  Init Master.
 // ------------------------
-void MasterSensor :: InitMaster (void)
+void MasterSensor :: InitMaster (DNASeq *X)
 {
   char *key_name,*pluginsDir;
   int  val_prior;
@@ -108,7 +106,7 @@ void MasterSensor :: InitMaster (void)
 	for(int k=strlen(msList[i]->Name); k < 22; k++)
 	  fprintf(stderr,".");
 	fprintf(stderr,"%d\n",j);
-	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
+	theSensors.push_back( dllList[nbSensors]->MakeSensor(j, X));
       }
       else {
 	fprintf(stderr,"Error: ignored plugin (invalid or not found) : %s\n",soList[i]);
