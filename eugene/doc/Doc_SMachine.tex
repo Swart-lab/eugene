@@ -2,63 +2,15 @@
 
 \subsubsection{\texttt{Sensor.SMachine}}
 
+Todo.
+
 \paragraph{Description}
 
 This plugin injects possible splice sites as predicted by the
-\textsc{SpliceMachine} program. The plugin reads the prediction of the
-programs from four files whose names are derived from the sequence name
-
-This documentation is not up to date.
-
-by adding the \texttt{.splices} and \texttt{.splicesR} suffix
-(respectively prediction for the forward and reverse strand).
-
-The sensor is activated by setting the value TRUE for the parameter
-\texttt{Sensor.NG2.use} in the parameter file. The score for acceptor
-and donor prediction is rescaled by the parameters {\tt NG2.accP} and
-{\tt NG2.accB} for acceptors and {\tt NG2.donP} and {\tt NG2.donB} for
-donors (see below).
-
-Here is an example of NG2 parameters definition.
-\begin{Verbatim}[fontsize=\small]
-NG2.accP*        0.903
-NG2.accB*        5.585
-NG2.donP*        0.980
-NG2.donB*        27.670
-Sensor.NG2.use   TRUE
-Sensor.NG2       1      # Sensor priority
-\end{Verbatim}
+SpliceMachine program. 
 
 \paragraph{Input files format}
 
-The files with \texttt{.splices} and \texttt{.splicesR} suffix are
-obtained by running \textsc{NetGene2} which can be obtained at
-\texttt{http://www.cbs.dtu.dk/services/NetGene2/} and using the
-detailed output of the software.
-
-Here is an extract from \texttt{SYNO\_ARATH.fasta.splices}:
-\begin{Verbatim}[fontsize=\small]
-    396 C  0      0      0.903 2  0.835  0.862  0      0      -     - 
-    397 T  0      0      0.858 3  0.828  0.869  0      0      -     - 
-    398 C  0      0      0.873 1  0.822  0.876  0      0      -     - 
-    399 A  0      0      0.826 2  0.816  0.882  0      0      -     - 
-    400 G  0      0      0.869 3  0.809  0.889  0      0     -2.337 359 
-    401 A  0      0      0.862 1  0.803  0.896  0      0      -     - 
-    402 G  0      0      0.794 2  0.798  0.901  0      0     -2.337 359 
-    403 C  0      0      0.809 3  0.792  0.907  0      0      -     - 
-    404 A  0      0      0.833 1  0.786  0.914  0      0      -     - 
-    405 G  0      0      0.823 2  0.780  0.920  0      0     -2.337 359 
-    406 T  0      0      0.845 3  0.774  0.926  0      0      -     - 
-    407 G  0      0      0.792 1  0.769  0.932  0      0      -     - 
-    408 T  0      0      0.745 2  0.764  0.936  0      0      -     - 
-    409 C  0      0      0.792 3  0.759  0.942  0      0      -     - 
-    410 A  0      0      0.802 1  0.753  0.948  0      0      -     - 
-    411 C  0      0      0.764 2  0.749  0.953  0      0      -     - 
-[...]
-\end{Verbatim}
-
-To run Netgene2, the following parameters are used (for Arabidopsis
-thaliana): \texttt{netgene2 -a -e -p -r -s at <Fasta sequence>}.
 
 \paragraph{Filtering input information}
 
@@ -66,30 +18,11 @@ No filtering.
 
 \paragraph{Integration of information}
 
-The integrated score for donor/acceptor prediction is read (columns 9
-and 10). If it is not available (extremities of the sequence) then the
-non integrated score is used (columns 3 and 4).
-
-The score read $s$ is rescaled using the {\tt NG2.accP} and {\tt
-NG2.accB} parameters for acceptors and {\tt NG2.donP} and {\tt
-NG2.donB} parameters for donors as follows:
-
-\[s' = B*s^P\]
-
-All predictions that use a predicted splice site receive a $\log(s')$
-penalty while those that go througha predicted splice site while they
-could have used it receive a $\log(1-s')$ penalty.
-
-
 \paragraph{Post analyse}
 
 No post analyse.
 
 \paragraph{Graph}
-
-Predicted splice sites are visible on the intronic tracks as green
-(donor) and magenta (acceptor) vertical lines whose length indicates
-the site score.
 
 
 
