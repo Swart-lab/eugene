@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2002 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted without                   */
+/*                 the express written permission of INRA.                   */
+/*                     Mail : tschiex@toulouse.inra.fr                       */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/Tester/Sensor.GSplicer.h            */
+/* Description  : Sensor Gene Splicer                                        */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : May 2003         	   		                     */
+/*****************************************************************************/
+
 #ifndef  SENSOR_GSPLICER_H_INCLUDED
 #define  SENSOR_GSPLICER_H_INCLUDED
 
@@ -15,8 +27,9 @@ class SensorGSplicer : public Sensor
   int iAccF, iAccR, iDonF, iDonR;
   double coefAcc, penAcc, coefDon, penDon;
   
-  void ReadGSplicer(char[FILENAME_MAX+1], int);
-  
+  void   ReadGSplicer(char[FILENAME_MAX+1], int);
+  double Norm(double, double);
+
  public:
   SensorGSplicer          (int);
   virtual ~SensorGSplicer ();

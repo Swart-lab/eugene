@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2002 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted without                   */
+/*                 the express written permission of INRA.                   */
+/*                     Mail : tschiex@toulouse.inra.fr                       */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/GSplicer/Sensor.GSplicer.cc         */
+/* Description  : Sensor Gene Splicer                                        */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : May 2003         	   		                     */
+/*****************************************************************************/
+
 #include "Sensor.GSplicer.h"
 
 /*************************************************************
@@ -11,10 +23,10 @@ extern Parameters PAR;
 // ----------------------
 SensorGSplicer :: SensorGSplicer (int n) : Sensor(n)
 {
-  coefAcc = PAR.getD("GSplicer.coefAcc");
-  penAcc  = PAR.getD("GSplicer.penAcc");
-  coefDon = PAR.getD("GSplicer.coefDon");
-  penDon  = PAR.getD("GSplicer.penDon");
+  coefAcc = PAR.getD("GSplicer.coefAcc",GetNumber());
+  penAcc  = PAR.getD("GSplicer.penAcc", GetNumber());
+  coefDon = PAR.getD("GSplicer.coefDon",GetNumber());
+  penDon  = PAR.getD("GSplicer.penDon", GetNumber());
 }
 
 // ----------------------
@@ -40,7 +52,8 @@ void SensorGSplicer :: Init (DNASeq *X)
   type = Type_Splice;
 
   iAccF = iDonF = 0;
-  
+  iAccR = iDonR = 0;
+
   // Clear the data structures 
   vPosAccF.clear();  vPosAccR.clear();
   vPosDonF.clear();  vPosDonR.clear();
@@ -59,9 +72,6 @@ void SensorGSplicer :: Init (DNASeq *X)
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
   
   if (PAR.getI("Output.graph")) Plot(X);
-  
-  iAccR = (int)vPosAccR.size() - 1;
-  iDonR = (int)vPosDonR.size() - 1;
 }
 
 // -------------------------------------
@@ -135,29 +145,31 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
     }
   else if(iAccF < (int)vPosAccF.size()  &&  vPosAccF[iAccF] == pos)
     {
-      d->sig[DATA::Acc].weight[Signal::Forward] += (vValAccF[iAccF] * coefAcc) - penAcc;
+      d->sig[DATA::Acc].weight[Signal::Forward] +=
+	(vValAccF[iAccF] * coefAcc) - penAcc;
       //d->sig[DATA::Acc].weight[Signal::ForwardNo] += ...
       iAccF++;
     }
   
   // Accepteur Reverse
-  if((iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR+1] >= pos) ||
-     (iAccR > -1                    &&  vPosAccR[iAccR]   <  pos))
+  if((iAccR != 0                    &&  vPosAccR[iAccR-1] >= pos) ||
+     (iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR]   <  pos))
     {
-      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos, std::greater<int>());
+      iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos);
       if(*iter == pos) {
 	d->sig[DATA::Acc].weight[Signal::Reverse] +=
 	  (vValAccR[iter-vPosAccR.begin()] * coefAcc) - penAcc;
 	//d->sig[DATA::Acc].weight[Signal::ReverseNo] += ...
-	iAccR = iter-vPosAccR.begin();
+	iAccR = iter-vPosAccR.begin() + 1;
       }
-      else iAccR = iter-vPosAccR.begin() - 1;
+      else iAccR = iter-vPosAccR.begin();
     }
-  else if(iAccR > -1  &&  vPosAccR[iAccR] == pos)
+  else if(iAccR < (int)vPosAccR.size()  &&  vPosAccR[iAccR] == pos)
     {
-      d->sig[DATA::Acc].weight[Signal::Reverse] += (vValAccR[iAccR] * coefAcc) - penAcc;
+      d->sig[DATA::Acc].weight[Signal::Reverse] += 
+	(vValAccR[iAccR] * coefAcc) - penAcc;
       //d->sig[DATA::Acc].weight[Signal::ReverseNo] += ...
-      iAccR--;
+      iAccR++;
     }
   
   // Donneur Forward
@@ -175,29 +187,31 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
     }
   else if(iDonF < (int)vPosDonF.size()  &&  vPosDonF[iDonF] == pos)
     {
-      d->sig[DATA::Don].weight[Signal::Forward] += (vValDonF[iDonF] * coefDon) - penDon;
+      d->sig[DATA::Don].weight[Signal::Forward] +=
+	(vValDonF[iDonF] * coefDon) - penDon;
       //d->sig[DATA::Don].weight[Signal::ForwardNo] += ...
       iDonF++;
     }
   
   // Donneur Reverse
-  if((iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR+1] >= pos) ||
-     (iDonR > -1                    &&  vPosDonR[iDonR]   <  pos))
+  if((iDonR != 0                    &&  vPosDonR[iDonR-1] >= pos) ||
+     (iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR]   <  pos))
     {
-      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos, std::greater<int>());
+      iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos);
       if(*iter == pos) {
 	d->sig[DATA::Don].weight[Signal::Reverse] += 
 	  (vValDonR[iter-vPosDonR.begin()] * coefDon) - penDon;
 	//d->sig[DATA::Don].weight[Signal::ReverseNo] += ...
-	iDonR = iter-vPosDonR.begin();
+	iDonR = iter-vPosDonR.begin() + 1;
       }
-      else iDonR = iter-vPosDonR.begin() - 1;
+      else iDonR = iter-vPosDonR.begin();
     }
-  else if(iDonR > -1  &&  vPosDonR[iDonR] == pos)
+  else if(iDonR < (int)vPosDonR.size()  &&  vPosDonR[iDonR] == pos)
     {
-      d->sig[DATA::Don].weight[Signal::Reverse] += (vValDonR[iDonR] * coefDon) - penDon;
+      d->sig[DATA::Don].weight[Signal::Reverse] +=
+	(vValDonR[iDonR] * coefDon) - penDon;
       //d->sig[DATA::Don].weight[Signal::ReverseNo] += ...
-      iDonR--;
+      iDonR++;
     }
 }
 
@@ -206,6 +220,24 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorGSplicer :: Plot(DNASeq *X)
 {
+  for (int i =0; i < (int)vPosAccF.size(); i++)
+    PlotBarF(vPosAccF[i],4,0.5,Norm(log(vValAccF[i]),20.0),4);
+  
+  for (int i =0; i < (int)vPosDonF.size(); i++)
+    PlotBarF(vPosDonF[i],4,0.5,Norm(log(vValDonF[i]),20.0),11);
+  
+  for (int i =0; i < (int)vPosAccR.size(); i++)
+    PlotBarF(vPosAccR[i],-4,0.5, Norm(log(vValAccR[i]),20.0),4);
+
+  for (int i =0; i < (int)vPosDonR.size(); i++)
+    PlotBarF(vPosDonR[i],-4,0.5,Norm(log(vValDonR[i]),20.0),11);
+}
+  
+// ---------------------
+//  Plot normalisation.
+// ---------------------
+double SensorGSplicer :: Norm(double x, double n) {
+  return (((n)+(Max(-(n),x)))/(n));
 }
 
 // ------------------
