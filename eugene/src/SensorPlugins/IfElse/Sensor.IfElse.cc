@@ -1,5 +1,5 @@
 #include "Sensor.IfElse.h"
-#include "../../EuGene/Dll.h"
+
 #include "../../EuGene/MSensor.h"
 
 extern Parameters PAR;
@@ -13,35 +13,17 @@ extern MasterSensor* MS;
 // ----------------------
 SensorIfElse :: SensorIfElse (int n, DNASeq *X) : Sensor(n)
 {
-  UseSensor *sensor_if, *sensor_else;
-  int dll_index_if, dll_index_else;
-  char *c = new char [FILENAME_MAX+1];
+  std::string name;
 
   type = Type_Multiple;
 
-  // read sensors to use
-  strcpy(c,"Sensor."); strcat(c, PAR.getC("IfElse.SensorIf",n));
-  sensor_if = new UseSensor(0, c);
-  strcpy(c,"Sensor."); strcat(c, PAR.getC("IfElse.SensorElse",n));
-  sensor_else = new UseSensor(0, c);
-
-  // load ".so" of sensors if necessary
-  dll_index_if   = MS->LoadSensor(sensor_if,   n, "Sensor.IfElse :\n If   : ");
-  dll_index_else = MS->LoadSensor(sensor_else, n, " Else : ");
-
   // create instance of sensors
-  sensorIf   = MS->dllList[dll_index_if]->MakeSensor(n+1, X);
-  sensorElse = MS->dllList[dll_index_else]->MakeSensor(n+1, X);
+  name = ((std::string) "Sensor.") + PAR.getC("IfElse.SensorIf",n);
+  sensorIf   = MS->MakeSensor( name.c_str(), n+1, X);
+  name = ((std::string) "Sensor.") + PAR.getC("IfElse.SensorElse",n);
+  sensorElse = MS->MakeSensor( name.c_str(), n+1, X);
 }
 
-// ----------------------
-//  Default destructor.
-// ----------------------
-SensorIfElse :: ~SensorIfElse ()
-{
-  delete sensorLIf;
-  delete sensorLElse;
-}
 
 // ----------------------
 //  Init from new seq.
@@ -52,7 +34,9 @@ void SensorIfElse :: Init (DNASeq *X)
   sensorElse->Init(X);
 }
 
-//
+
+// ----------------------
+// ----------------------
 void MergeInfo(DATA *ifData, DATA *elseData, DATA *d)
 {
   int i,j;
@@ -80,6 +64,7 @@ void MergeInfo(DATA *ifData, DATA *elseData, DATA *d)
       (ifData->contents[i] ? ifData->contents[i] : elseData->contents[i]);
 }
 
+
 // -----------------------
 //  GiveInfo signal stop.
 // -----------------------
@@ -104,6 +89,7 @@ void SensorIfElse :: GiveInfo (DNASeq *X, int pos, DATA *d)
   MergeInfo(&ifData,&elseData,d);
 }
 
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
@@ -112,6 +98,7 @@ void SensorIfElse :: Plot(DNASeq *X)
   sensorIf->Plot(X);
   sensorElse->Plot(X);
 }
+
 
 // ------------------
 //  Post analyse
