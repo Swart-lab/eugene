@@ -76,8 +76,8 @@
 #endif
 
 // ------------------ Globals --------------------
-MasterSensor MS;
-Parameters   PAR;
+MasterSensor*    MS;
+Parameters       PAR;
 ParaOptimization OPTIM;
 
 
@@ -810,8 +810,6 @@ int main  (int argc, char * argv [])
       // Objectif : limiter les appels à la MAP
       graph = PAR.getI("Output.graph");
       
-      MS.InitMaster();
-      
       ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
       
       int sequence;
@@ -824,7 +822,12 @@ int main  (int argc, char * argv [])
 	TheSeq = ReadSequence( PAR.getC("fstname") );
 	Data_Len = TheSeq->SeqLen;
     
-    
+	// ------------------------------------------------------------------------
+	// Init MasterSensor
+	// ------------------------------------------------------------------------
+	MS = new MasterSensor();
+	MS->InitMaster(TheSeq);
+
 	// ------------------------------------------------------------------------
 	// Preparation sortie graphique + Scores
 	// ------------------------------------------------------------------------
@@ -876,9 +879,9 @@ int main  (int argc, char * argv [])
 	  exit(2);
 	}
     
-	MS.InitSensors(TheSeq);
+	MS->InitSensors(TheSeq);
     
-	pred = Predict(TheSeq, &MS);
+	pred = Predict(TheSeq, MS);
     
 	if (!PorteOuverte && Data_Len > 6000) 
 	  exit(2);
@@ -888,10 +891,9 @@ int main  (int argc, char * argv [])
 	if (graph)
 	  pred->plotPred();
     
-	Output(TheSeq, &MS, pred, sequence, argc, argv, stdout);
-	MS.PostAnalyse(pred);
+	Output(TheSeq, MS, pred, sequence, argc, argv, stdout);
+	MS->PostAnalyse(pred);
     
-	// Free used memory
 	if (graph) {
 	  fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
 	  fflush(stderr);
@@ -899,7 +901,9 @@ int main  (int argc, char * argv [])
 	  fprintf(stderr, "done\n");
 	}
 	
-	delete TheSeq;
+	// Free used memory
+	delete TheSeq; 
+	delete MS;
 	pred->resetPred();
 	
       } // fin de traitement de chaque séquence....
