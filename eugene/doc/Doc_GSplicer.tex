@@ -9,7 +9,7 @@ GeneSplicer program. The plugin reads the prediction of the
 program from one file whose name is derived from the sequence name by
 adding the \texttt{.Gsplicer} suffix. This file describes the predicted
 splice sites for the forward and reverse strand.  The sensor is
-activated by the value TRUE for the parameter
+activated by the value 1 for the parameter
 \texttt{Sensor.GSplicer.use} in the parameter file.  Here is an
 example of GSplicer parameters definition :
 \begin{Verbatim}[fontsize=\small]
@@ -17,7 +17,7 @@ GSplicer.coefAcc*    0.8300      #
 GSplicer.penAcc*     7.7000      # GSplicer parameters (rescaling)
 GSplicer.coefDon*    1.3153      # See the Integration of
 GSplicer.penDon*     10.1600     # information section.
-Sensor.GSplicer.use  TRUE        # Use GSplicer sensor
+Sensor.GSplicer.use  1        # Use GSplicer sensor
 Sensor.GSplicer      1           # Sensor priority
 \end{Verbatim}
 

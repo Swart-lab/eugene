@@ -7,7 +7,7 @@
 This simple plugin predicts translation stops. It is able to deal with
 noisy sequences and will eg. predict a possible stop on \texttt{TGN}.
 
-The sensor is activated by setting the value TRUE for the parameter
+The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.EuStop.use} in the parameter file.
 
 The penalty payed for using a Stop is defined by the
@@ -16,7 +16,7 @@ The penalty payed for using a Stop is defined by the
 Here is an example of EuStop parameters definition.
 \begin{Verbatim}[fontsize=\small]
 EuStop.stopP*           4.155   # Stop penalty
-Sensor.EuStop.use       TRUE    # Use EuStop sensor
+Sensor.EuStop.use       1    # Use EuStop sensor
 Sensor.EuStop           1       # Sensor priority
 \end{Verbatim}
 

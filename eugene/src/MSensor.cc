@@ -102,7 +102,7 @@ void MasterSensor :: InitMaster (DNASeq *X)
     
     // Update the list of sensors defined at the top level
     for (i=0; i<msList.size(); i++)  MSSensorsList.push_back( (std::string) msList[i]->Name );
-
+    
     // delete instances of UseSensor
     for (i=0; i<msList.size(); i++)  delete msList[i];
     
@@ -226,14 +226,14 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
 
 // --------------------------------------------
 //  Get special info at special pos.
-//  Retourne TRUE si les sensors sont porteurs
-//  d'infos de type "type" FALSE sinon.
+//  Retourne 1 si les sensors sont porteurs
+//  d'infos de type "type" 0 sinon.
 // --------------------------------------------
 int MasterSensor :: GetInfoSpAt (unsigned char type,
 				 DNASeq *X, int pos, DATA *d)
 {
   int i;
-  int info = FALSE;  // Aucune info
+  int info = 0;  // Aucune info
   
   for(i=0; i< DATA::LastSigType;  i++)
     d->sig[i].Clear();
@@ -245,7 +245,7 @@ int MasterSensor :: GetInfoSpAt (unsigned char type,
   for(i=0; i<(int)theSensors.size(); i++) 
     if (theSensors[i]->type & type) {
       theSensors[i]->GiveInfo(X, pos, d);
-      info = TRUE;
+      info = 1;
     }
 
   for (i=0; i< DATA::LastSigType; i++)

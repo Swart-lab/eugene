@@ -40,7 +40,7 @@ To be plotted, specificity and sensibility are also written in the file \texttt{
 \texttt{Sensor.<sensorName>.Acc} (for acceptor only), \texttt{Sensor.<sensorName>.Don} (for donor only).\\ 
 Note that specificity and sensitivity are written in the \texttt{.SpSn}, \texttt{.Acc}, \texttt{.Don} files, only if TP+FP and TP+FN are higher than \texttt{Tester.SPSN.MinNumbers}. This to avoid Sp and Sn based on small effective.\\
 \\
-The sensor is activated by the value TRUE for the parameter
+The sensor is activated by the value 1 for the parameter
 \texttt{Sensor.Tester.use}. A parameter \texttt{Tester.Sensor} indicates which sensor to test. An other parameter \texttt{Tester.Sensor.Instance} defines wich instance (see the 2.2.1 Loading plugins section) of sensor to consider.\\
 \\
 Here is an example of Tester parameters definition:
@@ -49,7 +49,7 @@ Tester.Make             SPSN      # SPSN, TEST
 Tester.Sensor           EuStop
 Tester.Sensor.Instance  0
 Tester.SPSN.MinNumbers  100       # greater than 0
-Sensor.Tester.use       TRUE      # use Tester sensor
+Sensor.Tester.use       1      # use Tester sensor
 Sensor.Tester           1         # sensor priority
 \end{Verbatim}
 

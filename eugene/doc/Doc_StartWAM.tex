@@ -18,7 +18,7 @@ the score of a motif is a function of the emission probabilities of
 this motif given a true positive model and a false positive model.
 
 The sensor is activated by setting the parameter
-\texttt{Sensor.StartWAM.use} to TRUE.  The user have to specify in
+\texttt{Sensor.StartWAM.use} to 1.  The user have to specify in
 the parameter file the base name (prefix) of the model files
 (\texttt{StartWAM.modelfilename}), the size of the context
 (\texttt{StartWAM.NbNtBeforeATG, StartWAM.NbNtAfterATG}), the order of
@@ -34,7 +34,7 @@ StartWAM.NbNtAfterATG      3                  # aval context
 StartWAM.MarkovianOrder    1                  # order of the markovian models
 StartWAM.ScaleCoef*        0.1594             # scaling parameter
 StartWAM.ScalePenalty*     -3.1439            # scaling parameter
-Sensor.StartWAM.use        TRUE               # Use StartWAM sensor
+Sensor.StartWAM.use        1               # Use StartWAM sensor
 Sensor.StartWAM            1                  # Sensor priority
 \end{Verbatim}
 

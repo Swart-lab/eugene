@@ -10,7 +10,7 @@ the program from two files whose names are derived from the sequence
 name by adding the \texttt{.spliceP} and \texttt{.splicePR} suffixes
 (respectively prediction for the forward and reverse strand).
 
-The sensor is activated by setting the value TRUE for the parameter
+The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.SPred.use} in the parameter file. The score for acceptor
 and donor prediction is rescaled by the parameters {\tt SPred.accP*} and
 {\tt SPred.accB*} for acceptors and {\tt SPred.donP*} and {\tt SPred.donB*} for
@@ -22,7 +22,7 @@ SPred.accP*        0.987
 SPred.accB*        3.850
 SPred.donP*        0.929
 SPred.donB*        10.800
-Sensor.SPred.use   TRUE
+Sensor.SPred.use   1
 Sensor.SPred       1      # Sensor priority
 \end{Verbatim}
 

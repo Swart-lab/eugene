@@ -11,7 +11,7 @@ repeats are detected.
 The sensor is activated by either :
 \begin{itemize}
 \item the \texttt{-r} argument \index{CmdFlags}{[Repeat activation] r}
-\item the value TRUE for the parameter \texttt{Sensor.Repeat.use} in the
+\item the value 1 for the parameter \texttt{Sensor.Repeat.use} in the
   parameter file.
 \end{itemize}
 The penalties used when a repeat exists are \texttt{Repeat.IntronPenalty*},
@@ -23,7 +23,7 @@ Here is an example of Repeat parameters definition.
 Repeat.UTRPenalty*      0.0
 Repeat.IntronPenalty*   0.1
 Repeat.ExonPenalty*     1.0
-Sensor.Repeat.use       TRUE    # Use Repeat sensor
+Sensor.Repeat.use       1    # Use Repeat sensor
 Sensor.Repeat           1       # Sensor priority
 \end{Verbatim}
 

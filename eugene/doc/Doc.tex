@@ -527,7 +527,7 @@ parameters in the parameter file. The \texttt{Sensor.*.use} may
 activate or desactivate the corresponding sensor (which must be
 available in the PLUGINS directory). If the parameter value is set to
 \texttt{0} or \texttt{FALSE}, the plugin is not used. If the parameter
-value is set to \texttt{TRUE}, then a single instance of the plugin is
+value is set to \texttt{1}, then a single instance of the plugin is
 loaded. If the parameter is set to an integer value, then this number
 of instances of the plugin are created.
 
@@ -535,12 +535,12 @@ Below is the list of minimum plugins which are activated by default by
 the \emph{Arabidopsis thaliana} version of \EuGene.
 
 \begin{Verbatim}
-Sensor.Transcript.use   TRUE
-Sensor.EuStop.use       TRUE
-Sensor.NStart.use       TRUE
-Sensor.IfElse.use       TRUE (with 2 splice site prediction plugins)
-Sensor.MarkovIMM.use    TRUE
-Sensor.MarkovConst.use  TRUE
+Sensor.Transcript.use   1
+Sensor.EuStop.use       1
+Sensor.NStart.use       1
+Sensor.IfElse.use       1 (with 2 splice site prediction plugins)
+Sensor.MarkovIMM.use    1
+Sensor.MarkovConst.use  1
 \end{Verbatim}  
 
 Sensors are loaded and instanciated following an increasing order of
@@ -650,7 +650,7 @@ general function of the software with input and ouput files.
 
 The optimization can be lauched with the \texttt{-Z} argument
 \index{CmdFlags}{[parameters optimization] Z} on the command line or
-with the \texttt{ParaOptimi\-zation.Use} parameter set to \texttt{TRUE}.
+with the \texttt{ParaOptimi\-zation.Use} parameter set to \texttt{1}.
 
 After updating the parameter file \texttt{eugene.par} (which sensors
 to use,...), the software is lauched with the usual command line
@@ -677,11 +677,11 @@ Here is a simplified example of optimization parameters definition in the parame
 #################################################################
 ################### PARAMETERS OPTIMIZATION #####################
 #################################################################
-ParaOptimization.Use           TRUE
+ParaOptimization.Use           1
 ParaOptimization.TrueCoordFile Araset.coord
 ParaOptimization.Algorithm     GENETIC+LINESEARCH
 ParaOptimization.Test          FALSE
-ParaOptimization.Trace         TRUE
+ParaOptimization.Trace         1
 #
 ParaOptimization.NbParameter   3
 #
@@ -713,7 +713,7 @@ Genetic.Sharing 0.9             # 0: no sharing
 #                                 1: sharing, looking for clusters which best 
 #                                    elt fitness is at least n% of the overall 
 #                                    best element of the population
-Genetic.Clustering TRUE
+Genetic.Clustering 1
 Genetic.Elitism 0.9             # 0: none
 #                                 n: elitism; keeps the best elt if no sharing,
 #                                    and keeps the best elt of each cluster 
@@ -879,7 +879,7 @@ LineSearch.Para.Cluster[2]      1
   \index{CmdFlags}{[eugene image vertical resolution] y}
 
 \item \texttt{Z}: allows to ask for a parameters optimization (equivallent to
-  set the \texttt{ParaOptimization.Use} parameter to TRUE).
+  set the \texttt{ParaOptimization.Use} parameter to 1).
 \end{itemize}
 
 \printindex{CmdFlags}{Index of command line flags for sensors}

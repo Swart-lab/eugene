@@ -26,13 +26,13 @@ the GC\% of the input sequence.
 
 Instead of using a specific intergenic IMM, it is possible to simply
 use the sequence GC\% as the basis for a $O^{th}$ order Markov model
-by setting \texttt{MarkovIMM.UseM0asIG} to \texttt{TRUE}.
+by setting \texttt{MarkovIMM.UseM0asIG} to \texttt{1}.
 
 The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-m} argument followed by the filename of the set of Markov models.
   \index{CmdFlags}{[MarkovIMM Markov models file] m}
-\item the value TRUE for the parameter \texttt{[Sensor.MarkovIMM.use} in
+\item the value 1 for the parameter \texttt{[Sensor.MarkovIMM.use} in
   the parameter file.
 \end{itemize}
 
@@ -42,7 +42,7 @@ MarkovIMM.matname    Ara2UTR.mat
 MarkovIMM.minGC      0
 MarkovIMM.maxGC      100
 MarkovIMM.UseM0asIG  FALSE
-Sensor.MarkovIMM.use TRUE
+Sensor.MarkovIMM.use 1
 Sensor.MarkovIMM     1      # Sensor priority
 \end{Verbatim}
 

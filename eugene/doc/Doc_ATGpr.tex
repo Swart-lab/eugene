@@ -10,7 +10,7 @@ programs from two files whose names are derived from the sequence name
 by adding the \texttt{.atgpr} and \texttt{.atgprR} suffix
 (respectively prediction for the forward and reverse strand).
 
-The sensor is activated by setting the value TRUE for the parameter
+The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.ATGpr.use} in the parameter file. The score for acceptor
 and donor prediction is rescaled by the parameters {\tt ATGpr.startP*} and
 {\tt ATGpr.startB*} (see below).
@@ -19,7 +19,7 @@ Here is an example of ATGpr parameters definition.
 \begin{Verbatim}[fontsize=\small]
 ATGpr.startP*      0.002
 ATGpr.startB*      0.001
-Sensor.ATGpr.use   TRUE    # Use ATGpr sensor
+Sensor.ATGpr.use   1    # Use ATGpr sensor
 Sensor.ATGpr       1       # Sensor priority
 \end{Verbatim}
 

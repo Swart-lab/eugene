@@ -18,7 +18,7 @@ The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-d} argument \index{CmdFlags}{[EST activation]
     d}.
-\item the value TRUE for the parameter \texttt{Sensor.Est.use} in
+\item the value 1 for the parameter \texttt{Sensor.Est.use} in
   the parameter file.
 \end{itemize}
 
@@ -46,7 +46,7 @@ The behavior of the plugin is controlled by 4 parameters:
 
 The sensor is also capable of a postprocessing analyse described below
 and activated either by the \texttt{-E} argument or by setting the value
-TRUE for the parameter \texttt{Sensor.Est.PostProcess} in the parameter
+1 for the parameter \texttt{Sensor.Est.PostProcess} in the parameter
 file.
 
 The \texttt{Sensor.Est} is loaded last because it has the highest priority.
@@ -63,7 +63,7 @@ Est.utrM         5
 Est.StrongDonor* 0.95
 Est.MinDangling  18
 Est.MaxIntron    15000
-Sensor.Est.use   TRUE     # Use EST sensor
+Sensor.Est.use   1     # Use EST sensor
 Sensor.Est       20       # Sensor priority: the highest one
 \end{Verbatim}
 
@@ -182,7 +182,7 @@ When no information exists (None), the UTR tracks are penalized by
 The correspondance between transcribed sequence information and
 prediction is analyzed if the \texttt{-E} argument
 \index{CmdFlags}{[EST postprocessing activation] E} is activated or if
-the \texttt{Est.PostProcess} parameter is set to \texttt{TRUE}.
+the \texttt{Est.PostProcess} parameter is set to \texttt{1}.
 
 For each coding exon predicted, the percentage of nucleotides
 supported by a transcribed sequence is displayed. This count includes

@@ -12,7 +12,7 @@ corresponding penalties.
 The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-f} argument \index{CmdFlags}{[FrameShift activation] f}.
-\item the value TRUE for the parameter \texttt{Sensor.FrameShift.use} in
+\item the value 1 for the parameter \texttt{Sensor.FrameShift.use} in
   the parameter file.
 \end{itemize}
 
@@ -20,7 +20,7 @@ Here is an example of FrameShift parameters definition.
 \begin{Verbatim}[fontsize=\small]
 FrameShift.Ins*        1e999.0
 FrameShift.Del*        1e999.0
-Sensor.FrameShift.use  TRUE     # Use FrameShift sensor
+Sensor.FrameShift.use  1     # Use FrameShift sensor
 Sensor.FrameShift      1        # Sensor priority
 \end{Verbatim}
 
