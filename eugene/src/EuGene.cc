@@ -688,8 +688,8 @@ int main  (int argc, char * argv [])
 	       BaseScore[i][j] = 
 		 ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS[level]))/
 		 (100.0+(BlastScore[i][j]*BlastS[level]));
-	       BaseScore[i][12] = (BaseScore[i][12]*100.0)/
-		 (100.0+(BlastScore[i][j]*BlastS[level]));
+	       //!!!	       BaseScore[i][12] = (BaseScore[i][12]*100.0)/
+	       //!!!		 (100.0+(BlastScore[i][j]*BlastS[level]));
 	       if (graph && (BlastScore[i][j] > 0.0)) 
 		 PlotBarI(j,PhaseAdapt(i),0.6,1,4);
 	     }
