@@ -28,6 +28,9 @@ class BackPoint
     BackPoint *Origin;
     
   public:
+    BackPoint *Next;
+    BackPoint *Prev;    
+
     BackPoint ();
     BackPoint  (char state, int pos, double cost);
     ~BackPoint();
@@ -35,12 +38,10 @@ class BackPoint
     void Print();
     void Dump();
     void BackTrace(char *Choix);
-    void Update(double cost);
+    inline void Update(double cost) {  Next->Additional += cost; };
     BackPoint *BestUsable(int pos, unsigned char mask, int len,REAL *cost);
     BackPoint *StrictBestUsable(int pos, int len,REAL *cost);
     void Zap();
-    BackPoint *Next;
-    BackPoint *Prev;    
   };
 
 

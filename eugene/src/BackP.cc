@@ -109,13 +109,6 @@ void BackPoint :: BackTrace (char *Choix)
   }  while (It != NULL);
 }
 
-// ----------------------------------------------------------------
-// Updates the cost 
-// ----------------------------------------------------------------
-void BackPoint :: Update(double cost)
-{
-  Next->Additional += cost;
-}
 
 // ----------------------------------------------------------------
 // Returns the best BackPoint. If the SwitchType matches the mask
