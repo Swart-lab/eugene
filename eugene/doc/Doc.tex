@@ -578,6 +578,9 @@ rescaled using the $\log(\alpha.s^\beta)$ function. The four parameters
 parameters for acceptor sites and donor sites respectively.  These
 parameters have been estimated on existing data.
 
+\subsection{\texttt{Sensor.GSplicer}}
+\input {../SensorPlugins/GSplicer/GSplicerDoc.tex}
+
 \subsection{\texttt{Sensor.IfElse}}
 
 This plugin is used to combine the predictions of two existing
@@ -688,14 +691,12 @@ clone.
 
 \subsection{\texttt{Sensor.Repeat}}
 
-\texttt{Repeat.IntronPenalty}: the penalty for predicting an
-  intron over a ``repeat''.
-
-\texttt{Repeat.ExonPenalty}: the penalty for predicting an
-  exon over a ``repeat''.
-
-\texttt{Repeat.UTRPenalty}: the penalty for predicting an
-  UTR over a ``repeat''.
+\texttt{Repeat.IntronPenalty}: the penalty for predicting an intron over a
+``repeat''.\\
+\texttt{Repeat.ExonPenalty}: the penalty for predicting an exon over a
+``repeat''.\\
+\texttt{Repeat.UTRPenalty}: the penalty for predicting an UTR over a
+``repeat''.
 
 \subsection{\texttt{Sensor.Homology}}
 %todo: sylvain
@@ -704,6 +705,15 @@ clone.
 \subsection{\texttt{Sensor.User}}
 \label{pluguser}
 %todo
+
+
+\subsection{\texttt{Sensor.GFF}}
+\input {../SensorPlugins/GFF/GFFDoc.tex}
+
+
+\subsection{\texttt{Sensor.Tester}}
+\input {../SensorPlugins/Tester/TesterDoc.tex}
+
 
 \section{Command line flags}
  
