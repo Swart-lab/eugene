@@ -71,8 +71,8 @@ void SensorBlastX :: Init (DNASeq *X)
   vPMLevel.clear();
   vPMPhase.clear();
 
-  ProtMatch      = new float[Len+1];
-  ProtMatchLevel = new float[Len+1];
+  ProtMatch      = new REAL[Len+1];
+  ProtMatchLevel = new REAL[Len+1];
   ProtMatchPhase = new int[Len+1];
   for (i = 0; i<= Len; i++) {
     ProtMatch[i]      = 0.0;
