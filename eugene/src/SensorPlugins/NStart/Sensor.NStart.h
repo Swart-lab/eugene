@@ -29,8 +29,8 @@ class SensorNStart : public Sensor
   int indexF, indexR;
   double startP, startB;
   
-  void ReadNStartF (char[FILENAME_MAX+1], int);
-  void ReadNStartR (char[FILENAME_MAX+1], int);
+  void ReadNStartF (char *, int);
+  void ReadNStartR (char *, int);
 
  public:
   SensorNStart   (int n, DNASeq *X);
