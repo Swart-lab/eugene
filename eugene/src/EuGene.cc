@@ -94,7 +94,7 @@ int main  (int argc, char * argv [])
   DNASeq *TheSeq;
   int    Data_Len;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior;
-  double transStartP, transStopP, stopP, FsP;
+  double stopP;
   int    minL[18], minDiv, minFlow, minConv, min5, min3;
   int    graph;
   const unsigned char SwitchMask[18] = 
@@ -134,19 +134,12 @@ int main  (int argc, char * argv [])
   minConv = PAR.getI("EuGene.minConv");
   min5    = PAR.getI("EuGene.min5Prime");
   min3    = PAR.getI("EuGene.min3Prime");
-  transStartP = PAR.getD("EuGene.transStartP");
-  transStopP  = PAR.getD("EuGene.transStopP");
   stopP       = PAR.getD("EuGene.stopP");
   graph = PAR.getI("Output.graph");
   
   MS.InitMaster();
   
   ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
-  
-  // any Frameshift prob below -1000.0 means "not possible"
-  if (PAR.getD("EuGene.frameshift") <= -1000.0)
-    PAR.set("EuGene.frameshift", "NINFINITY");
-  FsP = PAR.getD("EuGene.frameshift");
   
   // ---------------------------------------------------------------------------  
   // Lecture de la sequence
@@ -391,7 +384,7 @@ int main  (int argc, char * argv [])
 	
 	// Il y a une insertion (frameshift). Pour l'instant, on ne
 	// prend pas en compte le saut de nucléotide.
-	BestU = PBest[(k+2)%3] + FsP;
+	BestU = PBest[(k+2)%3] + log(Data.Ins);
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+2)%3;
@@ -399,7 +392,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[(k+1)%3] + FsP;
+	BestU = PBest[(k+1)%3] + log(Data.Del);
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = (k+1)%3;
@@ -459,7 +452,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une insertion (frameshift)
-	BestU = PBest[3+(k+2)%3] + FsP;
+	BestU = PBest[3+(k+2)%3] +log(Data.Ins);
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 3+(k+2)%3;
@@ -467,7 +460,7 @@ int main  (int argc, char * argv [])
 	}
 
 	// Il y a une deletion (frameshift)
-	BestU = PBest[3+(k+1)%3] + FsP;
+	BestU = PBest[3+(k+1)%3] + log(Data.Del);
 	if (isnan(maxi) || (BestU > maxi)) {
 	  maxi = BestU;
 	  best = 3+(k+1)%3;
@@ -499,7 +492,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 5' reverse
-      BestU = PBest[21] - transStartP;
+      BestU = PBest[21] + log(Data.tStart[1]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -527,7 +520,7 @@ int main  (int argc, char * argv [])
       }
       
       // From 3' direct
-      BestU = PBest[20] - transStopP;
+      BestU = PBest[20] + log(Data.tStop[0]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -570,7 +563,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[23] - transStartP;
+      BestU = PBest[23] + log(Data.tStart[0]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -580,7 +573,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[18] - transStartP;
+      BestU = PBest[18] + log(Data.tStart[0]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -685,7 +678,7 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
       
       // Sur 5' reverse
-      BestU = PBest[24] - transStopP;
+      BestU = PBest[24] + log(Data.tStop[1]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
@@ -695,7 +688,7 @@ int main  (int argc, char * argv [])
       }
       
       // Sur 3' direct
-      BestU = PBest[25] - transStopP;
+      BestU = PBest[25] + log(Data.tStop[1]);
       // Un test tordu pour casser le cou aux NaN
       if (isnan(maxi) || (BestU > maxi)) {
 	maxi = BestU;
