@@ -41,10 +41,9 @@
 #else
 #include "getopt.h"
 #endif
+#include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
-#else
-#include <string.h>
 #endif
 #include "Const.h"
 
