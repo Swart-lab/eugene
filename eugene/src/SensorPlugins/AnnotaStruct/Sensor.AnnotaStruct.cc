@@ -44,18 +44,18 @@ Signals :: Signals ()
   pos   = -1;
   type  = -1;
   edge  = -1;
-  strcpy(score, "");
+  score = NULL;
 }
 
 // -------------------------
 //  Default constructor.
 // -------------------------
-Signals :: Signals (int p, int t, int e, char *s)
+Signals :: Signals (int p, int t, int e, char s[20])
 {
   pos   = p;
   type  = t;
   edge  = e;
-  strcpy(score, s);
+  score = s;
 }
 
 // -------------------------
@@ -97,14 +97,15 @@ Contents :: Contents ()
   start = -1;
   end   = -1;
   type  = -1;
-  score = -1.0;
+  score = NULL;
 }
 
 // -------------------------
 //  Default constructor.
 // -------------------------
-Contents :: Contents (int sta, int e, int t, float s)
-{  start = sta;
+Contents :: Contents (int sta, int e, int t, float *s)
+{
+  start = sta;
   end   = e;
   type  = t;
   score = s;
@@ -139,7 +140,7 @@ void Contents :: PrintC ()
   case DATA::IntronUTRF : strcpy(t, "IntronUTRF"); break;
   case DATA::IntronUTRR : strcpy(t, "IntronUTRR"); break;
   }
-  fprintf(stderr, "%d\t%d\t%s %f\n", start, end, t, score);
+  fprintf(stderr, "%d\t%d\t%s %f\n", start, end, t, *score);
 }
 
 
@@ -175,13 +176,13 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   strcat(tStartPAR, PAR.getC("AnnotaStruct.TrStart*",    GetNumber()));
   strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
   strcat(tStopPAR,  PAR.getC("AnnotaStruct.TrStop*",     GetNumber()));
-   
+    
   fprintf(stderr, "Reading %s file....", fileExt);
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".");
   strcat(tempname, fileExt);
-  ReadAnnotaStruct(tempname);
+  ReadAnnotaStruct(tempname, X->SeqLen);
   fprintf(stderr, "done\n");
   fflush(stderr);
   
@@ -191,6 +192,24 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   // Sort vCon by end and by start
   sort(vCon.begin(), vCon.end(), ByConEnd);
   stable_sort(vCon.begin(), vCon.end(), ByConStart);
+
+  // Delete redundancy
+  for(int i=0; i<(int)vSig.size(); i++) {
+    if(i == 0) continue;
+    if(vSig[i]->pos ==vSig[i-1]->pos  && vSig[i]->type ==vSig[i-1]->type &&
+       vSig[i]->edge==vSig[i-1]->edge && vSig[i]->score==vSig[i-1]->score) {
+      vSig.erase(i+vSig.begin());
+      i--;
+    }
+  }
+  for(int i=0; i<(int)vCon.size(); i++) {
+    if(i == 0) continue;
+    if(vCon[i]->start==vCon[i-1]->start && vCon[i]->end  ==vCon[i-1]->end &&
+       vCon[i]->type ==vCon[i-1]->type  && vCon[i]->score==vCon[i-1]->score) {
+      vCon.erase(i+vCon.begin());
+      i--;
+    }
+  }
 
   // FOR DEBUG
   std::vector <int> vPosAccF, vPosAccR;
@@ -224,9 +243,10 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   vPosStaF.clear(); vPosStaR.clear();
   vPosStoF.clear(); vPosStoR.clear();
   vPosAccF.clear(); vPosDonF.clear(); vPosAccR.clear(); vPosDonR.clear();
+  
   //for(int i=0; i<(int)vCon.size(); i++) {
   //vCon[i]->PrintC();
-  // }
+  //}
 }
 
 // ----------------------
@@ -244,6 +264,22 @@ SensorAnnotaStruct :: ~SensorAnnotaStruct ()
 // ----------------------
 void SensorAnnotaStruct :: Init (DNASeq *X)
 {
+  exonPAR   = PAR.getD("AnnotaStruct.Exon*",         GetNumber());
+  intronPAR = PAR.getD("AnnotaStruct.Intron*",       GetNumber());
+  cdsPAR    = PAR.getD("AnnotaStruct.CDS*",          GetNumber());
+  strcpy(startPAR,  PAR.getC("AnnotaStruct.StartType",   GetNumber()));
+  strcat(startPAR,  PAR.getC("AnnotaStruct.Start*",      GetNumber()));
+  strcpy(stopPAR,   PAR.getC("AnnotaStruct.StopType",    GetNumber()));
+  strcat(stopPAR,   PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
+  strcpy(accPAR,    PAR.getC("AnnotaStruct.AccType",     GetNumber()));
+  strcat(accPAR,    PAR.getC("AnnotaStruct.Acc*",        GetNumber()));
+  strcpy(donPAR,    PAR.getC("AnnotaStruct.DonType",     GetNumber()));
+  strcat(donPAR,    PAR.getC("AnnotaStruct.Don*",        GetNumber()));
+  strcpy(tStartPAR, PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
+  strcat(tStartPAR, PAR.getC("AnnotaStruct.TrStart*",    GetNumber()));
+  strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
+  strcat(tStopPAR,  PAR.getC("AnnotaStruct.TrStop*",     GetNumber()));
+
   PosSigGiveInfo = -1;
   PosConGiveInfo = -1;
   iSig = 0;
@@ -255,17 +291,19 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
 // --------------------------
 //  Read start forward file.
 // --------------------------
-void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
+void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 {
   FILE  *fp;
   char  line[MAX_LINE];
-  int   i, k;
-  int   start, end, edge;
+  int   i;
+  int   startC, endC, edge;   // C -> content
+  int   startS, endS;         // S -> signal       need for reverse
   char  strand;
-  char  frame[2];
-  float scoreF;
+  char  phase[2];
+  float scF;
   char  feature[20];
   char  scoreC[20];
+  int   frame = -1;
 
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open AnnotaStruct file %s\n", name);
@@ -276,9 +314,9 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
   while(fgets (line, MAX_LINE, fp) != NULL) {
     j++;
     if (line[0] != '#') {
-      // GFF line : seqn source feature start end score strand frame
+      // GFF line : seqn source feature start end score strand phase
       i = sscanf(line, "%*s %*s %s %d %d %s %c %s",
-		 feature, &start, &end, scoreC, &strand, frame);
+		 feature, &startC, &endC, scoreC, &strand, phase);
       if (i < 6) {
 	if (i==-1) {
 	  if(j==1)
@@ -290,163 +328,164 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	}
       }
       else {
+	/* Score ? */
+	if (strcmp(scoreC, ".")) {
+	  if (scoreC[0] == 'p' || scoreC[0] == 's') scF = atof(scoreC+1);
+	  else                                      scF = atof(scoreC);
+	}
+	else scF = 0.0;
+
+	/* Phase ? */
+	if (strcmp(phase, ".")) {
+	  if (strand == '+') { frame = (startC - 1)   % 3; }
+	  else               { frame = (len   - endC) % 3; }
+	  frame = (frame + atoi(phase)) % 3;
+	}
+
 	/* Strand ? */
-	if      (strand == '+') { edge = 0; }
+	if      (strand == '+') {
+	  edge = 0;
+	  startS = startC;
+	  endS   = endC;
+	}
 	else if (strand == '-') {
 	  edge = 1;
-	  int tmp = start;
-	  start   = end+1;
-	  end     = tmp-1;
+	  startS = endC+1;
+	  endS   = startC-1;
 	}
 	else {
 	  fprintf(stderr, "WARNING: feature %s line %d strand unknown"
 		  " => ignored.\n", feature, j);
 	  continue;
 	}
-
-	/* Score ? */
-	if (strcmp(scoreC, ".")) {
-	  if (scoreC[0] == 'p' || scoreC[0] == 's') scoreF = atof(scoreC+1);
-	  else                                      scoreF = atof(scoreC);
-	}
-	else scoreF = 0.0;
-
+	startC--;
+	endC--;
+	
 	/* Parse by feature */
-	int   isContents = 0;
-	float cSc        = 0.0;
 	// Low level (contents OR signals)
 	if     (!strcmp(feature, "trStart"))
-	  vSig.push_back(new Signals(start-1, DATA::tStart, edge, scoreC));
+	  vSig.push_back(new Signals(startS-1, DATA::tStart, edge, scoreC));
 	else if(!strcmp(feature, "trStop"))
-	  vSig.push_back(new Signals(start,   DATA::tStop,  edge, scoreC));
+	  vSig.push_back(new Signals(startS,   DATA::tStop,  edge, scoreC));
 	else if(!strcmp(feature, "start"))
-	  vSig.push_back(new Signals(start-1, DATA::Start,  edge, scoreC));
+	  vSig.push_back(new Signals(startS-1, DATA::Start,  edge, scoreC));
 	else if(!strcmp(feature, "stop"))
-	  vSig.push_back(new Signals(start,   DATA::Stop,   edge, scoreC));
+	  vSig.push_back(new Signals(startS,   DATA::Stop,   edge, scoreC));
 	else if(!strcmp(feature, "acc"))
-	  vSig.push_back(new Signals(start,   DATA::Acc,    edge, scoreC));
+	  vSig.push_back(new Signals(startS,   DATA::Acc,    edge, scoreC));
 	else if(!strcmp(feature, "don"))
-	  vSig.push_back(new Signals(start-1, DATA::Don,    edge, scoreC));
+	  vSig.push_back(new Signals(startS-1, DATA::Don,    edge, scoreC));
 	else if(!strcmp(feature, "ins"))
-	  vSig.push_back(new Signals(start,   DATA::Ins,    edge, scoreC));
+	  vSig.push_back(new Signals(startS,   DATA::Ins,    edge, scoreC));
 	else if(!strcmp(feature, "del"))
-	  vSig.push_back(new Signals(start,   DATA::Del,    edge, scoreC));
-	else if(!strcmp(feature, "exon")) {
-	  isContents = 1;
-	  cSc        = scoreF;
-	}
-	else if(!strcmp(feature, "intron")) {
-	  vCon.push_back(new Contents(start, end, DATA::IntronF+edge, scoreF));
-	}
-	else if(!strcmp(feature, "utr5")) {
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, scoreF));
-	}
-	else if(!strcmp(feature, "utr3")) {
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, scoreF));
-	}
+	  vSig.push_back(new Signals(startS,   DATA::Del,    edge, scoreC));
+	else if(!strcmp(feature, "exon"))
+	  PushInCon(startC, endC, &scF, strand, phase, frame);
+	else if(!strcmp(feature, "intron"))
+	  vCon.push_back(new Contents(startC, endC, DATA::IntronF+edge,&scF));
+	else if(!strcmp(feature, "utr5"))
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  &scF));
+	else if(!strcmp(feature, "utr3"))
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  &scF));
 	else if(!strcmp(feature, "utr")) {
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, scoreF));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, scoreF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  &scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  &scF));
 	}
-	else if(!strcmp(feature, "intronutr")) {
-	  vCon.push_back(new Contents(start,end,DATA::IntronUTRF+edge,scoreF));
-	}
-
+	else if(!strcmp(feature, "intronutr"))
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,&scF));
+	
 	// High level (contents OR/AND signals)
 	else if(!strcmp(feature, "E.Init")) {
-	  vSig.push_back(new Signals(start-1, DATA::Start, edge, startPAR));
-	  vSig.push_back(new Signals(end,     DATA::Don,   edge, donPAR));
-	  isContents = 1;
-	  cSc        = cdsPAR;
+	  vSig.push_back(new Signals(startS-1, DATA::Start, edge, startPAR));
+	  vSig.push_back(new Signals(endS,     DATA::Don,   edge, donPAR));
+	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Intr")) {
-	  vSig.push_back(new Signals(start-1, DATA::Acc, edge, accPAR));
-	  vSig.push_back(new Signals(end,     DATA::Don, edge, donPAR));
-	  isContents = 1;
-	  cSc        = cdsPAR;
+	  vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, accPAR));
+	  vSig.push_back(new Signals(endS,     DATA::Don,   edge, donPAR));
+	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Term")) {
-	  vSig.push_back(new Signals(start-1, DATA::Acc,  edge, accPAR));
-	  vSig.push_back(new Signals(end,     DATA::Stop, edge, stopPAR));
-	  isContents = 1;
-	  cSc        = cdsPAR;
+	  vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, accPAR));
+	  vSig.push_back(new Signals(endS,     DATA::Stop,  edge, stopPAR));
+       	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Sngl")) {
-	  vSig.push_back(new Signals(start-1, DATA::Start, edge, startPAR));
-	  vSig.push_back(new Signals(end,     DATA::Stop,  edge, stopPAR));
-	  isContents = 1;
-	  cSc        = cdsPAR;
+	  vSig.push_back(new Signals(startS-1, DATA::Start, edge, startPAR));
+	  vSig.push_back(new Signals(endS,     DATA::Stop,  edge, stopPAR));
+	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "UTR5")) {
-	  vSig.push_back(new Signals (start-1, DATA::tStart, edge, tStartPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cdsPAR));
+	  vSig.push_back(new Signals (startS-1,DATA::tStart,edge, tStartPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR3")) {
-	  vSig.push_back(new Signals (end,   DATA::tStop, edge, tStopPAR));
-	  vCon.push_back(new Contents(start-1,end-1,DATA::UTR3F+edge,cdsPAR));
+	  vSig.push_back(new Signals (endS,    DATA::tStop, edge, tStopPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR")) {
-	  vSig.push_back(new Signals(start-1, DATA::tStart, edge,tStartPAR));
-	  vSig.push_back(new Signals(end,     DATA::tStop,  edge,tStopPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cdsPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cdsPAR));
+	  vSig.push_back(new Signals(startS-1, DATA::tStart, edge,tStartPAR));
+	  vSig.push_back(new Signals(endS,     DATA::tStop,  edge,tStopPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &cdsPAR));
 	}
 	else if(!strcmp(feature, "Intron")) {
-	  vCon.push_back(new Contents(start, end, DATA::IntronF+edge, cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&cdsPAR));
 	}
 	
 	else if(!strcmp(feature, "E.Any")) {
-	  isContents = 1;
-	  cSc        = exonPAR;
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cSc));
+	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
 	}
 	else if(!strcmp(feature, "Intron.Any")) {
-	  vSig.push_back(new Signals (start-1, DATA::Don, edge, donPAR));
-	  vSig.push_back(new Signals (end,     DATA::Acc, edge, accPAR));
-	  vCon.push_back(new Contents(start,end,DATA::IntronF+edge,intronPAR));
-	  vCon.push_back(new Contents(start,end,DATA::IntronUTRF+edge,intronPAR));
+	  vSig.push_back(new Signals (startS-1, DATA::Don, edge, donPAR));
+	  vSig.push_back(new Signals (endS,     DATA::Acc, edge, accPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&intronPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,&intronPAR));
 	}
 	else if(!strcmp(feature, "E.First")) {
-	  isContents = 1;
-	  cSc        = exonPAR;
-	  vSig.push_back(new Signals (start-1, DATA::tStart, edge, tStartPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
+	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  vSig.push_back(new Signals (startS-1,DATA::tStart, edge, tStartPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
 	}
 	else if(!strcmp(feature, "E.Last")) {
-	  isContents = 1;
-	  cSc        = exonPAR;
-	  vSig.push_back(new Signals (end,   DATA::tStop, edge, tStopPAR));
-	  vCon.push_back(new Contents(start-1, end-1, DATA::UTR3F+edge, cSc));
+	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  vSig.push_back(new Signals (endS,  DATA::tStop, edge, tStopPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
 	}
 	else if(!strcmp(feature, "E.Extreme")) {
-	  isContents = 1;
-	  cSc        = exonPAR;
-	  vSig.push_back(new Signals(start-1, DATA::tStart, edge,tStartPAR));
-	  vSig.push_back(new Signals(end,     DATA::tStop,  edge,tStopPAR));
-	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, cSc));
-	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, cSc));
+	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  vSig.push_back(new Signals(startS-1, DATA::tStart, edge,tStartPAR));
+	  vSig.push_back(new Signals(endS,     DATA::tStop,  edge,tStopPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
 	}
 	else
 	  fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
 		  feature, j);
-
-	if (isContents) {
-	  if (strand == '-') k = 3;
-	  else               k = 0;
-	
-	  if (!strcmp(frame, ".")) {
-	    vCon.push_back(new Contents(start, end, DATA::ExonF1+k, cSc));
-	    vCon.push_back(new Contents(start, end, DATA::ExonF2+k, cSc));
-	    vCon.push_back(new Contents(start, end, DATA::ExonF3+k, cSc));
-	  }
-	  else
-	    vCon.push_back(new Contents(start, end, atoi(frame)+k, cSc));
-	}
       }
     }
   }
   fclose(fp);
+}
+
+// ----------------
+//  push_back con.
+// ----------------
+void SensorAnnotaStruct :: PushInCon(int d, int e, float *sc,
+				     char st, char p[2], int f)
+{
+  int k;
+  if (st == '-') k = 3;
+  else           k = 0;
+  if (!strcmp(p, ".")) {
+    vCon.push_back(new Contents(d, e, DATA::ExonF1+k, sc));
+    vCon.push_back(new Contents(d, e, DATA::ExonF2+k, sc));
+    vCon.push_back(new Contents(d, e, DATA::ExonF3+k, sc));
+  }
+  else
+    vCon.push_back(new Contents(d, e, f+k, sc));
 }
 
 // ------------------------
@@ -458,7 +497,7 @@ void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
   bool  update = false;
   int   i, j, iConTMP;
   float k;
- 
+  
   /* Signals */
   // update indexes on vector ?
   if((PosSigGiveInfo == -1) || (pos != PosSigGiveInfo+1)) update = true;
@@ -499,7 +538,7 @@ void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
     iConTMP = iCon;
     while((iConTMP < (int)vCon.size())   &&
 	  (pos >= vCon[iConTMP]->start)  &&  (pos <= vCon[iConTMP]->end)) {
-      d->contents[vCon[iConTMP]->type] += vCon[iConTMP]->score;
+      d->contents[vCon[iConTMP]->type] += (*vCon[iConTMP]->score);
       iConTMP++;
     }
     while(iCon < (int)vCon.size()  &&  pos > vCon[iCon]->end) iCon++;

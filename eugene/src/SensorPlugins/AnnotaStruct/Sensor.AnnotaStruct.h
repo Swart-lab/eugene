@@ -31,10 +31,10 @@ class Signals
   int   pos;
   int   type;
   int   edge;
-  char  score[20];
+  char* score;
     
   Signals  ();
-  Signals  (int, int, int, char*);
+  Signals  (int, int, int, char[20]);
   ~Signals ();
   void PrintS ();
   bool operator < (int i) { if (pos < i) return true; else return false; }
@@ -48,13 +48,13 @@ class Contents
  private:
   
  public:
-  int   start;
-  int   end;
-  int   type;
-  float score;
+  int    start;
+  int    end;
+  int    type;
+  float* score;
     
   Contents  ();
-  Contents  (int, int, int, float);
+  Contents  (int, int, int, float*);
   ~Contents ();
   void PrintC ();
 };
@@ -72,10 +72,12 @@ class SensorAnnotaStruct : public Sensor
   char  *fileExt;
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
-  float exonPAR, intronPAR, cdsPAR;
+  float exonPAR,      intronPAR,     cdsPAR;
+    
+  void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
+  void SensorAnnotaStruct :: PushInCon(int d,   int e,     float *sc,
+				       char st, char p[2], int f);
   
-  void ReadAnnotaStruct(char[FILENAME_MAX+1]);
-
  public:
   SensorAnnotaStruct          (int n, DNASeq *X);
   virtual ~SensorAnnotaStruct ();
