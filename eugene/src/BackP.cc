@@ -96,7 +96,7 @@ void BackPoint :: BackTrace (char *Choix)
   char etat;
   
   pos = It->StartPos;
-  etat = (It->State >= 12 ? 12 : It->State);
+  etat =(It->State >= 12 ? 12 : It->State);
   It  = It->Origin;
   
   do {
@@ -126,7 +126,7 @@ BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *c
 
   do {
     add += It->Additional;
-    if ((It->StartPos < pos-len) || !(It->SwitchType & mask) || (It->StartPos < 0)) {
+    if ((It->StartPos <= pos-len) || !(It->SwitchType & mask) || (It->StartPos < 0)) {
       *cost = add+It->Cost;
       return It;
     }
@@ -148,7 +148,7 @@ BackPoint *BackPoint :: StrictBestUsable(int pos, int len, REAL *cost)
 
   do {
     add += It->Additional;
-    if ((It->StartPos < pos-len) || (It->StartPos < 0)) {
+    if ((It->StartPos <= pos-len) || (It->StartPos < 0)) {
       *cost = add+It->Cost;
       return It;
     }
