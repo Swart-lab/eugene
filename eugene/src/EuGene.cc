@@ -813,8 +813,6 @@ int main  (int argc, char * argv [])
 		  PAR.getI("Output.golap"), glen, grname);
 	}
 	
-	MS->InitSensors(TheSeq);
-    
 	pred = Predict(TheSeq, MS);
     
 	fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
