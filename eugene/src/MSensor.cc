@@ -96,7 +96,10 @@ void MasterSensor :: InitMaster ()
     for (j=0; j<PAR.getI(useList[i]); j++) {
       dllList[nbSensors] = new SensorLoader ( soList[i] );
       if(!dllList[nbSensors]->LastError()) {
-	fprintf(stderr,"Loading %s\t%d\n",msList[i]->Name,j);
+	fprintf(stderr,"Loading %.21s",msList[i]->Name);
+	for(int k=strlen(msList[i]->Name); k < 22; k++)
+	  fprintf(stderr,".");
+	fprintf(stderr,"%d\n",j);
 	theSensors.push_back( dllList[nbSensors]->MakeSensor(j));
       }
       else {
