@@ -18,7 +18,8 @@
 # Comments: The library is not useful, but allows to automatically define source files for distribution.
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
 SUBDIRS = GetData
 
