@@ -18,13 +18,14 @@ class SensorBlastX : public Sensor
   REAL keyBXLevel[10];
   int    minIn;
   int blastxM;
+  int N;
 
   void LoadContentScore (DNASeq *);
   int  PhaseAdapt (char);
   char ph06       (char);
 
  public:
-  SensorBlastX  (int);
+  SensorBlastX  (int n, DNASeq *X);
   virtual ~SensorBlastX   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -32,5 +33,5 @@ class SensorBlastX : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorBlastX * builder0( int n ) {  return new SensorBlastX(n);}
+extern "C" SensorBlastX * builder0( int n, DNASeq *X) {  return new SensorBlastX(n, X);}
 #endif

@@ -16,20 +16,11 @@ extern Parameters PAR;
 // ----------------------
 // Default constructor.
 // ----------------------
-SensorBlastX :: SensorBlastX (int n) : Sensor(n)
+SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 {
-  keyBXLevel[0] = PAR.getD("BlastX.level0",n);
-  keyBXLevel[1] = PAR.getD("BlastX.level1",n);
-  keyBXLevel[2] = PAR.getD("BlastX.level2",n);
-  keyBXLevel[3] = PAR.getD("BlastX.level3",n);
-  keyBXLevel[4] = PAR.getD("BlastX.level4",n);
-  keyBXLevel[5] = PAR.getD("BlastX.level5",n);
-  keyBXLevel[6] = PAR.getD("BlastX.level6",n);
-  keyBXLevel[7] = PAR.getD("BlastX.level7",n);
-  keyBXLevel[8] = PAR.getD("BlastX.level8",n);
-  keyBXLevel[9] = PAR.getD("BlastX.level9",n);
-  blastxM = PAR.getI("BlastX.blastxM",n);
-  minIn = PAR.getI("EuGene.minIn");
+  type = Type_Content;
+
+  N = n;
 }
 
 // ----------------------
@@ -62,15 +53,18 @@ void SensorBlastX :: Init (DNASeq *X)
   const int MaxHitLen  = 15000;
   char tempname[FILENAME_MAX+1];
 
-  type = Type_Content;
-
-  index = 0;
-
-  vPos.clear();
-  vPMatch.clear();
-  vPMLevel.clear();
-  vPMPhase.clear();
-
+  keyBXLevel[0] = PAR.getD("BlastX.level0*",N);
+  keyBXLevel[1] = PAR.getD("BlastX.level1*",N);
+  keyBXLevel[2] = PAR.getD("BlastX.level2*",N);
+  keyBXLevel[3] = PAR.getD("BlastX.level3*",N);
+  keyBXLevel[4] = PAR.getD("BlastX.level4*",N);
+  keyBXLevel[5] = PAR.getD("BlastX.level5*",N);
+  keyBXLevel[6] = PAR.getD("BlastX.level6*",N);
+  keyBXLevel[7] = PAR.getD("BlastX.level7*",N);
+  keyBXLevel[8] = PAR.getD("BlastX.level8*",N);
+  keyBXLevel[9] = PAR.getD("BlastX.level9*",N);
+  blastxM = PAR.getI("BlastX.blastxM*",N);
+  minIn = PAR.getI("EuGene.minIn");
   ProtMatch      = new REAL[Len+1];
   ProtMatchLevel = new REAL[Len+1];
   ProtMatchPhase = new int[Len+1];
@@ -221,6 +215,8 @@ void SensorBlastX :: Init (DNASeq *X)
   delete [] ProtMatchPhase;
 
   fprintf(stderr,"done\n");
+
+  index = 0;
 }
 
 // --------------------------
