@@ -348,6 +348,9 @@ void SensorAnnotaStruct :: ReadAnnotaStruct (char name[FILENAME_MAX+1])
 	  vCon.push_back(new Contents(start, end, DATA::UTR5F+edge, scoreF));
 	  vCon.push_back(new Contents(start, end, DATA::UTR3F+edge, scoreF));
 	}
+	else if(!strcmp(feature, "intronutr")) {
+	  vCon.push_back(new Contents(start,end,DATA::IntronUTRF+edge,scoreF));
+	}
 
 	// High level (contents OR/AND signals)
 	else if(!strcmp(feature, "E.Init")) {
