@@ -22,7 +22,7 @@ Sensor :: ~Sensor ()
 // ---------------------------------------
 //  Sanity check : check that ATG occurs.
 // ---------------------------------------
-void Sensor :: CheckStart(DNASeq *X, vector<int> vPosF, vector<int> vPosR)
+void Sensor :: CheckStart(DNASeq *X, std::vector<int> vPosF, std::vector<int> vPosR)
 {
   for (int i = 0; i<(int)vPosF.size(); i++)
     if (!X->IsEStart(vPosF[i],1))
@@ -37,8 +37,8 @@ void Sensor :: CheckStart(DNASeq *X, vector<int> vPosF, vector<int> vPosR)
 //  Sanity check; AG/GT or GC  splice site check.
 // -----------------------------------------------
 void Sensor :: CheckSplices (DNASeq *X,
-			     vector<int> vPosAccF, vector<int> vPosDonF,
-			     vector<int> vPosAccR, vector<int> vPosDonR)
+			     std::vector<int> vPosAccF, std::vector<int> vPosDonF,
+			     std::vector<int> vPosAccR, std::vector<int> vPosDonR)
 {
   for (int i = 0; i<(int)vPosAccF.size(); i++)
     if(((*X)[vPosAccF[i]-2] != 'a') || ((*X)[vPosAccF[i]-1] != 'g'))

@@ -27,8 +27,8 @@ class Sensor
   int instanceNumber;
 
  protected:
-  void CheckStart   (DNASeq *,vector<int>, vector<int>);
-  void CheckSplices (DNASeq *,vector<int>, vector<int>, vector<int>, vector<int>);
+  void CheckStart   (DNASeq *,std::vector<int> a, std::vector<int> b);
+  void CheckSplices (DNASeq *,std::vector<int> a, std::vector<int> b, std::vector<int> c, std::vector<int> d);
   int  GetNumber    () { return instanceNumber; }
 
  public:
