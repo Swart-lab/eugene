@@ -9,13 +9,17 @@
 class SensorRepeat : public Sensor
 {
  private:
-  unsigned char *ForcedIG;
+  std::vector<int>           vPos;
+  std::vector<int>::iterator iter;
+  int index;
 
  public:
   SensorRepeat  (int);
-  ~SensorRepeat ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorRepeat   ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorRepeat * builder0( int n ) { return new SensorRepeat(n);}

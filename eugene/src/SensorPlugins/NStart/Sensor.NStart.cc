@@ -11,8 +11,6 @@ extern Parameters PAR;
 // ----------------------
 SensorNStart :: SensorNStart (int n) : Sensor(n)
 {
-  *Start = NULL;
-
   startP = PAR.getD("NStart.startP");
   startB = PAR.getD("NStart.startB");
 }
@@ -22,8 +20,10 @@ SensorNStart :: SensorNStart (int n) : Sensor(n)
 // ----------------------
 SensorNStart :: ~SensorNStart ()
 {
-  delete [] Start[0];
-  delete [] Start[1];
+  vPosF.clear();
+  vValF.clear();
+  vPosR.clear();
+  vValR.clear();
 }
 
 // ----------------------
@@ -34,35 +34,62 @@ void SensorNStart :: Init (DNASeq *X)
   char tempname[FILENAME_MAX+1];
 
   type = Type_Start;
-
-  if(*Start != NULL) {
-    delete [] Start[0];
-    delete [] Start[1];
-  }
-
-  Start[0] = new REAL[X->SeqLen+1];
-  Start[1] = new REAL[X->SeqLen+1];
+  
+  iterR = iterF = 0;
+  
+  vPosF.clear();
+  vValF.clear();
+  vPosR.clear();
+  vValR.clear();
   
   fprintf(stderr, "Reading start file (NetStart).................");
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".starts");
-  ReadNStart(tempname, X->SeqLen, 0);
+  ReadNStartF(tempname, X->SeqLen);
   fprintf(stderr,"forward,");
   fflush(stderr);
   
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".startsR");
-  ReadNStart(tempname, X->SeqLen, 1);
+  ReadNStartR(tempname, X->SeqLen);
   fprintf(stderr," reverse done\n");
   
-  CheckStart(X, Start);
+  CheckStart(X, vPosF, vPosR);
 }
 
-// ----------------------
-//  Read start file.
-// ----------------------
-void SensorNStart :: ReadNStart (char name[FILENAME_MAX+1], int Len, int rev)
+// --------------------------
+//  Read start forward file.
+// --------------------------
+void SensorNStart :: ReadNStartF (char name[FILENAME_MAX+1], int Len)
+{
+  FILE *fp;
+  int i,j = -1;
+  double force;
+
+  if (!(fp = fopen(name, "r"))) {
+    fprintf(stderr, "cannot open start file %s\n", name);
+    exit(2);
+  }
+  
+  while (1) {
+    i = fscanf(fp,"%d %lf %*s\n", &j, &force);
+    if (i == EOF) break;
+    if (i < 2) {
+      fprintf(stderr, "Error in start file %s, position %d\n", name, j);
+      exit(2);
+    }
+    vPosF.push_back( j-1 );
+    vValF.push_back( pow(force, startB)*(exp(-startP)) );
+  }
+  if (j == -1) fprintf(stderr,"WARNING: empty NetStart file !\n");
+  fclose(fp);
+}
+
+// --------------------------
+//  Read start reverse file.
+// --------------------------
+void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
 {
   FILE *fp;
   int i,j = -1;
@@ -73,9 +100,6 @@ void SensorNStart :: ReadNStart (char name[FILENAME_MAX+1], int Len, int rev)
     exit(2);
   }
 
-  for (i = 0; i<= Len; i++)
-    Start[rev][i] = 0.0;
-
   while (1) {
     i = fscanf(fp,"%d %lf %*s\n", &j, &force);
     if (i == EOF) break;
@@ -83,11 +107,20 @@ void SensorNStart :: ReadNStart (char name[FILENAME_MAX+1], int Len, int rev)
       fprintf(stderr, "Error in start file %s, position %d\n", name, j);
       exit(2);
     }
-    if (rev) j = Len-j+2;
-    Start[rev][j-1] = pow(force, startB)*(exp(-startP));
+    j = Len-j+2;
+    vPosR.push_back( j-1 );
+    vValR.push_back( pow(force, startB)*(exp(-startP)) );
   }
   if (j == -1) fprintf(stderr,"WARNING: empty NetStart file !\n");
   fclose(fp);
+}
+
+// -----------------------
+//  ResetIter.
+// -----------------------
+void SensorNStart :: ResetIter ()
+{
+  iterF = iterR = 0;
 }
 
 // ------------------------
@@ -95,6 +128,28 @@ void SensorNStart :: ReadNStart (char name[FILENAME_MAX+1], int Len, int rev)
 // ------------------------
 void SensorNStart :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  d->Start[0] += Start[0][pos];
-  d->Start[1] += Start[1][pos];
+  if( iterF <= (int)vPosF.size()  &&  vPosF[iterF] == pos ) {
+    d->Start[0] += vValF[iterF];
+    iterF++;
+  }
+  
+  if( iterR <= (int)vPosR.size()  &&  vPosR[iterR] == pos ) {
+    d->Start[1] += vValR[iterR];
+    iterR++;
+  }
 }
+
+// --------------------------
+//  GiveInfoAt signal start.
+// --------------------------
+void SensorNStart :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
+{
+  iter = find(vPosF.begin(), vPosF.end(), pos);
+  if(iter != vPosF.end())
+    d->Start[0] += vValF[iter-vPosF.begin()];
+  
+  iter = find(vPosR.begin(), vPosR.end(), pos);
+  if(iter != vPosR.end())
+    d->Start[1] += vValR[iter-vPosR.begin()];
+}
+

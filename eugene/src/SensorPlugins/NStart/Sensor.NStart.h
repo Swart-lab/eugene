@@ -9,16 +9,22 @@
 class SensorNStart : public Sensor
 {
  private:
-  REAL *Start[2];
+  std::vector<int>  vPosF, vPosR;
+  std::vector<REAL> vValF, vValR;
+  std::vector<int>::iterator iter;
+  int iterF, iterR;
   double startP, startB;
   
-  void ReadNStart (char[FILENAME_MAX+1], int, int);
+  void ReadNStartF (char[FILENAME_MAX+1], int);
+  void ReadNStartR (char[FILENAME_MAX+1], int);
 
  public:
   SensorNStart   (int);
-  ~SensorNStart  ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorNStart   ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorNStart* builder0( int n ) { return new SensorNStart(n);}

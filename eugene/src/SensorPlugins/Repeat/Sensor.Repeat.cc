@@ -11,7 +11,6 @@ extern Parameters PAR;
 // ----------------------
 SensorRepeat :: SensorRepeat (int n) : Sensor(n)
 {
-  ForcedIG = NULL;
 }
 
 // ----------------------
@@ -19,7 +18,7 @@ SensorRepeat :: SensorRepeat (int n) : Sensor(n)
 // ----------------------
 SensorRepeat :: ~SensorRepeat ()
 {
-  delete [] ForcedIG;
+  vPos.clear();
 }
 
 // ----------------------
@@ -29,13 +28,13 @@ void SensorRepeat :: Init (DNASeq *X)
 {
   char tempname[FILENAME_MAX+1];
   FILE* ncfile;
-  int i, j, deb, fin;
+  int i, deb, fin;
 
   type = Type_Content;
 
-  if(ForcedIG != NULL)
-    delete [] ForcedIG;
-  ForcedIG = NULL;
+  index = 0;
+
+  vPos.clear();
   
   fprintf(stderr,"Reading Intergenic regions... ");
   fflush(stderr);
@@ -44,24 +43,43 @@ void SensorRepeat :: Init (DNASeq *X)
   strcat(tempname,".ig");
   ncfile = FileOpen(NULL,tempname, "r");
   
-  ForcedIG = new unsigned char[X->SeqLen+1];
-  for (j = 0; j <= X->SeqLen; j++) ForcedIG[j] = FALSE;
-  
   while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
     deb = Max(1,deb)-1;
     fin = Min(X->SeqLen,fin)-1;
     for (i = deb; i <= fin; i++) {
-       ForcedIG[i] = TRUE;
-       if (PAR.getI("Output.graph")) PlotBarI(i,0,0.25,2,6);
+      vPos.push_back( i );
+      if (PAR.getI("Output.graph")) PlotBarI(i,0,0.25,2,6);
     }
   }
+}
+
+// -----------------------
+//  ResetIter.
+// -----------------------
+void SensorRepeat :: ResetIter ()
+{
+  index = 0;
 }
 
 // --------------------------
 //  GiveInfo Content Repeat.
 // --------------------------
-void SensorRepeat :: GiveInfo(DNASeq *X, int pos, DATA *d)
+void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  for(int i=0; i<8; i++)   // Exon(6) + Intron(2)
-    if(ForcedIG[pos]) d->ContentScore[i] += IGPenalty;
+  if( index <= (int)vPos.size()  &&  vPos[index] == pos ) {
+    for(int i=0; i<8; i++)   // Exon(6) + Intron(2)
+      d->ContentScore[i] += IGPenalty;
+    index++;
+  }
+}
+
+// ----------------------------
+//  GiveInfoAt Content Repeat.
+// ----------------------------
+void SensorRepeat :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
+{
+  iter = find(vPos.begin(), vPos.end(), pos);
+  if(iter != vPos.end())
+    for(int i=0; i<8; i++)   // Exon(6) + Intron(2)
+      d->ContentScore[i] += IGPenalty;
 }

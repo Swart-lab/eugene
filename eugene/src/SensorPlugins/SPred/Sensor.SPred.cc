@@ -11,8 +11,6 @@ extern Parameters PAR;
 // ----------------------
 SensorSPred :: SensorSPred (int n) : Sensor(n)
 {
-  *Acc = NULL;
-
   accP = PAR.getD("SPred.accP");
   accB = PAR.getD("SPred.accB");
   donP = PAR.getD("SPred.donP");
@@ -24,10 +22,10 @@ SensorSPred :: SensorSPred (int n) : Sensor(n)
 // ----------------------
 SensorSPred :: ~SensorSPred ()
 {
-  delete [] Acc[0];
-  delete [] Acc[1];
-  delete [] Don[0];
-  delete [] Don[1];
+  vPosAccF.clear();  vPosAccR.clear();
+  vPosDonF.clear();  vPosDonR.clear();
+  vValAccF.clear();  vValAccR.clear();
+  vValDonF.clear();  vValDonR.clear();
 }
 
 // ----------------------
@@ -39,49 +37,85 @@ void SensorSPred :: Init (DNASeq *X)
 
   type = Type_Splice;
 
-  if(*Acc != NULL) {
-    delete [] Acc[0];
-    delete [] Acc[1];
-    delete [] Don[0];
-    delete [] Don[1];
-  }
-
-  Acc[0] = new REAL[X->SeqLen+1];
-  Don[0] = new REAL[X->SeqLen+1];
-  Acc[1] = new REAL[X->SeqLen+1];
-  Don[1] = new REAL[X->SeqLen+1];
-  for(int i=0; i<=X->SeqLen; i++)
-    Acc[0][i] = Don[0][i] = Acc[1][i] = Don[1][i] = 0.0; 
-
+  iterAccF = iterAccR = iterDonF = iterDonR = 0;
+  
+  vPosAccF.clear();  vPosAccR.clear();
+  vPosDonF.clear();  vPosDonR.clear();
+  vValAccF.clear();  vValAccR.clear();
+  vValDonF.clear();  vValDonR.clear();
+  
   fprintf(stderr, "Reading splice site file (Splice Predictor)...");  
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".spliceP");
-  ReadSPred(tempname, 1, X->SeqLen);
+  ReadSPredF(tempname, X->SeqLen);
   fprintf(stderr,"forward,");
   fflush(stderr);
 
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".splicePR");
-  ReadSPred(tempname, -1, X->SeqLen);
+  ReadSPredR(tempname, X->SeqLen);
   fprintf(stderr," reverse done\n");
 
-  CheckSplices(X, Acc, Don);
+  CheckSplices(X, vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 }
 
-// -----------------------------
-//  Read Splice Predictor file.
-// ----------------------------- 
-void SensorSPred :: ReadSPred(char name[FILENAME_MAX+1], int dir, int SeqLen)
+// -------------------------------------
+//  Read Splice Predictor forward file.
+// -------------------------------------
+void SensorSPred :: ReadSPredF(char name[FILENAME_MAX+1], int SeqLen)
 {
   FILE *fp;
   char buf[FILENAME_MAX];
   double strength,add;
   int i = 0, j, k;
-  int rev;
   
-  if (dir == 1) rev = 0; else rev = 1;
+  if (!(fp = fopen(name, "r"))) {
+    fprintf(stderr, "cannot open splice sites file %s\n", name);
+    exit(2);
+  }
+  
+  k = -1;
+  while (1) {
+    if (!fgets(buf,99,fp))
+      break;
+    
+    j = 0;
+    j += sscanf(buf+9,"%d",&k);
+    j += sscanf(buf+38,"%lf",&strength);
+    j += sscanf(buf+45,"%lf",&add);
+    j += sscanf(buf+52,"%lf",&add);
+        
+    if (j < 4) {
+      fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
+      exit(2);
+    }
+        
+    if (buf[0] == 'D' && strength != 0.0) {
+      vPosDonF.push_back( k-1 );
+      vValDonF.push_back( pow(strength, donB)*donP );
+    }
+    else
+      if (strength != 0.0) {
+	vPosAccF.push_back( k );
+	vValAccF.push_back( pow(strength, accB)*accP );
+      }
+  }
+  
+  if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");
+  fclose(fp);
+}
 
+// -------------------------------------
+//  Read Splice Predictor reverse file.
+// -------------------------------------
+void SensorSPred :: ReadSPredR(char name[FILENAME_MAX+1], int SeqLen)
+{
+  FILE *fp;
+  char buf[FILENAME_MAX];
+  double strength,add;
+  int i = 0, j, k;
+  
   if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
     exit(2);
@@ -102,18 +136,28 @@ void SensorSPred :: ReadSPred(char name[FILENAME_MAX+1], int dir, int SeqLen)
       fprintf(stderr, "Error in splice sites file %s, line %d\n", name, i+2);
       exit(2);
     }
-        
-    if (buf[0] == 'D') {
-      if (Don[rev][k-(dir+1)/2] == 0.0)
-	Don[rev][k-(dir+1)/2] = pow(strength, donB)*donP;
+          
+    if (buf[0] == 'D' && strength != 0.0) {
+      vPosDonR.push_back( k );
+      vValDonR.push_back( pow(strength, donB)*donP );
     }
     else
-      if (Acc[rev][k+(dir-1)/2] == 0.0)
-	Acc[rev][k+(dir-1)/2] = pow(strength, accB)*accP;
+      if (strength != 0.0) {
+	vPosAccR.push_back( k-1 );
+	vValAccR.push_back( pow(strength, accB)*accP);
+      }
   }
   
   if (k == -1) fprintf(stderr,"WARNING: Empty splice predictor file !\n");
   fclose(fp);
+}
+
+// -----------------------
+//  ResetIter.
+// -----------------------
+void SensorSPred :: ResetIter ()
+{
+  iterAccF = iterAccR = iterDonF = iterDonR = 0;
 }
 
 // ------------------------
@@ -121,8 +165,46 @@ void SensorSPred :: ReadSPred(char name[FILENAME_MAX+1], int dir, int SeqLen)
 // ------------------------
 void SensorSPred :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if(d->Acc[0] == 0.0) d->Acc[0] = Acc[0][pos];
-  if(d->Acc[1] == 0.0) d->Acc[1] = Acc[1][pos];
-  if(d->Don[0] == 0.0) d->Don[0] = Don[0][pos];
-  if(d->Don[1] == 0.0) d->Don[1] = Don[1][pos];
+  if( iterAccF <= (int)vPosAccF.size()  &&  vPosAccF[iterAccF] == pos ) {
+    if(d->Acc[0] == 0.0)
+      d->Acc[0] = vValAccF[iterAccF];
+    iterAccF++;
+  }
+  if( iterAccR <= (int)vPosAccR.size()  &&  vPosAccR[iterAccR] == pos ) {
+    if(d->Acc[1] == 0.0)
+      d->Acc[1] = vValAccR[iterAccR];
+    iterAccR++;
+  }
+  if( iterDonF <= (int)vPosDonF.size()  &&  vPosDonF[iterDonF] == pos ) {
+    if(d->Don[0] == 0.0)
+      d->Don[0] = vValDonF[iterDonF];
+    iterDonF++;
+  }
+  if( iterDonR <= (int)vPosDonR.size()  &&  vPosDonR[iterDonR] == pos ) {
+    if(d->Don[1] == 0.0)
+      d->Don[1] = vValDonR[iterDonR];
+    iterDonR++;
+  }
+}
+
+// --------------------------
+//  GiveInfoAt signal SPred.
+// --------------------------
+void SensorSPred :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
+{
+  iter = find(vPosAccF.begin(), vPosAccF.end(), pos);
+  if(iter != vPosAccF.end())
+    d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
+  
+  iter = find(vPosAccR.begin(), vPosAccR.end(), pos);
+  if(iter != vPosAccR.end())
+    d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
+  
+  iter = find(vPosDonF.begin(), vPosDonF.end(), pos);
+  if(iter != vPosDonF.end())
+    d->Don[0] = vValDonF[iter-vPosDonF.begin()];
+  
+  iter = find(vPosDonR.begin(), vPosDonR.end(), pos);
+  if(iter != vPosDonR.end())
+    d->Don[1] = vValDonR[iter-vPosDonR.begin()];
 }

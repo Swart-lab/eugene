@@ -9,17 +9,22 @@
 class SensorSPred : public Sensor
 {
  private:
-  REAL *Acc[2];
-  REAL *Don[2];
+  std::vector<int>  vPosAccF, vPosAccR, vPosDonF, vPosDonR;
+  std::vector<REAL> vValAccF, vValAccR, vValDonF, vValDonR;
+  std::vector<int>::iterator iter;
+  int iterAccF, iterAccR, iterDonF, iterDonR;
   double accP, accB, donP, donB;
-
-  void ReadSPred(char[FILENAME_MAX+1], int, int);
-
+  
+  void ReadSPredF(char[FILENAME_MAX+1], int);
+  void ReadSPredR(char[FILENAME_MAX+1], int);
+  
  public:
   SensorSPred   (int);
-  ~SensorSPred  ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorSPred    ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorSPred * builder0( int n ) {  return new SensorSPred(n);}

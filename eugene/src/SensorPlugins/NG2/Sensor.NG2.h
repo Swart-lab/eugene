@@ -9,17 +9,22 @@
 class SensorNG2 : public Sensor
 {
  private:
-  REAL *Acc[2];
-  REAL *Don[2];
+  std::vector<int>  vPosAccF, vPosAccR, vPosDonF, vPosDonR;
+  std::vector<REAL> vValAccF, vValAccR, vValDonF, vValDonR;
+  std::vector<int>::iterator iter;
+  int iterAccF, iterAccR, iterDonF, iterDonR;
   double accB, accP, donB, donP;
-
-  void ReadNG2(char[FILENAME_MAX+1], int, int);
+  
+  void ReadNG2F(char[FILENAME_MAX+1], int);
+  void ReadNG2R(char[FILENAME_MAX+1], int);
 
  public:
   SensorNG2  (int);
-  ~SensorNG2 ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorNG2      ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorNG2 * builder0( int n ) {  return new SensorNG2(n);}
