@@ -241,7 +241,7 @@ void Parameters :: ReadPar(char *argv)
   char line    [MAX_LINE];
   char tempname[FILENAME_MAX+1];
   char *key, *val = NULL;
-
+  
   if(parname[0] == '0') {
     strcpy(tempname, argv);
     strcat(tempname, ".par");
@@ -256,7 +256,7 @@ void Parameters :: ReadPar(char *argv)
   fgets (line, MAX_LINE, fp);
   fgets (line, MAX_LINE, fp);
 
-  while(fgets (line, MAX_LINE, fp) != NULL) {    
+  while(fgets (line, MAX_LINE, fp) != NULL) {
     key = new char[FILENAME_MAX+1];
     val = new char[FILENAME_MAX+1];
     if(sscanf(line, "%s %s", key, val) == 2)  
@@ -272,25 +272,36 @@ void Parameters :: ReadPar(char *argv)
 
   fclose(fp);
   fprintf(stderr,"done\n");
-  if(strcmp(m["eugene.versionPAR"], VERSION_PAR)) {
-    fprintf(stderr, "Incorrect parameter file version : %s\n", m["eugene.versionPAR"]);
+  if(strcmp(getC("EuGene.versionPAR"), VERSION_PAR)) {
+    fprintf(stderr, "Incorrect parameter file version : %s.\n", getC("EuGene.versionPAR"));
     fprintf(stderr,"Version %s required\n", VERSION_PAR);
     exit(2);
   }
   else
-    fprintf(stderr, "Parameters file %s\n", m["eugene.versionPAR"]);
+    fprintf(stderr, "Parameters file %s\n", m["EuGene.versionPAR"]);
   
   // Remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
-  m["eugene.minL0"] = m["eugene.minL1"] = m["eugene.minL2"] = m["eugene.minEx"];
-  m["eugene.minL3"] = m["eugene.minL4"] = m["eugene.minL5"] = m["eugene.minEx"];
-  m["eugene.minL6"] = m["eugene.minL7"] = m["eugene.minL8"] = m["eugene.minIn"];
-  m["eugene.minL9"] = m["eugene.minL10"]= m["eugene.minL11"]= m["eugene.minIn"];
-  m["eugene.minL12"]= m["eugene.minL13"]= m["eugene.minL14"]= m["eugene.minSg"];
-  m["eugene.minL15"]= m["eugene.minL16"]= m["eugene.minL17"]= m["eugene.minSg"];
+  m["EuGene.minL0"] = m["EuGene.minL1"] = m["EuGene.minL2"] = m["EuGene.minEx"];
+  m["EuGene.minL3"] = m["EuGene.minL4"] = m["EuGene.minL5"] = m["EuGene.minEx"];
+  m["EuGene.minL6"] = m["EuGene.minL7"] = m["EuGene.minL8"] = m["EuGene.minIn"];
+  m["EuGene.minL9"] = m["EuGene.minL10"]= m["EuGene.minL11"]= m["EuGene.minIn"];
+  m["EuGene.minL12"]= m["EuGene.minL13"]= m["EuGene.minL14"]= m["EuGene.minSg"];
+  m["EuGene.minL15"]= m["EuGene.minL16"]= m["EuGene.minL17"]= m["EuGene.minSg"];
 
-  // FsP (frameshift) défini en argument -f on modifie sa valeur lu dans .par
-  if(FsP != 0)
-    m["eugene.frameshift"] = doubleToChar(FsP);
+  // La ligne d'argument est prioritaire sur le .par
+  // Si info défini en argument on modifie sa valeur lu dans .par
+  if( FsP != 0 )                                 // -f -> Frameshift
+    m["EuGene.frameshift"] = doubleToChar(FsP);
+  if( m["estopt"] == "TRUE" )                    // -d -> Est
+    m["Sensor.Est.use"] = "TRUE";
+  if( m["blastopt"] == "TRUE" )                  // -b -> BlastX
+    m["Sensor.BlastX.use"] = "TRUE";
+  if( m["userinfo"] == "TRUE" )                  // -U -> User
+    m["Sensor.User.use"] = "TRUE";
+  if( m["raflopt"] == "TRUE" )                   // -R -> Riken
+    m["Sensor.Riken.use"] = "TRUE";
+  if( m["ncopt"] == "TRUE" )                     // -r -> Repeat
+    m["Sensor.Repeat.use"] = "TRUE";
 }
 
 // ------------------------
@@ -301,7 +312,7 @@ char* Parameters :: getC(char *key)
   if(m.count(key))
     return (char*)m[key];
   else {
-    fprintf(stderr,"WARNING: undefined key %s.\n",key);
+    fprintf(stderr,"WARNING: Undefined key %s\n",key);
     return (char*)"";
   }
 }
@@ -318,7 +329,7 @@ double Parameters :: getD(char *key)
       return atof(m[key]);
   }
   else {
-    fprintf(stderr,"WARNING: undefined key %s.\n",key);
+    fprintf(stderr,"WARNING: Undefined key %s\n",key);
     return 0.0;
   }
 }
@@ -329,16 +340,16 @@ double Parameters :: getD(char *key)
 int Parameters :: getI(char *key)
 {
   if(m.count(key)) {
-    if(m[key] == "TRUE")
+    if(!strcmp(m[key], "TRUE"))
       return TRUE;
-    else if (m[key] == "FALSE")
+    else if(!strcmp(m[key], "FALSE"))
       return FALSE;
     else
       return atoi(m[key]);
   }
 
   else {
-    fprintf(stderr,"WARNING: undefined key %s.\n",key);
+    fprintf(stderr,"WARNING: Undefined key %s\n",key);
     return 0; 
   }
 }
@@ -347,19 +358,26 @@ int Parameters :: getI(char *key)
 //  Get Use.Sensor.
 // ------------------------
 int Parameters :: getUseSensor(char **key, int *val)
-{ 
-  while(iter != m.end() &&
-	(iter->first[0] != 's' || iter->first[1] != 'e' ||
-	 iter->first[2] != 'n' || iter->first[3] != 's' ||
-	 iter->first[4] != 'o' || iter->first[5] != 'r' ||
-	 iter->first[6] != '.'))
-    ++iter;
+{
+  int l;
   
-  if(iter != m.end()) {
-    *key = (char*)iter->first;
-    *val = atoi(iter->second);
-    ++iter;
-    return TRUE;
+  while(iter != m.end()) {
+    while(iter != m.end() &&
+	  (iter->first[0] != 'S' || iter->first[1] != 'e' ||
+	   iter->first[2] != 'n' || iter->first[3] != 's' ||
+	   iter->first[4] != 'o' || iter->first[5] != 'r'))
+      ++iter;
+    if(iter != m.end()) {
+      l = strlen(iter->first) - 1;
+      if(iter->first[l-2] == 'u' && iter->first[l-1] == 's' && iter->first[l] == 'e')  
+	++iter;
+      else {
+	*key = (char*)iter->first;
+	*val = atoi(iter->second);
+	++iter;
+	return TRUE;
+      }
+    }
   }
   return FALSE;
 }
