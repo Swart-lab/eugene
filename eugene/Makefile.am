@@ -41,9 +41,7 @@ EXTRA_DIST = reconf configure  config/* CREATE_LINKS \
 	     src/WEB/Images/m_plugins.jpg src/WEB/Images/next.jpg src/WEB/Images/top.jpg \
 	     src/WEB/Javascripts/cm_addins.js src/WEB/Javascripts/coolmenus4.js \
 	     src/WEB/Javascripts/diap.js src/WEB/Javascripts/euG_menu.js \
-	     src/WEB/Style/eugene.css \
-	     lib/gd-2.0.22/libgd.a  lib/libpng-1.2.5/libpng.a  lib/zlib-1.2.1/libz.a
-
+	     src/WEB/Style/eugene.css 
 
 SUBDIRS = src doc
 

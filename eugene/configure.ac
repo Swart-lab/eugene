@@ -33,15 +33,39 @@ AC_PROG_LN_S
 AC_PROG_RANLIB
 
 # Checks for libraries.
-AC_CHECK_LIB([c], [main])
-AC_CHECK_LIB([dl], [main])
-AC_CHECK_LIB([gcc], [main])
-AC_CHECK_LIB([gd], [main])
-AC_CHECK_LIB([m], [main])
-AC_CHECK_LIB([mp], [main])
-AC_CHECK_LIB([nsl], [main])
-AC_CHECK_LIB([png], [main])
-AC_CHECK_LIB([z], [main])
+AC_CHECK_LIB([c], [main], [], [ \
+	echo "Error! You need to have the c library to compile eugene."
+        exit -1
+        ])
+AC_CHECK_LIB([dl], [main], [], [ \
+	echo "Error! You need to have the dl library to compile eugene."
+        exit -1
+        ])
+AC_CHECK_LIB([gcc], [main], [], [ \
+	echo "Error! You need to have the gcc library to compile eugene."
+        exit -1
+        ])
+AC_CHECK_LIB([gd], [main], [], [ \
+	echo "Error! You need to have the gd library (>= 2.0) to compile eugene."
+	echo "See http://www.boutell.com/gd/http/ for a download."
+        exit -1
+        ])
+AC_CHECK_LIB([m], [main], [], [ \
+	echo "Error! You need to have the m library to compile eugene."
+        exit -1
+        ])
+AC_CHECK_LIB([nsl], [main], [], [ \
+	echo "Error! You need to have the nsl library to compile eugene."
+        exit -1
+        ])
+AC_CHECK_LIB([png], [main], [], [ \
+	echo "Error! You need to have the png library for the gd library."
+        exit -1
+        ])
+AC_CHECK_LIB([z], [main], [], [ \
+	echo "Error! You need to have the z library for the gd library."
+        exit -1
+        ])
 
 # Checks for header files.
 AC_HEADER_STDC
