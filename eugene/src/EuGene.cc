@@ -342,7 +342,6 @@ int main  (int argc, char * argv [])
 	if ((i % 3 == k))
 	  LBP[k]->Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
 #ifdef PAYTOIGNORE      
-	else // on ne prend pas le donneur
 	  LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 #endif
 	LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
@@ -413,7 +412,6 @@ int main  (int argc, char * argv [])
 	if (((Data_Len-i) % 3 == k-3)) 
 	  LBP[k]->Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
 #ifdef PAYTOIGNORE      
-	else // sinon on ne prend pas le donneur 
 	  LBP[k]->Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 #endif
 	
