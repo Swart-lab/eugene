@@ -290,10 +290,6 @@ Sensor.Riken		7	#  Priority 1 -> Second
 Sensor.Repeat		8	#  ...
 Sensor.User		9	#  Priority n -> Last
 Sensor.GFF		10	#
-<<<<<<< EuGeneAS.par
+Sensor.Plotter		11	#
 Sensor.GCPlot		11	#
 Sensor.Tester		12	#
-=======
-Sensor.Plotter		11	#
-Sensor.Tester		12	#
->>>>>>> 1.38
