@@ -309,27 +309,27 @@ ParaOptimization.Cluster[2] IDENTICAL
 #
 ParaOptimization.NbParameter 5
 #
-ParaOptimization.Para.Name[0] para1
+ParaOptimization.Para.Name[0] para1*
 ParaOptimization.Para.Max[0] 1
 ParaOptimization.Para.Min[0] 0
 ParaOptimization.Para.Cluster[0] 0
 #
-ParaOptimization.Para.Name[1] para2
+ParaOptimization.Para.Name[1] para2*
 ParaOptimization.Para.Max[1] 1
 ParaOptimization.Para.Min[1] 0
 ParaOptimization.Para.Cluster[1] 0
 #
-ParaOptimization.Para.Name[2] para3
+ParaOptimization.Para.Name[2] para3*
 ParaOptimization.Para.Max[2] 1
 ParaOptimization.Para.Min[2] 0
 ParaOptimization.Para.Cluster[2] 1
 #
-ParaOptimization.Para.Name[3] para4
+ParaOptimization.Para.Name[3] para4*
 ParaOptimization.Para.Max[3] 1
 ParaOptimization.Para.Min[3] 0
 ParaOptimization.Para.Cluster[3] 1
 #
-ParaOptimization.Para.Name[4] para5
+ParaOptimization.Para.Name[4] para5*
 ParaOptimization.Para.Max[4] 1
 ParaOptimization.Para.Min[4] 0
 ParaOptimization.Para.Cluster[4] 2
