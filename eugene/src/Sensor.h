@@ -12,6 +12,7 @@
 #include "DNASeq.h"
 #include "Prediction.h"
 #include "Const.h"
+#include "SensorIF.h"
 
 extern "C" {
 #include "../GDIF/gdIF.h"
