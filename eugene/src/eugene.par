@@ -56,8 +56,8 @@ EuStop.stopP            4.155
 #
 ##### FrameShift parameters #####
 #
-FrameShift.Ins	999.0
-FrameShift.Del	999.0
+FrameShift.Ins	1e999.0
+FrameShift.Del	1e999.0
 #
 ##### NetStart parameters #####
 #
