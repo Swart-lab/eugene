@@ -207,9 +207,12 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     maxi = -NINFINITY;
     for (k = 0 ; k < 18; k++) {
       LBP[k]->BestUsable(i,SwitchAny,0,&BestU);
+      //      printf("%d %d maxi %lf\n",i,k,BestU);
       if ((BestU > NINFINITY) && (BestU < maxi)) maxi =BestU;
     }
     
+
+
     for (k = 0 ; k < 18; k++) 
       LBP[k]->Update(-maxi);
     NormalizingPath += maxi;
@@ -761,23 +764,14 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 // -------------------------------------------------------------------------
 DNASeq* ReadSequence (char* sequence_name)
 {
-  FILE   *fp;
+
   DNASeq *TheSeq;
-  
-  fp = (*sequence_name ? FileOpen (NULL, sequence_name, "r") : stdin);
-  
-  if (fp == NULL) {
-    fprintf(stderr, "Cannot open fasta file %s\n", sequence_name);
-    exit(3);
-  }
   
   fprintf(stderr,"-------------------------------------");
   fprintf(stderr,"--------------------------------\nLoading sequence...");
   fflush(stderr);
   
-  TheSeq = new DNASeq(fp);
-  
-  if (fp != stdin) fclose(fp);
+  TheSeq = new DNASeq(sequence_name);
   
   fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, TheSeq->SeqLen);
   
@@ -786,7 +780,6 @@ DNASeq* ReadSequence (char* sequence_name)
   
   return TheSeq;
 }
-
 
 // -------------------------------------------------------------------------
 //            MAIN
