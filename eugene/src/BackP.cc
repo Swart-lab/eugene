@@ -193,7 +193,7 @@ Prediction* Track :: BackTrace (int MinCDSLen)
   int  pos;
   char etat;
   int igpos = -1;
-  int prevpos;
+  int prevpos,prevstate;
   int CDSlen = 0;
 
   // initialisation by the terminal state
@@ -203,6 +203,7 @@ Prediction* Track :: BackTrace (int MinCDSLen)
   pred->add(pos, etat);
 
   prevpos = pos;
+  prevstate = etat;
   if (etat == InterGen) igpos = pos;
 
   while (It != NULL) {
@@ -211,20 +212,21 @@ Prediction* Track :: BackTrace (int MinCDSLen)
     etat = It->State;
     It   = It->Origin;
 
-    printf("pos %d etat %d CDSlen %d igpos %d prevpos %d\n",
-	   pos,etat,CDSlen,igpos,prevpos);
+    //    printf("pos %d etat %d CDSlen %d igpos %d prevpos %d\n",
+    //	   pos,etat,CDSlen,igpos,prevpos);
 
-    if (etat <= TermR3)  // codant
+    if (prevstate <= TermR3)  // codant
       CDSlen += prevpos-pos;
 
     prevpos = pos;
+    prevstate = etat;
 
     if ((etat == InterGen) && (pos >=0))
       if (CDSlen <= MinCDSLen) {
 	CDSlen = 0;
 	pred->poptill(igpos);
-	printf("CDSLen %d, je pope jusqu'a pos=%d (exclus)\n",
-	       CDSlen,igpos);
+	//	printf("CDSLen %d, je pope jusqu'a pos=%d (exclus)\n",
+	//	       CDSlen,igpos);
       }
       else {
 	igpos = pos;
