@@ -280,7 +280,7 @@ void OutputHTMLFileNames(int firstImg)
 	     (ImgLen*(i+1))+From < Len ? (ImgLen*(i+1))+From : Len);
     else
       printf("%s : %d -> %d</option>\n",
-	     TName, ImgLen*i+From-OvLap,
-	     (ImgLen*(i+1))+From-OvLap < Len ? (ImgLen*(i+1))+From-OvLap :Len);
+	     TName, ImgLen*i+From-(OvLap*i),
+	     (ImgLen*(i+1))+From-(OvLap*i) < Len ? (ImgLen*(i+1))+From-(OvLap*i) :Len);
   }
 }
