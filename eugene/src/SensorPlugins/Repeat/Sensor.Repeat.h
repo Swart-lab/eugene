@@ -6,6 +6,8 @@
 /*************************************************************
  **                     SensorRepeat                        **
  *************************************************************/
+const REAL IGPenalty = -1.0; 
+
 class SensorRepeat : public Sensor
 {
  private:
