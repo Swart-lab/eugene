@@ -1839,7 +1839,7 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k])+log(4));
+      LBP[k]->Update(log(BaseScore[k])+log(4*TransitionWeight[0]));
        
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if (estopt)
@@ -1912,7 +1912,7 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k])+log(4)) ;
+      LBP[k]->Update(log(BaseScore[k])+log(4*TransitionWeight[0])) ;
 
       // Si on a un Gap EST ou si l'on connait le sens du match EST
       if (estopt)
@@ -1965,7 +1965,7 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen5]->Update(log(BaseScore[8])+log(4));
+    LBP[InterGen5]->Update(log(BaseScore[8])+log(4*TransitionWeight[4]));
     //    LBP[InterGen5]->Update(log(TheSeq->GC_AT(i))+log(4));
     if (estopt)
       LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
@@ -2004,7 +2004,7 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen3]->Update(log(BaseScore[8])+log(4));
+    LBP[InterGen3]->Update(log(BaseScore[8])+log(4*TransitionWeight[4]));
     //LBP[InterGen3]->Update(log(TheSeq->GC_AT(i))+log(4));
     if (estopt)
       LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
@@ -2068,7 +2068,7 @@ int main  (int argc, char * argv [])
 
     //    LBP[UTR5F]->Update(log(BaseScore[8])+log(3.999));
     //    LBP[UTR5F]->Update(log(TheSeq->GC_AT(i))+log(3.999));
-    LBP[UTR5F]->Update(log(BaseScore[9])+log(3.999));
+    LBP[UTR5F]->Update(log(BaseScore[9])+log(4*TransitionWeight[2]));
 
     if (blastopt && (ProtMatch[i] != 0))
       LBP[UTR5F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
@@ -2107,7 +2107,7 @@ int main  (int argc, char * argv [])
 
     //    LBP[UTR3F]->Update(log(BaseScore[9])+log(4));
     //    LBP[UTR3F]->Update(log(BaseScore[8])+log(4));
-    LBP[UTR3F]->Update(log(BaseScore[11])+log(4));
+    LBP[UTR3F]->Update(log(BaseScore[11])+log(4*TransitionWeight[3]));
     //    LBP[UTR3F]->Update(log(TheSeq->GC_AT(i))+log(4));
 
     if (blastopt && (ProtMatch[i] != 0))
@@ -2159,7 +2159,7 @@ int main  (int argc, char * argv [])
 
     //    LBP[UTR5R]->Update(log(BaseScore[8])+log(3.999));
     //    LBP[UTR5R]->Update(log(TheSeq->GC_AT(i))+log(3.999));
-    LBP[UTR5R]->Update(log(BaseScore[10])+log(3.999));
+    LBP[UTR5R]->Update(log(BaseScore[10])+log(4*TransitionWeight[2]));
 
     if (blastopt && (ProtMatch[i]!=0))
       LBP[UTR5R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
@@ -2214,7 +2214,7 @@ int main  (int argc, char * argv [])
       
     //    LBP[UTR3R]->Update(log(BaseScore[10])+log(4));
     //    LBP[UTR3R]->Update(log(BaseScore[8])+log(4));
-    LBP[UTR3R]->Update(log(BaseScore[12])+log(4));
+    LBP[UTR3R]->Update(log(BaseScore[12])+log(4)*TransitionWeight[3]);
     //    LBP[UTR3R]->Update(log(TheSeq->GC_AT(i))+log(4));
 
     if (blastopt && (ProtMatch[i] != 0))
@@ -2257,7 +2257,7 @@ int main  (int argc, char * argv [])
  
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[6+k]->Update(log(BaseScore[6])+log(4));
+      LBP[6+k]->Update(log(BaseScore[6])+log(4*TransitionWeight[1]));
 
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
@@ -2311,7 +2311,7 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[9+k]->Update(log(BaseScore[7])+log(4));
+      LBP[9+k]->Update(log(BaseScore[7])+log(4*TransitionWeight[1]));
 
       // Si on a un Hit EST ou si l'on connait le sens du match EST
       if (estopt)
