@@ -43,15 +43,18 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <limits.h>
-#include <float.h>
-#include <time.h>
-#include <assert.h>
-#include <errno.h>
+
+#include <vector>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <cfloat>
+#include <ctime>
+#include <cassert>
+#include <cerrno>
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #else
@@ -131,7 +134,7 @@ const  unsigned char NotAHit       = Margin | Gap;
 
 double Score [9],NScore[9];
 int Data_Len;
-int normopt,blastopt,estopt,estanal,ncopt;
+int normopt,blastopt,estopt,estanal,ncopt,raflopt;
 int window, offset,graph,resx,resy;
 int    gfrom,gto,golap,glen;
 
@@ -158,6 +161,13 @@ extern "C"{
 }
 #include "clef.h"
 
+// RAFL: Riken Arabidopsis Full Length cDNA
+typedef struct RAFLgene{
+  int deb;
+  int fin;
+  char sens;
+  char ID[FILENAME_MAX+1];
+}RAFLgene;
 
 // ------------------ Globals ---------------------
 
@@ -742,6 +752,9 @@ int main  (int argc, char * argv [])
   
   char *EugDir;
 
+  std::vector <RAFLgene> RAFL;
+  int              RAFLpos;  //position par rapport a un gene RAFL
+
   // prior on the initial state, selon Sato et al 1999 / Terryn et
   // al. 1999
   REAL ExonPrior = 0.33,IntronPrior = 0.17;
@@ -749,6 +762,7 @@ int main  (int argc, char * argv [])
 
   const REAL DontCrossStop = NINFINITY;
   const REAL IGPenalty = NINFINITY; 
+  const REAL RAFLPenalty = NINFINITY; 
 
   // Les longueurs. 
 
@@ -768,6 +782,7 @@ int main  (int argc, char * argv [])
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
   estanal = FALSE;             // don't try to analyze EST support
+  raflopt = FALSE;            // don't try to read a est.rafl file
   blastopt = -1;              // don't try to read a blast file
   ncopt = FALSE;                   //don't try to read a non coding input
   normopt = 1;                // normalize across frames
@@ -817,7 +832,7 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "Edrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "REdrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
             
@@ -920,6 +935,10 @@ int main  (int argc, char * argv [])
     case 'd':           /* -d  use cDNA blastn results      */
       estopt = TRUE;
       break; 
+
+    case 'R':           /* -R use RAFL-like EST*/
+      raflopt = TRUE;
+      break;
 
     case 'f':           /* -f frameshift loglike            */
       if (! GetDArg(optarg, &FsP, FsP))
@@ -1109,6 +1128,29 @@ int main  (int argc, char * argv [])
     fclose(fEST);
   }
 
+  if (raflopt) {
+    FILE *fRAFL;
+    int beg,end;
+    char name[FILENAME_MAX+1];
+    RAFLgene tmp;
+
+    fprintf(stderr,"Reading RAFL gene...");
+    fflush(stderr);
+    strcpy(tempname,fstname);
+    strcat(tempname,".riken");
+    fRAFL = FileOpen(NULL,tempname, "r");
+    while (fscanf (fRAFL,"%d %*s %d %*s %s",&beg,&end,name) != EOF){
+      tmp.deb=Min(beg,end);
+      tmp.fin=Max(beg,end);
+      strcpy(tmp.ID,name);
+      tmp.sens= ((beg<end)?'+':'-');
+      RAFL.push_back(tmp);
+    }
+    fclose(fRAFL);
+    fprintf(stderr,"done\n");
+    fflush(stderr);
+    if (RAFL.size() < 1) raflopt=FALSE;
+  }
 
   if (graph) PlotScore(Data_Len,window,normopt,BaseScore);
 
@@ -1322,6 +1364,7 @@ int main  (int argc, char * argv [])
   REAL  maxi, PBest[26];
   BackPoint *PrevBP[26];
   int source;
+  j=0;
 
   for (i = 0; i <= Data_Len; i++) {
     
@@ -1351,6 +1394,21 @@ int main  (int argc, char * argv [])
     PrevBP[21] = LBP[UTR5R]->StrictBestUsable(i,MinFivePrime,&PBest[21]);
     PrevBP[22] = LBP[UTR3R]->StrictBestUsable(i,MinThreePrime,&PBest[22]);
 
+    // Calcul de la position par rapport aux genes RAFL (Riken Ara.Full-Length)
+    // valeurs de RAFLpos:
+    // 0-> en dehors, 1-> frontiere(intergenique obligatoire), 2-> dedans(penalisation IG)
+
+    if (raflopt){
+      if ( i > RAFL[j].fin){ // si on depasse le RAFL, on prend l'eventuel prochain
+	(j+1 < RAFL.size()) ? j++ : raflopt=FALSE ;
+      }
+      if ( (i >= RAFL[j].deb-2) && (i < RAFL[j].fin+1) ){
+	RAFLpos= ( ((i==RAFL[j].deb-2) || (i==RAFL[j].fin)) ? 1 : 2);
+      }
+      else{
+	RAFLpos=0;
+      }
+    }
     // ----------------------------------------------------------------
     // ------------------ Exons en forward ----------------------------
     // ----------------------------------------------------------------
@@ -1408,6 +1466,10 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
+
+      if (raflopt){
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[k]->Update(RAFLPenalty);
+      }
     }
     // ----------------------------------------------------------------
     // ------------------------- Exons en reverse ---------------------
@@ -1467,6 +1529,10 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[k]->Update(IGPenalty);
+
+      if (raflopt){
+	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[k]->Update(RAFLPenalty);
+      }
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
@@ -1504,6 +1570,10 @@ int main  (int argc, char * argv [])
     LBP[InterGen5]->Update(log(BaseScore[8][i])+log(4));
     LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
+    if (raflopt){
+      if (RAFLpos==2) LBP[InterGen5]->Update(RAFLPenalty);
+    }
+
     // ----------------------------------------------------------------
     // Puis les 3' forward => LBP[InterGen3]
     // ----------------------------------------------------------------
@@ -1533,6 +1603,10 @@ int main  (int argc, char * argv [])
     
     LBP[InterGen3]->Update(log(BaseScore[8][i])+log(4));
     LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+
+    if (raflopt){
+      if (RAFLpos==2) LBP[InterGen3]->Update(RAFLPenalty);
+    }
 
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
@@ -1583,6 +1657,10 @@ int main  (int argc, char * argv [])
     if (best != -1) LBP[UTR5F]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
 
     LBP[UTR5F]->Update(log(BaseScore[8][i])+log(3.999));
+ 
+    if (raflopt){
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[UTR5F]->Update(RAFLPenalty);
+    }
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
     // ----------------------------------------------------------------
@@ -1611,6 +1689,10 @@ int main  (int argc, char * argv [])
     if (best != -1) LBP[UTR3F]->InsertNew(best %12,Switch,i,maxi,PrevBP[best]);
 
     LBP[UTR3F]->Update(log(BaseScore[9][i])+log(4));
+
+    if (raflopt){
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[UTR3F]->Update(RAFLPenalty);
+    }
 
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
@@ -1647,6 +1729,10 @@ int main  (int argc, char * argv [])
     if (best != -1) LBP[UTR5R]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
 
     LBP[UTR5R]->Update(log(BaseScore[8][i])+log(3.999));
+
+    if (raflopt){
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[UTR5R]->Update(RAFLPenalty);
+    }
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
@@ -1692,6 +1778,10 @@ int main  (int argc, char * argv [])
       
     LBP[UTR3R]->Update(log(BaseScore[10][i])+log(4));
 
+    if (raflopt){
+      if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) LBP[UTR3R]->Update(RAFLPenalty);
+    }
+
     // ----------------------------------------------------------------
     // ---------------- Introns de phase k forward --------------------
     // ----------------------------------------------------------------
@@ -1728,8 +1818,12 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[6+k]->Update(IGPenalty);
+
+      if (raflopt){
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='-'))) LBP[6+k]->Update(RAFLPenalty);
+      }
     }
-      
+
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
@@ -1766,6 +1860,11 @@ int main  (int argc, char * argv [])
 
       if ((ForcedIG != NULL) && ForcedIG[i])
 	LBP[9+k]->Update(IGPenalty);
+
+      if (raflopt){
+	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[j].sens=='+'))) 
+	  LBP[9+k]->Update(RAFLPenalty);
+      }
     }
   }
 
@@ -1861,6 +1960,6 @@ int main  (int argc, char * argv [])
 
   for  (i = 0;  i < 5;  i ++)
     delete  IMMatrix[i];
-    
+
   return  0;
 }
