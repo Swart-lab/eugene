@@ -2,22 +2,74 @@
 
 \subsubsection{\texttt{Sensor.PepSignal}}
 
-Todo.
 
 \paragraph{Description}
+This plugin injects possible translation starts as predicted by the Predotar
+ program (http://genoplante-info.infobiogen.fr/predotar/) that looks for 
+peptide adressing sequences after every occurrence of an ATG. The plugin reads 
+the predictions (both in forward and reverse strand) of the program 
+from a file whose name is derived 
+from the sequence name by adding the \texttt{.psignal} suffix.
+
+The sensor is activated by setting the value \texttt{1} for the parameter
+\texttt{Sensor.PepSignal.use} in the parameter file. The score for start
+ prediction is rescaled by the parameters {\tt PepSignal.startP*} and
+{\tt PepSignal.startB*} (see below).
+
+Here is an example of PepSignal parameters definition.
+\begin{Verbatim}[fontsize=\small]
+PepSignal.startP*       0.9
+PepSignal.startB*       0.1
+Sensor.PepSignal.use    1       # Use PepSignal sensor	
+Sensor.PepSignal        10      # Sensor priority
+\end{Verbatim}
 
 
 \paragraph{Input files format}
 
+The file \texttt{.psignal} describes the predicted start sites
+sorted by position on the sequence (as given by Predotar).
+The format of a line is : \texttt{<position> <strand> <score> <comment>}
+
+Here is an example used for test:
+\begin{Verbatim}[fontsize=\small]
+175 start_rev 0.024083 test
+188 start 0.000151 test
+195 start_rev 0.010081 test
+261 start 0.001628 test
+270 start 0.000026 test
+[...]
+\end{Verbatim}
+
+This file can be obtained by launching the Predotar software
+available at\\
+\texttt{http://genoplante-info.infobiogen.fr/predotar/predotar.html}
+
+
 \paragraph{Filtering input information}
+
+No filtering.
 
 
 \paragraph{Integration of information}
 
+The score (column 3) read $s$ is rescaled using the {\tt PepSignal.startP*} 
+(\emph{P}) and {\tt PepSignal.startB*} (\emph{B}) as follows:
+
+\[s' = e^{-P}.s^B\]
+
+All predictions that use a predicted start receive a $\log(s')$
+penalty while those that go through a predicted start while they
+could have used it receive a $\log(1-s')$ penalty.
+
 
 \paragraph{Post analyse}
+
+No post analyse.
 
 
 \paragraph{Graph}
 
+Predicted starts are visible on exonix tracks as blue vertical lines
+whose length indicates the site score.
 

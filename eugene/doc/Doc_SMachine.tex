@@ -2,14 +2,64 @@
 
 \subsubsection{\texttt{Sensor.SMachine}}
 
-Todo.
 
 \paragraph{Description}
 
-This plugin injects possible splice sites as predicted by the
-SpliceMachine program. 
+This plugin injects possible start and splice sites as predicted by the
+SpliceMachine program. For more detail, see the publication Degroeve, S., Saeys, Y., De Baets, B., Rouz\'e, P., Van de Peer, Y. (2004) Predicting splice sites from high-dimensional local context representations Bioinformatics. 
+
+The plugin reads the predictions of the
+program from two files whose names are derived from the sequence name
+by adding the \texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes
+(respectively prediction for the starts and splices sites).
+The sensor is activated by setting the value 1 for the parameter
+\texttt{Sensor.SMachine.use} in the parameter file. The score for start, acceptor
+and donor prediction is rescaled by the parameters {\tt SMachine.startP*} and
+{\tt SMachine.startB*} for starts,  {\tt SMachine.accP*} and
+{\tt SMachine.accB*} for acceptors and {\tt SMachine.donP*} and {\tt SMachine.donB*} for donors (see below).
+The parameter {\tt SMachine.isScaled} indicates that predictions are scaled after fitsigmoid in SpliceMachine. That changes the rescaling fonction used (see below).
+The parameter {\tt SMachine.cmd} contains the command which is launch if the predictions files do not exist.
+
+
+Here is an example of SMachine parameters definition.
+\begin{Verbatim}[fontsize=\small]
+SMachine.cmd            "splicemachine.pl "
+SMachine.isScaled       1
+SMachine.accP*          0.102032725565
+SMachine.accB*          5.585
+SMachine.donP*          0.020202707318
+SMachine.donB*          27.670
+SMachine.startP*        0.052
+SMachine.startB*        0.308
+Sensor.SMachine.use     1                # Use SMachine sensor
+Sensor.SMachine         10               # Sensor priority
+\end{Verbatim}
+
+
 
 \paragraph{Input files format}
+The files with \texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes are
+obtained by running SpliceMachine which can be obtained at \\
+\texttt{http://bioinformatics.psb.ugent.be/webtools/splicemachine/}
+
+Here is an extract from a \texttt{.spliceMSt} file:
+\begin{Verbatim}[fontsize=\small]
+175 start_rev 0.024083
+188 start 0.000151
+195 start_rev 0.010081
+261 start 0.001628
+270 start 0.000026
+[...]
+\end{Verbatim}
+
+Here is an extract from a \texttt{.spliceMAD} file:
+\begin{Verbatim}[fontsize=\small]
+210 acceptor_rev 0.066414
+245 donor_rev 0.001345
+628 acceptor 0.066414
+1309 donor 0.000039
+[...]
+\end{Verbatim}
 
 
 \paragraph{Filtering input information}
@@ -18,11 +68,35 @@ No filtering.
 
 \paragraph{Integration of information}
 
+The integrated score for start and donor/acceptor prediction is read (columns 3). 
+The score read $s$ is rescaled using the {\tt SMachine.startP*} (\emph{P}) and 
+{\tt SMachine.startB*} (\emph{B}) parameters for starts,
+ {\tt SMachine.accP*} (\emph{P}) and 
+{\tt SMachine.accB*} (\emph{B}) parameters for acceptors and {\tt SMachine.donP*} 
+(\emph{P}) and {\tt SMachine.donB*} (\emph{B}) parameters for donors.
+If predictions are scaled ({\tt SMachine.isScaled} is set to {\tt 1}) then the rescaled score  $s'$ is:
+\[s' = e^{-P}.s^B\]
+All predictions that use a predicted start receive a $\log(s')$
+penalty while those that go through a predicted start while they
+could have used it receive a $\log(1-s')$ penalty.
+If predictions are not scaled ({\tt SMachine.isScaled} is set to {\tt 0}) then the rescaled score  $s'$ is:
+\[s' = 1 - e^{-P}.s^B\]
+ All predictions that use a predicted start receive a $\log(s')$
+penalty while those that go through a predicted start while they
+could have used it do not receive a penalty.
+
+
 \paragraph{Post analyse}
 
 No post analyse.
 
 \paragraph{Graph}
+
+Predicted starts are visible on exonix tracks as blue vertical lines
+whose length indicates the site score.
+Predicted splice sites are visible on the intronic tracks as green
+(donor) and magenta (acceptor) vertical lines whose length indicates
+the site score.
 
 
 
