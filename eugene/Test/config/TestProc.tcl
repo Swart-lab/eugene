@@ -228,9 +228,9 @@ set NewValue1(GCPlot.Smooth)	100
 #
 ##### Sensor Plotter
 #
-set NewValue1(Plotter.GC)	 1 
-set NewValue1(Plotter.GC3)	 1 
-set NewValue1(Plotter.A|T/A+T)	 0 
+set NewValue1(Plotter.GC\[0\])	 1 
+set NewValue1(Plotter.GC3\[0\])	 1 
+set NewValue1(Plotter.A|T/A+T\[0\])	 0 
 #
 ##### Sensor Tester #####
 #
@@ -239,6 +239,97 @@ set NewValue1(Tester.Param.idx.0)	0
 #
 # No sensor used
 foreach sensor $SensorsList {set NewValue1(Sensor.${sensor}.use) FALSE}
+
+#################################################################
+################### PARAMETERS OPTIMIZATION #####################
+#################################################################
+set NewValue1(ParaOptimization.Use)	        FALSE
+set NewValue1(ParaOptimization.TrueCoordFile) 	---
+set NewValue1(ParaOptimization.Algorithm)	GENETIC+LINESEARCH
+set NewValue1(ParaOptimization.Test)	        TRUE
+set NewValue1(ParaOptimization.Trace)		TRUE
+#
+set NewValue1(ParaOptimization.NbCluster) 3
+set NewValue1(ParaOptimization.Cluster\[0\]) LINKED
+set NewValue1(ParaOptimization.Cluster\[1\]) IDENTICAL
+set NewValue1(ParaOptimization.Cluster\[2\]) IDENTICAL
+#
+set NewValue1(ParaOptimization.NbParameter)   	5
+#
+set NewValue1(ParaOptimization.Para.Name\[0\])	para1
+set NewValue1(ParaOptimization.Para.Max\[0\])	1	
+set NewValue1(ParaOptimization.Para.Min\[0\])	0
+set NewValue1(ParaOptimization.Para.Cluster\[0\]) 0
+#
+set NewValue1(ParaOptimization.Para.Name\[1\])	para2
+set NewValue1(ParaOptimization.Para.Max\[1\])	1	
+set NewValue1(ParaOptimization.Para.Min\[1\])	0
+set NewValue1(ParaOptimization.Para.Cluster\[1\]) 0
+#
+set NewValue1(ParaOptimization.Para.Name\[2\])	para3
+set NewValue1(ParaOptimization.Para.Max\[2\])	1	
+set NewValue1(ParaOptimization.Para.Min\[2\])	0
+set NewValue1(ParaOptimization.Para.Cluster\[2\]) 1
+#
+set NewValue1(ParaOptimization.Para.Name\[3\])	para4
+set NewValue1(ParaOptimization.Para.Max\[3\])	1	
+set NewValue1(ParaOptimization.Para.Min\[3\])	0
+set NewValue1(ParaOptimization.Para.Cluster\[3\]) 1
+#
+set NewValue1(ParaOptimization.Para.Name\[4\])	para5
+set NewValue1(ParaOptimization.Para.Max\[4\])	1	
+set NewValue1(ParaOptimization.Para.Min\[4\])	0
+set NewValue1(ParaOptimization.Para.Cluster\[4\]) 2
+#
+################## Genetic ######################################
+set NewValue1(Genetic.NbRun)		2
+set NewValue1(Genetic.NbGeneration)	2
+set NewValue1(Genetic.NbElement)	10
+set NewValue1(Genetic.CrossOverProbability)	0.6
+set NewValue1(Genetic.MutationProbability)	0.2
+set NewValue1(Genetic.SelectionType)	1    
+set NewValue1(Genetic.ScalingType)	1
+set NewValue1(Genetic.Sharing)		0.9
+set NewValue1(Genetic.Clustering)	TRUE
+set NewValue1(Genetic.Elitism)		0.9
+set NewValue1(Genetic.SA.Mutation)	FALSE
+set NewValue1(Genetic.SA.CrossOver)	FALSE
+set NewValue1(Genetic.Seed)		4
+#
+#
+######### LINESEARCH ###########################################
+set NewValue1(LineSearch.NbMaxCycle)	1
+set NewValue1(LineSearch.NbMinCycle)	1
+set NewValue1(LineSearch.NbMaxStab)	2
+set NewValue1(LineSearch.DivInter)	10
+set NewValue1(LineSearch.Alpha)	0.6
+set NewValue1(LineSearch.EvolutionMini) 0.001
+set NewValue1(LineSearch.Seed)		1
+#
+set NewValue1(LineSearch.Para.Step\[0\])	0.01
+set NewValue1(LineSearch.Para.Init\[0\])	0.5
+set NewValue1(LineSearch.Para.MaxInit\[0\]) 	1
+set NewValue1(LineSearch.Para.MinInit\[0\]) 	0
+#
+set NewValue1(LineSearch.Para.Step\[1\])	0.01
+set NewValue1(LineSearch.Para.Init\[1\])	0.5
+set NewValue1(LineSearch.Para.MaxInit\[1\])	1
+set NewValue1(LineSearch.Para.MinInit\[1\])	0
+#
+set NewValue1(LineSearch.Para.Step\[2\])	0.01
+set NewValue1(LineSearch.Para.Init\[2\])	0.5
+set NewValue1(LineSearch.Para.MaxInit\[2\])	1
+set NewValue1(LineSearch.Para.MinInit\[2\])	0
+#
+set NewValue1(LineSearch.Para.Step\[3\])	0.01
+set NewValue1(LineSearch.Para.Init\[3\])	0.5
+set NewValue1(LineSearch.Para.MaxInit\[3\])	1
+set NewValue1(LineSearch.Para.MinInit\[3\])	0
+#
+set NewValue1(LineSearch.Para.Step\[4\)]	0.01
+set NewValue1(LineSearch.Para.Init\[4\])	0.5
+set NewValue1(LineSearch.Para.MaxInit\[4\])	1
+set NewValue1(LineSearch.Para.MinInit\[4\])	0
 
 ModifyParaValue $FileName  NewValue1
 }

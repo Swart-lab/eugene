@@ -222,14 +222,14 @@ ModifyParaValue ${EUGENE}.par  NewValueAraset
 
 catch {eval exec $EUGENE_DIR/$EUGENE $SEQ(Araset) > tmp%stdout}
 
-if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_Araset]} {
-    exec cp tmp%stdout $OUTPUT_DIR/Output_Araset
-} elseif {[catch {exec diff $OUTPUT_DIR/Output_Araset tmp%stdout}]} {
-    AskReplace $OUTPUT_DIR/Output_Araset
+if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF(Araset)]} {
+    exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Araset)
+} elseif {[catch {exec diff $OUTPUT_DIR/$FILE_REF(Araset) tmp%stdout}]} {
+    AskReplace $OUTPUT_DIR/$FILE_REF(Araset)
     if {[gets stdin] == "Y"} {
-	exec cp tmp%stdout $OUTPUT_DIR/Output_Araset
+	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Araset)
     } else {
-	exec cp tmp%stdout $OUTPUT_DIR/Output_Araset.new
+	exec cp tmp%stdout $OUTPUT_DIR/${FILE_REF(Araset)}.new
     }
 }
 
@@ -243,7 +243,30 @@ puts "Reference files for Araset test created or checked."
 
 
 
+########################################################################
+##################### Parameters optimization ##########################
+########################################################################
+
+catch {eval exec $EUGENE_DIR/$EUGENE test -D ParaOptimization.Use=TRUE > tmp%stdout}
+
+if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF(Optimization)]} {
+    exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Optimization)
+} elseif {[catch {exec diff $OUTPUT_DIR/$FILE_REF(Optimization) tmp%stdout}]} {
+    AskReplace $OUTPUT_DIR/$FILE_REF(Optimization)
+    if {[gets stdin] == "Y"} {
+	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Optimization)
+    } else {
+	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF(Optimization).new
+    }
+}
+# remove temporary file	
+exec rm tmp%stdout
+
+puts "Reference files for Optimization test created or checked."
+
+
 # Indicate the end of the reference files generation
 puts "Reference files generated in the $OUTPUT_DIR directory."
 
 catch {eval exec rm ./$EUGENE.par}
+
