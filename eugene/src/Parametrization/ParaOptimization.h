@@ -17,8 +17,9 @@
 #include <string>
 
 #include "OptiAlgorithm.h"
-#include "../EuGene/MSensor.h"
-#include "../EuGene/DNASeq.h"
+
+class MasterSensor;
+class DNASeq;
 
 class ParaOptimization {
 

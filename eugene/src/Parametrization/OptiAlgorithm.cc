@@ -16,6 +16,7 @@
 #include "OptiAlgorithm.h"
 
 
+#include "../EuGene/config.h"
 #include "../EuGene/Param.h"
 
 extern Parameters PAR;

@@ -15,8 +15,10 @@
 #include <unistd.h>
 #include <stdio.h>
 
+
 #include "ParaOptimization.h"
 
+#include "../EuGene/config.h"
 #include "../EuGene/Param.h"
 #include "../EuGene/Prediction.h"
 #include "../EuGene/DNASeq.h"
@@ -156,7 +158,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       }
 
       fic_pred = "/tmp/EuGenePrediction";
-      sprintf (buffer,"%d",getpid()); fic_pred += buffer;
+      sprintf (buffer,"%d",(int)getpid()); fic_pred += buffer;
       sprintf (buffer,"%d",(int)time(NULL)); fic_pred += buffer;
       cmde = "rm -f " + fic_pred; system(cmde.c_str());
       fp = FileOpen(NULL,fic_pred.c_str(),"w");
@@ -171,7 +173,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       }
       fclose(fp);
       fic_eval = "/tmp/EuGeneEvaluation";
-      sprintf (buffer,"%d",getpid()); fic_eval += buffer;
+      sprintf (buffer,"%d",(int)getpid()); fic_eval += buffer;
       sprintf (buffer,"%d",(int)time(NULL)); fic_eval += buffer;
       if (!is_detail_required) eval_options = " -ps -o1";
       else eval_options = " -o1";
