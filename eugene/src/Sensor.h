@@ -29,14 +29,14 @@ class Sensor
  protected:
   void CheckStart   (DNASeq *,std::vector<int> a, std::vector<int> b);
   void CheckSplices (DNASeq *,std::vector<int> a, std::vector<int> b, std::vector<int> c, std::vector<int> d);
-  int  GetNumber    () { return instanceNumber; }
+  int  GetNumber    (void) { return instanceNumber; }
 
  public:
   TYPE_SENSOR type;
   
-  Sensor  (int);
-  virtual ~Sensor ();
-  virtual void Init       (DNASeq *) = 0;
+  Sensor  (int n);
+  virtual ~Sensor (void);
+  virtual void Init       (DNASeq *X) = 0;
   virtual void GiveInfo   (DNASeq *, int, DATA *) = 0;
   virtual void Plot       (DNASeq *) = 0;
   virtual void PostAnalyse(Prediction *) = 0;
