@@ -196,10 +196,9 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["Sensor.BlastX.use"] = "TRUE";
       if (optarg) {
 	m["BlastX.levels"] = optarg;
-	if(strlen(optarg) > 8)
+	if(strlen(optarg) > 10)
 	  errflag++;
       }
-      else m["BlastX.levels"] = "123";
       break;
 
     case 'E':
