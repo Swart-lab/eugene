@@ -80,7 +80,8 @@ void SensorHomology :: Init (DNASeq *X)
   
   FILE *ftblastx;
   FILE *protmatfile;
-  int deb,fin,phase,ProtDeb,ProtFin,sens,score;
+  int deb,fin,phase,ProtDeb,ProtFin,sens;
+  int score = 0;
   double bits;
   REAL GlobalBits;
   const int MaxHitLen  = 15000;
