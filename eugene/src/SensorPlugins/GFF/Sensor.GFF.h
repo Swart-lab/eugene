@@ -54,7 +54,7 @@ class SensorGFF : public Sensor
   static FILE *ppfile;
   static bool IsInitialized;
 
-  void ReadGFF(char[FILENAME_MAX+1]);
+  void ReadGFF(char[FILENAME_MAX+1], int seqlen);
 
  public:
   SensorGFF          (int n, DNASeq *X);

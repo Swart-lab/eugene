@@ -117,7 +117,7 @@ void SensorGFF :: Init (DNASeq *X)
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".gff");
-  ReadGFF(tempname);
+  ReadGFF(tempname, X->SeqLen);
   fprintf(stderr, "done\n");
   fflush(stderr);
 
@@ -148,7 +148,7 @@ void SensorGFF :: Init (DNASeq *X)
 // --------------------------
 //  Read start forward file.
 // --------------------------
-void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
+void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1], int seqlen)
 {
   FILE  *fp;
   char  line[MAX_LINE];
@@ -156,7 +156,7 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
   char  *seqname = (char *)malloc(FILENAME_MAX*sizeof(char));
   char  *feature = (char *)malloc(FILENAME_MAX*sizeof(char));
   int   start, end;
-  char  strand, frame;
+  char  strand, frame, phase[2];
   int   a  = -1, t = -1, c = -1, g = -1, n = -1;
   float gc = -1.0;
 
@@ -170,7 +170,7 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
     j++;
     if (line[0] != '#') {
       i = sscanf(line,"%s %*s %s %d %d %*s %c %c %d %d %d %d %d %f",
-		 seqname, feature, &start, &end, &strand, &frame,
+		 seqname, feature, &start, &end, &strand, phase,
 		 &a, &t, &c, &g, &n, &gc);
       if (i < 6) {
 	if (i==-1) {
@@ -183,8 +183,17 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1])
 	}
       }
       else {
+	frame = '.';
+	if (phase[0] != '.') {
+	  int f = -1;
+	  if (strand == '+')      { f = (start  - 1)   % 3; }
+	  else if (strand == '-') { f = (seqlen - end) % 3; }
+	  char t[2];
+	  if (f != -1) { sprintf(t, "%d", ((f + atoi(phase)) % 3)); }
+	  frame = t[0];
+	}
 	gffList.push_back(new GFFObject(seqname, feature, start, end,
-					strand, frame,
+					strand,  frame,
 					a, t, c, g, n, gc));
       }
     }
@@ -212,7 +221,7 @@ void SensorGFF :: Plot(DNASeq *X)
       int f = ((int)gffList[i]->frame - 48) + 1;
       if (gffList[i]->strand == '-')
 	f *= -1;
-      
+
       for (int j=gffList[i]->start; j<=gffList[i]->end; j++)
 	PlotBarI(j, f, 0.27, PredWidth, 9);
 
@@ -231,6 +240,10 @@ void SensorGFF :: Plot(DNASeq *X)
 	  PlotString((gffList[i]->end+gffList[i]->start)/2, f, -0.02, stGC, 9);
 	}
       }
+    }
+    else {
+      for (int j=gffList[i]->start; j<=gffList[i]->end; j++)
+	PlotBarI(j, 0, 0.27, PredWidth, 9);
     }
   }
 }
