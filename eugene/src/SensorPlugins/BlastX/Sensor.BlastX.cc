@@ -214,28 +214,15 @@ void SensorBlastX :: Init (DNASeq *X)
 		  ProtMatchPhase[j]= 0;
 		}
 	    }
-	    //	;
-	    //	PlotBarI(i,((phase < 0)?-4:4),0.6+(level/8.0),1,LevelColor[level]);
 	  }
 	}
-
-	if (PAR.getI("Output.graph") && levelidx <3) {
-	  PlotLine(MyHSP->Prev->End,MyHSP->Start,Pphase,MyHSP->Phase,
-		   0.6+(levelidx/8.0),0.6+(levelidx/8.0),LevelColor[levelidx]);
-	  //for(i=Pfin-(overlap<0)*overlap; i < deb+(overlap<0)*overlap ; i++){
-	  //   j=((phase < 0)?-4:4);
-	  //   PlotBarI(i,j,0.6+(level/8.0),1,LevelColor[level]);
-	  //}
-	}
+	if (PAR.getI("Output.graph") && levelidx <3) 
+	  PlotBlastGap(MyHSP->Prev->End,Pphase,MyHSP->Start,MyHSP->Phase,levelidx);
       }
 
       // HITS -> CODING
-      if (PAR.getI("Output.graph") && levelidx<3) {
-	for (j = MyHSP->Start-1; j < MyHSP->End; j++) {
-	  PlotBarI(j,MyHSP->Phase,
-		   0.6+(levelidx/8.0),1,LevelColor[levelidx]);
-	}
-      }
+      if (PAR.getI("Output.graph") && levelidx<3)
+	PlotBlastHit(MyHSP->Start-1,MyHSP->End-1,MyHSP->Phase,levelidx);
       
       for (j = MyHSP->Start; j < MyHSP->End+1; j++)
 	if (keyBXLevel[level] >= ProtMatchLevel[j])

@@ -148,12 +148,12 @@ void SensorStartWAM :: Plot(DNASeq *X)
     if (data.sig[DATA::Start].weight[Signal::Forward] != 0) {
       plotweight= data.sig[DATA::Start].weight[Signal::Forward] + PlotScoreIncrease;
       if (data.sig[DATA::Start].weight[Signal::Forward] > 0)
-      	PlotBarF(pos,(pos%3)+1,0.5,NormalizePlot(plotweight,10.0),2);
+      	PlotStart(pos,(pos%3)+1,NormalizePlot(plotweight,10.0));
     }
     if (data.sig[DATA::Start].weight[Signal::Reverse] != 0) {
       plotweight= data.sig[DATA::Start].weight[Signal::Reverse] + PlotScoreIncrease;
       if (data.sig[DATA::Start].weight[Signal::Reverse] > 0)
-	PlotBarF(pos,-((X->SeqLen-pos)%3)-1,0.5,NormalizePlot(plotweight,10.0),2);
+	PlotStart(pos,-((X->SeqLen-pos)%3)-1,NormalizePlot(plotweight,10.0));
     }
   }
 }

@@ -243,25 +243,24 @@ void SensorNG2 :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosAccF.size(); i++) {
     f = pow(vValAccF[i], accB) * accP;
-    PlotBarF(vPosAccF[i], 4, 0.5, NORM(log(f),20.0), 4);
+    PlotAcc(vPosAccF[i],1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosDonF.size(); i++) {
     f = pow( vValDonF[i], donB) * donP;
-    PlotBarF(vPosDonF[i], 4, 0.5, NORM(log(f),20.0), 11);
+    PlotDon(vPosDonF[i], 1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosAccR.size(); i++) {
     f = pow( vValAccR[i], accB) * accP;
-    PlotBarF(vPosAccR[i], -4, 0.5, NORM(log(f),20.0), 4);
+    PlotAcc(vPosAccR[i], -1, NORM(log(f),20.0));
   }
 
   for (int i =0; i < (int)vPosDonR.size(); i++) {
     f = pow( vValDonR[i], donB) * donP;
-    PlotBarF(vPosDonR[i], -4, 0.5, NORM(log(f),20.0), 11);
+    PlotDon(vPosDonR[i], -1, NORM(log(f),20.0));
   }
 }
-
 // ------------------
 //  Post analyse
 // ------------------

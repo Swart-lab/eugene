@@ -169,22 +169,22 @@ void SensorSpliceWAM :: Plot(DNASeq *X)
     if (data.sig[DATA::Acc].weight[Signal::Forward] != 0 ) {
       data.sig[DATA::Acc].weight[Signal::Forward] += plotscoreincrease;
       if (data.sig[DATA::Acc].weight[Signal::Forward] > 0 )
-	PlotBarF(pos,4,0.5,NORM(data.sig[DATA::Acc].weight[Signal::Forward],20.0), 4);
+	PlotAcc(pos,1,NORM(data.sig[DATA::Acc].weight[Signal::Forward],20.0));
     }
     if (data.sig[DATA::Don].weight[Signal::Forward] != 0 ) {
       data.sig[DATA::Don].weight[Signal::Forward] += plotscoreincrease;
       if (data.sig[DATA::Don].weight[Signal::Forward] > 0 )
-	PlotBarF(pos,4,0.5,NORM(data.sig[DATA::Don].weight[Signal::Forward],20.0),11);
+	PlotDon(pos,1,NORM(data.sig[DATA::Don].weight[Signal::Forward],20.0));
     }
     if (data.sig[DATA::Acc].weight[Signal::Reverse] != 0 ) {
       data.sig[DATA::Acc].weight[Signal::Reverse] += plotscoreincrease;
       if (data.sig[DATA::Acc].weight[Signal::Reverse] > 0 )
-	PlotBarF(pos,-4,0.5,NORM(data.sig[DATA::Acc].weight[Signal::Reverse],20.0),4);
+	PlotAcc(pos,-1,NORM(data.sig[DATA::Acc].weight[Signal::Reverse],20.0));
     }
     if (data.sig[DATA::Don].weight[Signal::Reverse] != 0 ) {
       data.sig[DATA::Don].weight[Signal::Reverse] += plotscoreincrease;
       if (data.sig[DATA::Don].weight[Signal::Reverse] > 0 )
-	PlotBarF(pos,-4,0.5,NORM(data.sig[DATA::Don].weight[Signal::Reverse],20.0),11);
+	PlotDon(pos,-1,NORM(data.sig[DATA::Don].weight[Signal::Reverse],20.0));
     }
 /* to print all the sites: (differents colors if negatives)    
     if (data.sig[DATA::Acc].weight[Signal::Forward] != 0 )

@@ -283,34 +283,33 @@ void SensorSMachine :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosAccF.size(); i++) {
     f = pow(vValAccF[i], accB) * accP;
-    PlotBarF(vPosAccF[i], 4, 0.5, NORM(log(f),20.0), 4);
+    PlotAcc(vPosAccF[i], 1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosDonF.size(); i++) {
     f = pow( vValDonF[i], donB) * donP;
-    PlotBarF(vPosDonF[i], 4, 0.5, NORM(log(f),20.0), 11);
+    PlotDon(vPosDonF[i], 1, NORM(log(f),20.0));
   }
   
   for (int i =0; i < (int)vPosAccR.size(); i++) {
     f = pow( vValAccR[i], accB) * accP;
-    PlotBarF(vPosAccR[i], -4, 0.5, NORM(log(f),20.0), 4);
+    PlotAcc(vPosAccR[i], -1, NORM(log(f),20.0));
   }
 
   for (int i =0; i < (int)vPosDonR.size(); i++) {
     f = pow( vValDonR[i], donB) * donP;
-    PlotBarF(vPosDonR[i], -4, 0.5, NORM(log(f),20.0), 11);
+    PlotDon(vPosDonR[i], -1, NORM(log(f),20.0));
   }
 
   for (int i =0; i < (int)vPosF.size(); i++) {
     f = pow(vValF[i], startB)*(exp(-startP));
-    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),10.0), 2);
+    PlotStart(vPosF[i], (vPosF[i]%3)+1, NORM(log(f),10.0));
   }
   
   for (int i =0; i < (int)vPosR.size(); i++) {
     f = pow(vValR[i], startB)*(exp(-startP));
-    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),10.0), 2);
+    PlotStart(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, NORM(log(f),10.0));
   }
-
 }
 
 // ------------------

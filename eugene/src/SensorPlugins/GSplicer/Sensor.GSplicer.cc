@@ -188,18 +188,18 @@ void SensorGSplicer :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorGSplicer :: Plot(DNASeq *X)
 {
   for (int i =0; i < (int)vPosAccF.size(); i++)
-    PlotBarF(vPosAccF[i],4,0.5,Norm(log(vValAccF[i]),20.0),4);
+    PlotAcc(vPosAccF[i],1,Norm(log(vValAccF[i]),20.0));
   
   for (int i =0; i < (int)vPosDonF.size(); i++)
-    PlotBarF(vPosDonF[i],4,0.5,Norm(log(vValDonF[i]),20.0),11);
+    PlotDon(vPosDonF[i],1,Norm(log(vValDonF[i]),20.0));
   
   for (int i =0; i < (int)vPosAccR.size(); i++)
-    PlotBarF(vPosAccR[i],-4,0.5, Norm(log(vValAccR[i]),20.0),4);
+    PlotAcc(vPosAccR[i],-1,Norm(log(vValAccR[i]),20.0));
 
   for (int i =0; i < (int)vPosDonR.size(); i++)
-    PlotBarF(vPosDonR[i],-4,0.5,Norm(log(vValDonR[i]),20.0),11);
+    PlotDon(vPosDonR[i],-1,Norm(log(vValDonR[i]),20.0));
 }
-  
+
 // ---------------------
 //  Plot normalisation.
 // ---------------------

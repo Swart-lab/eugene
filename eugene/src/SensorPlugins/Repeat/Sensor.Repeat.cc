@@ -117,8 +117,7 @@ void SensorRepeat :: Plot(DNASeq *TheSeq)
   int i,j;
   
   for (i =0; i < (int)vDeb.size(); i++)
-    for (j = vDeb[i]; j<= vFin[i]; j++)
-      PlotBarI(j,0,0.25,2,6);
+    PlotRepeat(vDeb[i],vFin[1]);
 }
 
 // ------------------

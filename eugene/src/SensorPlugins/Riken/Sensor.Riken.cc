@@ -331,15 +331,12 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorRiken :: Plot(DNASeq *TheSeq)
 {
-  const int HLen = 30;
   int plotcolor=0;
 
   for (int j =0; j<(int)RAFL.size() ;j++) {
     plotcolor= ( (RAFL[j].sens==2) ? 2 : 2-RAFL[j].sens);
-    PlotBarF(RAFL[j].deb, 0, 0.9, 0.2, plotcolor);
-    PlotLine(RAFL[j].deb, RAFL[j].deb+HLen, 0, 0, 1.0, 1.0, plotcolor);
-    PlotBarF(RAFL[j].fin, 0, 0.9, 0.2, plotcolor);
-    PlotLine(RAFL[j].fin-HLen,RAFL[j].fin, 0, 0, 1.0, 1.0, plotcolor);
+    PlotStartReg(RAFL[j].deb, 0, plotcolor);
+    PlotEndReg(RAFL[j].fin,0,plotcolor);
   }
 }
 

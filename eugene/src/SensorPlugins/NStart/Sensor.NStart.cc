@@ -188,12 +188,12 @@ void SensorNStart :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosF.size(); i++) {
     f = pow(vValF[i], startB)*(exp(-startP));
-    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),4.0), 2);
+    PlotStart(vPosF[i], (vPosF[i]%3)+1, NORM(log(f),4.0));
   }
 
   for (int i =0; i < (int)vPosR.size(); i++) {
     f = pow(vValR[i], startB)*(exp(-startP));
-    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),4.0), 2);
+    PlotStart(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, NORM(log(f),4.0));
   }
 }
 
