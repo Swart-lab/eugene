@@ -69,6 +69,7 @@
 #include "clef.h"
 #include "Output.h"
 #include "Prediction.h"
+#include "../Parametrization/ParaOptimization.h"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
@@ -77,6 +78,7 @@
 // ------------------ Globals --------------------
 MasterSensor MS;
 Parameters   PAR;
+ParaOptimization OPTIM;
 
 
 // -------------------------------------------------------------------------
@@ -800,107 +802,111 @@ int main  (int argc, char * argv [])
   
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
-  // Objectif : limiter les appels à la MAP
-  graph = PAR.getI("Output.graph");
-  
-  MS.InitMaster();
-  
-  ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
-  
-  int sequence;
-  for (sequence = optind; sequence < argc ; sequence++) {
+
+  if ((string) PAR.getC("ParaOptimization.Use") ==  "TRUE") 
+    OPTIM.ParaOptimize(argc, argv);
+  else 
+    {
+      // Objectif : limiter les appels à la MAP
+      graph = PAR.getI("Output.graph");
+      
+      MS.InitMaster();
+      
+      ReadKey(PAR.getC("EuGene.key"), "EUGENEAT");
+      
+      int sequence;
+      for (sequence = optind; sequence < argc ; sequence++) {
+	
+	PAR.set("fstname", argv[sequence]);
+	// ------------------------------------------------------------------------
+	// Lecture de la sequence    
+	// ------------------------------------------------------------------------
+	TheSeq = ReadSequence( PAR.getC("fstname") );
+	Data_Len = TheSeq->SeqLen;
     
-    PAR.set("fstname", argv[sequence]);
-    // ------------------------------------------------------------------------
-    // Lecture de la sequence    
-    // ------------------------------------------------------------------------
-    TheSeq = ReadSequence( PAR.getC("fstname") );
-    Data_Len = TheSeq->SeqLen;
     
+	// ------------------------------------------------------------------------
+	// Preparation sortie graphique + Scores
+	// ------------------------------------------------------------------------
+	if (graph) {
+	  int gto       = PAR.getI("Output.gto");
+	  int gfrom     = PAR.getI("Output.gfrom");
+	  int glen      = PAR.getI("Output.glen");
+      
+	  // Récupération du nom du fichier d'origine
+	  grnameFile = BaseName(PAR.getC("fstname"));
+	  
+	  // Construction du nom de sortie (*.png)
+	  strcpy(grname, PAR.getC("Output.Prefix"));
+	  strcat(grname, grnameFile);
+	  *rindex(grname, '.') = 0;             // on enleve l'extension
+	  if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'arg
+	    strcat(grname,".");
+	    strcat(grname,PAR.getC("grnameArg"));
+	  }
+	  
+	  if ((gfrom <= 0)|| (gfrom >= Data_Len))
+	    gfrom = 1;
+	  if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
+	    gto = Data_Len;
+	  
+	  if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
+	    sprintf(grname+strlen(grname), ".%d", gfrom);
+	    sprintf(grname+strlen(grname), "-%d", gto);
+	  }
+	  
+	  gfrom--;
+	  gto--;
+	  
+	  if (glen < 0)
+	    glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
+	  
+	  InitPNG(PAR.getI("Output.resx"),   PAR.getI("Output.resy"),
+		  PAR.getI("Output.offset"), gfrom, gto,
+		  PAR.getI("Output.golap"), glen, grname);
+	}
+	
+	OpenDoor();
+	
+	if (!PorteOuverte && Data_Len > 6000) {
+	  printf("\nValid license key not found ! The software is therefore");
+	  printf(" limited to 6kb long\nsequences. Please contact");
+	  printf(" Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
+	  printf("license key.\n");
+	  exit(2);
+	}
     
-    // ------------------------------------------------------------------------
-    // Preparation sortie graphique + Scores
-    // ------------------------------------------------------------------------
-    if (graph) {
-      int gto       = PAR.getI("Output.gto");
-      int gfrom     = PAR.getI("Output.gfrom");
-      int glen      = PAR.getI("Output.glen");
-      
-      // Récupération du nom du fichier d'origine
-      grnameFile = BaseName(PAR.getC("fstname"));
-      
-      // Construction du nom de sortie (*.png)
-      strcpy(grname, PAR.getC("Output.Prefix"));
-      strcat(grname, grnameFile);
-      *rindex(grname, '.') = 0;             // on enleve l'extension
-      if(PAR.getC("grnameArg")[0] != '0') { // -p h sans -g ou -g NO pas d'arg
-	strcat(grname,".");
-        strcat(grname,PAR.getC("grnameArg"));
-      }
-      
-      if ((gfrom <= 0)|| (gfrom >= Data_Len))
-	gfrom = 1;
-      if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
-	gto = Data_Len;
-      
-      if ((PAR.getI("Output.gfrom") != -1) || PAR.getI("Output.gto") != -1) {
-	sprintf(grname+strlen(grname), ".%d", gfrom);
-	sprintf(grname+strlen(grname), "-%d", gto);
-      }
-      
-      gfrom--;
-      gto--;
-      
-      if (glen < 0)
-	glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
-      
-      InitPNG(PAR.getI("Output.resx"),   PAR.getI("Output.resy"),
-	      PAR.getI("Output.offset"), gfrom, gto,
-	      PAR.getI("Output.golap"), glen, grname);
+	MS.InitSensors(TheSeq);
+    
+	pred = Predict(TheSeq, &MS);
+    
+	if (!PorteOuverte && Data_Len > 6000) 
+	  exit(2);
+	
+	fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
+	
+	if (graph)
+	  pred->plotPred();
+    
+	Output(TheSeq, &MS, pred, sequence, argc, argv, stdout);
+	MS.PostAnalyse(pred);
+    
+	// Free used memory
+	if (graph) {
+	  fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
+	  fflush(stderr);
+	  ClosePNG();
+	  fprintf(stderr, "done\n");
+	}
+	
+	delete TheSeq;
+	pred->resetPred();
+	
+      } // fin de traitement de chaque séquence....
+  
+      fprintf(stderr,"-----------------------------------");
+      fprintf(stderr,"--------------------------------\n");
+  
+      return  0;
     }
-    
-    OpenDoor();
-    
-    if (!PorteOuverte && Data_Len > 6000) {
-      printf("\nValid license key not found ! The software is therefore");
-      printf(" limited to 6kb long\nsequences. Please contact");
-      printf(" Thomas.Schiex@toulouse.inra.fr and ask for a FREE\n");
-      printf("license key.\n");
-      exit(2);
-    }
-    
-    MS.InitSensors(TheSeq);
-    
-    pred = Predict(TheSeq, &MS);
-    
-    if (!PorteOuverte && Data_Len > 6000) 
-      exit(2);
-    
-    fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
-    
-    if (graph)
-      pred->plotPred();
-    
-    Output(TheSeq, pred, sequence, argc, argv);
-    MS.PostAnalyse(pred);
-    
-    // Free used memory
-    if (graph) {
-      fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
-      fflush(stderr);
-      ClosePNG();
-      fprintf(stderr, "done\n");
-    }
-    
-    delete TheSeq;
-    pred->resetPred();
-    
-  } // fin de traitement de chaque séquence....
-  
-  MS.ResetSensors();
-  
-  fprintf(stderr,"-----------------------------------");
-  fprintf(stderr,"--------------------------------\n");
-  
-  return  0;
 }
