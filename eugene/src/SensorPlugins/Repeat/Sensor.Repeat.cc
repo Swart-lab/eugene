@@ -20,6 +20,8 @@ SensorRepeat :: ~SensorRepeat ()
 {
   vDeb.clear();
   vFin.clear();
+
+  PositionGiveInfo = -1;
 }
 
 // ----------------------
@@ -65,35 +67,25 @@ void SensorRepeat :: Init (DNASeq *X)
 // --------------------------
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  // si le bloc courant est depasse, il faut avancer !
-  if (index < (int)vDeb.size()  &&  vFin[index] < pos) index++;
+  bool update = false;
 
-  // index cohérent ?
-  if ((index == 0 && pos > vFin[index]) ||
-      (index != 0 && (pos <= vFin[index-1] || pos > vFin[index]))) {
-    iter = lower_bound(vFin.begin(), vFin.end(), pos);
-    if (vDeb[iter-vFin.begin()] <= pos) {
-      for(int i=0; i<6; i++)   // Exon(6)
- 	d->contents[i] -= exonPenalty;
-      for(int i=6; i<8; i++)   // Intron (2)
-	d->contents[i] -= intronPenalty; 
-      for(int i=9; i<13; i++)  // UTR (4)
-	d->contents[i] -= UTRPenalty; 
-    }
-    index = iter-vFin.begin();
-  }
-  else {
-    // est on dedans ?
-    if (index < (int)vDeb.size()  &&
-	vDeb[index] <= pos  &&  vFin[index] >= pos) {
-      // penaliser !
-      for(int i=0; i<6; i++)   // Exon(6)
-	d->contents[i] -= exonPenalty;
-      for(int i=6; i<8; i++)   // Intron (2)
-	d->contents[i] -= intronPenalty; 
-      for(int i=9; i<13; i++)  // UTR (4)
- 	d->contents[i] -= UTRPenalty; 
-    }
+  if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
+  PositionGiveInfo = pos;
+
+  if(!vFin.empty()) {
+    if (update) 
+      index = lower_bound(vFin.begin(), vFin.end(), pos) - vFin.begin();
+
+    if (index < (int) vFin.size())
+      if (pos >= vDeb[index]) { 
+	for(int i=0; i<6; i++)   // Exon(6)
+	  d->contents[i] -= exonPenalty;
+	for(int i=6; i<8; i++)   // Intron (2)
+	  d->contents[i] -= intronPenalty; 
+	for(int i=9; i<13; i++)  // UTR (4)
+	  d->contents[i] -= UTRPenalty; 
+	if (pos == vFin[index]) index++;
+      }
   }
 }
 

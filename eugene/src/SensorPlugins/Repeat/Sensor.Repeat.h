@@ -10,9 +10,10 @@
 class SensorRepeat : public Sensor
 {
  private:
+  int PositionGiveInfo;
+
   std::vector<int>           vDeb;
   std::vector<int>           vFin;
-  std::vector<int>::iterator iter;
   int index;
   double intronPenalty;
   double UTRPenalty;
