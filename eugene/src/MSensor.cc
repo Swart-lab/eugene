@@ -100,6 +100,7 @@ void MasterSensor :: InitMaster (DNASeq *X)
     for (j=0; j<PAR.getI(c); j++) 
       theSensors.push_back( MakeSensor( MSSensorsList[i].c_str(),j, X) );
   }
+  delete [] c;
 }
 
 
