@@ -1,9 +1,42 @@
-/*************************************************************
- **                     SensorMarkovIMM                     **
- ** Estimation des parametres a la Glimmer (Salzberg)
- *************************************************************/
-// Constantes
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     TrainIMM.cc
+// Contents: Estimation of parameters (inspired of Glimmer (Salzberg))
+// ------------------------------------------------------------------
 
+
+#ifdef HAVE_CONFIG_H
+#include "../../../../config.h"
+#endif
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#else
+#ifndef HAVE_GETOPT
+#include "../../../getopt.h"
+#endif
+#endif
+
+#include "../../../System.cc"
+#include "../../../Const.h"
+#include "../../0_SensorTk/EndianConv.h"
+#include "strarray.h"
+
+
+// Constantes
 const int  MODEL_LEN = 9;                         
 const int  SIMPLE_MODEL_LEN = 6;
 const int  ALPHABET_SIZE = 4;
@@ -12,18 +45,7 @@ const int  MAX_STRING_LEN = 6000;
 const double  MINIMUM_DELTA_VALUE = 0.1;
 const int  WINDOW_SIZE = 48;
 
-#ifdef HAVE_CONFIG_H
-#include "../../../EuGene/config.h"
-#endif
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#else
-#include "../../../EuGene/getopt.h"
-#endif
-#include "../../../EuGene/System.h"
-#include "../../../EuGene/Const.h"
-#include "strarray.h"
 
 void  Find_Stop_Codons  (char [], int, int []);
 int  Read_String  (FILE *, char * &, long int &, char []);

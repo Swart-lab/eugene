@@ -21,7 +21,6 @@
 
 #include <math.h>
 #include <string.h>
-#include  "EndianConv.h"
 #include <ctype.h>
 
 const long int  INCR_SIZE = 10000;
