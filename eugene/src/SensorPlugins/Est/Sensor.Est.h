@@ -10,25 +10,29 @@
 class SensorEst : public Sensor
 {
  private:
-  std::vector<int>  vPos;
+  std::vector<int>           vPos;
   std::vector<unsigned char> vESTMatch;
   std::vector<int>::iterator iter;
-  int index;
+  int    index;
   unsigned char *ESTMatch;
-  Hits **HitTable;
-  int NumEST;
+  Hits   **HitTable;
+  int    NumEST;
   double estP, utrP;
   double DonorThreshold;
   double spliceBoost;
   int    estM, utrM;
-  int N;
+  int    N;
   
-  Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
-  void   ESTSupport  (Prediction *pred, int Tdebut, int Tfin,
-		      int debut,int fin,  Hits **HitTable, int Size);
+  Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);
+  void   ESTSupport (Prediction *pred,   int Tdebut,      int Tfin,
+		     int debut, int fin, Hits **HitTable, int Size);
+  void   FEASupport (Prediction *pred,   int Tdebut,      int Tfin,
+		     int debut, int fin, Hits **HitTable, int Size, int NumG);
+  int    LenSup     (Hits **HitTable, std::vector<int> vSupEstI,
+		     int index, int beg, int end);
 
  public:
-  SensorEst  (int n, DNASeq *X);
+  SensorEst               (int n, DNASeq *X);
   virtual ~SensorEst      ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);

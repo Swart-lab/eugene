@@ -126,16 +126,16 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
   }
   // On est juste avant ou sur pos
   
-   // Si on est dessus
+  // Si on est dessus
   if (index < (int)vPos.size()  &&  vPos[index] == pos) {
-
+    
     cESTMatch = vESTMatch[index];
-
+    
     // Favor splice sites in marginal exon-intron regions
-   if ((cESTMatch & MLeftForward) && 
+    if ((cESTMatch & MLeftForward) && 
 	d->sig[DATA::Don].weight[Signal::Forward] != 0.0) 
       d->sig[DATA::Don].weight[Signal::Forward] += spliceBoost;
-
+    
     if ((cESTMatch & MRightForward) && 
 	d->sig[DATA::Acc].weight[Signal::Forward] != 0.0)
       d->sig[DATA::Acc].weight[Signal::Forward] += spliceBoost;
@@ -519,15 +519,18 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   int TStart = 0, TEnd = 0, GStart = 0, GEnd = 0;
   int state, stateNext = 0, stateBack = 0;
   int pos,   posNext   = 0, posBack   = 0;
-  
-  if (!PAR.getI("Est.PostProcess",GetNumber())) return;
+  int NumGene = 0;  
+
+  int pprocess = PAR.getI("Est.PostProcess",GetNumber());
+  if (!pprocess) return;
 
   if (NumEST == 0) return;
 
   qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
   
-  // Reset static in EST Support
-  ESTSupport(NULL,100,0,100,0,NULL,0);
+  // Reset static in EST Support or FEA Support
+  if (pprocess == 1)  ESTSupport(NULL,100,0,100,0,NULL,0);
+  else                FEASupport(NULL,100,0,100,0,NULL,0,0);
 
   for(int i=pred->size()-1; i!=-1; i--) {
     if(i != pred->size()-1) {
@@ -540,7 +543,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
       stateNext = pred->getState(i-1);
       posNext   = pred->getPos(i-1);
     }
-
+    
     // Demarrage exon extreme. Noter pour verif EST
     if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
     if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
@@ -550,14 +553,20 @@ void SensorEst :: PostAnalyse(Prediction *pred)
     // Si fin de gene ou fin seq gene en cours
     if ((state <= ExonR3 && stateNext >= InterGen5) ||
 	(i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {
-      ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
+      NumGene++;
+      if (pprocess == 1)
+	// Analyse des ESTs par rapport à la prédiction
+	ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
+      else
+	// Analyse de la prédiction (des features) par rapport aux EST
+	FEASupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST,NumGene);
       GStart = TStart = GEnd = TEnd = -1;
     }
   }
 }
 
 // -------------------------------------------------------------------------
-//  Post analyse
+//  Post analyse (Analyse des ESTs par rapport à la prédiction)
 //    Tdebut/fin = debut/fin de transcript
 //    debut/fin  = debut/fin de traduit
 // -------------------------------------------------------------------------
@@ -677,4 +686,215 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
   delete Sup;
   return;
+}
+
+// -------------------------------------------------------------------------
+//  Post analyse (Analyse de la prédiction (features) par rapport aux EST)
+//    Tdebut/fin = debut/fin de transcript
+//    debut/fin  = debut/fin de traduit
+// -------------------------------------------------------------------------
+void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
+			     int fin, Hits **HitTable, int Size, int NumGene)
+{
+  static int EstIndex;
+  Block *ThisBlock;
+  int ConsistentEST, i, j;
+  int from = 0, to = 0, ESTEnd = 0;
+  int state;
+  std::vector <int> vSupEstI;  // index des transcrits supportant la pred
+  
+  if (pred == NULL) {
+    EstIndex = 0;
+    return;
+  }
+  
+  /***********************************************************************/
+  /** Objectif : obtenir un vecteur contenant les index des transcripts **/
+  /**            qui supportent la prédiction                           **/
+  /***********************************************************************/
+  // si la fin du codant n'a pas ete rencontree
+  if (fin == -1) fin = Tfin;
+  if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
+  
+  //si l'iteration precendete a atteint l'extremite 
+  if (EstIndex >= Size) EstIndex = Max(0,Size-1);
+
+  // on rembobine....
+  while ((EstIndex > 0) && (HitTable[EstIndex]->End > Tdebut))
+    EstIndex--;
+
+  if (EstIndex >= 0  &&  HitTable[EstIndex]->End < Tdebut) EstIndex++;
+  
+  while (EstIndex >=0  &&  EstIndex < Size) {
+     // le dernier transcrit exploitable est passe
+    if (HitTable[EstIndex]->Start > Tfin) break;
+    
+    ConsistentEST = 1;
+    ThisBlock = HitTable[EstIndex]->Match;
+    
+    while (ThisBlock && ConsistentEST) {
+      // si on a un gap
+      if (ThisBlock->Prev != NULL) {
+	// intersection
+	from = Max(Tdebut,ThisBlock->Prev->End+1);
+	to = Min(Tfin,ThisBlock->Start-1);
+	
+	for (i = from; i <= to; i++) {
+	  state = pred->getStateForPos(i+1);
+	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3 )
+	    ConsistentEST = 0;
+	}
+      }      
+      from = Max(Tdebut,ThisBlock->Start);
+      to = Min(Tfin,ThisBlock->End);
+      ESTEnd = ThisBlock->End;
+      
+      for (i = from; i <= to; i++) {
+	state = pred->getStateForPos(i+1);
+	if (((state > ExonR3) && (state <= InterGen5)) || state == InterGen3)
+	  ConsistentEST = 0;
+      }
+      ThisBlock = ThisBlock->Next;
+    }
+    
+    // Si EST non filtrée et "consistente"
+    if (!HitTable[EstIndex]->Rejected  &&  ConsistentEST) {
+      vSupEstI.push_back( EstIndex );
+    }
+    EstIndex++;
+  }
+
+  /***********************************************************************/
+  /* Objectif : Analyser chaque feature predite -> supportée ?           */
+  /***********************************************************************/
+  int  start, end, len;
+  char fea[5];
+  char strand = '+';
+  if(pred->getStateForPos(debut+1) >= ExonR1) strand = '-';
+  int NumFEA = 0;
+  if(strand == '-') NumFEA = pred->nbExon(NumGene) + 1;
+    
+  for(i=pred->size()-1; i!=-1; i--) {
+    state = pred->getState(i);
+    start = pred->getPos(i+1) + 1;
+    end   = pred->getPos(i);
+    if(end >= Tdebut-1  &&  end <= Tfin+1)
+      {
+	len      = 0;
+	int numF = -1;
+
+	if(state <= ExonR3) {
+	  (strand == '-') ? NumFEA-- : NumFEA++;
+	  strcpy(fea, "Exon");
+	  numF = NumFEA;
+	}
+	if(state >= UTR5F  &&  state <= UTR3R) {
+	  strcpy(fea, "UTR");
+	  numF = 0;
+	}
+
+	if(numF != -1) {
+	  if((int)vSupEstI.size() > 0)
+	    // Longueur totale supportée par les transcrits
+	    len = LenSup(HitTable, vSupEstI, -1, start, end);
+	  
+	  if(len > 0) {
+	    printf("%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
+		   NumGene, numF, fea, start, end, len, strand);
+	    printf("%.1f\t", (float)len/(end-start+1)*100);
+	    
+	    for(j=0; j<(int)vSupEstI.size(); j++) {
+	      // Longueur supportée par le transcrit
+	      len =  LenSup(HitTable, vSupEstI, j, start, end);
+	      if(len > 0)
+		printf("%s(%.1f) ", HitTable[vSupEstI[j]]->Name,
+		       (float)len/(end-start+1)*100);
+	    }
+	    printf("\n");
+	  }
+	}
+      }	
+  }
+  
+  /***********************************************************************/
+  /* Objectif : Analyser la CDS et le gene predit -> supportée ?         */
+  /***********************************************************************/
+  for(int i=0; i<2; i++) {
+    if(i==0) { start = debut;  end = fin;  strcpy(fea, "CDS");  }
+    else     { start = Tdebut; end = Tfin; strcpy(fea, "Gene"); }
+
+    if (end >= start) {
+      len = 0;
+      if((int)vSupEstI.size() > 0)
+	// Longueur totale supportée par les transcrits
+	len = LenSup(HitTable, vSupEstI, -1, start, end);
+      
+      if(len > 0) {
+	printf("%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
+	       NumGene, fea, start+1, end+1, len, strand);
+	printf("%.1f\t", (float)len/(end-start+1)*100);
+	
+	for(j=0; j<(int)vSupEstI.size(); j++) {
+	  // Longueur supportée par le transcrit
+	  len =  LenSup(HitTable, vSupEstI, j, start, end);
+	  if(len > 0)
+	    printf("%s(%.1f) ", HitTable[vSupEstI[j]]->Name,
+		   (float)len/(end-start+1)*100);
+	}
+	printf("\n");
+      }
+    }
+  }
+  vSupEstI.clear();
+  return;
+}
+
+// -------------------------------------------------------------------------
+//  Lenght supported by EST.
+//    If index = -1 -> Lenght supported by ALL EST.
+//    Else          -> Lenght supported by ONE EST.
+// -------------------------------------------------------------------------
+int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
+			int index, int beg, int end)
+{
+  int supported = 0;
+  unsigned char *Sup;
+  Block *ThisBlock;
+  int from = 0, to = 0;
+  int i;
+  int j;
+
+  Sup = new unsigned char[end-beg+1]; 
+  for (i=0; i<=end-beg; i++)
+    Sup[i]=0;
+  
+  index == -1  ?  i=0 : i=index;
+  for(; i<(int)vSupEstI.size() || i==index; i++) {
+    ThisBlock = HitTable[vSupEstI[i]]->Match;
+    while (ThisBlock) {
+      if (ThisBlock->Prev != NULL) {
+ 	// intersection
+ 	from = Max(beg, ThisBlock->Prev->End+1);
+ 	to   = Min(end, ThisBlock->Start-1);
+
+ 	for (j=from; j<=to; j++)
+ 	  if (!Sup[j-beg]) {
+ 	    Sup[j-beg] = TRUE;
+ 	    supported++;
+ 	  }
+      }
+      from = Max(beg, ThisBlock->Start);
+      to   = Min(end, ThisBlock->End);
+      
+      for (j=from; j<=to; j++)
+	if (!Sup[j-beg]) {
+	  Sup[j-beg] = TRUE;
+	  supported++;
+	}
+      ThisBlock = ThisBlock->Next;
+    }
+    if(index != -1) break;
+  }
+  delete Sup;
+  return supported;
 }
