@@ -271,13 +271,25 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
   while (fscanf(ESTFile,"%d %d %d %*s %d %s %d %d\n",
 		&deb, &fin,&poids,&brin,EstId,&EstDeb,&EstFin) != EOF)
     {
-      if (strcmp(EstId,PEstId) != 0) {
+      if ((strcmp(EstId,PEstId) == 0) && 
+	  (EstDeb > ThisBlock->LEnd) && 
+	  (deb > ThisBlock->End))
+	// si EstId et PEstId sont égaux, alors il y a un EST en cours
+	// de meme nom on verifie que c'est bien compatible en terme
+	// de position (sur l'est et le genomique)
+	  {
+	    ThisEST->NGaps++;
+	    ThisBlock->AddBlockAfter(deb-1,fin-1,EstDeb,EstFin);
+	    ThisBlock = ThisBlock->Next;
+	  }
+      else {
 	NumEST++;
 	OneEST = new Hits(EstId,poids,brin,deb-1,fin-1,EstDeb,EstFin);
 	ThisBlock = OneEST->Match;
 	tmp = PEstId;
 	PEstId = EstId;
 	EstId = tmp;
+
 	if (AllEST == NULL) {
 	  AllEST = OneEST;
 	  ThisEST = OneEST;
@@ -287,12 +299,6 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
 	  ThisEST = OneEST;
 	}
       }
-      else
-	{
-	  ThisEST->NGaps++;
-	  ThisBlock->AddBlockAfter(deb-1,fin-1,EstDeb,EstFin);
-	  ThisBlock = ThisBlock->Next;
-	}
     }
   
   fprintf(stderr,"%d sequences read.\n",NumEST);
@@ -479,6 +485,8 @@ int main  (int argc, char * argv [])
 
   char *EugDir;
 
+  // prior on the initial state, selon Sato et al 1999 / Terryn et
+  // al. 1999
   REAL ExonPrior = 0.33,IntronPrior = 0.17;
   REAL InterPrior = 0.4,FivePrimePrior = 0.03,ThreePrimePrior = 0.07;
 
@@ -1036,8 +1044,6 @@ int main  (int argc, char * argv [])
   const int UTR3F = 14;
   const int UTR3R = 16;
 
-  // prior on the initial state, selon Sato et al 1999 / Terryn et
-  // al. 1999
   
   // Codant
   LBP[ExonF1]->Update(log(ExonPrior/6.0)/2.0);
