@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.0
+EuGene.version		3.1
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 EuGene.sloppy		0
