@@ -24,14 +24,15 @@ class Block
  public:
 
   Block ();
-  Block(int Start, int End,int LStart,int LEnd);
+  Block(int Start, int End,int LStart,int LEnd,int Ph,int Scr);
   ~Block ();
   
-  void AddBlockAfter(int Start,int End,int LStart,int LEnd);
+  void AddBlockAfter(int Start,int End,int LStart,int LEnd,int Ph,int Scr);
   
   int Start;
   int End;
-
+  int Phase;
+  int Score;
   int LStart;
   int LEnd;
   Block *Prev,*Next;
@@ -44,8 +45,9 @@ class  Hits
 
  public:
   Hits ();
-  Hits  (char* name, int length, char strand,int deb,int fin,int ldeb,int lfin);
-  Hits* Hits::ReadFromFile(FILE* ESTFile,int * NumEST);
+  Hits  (char* name, int length, char strand,int deb,int fin,int ldeb,int lfin,
+	 int Ph,int Scr,double prob);
+  Hits* Hits::ReadFromFile(FILE* HitFile,int * NumSeqs);
   
   ~Hits ();
 
@@ -55,6 +57,7 @@ class  Hits
   int NGaps;
   int Start;
   int End;
+  double Evalue;
   char Rejected;
 
   Block *Match;
