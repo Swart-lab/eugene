@@ -169,7 +169,7 @@ void SensorNStart :: Plot(DNASeq *X)
     PlotBarF(vPosF[i],(vPosF[i]%3)+1,0.5,NORM(log(vValF[i]),4.0),2);
 
   for (int i =0; i < (int)vPosR.size(); i++)
-    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i]-1)%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
+    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i])%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
 }
 
 // ------------------

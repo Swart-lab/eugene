@@ -98,7 +98,7 @@ void SensorEuStop :: Plot(DNASeq *X)
     PlotBarF(vPosF[i],(vPosF[i]%3)+1,0.1,0.2,1);
 
   for (int i =0; i < (int)vPosR.size(); i++)
-    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i]-1)%3)-1,0.1,0.2,1);
+    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i])%3)-1,0.1,0.2,1);
 }
 
 // ------------------
