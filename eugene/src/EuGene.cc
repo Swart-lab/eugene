@@ -812,7 +812,7 @@ int main  (int argc, char * argv [])
   REAL InterPrior = 0.4,FivePrimePrior = 0.03,ThreePrimePrior = 0.07;
 
   const REAL DontCrossStop = NINFINITY;
-  const REAL IGPenalty = NINFINITY; 
+  const REAL IGPenalty = -1.0; 
   const REAL RAFLPenalty = NINFINITY; 
 
   // Les longueurs. 
@@ -1146,7 +1146,9 @@ int main  (int argc, char * argv [])
   strcat(tempname,".startsR");
   Read_Start(tempname,Data_Len, exp(-StartP), StartB, Start[1],1);
   fprintf(stderr," reverse done\n");
-  
+
+  Check_Start(TheSeq,Start);
+
   fprintf(stderr, "Reading splice site files...");  
   fflush(stderr);
   
@@ -1157,6 +1159,8 @@ int main  (int argc, char * argv [])
   Read_Splice(fstname,-1,Data_Len, Acc[1], Don[1],AccP,AccB,DonP,DonB);
   fprintf(stderr," reverse done\n");
   
+  Check_Splices(TheSeq,Acc,Don);
+
   // ---------------------------------------------------------------------------
   // Lecture donnees user
   // ---------------------------------------------------------------------------
@@ -2197,6 +2201,10 @@ int main  (int argc, char * argv [])
   
   fprintf(stderr,"Optimal path length = %#f\n",-maxi+log(4)*(Data_Len+1));
 
+  // Sanity check ! A feasible path has not been found ?
+  if (isnan(maxi))
+    fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
+  
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
 
 #include "Output.h"
