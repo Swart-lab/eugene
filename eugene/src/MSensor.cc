@@ -70,51 +70,49 @@ MasterSensor :: ~MasterSensor ()
 // ------------------------
 void MasterSensor :: InitMaster ()
 {
-  char Line [MAX_LINE];
-  char n[FILENAME_MAX+1];
-  int  i, p;
-
-  while (fgets (Line, MAX_LINE, PAR.fp) != NULL)
-    if (sscanf(Line, "%*s\t%s\t%d", n, &p) == 2)
-      msList.push_back(new UseSensor(p, n));
-  fclose(PAR.fp);
+  char *key_name;
+  int  val_prior;
+  int i;
+  
+  while(PAR.getUseSensor(&key_name, &val_prior))
+    msList.push_back(new UseSensor(val_prior, key_name));
 
   sort(msList.begin(), msList.end(), Prior);
   
   for(i=0;i<(int)msList.size();i++) {
-    if(!strcmp(msList[i]->Name, "EuStop") && msList[i]->Priority != 0) {
+    if(!strcmp(msList[i]->Name, "sensor.EuStop") && msList[i]->Priority != 0) {
       theSensors.push_back(new SensorEuStop());
     }
-    else if(!strcmp(msList[i]->Name, "NStart") && msList[i]->Priority != 0) {
+    else if(!strcmp(msList[i]->Name, "sensor.NStart") && msList[i]->Priority != 0) {
       theSensors.push_back(new SensorNStart());
     }
-    else if(!strcmp(msList[i]->Name, "NG2") && msList[i]->Priority != 0) {
+    else if(!strcmp(msList[i]->Name, "sensor.NG2") && msList[i]->Priority != 0) {
       theSensors.push_back(new SensorNG2());
     }
-    else if(!strcmp(msList[i]->Name, "SPred") && msList[i]->Priority != 0) {
+    else if(!strcmp(msList[i]->Name, "sensor.SPred") && msList[i]->Priority != 0) {
       theSensors.push_back(new SensorSPred());
     }
-    else if(!strcmp(msList[i]->Name, "markov") && msList[i]->Priority != 0) {
+    else if(!strcmp(msList[i]->Name, "sensor.Markov") && msList[i]->Priority != 0) {
       theSensors.push_back(new SensorMarkov());
     }
-    else if(!strcmp(msList[i]->Name, "blastX") && msList[i]->Priority != 0) {
-      if(PAR.blastopt)
+    else if(!strcmp(msList[i]->Name, "sensor.BlastX") && msList[i]->Priority != 0) {
+      if(PAR.getI("blastopt"))
 	theSensors.push_back(new SensorBlastX());
     }
-    else if(!strcmp(msList[i]->Name, "repeat") && msList[i]->Priority != 0) {
-      if(PAR.ncopt)
+    else if(!strcmp(msList[i]->Name, "sensor.Repeat") && msList[i]->Priority != 0) {
+      if(PAR.getI("ncopt"))
 	theSensors.push_back(new SensorRepeat());
     }
-    else if(!strcmp(msList[i]->Name, "riken") && msList[i]->Priority != 0) {
-      if(PAR.raflopt)
+    else if(!strcmp(msList[i]->Name, "sensor.Riken") && msList[i]->Priority != 0) {
+      if(PAR.getI("raflopt"))
 	theSensors.push_back(new SensorRiken());
     }
-    else if(!strcmp(msList[i]->Name, "user") && msList[i]->Priority != 0) {
-      if(PAR.userinfo)
+    else if(!strcmp(msList[i]->Name, "sensor.User") && msList[i]->Priority != 0) {
+      if(PAR.getI("userinfo"))
 	theSensors.push_back(new SensorUser());
     }
-    else if(!strcmp(msList[i]->Name, "est") && msList[i]->Priority != 0) {
-      if(PAR.estopt)
+    else if(!strcmp(msList[i]->Name, "sensor.Est") && msList[i]->Priority != 0) {
+      if(PAR.getI("estopt"))
 	theSensors.push_back(new SensorEst());
     }
     else if(msList[i]->Priority == 0)
