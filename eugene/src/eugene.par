@@ -18,5 +18,5 @@ HVGNNJUDTJDQDF	# Clef
 0.2 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 #MinEx	MinIn	MinSg	MinFlow	MinConv	MinDiv	Min5'	Min3'
 3	50	150	50	0	100	20	20
-# 5 Poids sur les modèles
-1.0 1.0 1.0 1.0 1.0
+# Codant Intron UTR5 UTR3 Intergenique
+1.0 1.0 0.999 0.999 1.0
