@@ -5,10 +5,10 @@ class Signal
 {
  public:
 
-  enum Edge {Forward = 0, Reverse = 1, ForwardNo = 2, ReverseNo = 3};
-  double weight[ReverseNo+1];
+  enum Edge {Forward = 0, Reverse = 1, ForwardNo = 2, ReverseNo = 3, LastEdge = 4};
+  double weight[LastEdge];
 
-  inline void Clear() { for (int i = Forward; i <= ReverseNo; i++) weight[i] = 0.0;}
+  inline void Clear() { for (int i = 0; i < LastEdge; i++) weight[i] = 0.0;}
   inline bool IsSet(int i) { return ((weight[i] != 0.0) || (weight[i+2] != 0.0)); }
   inline void SetToDefault() { 
     if (!IsSet(Forward)) weight[Forward] = NINFINITY;
@@ -20,8 +20,8 @@ class DATA
 {
  public:
   // Signal scores
-  enum SigType {Start = 0, Stop =1, Acc =2, Don =3, 
-		tStart =4, tStop =5, Ins = 6, Del =7, LastSigType = 8};
+  enum SigType {tStart = 0, tStop = 1, Start = 2, Stop = 3,
+		Acc = 4, Don = 5, Ins = 6, Del =7, LastSigType = 8};
   Signal sig[LastSigType];
 
   // Contents scores 
