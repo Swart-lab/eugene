@@ -1,0 +1,45 @@
+#!/usr/bin/tcsh
+
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     CREATE_LINKS
+# Contents: Create links in the tree of the software
+# ------------------------------------------------------------------
+
+# To be able to generate the documentation with included outputs
+# a PLUGINS dir is defined in the doc directory
+cd doc
+ln -s ../src/PLUGINS PLUGINS
+cd ..
+
+# Define an specific executable name for tests (allows then to modify the corresponding .par file
+# without modifying eugene.par
+cd src
+ln -s eugene eugeneTest
+
+# Plugins are expected to be in src/PLUGINS but are created in src/SensorPlugins/X
+# To avoid move or copy, links are defined
+cd SensorPlugins
+foreach f ( ` ls | awk '{if ($0 ~ /\//) {print substr($0,1,index($0,"/")-1)} else {print $0}}' ` )
+  if ( $f != 0_SensorTk && $f != Makefile.am && $f != Makefile.in && $f != Makefile ) then
+    cd ../PLUGINS
+    ln -s ../SensorPlugins/$f/Sensor.$f.so Sensor.$f.so 
+    cd ../SensorPlugins
+  endif
+end
+
+cd ../..
+
