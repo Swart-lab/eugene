@@ -1,11 +1,23 @@
 #!/usr/bin/perl
 
-use strict;
-use warnings;
-use IO::Handle;
-use Getopt::Long;
-use gffUtils;
-
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     eugeneAdapt.pl
+# Contents: creates the different files need for an adaptation of
+# eugene to a new specie
 # Phil: Attention aux lignes UTRs dans les fichiers gff.
 #         Ne sont notés que les UTRs ne contenant pas d'intron. (méthode =
 #         alignement de chaque UTR contre le génomique (sim4) et parsing de
@@ -13,38 +25,35 @@ use gffUtils;
 #         Du coup concernant les longueurs "#LenGene" (Exons+Introns+UTRs) et
 #         "#LencDNA" (Exons+UTRs) elles sont mentionnées "aux UTRs près"...!
 #
-#=============================================================================#
-#=             Copyright (c) 2003 by INRA. All rights reserved.              =#
-#=                 Redistribution is not permitted without                   =#
-#=                 the express written permission of INRA.                   =#
-#=                     Mail : tschiex@toulouse.inra.fr                       =#
-#=---------------------------------------------------------------------------=#
-#= File         : eugeneAdapt.pl                                             =#
-#= Description  : First step for the adaptation of EuGene to a new specie.   =#
-#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          =#
-#= History      : version 1.0 (Dec. 1, 2002)  -> sim2eugene.pl   	     =#
-#=                version 2.0 (Aou. 5, 2003)  -> eugeneAdapt.pl              =#
-#= Improvements :                                                            =#
-#=============================================================================#
+# First step for the adaptation of eugene to a new specie.
+# History      : version 1.0 (Dec. 1, 2002)  -> sim2eugene.pl
+#                version 2.0 (Aou. 5, 2003)  -> eugeneAdapt.pl
 # Warning :
 #  - This script doesn't accept redondances in each list. Thus, if one genomic
 #    sequence "contains" more than one cDNA (2), or if the genomic and the gff
 #    file contains more than one gene, it has to be splited.
-#    The alphabetical order allow to lauch EuGene using *.fasta and obtain the
+#    The alphabetical order allow to lauch eugene using *.fasta and obtain the
 #    predictions must be in the same order than the list files.
 #  - For the second approch, each cDNA has to be the real cDNA corresponding
 #    to the gene present in his genomic sequence, a good sequence quality is
 #    request (> ~95%), in order to obtain with the sim4 alignment the true
 #    exons coordinates.
 #  - eugeneAdapt need :
-#       -> EUGENEDIR        : root directory of the EuGene distribution
+#       -> EUGENEDIR        : root directory of the eugene distribution
 #       -> two EMBOSS tools : extractseq and revseq.
 #       -> Eu-imm2UTR       : Matrices builder
 #       -> WAMbuilder       : WAM builder
 #       -> seqlogo          : Plot signal consensus (WAM)
 #       -> For the second approch sim4 and GeneSeqer.
 #  - eugeneAdapt creates temporary files deleted at the end of procedure.
-#=============================================================================#
+# ------------------------------------------------------------------
+
+use strict;
+use warnings;
+use IO::Handle;
+use Getopt::Long;
+use gffUtils;
+
 
 =pod
 
@@ -53,7 +62,7 @@ use gffUtils;
 =head1 DESCRIPTION
 
   eugeneAdapt creates the different files need for an adaptation of
-  EuGene to a new specie.
+  eugene to a new specie.
   Two approaches could be used. The first one (1) is based  on  the
   gene  coordinates  knowledge about  genomic  sequences.  And  the
   second (2)  one  is  based  on  sim4  program (cDNA  and  Genomic
@@ -116,7 +125,7 @@ use gffUtils;
 my $EUGENEDIR = $ENV{EUGENEDIR};
 if (!defined $EUGENEDIR)
   {
-    print "\n\$EUGENEDIR (root directory of the EuGene distribution) must".
+    print "\n\$EUGENEDIR (root directory of the eugene distribution) must".
       " be defined.\n\n";
     exit();
   }
@@ -129,11 +138,11 @@ my $cmd_revseq     = "revseq";        # EMBOSS
 
 # Matrices builder
 my $cmd_IMM =
-  "$EUGENEDIR/../SensorPlugins/MarkovIMM/GetData/TrainIMM -h";
+  "$EUGENEDIR/SensorPlugins/MarkovIMM/GetData/TrainIMM -h";
 
 # WAM builder
 my $cmd_WAMBuilder =
-  "$EUGENEDIR/../SensorPlugins/0_SensorTk/GetData/WAMbuilder";
+  "$EUGENEDIR/SensorPlugins/0_SensorTk/GetData/WAMbuilder";
 
 # seqlogo
 my $cmd_seqlogo =
@@ -179,15 +188,15 @@ my $intronMinLen = 100000;    # min length for intron
 my $intronMaxLen = 0;         # max length for intron
 
 # For WAM
-my $worder  = 1;              # WAM order
-my $wamstaB = 3;              # Context lenght, B before signal
-my $wamstaA = 3;              # Context lenght, A after  signal
-my $wamdonB = 3;              # Context lenght, B before signal
-my $wamdonA = 4;              # Context lenght, A after  signal
-my $wamaccB = 3;              # Context lenght, B before signal
-my $wamaccA = 3;              # Context lenght, A after  signal
-my $wamstoB = 8;              # Context lenght, B before signal
-my $wamstoA = 8;              # Context lenght, A after  signal
+my $worder  = 3;              # WAM order
+my $wamstaB = 10;              # Context lenght, B before signal
+my $wamstaA = 10;              # Context lenght, A after  signal
+my $wamdonB = 10;              # Context lenght, B before signal
+my $wamdonA = 10;              # Context lenght, A after  signal
+my $wamaccB = 10;              # Context lenght, B before signal
+my $wamaccA = 10;              # Context lenght, A after  signal
+my $wamstoB = 10;              # Context lenght, B before signal
+my $wamstoA = 10;              # Context lenght, A after  signal
 
 # Options
 my $genomic;

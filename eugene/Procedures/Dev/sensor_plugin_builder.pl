@@ -1,23 +1,31 @@
 #!/usr/bin/perl
 
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     sensor_plugin_builder.pl
+# Contents: Just a little script to build new plugin :  
+#             - create two files Sensor."name".h and Sensor."name".cc
+#             - modify the makefile  
+# ------------------------------------------------------------------
+
+
 use strict;
 use warnings;
 use IO::Handle;
 
-#=============================================================================#
-#=             Copyright (c) 2003 by INRA. All rights reserved.              =#
-#=                 Redistribution is not permitted without                   =#
-#=                 the express written permission of INRA.                   =#
-#=                     Mail : tschiex@toulouse.inra.fr                       =#
-#=---------------------------------------------------------------------------=#
-#= File         : sensor_plugin_builder.pl                                   =#
-#= Description  : Just a little script to build new plugin :                 =#
-#=                  - create two files Sensor."name".h and Sensor."name".cc  =#
-#=                  - modify the makefile                                    =#
-#= Authors      : P.Bardou, M.J.Cros, S.Foissac, A.Moisan, T.Schiex          =#
-#= History      : version 1.0 (Mar. 12, 2003)				     =#
-#= Improvements : EuGene parameters file modification                        =#
-#=============================================================================#
 
 # input
 my $sensorName = "";

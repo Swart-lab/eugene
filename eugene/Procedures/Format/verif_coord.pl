@@ -1,23 +1,31 @@
 #!/usr/bin/perl
 
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     verif_coord.pl
+# Contents: Just a little script for coordinates verification by
+#           starts stops and splices extraction from the new genomic
+#           sequences. Need a list of fasta files (the genomic seqs)
+#           and a coord file (cf. sim2eugene output)
+# ------------------------------------------------------------------
+
+
 use strict;
 #use warnings;
 use IO::Handle;
-
-#=============================================================================#
-#=             Copyright (c) 2002 by INRA. All rights reserved.              =#
-#=                 Redistribution is not permitted without                   =#
-#=                 the express written permission of INRA.                   =#
-#=                     Mail : tschiex@toulouse.inra.fr                       =#
-#=---------------------------------------------------------------------------=#
-#= File         : verif_coord.pl                                             =#
-#= Description  : Just a little script for coordinates verification by       =#
-#=                starts stops and splices extraction from the new genomic   =#
-#=                sequences. Need a list of fasta files (the genomic seqs)   =#
-#=                and a coord file (cf. sim2eugene output)                   =#
-#= Authors      : P.Bardou, M.J.Cros, S.Foissac, A.Moisan, T.Schiex          =#
-#= History      : version 1.0 (Jan. 22, 2003)				     =#
-#=============================================================================#
 
 my $embosspath = "";
 my $cmd_seqret = $embosspath."seqret";
