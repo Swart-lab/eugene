@@ -266,6 +266,25 @@ Tester.Sensor		EuStop
 Tester.Sensor.Instance	0
 Tester.SPSN.MinNumbers	100     # greater than 0
 #
+##### Sensors AnnotaStruct #####
+#
+AnnotaStruct.FileExtension      gff
+AnnotaStruct.Start*             1
+AnnotaStruct.StartType          p     # p: probability  s: score
+AnnotaStruct.Stop*              1
+AnnotaStruct.StopType           p
+AnnotaStruct.Acc*               1
+AnnotaStruct.AccType            p
+AnnotaStruct.Don*               1
+AnnotaStruct.DonType            p
+AnnotaStruct.TrStart*           1
+AnnotaStruct.TrStartType        p
+AnnotaStruct.TrStop*            1
+AnnotaStruct.TrStopType         p
+AnnotaStruct.Exon*              10
+AnnotaStruct.Intron*            10
+AnnotaStruct.CDS*               10
+#
 ##### Sensors activation #####
 #
 Sensor.Transcript.use	TRUE
@@ -304,6 +323,7 @@ Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
 Sensor.GCPlot.use	FALSE
 Sensor.Plotter.use	TRUE
+Sensor.AnnotaStruct.use FALSE
 #
 # TEST
 Sensor.Tester.use	FALSE
@@ -316,7 +336,7 @@ Sensor.Homology 	1	#
 Sensor.EuStop		1	#
 Sensor.NStart		1	#
 Sensor.ATGpr		1	#
-Sensor.StartWAM	1	#
+Sensor.StartWAM		1	#
 Sensor.IfElse		1	#
 Sensor.NG2		1	#
 Sensor.SMachine		1	#
@@ -332,6 +352,7 @@ Sensor.BlastX		2	#  Priority 0 -> First
 Sensor.Riken		7	#  Priority 1 -> Second
 Sensor.Repeat		8	#  ...
 Sensor.User		9	#  Priority n -> Last
+Sensor.AnnotaStruct     9       #
 Sensor.GFF		10	#
 Sensor.Plotter		11	#
 Sensor.GCPlot		11	#
