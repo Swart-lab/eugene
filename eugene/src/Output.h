@@ -85,7 +85,7 @@ else if ((printopt == 'l') || (printopt == 'h'))
 {
   int Starts[18];
   int cons =0,incons = 0;
-  int TStart = 0, TEnd;
+  int TStart = 0, GStart = 0, GEnd = 0;
   int forward,init,term,Lend,Rend,Phase;
   int Don,Acc;
   char seqn[6];
@@ -94,7 +94,7 @@ else if ((printopt == 'l') || (printopt == 'h'))
   if (estopt) {    
     qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
     // reset static in EST Support
-    if (estanal) ESTSupport(0,100,0,NULL,0);
+    if (estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
   }
 
 
@@ -131,11 +131,13 @@ else if ((printopt == 'l') || (printopt == 'h'))
     if (Choice[i+1] != Choice[i]) {
       // something happens
 
-      CheckConsistency(Starts[Choice[i]],i,Choice[i],ESTMatch,&cons,&incons);
+      if (estopt)
+	CheckConsistency(Starts[Choice[i]],i,Choice[i],ESTMatch,&cons,&incons);
 	
       // demarrage exon extreme. Noter pour verif EST
-      if ((Choice[i] == UTR5F) || (Choice[i] == UTR3R)) TStart = i;
-      if ((Choice[i+1] == UTR3F) || (Choice[i+1] == UTR5R)) TEnd = i-1;
+      if ((Choice[i+1] == UTR5F) || (Choice[i+1] == UTR3R)) TStart = i;
+      if ((Choice[i] == UTR5F) || (Choice[i] == UTR3R)) GStart = i;
+      if ((Choice[i+1] == UTR3F) || (Choice[i+1] == UTR5R)) GEnd = i-1;
 
       // An exon is finishing
       if (Choice[i] <= ExonR3) {
@@ -219,7 +221,10 @@ else if ((printopt == 'l') || (printopt == 'h'))
       }
 
       if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
-	if (estopt && estanal) ESTSupport(Choice,TStart,TEnd,HitTable,NumEST);
+	if (estopt && estanal) {
+	  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
+	  GStart = TStart = GEnd = -1;
+	}
 
       Starts[Choice[i+1]] = i;
     }
