@@ -133,7 +133,7 @@ void SaveClosePNG(struct Image *image, int num)
   strcpy(TName,FName);
   sprintf(str,"%d",num);
   strcat(TName,str);
-#if VERSION==GIF
+#if GIF
   strcat(TName,".gif");
   out = fopen(TName,"wb");
   gdImageGif(image->im, out);
