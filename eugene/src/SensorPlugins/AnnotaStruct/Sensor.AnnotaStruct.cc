@@ -430,7 +430,7 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &cdsPAR));
 	}
 	else if(!strcmp(feature, "Intron")) {
-	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&intronPAR));
 	}
 	
 	else if(!strcmp(feature, "E.Any")) {
