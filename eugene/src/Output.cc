@@ -32,7 +32,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   int  Data_Len  = X->SeqLen;
   char printopt0 = PAR.getC("Output.format")[0]; 
   int  offset    = PAR.getI("Output.offset");
-  int  estopt    = PAR.getI("Sensor.Est.use");
+  int  estopt    = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
   int  trunclen  = PAR.getI("Output.truncate");
   int  stepid    = PAR.getI("Output.stepid");
   char nameformat[20];
