@@ -1,13 +1,13 @@
 % Documentation of the MarkovConst sensor
 
-\subsection{\texttt{Sensor.MarkovConst}}
+\subsubsection{\texttt{Sensor.MarkovConst}}
 
 \paragraph{Description}
 
-A simulated contents sensor that gives constant probabilities (as
-indicated in the \texttt{MarkovConst.Coding},
-\texttt{MarkovConst.Intron}, \texttt{MarkovConst.UTR5},
-\texttt{MarkovConst.UTR3} and \texttt{MarkovConst.Inter} parameters).
+A simulated content sensor that gives constant probabilities (as
+indicated in the \texttt{MarkovConst\-.Coding*},
+\texttt{MarkovConst.Intron*}, \texttt{MarkovConst.UTR5*},
+\texttt{MarkovConst.UTR3*} and \texttt{Markov\-Const.Inter*} parameters).
 to all positions for each region type. As the MarkovIMM sensor, the
 plugin is controlled by two further parameters:
 \texttt{MarkovConst.minGC} and \texttt{MarkovConst.maxGC} which
@@ -35,19 +35,15 @@ Sensor.MarkovConst      1      # Sensor priority
 
 No input files  needed.
 
-\paragraph{Filtering input information}
-
-No filtering.
-
 \paragraph{Integration of information}
 
 If the GC\% of the sequence handled is between
 \texttt{MarkovConst.minGC} and \texttt{MarkovConst.maxGC} then in
 every position, in all possible states, the prediction is penalized by
 the logarithm of the corresponding parameter:
-\texttt{MarkovConst.Coding}, \texttt{MarkovConst.Intron},
-\texttt{MarkovConst.UTR5}, \texttt{MarkovConst.UTR3} and
-\texttt{MarkovConst.Inter}.
+\texttt{MarkovConst.Coding*}, \texttt{MarkovConst.Intron*},
+\texttt{MarkovConst.UTR5*}, \texttt{MarkovConst.UTR3*} and
+\texttt{MarkovConst.Inter*}.
 
 \paragraph{Post analyse}
 

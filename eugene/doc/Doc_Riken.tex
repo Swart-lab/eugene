@@ -1,12 +1,12 @@
 % Documentation of the Riken sensor
 
-\subsection{\texttt{Sensor.Riken}}
+\subsubsection{\texttt{Sensor.Riken}}
 
 \paragraph{Description}
 
 The plugin allows to exploit 5'/3' EST extracted from the extremities
 of full-length cDNA. This type of data was produced by the Riken
-institute for Arabidopsis thaliana. By mapping such EST to the genomic
+institute for \emph{Arabidopsis thaliana}. By mapping such EST to the genomic
 sequence, it is possible to know the positions where a gene
 (transcript) must start (5' side) and stop (3' side). The plugin
 assumes that this mapping has been done and that the coordinates of
@@ -25,7 +25,7 @@ sanity checks (see below). The \texttt{Riken.RAFLPenalty*} parameter
 controls the amount of penalty used to force \EuGene\ to predict a
 gene on a region defined by a valid EST pair.
 
-Here is an example of Riken parameters definition :
+Here is an extract of Riken parameters definition :
 \begin{Verbatim}[fontsize=\small]
 Riken.Min_est_diff              100
 Riken.Max_overlap               60

@@ -1,11 +1,11 @@
 % Documentation of the MarkovIMM sensor
 
-\subsection{\texttt{Sensor.MarkovIMM}}
+\subsubsection{\texttt{Sensor.MarkovIMM}}
 
 \paragraph{Description}
 
 This plugin injects coding/intronic/utr/intergenic likelihood as
-modeled by interpolated Markov models (introduced in Glimmer). These
+modeled by interpolated Markov models (introduced in Glimmer, see S. Salzberg, A. Delcher, S. Kasif, and O. White.{\em Microbial gene identification using interpolated Markov models} Nucleic Acids Research 26:2 (1998), 544-548). These
 models are defined in a so-called matrices file (located in the
 directory specified by the \texttt{EuGene.PluginsDir} parameter) whose
 name is indicated by the \texttt{MarkovIMM.matname}
@@ -28,23 +28,28 @@ Instead of using a specific intergenic IMM, it is possible to simply
 use the sequence GC\% as the basis for a $O^{th}$ order Markov model
 by setting \texttt{MarkovIMM.UseM0asIG} to \texttt{TRUE}.
 
+The sensor is activated by either:
+\begin{itemize}
+\item the \texttt{-m} argument followed by the filename of the set of Markov models.
+  \index{CmdFlags}{[MarkovIMM Markov models file] m}
+\item the value TRUE for the parameter \texttt{[Sensor.MarkovIMM.use} in
+  the parameter file.
+\end{itemize}
+
 Here is an example of MarkovIMM parameters definition.
 \begin{Verbatim}[fontsize=\small]
 MarkovIMM.matname    Ara2UTR.mat
 MarkovIMM.minGC      0
 MarkovIMM.maxGC      100
-MarkovIMM.UseM0asIG      FALSE
-Sensor.MarkovIMM.use    TRUE
-Sensor.MarkovIMM        1      # Sensor priority
+MarkovIMM.UseM0asIG  FALSE
+Sensor.MarkovIMM.use TRUE
+Sensor.MarkovIMM     1      # Sensor priority
 \end{Verbatim}
+
 
 \paragraph{Input files format}
 
-No input files  needed beyond the IMM matrix file. 
-
-\paragraph{Filtering input information}
-
-No filtering.
+No input files needed beyond the IMM matrix file. 
 
 \paragraph{Integration of information}
 
@@ -57,7 +62,7 @@ For reverse tracks, the same process is used but the probability used
 is the probability that the nucleotide at position $i$ appears given
 the nucleotides that precede him.
 
-For the intergenic track, the probability used is the mean of the the
+For the intergenic track, the probability used is the mean of the
 probability that the nucleotide at position $i$ appears given the
 nucleotides that precede him and the probability that the nucleotide
 at position $i$ appears given the nucleotides that follow him.  This

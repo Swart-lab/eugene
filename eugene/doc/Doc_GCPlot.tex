@@ -1,6 +1,6 @@
 % Documentation of the GCPlot sensor
 
-\subsection{\texttt{Sensor.GCPlot}}
+\subsubsection{\texttt{Sensor.GCPlot}}
 
 \paragraph{Description}
 
@@ -9,34 +9,30 @@ of basic composition statistics on the sequence. The sensor is
 activated by setting the parameter \texttt{Sensor.GCPlot.use} to
 \texttt{TRUE} in the parameter file. The composition statistics
 represented can be arbitrarily chosen. For example, the
-GC\%=$\frac{G+C}{A+T+G+C}$ is selected by setting \texttt{GCPlot.up}
-to \texttt{GC} and \texttt{GCPlot.over} to \texttt{ATGC}. Statistics
+GC\%=$\frac{G+C}{A+T+G+C}$ is selected by setting \texttt{GCPlot.Up}
+to \texttt{GC} and \texttt{GCPlot.Over} to \texttt{ATGC}. Statistics
 on the 3rd base of each codon are automatically computed and plotted.
 
-The color (integer between 0 and 8),, the smoothing window width and a
-zooming factor can be specified. The zooming factor for the 3rd base
-in each codon in zoomed using specific zooming factor
-\texttt{GCPlot.Zoom}
+The color (integer between 0 and 8), the smoothing window width and
+specific zooming factors can be given. The zooming factor for the 3rd base
+in each codon is zoomed using specific zooming factor
+\texttt{GCPlot.Zoom3}
 
 Here is an example of a GCPlot parameter definition :
 \begin{Verbatim}[fontsize=\small]
-Sensor.GCPlot.use  TRUE      # use GCPlot sensor
-Sensor.GCPlot      10        # sensor priority
-GCPlot.Up  GC
-GCPlot.Over  ATGC
-GCPlot.Smooth 98
-GCPlot.Color  5    #light green
-GCPlot.Zoom 2.0
-GCPlot.Zoom3 1.0
+GCPlot.Up          GC
+GCPlot.Over        ATGC
+GCPlot.Smooth      98
+GCPlot.Color       5     # light green
+GCPlot.Zoom        2.0
+GCPlot.Zoom3       1.0
+Sensor.GCPlot.use  TRUE  # use GCPlot sensor
+Sensor.GCPlot      1     # sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
 
 No input file.
-
-\paragraph{Filtering input information}
-
-No filter.
 
 \paragraph{Integration of information}
 

@@ -18,7 +18,11 @@
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex\\Biometry and AI Dept.\\ INRA Toulouse\\INRA France}
+\author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
+
+\def\abstractname{Overview}
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
 
 \title{\EuGene: an open gene finder for eukaryotes}
 
@@ -30,13 +34,12 @@
   \EuGene\ is a sophisticated open gene finder for eukaryotic
   organisms. It has been developped thanks to funding by INRA
   (permanent scientists and engineers), G\'enoplante and the french
-  ministry of research (with one PhD student). It is written in C++,
-  generates text, HTML and graphical output.
+  ministry of research (with one PhD student). It generates text, HTML and graphical outputs.
   
   \EuGene\ uses a graph based model to predict genes that covers both
   HMM based or more complex Bayesian net based probabilistic
   predictions. The model is fixed but complex (with 43 different
-  states) and covers UTR, UTR introns\ldots each with a possible explicit
+  states) and covers Exon, Intron, UTR, UTR introns\ldots each with a possible explicit
   distribution on length. The prediction itself relies on an optimal
   linear time and space algorithm for prediction.
   
@@ -47,24 +50,21 @@
   information (Markov models at DNA or amino acid level, WAM, Support
   Vector machine based signal prediction\ldots), similarity information
   (Est, cDNA, proteins) and homology (exon conservation). It can also
-  integrate prediction from other gene predictors if needed.
+  integrate predictions from other gene predictors if needed.
   
-  In orer to integrate all this information, \EuGene\ does not use
+  In order to integrate all this information, \EuGene\ does not use
   maximum likelihood estimation for all parameters but parameters
   optimized by maximum of prediction quality on expertized data sets.
+
+  The software called \texttt{eugene} is written in C++ and is distributed 
+  under the artistic license.
  \end{abstract}
 
 \chapter{Quick Start}
 
 \section{Annoting a sequence}
-Here is a small example followed by a minimal documentation on
-\EuGene\ (the \emph{Arabidopsis thaliana} instanciation of \EuGene).
-For our example, we have used the \texttt{SYNO\_ARATH.fasta} sequence.
-
-\begin{Verbatim}[fontsize=\scriptsize]
-> ls Sequences/
-SYNO_ARATH.fasta
-\end{Verbatim}
+Here is a small example based on the \texttt{SYNO\_ARATH.fasta} sequence.
+For reference information on the software, see chapter 2.
 
 In order to first collect information on the sequence (splice sites,
 translation start predictions\ldots) we will have to use the
@@ -76,14 +76,14 @@ the paths to the executables).
 
 \begin{Verbatim}[fontsize=\scriptsize]
 > ./getsites4eugene.pl Sequences/SYNO_ARATH.fasta 
-started on sam d\'ec 7 13:44:35 CET 2002
+started on sam dec 7 13:44:35 CET 2002
 
 processing Sequences/SYNO_ARATH.fasta
 
 NetStart [2*1 request(s)]: F1..R1..done
 NetGene2 [1   request(s)]: 1..FR..done
 SplicePredictor: done
-finished on sam d\'ec 7 13:47:14 CET 2002
+finished on sam dec 7 13:47:14 CET 2002
 \end{Verbatim}
 
 The script creates the files that contains information about the
@@ -112,7 +112,7 @@ If the standard output is saved in a file (for example adding '> \texttt{SYNO\_A
 
 If you want to exploit similarities with cDNA/EST sequences, you have to inform \EuGene\ of existing simiairities. These similarities
 should be available in a file with the \texttt{.est} extension. The
-format of this file is described in the EST plugin
+format of this file is described in the \texttt{Est} plugin
 section~\ref{plugest}. It can easily be created from an existing FASTA
 databank of EST and cDNA using a patched version of \texttt{sim4}. The
 patch is provided with \EuGene.
@@ -152,13 +152,13 @@ We can now ask \EuGene\ for a new prediction, including this new
 evidence using the \texttt{-d} flag (equivalently, the \texttt{Est}
 plugin can be activated by modifying \EuGene\ parameter file).  When
 evidence from transcribed sequences is available, \EuGene\ will
-automatically report in the ;ast column of its output the percentage
+automatically report in the last column of its output the percentage
 of bases of the element (exon, UTR\ldots) which is consistent with the
 available evidence. Here, the gene is almost completely covered by the
 available transcribed sequences. The \texttt{Est} plugin also mentions
 if transcribed sequences are rejected and why. The information from
 two transcribed sequences is rejected. The first one because no splice
-site has been found near one of the intron border detected vy the EST,
+site has been found near one of the intron border detected by the EST,
 another one because it was inconsistent with a sequence considered as
 more reliable.
 
@@ -175,13 +175,14 @@ with the prediction.
 EXECUTION_TRACE3
 \end{Verbatim}
 
-One can see that 2 of the 5 transcribed sequences have been filtered.
-\texttt{ATAJ644} is an almost full-length cDNA. It covers almost all
-the gene, from the position after the ATG to the 3'UTR. At the end,
-for each gene predicted, a summary reports that the CDS predicted is
-supported by 3273 over 3276 bases (the ATG is missing in all
-trannscripts). The transcribed sequence predicted (including the UTR)
-is supported for 3416 of its 3444 bases.
+% TO UPDATE: THOMAS
+%One can see that 2 of the 5 transcribed sequences have been filtered.
+%\texttt{ATAJ644} is an almost full-length cDNA. It covers almost all
+%the gene, from the position after the ATG to the 3'UTR. At the end,
+%for each gene predicted, a summary reports that the CDS predicted is
+%supported by 3273 over 3276 bases (the ATG is missing in all
+%trannscripts). The transcribed sequence predicted (including the UTR)
+%is supported for 3416 of its 3444 bases.
 
 \section{Using protein similarities}
 
@@ -192,8 +193,8 @@ associated with a specific ``level''. For each level, a confidence is
 defined in \EuGene's parameter file. Usually, 3 databases are used:
 SwissProt, PIR and TrEMBL (from the highest confidence to the
 lowest). Each collection of similarity is stored in a file with an
-extension \texttt{.blast} followed by the level of the database
-(\texttt{ .blast0}, \texttt{.blast1}, ..., \texttt{.blast9}).  The
+extension \texttt{.blast} followed by the level of the database 
+(\texttt{.blast0}, \texttt{.blast1}, ..., \texttt{.blast9}).  The
 script used create these files from the output of NCBI-BLASTX is
 copyrighted and is therefore not distributed with \EuGene. It is not
 difficult to design another one. Here is an extract from
@@ -227,11 +228,11 @@ EXECUTION_TRACE4
 
 Additional user information on the intronic, exonic, intergenic aspect
 of the sequence or on specific signals can be injected using a
-specific simple langage (see the the user plugin,
+specific simple langage (see the the \texttt{User} plugin,
 section \ref{pluguser}). This plugin is activated using the
 \texttt{-U} flag. The plugin will read the file with extension
 \texttt{.user}. For example, imagine I know that the 5'UTR of the gene
-extends from position2 to 28 I can inject this information in
+extends from position 2 to 28. I can inject this information in
 \EuGene\ as follows (the \texttt{10.0} gives a strong influence to
 this information, see the plugin description):
 
@@ -270,7 +271,7 @@ so-called parameter file.  \EuGene\ behavior is entirely controlled
 by a set of parameters whose default values are available in this
 file. These default values can be altered by editing this file or for
 some values through flags in the command line (such as \texttt{-d},
-see below). Command line flags override any value in the parameter
+see the quick start chapter). Command line flags override any value in the parameter
 file. The name of the parameter file that \EuGene\ seeks is obtained
 by adding the suffix ``\texttt{.par}'' to the name of the \EuGene\ 
 command itself.  As it is distributed, \EuGene\ command's name is
@@ -301,7 +302,7 @@ The typical call to \EuGene\ is:
 eugene <fasta files>
 \end{Verbatim}
 
-where each FASTA file contains one single DNA sequence. In this cas,
+where each FASTA file contains one single DNA sequence. In this case,
 the first action of \EuGene\ is to seek and load the parameter file.
 All the parameters in this file are either used by \EuGene\ or by the
 plugins. Each plugin may have its own parameters. The following
@@ -309,10 +310,10 @@ section describes all the parameters used by \EuGene. Information
 about the parameters used by plugins is provided in each plugin
 section (see section~\ref{plug}).
 
-\section{\EuGene's parameters}
+\section{\EuGene's general parameters}
 \label{param}
 
-Here is a list of all the parameters which control \EuGene's
+Here is a list of all the parameters not related to a plugin which control \EuGene's
 behavior. When a command line flag exists that can modify the
 corresponding parameter, it is indicated.  All the parameters that
 control \EuGene\'s behavior are available in the parameter file. This
@@ -324,9 +325,9 @@ the name of the parameter, the second is its value. Everything is case
 sensitive. The definition order is not important.
 
 \begin{itemize}
-\item \texttt{EuGene.version}: specifies the version of the
-  parameter file. After having load the parameter file, EuGene checks
-  that the parameter file version is consistent with the expected
+\item \texttt{EuGene.version}: specifies the \EuGene \ version. 
+  After having load the parameter file, \EuGene \ checks
+  that the parameter file version is consistent with the executable
   version.
 
 \item \texttt{EuGene.organism}: name of the considered organism.
@@ -334,19 +335,9 @@ sensitive. The definition order is not important.
 \item \texttt{EuGene.PluginsDir}: specify the location of the directory
   where plugins could be found (``\texttt{.so}'' files, sensor specific 
   models files); that is the path to the \texttt{PLUGINS} directory.
-
-\item \texttt{EuGene.minEx}, \texttt{EuGene.minIn},
-  \texttt{EuGene.minSg}, \texttt{EuGene.minFlow},
-  \texttt{EuGene.minConv}, \texttt{EuGene.minDiv},
-  \texttt{EuGene.min5Prime}, \texttt{EuGene.min3Prime}: minimum length
-  constraints on respectively the length of exons, introns, single
-  exon genes, intergenic regions (depending on the orientation of
-  surrounding genes), 5'UTR and 3'UTR regions.
-  
-\item \texttt{EuGene.stopP}: penalty for stopping a gene (traduction).
   
 \item \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
-  \texttt{EuGene.InterPrior}, \texttt{EuGene.FivePrimePrior},
+  \texttt{EuGene.InterPrior}, \texttt{EuGene.FivePri\-mePrior},
   \texttt{EuGene.ThreePrimePrior}: prior on the initial/final state of
   prediction. The ``\texttt{-s}'' command line flag can override these
   priors by setting all the non intergenic priors to $0.0$. This
@@ -360,7 +351,7 @@ sensitive. The definition order is not important.
   predicted. This can be an initial exon, and intermediary exon, a
   terminal exon, a single exon gene, an intron an intergenic region, a
   5' UTR region or a 3' UTR region. Each parameter specifies the
-  filename of an explicit penalty distribution file. %TBD
+  filename of an explicit penalty distribution file (see the following section). %TBD
   
 \item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
   predicting genes containing in-frame spliced STOPs. This is
@@ -371,10 +362,12 @@ sensitive. The definition order is not important.
 \item \texttt{Output.truncate}: in the text output, each gene element
   predicted if prefixed by the FASTA sequence id (or the filename if
   no FASTA id is available). This is truncated to the number of
-  cahracters indicated. If set to 0 (or FALSE), the full id is used.
+  caracters indicated. If set to 0 (or FALSE), the full id is used.
+
+\item \texttt{Output.stepid}: in the text output, step for numbering genes.
 
 \item \texttt{Output.graph}: if set, requests graphical PNG output.
-  This can also be set using the \texttt{-g} command line flag. This
+  This can also be set using the \texttt{-g} command line flag \index{CmdFlags}{[eugene PNG graph required] g}. This
   flag can be followed (without spaces) by a base filename which will
   be completed by the number of the figure + .png extension (possibly,
   start/end positions will be inserted too if -u/-v is used). If the
@@ -389,8 +382,9 @@ sensitive. The definition order is not important.
   controls which part of the sequence is to be plotted (eg. for
   zooming). The default value for both is $-1$ which corresponds to
   the whole sequence. These parameters can also be set using the
-  \texttt{-u} and \texttt{-v} flags.
-  
+  \texttt{-u} and \texttt{-v}. flags \index{CmdFlags}{[eugene PNG graph lower bound] u}
+  \index{CmdFlags}{[eugene PNG graph higher bound] v}
+
 \item \texttt{Output.glen}: controls the number of nucleotides that
   will appear on a single image. The value $-1$ corresponds to a
   default adaptative mechanism which plots min (6000,length to
@@ -402,28 +396,10 @@ sensitive. The definition order is not important.
   between 2 successives PNG images. Default is $-1$ which
   heuristically determines this based on resolution and number of nuc.
   per image. This parameter can also be set using the \texttt{-c}
-  command line flag.
-  
-\item \texttt{Output.window}: sets the half-size of the smoothing
-  window used to plot the scores.  Default is 48. This does not affect
-  prediction, only graphical output. It can be set using the
-  \texttt{-w} command line flag.
-  
-\item \texttt{Output.format}: controls the format of the textual
-  outpout. May be \texttt{d} (detailed), \texttt{l} (long), \texttt{s}
-  (short), \texttt{h} (html), \texttt{g} (gff) or \texttt{a} (araset
-  format). Default is \texttt{l}. This can be overrided using the
-  \texttt{-p} command line flag.
-  
-\item \texttt{Output.offset}: allows to offset the nucleotide position
-  of the prediction.  That is, the prediction for nucleotide at
-  position $i$ of the given sequence is printed as nucleotide $i+$ the
-  offset. Useful to perform prediction on an extracted sequence
-  without loosing the original position. CAn also be set using the
-  \texttt{-o} command line flag.
-  
+  command line flag. \index{CmdFlags}{[eugene PNG graph overlapping] c}
+    
 \item \texttt{Output.normopt}: indicates the way the score are
-  normalized accross the possibles states (phase 1,2,3,-1,-2,-3,
+  normalized accross the possibles states (phase 1, 2, 3, -1, -2, -3,
   introns and intergenic states).
   \begin{itemize}
   \item 0: no normalization
@@ -432,13 +408,32 @@ sensitive. The definition order is not important.
     score only.
   \end{itemize}
   Default is 1. Does not affect prediction, only graphical output.
+
+\item \texttt{Output.window}: sets the half-size of the smoothing
+  window used to plot the scores.  Default is 48. This does not affect
+  prediction, only graphical output. It can be set using the
+  \texttt{-w} command line flag. \index{CmdFlags}{[eugene PNG graph smoothing window] w}
+  
+\item \texttt{Output.format}: controls the format of the textual
+  outpout. May be \texttt{d} (detailed), \texttt{l} (long), \texttt{s}
+  (short), \texttt{h} (html), \texttt{g} (gff) or \texttt{a} (araset
+  format). Default is \texttt{l}. This can be overrided using the
+  \texttt{-p} command line flag.\index{CmdFlags}{[eugene textual output format] p}
+  
+\item \texttt{Output.offset}: allows to offset the nucleotide position
+  of the prediction.  That is, the prediction for nucleotide at
+  position $i$ of the given sequence is printed as nucleotide $i+$ the
+  offset. Useful to perform prediction on an extracted sequence
+  without loosing the original position. Can also be set using the
+  \texttt{-o} command line flag. \index{CmdFlags}{[eugene nucleotide position offset] o}
   
 \item \texttt{Output.Prefix}: indicates the directory where all non
   stderr/stdout output (eg. PNG images) should go. Default is the
   current directory.
+   \index{CmdFlags}{[eugene output directory] O}
 \end{itemize}
 
-\subsection{Specification of explicit penalty distributions on length}
+{\bf Specification of explicit penalty distributions on length}
 
 As in semi-Markov models, \EuGene\ uses explicit distribution of
 penalties on the length of all predicted elements. The dynamic
@@ -448,7 +443,7 @@ time and space in the length of the sequence in all cases.
 The distributions handled by \EuGene\ are made of 3 components. First,
 there is a region of forbidden length (minimum length), then a region
 with an arbitrary penalty distribution, then a region with a linear
-variation of the penalty. Froma proabilitics point of view, this means
+variation of the penalty. From a probabilitic point of view, this means
 an exponential tail.
 
 Although \EuGene\ is linear in time in the sequence length, it is also
@@ -475,8 +470,8 @@ typical distribution file is given below:
 
 It specifies a minimum length of 3. We then have an explicit
 distribution region with penalty 0.0 for 3, 2.0 for 4, 3.0 for 5
-(linear interpolation), then 4.0 at 6. Because this is the last point
-and the slope is 1, then the rest of the distribution will be linear
+(linear interpolation), then 4.0 at 6. As this is the last point
+and the slope is 1, the rest of the distribution will be linear
 with slope 1.
 
 \section{Plugins}
@@ -488,35 +483,35 @@ every plugin loaded by \EuGene\ must be written in C++ and be a
 subclass of the Sensor class. This class provides essentially four
 methods:
 \begin{itemize}
-\item creator: when instanciated, a plugin receives an instance number
+\item constructor: when instanciated, a plugin receives an instance number
   (specified in the parameter file) and a DNA sequence (instance of
   the \texttt{DNASeq} class). The instance number allows to load
   several identical plugins using different parameters. A plugin with
   a parameter \texttt{X} and instance number \texttt{n} will fetch
   parameter \texttt{X[n]} in the parameter file. On instanciation, the
   plugin should load all data needed to handle the sequence. If the
-  plugin depends on optimizable parameters (parameter whose name is
+  plugin depends on optimizable parameters (parameters whose name is
   followed by a \texttt{*}), then the final configuration that may
   depend on these parameters must be postponed in the \texttt{Init}
   method. 
   
 \item \texttt{Init}: receives as argument the sequence to process (an
   instance of the \texttt{DNASeq} class) and performs the extra
-  initializations that depends on optimizable parameter values
-  (parameter whose name is followed by a \texttt{*}).
+  initializations that depends on optimizable parameters values
+  (parameters whose name is followed by a \texttt{*}).
   
 \item \texttt{GiveInfo}: receives as argument the sequence to process
   (an instance of the \texttt{DNASeq} class), a position on the
   sequence and a \texttt{Data} instance. The \texttt{Data}
   data-structure can receive predictions on all signals and contents
-  scores know to \EuGene.
+  scores known to \EuGene.
 
 \item \texttt{Plot}: receives as argument the sequence to process (an
   instance of the \texttt{DNASeq} class) and plots all the predictions
   made by the sensor.
 
 \item \texttt{PostAnalyse}: receives as argument the prediction of
-  \EuGene\ and may check it agains its own prediction and report
+  \EuGene\ and may check it against its own prediction and report
   support or inconsistencies.
 \end{itemize}
 
@@ -541,11 +536,11 @@ the \emph{Arabidopsis thaliana} version of \EuGene.
 
 \begin{Verbatim}
 Sensor.Transcript.use   TRUE
-Sensor.FrameShift.use   TRUE
 Sensor.EuStop.use       TRUE
 Sensor.NStart.use       TRUE
-Sensor.IfElse.use       TRUE
+Sensor.IfElse.use       TRUE (with 2 splice site prediction plugins)
 Sensor.MarkovIMM.use    TRUE
+Sensor.MarkovConst.use  TRUE
 \end{Verbatim}  
 
 Sensors are loaded and instanciated following an increasing order of
@@ -559,13 +554,14 @@ Sensor.FrameShift       1
 Sensor.IfElse           1
 Sensor.EuStop           1       
 Sensor.NStart           1       
-Sensor.MarkovIMM        1        
-Sensor.Est              2         
+Sensor.MarkovIMM        1 
+Sensor.User             10
+Sensor.Est              20         
 \end{Verbatim}
 
-The \texttt{Sensor.Est} is loaded last because it has higher priority.
+The \texttt{Sensor.Est} is loaded last because it has the highest priority.
 This is important since the sensor actually uses the information
-provided by other sensors (splice site prediction sensors).
+provided by other sensors (splice site prediction sensors) that then have to be loaded before.
 
 Several instances of the same sensor can be loaded. Eg., if you are
 dealing with an organism that has a large GC\% range, one may use
@@ -578,9 +574,9 @@ Sensor.MarkovIMM        2
 \end{Verbatim}
 
 When these sensors will be instanciated, they will look for specific
-parameters. The first instance will use the usual parameters for this
-plugin class, the second instance will use parameters followed by
-\texttt{[1]}.
+parameters. The first instance will use the usual parameters or parameters 
+followed by \texttt{[0]} for this plugin class, the second instance will use parameters 
+followed by \texttt{[1]}.
 
 \begin{Verbatim}
 MarkovIMM.matname[0]    lowGC.mat 
@@ -597,32 +593,39 @@ As the example show, it is equivalent to define the parameter
 
 We now descrive each plugin, its behavior and parameters.
 
-\input{Doc_Transcript.tex}
-\input{Doc_EuStop.tex}
-\input{Doc_PatConst.tex}
-\input{Doc_NStart.tex}
+\subsection{\texttt{Signal plugins}}
 \input{Doc_ATGpr.tex}
-\input{Doc_StartWAM.tex}
-\input{Doc_SpliceWAM.tex}
-\input{Doc_NG2.tex}
-\input{Doc_SPred.tex}
-\input{Doc_GSplicer.tex}
-\input{Doc_IfElse.tex}
+\input{Doc_EuStop.tex}
 \input{Doc_FrameShift.tex}
+\input{Doc_GSplicer.tex}
+\input{Doc_NG2.tex}
+\input{Doc_NStart.tex}
+\input{Doc_PatConst.tex}
+\input{Doc_PepSignal.tex}
+\input{Doc_SpliceWAM.tex}
+\input{Doc_SPred.tex}
+\input{Doc_StartWAM.tex}
+\input{Doc_Transcript.tex}
+
+\subsection{\texttt{Content plugins}}
+\input{Doc_BlastX.tex}
+\input{Doc_Est.tex}
+\input{Doc_Homology.tex}
 \input{Doc_MarkovConst.tex}
 \input{Doc_MarkovIMM.tex}
 \input{Doc_MarkovProt.tex}
-\input{Doc_Est.tex}
-\input{Doc_Riken.tex}
-\input{Doc_BlastX.tex}
 \input{Doc_Repeat.tex}
-% A faire !
-\input{Doc_Homology.tex}
+
+\subsection{\texttt{Mixed signal/content plugins}}
 \input{Doc_AnnotaStruct.tex}
+\input{Doc_IfElse.tex}
+\input{Doc_Riken.tex}
 \input{Doc_User.tex}
+
+\subsection{\texttt{Others plugins}}
 \input{Doc_GFF.tex}
-\input{Doc_Plotter.tex}
 \input{Doc_GCPlot.tex}
+\input{Doc_Plotter.tex}
 \input{Doc_Tester.tex}
 
 
@@ -646,14 +649,14 @@ general function of the software with input and ouput files.
 
 The optimization can be lauched with the \texttt{-Z} argument
 \index{CmdFlags}{[parameters optimization] Z} on the command line or
-with the \texttt{ParaOptimization.Use} parameter set to \texttt{TRUE}.
+with the \texttt{ParaOptimi\-zation.Use} parameter set to \texttt{TRUE}.
 
 After updating the parameter file \texttt{eugene.par} (which sensors
 to use,...), the software is lauched with the usual command line
 specifying as argument the reference sequences to consider. At the
 end, the software creates a new parameter file called
 \texttt{eugene.<date>.OPTI.par} (for example,
-\texttt{eugene.30Sep2003.OPTI.par}) with the new value for the
+\texttt{eugene.30Sep\-2003.OPTI.par}) with the new value for the
 optimized parameters.
 
 For parameters optimization, the inputs to be specified in the
@@ -755,10 +758,52 @@ LineSearch.Para.Cluster[2]      1
 \section{Command line flags}
  
 \begin{itemize}
-\item \texttt{h}: help
+
+\item \texttt{b}: activates the plugin \texttt{Sensor.BlastX}.
+
+\item \texttt{B}: postprocessing activation of the plugin \texttt{Sensor.BlastX}.
   
-\item \texttt{m}: specifies the filename of the set of Markov models that will
-  be used by the Markov sensor (parameter \texttt{Markov.matname}).
+\item \texttt{c}: controls how successives PNG images overlap (parameter
+  \texttt{Output.golap}). It must be followed by the number of
+  overlapping nucleotides between 2 successives PNG images. Default is
+  heuristically determined based on resolution and number of nuc. per
+  image.
+ 
+\item \texttt{d}: activates the plugin \texttt{Sensor.Est}.
+
+\item \texttt{D}: allows to specify a value to a parameter (syntax: -D<para>=<value>).
+  \index{CmdFlags}{[eugene parameter definition] D}
+  
+\item \texttt{E}: enables EST and cDNA post-predition analysis (parameter
+  \texttt{Est.PostProcess}) of the Est sensor: after each transcript
+  prediction, all matching EST are analyzed and the consistency of the
+  EST with the prediction is analyzed. At the end, the number of bases
+  of the exon/intron structure predicted which are consistent with at
+  least one EST/cDNA are reported.
+
+\item \texttt{f}: the frameshift penalty. A large value prevents
+  \EuGene\ from predicting frameshifts (the default).
+
+\item \texttt{g}: graph required.
+
+\item \texttt{G}: activates the plugin \texttt{Sensor.GFF}.
+
+\item \texttt{h}: help \index{CmdFlags}{[eugene help] h}
+   
+\item \texttt{l}: controls the number of nucleotides that will appear on a
+  single image (parameter \texttt{Output.glen}). Default is min
+  (6,000 length to visualize). The length to visualize is computed from
+  the value given to -u and -v (default is all sequence)
+  \index{CmdFlags}{[eugene image size] l}
+ 
+\item \texttt{m}: activates the plugin \texttt{Sensor.MarkovIMM} and specifies 
+  the filename of the set of Markov models that will
+  be used by the MarkovIMM sensor (parameter \texttt{MarkovIMM.matname}).
+
+\item \texttt{M}:  activates the plugin \texttt{Sensor.MarkovProt} and specifies 
+  the filename of the set of Markov models that will
+  be used by the MarkovProt sensor (parameter \texttt{MarkovProt.matname}).
+
 
 \item \texttt{n}: followed by 0 1 or 2. Indicates the way the score are
   normalized accross the possibles states (phase 1,2,3,-1,-2,-3,
@@ -771,75 +816,24 @@ LineSearch.Para.Cluster[2]      1
   \end{itemize}
   Default is 1 (parameter \texttt{Output.normopt}). Does not affect
   prediction, only text/graphical output.
+  \index{CmdFlags}{[eugene graphical score normalization] n}
   
-\item \texttt{w}: followed by half the size of the smoothing window for the
-  scores (parameter \texttt{Output.window}). Default is 48. Does not
-  affect prediction, only graphical output.
- 
-\item \texttt{d}: activates the plugin \texttt{Sensor.Est}.
-  
+\item \texttt{o}: allows to offset the nucleotide position of the prediction
+  (parameter \texttt{Output.offset}).  That is, the prediction for
+  nucleotide at position $i$ of the given sequence is printed as
+  nucleotide $i+$ the offset. Useful to perform prediction on an
+  extracted sequence without loosing the original position.
+
+\item \texttt{O}: allows to specify an output directory (the texttt{Output.Prefix} 
+  parameter value).
+
+\item \texttt{p}: controls the format of the textual outpout (parameter
+  \texttt{Output.format}). May be d (detailed), l (long), s (short), h
+  (html), g (gff) or a (araset format). Default is l.
+    
+\item \texttt{r}: activates the plugin \texttt{Sensor.Repeat}.
+
 \item \texttt{R}: activates the plugin \texttt{Sensor.Riken}.
-  
-\item \texttt{E}: enables EST and cDNA post-predition analysis (parameter
-  \texttt{Est.PostProcess}) of the Est sensor: after each transcript
-  prediction, all matching EST are analyzed and the consistency of the
-  EST with the prediction is analyzed. At the end, the number of bases
-  of the exon/intron structure predicted which are consistent with at
-  least one EST/cDNA are reported.
-  
-\item \texttt{U}: activates the User information sensor (parameter
-  \texttt{Sensor.User.use}). This sensor reads user informations
-  stored in .user file. These informations use a small language. The
-  language can contain two types of statements. Statements on signals
-  (translation start, splice sites) and on the sequence itself
-  (coding, non coding...).
-  
-  Information on signals (stop/start/splice sites) use the
-  following syntax:
-  \begin{Verbatim}[fontsize=\small]
-  <type> <strand> <position> <value>
-\end{Verbatim}
-  where:
-  \begin{itemize}
-  \item \verb|<type>| can be start,stop,acceptor,donor 
-  \item \verb|<strand>| can be f for forward and r for reverse
-  \item \verb|<position>| is a position on the sequence 
-  \item \verb|<value>| is the cost associated with the signal. It can range
-    from 0.0 to 1.0. A value of 0.0 means that no site of this type
-    exists at this position.  The cost will override any existing
-    cost.
-  \end{itemize} 
-  
-Informations on regions have the following syntax:
-  \begin{Verbatim}[fontsize=\small]
-         <type> <strand>{<phase>} [<start>..<end>] <value>
-\end{Verbatim}
-where
-\begin{itemize}
-\item \verb|<type>| can be exon, intron, utr3, utr5, intergenic
-\item \verb|<strand>| if either f for forward or r for reverse
-
-\item \verb|<phase>| is only used for exons and introns. The phase of an
-  exon indicates the position of the codons wrt. to the
-  start/end of the sequence (modulo 3, same as reported by
-  BlastX). The phase of an intron specifies how the codon is
-  split by the splice site: between 2 codons, after 1
-  nucleotode or after 2. Basically, if you don't care of the
-  intron "phase" just put the same information for all 3
-  phases.
-  
-\item \verb|<start>| and \verb|<end>| are positions on the sequence that
-  indicate the scope of the information.
-  
-\item \verb|<value>| is a score that can take any floating point value
-  plus the extra value "infinity" that represent "minus
-  infinity". This cost will be added to the existing cost.  A
-  positive cost helps predicting something consistent with the
-  information, a negative one prevents from predicting
-  something consistent with the information. Thus a cost
-  "infinity" effectively forbids the prediction.
-\end{itemize}
-
   
 \item \texttt{s}: forces non partial gene mode prediction. This forbids
   predictions that start and end in intergenic mode and therefore
@@ -849,12 +843,21 @@ where
   In practice this simply sets the parameters
   \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
   \texttt{EuGene.FivePrimePrior} and \texttt{EuGene.ThreePrimePrior}
-  to $0.0$.
+  to $0.0$. \index{CmdFlags}{[eugene non partial gene mode] s}
  
+\item \texttt{t}: activates the plugin \texttt{Sensor.Homology}
+
 \item \texttt{u}: controls the part of the sequence whose prediction will be
   displayed in the graphical output (parameter \texttt{Output.gfrom}). It must
   be followed by the position of the 1st nuc. which will be plotted on
   graphical output (allows for zoom'in).  Default is 1.
+  
+\item \texttt{U}: activates the User information sensor (parameter
+  \texttt{Sensor.User.use}). This sensor reads user informations
+  stored in .user file. These informations use a small language. The
+  language can contain two types of statements. Statements on signals
+  (translation start, splice sites) and on the sequence itself
+  (coding, non coding...).
   
 \item \texttt{v}: controls the part of the sequence whose prediction will be
   displayed in the graphical output (parameter \texttt{Output.gfrom}).
@@ -862,36 +865,20 @@ where
   plotted on graphical output (allows for zoom'in). Default is the
   sequence length.
   
-\item \texttt{c}: controls how successives PNG images overlap (parameter
-  \texttt{Output.golap}). It must be followed by the number of
-  overlapping nucleotides between 2 successives PNG images. Default is
-  heuristically determined based on resolution and number of nuc. per
-  image.
-  
-\item \texttt{l}: controls the number of nucleotides that will appear on a
-  single image (parameter \texttt{Output.glen}). Default is min
-  (6000,length to visualize). The length to visualize is computed from
-  the value given to -u and -v (default is all sequence)
-  
+\item \texttt{w}: followed by half the size of the smoothing window for the
+  scores (parameter \texttt{Output.window}). Default is 48. Does not
+  affect prediction, only graphical output.
+
 \item \texttt{x}: controls the horizontal resolution of the PNG images
-  generated by EuGene (parameter \texttt{Output.resx}). Default is
-  900.
+  generated by EuGene (parameter \texttt{Output.resx}). Default is 900.
+  \index{CmdFlags}{[eugene image horizontal resolution] x}
   
 \item \texttt{y}: controls vertical resolution of the PNG images generated by
   EuGene (parameter \texttt{Output.resy}).  Default is 400.
-          
-\item \texttt{p}: controls the format of the textual outpout (parameter
-  \texttt{Output.format}). May be d (detailed), l (long), s (short), h
-  (html), g (gff) or a (araset format). Default is l.
-  
-\item \texttt{o}: allows to offset the nucleotide position of the prediction
-  (parameter \texttt{Output.offset}).  That is, the prediction for
-  nucleotide at position $i$ of the given sequence is printed as
-  nucleotide $i+$ the offset. Useful to perform prediction on an
-  extracted sequence without loosing the original position.
-  
-\item \texttt{f}: the frameshift penalty. A large value prevents
-  \EuGene\ from predicting frameshifts (the default).
+  \index{CmdFlags}{[eugene image vertical resolution] y}
+
+\item \texttt{Z}: allows to ask for a parameters optimization (equivallent to
+  set the \texttt{ParaOptimization.Use} parameter to TRUE).
 \end{itemize}
 
 \printindex{CmdFlags}{Index of command line flags for sensors}

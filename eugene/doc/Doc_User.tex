@@ -1,6 +1,6 @@
 % Documentation of the User sensor
 
-\subsection{\texttt{Sensor.User}}
+\subsubsection{\texttt{Sensor.User}}
 \label{pluguser}
 
 The user plugin is superseded by the AnnotaStruct\footnote{Also know
@@ -25,7 +25,7 @@ The sensor is activated by either :
 Here is an example of User parameters definition :
 \begin{Verbatim}[fontsize=\small]
 Sensor.User.use  TRUE      # Use User sensor
-Sensor.USer      9         # Sensor priority
+Sensor.User      10        # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
@@ -48,6 +48,52 @@ region where contents edge weights should be modified (as an interval
 as a floating point value. Any floating point value can be used
 including two special values denoted \texttt{infinity} and
 \texttt{-infinity} (with an obvious meaning).
+
+  Information on signals (stop/start/splice sites) use the
+  following syntax:
+  \begin{Verbatim}[fontsize=\small]
+  <type> <strand> <position> <value>
+\end{Verbatim}
+  where:
+  \begin{itemize}
+  \item \verb|<type>| can be start, stop, acceptor, donor 
+  \item \verb|<strand>| can be f for forward and r for reverse
+  \item \verb|<position>| is a position on the sequence 
+  \item \verb|<value>| is the cost associated with the signal. It can range
+    from 0.0 to 1.0. A value of 0.0 means that no site of this type
+    exists at this position.  The cost will override any existing
+    cost.
+  \end{itemize} 
+  
+Informations on regions have the following syntax:
+  \begin{Verbatim}[fontsize=\small]
+         <type> <strand>{<phase>} [<start>..<end>] <value>
+\end{Verbatim}
+where
+\begin{itemize}
+\item \verb|<type>| can be exon, intron, utr3, utr5, intergenic
+\item \verb|<strand>| if either f for forward or r for reverse
+
+\item \verb|<phase>| is only used for exons and introns. The phase of an
+  exon indicates the position of the codons wrt. to the
+  start/end of the sequence (modulo 3, same as reported by
+  BlastX). The phase of an intron specifies how the codon is
+  split by the splice site: between 2 codons, after 1
+  nucleotode or after 2. Basically, if you don't care of the
+  intron "phase" just put the same information for all 3
+  phases.
+  
+\item \verb|<start>| and \verb|<end>| are positions on the sequence that
+  indicate the scope of the information.
+  
+\item \verb|<value>| is a score that can take any floating point value
+  plus the extra value "infinity" that represent "minus
+  infinity". This cost will be added to the existing cost.  A
+  positive cost helps predicting something consistent with the
+  information, a negative one prevents from predicting
+  something consistent with the information. Thus a cost
+  "infinity" effectively forbids the prediction.
+\end{itemize}
 
 Here is an example:
 \begin{Verbatim}[fontsize=\small]

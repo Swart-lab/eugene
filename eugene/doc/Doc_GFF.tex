@@ -1,6 +1,6 @@
 % Documentation of the GFF sensor
 
-\subsection{\texttt{Sensor.GFF}}
+\subsubsection{\texttt{Sensor.GFF}}
 
 \paragraph{Description}
 
@@ -21,12 +21,12 @@ suffix.  The sensor is activated by either :
 Here is an example of GFF parameters definition :
 \begin{Verbatim}[fontsize=\small]
 Sensor.GFF.use  TRUE      # Use GFF sensor
-Sensor.GFF      10        # Sensor priority
+Sensor.GFF      1         # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
 
-The files \texttt{.gff} describe an annotation for a sequence. The format of
+The file \texttt{.gff} describes an annotation for a sequence. The format of
 a line is : \texttt{<seqname> <source> <feature> <start> <end> <score>
   <strand> <frame>}. Seqname, source and score fields are ignored.
 

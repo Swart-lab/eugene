@@ -1,21 +1,21 @@
 % Documentation of the NStart sensor
 
-\subsection{\texttt{Sensor.NStart}}
+\subsubsection{\texttt{Sensor.NStart}}
 
 \paragraph{Description}
 
 This plugin injects possible translation starts as predicted by the
-\textsc{NetStart} program. The plugin reads the prediction of the
-programs from two files whose names are derived from the sequence name
-by adding the \texttt{.starts} and \texttt{.startsR} suffix
+NetStart program. The plugin reads the prediction of the
+program from two files whose names are derived from the sequence name
+by adding the \texttt{.starts} and \texttt{.startsR} suffixes
 (respectively prediction for the forward and reverse strand).
 
-The sensor is activated by setting the value TRUE for the parameter
+The sensor is activated by setting the value \texttt{TRUE} for the parameter
 \texttt{Sensor.NStart.use} in the parameter file. The score for acceptor
-and donor prediction is rescaled by the parameters {\tt NStart.startP} and
-{\tt NStart.startB} (see below).
+and donor prediction is rescaled by the parameters {\tt NStart.startP*} and
+{\tt NStart.startB*} (see below).
 
-Here is an example of NG2 parameters definition.
+Here is an example of NetStart parameters definition.
 \begin{Verbatim}[fontsize=\small]
 NStart.startP*     0.052
 NStart.startB*     0.308
@@ -47,8 +47,8 @@ Here is an extract from \texttt{SYNO\_ARATH.fasta.starts}:
 [...]
 \end{Verbatim}
 
-To run NetStart, the following parameters are used (for Arabidopsis
-thaliana): \texttt{netstart -at <Fasta sequence>}.
+To run NetStart, the following parameters are used (for \emph{Arabidopsis
+thaliana}): \texttt{netstart -at <Fasta sequence>}.
 
 \paragraph{Filtering input information}
 
@@ -57,8 +57,8 @@ No filtering.
 \paragraph{Integration of information}
 
 The integrated score for start prediction is read (column 2).  The
-score read $s$ is rescaled using the {\tt NStart.startP} and {\tt
-NStart.startB} as follows:
+score read $s$ is rescaled using the {\tt NStart.startP*} (\emph{P}) and {\tt
+NStart.startB*} (\emph{B}) as follows:
 
 \[s' = B*s^P\]
 

@@ -1,6 +1,6 @@
 % Documentation of the BlastX sensor
 
-\subsection{\texttt{Sensor.BlastX}}
+\subsubsection{\texttt{Sensor.BlastX}}
 
 \paragraph{Description}
 
@@ -10,7 +10,7 @@ Similarities from several databases can be exploited. Usually 3
 databases are used: SwissProt, PIR and TrEMBL.
 
 A label $i$ (that could vary from 0 to 9) is assigned at each
-considered database. iles describing a collection of similarities with
+considered database. Files describing a collection of similarities with
 a sequence have an extension .blast$<$i$>$ (\texttt{.blast0,...,.blast9}).
 
 The user has to specify the list of labels to consider, the
@@ -27,10 +27,10 @@ activated by either:
   \texttt{.BlastX.levels} parameter.
 \end{itemize}
 The confidence in analyzes have to be specified in the parameter file
-giving values to the parameters \texttt{BlastX.level}$<$i$>$.  The
-minimum length of an intron is defined in the \texttt{EuGene.minIn}
+giving values to the parameters \texttt{BlastX.level}$<$i$>$*.  The
+minimum length of an intron is defined in the \texttt{BlastX.minIn}
 parameter.  A number of amino acids defined in the
-\texttt{BlastX.blastxM} parameter that allows to define if 2
+\texttt{BlastX.blastxM*} parameter that allows to define if 2
 similarities are near (see the paragraph Integration of information).
 Finally the \texttt{BlastX.postProcess} parameter (when set to TRUE)
 allows to request to analyse how BlastX information are integrated in
@@ -38,15 +38,15 @@ the final prediction.
 
 Here is an example of BlastX parameters definition.
 \begin{Verbatim}[fontsize=\small]
-Sensor.BlastX.use  TRUE     # Use BlastX sensor
-Sensor.BlastX      2        # Sensor priority
 BlastX.postProcess TRUE     # analyse prediction accorded to BlastX information
 BlastX.levels      012      # use levels 0, 1, and 2
 BlastX.level0*     0.2      # confidence in the level 0
 BlastX.level1*     0.0      # confidence in the level 1
 BlastX.level2*     0.0      # confidence in the level 2
 BlastX.blastxM*    10       # nb of amino acids implicated in intron incitation
-EuGene.minIn       50       # minimum length of intron
+BlastX.minIn       50       # minimum length of intron
+Sensor.BlastX.use  TRUE     # Use BlastX sensor
+Sensor.BlastX      1        # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
@@ -65,7 +65,7 @@ where:
 \item $s^S$ is the score of the similarity S,
 \item $v^S$ is the e-value given by BlastX and ignored by \EuGene,
 \item $p^S$ is the phase: +1, +2, +3, -1, -2, -3,
-item $bp^S$ and $ep^S$are the begin and the end of the similarity S on the protein.
+\item $bp^S$ and $ep^S$are the begin and the end of the similarity S on the protein.
 \end{itemize}
 
 Here is an extract from \texttt{SYNO\_ARATH.fasta.blast0}:
@@ -97,7 +97,7 @@ and the final \texttt{.blast}$<i>$ files are obtained with:
 \end{Verbatim}
 
 For more explanation, see the README file in the directory
-\texttt{eugene/SensorPlugins/BlastX/GetData}.
+\texttt{eugene/src/SensorPlugins/BlastX/GetData}.
 
 \paragraph{Filtering input information}
 
@@ -110,7 +110,8 @@ printed to alert the user.
 The procedure consists first, in computing information at the
 nucleotide level and second, in weigthing the graph used by \EuGene.
 
-A/ Computing information at the nucleotide level\\
+A/ Computing information at the nucleotide level
+
 A-1/ Extracting information
 
 Each similarity S is considered, one after the other.  A set of 3
@@ -142,16 +143,16 @@ Intron is only possible if:
 \item the similarities before or after in the same file are on the
   same protein, strand and near. That is have the same protein name,
   the same sense and have a maximum distance or overlap of
-  \texttt{BlastX.blastxM} amino acids.
+  \texttt{BlastX.blastxM*} amino acids.
 \item the distance in nucleotide on the sequence is upper than
-  \texttt{EuGene.minIn}.
+  \texttt{BlastX.minIn}.
 \end{itemize}
 Considering a similarity S with 2 similarities before and after in
 accordance with these conditions, an intron is incitated on a small
-length of \texttt{EuGene.minIn}/2 on both sides of S.
+length of \texttt{BlastX.minIn}/2 on both sides of S.
 \begin{itemize}
-\item from $i = b^S -$ EuGene.minIn$/2$ to $i = b^S$ 
-\item from $i = e^S$ to $i = e^S +$ EuGene.minIn$/2$ 
+\item from $i = b^S -$ BlastX.minIn$/2$ to $i = b^S$ 
+\item from $i = e^S$ to $i = e^S +$ BlastX.minIn$/2$ 
 \item the following values are given at each position:
   \begin{itemize}
   \item $s_i = s^S / l^S$ 
@@ -171,10 +172,10 @@ B/ Weigthing the graph\\
 For each $i$ with a set of variables:
 \begin{itemize}
 \item if $p_i$ codes for exon then $s_i .c_i$ is added to the content
-  signal of nucleotide i in the corresponding exon phase (a track
+  score of nucleotide i in the corresponding exon phase (a track
   between 0 and 5),
 \item if $p_i$ codes for intron then $s_i .c_i$ is added to the intron
-  content signals of nucleotide i (tracks 6 and 7),
+  score of nucleotide i (tracks 6 and 7),
 \end{itemize}
 
 Note: in fact, instead of rewarding the correct track (like described

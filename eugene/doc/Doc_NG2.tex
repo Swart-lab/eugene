@@ -1,19 +1,19 @@
 % Documentation of the NG2 sensor
 
-\subsection{\texttt{Sensor.NG2}}
+\subsubsection{\texttt{Sensor.NG2}}
 
 \paragraph{Description}
 
 This plugin injects possible splice sites as predicted by the
-\textsc{NetGene2} program. The plugin reads the prediction of the
-programs from two files whose names are derived from the sequence name
-by adding the \texttt{.splices} and \texttt{.splicesR} suffix
+NetGene2 program. The plugin reads the prediction of the
+program from two files whose names are derived from the sequence name
+by adding the \texttt{.splices} and \texttt{.splicesR} suffixes
 (respectively prediction for the forward and reverse strand).
 
 The sensor is activated by setting the value TRUE for the parameter
 \texttt{Sensor.NG2.use} in the parameter file. The score for acceptor
-and donor prediction is rescaled by the parameters {\tt NG2.accP} and
-{\tt NG2.accB} for acceptors and {\tt NG2.donP} and {\tt NG2.donB} for
+and donor prediction is rescaled by the parameters {\tt NG2.accP*} and
+{\tt NG2.accB*} for acceptors and {\tt NG2.donP*} and {\tt NG2.donB*} for
 donors (see below).
 
 Here is an example of NG2 parameters definition.
@@ -29,7 +29,7 @@ Sensor.NG2       1      # Sensor priority
 \paragraph{Input files format}
 
 The files with \texttt{.splices} and \texttt{.splicesR} suffix are
-obtained by running \textsc{NetGene2} which can be obtained at
+obtained by running NetGene2 which can be obtained at
 \texttt{http://www.cbs.dtu.dk/services/NetGene2/} and using the
 detailed output of the software.
 
@@ -54,8 +54,8 @@ Here is an extract from \texttt{SYNO\_ARATH.fasta.splices}:
 [...]
 \end{Verbatim}
 
-To run Netgene2, the following parameters are used (for Arabidopsis
-thaliana): \texttt{netgene2 -a -e -p -r -s at <Fasta sequence>}.
+To run Netgene2, the following parameters are used (for \emph{Arabidopsis
+thaliana}): \texttt{netgene2 -a -e -p -r -s at <Fasta sequence>}.
 
 \paragraph{Filtering input information}
 
@@ -67,14 +67,14 @@ The integrated score for donor/acceptor prediction is read (columns 9
 and 10). If it is not available (extremities of the sequence) then the
 non integrated score is used (columns 3 and 4).
 
-The score read $s$ is rescaled using the {\tt NG2.accP} and {\tt
-NG2.accB} parameters for acceptors and {\tt NG2.donP} and {\tt
-NG2.donB} parameters for donors as follows:
+The score read $s$ is rescaled using the {\tt NG2.accP*} (\emph{P}) and {\tt
+NG2.accB*} (\emph{B}) parameters for acceptors and {\tt NG2.donP*} (\emph{P}) and {\tt
+NG2.donB*} (\emph{B}) parameters for donors as follows:
 
 \[s' = B*s^P\]
 
 All predictions that use a predicted splice site receive a $\log(s')$
-penalty while those that go througha predicted splice site while they
+penalty while those that go through a predicted splice site while they
 could have used it receive a $\log(1-s')$ penalty.
 
 

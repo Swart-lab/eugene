@@ -1,24 +1,24 @@
 % Documentation of the ATGpr sensor
 
-\subsection{\texttt{Sensor.ATGpr}}
+\subsubsection{\texttt{Sensor.ATGpr}}
 
 \paragraph{Description}
 
 This plugin injects possible translation starts as predicted by the
-\textsc{ATGpr} program. The plugin reads the prediction of the
+ATGpr program. The plugin reads the prediction of the
 programs from two files whose names are derived from the sequence name
 by adding the \texttt{.atgpr} and \texttt{.atgprR} suffix
 (respectively prediction for the forward and reverse strand).
 
 The sensor is activated by setting the value TRUE for the parameter
 \texttt{Sensor.ATGpr.use} in the parameter file. The score for acceptor
-and donor prediction is rescaled by the parameters {\tt ATGpr.startP} and
-{\tt ATGpr.startB} (see below).
+and donor prediction is rescaled by the parameters {\tt ATGpr.startP*} and
+{\tt ATGpr.startB*} (see below).
 
 Here is an example of ATGpr parameters definition.
 \begin{Verbatim}[fontsize=\small]
-ATGpr.startP*       ?
-ATGpr.startB*       ?
+ATGpr.startP*      0.002
+ATGpr.startB*      0.001
 Sensor.ATGpr.use   TRUE    # Use ATGpr sensor
 Sensor.ATGpr       1       # Sensor priority
 \end{Verbatim}
@@ -26,7 +26,7 @@ Sensor.ATGpr       1       # Sensor priority
 \paragraph{Input files format}
 
 The files with \texttt{.atgpr} and \texttt{.atgprR} suffix are
-obtained by running \textsc{ATGpr} which can be obtained at
+obtained by running ATGpr which can be obtained at
 \texttt{http://www.hri.co.jp/atgpr/} and using the
 detailed output of the software.
 
@@ -57,8 +57,8 @@ No filtering.
 \paragraph{Integration of information}
 
 The integrated score for start prediction is read (column 2).  The
-score read $s$ is rescaled using the {\tt ATGpr.startP} and {\tt
-ATGpr.startB} as follows:
+score read $s$ is rescaled using the {\tt ATGpr.startP*} (\emph{P}) and {\tt
+ATGpr.startB*} (\emph{B}) as follows:
 
 \[s' = B*s^P\]
 

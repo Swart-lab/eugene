@@ -1,6 +1,6 @@
 % Documentation of the  Repeat sensor
 
-\subsection{\texttt{Sensor.Repeat}}
+\subsubsection{\texttt{Sensor.Repeat}}
 
 \paragraph{Description}
 
@@ -14,8 +14,8 @@ The sensor is activated by either :
 \item the value TRUE for the parameter \texttt{Sensor.Repeat.use} in the
   parameter file.
 \end{itemize}
-The penalties used when a repeat exists are \texttt{Repeat.IntronPenalty},
-\texttt{Repeat.ExonPenalty} and \texttt{Repeat.UTRPenalty}
+The penalties used when a repeat exists are \texttt{Repeat.IntronPenalty*},
+\texttt{Repeat.ExonPenalty*} and \texttt{Repeat.UTRPenalty*}
 respectively.
 
 Here is an example of Repeat parameters definition.
@@ -24,13 +24,13 @@ Repeat.UTRPenalty*      0.0
 Repeat.IntronPenalty*   0.1
 Repeat.ExonPenalty*     1.0
 Sensor.Repeat.use       TRUE    # Use Repeat sensor
-Sensor.Repeat           8       # Sensor priority
+Sensor.Repeat           1       # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
 
 The file with a \texttt{.ig} suffix is needed. Each line of the file
-contains the beginning and the end of aq region detected as a
+contains the beginning and the end of a region detected as a
 repeat. The positions must be sorted in increasing positions. Such a
 file can be obtained by eg. reformatting RepeatMasker output.
 
@@ -53,8 +53,8 @@ No filtering.
 
 For exonic, intronic and UTR tracks, all positions that occur in a
 repeat interval as reported in the \texttt{.ig} file are penalized
-suing the corresponding \texttt{Repeat.IntronPenalty},
-\texttt{Repeat.ExonPenalty} and \texttt{Repeat.UTRPenalty} penalties.
+using the corresponding \texttt{Repeat.IntronPenalty*},
+\texttt{Repeat.ExonPenalty*} and \texttt{Repeat.UTRPenalty*} penalties.
 
 \paragraph{Post analyse}
 

@@ -1,10 +1,10 @@
 % Documentation of the Splice WAM sensor
 
-\subsection{\texttt{Sensor.SpliceWAM}}
+\subsubsection{\texttt{Sensor.SpliceWAM}}
 
 \paragraph{Description}
 
-The goal of the SspliceWAM sensor is to detect splice sites and to
+The goal of the SpliceWAM sensor is to detect splice sites and to
 give them a score reflecting the context accordance with given
 models. A score is attributed at each potential acceptor and donor
 AG/GT site according to Weight Array Method (see Zhang and Marr, {\em
@@ -42,8 +42,8 @@ SpliceWAM.NbNtBeforeAG          2
 SpliceWAM.NbNtAfterAG           3
 SpliceWAM.AccScaleCoef*         2.9004
 SpliceWAM.AccScalePenalty*      -7.5877
-Sensor.SpliceWAM.use        TRUE               # Use SpliceWAM sensor
-Sensor.SpliceWAM            1                  # Sensor priority
+Sensor.SpliceWAM.use            TRUE               # Use SpliceWAM sensor
+Sensor.SpliceWAM                1                  # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
@@ -51,11 +51,11 @@ Sensor.SpliceWAM            1                  # Sensor priority
 This SpliceWAM Sensor requires a true positive and a false positive
 model file per motif position and for each type so sites. These files
 have to be present in the path given by
-\texttt{SpliceWAM.donmodelfilename} and
+\texttt{SpliceWAM.don\-modelfilename} and
 \texttt{SpliceWAM.donmodelfilename} from the plugins directory (see
-\texttt{EuGene.PluginsDir} parameter). These models can be generated
+\texttt{EuGene.\-PluginsDir} parameter). These models can be generated
 using \texttt{WAMbuilder.cc} (see
-\texttt{eugene/src/SensorPlugins/0\_SensorTk/GetData/README}).  The
+\texttt{eugene/src/\-SensorPlugins/0\_SensorTk/GetData/README}).  The
 file name of a model is a concatenation of the base name (prefix)
 specified in the parameter file, an extension (suffix) specified in
 the \texttt{WAM.h} file (\texttt{.TP.} for true positive and
@@ -126,6 +126,6 @@ No Post-Analyse.
 
 Vertical green/magenta lines (whose length is function of the score)
 are plotted on the intron track on the corresponding strand for each
-splice iste occurrence whose score is higher than a defined
-treshold. This treshold is defined in the \texttt{SpliceWAM.cc} file
+splice site occurrence whose score is higher than a defined
+threshold. This threshold is defined in the \texttt{SpliceWAM.cc} file
 as -\texttt{plotscoreincrease}.

@@ -1,6 +1,6 @@
 % Documentation of the AnnotaStruct sensor
 
-\subsection{\texttt{Sensor.AnnotaStruct}}
+\subsubsection{\texttt{Sensor.AnnotaStruct}}
 
 \paragraph{Description}
 
@@ -17,14 +17,14 @@ The high-level entries allow to take into account information on:
   alignment algorithms such as sim4 or PASA).
 \item \textbf{CDS} (involving exons, introns, translation start,
   translation stop and splice sites) that may come from other gene
-  predictors that may predict CDS (either ab initio or homology based
+  predictors that may predict CDS (either \emph{ab initio} or homology based
   predictors).
 \end{itemize}
 The high-level entries are actually automatically expanded in
 elementary (low-level) information as the plugin reads the data. The
 way the expansion takes place is user-controllable through parameters.
 
-Compared to the \texttt{Est} plgin, there is no data filtering
+Compared to the \texttt{Est} plugin, there is no data filtering
 performed here which means that the plugin should rather be used on
 consistent and fairly reliable data (eg. on existing gene predictions,
 cDNA or EST cluster alignements rather than simple EST alignments that
@@ -43,24 +43,24 @@ The sensor is activated by using the value TRUE for the parameter
 
 Here is an example of AnnotaStruct parameters definition :
 \begin{Verbatim}[fontsize=\small]
-AnnotaStruct.FileExtension
-AnnotaStruct.Exon*
-AnnotaStruct.Intron*
-AnnotaStruct.CDS*
-AnnotaStruct.StartType
-AnnotaStruct.Start*
-AnnotaStruct.StopType
-AnnotaStruct.Stop*
-AnnotaStruct.AccType
-AnnotaStruct.Acc*
-AnnotaStruct.DonType
-AnnotaStruct.Don*
-AnnotaStruct.TrStartType
-AnnotaStruct.TrStart*
-AnnotaStruct.TrStopType
-AnnotaStruct.TrStop*
-Sensor.AnnotaStruct.use  TRUE      # Use AnnotaStruct sensor
-Sensor.AnnotaStruct      9         # Sensor priority
+AnnotaStruct.FileExtension    gff
+AnnotaStruct.Exon*            10
+AnnotaStruct.Intron*          10
+AnnotaStruct.CDS*             10
+AnnotaStruct.StartType        p 
+AnnotaStruct.Start*           1
+AnnotaStruct.StopType         p 
+AnnotaStruct.Stop*            1
+AnnotaStruct.AccType          p 
+AnnotaStruct.Acc*             1
+AnnotaStruct.DonType          p 
+AnnotaStruct.Don*             1
+AnnotaStruct.TrStartType      p 
+AnnotaStruct.TrStart*         1
+AnnotaStruct.TrStopType       p 
+AnnotaStruct.TrStop*          1
+Sensor.AnnotaStruct.use       TRUE      # Use AnnotaStruct sensor
+Sensor.AnnotaStruct           1         # Sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
@@ -83,7 +83,7 @@ signals, the following features are recognized:
 \item \texttt{stop}: for translation stops.
 \item \texttt{acc}: for acceptor splice sites.
 \item \texttt{don}: for donor splice sites.
-\item \texttt{ins}: for insertions (frameshift).
+\item \texttt{ins}: for insertion (frameshift).
 \item \texttt{del}: for deletion (frameshift).
 \end{itemize}
 In this case, the start and the strand field are used to indicate the
@@ -97,7 +97,7 @@ between $0.0$ and $1.0$ preceded by the letter $p$ (like probability).
 \item In the first case, the score indicated is directly added to the
   weight of the signal edge (that corresponds to the fact that the
   signal is used). The other signal edge is unmodified.
-\item In the second case, the score $s$ that appears fater the $p$ is
+\item In the second case, the score $s$ that appears after the $p$ is
   treated as a (conditional) probability. The edge that corresponds to
   the fact that the signal is used receive a weight $\log(s)$ and the
   other edge $\log(1-p)$.
@@ -119,7 +119,7 @@ by the weight indicated in the score field.
 
 High-level information may either be used to express knowledge about
 potential \emph{transcribed sequences} or potential \emph{coding
-  sequences}. For informations about CDS regions, the following
+  sequences}. For information about CDS regions, the following
 features may be used:
 \begin{itemize}
 \item \texttt{E.Init}: for an initial exon, this will automatically
@@ -156,9 +156,9 @@ features may be used:
 \item \texttt{UTR5}, \texttt{UTR3}, \texttt{UTR}: although not part of
   the CDS, some gene predictors may predict UTR (non coding part of
   exons). These 3 features allow to inject this information by
-  prespectively reweighting a transcription start, stop or both using
+  respectively reweighting a transcription start, stop or both using
   the corresponding \texttt{AnnotaStruct.TrStart*},
-  \texttt{AnnotaStruct.TrStop*} parameters and then by reweighting the
+  \texttt{Annota\-Struct.TrStop*} parameters and then by reweighting the
   UTR5, UTR3 or both contents edges (using the
   \texttt{AnnotaStruct.CDS*} parameter).
 \item \texttt{Intron}: equivalent to \texttt{intron} except that the
@@ -174,12 +174,12 @@ are recognized:
   considered). The corresponding contents region are modified
   accordingly to the \texttt{AnnotaStruct.Exon*} parameter.
 \item \texttt{E.First}: the first biological exon (containing UTR and
-  possibly part of CDS too)1. A transcription start signal is weighted
+  possibly part of CDS too). A transcription start signal is weighted
   according to the \texttt{AnnotaStruct.TrStart*} parameter value. The
   UTR5 and coding exon contents edge are reweighted according to the
   \texttt{AnnotaStruct.Exon*} parameter value.
 \item \texttt{E.Last}: the last biological exon. A transcription stop
-  signal is weighted according to the \texttt{AnnotaStruct.TrStop*}
+  signal is weighted according to the \texttt{Annota\-Struct.TrStop*}
   parameters value. The UTR3 and coding exon contents edge are
   reweighted according to the \texttt{AnnotaStruct.Exon*} parameter
   value.

@@ -1,6 +1,6 @@
 % Documentation of the EuStop sensor
 
-\subsection{\texttt{Sensor.EuStop}}
+\subsubsection{\texttt{Sensor.EuStop}}
 
 \paragraph{Description}
 
@@ -11,7 +11,7 @@ The sensor is activated by setting the value TRUE for the parameter
 \texttt{Sensor.EuStop.use} in the parameter file.
 
 The penalty payed for using a Stop is defined by the
-\texttt{EuStop.stopP} parameter.
+\texttt{EuStop.stopP*} parameter.
 
 Here is an example of EuStop parameters definition.
 \begin{Verbatim}[fontsize=\small]
@@ -24,14 +24,10 @@ Sensor.EuStop           1       # Sensor priority
 
 No input files  needed.
 
-\paragraph{Filtering input information}
-
-No filtering.
-
 \paragraph{Integration of information}
 
 In the case of non degenerated sequences, all predictions using a Stop
-to end a terminal exon are given an extra \texttt{EuStop.stopP}
+to end a terminal exon are given an extra \texttt{EuStop.stopP*}
 penalty. All predictions going through an in-phase Stop in an exonic
 state receive an infinite penalty.
 
@@ -42,6 +38,6 @@ No post analyse.
 \paragraph{Graph}
 
 Every predicted Stop is ploted as a small vertical red bar in the
-corresponding phase.
+corresponding phase on the exonics tracks.
 
 

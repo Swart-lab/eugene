@@ -1,6 +1,6 @@
 % Documentation of the Tester sensor
 
-\subsection{\texttt{Sensor.Tester}}
+\subsubsection{\texttt{Sensor.Tester}}
 
 \paragraph{Description}
 
@@ -45,18 +45,19 @@ The sensor is activated by the value TRUE for the parameter
 \\
 Here is an example of Tester parameters definition:
 \begin{Verbatim}[fontsize=\small]
-Sensor.Tester.use       TRUE      # use Tester sensor
-Sensor.Tester           11        # sensor priority
 Tester.Make             SPSN      # SPSN, TEST
 Tester.Sensor           EuStop
 Tester.Sensor.Instance  0
 Tester.SPSN.MinNumbers  100       # greater than 0
+Sensor.Tester.use       TRUE      # use Tester sensor
+Sensor.Tester           1         # sensor priority
 \end{Verbatim}
 
 \paragraph{Input files format}
 
-The files \texttt{.gff} describe the truth coordinates of only one complete gene in GFF format. The format of a
+The file \texttt{.gff} describes the truth coordinates of only one complete gene in GFF format. The format of a
 line is :\texttt{<seqname> <source> <feature> <start> <end> <score> <strand> <frame>}. Seqname, source, score and frame fields are ignored.
+
 Example:
 \begin{Verbatim}[fontsize=\small]
 seqName EuGene  UTR5    866     885     0       +       .

@@ -1,21 +1,21 @@
 % Documentation of the Transcript sensor
 
-\subsection{\texttt{Sensor.Transcript}}
+\subsubsection{\texttt{Sensor.Transcript}}
 
 \paragraph{Description}
 
 This simple plugin predicts a possible transcription start and stop at
 every position, all with the same uniform cost. These costs are
-respectively set by the \texttt{Transcript.Start} and
-\texttt{Transcript.Stop} parameters.
+respectively set by the \texttt{Transcript.Start*} and
+\texttt{Transcript.Stop*} parameters.
 
 The sensor is activated by setting the value TRUE for the parameter
 \texttt{Sensor.Transcript.use} in the parameter file. 
 
 Here is an example of Transcript parameters definition.
 \begin{Verbatim}[fontsize=\small]
-Transcript.Start*        4.155
-Transcript.Stop*         4.155
+Transcript.Start*       4.155
+Transcript.Stop*        4.155
 Sensor.Transcript.use   TRUE   # Use Transcript sensor
 Sensor.Transcript       1      # Sensor priority
 \end{Verbatim}
@@ -24,15 +24,11 @@ Sensor.Transcript       1      # Sensor priority
 
 No input file needed.
 
-\paragraph{Filtering input information}
-
-No filtering.
-
 \paragraph{Integration of information}
 
 All predictions that go through a transcription start (resp. stop) are
-penalized by the corresponding \texttt{Transcript.Start} and
-\texttt{Transcript.Stop} parameter value.
+penalized by the corresponding \texttt{Transcript.Start*} (resp. 
+\texttt{Transcript.Stop*}) parameter value.
 
 \paragraph{Post analyse}
 
