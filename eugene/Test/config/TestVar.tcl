@@ -42,14 +42,14 @@ set OPTIONS(Sensor) "-pd"
 set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest SeqBig}
 
 ##################### SeqAra test variables #################################
-set SensorsList(SeqAra) {MarkovIMM EuStop NStart IfElse GSplicer Est BlastX}
+set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(SeqAra) {seq25ab005234g10g11.tfa}
 set IMG(SeqAra) {seq25ab005234g10g11.test.000.png}
 set FILE_REF(SeqAra) Output_SeqAra
 set OPTIONS(SeqAra) "-gtest -E -B"
 
 ##################### SeqDoc test variables ############################
-set SensorsList(SeqDoc) {MarkovIMM EuStop NStart IfElse Transcript \
+set SensorsList(SeqDoc) {MarkovIMM MarkovConst EuStop NStart IfElse Transcript \
 			     FrameShift User}
 set SEQ(SeqDoc) {SYNO_ARATH.fasta}
 set IMG(SeqDoc) {SYNO_ARATH.test.000.png}
@@ -57,7 +57,7 @@ set FILE_REF(SeqDoc) Output_SeqDoc
 set OPTIONS(SeqDoc) "-gtest"
 
 ##################### SeqHom test variables ################################
-set SensorsList(SeqHom) {MarkovProt EuStop StartWAM SpliceWAM Homology \
+set SensorsList(SeqHom) {MarkovProt MarkovConst EuStop StartWAM SpliceWAM Homology \
 			     Transcript User GFF}
 set SEQ(SeqHom) {exSeqHom.fasta}
 set IMG(SeqHom) {exSeqHom.test.000.png}
@@ -76,7 +76,7 @@ set FILE_REF(SeqRest) Output_SeqRest
 set OPTIONS(SeqRest) "-gtest"
 
 ##################### SeqBig test variables ################################
-set SensorsList(SeqBig) {MarkovIMM EuStop NStart IfElse GSplicer Est BlastX}
+set SensorsList(SeqBig) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(SeqBig) {chr1_2002.tfa_22540000-23040000.tfa}
 set IMG(SeqBig) {chr1_2002.tfa_22540000-23040000.test.000.png}
 set FILE_REF(SeqBig) Output_SeqBig
@@ -86,7 +86,7 @@ set OPTIONS(SeqBig) "-gtest"
 ############################################################################
 ##################### Araset test variables ################################
 set SEQBASE_DIR "/Annotation/Arabidopsis/araset/Genes"
-set SensorsList(Araset) {MarkovIMM EuStop NStart IfElse GSplicer Est BlastX}
+set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(Araset) {}
 set seq [eval exec ls $SEQBASE_DIR]
 foreach f $seq {
