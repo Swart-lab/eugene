@@ -66,8 +66,8 @@ SensorMarkovProt :: SensorMarkovProt (int n) : Sensor(n)
   transUTR5   = PAR.getD("EuGene.transUTR5");   //UTR5
   transUTR3   = PAR.getD("EuGene.transUTR3");   //UTR3
 
-  minGC = PAR.getD("MarkovProt.minGC",GetNumber());
-  maxGC = PAR.getD("MarkovProt.maxGC",GetNumber());
+  minGC = PAR.getD("MarkovProt.minGC",GetNumber())/100;
+  maxGC = PAR.getD("MarkovProt.maxGC",GetNumber())/100;
 
   maxorder = PAR.getI("MarkovProt.maxorder");
   order    = PAR.getI("MarkovProt.order");

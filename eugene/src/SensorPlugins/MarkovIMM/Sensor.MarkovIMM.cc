@@ -67,8 +67,8 @@ SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
   transUTR5   = PAR.getD("EuGene.transUTR5");   //UTR5
   transUTR3   = PAR.getD("EuGene.transUTR3");   //UTR3
 
-  minGC = PAR.getD("MarkovIMM.minGC",GetNumber());
-  maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber());
+  minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
+  maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
   
   if (! (fp = FileOpen(EugDir, PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
