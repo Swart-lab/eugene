@@ -15,8 +15,6 @@ EuGene.minDiv		100
 EuGene.min5Prime	20
 EuGene.min3Prime	20
 #
-EuGene.stopP		4.155
-#
 # Priors
 #
 EuGene.ExonPrior	0.33		# Prior on the initial states
@@ -52,6 +50,10 @@ Output.Prefix		./
 #
 Transcript.Start	4.155
 Transcript.Stop		4.155
+#
+# EuStop parameters
+#
+EuStop.stopP            4.155
 #
 # FrameShift parameters
 #
@@ -101,7 +103,7 @@ MarkovProt.order        4
 # Est sensor parameters
 #
 Est.PostProcess	FALSE
-Est.estP	-0.2
+Est.estP	-0.4
 Est.estM	6
 #
 # Proteic similarity sensor parameters
@@ -140,7 +142,7 @@ MarkovConst.maxGC[0]	100
 #
 Sensor.Transcript.use	TRUE
 Sensor.FrameShift.use	TRUE
-Sensor.EuStop.use		TRUE
+Sensor.EuStop.use	TRUE
 Sensor.NStart.use		TRUE
 Sensor.NG2.use		FALSE
 Sensor.SPred.use		FALSE
