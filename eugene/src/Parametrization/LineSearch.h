@@ -24,15 +24,16 @@ class LineSearch : public OptiAlgorithm {
   std::vector <double> ParaLInter;
   std::vector <double> ParaStep;
   std::vector <double> ParaMinStep;
-  std::vector < std::vector <double> > Optimums;
   int NbMaxCycle;
   int NbMinCycle;
   int NbMaxStab;
   int DivInter;
   double Alpha;
   double EvolutionMini;
-  double FitOpt;
-  double Fitness;
+  double FitOpt;           // fitness of the current optimal point
+  double Fitness;          // fitness of the point described in Para
+  std::vector < std::vector <double> > Optimums;  // list of optimal points after
+                                                  // the scan of a cluster
   std::string MsgParaNames;
 
   void ReduceSearch(void);

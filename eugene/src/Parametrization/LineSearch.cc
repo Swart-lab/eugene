@@ -64,7 +64,6 @@ LineSearch::LineSearch (void) : OptiAlgorithm()
       }
     } else
       MsgParaNames += ReduceName(ParaName[i]) + "\t";
-
 }
 
 
@@ -76,10 +75,11 @@ void LineSearch :: Optimize(bool is_chaining)
 {
   int n;
   int STOP;
-  double FitOptPrec = Fitness;
-  FitOpt = 0.0;
+  double FitOptPrec = 0;
   unsigned int i; int c;
   std::string warning_message;
+
+  FitOpt = 0;
 
   // if chains another algo then takes the optimum found as initial point
   if (is_chaining)
@@ -132,7 +132,7 @@ void LineSearch :: Optimize(bool is_chaining)
       if (IsTracing) { std::cout << "Local optimal point:" <<std::endl; PrintParam(); std::cout <<std::endl;}
     }
     
-    if ((FitOpt - FitOptPrec) < EvolutionMini)
+    if ( (n!=0) && ((FitOpt - FitOptPrec) < EvolutionMini) )
       STOP += 1; 
     else { 
       STOP = 0;
@@ -185,12 +185,14 @@ void LineSearch :: ScanCluster(int k)
 {  
   int n, m;
   unsigned int i;
+  double t;
 
   if (ParaClusterRelations[k] == IDENTICAL) { 
     // We assume that identical parameters do have identical intervals
     n = (ParaClusters[k])[0];
 	  
-    for (double t = ParaMinInter[n]; t <= ParaMaxInter[n]; t += ParaStep[n]) {
+    for (int q=0; q<=DivInter; q++) {
+      t = ParaMinInter[n] + q*ParaStep[n];
       // all the parameters of the cluster are set the same value
       for (i=0; i<ParaClusters[k].size(); i++) {
 	m = (ParaClusters[k])[i];
@@ -214,16 +216,16 @@ void LineSearch :: CartesianProduct(int j, int k)
   int m = (ParaClusters[k])[j];
   
   if ( j == ((int) ParaClusters[k].size()) - 1 ) 
-    for (double s = ParaMinInter[m]; s <= ParaMaxInter[m]; s += ParaStep[m]) {
-      Para[m] = s;
+    for (int q=0; q<=DivInter; q++) {
+      Para[m] = ParaMinInter[m] + q*ParaStep[m];
       Fitness = OPTIM.ParaEvaluate();
       UpdateOpt();
       if (IsTracing) PrintParam();
     }
   else {
     j++;
-    for (double t = ParaMinInter[m]; t <= ParaMaxInter[m]; t += ParaStep[m]) {
-      Para[m] = t;
+    for (int q=0; q<=DivInter; q++) {
+      Para[m] = ParaMinInter[m] + q*ParaStep[m];
       CartesianProduct(j,k);
     }
   }
