@@ -3,13 +3,15 @@
 
 #include "../Sensor.h"
 
+
 /*************************************************************
  **                     SensorRepeat                        **
  *************************************************************/
 class SensorRepeat : public Sensor
 {
  private:
-  std::vector<int>           vPos;
+  std::vector<int>           vDeb;
+  std::vector<int>           vFin;
   std::vector<int>::iterator iter;
   int index;
   double intronPenalty;
