@@ -274,13 +274,13 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
     //    fprintf(stdout,"i=%d, raflpos= %d\n",pos,RAFLpos);
 
     // Exons forward
-    for(int i=0; i<3; i++)
+    for(int i = DATA::ExonF1; i<= DATA::ExonF3; i++)
       if ((RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex].sens == -1)) )
 	d->contents[i] += RAFLPenalty;  
 
     // Exons Reverse
-    for(int i=3; i<6; i++)
+    for(int i=DATA::ExonR1; i<=DATA::ExonR3; i++)
       if ((RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex].sens == 1)) )
 	d->contents[i] += RAFLPenalty; 
@@ -288,16 +288,16 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // IntronF
     if ( (RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex].sens == -1)) )
-      d->contents[6] += RAFLPenalty;
+      d->contents[DATA::IntronF] += RAFLPenalty;
 
     //IntronR
     if ( (RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex].sens == 1)) )
-      d->contents[7] += RAFLPenalty;     
+      d->contents[DATA::IntronR] += RAFLPenalty;     
 
     //InterG
     if (RAFLpos == 3) {
-      d->contents[8] += RAFLPenalty;     
+      d->contents[DATA::InterG] += RAFLPenalty;     
       
       // Warning SIGNAL START MODIFICATION //
       d->sig[DATA::Start].weight[Signal::ForwardNo] = 0.0;
@@ -307,22 +307,22 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
     //UTR5'F
     if ( (RAFLpos == 2) || (RAFLpos == 5) || 
 	 ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
-      d->contents[9] += RAFLPenalty;     
+      d->contents[DATA::UTR5F] += RAFLPenalty;     
     
     //UTR5'R
     if ( (RAFLpos == 2) || (RAFLpos == 4) || 
 	 ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
-      d->contents[10]+= RAFLPenalty;     
+      d->contents[DATA::UTR5R]+= RAFLPenalty;     
     
     //UTR3'F
     if ( (RAFLpos == 1) || (RAFLpos == 4) || 
 	 ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
-      d->contents[11]+= RAFLPenalty; 
+      d->contents[DATA::UTR3F]+= RAFLPenalty; 
     
     //UTR3'R
     if ( (RAFLpos == 1) || (RAFLpos == 5) || 
 	 ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
-      d->contents[12]+= RAFLPenalty;
+      d->contents[DATA::UTR3R]+= RAFLPenalty;
   }
 }
 
