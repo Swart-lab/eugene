@@ -3,6 +3,7 @@
 
 #include "../../EuGene/Sensor.h"
 #include "../0_SensorTk/markov.h"
+#include "../0_SensorTk/markov.cc"
 
 /*************************************************************
  **                     SensorHomology                        **
