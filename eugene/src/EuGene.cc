@@ -817,7 +817,7 @@ int main  (int argc, char * argv [])
     if (!PorteOuverte && Data_Len > 6000) 
       exit(2);
     
-    fprintf(stderr,"Optimal path length = %#f\n",-maxi-NormalizingPath);
+    fprintf(stderr,"Optimal path length = %.4f\n",-maxi-NormalizingPath);
     
     // Sanity check ! A feasible path has not been found ?
     if (isnan(maxi+NormalizingPath) || maxi+NormalizingPath == NINFINITY)
