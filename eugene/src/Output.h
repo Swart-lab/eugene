@@ -5,22 +5,28 @@ if (printopt == 'd')
      
   window = ((window/2)*2)+1;
      
-  for (j = 0 ; j < 8 ; j++)
-    for (i = 0; i < window/2; i++)
-      NScore [j] += log(BaseScore[j][i]);
+  for (i = 0; i < window/2; i++) {
+    Fill_Score(TheSeq,IMMatrix,i,BaseScore);
+    for (j = 0 ; j < 8 ; j++)
+      NScore [j] += log(BaseScore[j]);
+  }
 
   printf("#  pos FR Pr  Ph 1 Ph 2 Ph 3 Ph-1 Ph-2 Ph-3 IntF IntR SF  SR  sF  sF  sR  sR  DF   DR   AF   AR\n");
   
   for  (i = 0 ; i < Data_Len ; i++)
     {
-      if (i-window/2 > 0)
+      if (i-window/2 > 0) {
+        Fill_Score(TheSeq,IMMatrix,i-1-window/2,BaseScore);
 	for (j = 0 ; j < 8 ; j++)
-	  NScore [j] -= log(BaseScore[j][i-1-window/2]);
-	 
-      if (i+window/2 < Data_Len)
+	  NScore [j] -= log(BaseScore[j]);
+      }
+
+      if (i+window/2 < Data_Len) {
+        Fill_Score(TheSeq,IMMatrix,i+window/2,BaseScore);
 	for (j = 0 ; j < 8 ; j++)
-	  NScore [j] += log(BaseScore[j][i+window/2]);
-	 
+	  NScore [j] += log(BaseScore[j]);
+      }
+
       for (j = 0 ; j < 8 ; j++) Score[j] = NScore[j];
 	 
       AmplifyScore(Score,normopt);
