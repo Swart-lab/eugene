@@ -234,22 +234,24 @@ void  DNASeq :: Print (FILE * fp)
   }
 }
 // ---------------------------------------------------------------------
-// Translate the codon at position i in the given sense and 
+// Translate the codon at position i (from the 5' end) in the given sense and 
 // return the corresponding amino acid
 // ---------------------------------------------------------------------
-char DNASeq :: AA(int i, int sens)
+char DNASeq :: AA(int i, int mode)
 {
   int codon,c1,c2,c3;
-  if (sens < 0) {
+
+  if (mode == 1) {
     c3 = (*this)(i-1,1);
     c2 = (*this)(i-2,1);
     c1 = (*this)(i-3,1);
   }
   else{
-    c1 = (*this)(i+2,0);
-    c2 = (*this)(i+1,0);
-    c3 = (*this)(i,0);
+    c1 = (*this)(i+2,mode);
+    c2 = (*this)(i+1,mode);
+    c3 = (*this)(i,mode);
   }
+
   if (Code2NumOne[c1]*Code2NumOne[c2]*Code2NumOne[c3] != 1) 
     return('X');
   else {
@@ -489,7 +491,6 @@ void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
   
   return;
 }
-
 // ---------------------------------------------------------------------
 // test if a Stop Codon starts at position i. Returns the number of
 // possible matches with a STOP codon i.e. T{AA,AG,GA}
@@ -507,7 +508,7 @@ double DNASeq :: IsStop(int i,int sens)
   if (((*this)(i,mode) & CodeT) == 0) return 0.0;
 
   // le cas des TA{A,G}
-  if (((*this)(i+1,mode)) & CodeA) 
+  if (((*this)(i+1,mode)) & CodeA)
     count += Code2NumOne[(*this)(i+2,mode) & (CodeA|CodeG)]; 
   
   // le cas du TGA
@@ -515,6 +516,17 @@ double DNASeq :: IsStop(int i,int sens)
     count ++;
   
   return (double)count/ Degeneracy(i,mode);
+}
+// ---------------------------------------------------------------------
+// Return simply A,T,C,G or N depending on the nucleotide at position i
+// ---------------------------------------------------------------------
+char DNASeq :: nt(int i, int mode)
+{
+  if ((*this)(i,mode) & CodeT) return 'T';
+  if ((*this)(i,mode) & CodeA) return 'A';
+  if ((*this)(i,mode) & CodeG) return 'G';
+  if ((*this)(i,mode) & CodeC) return 'C';
+  return 'N';
 }
 // ---------------------------------------------------------------------
 // returns a penalty for infrequent start depending on the code of the
