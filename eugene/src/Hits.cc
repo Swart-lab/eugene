@@ -98,7 +98,7 @@ Hits :: Hits  (char* name, int length, char strand, int deb,int fin,int ldeb,int
 Hits* Hits::ReadFromFile(FILE* ESTFile, int *NumEST) 
 {
   char *EstId, *PEstId,*tmp;
-  int deb,fin,brin,EstDeb,EstFin,poids;
+  int deb,fin,brin,EstDeb,EstFin,poids,read;
   char A[128],B[128];
   Block *ThisBlock = NULL;
   Hits *OneEST = NULL,*ThisEST,*AllEST = NULL;
@@ -107,8 +107,8 @@ Hits* Hits::ReadFromFile(FILE* ESTFile, int *NumEST)
   EstId = A;
   PEstId = B;
 
-  while (fscanf(ESTFile,"%d %d %d %*s %d %s %d %d\n",
-		&deb, &fin,&poids,&brin,EstId,&EstDeb,&EstFin) != EOF)
+  while ((read=fscanf(ESTFile,"%d %d %d %*s %d %s %d %d\n",
+		&deb, &fin,&poids,&brin,EstId,&EstDeb,&EstFin)) == 7)
     {
       if ((strcmp(EstId,PEstId) == 0) && 
 	  (EstDeb > ThisBlock->LEnd) && 
@@ -139,6 +139,8 @@ Hits* Hits::ReadFromFile(FILE* ESTFile, int *NumEST)
 	}
       }
     }
+  if (read != EOF) fprintf(stderr,"Incorrect EST file !\n");
+
   return AllEST;
 }
 // ---------------------------------------------------------------------
