@@ -105,7 +105,12 @@ void SensorRiken :: Init (DNASeq *X)
 	      name, abs(beg3-end3));
       continue;
     }
-
+    if (tmp.deb <= 0  || tmp.fin > X->SeqLen) {
+      fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s rejected, coordinate(s) %d-%d out of range\n",
+      	      name, tmp.deb, tmp.fin);
+      continue;
+    }
+    
     RAFLtmp.push_back(tmp);
   }
 
@@ -237,18 +242,23 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex].sens == 1)) )
       d->contents[7] += RAFLPenalty;     //IntronR
 
-    if (RAFLpos == 3)
+    if (RAFLpos == 3) {
       d->contents[8] += RAFLPenalty;     //InterG
-
+      
+      // Warning SIGNAL START MODIFICATION //
+      d->sig[DATA::Start].weight[Signal::ForwardNo] = 0.0;
+      d->sig[DATA::Start].weight[Signal::ReverseNo] = 0.0;
+    }
+    
     if ( (RAFLpos == 2) || ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
       d->contents[9] += RAFLPenalty;     //UTR5'F
-
+    
     if ( (RAFLpos == 2) || ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
       d->contents[10]+= RAFLPenalty;     //UTR5'R
-
+    
     if ( (RAFLpos == 1) || ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
       d->contents[11]+= RAFLPenalty;     //UTR3'F
-
+    
     if ( (RAFLpos == 1) || ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
       d->contents[12]+= RAFLPenalty;     //UTR3'R
   }
