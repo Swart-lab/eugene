@@ -118,16 +118,19 @@ void MasterSensor :: InitSensors (DNASeq *X)
 void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 {
   int i;
-  for(i=0; i<2;  i++) 
-    d->tStart [i] = d->tStop[i] = d->Stop[i] = d->Start[i] = d->Acc[i] = d->Don[i] = 0.0;
-  for(i=0; i<13; i++) d->ContentScore[i] = 0.0;
-  d->Ins = d->Del = 0.0;
-
+  
+  for(i=0; i <= DATA::Del;  i++)
+    d->sig[i].Clear();
+  
+  for(i=0; i<= DATA::UTR3R; i++) d->contents[i] = 0.0;
+  
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
   
-  for(i=0; i<(int)theSensors.size(); i++) {
+  for(i=0; i<(int)theSensors.size(); i++) 
     theSensors[i]->GiveInfo(X, pos, d);
-  }
+  
+  for (i=0; i<= DATA::Del; i++)
+    d->sig[i].SetToDefault();
 }
 
 // --------------------------
@@ -135,14 +138,18 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 // --------------------------
 void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
 {
-  int i;
+  int i,j;
+
   printf("%6d %c ", 1+pos, (*X)[pos]);
-  for(i=0; i<13; i++)
-    printf (" %.2f",d->ContentScore[i]);
-  for(i=0; i<2;  i++)
-    printf (" || %.2f %.2f %1.0f %.2f %.2f %.2f",
-	    d->tStart[i],d->tStop[i],d->Stop[i],d->Start[i],d->Acc[i],d->Don[i]);
-  printf(" || %.2f %.2f\n",d->Ins,d->Del);
+
+  for(i=0; i<=DATA::UTR3R; i++)
+    printf (" %.2f",d->contents[i]);
+
+  for(i=0; i<= Signal::Reverse;  i++) 
+    printf (" || ");
+  for (j=0; j<= DATA::Del; j++)
+    printf("%.2f ",d->sig[j].weight[i]);
+  
 }
 
 // --------------------------------------------
@@ -156,19 +163,25 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
   int i;
   int info = FALSE;  // Aucune info
 
-  for(i=0; i<2;  i++) d->Stop[i] = d->Start[i] = d->Acc[i] = d->Don[i] = 0.0;
-  for(i=0; i<13; i++) d->ContentScore[i] = 0.0;
-
+  for(i=0; i< DATA::Del+1;  i++)
+    d->sig[i].Clear();
+  
+  for(i=0; i<UTR3R+1; i++) d->contents[i] = 0.0;
+  
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
 
   for(i=0; i<(int)theSensors.size(); i++) {
-    if(theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
+    if (theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
       theSensors[i]->GiveInfo(X, pos, d);
       info = TRUE;
     }
-    else if(theSensors[i]->type == Type_Unknown)
+    else if (theSensors[i]->type == Type_Unknown)
       return info;  // Aucune info pour ce type
   }
+
+  for (i=0; i<= DATA::Del; i++)
+    d->sig[i].SetToDefault();
+
   return info;
 }
 
