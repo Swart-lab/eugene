@@ -136,13 +136,13 @@ void Prediction :: reversePred()
 // ------------------------
 char* Prediction :: isStart(int p)
 {
-  char pState = getStateForPos (p-1);
   char state  = getStateForPos (p);
   char nState = getStateForPos (p+1);
-
-  if(state <= ExonF3  &&  pState >= InterGen5)
+  
+  if(nState <= ExonF3  &&  state >= InterGen5)
     return "True";
-  if(state >= ExonR1  &&  state <= ExonR3  &&  nState >= InterGen5)
+  if(state >= ExonR1  &&  state <= ExonR3  && 
+     (nState >= InterGen5 || p+1 >= vPos[0]))
     return "True";
   return "False";
 }
@@ -152,13 +152,13 @@ char* Prediction :: isStart(int p)
 // ------------------------
 char* Prediction :: isStop(int p)
 {
-  char pState = getStateForPos (p-1);
   char state  = getStateForPos (p);
   char nState = getStateForPos (p+1);
-
-  if(state <= ExonF3  &&  nState >= InterGen5)
+  
+  if(state != -1  &&  state <= ExonF3  &&  
+     (nState >= InterGen5 || p+1 >= vPos[0]))
     return "True";
-  if(state >= ExonR1  &&  state <= ExonR3  &&  pState >= InterGen5)
+  if(nState >= ExonR1  &&  nState <= ExonR3  &&  state >= InterGen5)
     return "True";
   return "False";
 }
