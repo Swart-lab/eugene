@@ -140,8 +140,9 @@ sub getsites( $ )
     if ($DoIt) {
       # direct strand
       print STDERR "Issuing request to SplicePredictor (direct strand)...\n";
+      system("readseq -f2 $_[0] -o/home/thomas/Annotation/netstart-1.0/tmp/`basename $_[0]`.gb");
       open(FORWARD,">$_[0].spliceP");
-      open(FIN,"./sgdp -f -c 1 -m 1 -l 1 $_[0].gb|") || die "Can't start Splice Predictor";
+      open(FIN,"rsh ossau 'cd Linux/Annotation/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 ../netstart-1.0/tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
 	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
@@ -167,7 +168,7 @@ sub getsites( $ )
     if ($DoIt) {
       print STDERR "Issuing request to SplicePredictor (reverse strand)...\n";
       open(REVERSE,">$_[0].splicePR");
-      open(FIN,"sgdp -f -c 1 -m 1 -l 0 -r $_[0].gb|") || die "Can't start Splice Predictor";
+      open(FIN,"rsh ossau 'cd Linux/Annotation/SplicePredictor; ./sgdp -f -c 1 -m 1 -l 0 -r ../netstart-1.0/tmp/`basename $_[0]`.gb' |") || die "Can't start Splice Predictor";
       while(<FIN>)
 	{
 	  if (($pos,$P) = (/^\s+(\d+)\s+\d\s+\w+\s+(\d+\.\d+)\s+\(/))
@@ -273,7 +274,7 @@ sub eugene( $ @ )
     
     print STDERR "\nprocessing $file\n\n";
     &getsites($file);
-    $cmd = sprintf("EuGeneAS -p h %s -g $file > $file.html", join(' ',@params));
+    $cmd = sprintf("EuGeneAS -ph %s -g $file > $file.html 2> $file.trace", join(' ',@params));
     system($cmd);
   }
 
