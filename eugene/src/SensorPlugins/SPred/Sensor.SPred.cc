@@ -170,24 +170,20 @@ void SensorSPred :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   int i;
   if( iterAccF < (int)vPosAccF.size()  &&  vPosAccF[iterAccF] == pos ) {
-    if(d->Acc[0] == 0.0)
       d->Acc[0] = vValAccF[iterAccF];
     iterAccF++;
   }
   i = (int)vPosAccR.size();
   if( abs(iterAccR) < i  &&  vPosAccR[iterAccR + i-1] == pos ) {
-    if(d->Acc[1] == 0.0)
       d->Acc[1] = vValAccR[iterAccR + i-1];
     iterAccR--;
   }
   if( iterDonF < (int)vPosDonF.size()  &&  vPosDonF[iterDonF] == pos ) {
-    if(d->Don[0] == 0.0)
       d->Don[0] = vValDonF[iterDonF];
     iterDonF++;
   }
   i = (int)vPosDonR.size();
   if( abs(iterDonR) < i  &&  vPosDonR[iterDonR + i-1] == pos ) {
-    if(d->Don[1] == 0.0)
       d->Don[1] = vValDonR[iterDonR + i-1];
     iterDonR--;
   }
@@ -199,19 +195,19 @@ void SensorSPred :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorSPred :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 {
   iter = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos);
-  if(*iter == pos && d->Acc[0] == 0.0)
+  if(*iter == pos)
     d->Acc[0] = vValAccF[iter-vPosAccF.begin()];
   
   iter = lower_bound(vPosAccR.begin(), vPosAccR.end(), pos);
-  if(*iter == pos && d->Acc[1] == 0.0)
+  if(*iter == pos)
     d->Acc[1] = vValAccR[iter-vPosAccR.begin()];
   
   iter = lower_bound(vPosDonF.begin(), vPosDonF.end(), pos);
-  if(*iter == pos && d->Don[0] == 0.0)
+  if(*iter == pos)
     d->Don[0] = vValDonF[iter-vPosDonF.begin()];
   
   iter = lower_bound(vPosDonR.begin(), vPosDonR.end(), pos);
-  if(*iter == pos && d->Don[1] == 0.0)
+  if(*iter == pos)
     d->Don[1] = vValDonR[iter-vPosDonR.begin()];
 }
 // ----------------------------
