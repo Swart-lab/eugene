@@ -19,7 +19,7 @@ Here is an example of NetStart parameters definition.
 \begin{Verbatim}[fontsize=\small]
 NStart.startP*     0.052
 NStart.startB*     0.308
-Sensor.NStart.use  1    # Use NStart sensor
+Sensor.NStart.use  1       # Use NStart sensor
 Sensor.NStart      1       # Sensor priority
 \end{Verbatim}
 
@@ -60,7 +60,7 @@ The integrated score for start prediction is read (column 2).  The
 score read $s$ is rescaled using the {\tt NStart.startP*} (\emph{P}) and {\tt
 NStart.startB*} (\emph{B}) as follows:
 
-\[s' = B*s^P\]
+\[s' = e^{-P}*s^B\]
 
 All predictions that use a predicted start receive a $\log(s')$
 penalty while those that go through a predicted start while they

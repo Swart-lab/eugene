@@ -19,7 +19,7 @@ Here is an example of ATGpr parameters definition.
 \begin{Verbatim}[fontsize=\small]
 ATGpr.startP*      0.002
 ATGpr.startB*      0.001
-Sensor.ATGpr.use   1    # Use ATGpr sensor
+Sensor.ATGpr.use   1       # Use ATGpr sensor
 Sensor.ATGpr       1       # Sensor priority
 \end{Verbatim}
 
@@ -60,7 +60,7 @@ The integrated score for start prediction is read (column 2).  The
 score read $s$ is rescaled using the {\tt ATGpr.startP*} (\emph{P}) and {\tt
 ATGpr.startB*} (\emph{B}) as follows:
 
-\[s' = B*s^P\]
+\[s' = e^{-P}*s^B\]
 
 All predictions that use a predicted start receive a $\log(s')$
 penalty while those that go through a predicted start while they
