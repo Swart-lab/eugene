@@ -113,6 +113,8 @@ Est.PostProcess	FALSE
 Est.estP	-0.4
 #Est.estP	-1e4  # forces EuGene to match with est
 Est.estM	6
+Est.utrP	0.35
+Est.utrM	5
 #
 ##### Proteic similarity sensor parameters #####
 #
@@ -202,7 +204,7 @@ Sensor.MarkovIMM.use		TRUE
 Sensor.MarkovProt.use	FALSE
 Sensor.MarkovConst.use	FALSE
 #
-# Similarities:
+# SIMILARITIES:
 Sensor.Est.use		FALSE
 Sensor.Riken.use	FALSE
 Sensor.BlastX.use	FALSE
@@ -213,7 +215,7 @@ Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
 #
 ##### Sensor priorities	 #####
-#	          Sensor.Name Priority
+#         Name       Priority
 Sensor.Transcript	1	#
 Sensor.FrameShift	1	#
 Sensor.Homology 	1	#
