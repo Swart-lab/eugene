@@ -10,6 +10,7 @@
 
 #include "Param.h"
 #include "DNASeq.h"
+#include "Prediction.h"
 #include "System.h"
 #include "Const.h"
 
@@ -34,7 +35,8 @@ class Sensor
   virtual void ResetIter  () = 0;
   virtual void GiveInfo   (DNASeq *, int, DATA *) = 0;
   virtual void GiveInfoAt (DNASeq *, int, DATA *) = 0;
-  virtual void Plot(DNASeq *) = 0;
+  virtual void Plot       (DNASeq *) = 0;
+  virtual void PostAnalyse(Prediction *) = 0;
   void CheckStart   (DNASeq *, vector<int>, vector<int>);
   void CheckSplices (DNASeq *, vector<int>, vector<int>, vector<int>, vector<int>);
   int  GetNumber    () { return instanceNumber; }
