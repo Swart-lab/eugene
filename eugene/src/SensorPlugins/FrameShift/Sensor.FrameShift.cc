@@ -63,9 +63,9 @@ void SensorFrameShift :: PostAnalyse(Prediction *pred)
   if (PAR.getI("Output.graph")) {
     for(int i=pred->size()-1; i!=-1; i--) {
       state = pred->getState(i);
-      if(state <= ExonR3)
+      if(state <= TermR3)
 	if(posFs != -1) { // Frameshift plot
-	  if(state <= ExonF3)	 
+	  if(1 <= State2Phase[state] <= 3)	 
 	    PlotLine(posFs, posFs, state+1, stateBack+1, 0.4, 0.4, 1);
 	  else
 	    PlotLine(posFs, posFs, -state+2, -stateBack+2, 0.4, 0.4, 1);

@@ -301,7 +301,7 @@ void SensorTester :: PostAnalyse(Prediction *pred)
 // BE CAREFUL:
 //         GFF with one complete gene, that could not specify the UTR. 
 //         In this case, the state from 0 to the first exon in the GFF 
-//         is in InterGen5 and the state after the last exon in the GFF  
+//         is in InterGen and the state after the last exon in the GFF  
 //         is not set Introns are all in the state IntronF1.
 // -----------------
 Prediction* SensorTester :: ReadGFFAnnotation(void)
@@ -334,16 +334,16 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
 	  {std::cerr<<"\nError in gff file "<<gff_file_name<<" line "<<j<<".\n";exit(2);}
       } else if (strcmp(feature,"Intron") != 0) {
 	if (j==1) {
-	  gene->add(start-1, InterGen5);
+	  gene->add(start-1, InterGen);
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
 	    if (Todo=="TEST") gene->add(end, UTR5F);
 	  } else if (strcmp(feature, "E.Init") == 0)
-	    gene->add(end, ExonF1);
+	    gene->add(end, InitF1);
 	  else if (strcmp(feature, "E.Term") == 0)
-	    gene->add(end, ExonR1);
+	    gene->add(end, InitR1);
 	  else if (strcmp(feature, "E.Sngl") == 0)
-	    if (strand == '+') gene->add(end, ExonF1);
-	    else               gene->add(end, ExonR1);
+	    if (strand == '+') gene->add(end, InitF1);
+	    else               gene->add(end, InitR1);
 	  else {
 	    std::cerr <<"\n Error in gff file "<<gff_file_name
 		      <<" line "<<j<<".\n"
@@ -358,28 +358,28 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
 	    if (Todo=="TEST") gene->add(end, UTR5F);
 	  } else if (strcmp(feature,"E.Init") == 0)
-	    if (strand == '+') gene->add(end, ExonF1);
+	    if (strand == '+') gene->add(end, InitF1);
 	    else {
 	      gene->add(start-1, IntronR1);
-	      gene->add(end, ExonR1);
+	      gene->add(end, InitR1);
 	    }
 	  else if (strcmp(feature,"E.Term") == 0)
-	    if (strand == '-') gene->add(end, ExonR1);
+	    if (strand == '-') gene->add(end, InitR1);
 	    else {
 	      gene->add(start-1, IntronF1);
-	      gene->add(end, ExonF1);
+	      gene->add(end, InitF1);
 	    }
 	  else if (strcmp(feature,"E.Sngl") == 0)
-	    if (strand == '+') gene->add(end, ExonF1);
-	    else               gene->add(end, ExonR1); 
+	    if (strand == '+') gene->add(end, InitF1);
+	    else               gene->add(end, InitR1); 
 	  else if (strcmp(feature,"E.Intr") == 0) {
 	    if (strand == '+') {
 	      gene->add(start-1, IntronF1);
-	      gene->add(end, ExonF1);
+	      gene->add(end, IntrF1);
 	    }
 	    else {
 	      gene->add(start-1, IntronR1);
-	      gene->add(end, ExonR1);
+	      gene->add(end, InitR1);
 	    }
 	  }
 	  else {
@@ -449,25 +449,37 @@ char* SensorTester :: State(int pos)
 {
   switch (gene->getStateForPos(pos)) {
   case 0:
-    return "ExonF";
+    return "InitF";
   case 3:
-    return "ExonR";
+    return "InitR";
   case 6:
-    return "IntronF";
+    return "SnglF";
   case 9:
-    return "IntronR";
-  case 13:
-    return "UTR";
+    return "SnglR";
   case 12:
+    return "IntrF";
+  case 15:
+    return "IntrR";
+  case 18:
+    return "TermF";
+  case 21:
+    return "TermR";
+  case 24:
+    return "IntronF";
+  case 27:
+    return "IntronR";
+  case 30:
     return "IG";
+  case 31:
+    return "UTR";
+  case 35:
+    return "IntronUTR";
   case -1:        // From the last element of "prediction"
     return "IG";  // to the end of the sequence...
   default:
     return ".";
   }
 }
-
-
 
 // -------------------------------------------
 // Count the number of TP, FP, TN, FN for each threshold

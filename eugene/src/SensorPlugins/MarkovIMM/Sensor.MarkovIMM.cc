@@ -207,6 +207,8 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   // Introns F/R
   d->contents[DATA::IntronF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
   d->contents[DATA::IntronR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
+  d->contents[DATA::IntronUTRF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
+  d->contents[DATA::IntronUTRR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
   
   // InterG
   d->contents[DATA::InterG] += (UseM0asIG ? log(X->GC_AT(pos)) :

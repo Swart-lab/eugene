@@ -183,13 +183,15 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
   NonCodingF = log (X->Markov(pos));
   NonCodingR = log (X->MarkovR(pos));
 
-  d->contents[6] += NonCodingF;                //IntronF
-  d->contents[7] += NonCodingR;                //IntronR
-  d->contents[8] += (NonCodingF+NonCodingR)/2; //InterG
-  d->contents[9] += NonCodingF;                // UTR5'F
-  d->contents[10] += NonCodingR;               // UTR5'R
-  d->contents[11] += NonCodingF;               // UTR3'F
-  d->contents[12] += NonCodingR;               // UTR3'R
+  d->contents[DATA::InterG] += (NonCodingF+NonCodingR)/2;
+  d->contents[DATA::IntronF] += NonCodingF;
+  d->contents[DATA::IntronR] += NonCodingR;
+  d->contents[DATA::IntronUTRF] += NonCodingF;
+  d->contents[DATA::IntronUTRR] += NonCodingR;
+  d->contents[DATA::UTR5F] += NonCodingF;
+  d->contents[DATA::UTR5R] += NonCodingR;
+  d->contents[DATA::UTR3F] += NonCodingF;
+  d->contents[DATA::UTR3R] += NonCodingR;
 
   delete peptid;
   delete codon;

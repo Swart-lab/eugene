@@ -55,6 +55,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   fprintf(stderr,"  done\n");
 
   CheckStart(X,vPosF, vPosR);
+
 }
 
 // ----------------------

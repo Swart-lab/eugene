@@ -334,7 +334,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
       posNext   = pred->getPos(i-1);
     }
 
-    if (state <= ExonR3) { // EXON
+    if (state <= TermR3) { // EXON
 
       if (stateBack >= UTR5F) { // c'est le premier (ou dernier) d'une CDS
 	CodingNuc = 0;
@@ -357,7 +357,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 	}
       }
       
-      if ( ((state <= ExonR3) && (stateNext >= InterGen5)) || // fin de gene
+      if ( ((state <= TermR3) && (stateNext >= InterGen)) || // fin de gene
 	   (i==0 && state <= IntronR3)) {       // ou fin seq(gene en cours)
 	endCDS = pos;
 	printf("      CDS (prot.)  %7d %7d    %5d     supported on %d/%d coding.\n",begCDS,endCDS,endCDS-begCDS+1,SupportedNuc,CodingNuc);

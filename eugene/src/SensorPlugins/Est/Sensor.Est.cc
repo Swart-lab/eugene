@@ -71,10 +71,10 @@ void SensorEst :: Init (DNASeq *X)
   FILE *fEST;
   char tempname[FILENAME_MAX+1];
   int  i;
-
+ 
   vPos.clear();
   vESTMatch.clear();
-
+  
   if(HitTable != NULL) delete [] HitTable;
   HitTable = NULL;
 
@@ -85,7 +85,7 @@ void SensorEst :: Init (DNASeq *X)
   spliceBoost = PAR.getD("Est.SpliceBoost*",N);
   DonorThreshold = PAR.getD("Est.StrongDonor*");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
-  
+
   index = 0;
  
   ESTMatch = new unsigned char[X->SeqLen+1];
@@ -130,7 +130,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
   if (index < (int)vPos.size()  &&  vPos[index] == pos) {
     
     cESTMatch = vESTMatch[index];
-    
+
     // Favor splice sites in marginal exon-intron regions
     if ((cESTMatch & MLeftForward) && 
 	d->sig[DATA::Don].weight[Signal::Forward] != 0.0) 
@@ -147,7 +147,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     if ((cESTMatch & MRightReverse) &&
 	d->sig[DATA::Don].weight[Signal::Reverse] != 0.0)
       d->sig[DATA::Don].weight[Signal::Reverse] += spliceBoost;
-    
+
     // Exon Forward
     // Si on a un Gap EST ou si l'on connait le sens du match EST
     for(int i=0; i<3; i++)
@@ -165,15 +165,32 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // Intron Forward
     // Si on a un Hit EST ou si l'on connait le sens du match EST
     if((cESTMatch & Hit) ||
-       ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
+       ((cESTMatch & Gap) && !(cESTMatch & GapForward))) {
       d->contents[DATA::IntronF] += estP;
+      d->contents[DATA::IntronUTRF] += estP;
+    }
     
     // Intron Reverse
     // Si on a un Hit EST ou si l'on connait le sens du match EST
     if((cESTMatch & Hit) ||
-       ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
+       ((cESTMatch & Gap) && !(cESTMatch & GapReverse))) {
       d->contents[DATA::IntronR] += estP;
+      d->contents[DATA::IntronUTRR] += estP;
+    }
+
+    // UTR Forward
+    // Si on a un hit ou un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitForward | GapForward))) {
+      d->contents[DATA::UTR5F] += estP;
+      d->contents[DATA::UTR3F] += estP;
+    }
     
+    // UTR Reverse
+    // Si on a un hit un un gap ET qu'il est sur l'autre brin seulement
+    if ((cESTMatch & (Hit | Gap)) && !(cESTMatch & (HitReverse | GapReverse))) {
+      d->contents[DATA::UTR5R] += estP;
+      d->contents[DATA::UTR3R] += estP;
+    }
 
     // Ca merdouille sur SeqAra. A creuser
     // UTR Forward
@@ -193,8 +210,8 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
     
-    d->ESTMATCH_TMP = cESTMatch;  // WARNING : EST -> on est dans intron
-    
+
+    d->EstMatch = cESTMatch;  // WARNING : EST -> on est dans intron
     index++;
   }
 
@@ -420,7 +437,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       int LBoundary;
       int RBoundary;
       unsigned char Info;
-      
+
       ThisBlock = ThisEST->Match;
       
       while (ThisBlock) {
@@ -469,7 +486,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	      ESTMatch[i] |= (Info & (TheStrand << HitToGap));
 	    else
 	      ESTMatch[i] |= TheStrand << HitToGap;
-	  
+
 	  for (i =  Max(0,ThisBlock->Start-1-EstM);
 	       i <  Min(X->SeqLen, ThisBlock->Start-1+EstM); i++)
 	    if ((Info = (ESTMatch[i] & MRight)))
@@ -551,7 +568,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
     if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
         
     // Si fin de gene ou fin seq gene en cours
-    if ((state <= ExonR3 && stateNext >= InterGen5) ||
+    if ((state <= TermR3 && stateNext >= InterGen) ||
 	(i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {
       NumGene++;
       if (pprocess == 1)
@@ -621,7 +638,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	
 	for (i = from; i <= to; i++) {
 	  state = pred->getStateForPos(i+1);
-	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3 )
+	  if ((state < IntronF1) || state == InterGen)
 	    ConsistentEST = 0;
 	}
       }      
@@ -631,7 +648,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
       
       for (i = from; i <= to; i++) {
 	state = pred->getStateForPos(i+1);
-	if (((state > ExonR3) && (state <= InterGen5)) || state == InterGen3)
+	if ((state > TermR3) && (state <= InterGen))
 	  ConsistentEST = 0;
       }
       ThisBlock = ThisBlock->Next;
@@ -741,7 +758,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	
 	for (i = from; i <= to; i++) {
 	  state = pred->getStateForPos(i+1);
-	  if ((state < IntronF1) || state == InterGen5 || state == InterGen3 )
+	  if ((state < IntronF1) || state ==  InterGen )
 	    ConsistentEST = 0;
 	}
       }      
@@ -751,7 +768,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
       
       for (i = from; i <= to; i++) {
 	state = pred->getStateForPos(i+1);
-	if (((state > ExonR3) && (state <= InterGen5)) || state == InterGen3)
+	if ((state > TermR3) && (state <= InterGen))
 	  ConsistentEST = 0;
       }
       ThisBlock = ThisBlock->Next;
@@ -770,7 +787,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   int  start, end, len;
   char fea[5];
   char strand = '+';
-  if(pred->getStateForPos(debut+1) >= ExonR1) strand = '-';
+  if (PhaseAdapt(pred->getStateForPos(debut+1)) < 0) strand = '-';
   int NumFEA = 0;
   if(strand == '-') NumFEA = pred->nbExon(NumGene) + 1;
     
@@ -783,7 +800,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	len      = 0;
 	int numF = -1;
 
-	if(state <= ExonR3) {
+	if(state <= TermR3) {
 	  (strand == '-') ? NumFEA-- : NumFEA++;
 	  strcpy(fea, "Exon");
 	  numF = NumFEA;
