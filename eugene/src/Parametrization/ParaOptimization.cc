@@ -1,13 +1,25 @@
-//=======================================================================
-//            Copyright (c) 2003 by INRA. All rights reserved            
-//                Redistribution is not permitted without                
-//                the express written permission of INRA                 
-//                   eMail : tschiex@toulouse.inra.fr                    
-//------------------------------------------------------------------------
-// File        : EuGeneTk/Parametrization/ParaOptimization.cc
-// Description : The ParaOptimization class optimizes EuGene parameters
-// Authors     : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex       
-//=======================================================================
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     ParaOptimization.cc
+// Contents: The ParaOptimization class optimizes eugene parameters
+// ------------------------------------------------------------------
+
+#ifdef HAVE_CONFIG_H
+#include "../../config.h"
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -17,14 +29,13 @@
 
 #include "ParaOptimization.h"
 
-#include "../EuGene/config.h"
-#include "../EuGene/Param.h"
-#include "../EuGene/Prediction.h"
-#include "../EuGene/DNASeq.h"
-#include "../EuGene/MSensor.h"
-#include "../EuGene/Output.h"
-#include "LineSearch/LineSearch.h"
-#include "Genetic/Genetic.h"
+#include "../Param.h"
+#include "../Prediction.h"
+#include "../DNASeq.h"
+#include "../MSensor.h"
+#include "../Output.h"
+#include "LineSearch.h"
+#include "Genetic.h"
 
 extern Parameters PAR;
 extern MasterSensor*    MS;
@@ -157,7 +168,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       }
 
 
-      fic_pred = "/tmp/EuGenePrediction";
+      fic_pred = "/tmp/eugenePrediction";
       sprintf (buffer,"%d",getpid()); fic_pred += buffer;
       sprintf (buffer,"%d",(int)time(NULL)); fic_pred += buffer;
       cmde = "rm -f " + fic_pred; system(cmde.c_str());
@@ -172,7 +183,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
 	delete pred;
       }
       fclose(fp);
-      fic_eval = "/tmp/EuGeneEvaluation";
+      fic_eval = "/tmp/eugeneEvaluation";
       sprintf (buffer,"%d",getpid()); fic_eval += buffer;
       sprintf (buffer,"%d",(int)time(NULL)); fic_eval += buffer;
       if (!is_detail_required) eval_options = " -ps -o1";
