@@ -30,8 +30,7 @@ Parameters :: Parameters ()
 // ------------------------
 void Parameters :: initParam (int argc, char * argv[])
 {
-  fprintf(stderr,"EuGene rel. %s\n",VERSION);
-  fprintf(stderr,"Loading parameters file...");
+  fprintf(stderr,"EuGene rel. %s",VERSION);
   fflush(stderr);
 
   ReadPar(argv[0]);
@@ -42,6 +41,9 @@ void Parameters :: initParam (int argc, char * argv[])
       fprintf(stderr,"%s = %s\n",iter->first, iter->second);
 
   iter = m.begin();  // Cf. : getUseSensor
+  
+  fprintf(stderr,"-%s (%s)\n",getC("EuGene.organism"),VERSION_DATE);
+  fprintf(stderr,"Parameters file loaded.\n");
 }
 
 // ------------------------
@@ -290,14 +292,12 @@ void Parameters :: ReadPar(char *argv)
   }
 
   fclose(fp);
-  fprintf(stderr,"done ");
+
   if(strcmp(getC("EuGene.versionPAR"), VERSION_PAR)) {
     fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.versionPAR"));
     fprintf(stderr,"Version %s required\n", VERSION_PAR);
     exit(2);
   }
-  else
-    fprintf(stderr, "(%s)\n", m["EuGene.versionPAR"]);
   
   // Remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
   m["EuGene.minL0"] = m["EuGene.minL1"] = m["EuGene.minL2"] = m["EuGene.minEx"];
