@@ -12,7 +12,7 @@
 #include "System.h"
 #include "Const.h"
 
-extern "C"{
+extern "C" {
 #include "../GDIF/gdIF.h"
 }
 
@@ -24,6 +24,7 @@ class Sensor
  private:
   
  public:
+  int instanceNumber;
   TYPE_SENSOR type;
   
   Sensor  ();
