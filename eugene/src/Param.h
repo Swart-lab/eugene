@@ -18,8 +18,8 @@
 #include "Const.h"
 #include "System.h"
 
-const char VERSION_PAR[FILENAME_MAX+1] = "14_10_02";
-const char VERSION[FILENAME_MAX+1]     = "1.46 (141002)";
+const char VERSION_PAR[FILENAME_MAX+1] = "16_10_02";
+const char VERSION[FILENAME_MAX+1]     = "1.49 (161002)";
 
 extern char   *optarg;   
 extern int     optind;
@@ -35,11 +35,7 @@ class ltstr
 class Parameters
 {
  private: 
-  char *DFT_MATRIX;
-  char *DFT_OUTPUT;  
-  double FsP;
   char parname[FILENAME_MAX+1];
-  int normopt, window, offset, resx, resy, gfrom, gto, golap, glen;
   std::map <const char*, const char*, ltstr> m;
   std::map <const char*, const char*, ltstr>::iterator iter;
 
