@@ -4,6 +4,7 @@
 EuGene.version		3.0
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
+EuGene.sloppy		1
 #
 ##### Lengths #####
 EuGene.InitExDist	init.dist
@@ -27,7 +28,7 @@ EuGene.ThreePrimePrior	0.07
 Output.MinCDSLen	60
 Output.truncate		5
 Output.stepid		1
-Output.graph		FALSE		# Don't produce a graphical output
+Output.graph		0		# Don't produce a graphical output
 Output.resx		900
 Output.resy		400
 Output.glen		-1
@@ -147,7 +148,7 @@ Transcript.Stop*	4.155
 #################################################################
 #
 ##### Proteic similarity sensor parameters #####
-BlastX.PostProcess 2    # FALSE TRUE OR 2
+BlastX.PostProcess 2    # 0 1 OR 2
 BlastX.PPNumber	   5    # For PostProcess = "2"
 BlastX.levels	012
 BlastX.level0*	0.2
@@ -159,12 +160,12 @@ BlastX.level5*	0.0
 BlastX.level6*	0.0
 BlastX.level7*	0.0
 BlastX.level8*	0.0
-BlastX.level9*	0.0
+#BlastX.level9*	0.0
 BlastX.blastxM*	10	
 BlastX.minIn 50
 #
 ##### Est sensor parameters #####
-Est.PostProcess	FALSE     # FALSE TRUE OR 2
+Est.PostProcess	0     # 0 1 OR 2
 Est.PPNumber	5     # For PostProcess = "2"
 Est.estP*	-0.4
 #Est.estP*	-1e4  # forces EuGene to match with est
@@ -264,7 +265,7 @@ GCPlot.Over	ATGC
 GCPlot.Smooth	100
 #
 ##### GFF sensor parameters #####
-GFF.PostProcess		TRUE
+GFF.PostProcess		1
 #
 ##### Sensor Plotter
 Plotter.GC	 1   # 0 -> no plot  -  1 -> plot 
@@ -283,41 +284,41 @@ Tester.SPSN.MinNumbers	100     # greater than 0
 #
 ##### Sensors activation #####
 # SIGNAL SENSORS
-Sensor.ATGpr.use	FALSE
-Sensor.EuStop.use	TRUE
-Sensor.FrameShift.use	FALSE
-Sensor.GSplicer.use	FALSE
-Sensor.SMachine.use	FALSE
-Sensor.NG2.use		FALSE
-Sensor.NStart.use	TRUE
-Sensor.PatConst.use	FALSE
-Sensor.PepSignal.use	FALSE
-Sensor.SpliceWAM.use 	FALSE
-Sensor.SPred.use	FALSE
-Sensor.StartWAM.use	FALSE
-Sensor.Transcript.use	TRUE
+Sensor.ATGpr.use	0
+Sensor.EuStop.use	1
+Sensor.FrameShift.use	0
+Sensor.GSplicer.use	0
+Sensor.SMachine.use	0
+Sensor.NG2.use		0
+Sensor.NStart.use	1
+Sensor.PatConst.use	0
+Sensor.PepSignal.use	0
+Sensor.SpliceWAM.use 	0
+Sensor.SPred.use	0
+Sensor.StartWAM.use	0
+Sensor.Transcript.use	1
 #
 # CONTENT SENSORS
-Sensor.BlastX.use	FALSE
-Sensor.Est.use		FALSE
-Sensor.Homology.use	FALSE
-Sensor.MarkovConst.use	TRUE
-Sensor.MarkovIMM.use	TRUE
+Sensor.BlastX.use	0
+Sensor.Est.use		0
+Sensor.Homology.use	0
+Sensor.MarkovConst.use	1
+Sensor.MarkovIMM.use	1
 #Sensor.MarkovIMM.use	2
-Sensor.MarkovProt.use	FALSE
-Sensor.Repeat.use	FALSE
+Sensor.MarkovProt.use	0
+Sensor.Repeat.use	0
 #
 # SIGNAL/CONTENT SENSORS
-Sensor.AnnotaStruct.use FALSE
-Sensor.IfElse.use	TRUE
-Sensor.Riken.use	FALSE
-Sensor.User.use		FALSE
+Sensor.AnnotaStruct.use 0
+Sensor.IfElse.use	1
+Sensor.Riken.use	0
+Sensor.User.use		0
 #
 # OTHERS SENSORS
-Sensor.GCPlot.use	FALSE
-Sensor.GFF.use		FALSE
-Sensor.Plotter.use	FALSE
-Sensor.Tester.use	FALSE
+Sensor.GCPlot.use	0
+Sensor.GFF.use		0
+Sensor.Plotter.use	0
+Sensor.Tester.use	0
 #
 ##### Sensor priorities	 #####
 #  the lower the priority, the first loaded sensor
@@ -361,12 +362,12 @@ Sensor.Tester 		1
 #################################################################
 ################### OPTIMIZATION PARAMETERS #####################
 #################################################################
-ParaOptimization.Use FALSE
+ParaOptimization.Use 0
 ParaOptimization.TrueCoordFile ---
 ParaOptimization.EvalPredDir   ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
-ParaOptimization.Test FALSE
-ParaOptimization.Trace TRUE
+ParaOptimization.Test 0
+ParaOptimization.Trace 1
 #
 ParaOptimization.NbCluster 3
 ParaOptimization.Cluster[0] LINKED
@@ -415,14 +416,14 @@ Genetic.Sharing 0.9
 #				  1: sharing, looking for clusters which best 
 #				     elt fitness is at least n% of the overall 
 #	                             best element of the population
-Genetic.Clustering TRUE
+Genetic.Clustering 1
 Genetic.Elitism 0.9
 #				  n: elitism; keeps the best elt if no sharing,
 #	                             and keeps the best elt of each cluster 
 #				     which best_elt fitness is at
 #	                             least n% of the overallbest elt if sharing
-Genetic.SA.Mutation FALSE
-Genetic.SA.CrossOver FALSE
+Genetic.SA.Mutation 0
+Genetic.SA.CrossOver 0
 Genetic.Seed 4
 #
 #
