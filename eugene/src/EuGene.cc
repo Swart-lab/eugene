@@ -35,7 +35,7 @@
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
 
-#define  VERSION "1.1a (160301)"
+#define  VERSION "1.1b (230401)"
 
 
 #ifdef HAVE_CONFIG_H
@@ -73,8 +73,6 @@
 
 
 
-//#define SpliceNOnly
-//#define SplicePOnly
 // ------------------ Globals ---------------------
 // Les Hits EST
 
@@ -101,7 +99,7 @@ const  unsigned char NotAHit       = MLeft | MRight | Gap;
 
 double Score [9],NScore[9];
 int Data_Len;
-int normopt,blastopt,estopt;
+int normopt,blastopt,estopt,ncopt;
 int window, offset,graph,resx,resy;
 int    gfrom,gto,golap,glen;
 
@@ -117,15 +115,12 @@ extern int      optind;
 #include "BackP.h"
 #include "Plot.h"
 #include "Hits.h"
-#ifdef SplicePOnly
-#include "SpliceP.h"
-#else
-#ifdef SpliceNOnly
-#include "SpliceN.h"
-#else 
+
+//#include "SpliceGS.h"
+//#include "SpliceP.h"
+//#include "SpliceN.h"
 #include "SpliceNP.h"
-#endif
-#endif
+
 extern "C"{
 #include "../GDIF/gdIF.h"
 }
@@ -480,6 +475,7 @@ int main  (int argc, char * argv [])
   int              EstM;
   double           FsP,StartP,StartB,StopP,TransStartP,TransStopP;
   double           AccP,AccB,DonP,DonB,BlastS[3],EstP;
+  unsigned char *ForcedIG;
 
   char *EugDir;
 
@@ -487,6 +483,7 @@ int main  (int argc, char * argv [])
   REAL InterPrior = 0.4,FivePrimePrior = 0.03,ThreePrimePrior = 0.07;
 
   const REAL DontCrossStop = NINFINITY;
+  const REAL IGPenalty = NINFINITY; 
 
   // Les longueurs. 
 
@@ -506,6 +503,7 @@ int main  (int argc, char * argv [])
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
   blastopt = -1;              // don't try to read a blast file
+  ncopt = FALSE;                   //don't try to read a non coding input
   normopt = 1;                // normalize across frames
   window  = 97;               // window length
   printopt = 'l';             // short print format 
@@ -550,7 +548,7 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "dshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "drshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
             
@@ -571,6 +569,10 @@ int main  (int argc, char * argv [])
       ThreePrimePrior = 1.0;
       break;
 
+    case 'r':    /* RepeatMasker input */
+      ncopt = TRUE;
+      break;
+      
     case 'c':            /* -c couverture      */
       if (! GetIArg(optarg, &golap, golap))
         errflag++;
@@ -833,6 +835,28 @@ int main  (int argc, char * argv [])
 
 
   if (graph) PlotScore(Data_Len,window,normopt,BaseScore);
+
+  // Analysing NC input
+  if (ncopt) {
+    FILE* ncfile;
+    int deb,fin;
+
+    fprintf(stderr,"Reading Intergenic regions... ");
+    fflush(stderr);
+
+    strcpy(tempname,fstname);
+    strcat(tempname,".ig");
+    ncfile = FileOpen(NULL,tempname, "r");
+
+    ForcedIG = new unsigned char[Data_Len+1];
+    for (j = 0; j <= Data_Len; j++) ForcedIG[j] = FALSE;
+
+    while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
+      deb = Max(1,deb)-1;
+      fin = Min(Data_Len,fin)-1;
+      for (i = deb; i <= fin; i++) ForcedIG[i] = TRUE;
+    }
+  }
 
   // Blastx against protein databases 1st simple version, we simply
   // enhance coding probability according to phase Dangerous (NR
@@ -1116,8 +1140,11 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 18) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i])+
-		     ((ESTMatch[i] & Gap) != 0)*EstP);
+      LBP[k]->Update(log(BaseScore[k][i]));
+      LBP[k]->Update(((ESTMatch[i] & Gap) != 0)*EstP);
+
+      if ((ForcedIG != NULL) && ForcedIG[i])
+	LBP[k]->Update(IGPenalty);
     }
     // ----------------------------------------------------------------
     // ------------------------- Exons en reverse ---------------------
@@ -1165,8 +1192,11 @@ int main  (int argc, char * argv [])
       if (best != k) 
 	LBP[k]->InsertNew(((best >= 19) ? source : best),Switch,i,maxi,PrevBP[best]);
       
-      LBP[k]->Update(log(BaseScore[k][i]) + 
-		     ((ESTMatch[i] & Gap ) != 0)*EstP);
+      LBP[k]->Update(log(BaseScore[k][i])) ;
+      LBP[k]->Update(((ESTMatch[i] & Gap ) != 0)*EstP);
+
+      if ((ForcedIG != NULL) && ForcedIG[i])
+	LBP[k]->Update(IGPenalty);
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
@@ -1199,7 +1229,8 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen5]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen5]->Update(log(BaseScore[8][i])+((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+    LBP[InterGen5]->Update(log(BaseScore[8][i]));
+    LBP[InterGen5]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
     // ----------------------------------------------------------------
     // Puis les 3' forward => LBP[InterGen3]
@@ -1226,7 +1257,8 @@ int main  (int argc, char * argv [])
     if (best != -1) 
       LBP[InterGen3]->InsertNew(source,Switch,i,maxi,PrevBP[best]);
     
-    LBP[InterGen3]->Update(log(BaseScore[8][i])+((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
+    LBP[InterGen3]->Update(log(BaseScore[8][i]));
+    LBP[InterGen3]->Update(((ESTMatch[i] & (Gap|Hit)) != 0)*EstP);
 
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
@@ -1396,8 +1428,11 @@ int main  (int argc, char * argv [])
  
       if (best != -1) LBP[6+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[6+k]->Update(log(BaseScore[6][i]) +
-		       ((ESTMatch[i] & Hit ) != 0)*EstP);
+      LBP[6+k]->Update(log(BaseScore[6][i]));
+      LBP[6+k]->Update(((ESTMatch[i] & Hit ) != 0)*EstP);
+
+      if ((ForcedIG != NULL) && ForcedIG[i])
+	LBP[k]->Update(IGPenalty);
     }
       
     // ----------------------------------------------------------------
@@ -1425,8 +1460,11 @@ int main  (int argc, char * argv [])
       
       if (best != -1) LBP[9+k]->InsertNew(best,Switch,i,maxi,PrevBP[best]);
       
-      LBP[9+k]->Update(log(BaseScore[7][i])+
-		       ((ESTMatch[i] & Hit) != 0)*EstP);
+      LBP[9+k]->Update(log(BaseScore[7][i]));
+      LBP[9+k]->Update(((ESTMatch[i] & Hit) != 0)*EstP);
+
+      if ((ForcedIG != NULL) && ForcedIG[i])
+	LBP[k]->Update(IGPenalty);
     }
   }
 
