@@ -186,7 +186,7 @@ DNASeq :: ~ DNASeq  ()
 
 char DNASeq :: operator [] (int i)
 {
-  if (i >= SeqLen)
+  if ((i >= SeqLen) || (i < 0))
     return Code2Nuc[CodeT|CodeC|CodeA|CodeG];
   else
     return  Code2Nuc[Sequence[i] & MASKSEQ];
@@ -197,7 +197,7 @@ char DNASeq :: operator [] (int i)
 
 char DNASeq :: operator () (int i)
 {
-  if (i >= SeqLen)
+  if ((i >= SeqLen) || (i < 0))
     return Code2CNuc[CodeT|CodeC|CodeA|CodeG];
   else
     return  Code2CNuc[Sequence[i] & MASKSEQ];
@@ -205,7 +205,7 @@ char DNASeq :: operator () (int i)
 
 unsigned short DNASeq :: operator () (int i, int mode)
 {
-  if (i >= SeqLen)
+  if ((i >= SeqLen) || (i < 0))
     return CodeT|CodeC|CodeA|CodeG;
   
   switch (mode) {
@@ -463,11 +463,10 @@ double DNASeq :: IsStop(int i,int sens)
   int count = 0;
   int mode = 0;
 
-  if (sens < 0) 
-    { 
-      i = SeqLen - i - 1;
-      mode = 2;
-    }
+  if (sens < 0) {
+    i = SeqLen -i -1;
+    mode = 2;
+  }
   
   if (((*this)(i,mode) & CodeT) == 0) return 0.0;
 
@@ -479,7 +478,7 @@ double DNASeq :: IsStop(int i,int sens)
   if (((*this)(i+1,mode) & CodeG) && ((*this)(i+2,mode) & CodeA))
     count ++;
   
-  return (double)count/ Degeneracy(i,sens);;
+  return (double)count/ Degeneracy(i,mode);
 }
 // ---------------------------------------------------------------------
 // returns a penalty for infrequent start depending on the code of the
@@ -508,8 +507,8 @@ double DNASeq :: IsStart(int i,int sens)
   int mode = 0;
 
   if (sens < 0) 
-    { 
-      i = SeqLen - i - 1;
+    {
+      i = SeqLen -i -1;
       mode = 2;
     }
 
@@ -520,7 +519,7 @@ double DNASeq :: IsStart(int i,int sens)
 
   if ((First & (CodeA | CodeT | CodeG)) == 0) return 0.0;
 
-  return StartTypePenalty(First) / Degeneracy(i,sens);
+  return StartTypePenalty(First) / Degeneracy(i,mode);
 }
 
 // ---------------------------------------------------------------------
@@ -531,33 +530,23 @@ double DNASeq :: IsEStart(int i,int sens)
 {
   int mode = 0;
   
-  if (i >= SeqLen) return 0.0;
-  
-  if (sens < 0) 
-    { 
-      i = SeqLen - i - 1;
-      mode = 2;
-    }
+  if (sens < 0)  {
+    i = SeqLen -i -1;
+    mode = 2;
+  }
   
   if (((*this)(i+2,mode) & CodeG) == 0) return 0.0;
   if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
   if (((*this)(i,mode) & CodeA) == 0) return 0.0;
 
-  return 1.0 / Degeneracy(i,sens);
+  return 1.0 / Degeneracy(i,mode);
 }
 // ---------------------------------------------------------------------
 // Degeneracy : returns the number of possible codons represented by a
 // degenerated codon
 // ---------------------------------------------------------------------
-unsigned char DNASeq :: Degeneracy(int i, int sens)
+unsigned char DNASeq :: Degeneracy(int i, int mode)
 {
-  int mode = 0;
-  
-  if (sens < 0) 
-    { 
-      i = SeqLen - i - 1;
-      mode = 2;
-    }
   
   return (Code2NumOne[(*this)(i+2,mode)] *
 	  Code2NumOne[(*this)(i+1,mode)] *
