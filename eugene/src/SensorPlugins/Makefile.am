@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------
 
 
-export eugene_LDFLAGS = $(sensors_ldflags)
-
 SUBDIRS = 0_SensorTk AnnotaStruct ATGpr BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript User
 
 
