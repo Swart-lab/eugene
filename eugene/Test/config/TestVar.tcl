@@ -69,7 +69,7 @@ set NewValueSeqHom(EuStop.stopP)     3.1439
 set NewValueSeqHom(BlastX.level1)    0.0
 
 ##################### SeqRest test variables #################################
-set SensorsList(SeqRest) {MarkovConst EuStop StartConst SpliceConst Riken Repeat}
+set SensorsList(SeqRest) {MarkovIMM EuStop StartConst SpliceConst Riken Repeat}
 set SEQ(SeqRest) {seq25ab005234g10g11.tfa}
 set IMG(SeqRest) {seq25ab005234g10g11.test.000.png}
 set FILE_REF(SeqRest) Output_SeqRest
