@@ -18,7 +18,6 @@ class SensorMarkovProt : public Sensor
   TabChaine<ChainePROT21,unsigned short>* ModeleProt; 
   TabChaine<ChaineADN,double>* Probacodon;
   double GCrate;
-  double transCodant, transIntron, transInter, transUTR5, transUTR3;
   double minGC,maxGC;
 
  public:

@@ -11,7 +11,6 @@ class SensorMarkovIMM : public Sensor
 {
  private:
   BString_Array *IMMatrix[7];
-  double transCodant, transIntron, transInter, transUTR5, transUTR3;
   double minGC,maxGC;
   const static int  MODEL_LEN = 9;
   const static int  SIMPLE_MODEL_LEN = 6;

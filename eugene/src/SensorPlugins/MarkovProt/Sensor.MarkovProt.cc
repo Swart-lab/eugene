@@ -60,12 +60,6 @@ SensorMarkovProt :: SensorMarkovProt (int n) : Sensor(n)
 {
   FILE *fp;
 
-  transCodant = PAR.getD("EuGene.transCodant"); //Exon
-  transIntron = PAR.getD("EuGene.transIntron"); //IntronF
-  transInter  = PAR.getD("EuGene.transInter");  //InterG
-  transUTR5   = PAR.getD("EuGene.transUTR5");   //UTR5
-  transUTR3   = PAR.getD("EuGene.transUTR3");   //UTR3
-
   minGC = PAR.getD("MarkovProt.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovProt.maxGC",GetNumber())/100;
 
@@ -199,16 +193,6 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[10] += NonCodingR;               // UTR5'R
   d->contents[11] += NonCodingF;               // UTR3'F
   d->contents[12] += NonCodingR;               // UTR3'R
-
-  for(int i=0; i<6; i++)
-    d->contents[i] += log(transCodant);        //Exon
-  d->contents[6] += log(transIntron);          //IntronF
-  d->contents[7] += log(transIntron);          //IntronR
-  d->contents[8] += log(transInter);           //InterG
-  d->contents[9] += log(transUTR5);            //UTR5'F
-  d->contents[10] += log(transUTR5);           //UTR5'R
-  d->contents[11] += log(transUTR3);           //UTR3'F
-  d->contents[12] += log(transUTR3);           //UTR3'R
 
   delete peptid;
   delete codon;

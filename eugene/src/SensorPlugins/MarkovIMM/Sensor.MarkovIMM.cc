@@ -61,12 +61,6 @@ SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
   FILE *fp;
   int i;
   
-  transCodant = PAR.getD("EuGene.transCodant"); //Exon
-  transIntron = PAR.getD("EuGene.transIntron"); //IntronF
-  transInter  = PAR.getD("EuGene.transInter");  //InterG
-  transUTR5   = PAR.getD("EuGene.transUTR5");   //UTR5
-  transUTR3   = PAR.getD("EuGene.transUTR3");   //UTR3
-
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
   
@@ -192,15 +186,6 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[11] += log((double)(*IMMatrix[5])[indexF]/65535.0);
   d->contents[12] += log((double)(*IMMatrix[5])[indexR]/65535.0);
   
-  for(int i=0; i<6; i++)
-    d->contents[i] += log(transCodant); //Exon
-  d->contents[6] += log(transIntron); //IntronF
-  d->contents[7] += log(transIntron); //IntronR
-  d->contents[8] += log(transInter);  //InterG
-  d->contents[9] += log(transUTR5);   //UTR5'F
-  d->contents[10] += log(transUTR5);   //UTR5'R
-  d->contents[11] += log(transUTR3);   //UTR3'F
-  d->contents[12] += log(transUTR3);   //UTR3'R
   return;
 }
 
