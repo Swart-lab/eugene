@@ -10,8 +10,9 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorTranscript :: SensorTranscript (int n) : Sensor(n)
+SensorTranscript :: SensorTranscript (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Start;
 }
 
 // ----------------------
@@ -26,9 +27,8 @@ SensorTranscript :: ~SensorTranscript ()
 // ----------------------
 void SensorTranscript :: Init (DNASeq *X)
 {
-  type = Type_Start;
-  transStart = PAR.getD("Transcript.Start");
-  transStop = PAR.getD("Transcript.Stop");
+  transStart = PAR.getD("Transcript.Start*");
+  transStop = PAR.getD("Transcript.Stop*");
 
   if (PAR.getI("Output.graph")) Plot(X);
 }

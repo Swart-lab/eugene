@@ -14,7 +14,7 @@ class SensorTranscript : public Sensor
   REAL transStop;
 
  public:
-  SensorTranscript  (int);
+  SensorTranscript  (int n, DNASeq *X);
   virtual ~SensorTranscript   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
@@ -22,6 +22,6 @@ class SensorTranscript : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorTranscript * builder0(int n) {  return new SensorTranscript(n); }
+extern "C" SensorTranscript * builder0(int n, DNASeq *X) {  return new SensorTranscript(n, X); }
 
 #endif

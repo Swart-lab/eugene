@@ -11,8 +11,9 @@ extern Parameters PAR;
 // ----------------------
 //  Default constructor.
 // ----------------------
-SensorUser :: SensorUser (int n) : Sensor(n)
+SensorUser :: SensorUser (int n, DNASeq *X) : Sensor(n)
 {
+  type = Type_Multiple;
 }
 
 // ----------------------
@@ -29,8 +30,6 @@ void SensorUser :: Init (DNASeq *X)
 {
   char tempname[FILENAME_MAX+1];
   int errflag;
-
-  type = Type_Multiple;
 
   fprintf(stderr,"Loading user data............");
   

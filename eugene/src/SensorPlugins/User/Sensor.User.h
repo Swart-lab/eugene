@@ -11,7 +11,7 @@ class SensorUser : public Sensor
  private:
   
  public:
-  SensorUser  (int);
+  SensorUser  (int n, DNASeq *X);
   virtual ~SensorUser     ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
@@ -19,6 +19,6 @@ class SensorUser : public Sensor
   virtual void PostAnalyse(Prediction *);
 };
 
-extern "C" SensorUser * builder0( int n ) {  return new SensorUser(n);}
+extern "C" SensorUser * builder0( int n, DNASeq *X) {  return new SensorUser(n, X);}
 
 #endif
