@@ -71,7 +71,7 @@ void SensorRepeat :: ResetIter ()
 // --------------------------
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  if( index <= (int)vPos.size()  &&  vPos[index] == pos ) {
+  if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
     for(int i=0; i<6; i++)   // Exon(6)
       d->ContentScore[i] += exonPenalty;
     for(int i=7; i<8; i++)   // Intron (2)
@@ -93,7 +93,7 @@ void SensorRepeat :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
       d->ContentScore[i] += exonPenalty;
     for(int i=7; i<8; i++)   // Intron (2)
       d->ContentScore[i] += intronPenalty; 
-    for(int i=9; i<13; i++)   // UTR (4)
+    for(int i=9; i<13; i++)  // UTR (4)
       d->ContentScore[i] += UTRPenalty; 
   }
 }
