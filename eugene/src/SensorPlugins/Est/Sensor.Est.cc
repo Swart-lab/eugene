@@ -226,7 +226,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     TheStrand = HitForward | HitReverse;
     Inc = 0;
     ExonInc = 0;
-    WorstSpliceF = WorstSpliceR = NINFINITY;
+    WorstSpliceF = WorstSpliceR = -NINFINITY;
         
     // Look for each match in the current Hit
     ThisBlock = ThisEST->Match;
