@@ -17,7 +17,7 @@
    Contents: Functions for interfacing with libGD
    ------------------------------------------------------------------*/
 
-
+#include <stdlib.h>
 #include <math.h>
 #include <gd.h>
 #include <gdfontt.h>
