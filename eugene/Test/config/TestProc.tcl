@@ -230,7 +230,7 @@ set NewValue1(Est.utrP*)	0.35
 set NewValue1(Est.utrM)	        5
 set NewValue1(Est.SpliceBoost*) 0.0
 set NewValue1(Est.StrongDonor)	0.95
-set NewValue1(Est.MinDangling)  18
+set NewValue1(Est.MinDangling)  10
 set NewValue1(Est.MaxIntron)    15000
 ##### Homology Sensor parameters #####
 set NewValue1(Homology.TblastxP*) 	0
