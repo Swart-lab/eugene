@@ -244,6 +244,7 @@ int main  (int argc, char * argv [])
     char *Choice;
     BackPoint *LBP[18];
     REAL BestU;
+    REAL NormalizingPath = 0.0;
     signed   char best   = 0;
     unsigned char Switch = 0;
     
@@ -303,6 +304,7 @@ int main  (int argc, char * argv [])
 
       for (k = 0 ; k < 18; k++) 
 	LBP[k]->Update(-maxi);
+      NormalizingPath += maxi;
 
       // Calcul des meilleures opening edges
       for (k = 0 ; k < 18; k++) 
@@ -788,10 +790,10 @@ int main  (int argc, char * argv [])
     if (!PorteOuverte && Data_Len > 6000) 
       exit(2);
     
-    fprintf(stderr,"Optimal path length = %#f\n",-maxi+log(4)*(Data_Len+1));
+    fprintf(stderr,"Optimal path length = %#f\n",-maxi-NormalizingPath);
     
     // Sanity check ! A feasible path has not been found ?
-    if (isnan(maxi))
+    if (maxi == NINFINITY)
       fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
     
     if (PAR.graph)
