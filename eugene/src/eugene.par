@@ -97,8 +97,8 @@ MarkovIMM.maxGC[0]	100
 MarkovProt.matname[0]	default_prot.mat
 MarkovProt.minGC[0]	0
 MarkovProt.maxGC[0]	100
-MarkovProt.maxorder     4
-MarkovProt.order        4
+MarkovProt.maxorder     2
+MarkovProt.order        2
 #
 # Est sensor parameters
 #
@@ -132,49 +132,68 @@ Homology.protmatname	BLOSUM62
 #
 # Sensors with uniform penalties
 #
-SpliceConst.val		0.5
-StartConst.val		0.5
+SpliceConst.accP	10e-9
+SpliceConst.accPNo	0
+SpliceConst.donP	10e-9
+SpliceConst.donPNo	0
+StartConst.startP	10e-9
+StartConst.startPNo	0
 MarkovConst.val		0.25
 MarkovConst.minGC[0]	0
 MarkovConst.maxGC[0]	100
+#
+# Sensor SplicePlantWAM
+#
+SplicePlantWAM.TPdonfile	PLUGINS/WAMsensor/WAM.ARA.DON.L9.TP.
+SplicePlantWAM.FPdonfile	PLUGINS/WAMsensor/WAM.ARA.DON.L9.FP.
+SplicePlantWAM.TPaccfile	PLUGINS/WAMsensor/WAM.ARA.ACC.L7.TP.
+SplicePlantWAM.FPaccfile	PLUGINS/WAMsensor/WAM.ARA.ACC.L7.FP.
+SplicePlantWAM.beforedon	3
+SplicePlantWAM.afterdon		4
+SplicePlantWAM.beforeacc	2
+SplicePlantWAM.afteracc		3
+SplicePlantWAM.order		1
+SplicePlantWAM.coef		5
 #
 # Sensors activation
 #
 Sensor.Transcript.use	TRUE
 Sensor.FrameShift.use	TRUE
 Sensor.EuStop.use	TRUE
-Sensor.NStart.use		TRUE
-Sensor.NG2.use		FALSE
+Sensor.NStart.use	TRUE
+Sensor.NG2.use			FALSE
 Sensor.SPred.use		FALSE
-Sensor.IfElse.use		TRUE
+Sensor.IfElse.use	TRUE
 Sensor.MarkovIMM.use	TRUE
 #Sensor.MarkovIMM.use	2
 Sensor.BlastX.use		FALSE
 Sensor.Repeat.use		FALSE
 Sensor.Riken.use		FALSE
-Sensor.Est.use		FALSE
-Sensor.User.use		FALSE
-Sensor.Homology.use	FALSE
-Sensor.StartConst.use	FALSE
-Sensor.SpliceConst.use	FALSE
-Sensor.MarkovConst.use	FALSE
-Sensor.MarkovProt.use	FALSE
+Sensor.Est.use			FALSE
+Sensor.User.use			FALSE
+Sensor.Homology.use		FALSE
+Sensor.StartConst.use		FALSE
+Sensor.SpliceConst.use		FALSE
+Sensor.MarkovConst.use		FALSE
+Sensor.MarkovProt.use		FALSE
+Sensor.SplicePlantWAM.use	FALSE
 #
-# Sensor priorities
+# Sensor priorities		  Sensor.Name Priority
 #
-Sensor.Transcript		1
-Sensor.FrameShift	1
-Sensor.IfElse		1
+Sensor.Transcript	1	#
+Sensor.FrameShift	1	#
 Sensor.EuStop		1	#
-Sensor.StartConst		1	# Sensor.Name Priority
-Sensor.SpliceConst	1	#
 Sensor.NStart		1	#
+Sensor.StartConst	1	#
+Sensor.IfElse		1	#
 Sensor.NG2		1	#
-Sensor.SPred		1	#  
-Sensor.MarkovIMM	1	# 
-Sensor.MarkovConst	1	#
+Sensor.SPred		1	#
+Sensor.SpliceConst	1	#
+Sensor.SplicePlantWAM   1       #
+Sensor.MarkovIMM	1	#
 Sensor.MarkovProt	1	#
-Sensor.Est		2	#  
+Sensor.MarkovConst	1	#
+Sensor.Est		2	#
 Sensor.BlastX		2	#  Priority 0 -> First
 Sensor.Homology 	2	#
 Sensor.Riken		7	#  Priority 1 -> Second
