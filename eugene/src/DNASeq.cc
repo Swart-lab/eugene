@@ -515,6 +515,93 @@ double DNASeq :: IsStop(int i,int sens)
   return (double)count/ Degeneracy(i,mode);
 }
 // ---------------------------------------------------------------------
+// test if a spliced Stop Codon may start just before position i. 
+// Sets specific bits depending on the occurrence:
+//   - bit values 1,2,4 are used to report if the current pos is just 
+//     after (FORWARD strand)
+//     - 1: a T  
+//     - 2: a TG 
+//     - 4: a TA 
+//   - bit values 8,16,32 are used to report if the seq at hand can generate 
+//     a STOP if it appears (REVERSE)
+//     - 8 : after G (AT)
+//     - 16: after A (GT|AT)
+//     - 32: after AG|AA|GA (T) 
+// ---------------------------------------------------------------------
+int DNASeq :: IsStartStop(int i)
+{
+  int stop = 0;
+
+  
+  // le T
+  if (((*this)(i-1,0)) & CodeT) stop |= StopAfterT;
+
+  // le cas du TG/TA
+  if (((*this)(i-2,0)) & CodeT) {
+    if (((*this)(i-1,0)) & CodeG) stop |= StopAfterTG;
+    if (((*this)(i-1,0)) & CodeA) stop |= StopAfterTA;
+  }
+
+  i = SeqLen -i -1;
+    
+  // le T
+  if (((*this)(i,2)) & CodeT) stop |= StopAfterAG;
+
+  // le cas du GT/AT
+  if (((*this)(i-1,2)) & CodeT) {
+    if (((*this)(i,2)) & CodeG) stop |= StopAfterA;
+    if (((*this)(i,2)) & CodeA) stop |= StopAfterG+StopAfterA;
+  }
+
+  return stop;
+}
+// ---------------------------------------------------------------------
+// test if a spliced Stop Codon may stop just after position i. 
+// Sets specific bits depending on the occurrence.
+//   - bit values 1/2/4  are used to report if the seq at hand can generate 
+//     a STOP if it appears (FORWARD):
+//     - 1:  after T (GA|AG|AA)
+//     - 2:  after TG (A)
+//     - 4:  after TA (G|A)
+//   - bit values 8/16/32 
+// REVERSE (RC) are used to report if the current pos is just (C BACKWARD):
+//     - 8:  after G (AT)
+//     - 16: after A (GT|AT)
+//     - 32: after AG|AA|GA (T) 
+// ---------------------------------------------------------------------
+int DNASeq :: IsStopStop(int i)
+{
+  int stop = 0;
+
+  if (((*this)(i,0)) & CodeG) {
+    stop |= StopAfterTA;
+    if (((*this)(i+1,0)) & CodeA)
+      stop |= StopAfterT;
+  }
+
+  if (((*this)(i,0)) & CodeA) {
+    stop |= (StopAfterTA+StopAfterTG);
+    if (((*this)(i+1,0)) & (CodeA|CodeG))
+      stop |= StopAfterT;
+  }
+
+  i = SeqLen -i -1;
+
+  if (((*this)(i+1,2)) & CodeG) {
+    stop |= StopAfterG;
+    if (((*this)(i+2,2)) & CodeA)
+      stop |= StopAfterAG;
+  }
+  
+  if (((*this)(i+1,2)) & CodeA) {
+    stop |= StopAfterA;
+    if (((*this)(i+2,2)) & (CodeA|CodeG))
+      stop |= StopAfterAG;
+  }
+
+  return stop;
+}
+// ---------------------------------------------------------------------
 // Return simply A,T,C,G or N depending on the nucleotide at position i
 // ---------------------------------------------------------------------
 char DNASeq :: nt(int i, int mode)

@@ -61,6 +61,16 @@ class  DNASeq
   void  PrintTr(FILE*,int, int,signed char);
 
   unsigned char Degeneracy(int i, int sens);
+
+  const int static StopAfterT  = 1;
+  const int static StopAfterTG = 2;
+  const int static StopAfterTA = 4;
+  const int static StopAfterG = 8;
+  const int static StopAfterA = 16;
+  const int static StopAfterAG = 32;
+
+  int    IsStartStop(int i);
+  int    IsStopStop(int i);
   double IsStop(int i,int sens);
   double IsStart(int i,int sens);
   double IsEStart(int i,int sens);
