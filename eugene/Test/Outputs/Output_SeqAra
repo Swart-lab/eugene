@@ -22,7 +22,7 @@ Reading cDNA hits............13 sequences read
    [AV565933]: Gapless EST with strong donor [1510-1854]
 A total of 4/13 sequences rejected
 Reading Blastx data, level...0 done
-Optimal path length = 20236.5871
+Optimal path length = 20345.5632
 
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
 
@@ -56,4 +56,4 @@ cDNA  AA713204       12760   13114      359      0 introns    Support
 cDNA  AV547209       14087   14781      505      2 introns    Filtered 
       CDS             2919   12900     9982     supported on 162 bases
       Gene               1   14900    14900     supported on 2641 bases
-      CDS (prot.)     2919   12900     9982     supported on 1509/1929 coding.
+      CDS (prot.)     2919   12900     9982     supported on 1559/1929 coding.
