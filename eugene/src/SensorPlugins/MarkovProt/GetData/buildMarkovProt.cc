@@ -17,11 +17,9 @@
 #include "../../../EuGene/DNASeq.h"
 #include "../../../EuGene/DNASeq.cc"
 
-int ORDREMAX = 4;  /* maximum of 4 recommended ( pow(21,5) > 4 000 000 ...) */
+int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
 char* DBfile     = "/www/db/sp";                 // infile
-char* MATRIXfile = "swissprot.ordre4.usi.bin";  // outfile
-//char* DBfile     = "/Ange/sylvain/swissprot.arath";
-//char* MATRIXfile = "swissprot.arath.ordre4.usi.bin";
+char* MATRIXfile = "swissprot.ordre2.usi.bin";  // outfile
 
 int main()
 {
