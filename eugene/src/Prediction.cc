@@ -133,14 +133,31 @@ int Prediction :: nbExon (int geneNumber)
 {
   int i     = (int)vPos.size()-1;
   int nb    = 0;
-  int nbUtr = 0;    // Pb UTR :
-                    //  - seq.1.1.0 Utr5 - ...  Gene 1
-                    //  - seq.1.2.0 Utr5 + ...  Gene 2
+  int stUtr = 0;
+
+  // --------------------------------------
+  // On se positionne sur le 1er exon du 1er gene.
+  // ATTENTION aux utrs en debut de prediction, cas problematiques :
+  //    -> Cas 1 :
+  //         - seq.1.1.0 Utr5   - ...  Gene 1
+  //         - seq.1.2.0 Utr5   + ...  Gene 2   <---
+  //         - seq.1.2.1 E.Init + ...  Gene 2
+  //    -> Cas 2 :
+  //         - seq.1.1.0 Utr5   + ...  Gene 1
+  //         - seq.1.2.0 Utr5   + ...  Gene 1
+  //         - seq.1.2.1 E.Init + ...  Gene 1   <---
+  // --------------------------------------
   while(vState[i] >= InterGen) {
-    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3R)
-      nbUtr++;
-    if (nbUtr > 1)
-      break;
+    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3F) {
+      if (stUtr == -1)
+	break;
+      stUtr = 1;
+    }
+    if (vState[i] >= UTR5R  &&  vState[i] <= UTR3R) {
+      if (stUtr == 1)
+	break;
+      stUtr = -1;
+    }
     i--;
   }
 
@@ -165,13 +182,31 @@ int Prediction :: lenCDS (int geneNumber)
 {
   int i     = (int)vPos.size()-1;
   int len   = 0;
-  int nbUtr = 0;
-
+  int stUtr = 0;
+  
+  // --------------------------------------
+  // On se positionne sur le 1er exon du 1er gene.
+  // ATTENTION aux utrs en debut de prediction, cas problematiques :
+  //    -> Cas 1 :
+  //         - seq.1.1.0 Utr5   - ...  Gene 1
+  //         - seq.1.2.0 Utr5   + ...  Gene 2   <---
+  //         - seq.1.2.1 E.Init + ...  Gene 2
+  //    -> Cas 2 :
+  //         - seq.1.1.0 Utr5   + ...  Gene 1
+  //         - seq.1.2.0 Utr5   + ...  Gene 1
+  //         - seq.1.2.1 E.Init + ...  Gene 1   <---
+  // --------------------------------------
   while(vState[i] >= InterGen) {
-    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3R)
-      nbUtr++;
-    if (nbUtr > 1)
-      break;
+    if (vState[i] >= UTR5F  &&  vState[i] <= UTR3F) {
+      if (stUtr == -1)
+	break;
+      stUtr = 1;
+    }
+    if (vState[i] >= UTR5R  &&  vState[i] <= UTR3R) {
+      if (stUtr == 1)
+	break;
+      stUtr = -1;
+    }
     i--;
   }
 

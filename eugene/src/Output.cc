@@ -217,7 +217,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	  if(!forward && (i == pred->size()-1 ||
 			  (i == pred->size()-2 && stateBack < InterGen)))
 	    nbExon = pred->nbExon(1);
-	  
+
 	  // first or last exon ?
 	  init = ((forward  && stateBack >= InterGen) ||
 		  (!forward && stateNext >= InterGen));
@@ -312,7 +312,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      }
 	  
 	  if (printopt0 == 'g') {
-	     printf("\t%d\t%d\t.\t%c\t",Lend,Rend,((forward) ? '+' : '-'));
+	     printf("\t%d\t%d\t%.0f.%.0f\t%c\t",
+		    Lend, Rend,
+		    100.0*(double)cons/(Rend-Lend+1), 100.0*(double)incons/(Rend-Lend+1),
+		    ((forward) ? '+' : '-'));
 	     if (term && !forward)
 	       LenGFF = pred->lenCDS(nbGene);
 	     if (init) {
@@ -435,7 +438,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 	        if (printopt0 == 'g')
-		  printf("UTR5\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR5\t%d\t%d\t%.0f.%.0f\t+\t.\n",
+			 offset+posBack+1,offset+pos,
+			 100.0*(double)cons/((offset+pos)  -(offset+posBack+1)+1),
+			 100.0*(double)incons/((offset+pos)-(offset+posBack+1)+1));
 		else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>+</TD>");
 		else fprintf(f,"Utr5    +");
 	      break;
@@ -460,7 +466,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("UTR3\t%d\t%d\t.\t+\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR3\t%d\t%d\t%.0f.%.0f\t+\t.\n",
+			 offset+posBack+1,offset+pos,
+			 100.0*(double)cons/((offset+pos)  -(offset+posBack+1)+1),
+			 100.0*(double)incons/((offset+pos)-(offset+posBack+1)+1));
 		else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>+</TD>");
 		else fprintf(f,"Utr3    +");
 	      break;
@@ -485,7 +494,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("UTR5\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR5\t%d\t%d\t%.0f.%.0f\t-\t.\n",
+			 offset+posBack+1,offset+pos,
+			 100.0*(double)cons/((offset+pos)  -(offset+posBack+1)+1),
+			 100.0*(double)incons/((offset+pos)-(offset+posBack+1)+1));
 		else if (printopt0 == 'H') printf("<TD>Utr5</TD><TD>-</TD>");
 		else fprintf(f,"Utr5    -");
 	      break;
@@ -509,7 +521,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 				"</tr>\n");
 	      else
 		if (printopt0 == 'g')
-		  printf("UTR3\t%d\t%d\t.\t-\t.\n",offset+posBack+1,offset+pos);
+		  printf("UTR3\t%d\t%d\t%.0f.%.0f\t-\t.\n",
+			 offset+posBack+1,offset+pos,
+			 100.0*(double)cons/((offset+pos)  -(offset+posBack+1)+1),
+			 100.0*(double)incons/((offset+pos)-(offset+posBack+1)+1));
 		else if (printopt0 == 'H') printf("<TD>Utr3</TD><TD>-</TD>");
 		else fprintf(f,"Utr3    -");
 	      break;
