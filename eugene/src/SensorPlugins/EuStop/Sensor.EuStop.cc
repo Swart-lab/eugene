@@ -1,4 +1,5 @@
 #include "Sensor.EuStop.h"
+
 extern Parameters PAR;
 
 /*************************************************************
@@ -73,6 +74,7 @@ void SensorEuStop :: GiveInfo (DNASeq *X, int pos, DATA *d)
     iterR++;
   }
 }
+
 // -------------------------
 //  GiveInfoAt signal stop.
 // -------------------------
@@ -86,6 +88,7 @@ void SensorEuStop :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
   if(*iter == pos)
     d->Stop[1] += vValR[iter-vPosR.begin()];
 }
+
 // ----------------------------
 //  Plot Sensor information
 // ----------------------------
@@ -96,4 +99,11 @@ void SensorEuStop :: Plot(DNASeq *X)
 
   for (int i =0; i < (int)vPosR.size(); i++)
     PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i]-1)%3)-1,0.1,0.2,1);
+}
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorEuStop :: PostAnalyse(Prediction *pred)
+{
 }

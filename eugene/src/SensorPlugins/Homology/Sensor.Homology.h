@@ -25,8 +25,10 @@ class SensorHomology : public Sensor
   REAL tblastxupdate (int hitnb, REAL hitscore, double pen, double base);
   int  PhaseAdapt (char);
   char ph06       (char);
-  virtual void Plot(DNASeq *);
-  void PlotAt(int pos);
+  virtual void Plot  (DNASeq *);
+  virtual void PlotAt(int pos);
+  virtual void PostAnalyse(Prediction *);
+
 };
 
 extern "C" SensorHomology * builder0( int n ) {  return new SensorHomology(n);}

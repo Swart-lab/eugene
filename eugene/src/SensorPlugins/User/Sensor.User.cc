@@ -77,3 +77,10 @@ void SensorUser :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
 void SensorUser :: Plot(DNASeq *X)
 {
 }
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorUser :: PostAnalyse(Prediction *pred)
+{
+}

@@ -304,3 +304,10 @@ char SensorBlastX :: ph06(char p)
 void SensorBlastX :: Plot(DNASeq *X)
 {
 }
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorBlastX :: PostAnalyse(Prediction *pred)
+{
+}

@@ -93,13 +93,13 @@ void SensorHomology :: Init (DNASeq *X)
     fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname); exit (2);
   }
   // chargement classe protmat
-  fprintf(stderr,"Loading protmat file...");
+  fprintf(stderr,"Loading protmat file.........");
   fichier2protmat(protmatfile , PROTMAT);
   fclose(protmatfile);
 //   PROTMAT->affichage(2);
   fprintf(stderr,"done\n");
 
-  fprintf(stderr,"Reading tblastx data,... ");
+  fprintf(stderr,"Reading tblastx data.........");
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".tblastx");
@@ -153,7 +153,7 @@ void SensorHomology :: Init (DNASeq *X)
     }
   }
   fclose(ftblastx);
-  fprintf(stderr," done\n");
+  fprintf(stderr,"done\n");
 //	for(i=1495;i>1445;i-=3){
 //	for (i=1440;i<1500;i+=3) {
 //	  printf("i:%d  %c %c %c  %c %c %c\n",i,X->AA(i  ,1), X->AA(i+1,1), X->AA(i+2,1), X->AA(i  ,-1), X->AA(i+1,-1), X->AA(i+2,-1) );
@@ -240,4 +240,11 @@ void SensorHomology :: PlotAt(int pos)
       PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,(int)TblastxScore[j][pos]/3)) : 3 ) );
     }
   }
+}
+
+// ------------------
+//  Post analyse
+// ------------------
+void SensorHomology :: PostAnalyse(Prediction *pred)
+{
 }

@@ -202,3 +202,9 @@ void SensorMarkovConst :: Plot(DNASeq *TheSeq)
   }
 }
 
+// ------------------
+//  Post analyse
+// ------------------
+void SensorMarkovConst :: PostAnalyse(Prediction *pred)
+{
+}
