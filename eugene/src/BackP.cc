@@ -233,7 +233,7 @@ Prediction* Track :: BackTrace (int MinCDSLen)
 	CDSlen = 0;
 	pred->add(pos, etat);
       }
-    else
+    else if (pos >=0)
       pred->add(pos, etat);
   }
   pred->setPos(0, pred->getPos(0)-1);
