@@ -126,7 +126,7 @@ Prediction* BackPoint :: BackTrace ()
 BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask, int len, REAL *cost, int len2)
 {
   BackPoint *It = this->Next;
-  BackPoint *BestBP;
+  BackPoint *BestBP = NULL;
   double BestScore = NINFINITY;
   double add = 0.0;
 
