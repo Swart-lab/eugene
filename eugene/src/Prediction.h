@@ -1,6 +1,7 @@
 #ifndef  PREDICTION_H_INCLUDED
 #define  PREDICTION_H_INCLUDED
 
+#include <cstdio>
 #include <vector>
 #include "Const.h"
 extern "C"{
@@ -21,15 +22,17 @@ class Prediction
  public:
   Prediction  ();
   ~Prediction ();
-  void add          (int, signed char);
-  void setPos       (int, int);
-  char getNextState (int);
-  char getState     (int i) { return vState[i]; }
-  int  getPos       (int i) { return vPos[i];   }
-  int  size         ()      { return nb;        } 
-  void plotPred     ();
-  void resetPred    ();
-  int  nbExon       (int);
+  void add           (int, signed char);
+  void print         ();
+  void setPos        (int, int);
+  char getNextState  (int); 
+  char getStateForPos(int);
+  char getState      (int i) { return vState[i]; }
+  int  getPos        (int i) { return vPos[i];   }
+  int  size          ()      { return nb;        } 
+  void plotPred      ();
+  void resetPred     ();
+  int  nbExon        (int);
 };
 
 #endif

@@ -29,6 +29,15 @@ void Prediction :: add (int pos, signed char state)
 }
 
 // ------------------------
+//  print prediction.
+// ------------------------
+void Prediction :: print ()
+{
+  for(int i=(int)vPos.size()-1; i!=-1; i--)
+    printf("State:%2d\tPos:%d\n",vState[i],vPos[i]);
+}
+
+// ------------------------
 //  getNextState.
 // ------------------------
 char Prediction :: getNextState (int pos)
@@ -36,6 +45,18 @@ char Prediction :: getNextState (int pos)
   if(vPos[index + nb-1] < pos)
     index--;
   return vState[index + nb-1];
+}
+
+// ------------------------
+//  getStateForPos.
+// ------------------------
+char Prediction :: getStateForPos(int pos)
+{
+  int i = vPos.size()-1;
+  while(i!=-1 && vPos[i] < pos)
+    i--;
+  if(i!=-1) return vState[i];
+  else      return -1;
 }
 
 // ------------------------
