@@ -23,7 +23,7 @@ foreach TEST $AllSensorsList {
     # To follow execution
     puts "Performing $TEST unit test"
 
-    # Run EuGene
+    # Run eugene
     if {$TEST != "Est" && $TEST != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 	    -D Sensor.${TEST}.use=TRUE $SEQ_DIR/$SEQ(Sensor) \
@@ -76,3 +76,8 @@ foreach TEST $AllSensorsList {
     }
 
 }
+
+# Remove temporary files
+catch {exec rm tmp%stdout}
+catch {exec rm tmp%stderr}
+catch {exec rm tmp%testdiff}
