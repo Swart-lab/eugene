@@ -20,9 +20,11 @@ class SensorBlastX : public Sensor
 
  public:
   SensorBlastX  (int);
-  ~SensorBlastX ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
+  virtual ~SensorBlastX   ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorBlastX * builder0( int n ) {  return new SensorBlastX(n);}

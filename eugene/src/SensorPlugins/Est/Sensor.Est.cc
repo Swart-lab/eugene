@@ -86,6 +86,13 @@ void SensorEst :: Init (DNASeq *X)
 }
 
 // -----------------------
+//  ResetIter.
+// -----------------------
+void SensorEst :: ResetIter ()
+{
+}
+
+// -----------------------
 //  GiveInfo signal est.
 // -----------------------
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
@@ -115,6 +122,13 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
   d->ContentScore[8] += ((ESTMatch[pos] & (Gap|Hit)) != 0)*estP;  //InterG
 
   d->ESTMATCH_TMP = ESTMatch[pos];  // WARNING : EST -> on est dans intron
+}
+
+// -------------------------
+//  GiveInfoAt signal est.
+// -------------------------
+void SensorEst :: GiveInfoAt (DNASeq *X, int pos, DATA *d)
+{
 }
 
 // -----------------------

@@ -209,6 +209,13 @@ void SensorBlastX :: Init (DNASeq *X)
   fprintf(stderr," done\n");
 }
 
+// -----------------------
+//  ResetIter.
+// -----------------------
+void SensorBlastX :: ResetIter ()
+{
+}
+
 // --------------------------
 //  GiveInfo Content BlastX.
 // --------------------------
@@ -227,6 +234,13 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
   for(i=6; i<8; i++)       //introns
     if(ProtMatch[pos] > 0)
       d->ContentScore[i] += -ProtMatch[pos]*ProtMatchLevel[pos];
+}
+
+// ----------------------------
+//  GiveInfoAt Content BlastX.
+// ----------------------------
+void SensorBlastX :: GiveInfoAt(DNASeq *X, int pos, DATA *d)
+{
 }
 
 // -----------------------------------------------

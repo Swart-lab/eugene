@@ -14,13 +14,16 @@ class SensorEst : public Sensor
   Hits **HitTable;
   int NumEST;
   double estP, estM;
+  
+  Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
 
  public:
   SensorEst  (int);
-  ~SensorEst ();
-  void Init     (DNASeq *);
-  void GiveInfo (DNASeq *, int, DATA *);
-  Hits** ESTAnalyzer (FILE *, unsigned char *, int, int *, DNASeq *);
+  virtual ~SensorEst      ();
+  virtual void Init       (DNASeq *);
+  virtual void ResetIter  ();
+  virtual void GiveInfo   (DNASeq *, int, DATA *);
+  virtual void GiveInfoAt (DNASeq *, int, DATA *);
 };
 
 extern "C" SensorEst * builder0( int n ) { return new SensorEst(n);}
