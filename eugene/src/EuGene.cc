@@ -649,9 +649,9 @@ int main  (int argc, char * argv [])
       if (optarg)
 	errflag += !GetIArg(optarg, &blastopt, blastopt);
       else
-	blastopt = 2;
+	blastopt = 7;
 
-      if (blastopt > 2) errflag++;
+      if (blastopt > 7) errflag++;
       break; 
       
     case 'd':           /* -d  use cDNA blastn results      */
@@ -878,7 +878,7 @@ int main  (int argc, char * argv [])
  
 
   const int LevelColor[3] = {6,7,8}; 
-  if (blastopt >= 0)
+  if (blastopt > 0)
     {
       FILE *fblast;
        int deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
@@ -891,78 +891,79 @@ int main  (int argc, char * argv [])
        fprintf(stderr,"Reading Blastx data, level... ");
        fflush(stderr);
        
-       for (level = blastopt; level >= 0; level--)
-	 {	   
-	   strcpy(tempname,fstname);
-	   strcat(tempname,".blast");
-	   i = strlen(tempname);
-	   tempname[i] = '0'+level;
-	   tempname[i+1] = 0;
-	   
-	   fblast = FileOpen(NULL,tempname, "r");
-	   
-	   if (fblast == NULL) continue;
+       for( level = blastopt; level >= 0; level--)
+	 {
+	   if (blastopt&(1<<level)){
+	     strcpy(tempname,fstname);
+	     strcat(tempname,".blast");
+	     i = strlen(tempname);
+	     tempname[i] = '0'+level;
+	     tempname[i+1] = 0;
+	     
+	     fblast = FileOpen(NULL,tempname, "r");
+	     
+	     if (fblast == NULL) continue;
+	     
+	     for (i = 0; i < 6; i++)  {
+	       BlastScore[i] = new REAL[Data_Len];
+	       for (j=0; j<Data_Len; j++) BlastScore[i][j] = 0.0;
+	     }
+	     
+	     InterBlast  = new unsigned char[Data_Len];
+	     for (j = 0; j < Data_Len; j++) InterBlast[j] = 0;
+	     
+	     A[0] = B[0]= 0;
+	     ProtId = A;
+	     PProtId = B;
+	     PProtFin = -10000;
+	     
+	     while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
+			   &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
+	       if (phase < 0) {
+		 j = deb;
+		 deb = fin;
+		 fin = j;
+		 j = ProtDeb;
+		 ProtDeb = ProtFin;
+		 ProtFin = j;
+	       }
+	       
+	       if ((strcmp(ProtId,PProtId) == 0) && (abs(PProtFin-ProtDeb) <= 8)) {
+		 // blastx tends to enlarge local hits, we do not reduce gap width (no margin).
+		 for (i = Pfin; i < deb; i++) InterBlast[i] = level+1;
+		 if (graph) PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
+	       }
+	       
+	       Pfin = fin;
+	       tmp = PProtId;
+	       PProtId = ProtId;
+	       ProtId = tmp;
+	       PProtFin = ProtFin;
+	       PPhase = phase;
+	       
+	       phase = ph06(phase);
+	       BScore = ((REAL)score)/((REAL)abs(fin-deb));
+	       
+	       for (i = deb-1; i < fin; i++)  {
+		 if (BScore > BlastScore[phase][i]) 
+		   BlastScore[phase][i] = BScore;
+	       }
+	     }
 
-	   for (i = 0; i < 6; i++)  {
-	     BlastScore[i] = new REAL[Data_Len];
-	     for (j=0; j<Data_Len; j++) BlastScore[i][j] = 0.0;
-	   }
-	   
-	   InterBlast  = new unsigned char[Data_Len];
-	   for (j = 0; j < Data_Len; j++) InterBlast[j] = 0;
-       
-	   A[0] = B[0]= 0;
-	   ProtId = A;
-	   PProtId = B;
-	   PProtFin = -10000;
-	   
-	   while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
-			 &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
-	     if (phase < 0) {
-	       j = deb;
-	       deb = fin;
-	       fin = j;
-	       j = ProtDeb;
-	       ProtDeb = ProtFin;
-	       ProtFin = j;
+	     fprintf(stderr,"%d ",level);
+	     fflush(stderr);
+	     
+	     for (i = 0; i < 6; i++)  {
+	       for (j = 0; j < Data_Len; j++)  {
+		 BaseScore[i][j] = 
+		   ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS[level]))/
+		   (100.0+(BlastScore[i][j]*BlastS[level]));
+		 if (graph && (BlastScore[i][j] > 0.0)) 
+		   PlotBarI(j,PhaseAdapt(i),0.6+(level/8.0),1,LevelColor[level]);
+	       }
+	       delete BlastScore[i];
 	     }
 	     
-	     if ((strcmp(ProtId,PProtId) == 0) && (abs(PProtFin-ProtDeb) <= 8)) {
-	       // blastx tends to enlarge local hits, we do not reduce gap width (no margin).
-	       for (i = Pfin; i < deb; i++) InterBlast[i] = level+1;
-	       if (graph) PlotLine(Pfin,deb,PPhase,phase,0.6+(level/8.0),0.6+(level/8.0),LevelColor[level]);
-	     }
-	     
-	     Pfin = fin;
-	     tmp = PProtId;
-	     PProtId = ProtId;
-	     ProtId = tmp;
-	     PProtFin = ProtFin;
-	     PPhase = phase;
-	     
-	     phase = ph06(phase);
-	     BScore = ((REAL)score)/((REAL)abs(fin-deb));
-	     
-	     for (i = deb-1; i < fin; i++)  {
-	       if (BScore > BlastScore[phase][i]) 
-		 BlastScore[phase][i] = BScore;
-	     }
-	   }
-
-	   fprintf(stderr,"%d ",level);
-	   fflush(stderr);
-	   
-	   for (i = 0; i < 6; i++)  {
-	     for (j = 0; j < Data_Len; j++)  {
-	       BaseScore[i][j] = 
-		 ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS[level]))/
-		 (100.0+(BlastScore[i][j]*BlastS[level]));
-	       if (graph && (BlastScore[i][j] > 0.0)) 
-		 PlotBarI(j,PhaseAdapt(i),0.6+(level/8.0),1,LevelColor[level]);
-	     }
-	     delete BlastScore[i];
-	   }
-
 	   /*       
 	   // Parametre implicite !!!!!
 	   int tmp = 0;
@@ -980,9 +981,10 @@ int main  (int argc, char * argv [])
 	     }
 	   }
 	   */
-	   delete InterBlast;
-	   
-	   fclose(fblast);       
+	     delete InterBlast;
+	     
+	     fclose(fblast);       
+	   }
 	 }
        fprintf(stderr," done\n");
     }
