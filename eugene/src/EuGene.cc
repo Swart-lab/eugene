@@ -76,6 +76,30 @@
 
 
 // ------------------ Globals ---------------------
+// Les etats
+  
+  const int ExonF1 = 0;
+  const int ExonF2 = 1;
+  const int ExonF3 = 2;
+  const int ExonR1 = 3;
+  const int ExonR2 = 4;
+  const int ExonR3 = 5;
+
+  const int IntronF1 = 6;
+  const int IntronF2 = 7;
+  const int IntronF3 = 8;
+  const int IntronR1 = 9;
+  const int IntronR2 = 10;
+  const int IntronR3 = 11;
+
+  const int InterGen5 = 12;
+  const int InterGen3 = 17;
+
+  const int UTR5F = 13;
+  const int UTR5R = 15;
+  const int UTR3F = 14;
+  const int UTR3R = 16;
+
 // Les Hits EST
 
 const unsigned char HitForward    = 0x1;
@@ -95,17 +119,19 @@ const unsigned char MRightReverse = 0x80;
 
 const unsigned char Hit           = HitForward    | HitReverse;
 const unsigned char MLeft         = MLeftForward  | MLeftReverse;
+const unsigned char MForward         = MLeftForward  | MRightForward;
+const unsigned char MReverse         = MLeftReverse  | MRightReverse;
 const unsigned char Gap           = GapForward    | GapReverse;
 const unsigned char MRight        = MRightForward | MRightReverse;
 const unsigned char Margin        = MRight        | MLeft;
 
-const  unsigned char NotAHit       = MLeft | MRight | Gap;
+const  unsigned char NotAHit       = Margin | Gap;
 
 #define Inconsistent(x) (((x) & Hit) && ((x) & Gap))
 
 double Score [9],NScore[9];
 int Data_Len;
-int normopt,blastopt,estopt,ncopt;
+int normopt,blastopt,estopt,estanal,ncopt;
 int window, offset,graph,resx,resy;
 int    gfrom,gto,golap,glen;
 
@@ -140,6 +166,7 @@ const unsigned char SwitchMask[18] =
    SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
    SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop};
 
+
 //--------------------------------------------------
 int HitsCompare(const void *A, const void *B)
 {
@@ -156,6 +183,23 @@ int HitsCompare(const void *A, const void *B)
 }
 
 
+//--------------------------------------------------
+int HitsCompareLex(const void *A, const void *B)
+{
+  Hits **UA,**UB;
+  
+  UA = (Hits **) A;
+  UB = (Hits **) B;
+
+  if ((*UA)->Start < (*UB)->Start) return -1;
+  if ((*UA)->Start > (*UB)->Start) return 1;
+  if ((*UA)->NGaps > (*UB)->NGaps) return -1;
+  if ((*UA)->NGaps < (*UB)->NGaps) return 1;
+  if ((*UA)->Length > (*UB)->Length) return -1;
+  if ((*UA)->Length < (*UB)->Length) return 1;
+  return 0;
+}
+
 int IsPhaseOn(char p, int pp)
 {
   if (p == 6) return FALSE;
@@ -163,8 +207,9 @@ int IsPhaseOn(char p, int pp)
   return FALSE;
 }
 
-
+//--------------------------------------------------
 // Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
+//--------------------------------------------------
 int PhaseAdapt(char p)
 {
   if (p >= 12) return 0;
@@ -175,6 +220,7 @@ int PhaseAdapt(char p)
   
 }
 
+//--------------------------------------------------
 void PrintPhase(char p)
 {
   switch (p) {
@@ -257,7 +303,9 @@ void PrintPhase(char p)
   return;
 }
 
+//--------------------------------------------------
 // Convertit les phases 1 2 3 -1 -2 -3 0 en 0-6
+//--------------------------------------------------
 char ph06(char p)
 {
   if (p == 0) return 6;
@@ -265,71 +313,38 @@ char ph06(char p)
   else return 2-p;   
 }
 
-void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
-		 int EstM, REAL** Don, REAL **Acc)
+//--------------------------------------------------
+Hits **ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
+		 int EstM, REAL** Don, REAL **Acc, int *NumEST)
 {
   int i,j,k;
-  int deb,fin,brin,EstDeb,EstFin,poids,NumEST = 0,Rejected = 0;
-  char A[128],B[128];
-  char *EstId, *PEstId,*tmp;
-  Hits *ThisEST = NULL,*OneEST,*AllEST = NULL;
+  int Rejected = 0;
+  Hits *ThisEST = NULL,*AllEST = NULL;
   Block *ThisBlock = NULL;
-
-  A[0] = B[0]= 0;
-  EstId = A;
-  PEstId = B;
   
   fprintf(stderr,"Reading cDNA hits...");
   fflush(stderr);
 
-  while (fscanf(ESTFile,"%d %d %d %*s %d %s %d %d\n",
-		&deb, &fin,&poids,&brin,EstId,&EstDeb,&EstFin) != EOF)
-    {
-      if ((strcmp(EstId,PEstId) == 0) && 
-	  (EstDeb > ThisBlock->LEnd) && 
-	  (deb > ThisBlock->End))
-	// si EstId et PEstId sont égaux, alors il y a un EST en cours
-	// de meme nom on verifie que c'est bien compatible en terme
-	// de position (sur l'est et le genomique)
-	  {
-	    ThisEST->NGaps++;
-	    ThisBlock->AddBlockAfter(deb-1,fin-1,EstDeb,EstFin);
-	    ThisBlock = ThisBlock->Next;
-	  }
-      else {
-	NumEST++;
-	OneEST = new Hits(EstId,poids,brin,deb-1,fin-1,EstDeb,EstFin);
-	ThisBlock = OneEST->Match;
-	tmp = PEstId;
-	PEstId = EstId;
-	EstId = tmp;
-
-	if (AllEST == NULL) {
-	  AllEST = OneEST;
-	  ThisEST = OneEST;
-	}
-	else {
-	  ThisEST->Next = OneEST;
-	  ThisEST = OneEST;
-	}
-      }
-    }
+  AllEST = AllEST->ReadFromFile(ESTFile,NumEST);
   
-  fprintf(stderr,"%d sequences read.\n",NumEST);
+  fprintf(stderr,"%d sequences read.\n",*NumEST);
   fflush(stderr);
 
   // on trie les hits sur le nombre de gaps et la
   // longueur. L'idee est d'eliminer les epissages partiels et de
   // favoriser la longueur de toute facon.
   
-  Hits **HitTable = new Hits *[NumEST];
+  Hits **HitTable = new Hits *[*NumEST+1];
   
-  for (i = 0, ThisEST = AllEST; i < NumEST; i++, ThisEST = ThisEST->Next)
+  for (i = 0, ThisEST = AllEST; i < *NumEST; i++, ThisEST = ThisEST->Next)
     HitTable[i] = ThisEST;
+
+  // pour memorise le premier (a liberer)
+  HitTable[*NumEST] = AllEST;
   
-  qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompare);
+  qsort((void *)HitTable,*NumEST,sizeof(void *),HitsCompare);
   
-  for (int index = 0; index < NumEST; index++) {
+  for (int index = 0; index < *NumEST; index++) {
     
     int Inc;
     int ExonInc,TheStrand;
@@ -338,7 +353,7 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
     
     ThisEST = HitTable[index];
 
-    // Le vertibale  brin est a priori indetermine
+    // Le veritable  brin est a priori indetermine
     TheStrand = HitForward | HitReverse;
     Inc = 0;
     ExonInc = 0;
@@ -446,6 +461,7 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
     
     if (Inc) {
       Rejected++;
+      ThisEST->Rejected = TRUE;
       
       ThisBlock = ThisEST->Match;
       while (ThisBlock) {
@@ -491,6 +507,14 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
 	    ESTMatch[i] |= TheStrand;
 	}
 
+	if (ThisBlock->Prev == NULL)
+	  for (i = ThisBlock->Start; i<LBoundary; i++)
+	    ESTMatch[i] |= TheStrand << HitToMLeft;
+
+	if (ThisBlock->Next == NULL)
+	  for (i = RBoundary+1; i <= ThisBlock->End; i++)
+	    ESTMatch[i] |= TheStrand << HitToMRight;
+	
 	if ((ThisBlock->Prev != NULL) && 
 	    abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6) {
 	  
@@ -537,11 +561,158 @@ void ESTAnalyzer(FILE *ESTFile,   unsigned char    *ESTMatch,
     }
 
   if (Rejected)
-    fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,NumEST);
-  delete AllEST;
-  delete HitTable;
+    fprintf(stderr,"A total of %d/%d sequences rejected\n",Rejected,*NumEST);
+  return HitTable;
 }
 
+// -------------------------------------------------------------------------
+// Verif coherence EST: calcul le nombre de nuc. coherents et
+// incoherents avec les match est
+// debut/fin/etat: debut et fin de la seq. dont l'etat est etat
+// Match: resume des hits EST
+// cons/incons: retour des valeurs
+// -------------------------------------------------------------------------
+void CheckConsistency(int debut, int fin, int etat, 
+		      unsigned char *Match, int * cons, int* incons)
+{
+  int i, con = 0, inc = 0;
+
+  // les valeurs qui sont coherentes avec chaque etat
+  const unsigned char Consistent[18] = {
+    HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
+    HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
+    GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
+    GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
+    0,
+    HitForward|MForward|GapForward,HitForward|MForward|GapForward,
+    HitReverse|MReverse|GapReverse,    HitReverse|MReverse|GapReverse,
+    0
+  };
+  
+ const unsigned char MaskConsistent[18] = {
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Gap|Margin,    Gap|Margin,    Gap|Margin,
+    Gap|Margin,    Gap|Margin,    Gap|Margin,
+    0,
+    Margin|Hit|Gap,    Margin|Hit|Gap,
+    Margin|Hit|Gap,    Margin|Hit|Gap,
+    0
+  };
+
+ if (debut == -1) debut = 0;
+
+ for (i = debut; i <fin; i++) {
+   // y a t'il de l'info
+   if (Match[i]) {
+     // y a t'il une info incoherente avec l'etat
+     if (Match[i] & ~MaskConsistent[etat]) 
+       inc++;
+     else if (Match[i] & Consistent[etat]) 
+       con++;
+     else 
+       inc++;
+   }
+ }
+
+ *cons = con;
+ *incons = inc;
+}
+// -------------------------------------------------------------------------
+void ESTSupport(char * Choice, int debut, int fin, Hits **HitTable, int Size)
+{
+  static int EstIndex = 0;
+  int supported = 0;
+  unsigned char *Sup;
+  Block *ThisBlock;
+  int ConsistentEST,i;
+  int from,to,ESTEnd;
+  
+  if (fin < debut) return;
+     
+  Sup = new unsigned char[fin-debut+1]; 
+
+  for (i=0; i <= fin-debut; i++)
+    Sup[i]=0;
+  
+  while (EstIndex < Size) {
+    // le dernier transcrit exploitable est passe
+    if (HitTable[EstIndex]->Start > fin) break;
+
+    ConsistentEST = 1;
+    ThisBlock = HitTable[EstIndex]->Match;
+
+     while (ThisBlock && ConsistentEST) {
+       // si on a un gap
+       if (ThisBlock->Prev != NULL) {
+	 // intersection
+	 from = Max(debut,ThisBlock->Prev->End+1);
+	 to = Min(fin,ThisBlock->Start-1);
+	 
+	 for (i = from; i <=to; i++)
+	   if ((Choice[i+1] < IntronF1) || Choice[i+1] == InterGen5 || Choice[i+1] == InterGen3)
+	     ConsistentEST = 0;
+       }
+
+       from = Max(debut,ThisBlock->Start);
+       to = Min(fin,ThisBlock->End);
+       ESTEnd = ThisBlock->End;
+
+
+       for (i = from; i <= to; i++)
+	 if (((Choice[i+1] > ExonR3) && (Choice[i+1] <= InterGen5)) || Choice[i+1] == InterGen3)
+	   ConsistentEST = 0;
+
+       ThisBlock = ThisBlock->Next;
+     }
+      
+
+     printf("cDNA  %-12s %7d %7d     %4d     %2d introns     ",HitTable[EstIndex]->Name,
+	    HitTable[EstIndex]->Start+1,ESTEnd+1,
+	    HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
+
+     if (HitTable[EstIndex]->Rejected) printf("Filtered ");
+     else if (!ConsistentEST) printf("Inconsistent");
+     else {
+       if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
+	 printf("Full Support");
+       else printf("Support");
+       
+
+       ThisBlock = HitTable[EstIndex]->Match;
+       while (ThisBlock) {
+	 if (ThisBlock->Prev != NULL) {
+	   // intersection
+	   from = Max(debut,ThisBlock->Prev->End+1);
+	   to = Min(fin,ThisBlock->Start-1);
+
+	   for (i= from; i <= to; i++) 
+	     if (!Sup[i-debut]) {
+	       Sup[i-debut] = TRUE;
+	       supported++;
+	     }
+	 }
+
+	 from = Max(debut,ThisBlock->Start);
+	 to = Min(fin,ThisBlock->End);
+
+	 for (i= from; i <= to; i++) 
+	   if (!Sup[i-debut]) {
+	     Sup[i-debut] = TRUE;
+	     supported++;
+	   }
+	 ThisBlock = ThisBlock->Next;
+       }
+     }
+     printf("\n");
+     EstIndex++;
+  }
+
+  printf("      Gene         %7d %7d     %5d     supported on %d bases\n",debut,fin,fin-debut+1,
+	 supported);
+  delete Sup;
+  return;
+}
 // -------------------------------------------------------------------------
 //            MAIN
 // -------------------------------------------------------------------------
@@ -561,9 +732,11 @@ int main  (int argc, char * argv [])
   char             grname[FILENAME_MAX+1];
   int              EstM;
   double           FsP,StartP,StartB,StopP,TransStartP,TransStopP;
-  double           AccP,AccB,DonP,DonB,BlastS[3],EstP;
+  double           AccP[2],AccB[2],DonP[2],DonB[2],BlastS[3],EstP;
   unsigned char *ForcedIG;
-
+  Hits **HitTable = NULL;
+  int NumEST;
+  
   char *EugDir;
 
   // prior on the initial state, selon Sato et al 1999 / Terryn et
@@ -591,6 +764,7 @@ int main  (int argc, char * argv [])
   resy = 400;                 // y res for graph. output
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
+  estanal = FALSE;             // don't try to analyze EST support
   blastopt = -1;              // don't try to read a blast file
   ncopt = FALSE;                   //don't try to read a non coding input
   normopt = 1;                // normalize across frames
@@ -614,11 +788,12 @@ int main  (int argc, char * argv [])
   fflush(stderr);
   
   if (fscanf(fp,
-"%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %d",
-	     clef,&FsP,&StartP,&StartB,&StopP,&TransStartP,&TransStopP,&AccP,&AccB,
-	     &DonP,&DonB,&BlastS[0],&BlastS[1],&BlastS[2],&EstP,&EstM,
+"%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d %d %d %d %d", 
+	     clef,&FsP,&StartP,&StartB,&StopP,&TransStartP,&TransStopP,
+             &AccP[0],&AccB[0],&DonP[0],&DonB[0],&AccP[1],&AccB[1],&DonP[1],&DonB[1],
+	     &BlastS[0],&BlastS[1],&BlastS[2],&EstP,&EstM,
 	     &MinEx,&MinIn,&MinSg,&MinFlow,&MinConv,&MinDiv,
-	     &MinFivePrime,&MinThreePrime) != 24)
+	     &MinFivePrime,&MinThreePrime) != 28)
     {
       fprintf(stderr, "Incorrect parameter file EuGene.par\n");
       exit(2);
@@ -639,7 +814,7 @@ int main  (int argc, char * argv [])
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "drshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
+  while ((carg = getopt(argc, argv, "Edrshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
             
@@ -734,6 +909,10 @@ int main  (int argc, char * argv [])
 
       if (blastopt > 7) errflag++;
       break; 
+
+    case 'E':
+      estanal = TRUE;
+      break;
       
     case 'd':           /* -d  use cDNA blastn results      */
       estopt = TRUE;
@@ -865,7 +1044,7 @@ int main  (int argc, char * argv [])
   fprintf(stderr, "Reading splice site files...");  
   fflush(stderr);
 
-  Read_Splice(fstname,1,Data_Len, Acc[0], Don[0],AccP,AccB,DonP,DonB);
+  Read_Splice(fstname,1,Data_Len,Acc[0],Don[0],AccP,AccB,DonP,DonB);
   fprintf(stderr,"forward,");
   fflush(stderr);
 
@@ -922,7 +1101,8 @@ int main  (int argc, char * argv [])
     strcpy(tempname,fstname);
     strcat(tempname,".est");
     fEST = FileOpen(NULL,tempname, "r");
-    ESTAnalyzer(fEST,ESTMatch,EstM,Don,Acc);
+    NumEST = 0;
+    HitTable = ESTAnalyzer(fEST,ESTMatch,EstM,Don,Acc,&NumEST);
     fclose(fEST);
   }
 
@@ -1089,7 +1269,8 @@ int main  (int argc, char * argv [])
   // 14 UTR 3' direct
   // 15 UTR 5' reverse
   // 16 UTR 3' reverse
-  
+  // 17 Intergenique
+
   char *Choice;
   BackPoint *LBP[18];
   REAL BestU;
@@ -1104,28 +1285,6 @@ int main  (int argc, char * argv [])
     LBP[i]->Next = LBP[i];
     LBP[i]->Prev = LBP[i];
   }
-  
-  const int ExonF1 = 0;
-  const int ExonF2 = 1;
-  const int ExonF3 = 2;
-  const int ExonR1 = 3;
-  const int ExonR2 = 4;
-  const int ExonR3 = 5;
-
-  const int IntronF1 = 6;
-  const int IntronF2 = 7;
-  const int IntronF3 = 8;
-  const int IntronR1 = 9;
-  const int IntronR2 = 10;
-  const int IntronR3 = 11;
-
-  const int InterGen5 = 12;
-  const int InterGen3 = 17;
-
-  const int UTR5F = 13;
-  const int UTR5R = 15;
-  const int UTR3F = 14;
-  const int UTR3R = 16;
 
   
   // Codant
@@ -1667,6 +1826,13 @@ int main  (int argc, char * argv [])
   if (graph) ClosePNG();
 
   delete TheSeq;
+
+  if (HitTable) {
+    delete HitTable[NumEST];
+    delete HitTable;
+  }
+
+  HitTable = NULL;
   
   delete [] Stop[0];
   delete [] Stop[1];
