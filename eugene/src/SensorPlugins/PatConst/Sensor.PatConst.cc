@@ -31,18 +31,23 @@ SensorPatConst :: SensorPatConst (int n) : Sensor(n)
     pattern[i] = tolower(pattern[i]);
   
   // Type initialisation
-  type = Type_Start;
-  if(!strcmp(patType, "start"))          sigTypeIndex = DATA::Start;
-  else if(!strcmp(patType, "insertion")) sigTypeIndex = DATA::Ins;
-  else if(!strcmp(patType, "deletion"))  sigTypeIndex = DATA::Del;
-  else if(!strcmp(patType, "transstart"))sigTypeIndex = DATA::tStart;
-  else if(!strcmp(patType, "transstop")) sigTypeIndex = DATA::tStop;
+
+  if(!strcmp(patType, "start")) {
+    sigTypeIndex = DATA::Start;   type = Type_Start;  }
+  else if(!strcmp(patType, "insertion")) {
+    sigTypeIndex = DATA::Ins;     type = Type_FS; }
+  else if(!strcmp(patType, "deletion"))  {
+    sigTypeIndex = DATA::Del;     type = Type_FS; }
+  else if(!strcmp(patType, "transstart")) {
+    sigTypeIndex = DATA::tStart;  type = Type_TStart; }
+  else if(!strcmp(patType, "transstop")) {
+    sigTypeIndex = DATA::tStop;   type = Type_TStop; }
   else if(!strcmp(patType, "donor")) {
-    type = Type_Splice;                  sigTypeIndex = DATA::Don; }
+    sigTypeIndex = DATA::Don;     type = Type_Don; }
   else if(!strcmp(patType, "acceptor")) {
-    type = Type_Splice;                  sigTypeIndex = DATA::Acc; }
+    sigTypeIndex = DATA::Acc;     type = Type_Acc; }
   else if(!strcmp(patType, "stop")) {
-    type = Type_Stop;                    sigTypeIndex = DATA::Stop;}
+    sigTypeIndex = DATA::Stop;     type = Type_Stop;}
   else {
     fprintf(stderr, "Error \"%s\" undefined type in the parameter file"
 	    " for PatConst.pat[%d]\n", patType, GetNumber());
@@ -59,7 +64,6 @@ SensorPatConst :: SensorPatConst (int n) : Sensor(n)
 SensorPatConst :: ~SensorPatConst ()
 {
 }
-
 // ----------------------
 //  Init.
 // ----------------------
