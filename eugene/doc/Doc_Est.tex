@@ -42,6 +42,12 @@ The behavior of the plugin is controlled by 4 parameters:
   inside intronless EST. If a given Donor with scores $a|b$ such that
   $\log(\frac{a}{b}) >T$ then the intronless EST is rejected because
   it goes through a very strong donor site.
+  \item \texttt{Est.MinDangling} gives the minimum length of the first and last
+  match region in a genomic spliced alignment. If the length is below this, then it is assumed to be a false match and
+it is ignored.
+\item \texttt{Est.MaxIntron} gives the maximum length for the first and last gap (representing introns) in
+a spliced alignment. If the length exceeds this maximum, then the corresponding regions are
+ignored in the alignment.
 \end{itemize}
 
 The sensor is also capable of a postprocessing analyse described below
