@@ -37,7 +37,6 @@ class  DNASeq
   unsigned short *Sequence;
 
   void UpdateMarkov();
-  unsigned short Nuc2Code(char Ch);
 
  public:
   DNASeq ();
@@ -63,7 +62,9 @@ class  DNASeq
   double Markov(int);
   double MarkovR(int);
   double GC_AT(int);
-  
+
+  unsigned short Nuc2Code(char Ch);
+
   void Transfer(int Pos, int Len, char *To, int mode);
   
   unsigned short Unambit (int pos);
