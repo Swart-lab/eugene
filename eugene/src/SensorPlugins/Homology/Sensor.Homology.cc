@@ -81,7 +81,7 @@ void SensorHomology :: Init (DNASeq *X)
   FILE *ftblastx;
   FILE *protmatfile;
   int deb,fin,phase,ProtDeb,ProtFin,sens,score;
-  float bits;
+  double bits;
   REAL GlobalBits;
   const int MaxHitLen  = 15000;
   char tampon;
@@ -133,7 +133,7 @@ void SensorHomology :: Init (DNASeq *X)
   }
 
   while (!feof(ftblastx)) {
-    if (fscanf(ftblastx,"%d %d %f %*s %d %*s %d %d",
+    if (fscanf(ftblastx,"%d %d %lf %*s %d %*s %d %d",
 	       &deb, &fin, &bits, &phase, &ProtDeb, &ProtFin) != 6) {
       if (feof(ftblastx)) break;
       fprintf(stderr,"error(1) in tblastxfile format %s\n",tempname);
