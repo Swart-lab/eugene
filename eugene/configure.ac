@@ -67,6 +67,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/Makefile
 	src/SensorPlugins/0_SensorTk/Makefile
 	src/SensorPlugins/0_SensorTk/GetData/Makefile
+	src/SensorPlugins/AnnotaStruct/Makefile
 	src/SensorPlugins/ATGpr/Makefile
 	src/SensorPlugins/BlastX/Makefile
 	src/SensorPlugins/Est/Makefile
