@@ -10,7 +10,7 @@ is derived from the sequence name by adding the \texttt{.gff} suffix.\\
 \\
 Depending of the value of the parameter \texttt{Tester.Make}, two independant tests could be done. If \texttt{Tester.Make} is set to TEST, the positive positions (where the sensor detects a signal) are analysed (compared to the thruth). The results are written in a file \texttt{test.<sensorName.gff>}. 
 
-If the parameter \texttt{Tester.Make} is set to SPSN, the positions of the canonical coding of the considered signal (ATG for Start; TAG, TAA, TGA for Stop; AG for acceptor; GT, GC for donors) are analysed. Four variables are computed:
+If the parameter \texttt{Tester.Make} is set to SPSN, the positions of the canonical coding of the considered signal (ATG for Start; TAG, TAA, TGA for Stop; AG for acceptor; GT, GC for donors) are analysed. The considering signal is defined following the value given at the \texttt{Tester.SPSN.Eval} parameter. Four variables are computed:
 \begin{itemize} 
 \item TP, number of True Positive
 \item FN, number of False Negative
@@ -36,7 +36,7 @@ Thres.          Nb      TP      FP      TN      FN      Sens.           Spec.
 \end{Verbatim}
 Where Thres. is the threshold value, Nb is the number of observation of the threshold as a score.\\ 
 \\ 
-To be plotted, specificity and sensibility are also written in the file \texttt{Sensor.<sensorName>.SpSn} and for splice detector sensors only, in the files 
+To be plotted, specificity and sensibility are also written in the file \texttt{Sensor.<sensorName>.SpSn} and if the \texttt{Tester.SPSN.Eval} parameter is set to SPLICE, in the files 
 \texttt{Sensor.<sensorName>.Acc} (for acceptor only), \texttt{Sensor.<sensorName>.Don} (for donor only).\\ 
 Note that specificity and sensitivity are written in the \texttt{.SpSn}, \texttt{.Acc}, \texttt{.Don} files, only if TP+FP and TP+FN are higher than \texttt{Tester.SPSN.MinNumbers}. This to avoid Sp and Sn based on small effective.\\
 \\
@@ -49,7 +49,8 @@ Tester.Make             SPSN      # SPSN, TEST
 Tester.Sensor           EuStop
 Tester.Sensor.Instance  0
 Tester.SPSN.MinNumbers  100       # greater than 0
-Sensor.Tester.use       1      # use Tester sensor
+Tester.SPSN.Eval        STOP      # START, STOP, SPLICE
+Sensor.Tester.use       1         # use Tester sensor
 Sensor.Tester           1         # sensor priority
 \end{Verbatim}
 
