@@ -39,6 +39,7 @@ class OptiAlgorithm {
   Random* Rand;
 
   OptiAlgorithm(void);
+  virtual ~OptiAlgorithm(void) {};
   virtual void Optimize(bool is_chaining) = 0;
   string ReduceName(string s);
 };
