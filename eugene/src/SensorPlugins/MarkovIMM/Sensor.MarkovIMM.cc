@@ -71,7 +71,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
   
   if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
-    fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
+    fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
     exit(2);
   }
   
@@ -82,7 +82,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
   for  (i = 0;  i < 5;  i ++) {
     IMMatrix[i] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
     if (IMMatrix[i]->Read(fp)) {
-      fprintf(stderr,"Model %d unreadable in %s. Aborting.\n",i+1,PAR.getC("matname"));
+      fprintf(stderr,"Model %d unreadable in %s. Aborting.\n",i+1,PAR.getC("MarkovIMM.matname"));
       exit(1);
     } 
     fprintf(stderr,"%d ",i+1);
