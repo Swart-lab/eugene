@@ -66,7 +66,6 @@ class Prediction
   bool IsState (DATA::SigType sig_type, int pos, char strand);
 };
 
-// Les etats
 enum Tracks {
   InitF1 = 0, InitF2 = 1, InitF3 = 2,
   InitR1 = 3, InitR2 = 4, InitR3 = 5,
@@ -78,17 +77,21 @@ enum Tracks {
   TermR1 = 21, TermR2 = 22, TermR3 = 23,
   IntronF1 = 24,IntronF2 = 25, IntronF3 = 26,
   IntronR1 = 27, IntronR2 = 28, IntronR3 = 29,
-  InterGen = 30, 
-  UTR5F = 31, UTR3F = 32, 
-  UTR5R = 33,UTR3R = 34, 
-  IntronU5F = 35, IntronU5R = 36, 
-  IntronU3F = 37, IntronU3R = 38, 
-  NbTracks = 39};
+  IntronF2T = 30, IntronF3TG = 31, IntronF3TA = 32,
+  IntronR3G = 33, IntronR3A = 34, IntronR2AG = 35,
+  InterGen = 36, 
+  UTR5F = 37, UTR3F = 38, 
+  UTR5R = 39,UTR3R = 40, 
+  IntronU5F = 41, IntronU5R = 42, 
+  IntronU3F = 43, IntronU3R = 44, 
+  NbTracks = 45};
 
 const short int State2Phase[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
+					 4,4,4,
+					 -4,-4,-4,
 					 4,4,4,
 					 -4,-4,-4,
 					 0,0,0,0,0,
@@ -100,6 +103,8 @@ const short int State2Frame[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 4,5,6,
 					 -4,-5,-6,
+					 5,6,6,
+					 -6,-6,-5,
 					 0,0,0,0,0,
 					 4,-4,4,-4};
 
