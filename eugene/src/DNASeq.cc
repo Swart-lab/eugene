@@ -1,0 +1,566 @@
+//
+//   T. Schiex
+//
+//     File:  DNAseq.cc
+//     Version:  1.0
+//
+//    Copyright (c) 2000 by Thomas Schiex All rights reserved.
+//    Redistribution is not permitted without the express written
+//    permission of the authors.
+//
+//  Definitions for a class representing DNA seq with ambiguous data
+//  and 6 possible unambiguous versions (6 phases possible completions)
+//
+
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "Const.h"
+#include "DNASeq.h"
+#include <ctype.h>
+#include <stdlib.h>
+#include <assert.h>
+#ifdef STDC_HEADERS
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#include "System.h"
+
+// ---------------------------------------------------------------------
+// Attentiuon, ces tables dependent des codes employes pour coder les
+// nucleotides
+// ---------------------------------------------------------------------
+
+//                            0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+const char  Code2Nuc[16]  = {'-','a','c','m','g','r','s','v','t','w','y','h','k','d','b','n'};
+const char  Code2CNuc[16] = {'-','t','g','k','c','y','s','b','a','w','r','d','m','h','v','n'};
+const char  Code2UNuc[16] = {'-','a','c','c','g','g','c','c','t','t','c','c','t','g','c','c'};
+
+
+const unsigned short Code2UCode[16] = {0    ,CodeA,CodeC,CodeC,
+				       CodeG,CodeG,CodeC,CodeC,
+				       CodeT,CodeT,CodeC,CodeC,
+				       CodeT,CodeG,CodeC,CodeC};
+
+const unsigned short Code2Bit[16]  = {0    ,BitA,BitC,BitC,
+				       BitG,BitG,BitC,BitC,
+				       BitT,BitT,BitC,BitC,
+				       BitT,BitG,BitC,BitC};
+
+const unsigned short Code2CCode[16] = {0    ,CodeT,CodeG,CodeT|CodeG,
+				       CodeC,CodeT|CodeC,CodeG|CodeC,CodeT|CodeG|CodeC,
+				       CodeA,CodeT|CodeA,CodeG|CodeA,CodeT|CodeG|CodeA,
+				       CodeC|CodeA,CodeT|CodeC|CodeA,CodeG|CodeC|CodeA,CodeT|CodeC|CodeA|CodeG};
+
+const unsigned short Code2Code[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+
+//                                     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
+const int Code2NumOne[16]  = {0,  1,  1,  2,  1,  2,  2,  3,  1,  2,  2,  3,  2,  3,  3,  4};
+
+// Traduction
+
+const unsigned char Trad[64] = {'K','N','K','N','T','T','T','T',
+				'R','S','R','S','I','I','M','I',
+				'Q','H','Q','H','P','P','P','P',
+				'R','R','R','R','L','L','L','L',
+				'E','D','E','D','A','A','A','A',
+				'G','G','G','G','V','V','V','V',
+				'*','Y','*','Y','S','S','S','S',
+				'*','C','W','C','L','F','L','F'};
+
+// ---------------------------------------------------------------------
+//  Default constructor.
+// ---------------------------------------------------------------------
+DNASeq :: DNASeq  ()
+{
+  SeqLen = 0;
+  Size = 0;
+  Sequence = NULL;
+}
+
+// ---------------------------------------------------------------------
+//  Construct from a char*
+// ---------------------------------------------------------------------
+DNASeq :: DNASeq  (char* data)
+{
+  int i;
+  
+  SeqLen = strlen(data);
+  Sequence = (unsigned short int *) Safe_malloc (SeqLen * sizeof(unsigned short int));
+  Size = SeqLen;
+
+  for (i = 0; i < SeqLen; i++)
+    Sequence[i] =  Nuc2Code(data[i]);
+
+  UpdateMarkov();
+
+}
+// ---------------------------------------------------------------------     
+//  Construct a  DNASeq  of size L
+// ---------------------------------------------------------------------
+DNASeq :: DNASeq(int L)
+{
+  int  i;
+
+  Sequence = (unsigned short int *) Safe_malloc (L * sizeof(unsigned short int));
+  Size = L;
+  SeqLen = 0;
+
+  Markov0[BitA] = Markov0[BitT] = Markov0[BitG] = Markov0[BitC] = 0.0;
+
+  for  (i = 0;  i < L;  i ++)  Sequence [i] = 0;
+}
+// ---------------------------------------------------------------------
+// Construct a DNASeq from file and store it into Sequence, Allocate
+// memory as needed. Assumes FASTA firts. If no > is found assumes raw
+// DNA every unknown DNA char is replaced by N
+// ---------------------------------------------------------------------
+DNASeq :: DNASeq (FILE * fp)
+{
+  const unsigned int  INCR_SIZE = 10000;
+  const unsigned int  INIT_SIZE = 10000;
+
+  char  *P, Line [MAX_LINE];
+  int  Len;
+  int  Ch;
+
+  // reach the ">"
+  while  ((Ch = fgetc (fp)) != EOF && Ch != '>')
+    ;
+  
+  if  (Ch != EOF) 
+    {
+      fgets (Line, MAX_LINE, fp);
+      Len = strlen (Line);
+      assert (Line [Len - 1] == '\n');
+      P = strtok (Line, " \t\n");
+      if  (P != NULL)
+	{
+	  Len = strlen (P);
+	  Name = (char *)Safe_malloc(sizeof(char)*(Len+1));
+	  strcpy (Name, P);
+	}
+    }
+  else
+    {
+      // Assume the file is not FASTA but RAW DNA - will not work on stdin
+      rewind(fp);
+    }
+
+  Sequence = (unsigned short int *)Safe_malloc(sizeof(unsigned short int)*INIT_SIZE);
+  Size = INIT_SIZE;
+  
+  Len = 0;
+  while  ((Ch = fgetc (fp)) != EOF && Ch != '>')
+    {
+      if (isspace (Ch))
+	continue;
+      
+      if  (Len >= Size)
+	{
+	  Size += INCR_SIZE;
+	  Sequence = (unsigned short int *) Safe_realloc (Sequence, sizeof(unsigned short int)*Size);
+	}
+      Sequence [Len++] = Nuc2Code (Ch);
+    }
+  SeqLen = Len;
+
+  UpdateMarkov();
+
+  return;
+}
+
+// ---------------------------------------------------------------------
+//  Destroy this DNASeq by freeing its memory.
+// ---------------------------------------------------------------------
+DNASeq :: ~ DNASeq  ()
+{
+  free(Sequence);
+}
+
+// ---------------------------------------------------------------------
+//  Return the char at position i
+// ---------------------------------------------------------------------
+
+char DNASeq :: operator [] (int i)
+{
+  if (i >= SeqLen)
+    return Code2Nuc[CodeT|CodeC|CodeA|CodeG];
+  else
+    return  Code2Nuc[Sequence[i] & MASKSEQ];
+}
+// ---------------------------------------------------------------------
+//  Return the complement char at position i
+// ---------------------------------------------------------------------
+
+char DNASeq :: operator () (int i)
+{
+  if (i >= SeqLen)
+    return Code2CNuc[CodeT|CodeC|CodeA|CodeG];
+  else
+    return  Code2CNuc[Sequence[i] & MASKSEQ];
+}
+
+unsigned short DNASeq :: operator () (int i, int mode)
+{
+  if (i >= SeqLen)
+    return CodeT|CodeC|CodeA|CodeG;
+  
+  switch (mode) {
+  case 0:
+    return Code2Code[Sequence[i] & MASKSEQ];
+  case 1:
+    return  Code2CCode[Sequence[i] & MASKSEQ];
+  case 2:
+    return Code2CCode[Sequence[SeqLen-i-1] & MASKSEQ];
+  default:
+    printf("Error, call to DNASeq :: operator () with mode >2\n");
+    exit(1);
+  }
+}
+// ---------------------------------------------------------------------
+//  Print this DNASeq 
+// ---------------------------------------------------------------------
+void  DNASeq :: Print (FILE * fp)
+{
+  int i;
+
+  for (i = 0; i < SeqLen; i++) {
+    fprintf(fp,"%c", (*this)[i]);
+  }
+}
+// ---------------------------------------------------------------------
+// Print a subseq of the DNASeq translated.  Ambiguous codons are
+// translated to X. The from-to is not necessarily the start/end of a
+// codon (partial gene) and the frame of the gene is given.
+// ---------------------------------------------------------------------
+void  DNASeq :: PrintTr (FILE* fp, int from, int to, signed char phase)
+{
+  int loffset,roffset,i,codon,frame,mode = 0;
+  int c1,c2,c3;
+  int len = -1;
+  fprintf(fp,"> %s-%d-%d %d\n",Name,from,to,phase);
+
+  frame = abs(phase) -1;
+  from--;
+  to--;
+
+  if (from < 0) from = 0;
+  if (to >= SeqLen) to = SeqLen-1;
+
+  if (phase < 0) {
+    i= SeqLen - 1 - to;
+    to = SeqLen - 1 - from;
+    from = i;
+    mode = 2;
+  }
+  
+  loffset = (3+ frame - from) % 3;
+  if (loffset) { //codon partiel a gauche
+    from += loffset;
+  }
+  roffset = (to + 4 - frame) %3;
+  if (roffset) { //codon partiel a droite
+    to -= roffset;
+  }
+  
+  for (i = from; i < to; i += 3)
+    {
+      c1 = (*this)(i+2,mode);
+      c2 = (*this)(i+1,mode);
+      c3 = (*this)(i,mode);
+      
+      if (Code2NumOne[c1]*Code2NumOne[c2]*Code2NumOne[c3] != 1)
+	fprintf(fp,"X");
+      else {
+	codon = Code2Bit[c1]+Code2Bit[c2]*4+Code2Bit[c3]*16; 
+	fprintf(fp,"%c",Trad[codon]);
+      }
+      len++;
+      if ((len%FASTA_Len) == FASTA_Len-1) fprintf(fp,"\n");
+    }
+  fprintf(fp,"\n");
+  return;
+}
+// ---------------------------------------------------------------------
+// Update 0th order Markov model probabilities
+// ---------------------------------------------------------------------
+void DNASeq :: UpdateMarkov()
+{
+  int i;
+  double Sum;
+
+  Markov0[BitA] = Markov0[BitT] = Markov0[BitG] = Markov0[BitC] = 0.0;
+
+  for (i = 0; i < SeqLen; i++) 
+    {
+      if (Sequence[i] & CodeA) Markov0[BitA] += 1.0;
+      if (Sequence[i] & CodeT) Markov0[BitT] += 1.0;
+      if (Sequence[i] & CodeG) Markov0[BitG] += 1.0;
+      if (Sequence[i] & CodeC) Markov0[BitC] += 1.0;
+    }
+  Sum = Markov0[BitA] + Markov0[BitT] + Markov0[BitG] + Markov0[BitC];
+  
+  Markov0[BitA] /= Sum;
+  Markov0[BitT] /= Sum;
+  Markov0[BitG] /= Sum;
+  Markov0[BitC] /= Sum;
+
+  return;
+}
+// ---------------------------------------------------------------------
+// Compute 0th order Markov model probabilities on nuc i
+// ---------------------------------------------------------------------
+double DNASeq :: Markov(int i)
+{
+
+  if (i >= SeqLen) return 0.0;
+  
+  return Markov0[Code2Bit[Sequence[i] & MASKSEQ]];
+}
+// ---------------------------------------------------------------------
+// Compute GC/AT probabilities on nuc i
+// ---------------------------------------------------------------------
+double DNASeq :: GC_AT(int i)
+{
+
+  if (i >= SeqLen) return 0.0;
+  
+  if (Code2UCode[Sequence[i] & MASKSEQ] & (CodeA|CodeT))
+    return (Markov0[BitA]+Markov0[BitT])/2.0;
+  else
+    return (Markov0[BitG]+Markov0[BitC])/2.0;
+}
+// ---------------------------------------------------------------------
+// transforms the char for a nucleotide to its corresponding code
+// ---------------------------------------------------------------------
+
+unsigned short DNASeq :: Nuc2Code(char Ch)
+{
+  Ch = tolower (Ch);
+  switch  (Ch)
+    {
+    case  'a' :
+      return CodeA;
+      
+    case  'c' :
+      return CodeC;
+      
+    case  'g' :
+      return CodeG;
+      
+    case  't' :
+      return CodeT;
+      
+    case  's' :   // c ou g
+      return CodeC | CodeG;
+      
+    case  'w' :   // a ou t
+      return CodeA | CodeT;
+      
+    case  'r' :   // a ou g
+      return CodeA | CodeG;
+      
+    case  'y' :   // c ou t
+      return CodeC | CodeT;
+      
+    case  'm' :   // a ou c
+      return CodeA | CodeC;
+      
+    case  'k' :   // g ou t
+      return CodeG | CodeT;
+      
+    case  'b' :   // c, g ou t
+      return CodeC | CodeG | CodeT;
+      
+    case  'd' :   // a, g ou t
+      return CodeA | CodeG | CodeT;
+      
+    case  'h' :   // a, c ou t
+      return CodeA | CodeC | CodeT;
+      
+    case  'v' :   // a, c ou g
+      return CodeA | CodeC | CodeT;
+      
+    case  'n' :
+      return CodeA | CodeC | CodeG | CodeT;
+      
+    default :
+      fprintf (stderr, "Not a DNA character `%c\' in string %s\n", Ch, Name);
+      fprintf (stderr, "Replaced by `N'.\n");
+      return CodeA | CodeC | CodeG | CodeT;
+    }
+}
+
+
+// ---------------------------------------------------------------------
+// Compute the code for the unambiguous version at position pos
+// ---------------------------------------------------------------------
+unsigned short  DNASeq :: Unambit (int pos)
+{
+  return Code2Bit[Sequence[pos]&MASKSEQ];
+}
+
+// ---------------------------------------------------------------------
+// Compute the code for the complement 
+// ---------------------------------------------------------------------
+inline unsigned short Complement (unsigned short code)
+{
+  return Code2CCode[code & MASKSEQ];
+}
+  /* version calculatoire
+{
+  unsigned short res = (code & 1);
+  int i;
+  
+  for (i = 0 ;i < 3 ; i++) {
+    res <<= 1;
+    code >>= 1;
+    res |= (code & 1);
+  }
+
+  return res;
+}
+*/
+// ---------------------------------------------------------------------
+// Transfer |Len| characters from Pos...  to *To and add null
+// terminator.  If Len > 0 go in forward direction; otherwise, go in
+// reverse direction and use complements.  The mode indicates the 
+// type of information used: ambiguous or unambiguous
+// ---------------------------------------------------------------------
+void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
+{
+  long int  i;
+  const char * decode;
+
+  decode = (mode ? Code2UNuc : Code2Nuc);
+  
+  if  (Len > 0) {
+    // We go forward
+    for  (i = 0;  i < Len;  i ++) 
+      To[i] = decode[Sequence[Pos + i] & MASKSEQ];
+   
+    To [i] = '\0';
+  }
+  else  {
+    for  (i = 0;  i < - Len;  i ++) 
+      To[i] = decode[Complement(Sequence[Pos - i] & MASKSEQ)];
+    
+    To [i] = '\0';
+  }
+  
+  return;
+}
+
+// ---------------------------------------------------------------------
+// test if a Stop Codon ends at position i. Returns the number of
+// possible matches with a STOP codon i.e. T{AA,AG,GA}
+// ---------------------------------------------------------------------
+double DNASeq :: IsStop(int i,int sens)
+{
+  int count = 0;
+  int mode = 0;
+
+  if (sens < 0) 
+    { 
+      i = SeqLen - i - 1;
+      mode = 2;
+    }
+  
+  if (((*this)(i,mode) & CodeT) == 0) return 0.0;
+
+  // le cas des TA{A,G}
+  if (((*this)(i+1,mode)) & CodeA) 
+    count += Code2NumOne[(*this)(i+2,mode) & (CodeA|CodeG)]; 
+  
+  // le cas du TGA
+  if (((*this)(i+1,mode) & CodeG) && ((*this)(i+2,mode) & CodeA))
+    count ++;
+  
+  return (double)count/ Degeneracy(i,sens);;
+}
+// ---------------------------------------------------------------------
+// returns a penalty for infrequent start depending on the code of the
+// first nuc. (summed up in case of degeneracy ).
+// ---------------------------------------------------------------------
+double StartTypePenalty(unsigned short code)
+{
+  double pen = 0.0;
+
+  if (code & CodeA) pen += 0.8;
+  if (code & CodeG) pen += 0.1;
+  if (code & CodeT) pen += 0.1;
+  if (code & CodeC) pen += 0.00001;
+
+  return pen;
+}
+// ---------------------------------------------------------------------
+// test is a Start Codon appears at position i ({ATG}TG) returns the
+// probability that the seq is a start codon considering a iid
+// model with uniform distribution (1/4) and taking into account 
+// start frequencies
+// ---------------------------------------------------------------------
+double DNASeq :: IsStart(int i,int sens)
+{
+  unsigned short First;
+  int mode = 0;
+
+  if (sens < 0) 
+    { 
+      i = SeqLen - i - 1;
+      mode = 2;
+    }
+
+  if (((*this)(i+2,mode) & CodeG) == 0) return 0.0;
+  if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
+
+  First = (*this)(i,mode);
+
+  if ((First & (CodeA | CodeT | CodeG)) == 0) return 0.0;
+
+  return StartTypePenalty(First) / Degeneracy(i,sens);
+}
+
+// ---------------------------------------------------------------------
+// Version EUCA
+// ---------------------------------------------------------------------
+
+double DNASeq :: IsEStart(int i,int sens)
+{
+  int mode = 0;
+  
+  if (i >= SeqLen) return 0.0;
+  
+  if (sens < 0) 
+    { 
+      i = SeqLen - i - 1;
+      mode = 2;
+    }
+  
+  if (((*this)(i+2,mode) & CodeG) == 0) return 0.0;
+  if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
+  if (((*this)(i,mode) & CodeA) == 0) return 0.0;
+
+  return 1.0 / Degeneracy(i,sens);
+}
+// ---------------------------------------------------------------------
+// Degeneracy : returns the number of possible codons represented by a
+// degenerated codon
+// ---------------------------------------------------------------------
+unsigned char DNASeq :: Degeneracy(int i, int sens)
+{
+  int mode = 0;
+  
+  if (sens < 0) 
+    { 
+      i = SeqLen - i - 1;
+      mode = 2;
+    }
+  
+  return (Code2NumOne[(*this)(i+2,mode)] *
+	  Code2NumOne[(*this)(i+1,mode)] *
+	  Code2NumOne[(*this)(i,mode)]);
+  
+}
