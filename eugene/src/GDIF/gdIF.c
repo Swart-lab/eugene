@@ -131,7 +131,7 @@ void SaveClosePNG(struct Image *image, int num)
 
   gdImageInterlace(image->im, 1);
   strcpy(TName,FName);
-  sprintf(str,"%d",num);
+  sprintf(str,".%d",num);
   strcat(TName,str);
 #if GIF
   strcat(TName,".gif");
