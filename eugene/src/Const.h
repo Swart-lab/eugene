@@ -13,9 +13,7 @@ const int MAX_LINE = 300;
 const int TRUE  = 1;
 const int FALSE = 0;
 
-
 const double NINFINITY   = log(0.0);
-const REAL RAFLPenalty   = NINFINITY; 
 const REAL IGPenalty     = -1.0; 
 const REAL DontCrossStop = NINFINITY;
 
