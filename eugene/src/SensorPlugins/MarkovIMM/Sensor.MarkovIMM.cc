@@ -82,7 +82,8 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   std::vector<BString_Array*> IMMatrix;
   std::string matrixName;
   bool is_initialised = false;
-  
+  char *tmpdir = new char[FILENAME_MAX+1];
+
   type = Type_Content;
 
 
@@ -110,7 +111,9 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     // update a local variable, copied in the list when initialized
     for (i=0; i<7; i++) IMMatrix.push_back(NULL); 
 
-    if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
+    strcpy(tmpdir, PAR.getC("eugene_dir"));
+    strcat(tmpdir, MODELS_DIR);
+    if (! (fp = FileOpen(tmpdir , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
       fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("MarkovIMM.matname"));
       exit(2);
     }
@@ -153,6 +156,8 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     matrixNameList.push_back(matrixName);
     refCount.push_back(1);
   }
+
+  delete [] tmpdir;
 }
 
 // ----------------------
