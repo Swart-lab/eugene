@@ -199,10 +199,10 @@ void SensorATGpr :: GiveInfo (DNASeq *X, int pos, DATA *d)
 void SensorATGpr :: Plot(DNASeq *X)
 {
   for (int i =0; i < (int)vPosF.size(); i++)
-    PlotBarF(vPosF[i],(vPosF[i]%3)+1,0.5,NORM(log(vValF[i]),4.0),2);
+    PlotStart(vPosF[i],(vPosF[i]%3)+1,NORM(log(vValF[i]),4.0));
 
   for (int i =0; i < (int)vPosR.size(); i++)
-    PlotBarF(vPosR[i],-((X->SeqLen-vPosR[i])%3)-1,0.5,NORM(log(vValR[i]),4.0),2);
+    PlotStart(vPosR[i],-((X->SeqLen-vPosR[i])%3)-1,NORM(log(vValR[i]),4.0));
 }
 
 // ------------------
