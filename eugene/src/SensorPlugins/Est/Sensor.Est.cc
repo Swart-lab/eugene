@@ -963,6 +963,6 @@ int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
     }
     if(index != -1) break;
   }
-  delete Sup;
+  delete [] Sup;
   return supported;
 }
