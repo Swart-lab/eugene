@@ -69,18 +69,19 @@ OptiAlgorithm::OptiAlgorithm(void)
 
 //-------------------------------------------------------
 // return a string with maximum 6 signs
-// if more than 6 letters returns: the 2 first letters + '..' + the 2 last
+// if s has more than 6 letters plus '*' at the end
+// returns: the 2 first letters + '_' + the 3 last (without conting '*')
 //-------------------------------------------------------
 std::string OptiAlgorithm::ReduceName(std::string s)
 {
-  std::string ss, s0, s1, sn2, sn1;
-  int n = s.length();
+  std::string ss, s0, s1, sn3, sn2, sn1;
+  int n = s.length()-1; // ignore the last caracter which is always '*'
   
   if (n > 6) {
-   s0 = s[0]; s1 = s[1]; sn2 = s[n-2]; sn1 = s[n-1];
-   ss = s0 + s1 + ".."+ sn2 + sn1;
+   s0 = s[0]; s1 = s[1]; sn3 = s[n-3]; sn2 = s[n-2]; sn1 = s[n-1];
+   ss = s0 + s1 + "_"+ sn3 + sn2 + sn1;
  } else
-   ss =s;
+   for (int k=0; k<n; k++) ss += s[k];
  
  return ss;
 }
