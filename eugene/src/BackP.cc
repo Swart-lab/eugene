@@ -101,12 +101,12 @@ void BackPoint :: BackTrace (char *Choix)
   etat =It->State;
   It  = It->Origin;
   
-  do {
+  while (It != NULL) {
     for (i = pos; i > It->StartPos; i--) Choix[i] = etat;
     pos = It->StartPos;
     etat = It->State;
     It = It->Origin;
-  }  while (It != NULL);
+  }  
 }
 
 
