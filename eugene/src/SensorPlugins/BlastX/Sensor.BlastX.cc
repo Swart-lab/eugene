@@ -3,13 +3,12 @@
 /******************************************************************
  **                          SensorBlastX                        **
  ******************************************************************
- * Blastx against protein databases, we simply *
+ * Blastx against protein databases, we simply                    *
  * enhance coding probability according to phase Dangerous (NR    *
  * contains translation of frameshifted sequences) another        *
  * possibility would be too forbid introns/intergenic states      *
- * 10 levels of confidence may be used.                            *
- * TODO : distinction between intron forward and reverse
- ******************************************************************/
+ * 10 levels of confidence may be used.                           *
+ *****************************************************************/
 
 extern Parameters PAR;
 
@@ -106,10 +105,15 @@ void SensorBlastX :: Init (DNASeq *X)
 	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",ProtId);
 	continue;
       }
+
+      j= Min(deb,fin);
+      fin= Max(deb,fin);
+      deb= j;
+      j= Min(ProtDeb,ProtFin);
+      ProtFin= Max(ProtDeb,ProtFin);
+      ProtDeb= j;
+
       if (phase < 0) {
-	j   = deb;
-	deb = fin;
-	fin = j;
 	j   = ProtDeb;
 	ProtDeb = ProtFin;
 	ProtFin = j;
