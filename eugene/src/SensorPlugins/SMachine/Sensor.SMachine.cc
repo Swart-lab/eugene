@@ -149,7 +149,7 @@ void SensorSMachine :: ReadSMachineStarts(char *name, int Len)
   double force;
 
   if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "Cannot open splice sites file %s\n", name);
+    fprintf(stderr, "Cannot open start file %s\n", name);
     exit(2);
   }
 
@@ -164,14 +164,14 @@ void SensorSMachine :: ReadSMachineStarts(char *name, int Len)
       vPosF.push_back(pos-1);
       vValF.push_back(force);
     } else if (strcmp(type,"start_rev") == 0) {
-      vPosR.push_back(pos+1);
+      vPosR.push_back(pos);
       vValR.push_back(force);
     } else end = 2;
   }
   fclose(fp);
   
   if (end ==2) {
-    fprintf(stderr, "Error in SpliceMachine splice site file %s, line %d\n", name, len);
+    fprintf(stderr, "Error in SpliceMachine start file %s, line %d\n", name, len);
     exit(2);
   }
 }
