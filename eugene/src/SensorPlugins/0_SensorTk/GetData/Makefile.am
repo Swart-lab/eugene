@@ -17,12 +17,13 @@
 # Contents: compilation of the 0_SensorTk/GetData directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = 
+AM_CXXFLAGS = 
+AM_CFLAGS = 
 
 
 
-bin_PROGRAMS = WAMbuilder
-WAMbuilder_SOURCES = WAMbuilder.cc
-WAMbuilder_LDADD = 
+bin_PROGRAMS = egn_WAMbuilder
+egn_WAMbuilder_SOURCES = WAMbuilder.cc
+egn_WAMbuilder_LDADD = 
 
 CLEANFILES = *~
