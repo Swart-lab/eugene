@@ -76,13 +76,20 @@ if (printopt == 'd')
       printf("\n");
     }
 }
-else if (printopt == 'l')
+else if ((printopt == 'l') || (printopt == 'h'))
 {
   int Starts[6];
   int forward,init,term,Lend,Rend,Phase;
   int Don,Acc;
   char seqn[6];
   char *pos;
+
+  if (printopt == 'h')
+    {
+      printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
+      printf("<center><listing>\n");
+      printf("\n      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
+    }
   
   // Starting condition: 0  = the exon is only partial
   //                     -1 = nothing started yet
@@ -95,6 +102,7 @@ else if (printopt == 'l')
   
   fprintf(stderr,"\nSeq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do   Pr.\n\n");
 
+  
   pos = strstr(argv[sequence],"/seq");
   if (pos  == NULL)
     strcpy(seqn,"     ");
@@ -175,6 +183,12 @@ else if (printopt == 'l')
 	}
     }
   printf("\n");
+  if (printopt == 'h')
+    {
+      printf("</listing></center>\n");
+      OutputHTMLFileNames();
+      printf("</body></html>\n");
+    }
 }
 else
 {
