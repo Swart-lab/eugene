@@ -15,6 +15,7 @@ EuGene.3PrimeDist	utr.dist
 #
 ##### Priors #####
 #
+EuGene.SplicedStopPen   1e999.0
 EuGene.ExonPrior	0.33		# Prior on the initial states
 EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
