@@ -12,9 +12,11 @@
 #include <iostream>
 #include <string>
 
+
 #include "LineSearch.h"
 
 
+#include "../../EuGene/config.h"
 #include "../../EuGene/Param.h"
 #include "../ParaOptimization.h"
 #include "../Random.h"
