@@ -77,7 +77,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([floor gethostbyname gethostname inet_ntoa pow sqrt strchr strspn uname getopt])
+AC_CHECK_FUNCS([floor pow sqrt strchr strspn uname getopt])
 
 #check for OS
 AM_CONDITIONAL(LINUX_OS, test "$OSTYPE" = linux)
