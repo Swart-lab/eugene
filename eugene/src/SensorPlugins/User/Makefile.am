@@ -17,9 +17,9 @@
 # Contents: compilation of the User directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_CXXFLAGS)
 CC = $(CXX)
-YFLAGS = -d
+AM_YFLAGS = -d
 
 
 bin_PROGRAMS = Sensor.User.so

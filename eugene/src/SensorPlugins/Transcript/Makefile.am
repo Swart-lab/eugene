@@ -17,7 +17,7 @@
 # Contents: compilation of the Transcript directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_CXXFLAGS)
 
 
 bin_PROGRAMS = Sensor.Transcript.so

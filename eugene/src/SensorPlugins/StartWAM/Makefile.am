@@ -17,7 +17,7 @@
 # Contents: compilation of the StartWAM directory
 # ------------------------------------------------------------------
 
-CXXFLAGS = $(eugene_CXXFLAGS)
+AM_CXXFLAGS = $(eugene_CXXFLAGS)
 
 
 bin_PROGRAMS = Sensor.StartWAM.so
