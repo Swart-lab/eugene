@@ -151,8 +151,7 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
   for(i=0; i<=DATA::UTR3R; i++)
     printf (" %4.2f",d->contents[i]);
 
-  for(i=0; i<= Signal::Reverse;  i++) {
-//  for(i=0; i< Signal::LastEdge;  i++) {
+  for(i=0; i< Signal::LastEdge;  i++) {
     printf (" ||");
     for (j=0; j<= DATA::Del; j++)
       printf(" %4.2f",d->sig[j].weight[i]);

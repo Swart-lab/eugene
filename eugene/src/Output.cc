@@ -13,11 +13,11 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
   int  estopt    = PAR.getI("Sensor.Est.use");
   
   if (printopt0 == 'd') {
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
     for(int i=0; i<Data_Len ; i++) {
       MS.GetInfoAt   (X, i, &Data);      MS.PrintDataAt (X, i, &Data);
     }
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
   }
   
   else if ((printopt0 == 'l') || (printopt0 == 'a') || (printopt0 == 'g') ||
