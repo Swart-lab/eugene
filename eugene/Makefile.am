@@ -89,32 +89,31 @@ uninstall-local:
 
 # note that $(pkgdatadir) = $(datadir)/$(PACKAGE)
 install-data-hook:
-	if ! [ -d $(datadir) ]; then mkdir $(datadir); fi
-	mkdir $(pkgdatadir)
-	mkdir $(pkgdatadir)/doc 
-	mkdir $(pkgdatadir)/doc/Sequences 
-	mkdir $(pkgdatadir)/web
-	mkdir $(pkgdatadir)/web/Style
-	mkdir $(pkgdatadir)/web/Javascripts
-	mkdir $(pkgdatadir)/web/Images
-	mkdir $(pkgdatadir)/plugins
-	mkdir $(pkgdatadir)/cfg
-	mkdir $(pkgdatadir)/models
-	mkdir $(pkgdatadir)/models/WAM
-	mkdir $(pkgdatadir)/Procedures
-	mkdir $(pkgdatadir)/Procedures/Eval
-	mkdir $(pkgdatadir)/Procedures/Get
-	cp $(srcdir)/doc/EuGeneDoc.pdf $(pkgdatadir)/doc
-	cp $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(pkgdatadir)/doc/Sequences
-	cp $(srcdir)/models/*.dist $(pkgdatadir)/models
-	cp $(srcdir)/models/*.mat $(pkgdatadir)/models
-	cp $(srcdir)/models/*.bin $(pkgdatadir)/models
-	cp $(srcdir)/models/BLOSUM* $(pkgdatadir)/models
-	cp $(srcdir)/models/WAM/WAM* $(pkgdatadir)/models/WAM
-	cp $(srcdir)/web/Style/eugene.css $(pkgdatadir)/web/Style
-	cp $(srcdir)/web/Javascripts/diap.js $(pkgdatadir)/web/Javascripts
-	cp $(srcdir)/web/Images/*.jpg $(pkgdatadir)/web/Images
-	cp $(srcdir)/cfg/eugene.par $(pkgdatadir)/cfg
-	cp src/SensorPlugins/*/*.so $(pkgdatadir)/plugins
-	cp $(srcdir)/Procedures/Eval/egn_evalpred.pl $(pkgdatadir)/Procedures/Eval
-	cp $(srcdir)/Procedures/Get/egn_* $(pkgdatadir)/Procedures/Get
+	install -d $(DESTDIR)/$(pkgdatadir)
+	install -d $(DESTDIR)/$(pkgdatadir)/doc 
+	install -d $(DESTDIR)/$(pkgdatadir)/doc/Sequences 
+	install -d $(DESTDIR)/$(pkgdatadir)/web
+	install -d $(DESTDIR)/$(pkgdatadir)/web/Style
+	install -d $(DESTDIR)/$(pkgdatadir)/web/Javascripts
+	install -d $(DESTDIR)/$(pkgdatadir)/web/Images
+	install -d $(DESTDIR)/$(pkgdatadir)/plugins
+	install -d $(DESTDIR)/$(pkgdatadir)/cfg
+	install -d $(DESTDIR)/$(pkgdatadir)/models
+	install -d $(DESTDIR)/$(pkgdatadir)/models/WAM
+	install -d $(DESTDIR)/$(pkgdatadir)/Procedures
+	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
+	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
+	install $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
+	install $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
+	install $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
+	install $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
+	install $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
+	install $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
+	install $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
+	install $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
+	install $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
+	install $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
+	install $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
+	install src/SensorPlugins/*/*.so  $(DESTDIR)/$(pkgdatadir)/plugins
+	install $(srcdir)/Procedures/Eval/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
+	install $(srcdir)/Procedures/Get/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Get
