@@ -19,18 +19,28 @@
 // Mon Jul 19 16:09:54 1999 : Le Start est traite comme une proba cond.
 // Mon Oct 18 14:58:36 1999 : macs => backP, traitement des longueurs min
 
+// TODO:
+// supprimer Choice
+// remettre Frameshifts
+// alignement cds cDNA et proteines sur les splice sites
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 #include <ctype.h>
 #include <limits.h>
 #include <float.h>
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
+#ifdef __sun
+#include "getopt.h"
+#include <strings.h>
+#endif
+#ifdef __linux__
 #include <getopt.h>
+#include <string.h>
+#endif
 
 //#define STAND 1
 
@@ -43,9 +53,8 @@
 
 #define NORM(x,n) (((n)+(MAX(-(n),x)))/(n))
 
-
 //#define SpliceNOnly
-
+//#define SplicePOnly
 // ------------------ Globals ---------------------
 const int  MODEL_LEN = 9;
 const int  SIMPLE_MODEL_LEN = 6;
@@ -69,6 +78,7 @@ const char Hit           = HitForward    | HitReverse;
 const char MLeft         = MLeftForward  | MLeftReverse;
 const char Gap           = GapForward    | GapReverse;
 const char MRight        = MRightForward | MRightReverse;
+const char Margin        = MRight        | MLeft;
 
 const char NotAHit       = MLeft | MRight | Gap;
 
@@ -103,8 +113,9 @@ extern int      optind;
 #endif
 #endif
 #include "../GDIF/gdIF.h"
+#include "clef.h"
 
-// Les longueurs. Au pif (a part les introns)
+// Les longueurs. 
 
 const int MinIgFlow = 250;
 const int MinIgConv = 150;
@@ -115,26 +126,16 @@ const int MinIn = 50;
 const int MinSg = 150;
 
 // tableau des longueurs min de chaque etat (+ 6 pour les Single)
-const int MinLength[19] = 
+const int MinLength[18] = 
    {MinEx, MinEx, MinEx,MinEx, MinEx, MinEx,
     MinIn, MinIn, MinIn,MinIn, MinIn, MinIn,
-    MinIgFlow, 
     MinSg, MinSg,MinSg, MinSg, MinSg,MinSg};
 
-const unsigned char SwitchMask[19] = 
+const unsigned char SwitchMask[18] = 
    {SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
     SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,SwitchAny,
-    SwitchAny,
     SwitchStart,SwitchStart,SwitchStart,SwitchStop,SwitchStop,SwitchStop,
     };
-
-// les meme en strict (pour les intergeniques)
-const int StrictMinLength[4] =
-   {MinIgFlow, MinIgDiv, MinIgFlow, MinIgConv};
-
-const unsigned char StrictSwitchMask[4] = 
-   {SwitchStop,SwitchStart,SwitchStart,SwitchStop};
-
 
 // ------------------ Globals ---------------------
 
@@ -263,6 +264,7 @@ int main  (int argc, char * argv [])
   long int         Input_Size;
   REAL             Ch_Ct[ALPHABET_SIZE] = {0.0};
   BString_Array    *IMMatrix[5];
+  char             clef[20];
   char             *Data;
   char             printopt;
   char             matname[FILENAME_MAX+1], tempname[FILENAME_MAX+1], fstname[FILENAME_MAX+1];
@@ -270,7 +272,7 @@ int main  (int argc, char * argv [])
   char             seqname[MAX_LINE];
   int              EstM;
   REAL             FsP,StartP,StartB,StopP;
-  REAL             AccP,AccB,DonP,DonB,BlastS,EstP;
+  REAL             AccP,AccB,DonP,DonB,BlastS[3],EstP;
   REAL             ExonPrior,IntronPrior,InterPrior;
   // process args 
   // default values
@@ -283,7 +285,7 @@ int main  (int argc, char * argv [])
   resy = 400;                 // y res for graph. output
   graph = FALSE;              // don't produce a graphical output
   estopt = FALSE;             // don't try to read a EST file
-  blastopt = FALSE;           // don't try to read a blast file
+  blastopt = -1;              // don't try to read a blast file
   normopt = 1;                // normalize across frames
   window  = 97;               // window length
   printopt = 'l';             // short print format 
@@ -305,19 +307,21 @@ int main  (int argc, char * argv [])
   fprintf(stderr,"Loading parameters file...");
   fflush(stderr);
   
-  if (fscanf(fp,"%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d",
-	     &FsP,&StartP,&StartB,&StopP,&AccP,&AccB,
-	     &DonP,&DonB,&BlastS,&EstP,&EstM) != 11)
+  if (fscanf(fp,"%s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d",
+	     clef,&FsP,&StartP,&StartB,&StopP,&AccP,&AccB,
+	     &DonP,&DonB,&BlastS[0],&BlastS[1],&BlastS[2],&EstP,&EstM) != 14)
     {
       fprintf(stderr, "Incorrect parameter file EuGene.par\n");
       exit(2);
     }
   fprintf(stderr,"done\n");
 
+  ReadKey(clef,"EUGENEAT");
+
   // any Frameshift prob below -1000.0 means "not possible"
   if (FsP <= -1000.0) FsP = NINFINITY;
 
-  while ((carg = getopt(argc, argv, "dshbm:w:f:n:o:p:x:y:u:v:g:")) != -1) {
+  while ((carg = getopt(argc, argv, "dshm:w:f:n:o:p:x:y:u:v:g::b::l:")) != -1) {
     
     switch (carg) {
             
@@ -367,13 +371,14 @@ int main  (int argc, char * argv [])
       break;
       
     case 'g':           /* -g "Graphic File"                */
-      strcpy(grname,optarg);
+      if (optarg) strcpy(grname,optarg);
+      else grname[0] = 0;
       graph = TRUE;
       break;
     
     case 'p':           /* print opt: short/long/detailed   */
       printopt = optarg[0];
-      if ((printopt != 's') && (printopt != 'l') && (printopt != 'd'))
+      if ((printopt != 's') && (printopt != 'l') && (printopt != 'd')&& (printopt != 'h'))
 	errflag++;
       break;
       
@@ -393,7 +398,12 @@ int main  (int argc, char * argv [])
       break;
 
     case 'b':           /* -b  use blastx result            */
-      blastopt = TRUE;
+      if (optarg)
+	errflag += !GetIArg(optarg, &blastopt, blastopt);
+      else
+	blastopt = 2;
+
+      if (blastopt > 2) errflag++;
       break; 
       
     case 'd':           /* -d  use cDNA blastn results      */
@@ -419,13 +429,14 @@ int main  (int argc, char * argv [])
   // check usage
   
   if (errflag) {
-    fprintf(stderr, "usage: EuGene [-h] [-m matrix] [-b] [-c] [-p s|l|d] [-w window]\n");
-    fprintf(stderr, "              [-n 0|1|2] [-o offset] [-s] [-f FS prob] FASTA files\n");
+    fprintf(stderr, "usage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|s|l|d] [-w window]\n");
+    fprintf(stderr, "              [-b {level}] [-d] [-o offset] [-g {groutput}] [-u start]\n");
+    fprintf(stderr, "              [-v end] [-l len] [-c olap] [-x xres] [-y yres] FASTA files\n");
     exit(1);
   }
   
   // open matrix
-  
+    
   if (! (fp = OpenFile(matname,  "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n",  matname);
     exit(2);
@@ -450,9 +461,9 @@ int main  (int argc, char * argv [])
     // read fasta file
   
   Input_Size = INIT_SIZE;
-  Data  = (char *) Safe_malloc(Input_Size);
+  Data  = (char *) MyMalloc(Input_Size);
   
-  fp = (*fstname ? File_Open (fstname, "r") : stdin);
+  fp = (*fstname ? FileOpen (fstname, "r") : stdin);
   
   if (fp == NULL) {
     fprintf(stderr, "cannot open fasta file %s\n",  fstname);
@@ -545,6 +556,11 @@ int main  (int argc, char * argv [])
   fprintf(stderr," reverse done\n");
 
   if (graph) {
+    if (grname[0] == 0) {
+      strcpy(grname,fstname);
+      *rindex(grname,'.') = 0; // on enleve l'extension (.fasta typ.)
+    }
+
     if (gfrom != -1) sprintf(grname+strlen(grname),"%d",gfrom);
     if (gto != -1) sprintf(grname+strlen(grname),"-%d",gto);
     
@@ -578,112 +594,119 @@ int main  (int argc, char * argv [])
 
   fprintf(stderr,"done\n");
 
-
+  OpenDoor();
 
   // Blastx against protein databases 1st simple version, we simply
   // enhance coding probability according to phase Dangerous (NR
   // contains translation of frameshifted sequences) another
   // possibility would be too forbid introns/intergenic states
+  // 3 levels of confidence may be used.
  
-  if (blastopt)
+  if (blastopt >= 0)
     {
       FILE *fblast;
-       int deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase;
+       int deb,fin,phase,score,Pfin,ProtDeb,ProtFin,PProtFin,PPhase,level;
        char A[128],B[128];
        char *ProtId, *PProtId,*tmp;
        REAL BScore;
        REAL *BlastScore[6];
-       
-       for (i=0; i<6; i++)
-	 {
-	   BlastScore[i] = new REAL[Data_Len];
-	   for (j=0; j<Data_Len; j++)
-	     BlastScore[i][j] = 0.0;
-	 }
-       
-       strcpy(tempname,fstname);
-       strcat(tempname,".blast");
-       fblast = fopen(tempname, "r");
-       
-       if (fblast == NULL)
-	 {
-	   fprintf (stderr, "ERROR:  Could not open blast file \"%s\"\n", 
-		    tempname);
-	   exit (-1);
-	 }
+       unsigned char *InterBlast;
 
-       
-       A[0] = B[0]= 0;
-       ProtId = A;
-       PProtId = B;
-       PProtFin = -10000;
-
-       fprintf(stderr,"Reading Blastx data...");
+       fprintf(stderr,"Reading Blastx data, level... ");
        fflush(stderr);
-
-       while (fscanf(fblast,
-		     "%d %d %d %*s %d %s %d %d\n", 
-		     &deb, &fin, &score, &phase,ProtId,&ProtDeb,&ProtFin) != EOF) 
-	 {
-	   if (phase < 0) {
-	     j = deb;
-	     deb = fin;
-	     fin = j;
-	     j = ProtDeb;
-	     ProtDeb = ProtFin;
-	     ProtFin = j;
-	   }
-	  
-	   //	     printf("%s match (%d %d) - (%d %d) p. %d/%d, prev %d\n",ProtId,deb,fin,ProtDeb,ProtFin,PPhase,phase,PProtFin);
-	   if ((strcmp(ProtId,PProtId) == 0) && (abs(PProtFin-ProtDeb) <= 8)) {
-	     //	     printf("Sequential hit detected\n");
-
-	     //	     for (i = Pfin; i< deb; i++)
-	       //	       BaseScore[8][i] = (BaseScore[8][i]*100.0)/
-	       //		 (100.0+BlastS);
-	     if (graph) PlotLine(Pfin,deb,PPhase,phase,0.6,0.6,4);
-	   }
-
-	   Pfin = fin;
-	   tmp = PProtId;
-	   PProtId = ProtId;
-	   ProtId = tmp;
-	   PProtFin = ProtFin;
-	   PPhase = phase;
-
-
-	   phase = ph06(phase);
-	   BScore = ((REAL)score)/((REAL)abs(fin-deb));
+       
+       for (level = blastopt; level >= 0; level--)
+	 {	   
+	   strcpy(tempname,fstname);
+	   strcat(tempname,".blast");
+	   i = strlen(tempname);
+	   tempname[i] = '0'+level;
+	   tempname[i+1] = 0;
 	   
-	   for (i = deb-1; i < fin; i++)  
-	     {
+	   fblast = fopen(tempname, "r");
+	   
+	   if (fblast == NULL) continue;
+
+	   for (i = 0; i < 6; i++)  {
+	     BlastScore[i] = new REAL[Data_Len];
+	     for (j=0; j<Data_Len; j++) BlastScore[i][j] = 0.0;
+	   }
+	   
+	   InterBlast  = new unsigned char[Data_Len];
+	   for (j = 0; j < Data_Len; j++) InterBlast[j] = 0;
+       
+	   A[0] = B[0]= 0;
+	   ProtId = A;
+	   PProtId = B;
+	   PProtFin = -10000;
+	   
+	   while (fscanf(fblast,"%d %d %d %*s %d %s %d %d\n", 
+			 &deb, &fin, &score, &phase, ProtId,&ProtDeb,&ProtFin) != EOF) {
+	     if (phase < 0) {
+	       j = deb;
+	       deb = fin;
+	       fin = j;
+	       j = ProtDeb;
+	       ProtDeb = ProtFin;
+	       ProtFin = j;
+	     }
+	     
+	     if ((strcmp(ProtId,PProtId) == 0) && 
+		 (abs(PProtFin-ProtDeb) <= 8)) {
+	       for (i = Pfin+12; i< deb-12; i++) InterBlast[i] = 1;
+	       if (graph) PlotLine(Pfin,deb,PPhase,phase,0.6,0.6,4);
+	     }
+	     
+	     Pfin = fin;
+	     tmp = PProtId;
+	     PProtId = ProtId;
+	     ProtId = tmp;
+	     PProtFin = ProtFin;
+	     PPhase = phase;
+	     
+	     phase = ph06(phase);
+	     BScore = ((REAL)score)/((REAL)abs(fin-deb));
+	     
+	     for (i = deb-1; i < fin; i++)  {
 	       if (BScore > BlastScore[phase][i]) 
 		 BlastScore[phase][i] = BScore;
 	     }
-	 }
+	   }
 
-       fprintf(stderr,"done\n");
-
-       for (i=0; i<6; i++)
-	 {
-	   for (j=0; j<Data_Len; j++)
-	     {
+	   fprintf(stderr,"%d ",level);
+	   fflush(stderr);
+	   
+	   for (i=0; i<6; i++)  {
+	     for (j=0; j<Data_Len; j++)  {
 	       BaseScore[i][j] = 
-		 ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS))/
-		 (100.0+(BlastScore[i][j]*BlastS));
+		 ((BaseScore[i][j]*100.0)+(BlastScore[i][j]*BlastS[level]))/
+		 (100.0+(BlastScore[i][j]*BlastS[level]));
 	       BaseScore[i][12] = (BaseScore[i][12]*100.0)/
-		 (100.0+(BlastScore[i][j]*BlastS));
-	       if (graph && (BlastScore[i][j] > 0.0)) PlotBarI(j,PhaseAdapt(i),0.6,1,4);
-		 
+		 (100.0+(BlastScore[i][j]*BlastS[level]));
+	       if (graph && (BlastScore[i][j] > 0.0)) 
+		 PlotBarI(j,PhaseAdapt(i),0.6,1,4);
 	     }
-	   delete BlastScore[i];
+	     delete BlastScore[i];
+	   }
+       
+	   // Parametre implicite !!!!!
+	   for (j = 0; j < Data_Len; j++)
+	     if (InterBlast[j]) BaseScore[8][j] = (BaseScore[8][j]*100.0)/(101.0);
+	   delete InterBlast;
+	   fclose(fblast);       
 	 }
-       fclose(fblast);
+       fprintf(stderr," done\n");
     }
-  
+  else
 
-  /* Blastn against EST. 
-     1st Simple version: we simply forbid introns during matches */
+  if (!PorteOuverte) {
+    printf("\nThis version of EuGene cannot be executed\n");
+    printf("Contact the author tschiex@toulouse.inra.fr\n");
+    printf("and ask for a free license key\n");
+    exit(2);
+  }
+  
+  /* Blastn against EST */
 
   if (estopt)
     {
@@ -694,14 +717,7 @@ int main  (int argc, char * argv [])
 
        strcpy(tempname,fstname);
        strcat(tempname,".est");
-       fblast = fopen(tempname, "r");
-       
-       if (fblast == NULL)
-	 {
-	   fprintf (stderr, "ERROR:  Could not open EST blast file \"%s\"\n", 
-		    tempname);
-	   exit (-1);
-	 }
+       fblast = FileOpen(tempname, "r");
        
        A[0] = B[0]= 0;
        EstId = A;
@@ -717,7 +733,7 @@ int main  (int argc, char * argv [])
 	 {
 	   //	   printf("seq %s  matche (%d %d) sur (%d %d), prev %d\n",EstId,deb,fin,EstDeb,EstFin,PEstFin);
 
-	   // Use 1 or -1 to encode EST hit. Sign indicates forward/reverse
+	   // Use 1 or -1 to encode EST hit. Sign indicates foward/reverse
 	   for (i = deb-1+EstM; i < fin-EstM; i++)  ESTMatch[i] |= (HitForward << (brin*4));
 	   //	     if (!(ESTMatch[i] & NotAHit)) 
 
@@ -739,7 +755,7 @@ int main  (int argc, char * argv [])
 	     }
 	   }
 	   
-	   Pfin = fin;
+	   Pfin = fin; 
 	   tmp = PEstId;
 	   PEstId = EstId;
 	   EstId = tmp;
@@ -751,13 +767,15 @@ int main  (int argc, char * argv [])
 	 if (graph && (ESTMatch[i] & HitForward)) PlotBarI(i, 4,0.6,1,2);
 	 if (graph && (ESTMatch[i] & HitReverse)) PlotBarI(i, -4,0.6,1,2);
 	 if (Inconsistent(ESTMatch[i])) {
+	   // S'il y a un hit et un gap, on efface tout et on laisse Eugene decider
+	   ESTMatch[i] = 0;
 	   deb = 1;
 	 }
        }
        fclose(fblast);
 
        fprintf(stderr,"done\n");
-       if (deb) 
+       if (deb)
 	 fprintf(stderr,"  -> Warning: inconsistent cDNA data !\n");
     }
 
@@ -775,17 +793,18 @@ int main  (int argc, char * argv [])
   // 9  Intron frame 0
   // 10 Intron frame 1
   // 11 Intron frame 2  
-  // 12 intergenique
+  // 12 intergenique demarrant par un START
+  // 13 intergenique demarrant par un STOP
   
   char *Choice;
-  BackPoint *LBP[13];
+  BackPoint *LBP[14];
   double BestU;
   char best;
   unsigned char Switch;
 
   Choice =  new char[Data_Len+2];
   
-  for (i=0; i<13; i++) {
+  for (i = 0; i < 14; i++) {
     LBP[i] = new BackPoint(i, -1,0.0);
     LBP[i]->Next = LBP[i];
     LBP[i]->Prev = LBP[i];
@@ -809,26 +828,30 @@ int main  (int argc, char * argv [])
   LBP[11]->Update(log(IntronPrior/6.0)/2.0);
   
   LBP[12]->Update(log(InterPrior)/2.0);
-  
+  LBP[13]->Update(log(InterPrior)/2.0);
+
+
   REAL  maxi, PBest[23];
   BackPoint *PrevBP[23];
 
   for (i = 0; i <= Data_Len; i++) {
     
-    for (k = 0 ; k < 19; k++) 
-      PrevBP[k] = LBP[k%13]->BestUsable(i,SwitchMask[k],MinLength[k],&PBest[k]);
+    for (k = 0 ; k < 18; k++) 
+      PrevBP[k] = LBP[k%12]->BestUsable(i,SwitchMask[k],MinLength[k],&PBest[k]);
+    
+    PrevBP[18] = LBP[13]->StrictBestUsable(i,MinIgFlow,&PBest[18]);
+    PrevBP[19] = LBP[12]->StrictBestUsable(i,MinIgDiv,&PBest[19]);
 
-    for (k = 0; k < 4; k++) 
-      PrevBP[k+19] = LBP[12]->StrictBestUsable(i,StrictSwitchMask[k],StrictMinLength[k],&PBest[k+19]);
+    PrevBP[20] = LBP[12]->StrictBestUsable(i,MinIgFlow,&PBest[20]);
+    PrevBP[21] = LBP[13]->StrictBestUsable(i,MinIgConv,&PBest[21]);
 
-    //    for (k = 0; k < 6; k++) 
-    //      if (PBest[k] != PBest[k+13]) printf("pos %d state %d %f <> %f\n",i,k,PBest[k],PBest[k+13]);
-//     BestU = MAX(PBest[19],PBest[20]);
-//     if (BestU != PBest[12]) printf("pos %d state %d %f <> MAX(%f,%f)\n",
-// 				   i,k,PBest[12],PBest[19],PBest[20]);
-//     BestU = MAX(PBest[21],PBest[22]);
-//     if (BestU != PBest[12]) printf("pos %d state %d %f <> MAX(%f,%f)\n",
-// 				   i,k,PBest[12],PBest[21],PBest[22]);
+
+    //    printf("%d ",i);
+    //    for (k = 0; k < 19; k++)
+    //      printf("%f ",PBest[k]);
+    //    printf("%f ",MAX(PBest[18],PBest[19]));
+    //    printf("\n");
+	
 
     // Codant en forward
     for (k = 0; k<3; k++) {
@@ -861,16 +884,17 @@ int main  (int argc, char * argv [])
       // On prend le meilleur des deux.
 
       if ((i % 3 == k) && Start[0][i] != 0.0) {
+	BestU = PBest[18]+log(Start[0][i]);
+	if (BestU > maxi) {
+	  maxi = BestU;
+	  best = 18;
+	  Switch = SwitchStart;
+	}
+
 	BestU = PBest[19]+log(Start[0][i]);
 	if (BestU > maxi) {
 	  maxi = BestU;
 	  best = 19;
-	  Switch = SwitchStart;
-	}
-	BestU = PBest[20]+log(Start[0][i]);
-	if (BestU > maxi) {
-	  maxi = BestU;
-	  best = 20;
 	  Switch = SwitchStart;
 	}
       }
@@ -892,7 +916,7 @@ int main  (int argc, char * argv [])
       //      a[4] = (k+1)%3;
       
 
-      if (best != k) LBP[k]->InsertNew(((best >= 19) ? 12 : best),Switch,i,maxi,PrevBP[best]);
+      if (best != k) LBP[k]->InsertNew(((best >= 18) ? 31-best : best),Switch,i,maxi,PrevBP[best]);
       
       LBP[k]->Update(log(BaseScore[k][i])+((ESTMatch[i] & Gap) != 0)*EstP);
     }
@@ -928,17 +952,17 @@ int main  (int argc, char * argv [])
       //
       // On prend le meilleur des deux.
 
-      if (((Data_Len-i) % 3 == k-3) && Stop[1][i]) {// && !(ESTMatch[i] & Gap)) {
+      if (((Data_Len-i) % 3 == k-3) && Stop[1][i] && !(ESTMatch[i] & Margin)) {
+	BestU = PBest[20]-StopP;
+	if (BestU > maxi) {
+	  maxi = BestU;
+	  best = 20;
+	  Switch = SwitchStop;
+	}
 	BestU = PBest[21]-StopP;
 	if (BestU > maxi) {
 	  maxi = BestU;
 	  best = 21;
-	  Switch = SwitchStop;
-	}
-	BestU = PBest[22]-StopP;
-	if (BestU > maxi) {
-	  maxi = BestU;
-	  best = 22;
 	  Switch = SwitchStop;
 	}
       }
@@ -959,56 +983,73 @@ int main  (int argc, char * argv [])
       //	b[4] = LR[i%2][((k+1) % 3)+3]+FsP;
       //	a[4] = ((k+1) % 3)+3;
       
-      if (best != k) LBP[k]->InsertNew(((best >= 19) ? 12 : best),Switch,i,maxi,PrevBP[best]);
+      if (best != k) LBP[k]->InsertNew(((best >= 19) ? best-8 : best),Switch,i,maxi,PrevBP[best]);
       
       LBP[k]->Update(log(BaseScore[k][i]) + ((ESTMatch[i] & Gap) != 0)*EstP);
     }
 
     // Intergenique
-
+    // cas 1 on ameliore sur les STOPS (13)
     maxi = NINFINITY;
 
     // On reste intergenique
-    LBP[12]->Update(log(1.0-Start[0][i])+log(1.0-Start[1][i]));
-    
-    LBP[12]->BestUsable(i,SwitchAny,0,&BestU);
+    LBP[13]->Update(log(1.0-Start[0][i])+log(1.0-Start[1][i]));
+
+    LBP[13]->BestUsable(i,SwitchAny,0,&BestU);
     if (BestU > maxi) {
       maxi = BestU;
-      best = 12;
+      best = -1;
     }
- 
-    // Forward
-    for (k = 0; k<3; k++) {
+
+    // From forward => STOP => LBP[13]
+    for (k = 0; k < 3; k++) {
       // - on quitte un codant
       // y a-t-il un Stop en phase ?
-      if ((i % 3 == k) && Stop[0][i]) {// && !(ESTMatch[i] & Gap)) {
-	BestU = PBest[k+13]-StopP;
+      if ((i % 3 == k) && Stop[0][i] && !(ESTMatch[i] & Margin)) {
+	BestU = PBest[k+12]-StopP;
 	if (BestU > maxi) {
 	  maxi = BestU;
-	  best = k+13;
+	  best = k+12;
 	  Switch = SwitchStop;
 	}
       }
     }
+    
+    if (best != -1) LBP[13]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
 
-    // Reverse
+    LBP[13]->Update(log(BaseScore[8][i]));
+    
+    // cas 2 on ameliore sur les STARTS (12)
+    maxi = NINFINITY;
+
+    // On reste intergenique
+    LBP[12]->Update(log(1.0-Start[0][i])+log(1.0-Start[1][i]));
+
+    LBP[12]->BestUsable(i,SwitchAny,0,&BestU);
+    if (BestU > maxi) {
+      maxi = BestU;
+      best = -1;
+    }
+ 
+    // From reverse => START => LBP[12]
     for (k = 3; k < 6; k++) {
       // - on quitte un codant
       // y a-t-il un Start en phase ?
       if (((Data_Len-i) % 3 == k-3) && Start[1][i] != 0.0) {
-	BestU = PBest[k+13]+log(Start[1][i]);
+	BestU = PBest[k+12]+log(Start[1][i]);
 	if (BestU > maxi) {
 	  maxi = BestU;
-	  best = k+13;
+	  best = k+12;
 	  Switch = SwitchStart;
 	}
       }
     }
       
-    if (best != 12) LBP[12]->InsertNew(best % 13,Switch,i,maxi,PrevBP[best]);
+    if (best != -1) LBP[12]->InsertNew(best % 12,Switch,i,maxi,PrevBP[best]);
       
     LBP[12]->Update(log(BaseScore[8][i]));
-      
+
+  
     // Introns de phase k (Forward)
     for (k = 0; k<3; k++) {
 
@@ -1075,8 +1116,9 @@ int main  (int argc, char * argv [])
   LBP[10]->Update(log(IntronPrior/6.0)/2.0);
   LBP[11]->Update(log(IntronPrior/6.0)/2.0);
   LBP[12]->Update(log(InterPrior)/2.0);
+  LBP[13]->Update(log(InterPrior)/2.0);
 
-  for (i = 0; i < 13; i++) {
+  for (i = 0; i < 14; i++) {
     PrevBP[i] = LBP[i]->BestUsable(Data_Len+1,SwitchAny,0,&BestU);    
     LBP[i]->InsertNew(i,0xFF,Data_Len+1,BestU,PrevBP[i]);
   }
@@ -1085,7 +1127,7 @@ int main  (int argc, char * argv [])
   LBP[0]->BestUsable(Data_Len+1,SwitchAny,0,&maxi);
   j = 0;
 
-  for (i = 1; i < 13 ; i++) {
+  for (i = 1; i < 14 ; i++) {
     LBP[i]->BestUsable(Data_Len+1,SwitchAny,0,&BestU);
     if (BestU > maxi) {
       maxi = BestU;
@@ -1095,9 +1137,12 @@ int main  (int argc, char * argv [])
 
   LBP[j]->BackTrace(Choice);
   
-  for  (i = 0;  i < 13;  i ++) LBP[i]->Zap();
+  for  (i = 0;  i < 14;  i ++) LBP[i]->Zap();
 
-
+  if (!PorteOuverte) {
+    exit(2);
+  }
+  
   fprintf(stderr,"Optimal path length = %#f\n",maxi);
 
   if (graph) PlotPredictions(Choice,BaseScore,Stop,Start,Acc,Don);
