@@ -44,9 +44,10 @@ void SensorMarkovConst :: Init (DNASeq *X)
 void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   if ((X->Markov0[BitG] + X->Markov0[BitC]) > minGC &&
-      (X->Markov0[BitG] + X->Markov0[BitC]) <= maxGC) {
-    for(int i=0;i<6;i++)
-      d->contents[i] += log(transCodant); //Exon
+      (X->Markov0[BitG] + X->Markov0[BitC]) <= maxGC)
+    {
+      for(int i=0;i<6;i++)
+	d->contents[i] += log(transCodant); //Exon
       
       d->contents[6] += log(transIntron); //IntronF
       d->contents[7] += log(transIntron); //IntronR

@@ -9,7 +9,6 @@
 class SensorMarkovConst : public Sensor
 {
  private:
-  REAL value;
   double transCodant, transIntron, transInter, transUTR5, transUTR3;
   double minGC,maxGC;
 
