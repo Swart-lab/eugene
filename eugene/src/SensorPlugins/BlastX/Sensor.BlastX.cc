@@ -379,7 +379,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 
       // Si fin de gene ou fin seq gene en cours
       if ((state <= TermR3 && stateNext >= InterGen) ||
-	  (i==0 && (state <= IntronR3 || state == UTR3R || state == UTR5F))) {
+	  (i==0 && (state <= IntronR3))) {
 	endCDS = pos;
 	if (pprocess == 1) {
 	  printf("      CDS (prot.)  %7d %7d    %5d     ",
