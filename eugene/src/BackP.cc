@@ -1,19 +1,27 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
-//   T. Schiex
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
 //
-//     File:  BackP.cc
-//     Version:  1.0
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 //
-//    Copyright (c) 2000 by Thomas Schiex All rights reserved.
-//    Redistribution is not permitted without the express written
-//    permission of the authors.
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
 //
-//  Definitions for a linear time shortest path with constraint alg.
-//
+// $Id$
+// ------------------------------------------------------------------
+// File:     BackP.cc
+// Contents: Definitions for a linear time shortest path with constraint alg.
+// ------------------------------------------------------------------
 
-#include "BackP.h"
 #include <stdio.h>
 #include <math.h>
+
+#include "BackP.h"
+
 #include "System.h"
 
 // ----------------------------------------------------------------

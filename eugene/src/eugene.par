@@ -1,7 +1,4 @@
-#
-# Edité pour EuGeneAS 2.0 (July 8, 2004)
-#
-EuGene.versionPAR	"July 8, 2004"  # Parameter file version (date)
+EuGene.version		3.0
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
@@ -87,6 +84,10 @@ SMachine.startB*		0.308
 #
 # NetGene2 parameters #####
 #
+NG2.accP*[0]	0.903
+NG2.accB*[0]	5.585
+NG2.donP*[0]	0.980
+NG2.donB*[0]	27.670
 NG2.accP*[1]	0.903
 NG2.accB*[1]	5.585
 NG2.donP*[1]	0.980
@@ -94,6 +95,10 @@ NG2.donB*[1]	27.670
 #
 ##### SplicePredictor parameters #####
 #
+SPred.accP*[0]	0.987
+SPred.accB*[0]	3.850
+SPred.donP*[0]	0.929
+SPred.donB*[0]	10.800
 SPred.accP*[1]	0.987
 SPred.accB*[1]	3.850
 SPred.donP*[1]	0.929

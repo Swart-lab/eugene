@@ -1,3 +1,22 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Param.cc
+// Contents: class Parameters
+// ------------------------------------------------------------------
+
 #include "Param.h"
 
 // -----------------------------------------------
@@ -24,7 +43,7 @@ int TestDArg(char *arg)
 // ------------------------
 void Parameters :: initParam (int argc, char * argv[])
 {
-  fprintf(stderr,"EuGene rel. %s",VERSION);
+  fprintf(stderr,"EuGene rel. %s ",VERSION);
   fflush(stderr);
 
   ReadPar(argv[0]);
@@ -36,7 +55,7 @@ void Parameters :: initParam (int argc, char * argv[])
 
   iter = m.begin();  // Cf. : getUseSensor
   
-  fprintf(stderr,"-%s (%s)\n",getC("EuGene.organism"),VERSION_DATE);
+  fprintf(stderr,"- %s\n",getC("EuGene.organism"));
   fprintf(stderr,"Parameters file loaded.\n");
 }
 
@@ -307,9 +326,9 @@ void Parameters :: ReadPar(char *argv)
 
   fclose(fp);
 
-  if(strcmp(getC("EuGene.versionPAR"), VERSION_PAR)) {
-    fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.versionPAR"));
-    fprintf(stderr,"Version %s required\n", VERSION_PAR);
+  if(strcmp(getC("EuGene.version"), VERSION)) {
+    fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.version"));
+    fprintf(stderr,"Version %s required\n", VERSION    );
     exit(2);
   }
 }

@@ -1,20 +1,27 @@
-// ---------------------------------------------------------------
-//   T. Schiex
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
-//     File:  DNAseq.h
-//     Version:  1.0
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
 //
-//    Copyright (c) 2000 by Thomas Schiex All rights reserved.
-//    Redistribution is not permitted without the express written
-//    permission of the authors.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 //
-//  Definitions for a class representing DNA seq with ambiguous data
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     DNASeq.cc
+// Contents: Definitions for a class representing DNA seq with ambiguous data
 //  and 6 possible unambiguous versions (6 phases possible completions)
-// ---------------------------------------------------------------
+// ------------------------------------------------------------------
 
 
 #ifndef  DNASEQ_H_INCLUDED
 #define  DNASEQ_H_INCLUDED
+
 #include <stdio.h>
 
 const unsigned short MASKSEQ = 0x000F;

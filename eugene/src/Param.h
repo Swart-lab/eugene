@@ -1,19 +1,36 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Param.h
+// Contents: class Parameters
+// ------------------------------------------------------------------
+
 #ifndef  PARAM_H_INCLUDED
 #define  PARAM_H_INCLUDED
 
-#include <map>
-#include <vector>
-
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "../config.h"
 #endif
 
+#include <map>
+#include <vector>
 #include <string>
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #else
@@ -22,14 +39,9 @@
 #endif
 #endif
 
-
-
 #include "Const.h"
 #include "System.h"
 
-const char VERSION[FILENAME_MAX+1]     = "2.0";
-const char VERSION_DATE[FILENAME_MAX+1]     = "July 8, 2004";
-const char VERSION_PAR[FILENAME_MAX+1]     = "July 8, 2004";
 extern char   *optarg;   
 extern int     optind;
 

@@ -1,26 +1,45 @@
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     System.cc
+// Contents: utilitary functions
+// ------------------------------------------------------------------
+
+
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "../config.h"
 #endif
-#include "System.h"
+
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
-
-
 #include <time.h>
 #include <string>
-#include "Const.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/times.h>
 
-
 #if defined (__sun)
 #include <ieeefp.h>
 int isinf(double x) { return !finite(x) && x==x; }
 #endif
+
+#include "Const.h"
+#include "System.h"
 
 
 // ------------------------------------------------------------------

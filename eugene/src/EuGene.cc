@@ -1,13 +1,26 @@
-//-----------------------------------------------------------------------------
-//  This program finds exons/introns and intergenic regions (including UTR)
-//  Copyright T. Schiex 1999
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
-//  $Id$
-//-----------------------------------------------------------------------------
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     EuGene.cc
+// Contents: This program finds exons/introns and intergenic regions (including UTR)
 // Manage T/TG/TA for introns in coding regions.
+// ------------------------------------------------------------------
+
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "../config.h"
 #endif
 
 #include <cstdio>
@@ -21,7 +34,6 @@
 #include <cerrno>
 #include <unistd.h>
 #include <string.h>
-
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif
@@ -36,7 +48,7 @@
 #include "PenaltyDist.h"
 #include "Output.h"
 #include "Prediction.h"
-#include "../Parametrization/ParaOptimization.h"
+#include "Parametrization/ParaOptimization.h"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024

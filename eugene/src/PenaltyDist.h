@@ -1,17 +1,37 @@
-#ifndef  PENALTYD_H_INCLUDED
-#define  PENALTYD_H_INCLUDED
-
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     PenaltyDist.h
+// Contents: Definitions for length penalties with bounded arbitrary dist. followed by linear
+// cost, includes a minimum and maximum len.
 // A class to represent length penalties. The penalty can be arbitrary
 // up to a given length and then linearly interpolated for further
 // length.  Considering prob. distributions this means we have an
 // exponential tail. INFINITE costs are allowed.
+// ------------------------------------------------------------------
+
+#ifndef  PENALTYD_H_INCLUDED
+#define  PENALTYD_H_INCLUDED
+
+#ifdef HAVE_CONFIG_H
+#include "../config.h"
+#endif
 
 #include <vector>
 #include <math.h>
 #include <cstdio>
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 class PenaltyDist
 {
