@@ -224,7 +224,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: affichagevaleurs(
 
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2index(int indice) const
 {
-  int i,j;
+  int i,j = 0;
   if(indice<nbrevaleurs){
     for (i=0;i<=lgrmax;i++){
       if (indice>=indexlgrmots[i]) j=indexlgrmots[i];
@@ -237,7 +237,7 @@ template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2index(int i
 
 template<class CHAINE, typename T> int TabChaine<CHAINE,T> :: indice2lgrmot(int indice) const
 {
-  int i,j;
+  int i,j = 0;
   if(indice<nbrevaleurs){
     for (i=0;i<=lgrmax;i++){
       if (indice>=indexlgrmots[i]) j=i;
