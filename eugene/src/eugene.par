@@ -1,8 +1,8 @@
 #
-# Edité pour EuGeneAS 1.57 (220803)
+# Edité pour EuGeneAS 1.58 (280803)
 #
 EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	22_08_03        # Parameter file version (date)
+EuGene.versionPAR	28_08_03        # Parameter file version (date)
 EuGene.PluginsDir       ./PLUGINS/      # the plugins directory
 #
 ##### Minimum lengths #####
@@ -122,6 +122,17 @@ Est.estP	-0.4
 Est.estM	6
 Est.utrP	0.35
 Est.utrM	5
+#
+##### Riken sensor parameters #####
+#
+Riken.StrandRespect			1
+Riken.Min_est_diff			100
+Riken.Max_overlap			60
+Riken.Max_riken_length			60000
+Riken.Max_riken_est_length		3000
+Riken.Min_riken_length			120 
+Riken.Min_riken_est_length		10
+Riken.RAFLPenalty			-120.0
 #
 ##### Proteic similarity sensor parameters #####
 #
