@@ -11,11 +11,11 @@ SEQ1A.1.3	Intr    -       3962    4047       86     -2      -3    4048    3961  
 SEQ1A.1.2	Intr    -       4131    4280      150     -2      -1    4281    4130   100.0  
 SEQ1A.1.1	Init    -       4555    4657      103     -1      -3    4658    4554   100.0  
 SEQ1A.1.0	Utr5    -       4658    4775      118     NA      NA      NA      NA    58.0  
-SEQ1A.2.0	Utr5    -       5247    5513      267     NA      NA      NA      NA     0.0  
-SEQ1A.3.0	Utr5    -       5785    6104      320     NA      NA      NA      NA   100.0  
-SEQ1A.4.0	Utr5    -       6204    6246       43     NA      NA      NA      NA   100.0  
-SEQ1A.5.0	Utr5    -       6348    6404       57     NA      NA      NA      NA   100.0  
-SEQ1A.6.0	Utr5    -       6492    6657      166     NA      NA      NA      NA    43.0  
+SEQ1A.1.0	Utr5    -       5247    5513      267     NA      NA      NA      NA     0.0  
+SEQ1A.1.0	Utr5    -       5785    6104      320     NA      NA      NA      NA   100.0  
+SEQ1A.1.0	Utr5    -       6204    6246       43     NA      NA      NA      NA   100.0  
+SEQ1A.1.0	Utr5    -       6348    6404       57     NA      NA      NA      NA   100.0  
+SEQ1A.1.0	Utr5    -       6492    6657      166     NA      NA      NA      NA    43.0  
 
 SEQ2A.1.1	Intr    +          1      37       37   Unk.      +1       0      38     0.0  
 SEQ2A.1.2	Intr    +       1131    1222       92     +2      +2    1130    1223     0.0  
@@ -88,9 +88,9 @@ SEQ6A.1.9	Intr    +       5399    5519      121     +3      +3    5398    5520  
 SEQ6A.1.10	Intr    +       5719    5763       45     +1      +1    5718    5764   100.0  
 SEQ6A.1.11	Term    +       5886    6041      156     +1      +3    5885    6042   100.0  
 SEQ6A.1.0	Utr3    +       6042    6184      143     NA      NA      NA      NA   100.0  
-SEQ6A.2.0	Utr3    +       6244    6815      572     NA      NA      NA      NA     0.0  
-SEQ6A.3.0	Utr3    +       7207    7841      635     NA      NA      NA      NA     0.0  
-SEQ6A.4.0	Utr3    +       7911    8037      127     NA      NA      NA      NA     0.0  
+SEQ6A.1.0	Utr3    +       6244    6815      572     NA      NA      NA      NA     0.0  
+SEQ6A.1.0	Utr3    +       7207    7841      635     NA      NA      NA      NA     0.0  
+SEQ6A.1.0	Utr3    +       7911    8037      127     NA      NA      NA      NA     0.0  
 
 SEQ7A.1.1	Intr    +          1     113      113   Unk.      +2       0     114     0.0  
 SEQ7A.1.2	Intr    +        203     559      357     +2      +1     202     560     0.0  
@@ -99,10 +99,10 @@ SEQ7A.1.4	Intr    +       1740    1810       71     +2      +2    1739    1811  
 SEQ7A.1.5	Intr    +       1986    2061       76     +1      +3    1985    2062    86.0  
 SEQ7A.1.6	Term    +       2202    2410      209     +2      +2    2201    2411   100.0  
 SEQ7A.1.0	Utr3    +       2411    3037      627     NA      NA      NA      NA    29.0  
-SEQ7A.2.0	Utr3    +       3134    3461      328     NA      NA      NA      NA     0.0  
-SEQ7A.3.0	Utr3    +       3967    4910      944     NA      NA      NA      NA     0.0  
-SEQ7A.4.0	Utr3    +       5460    5983      524     NA      NA      NA      NA    23.0  
-SEQ7A.5.0	Utr3    +       6121    7313     1193     NA      NA      NA      NA    31.0  
+SEQ7A.1.0	Utr3    +       3134    3461      328     NA      NA      NA      NA     0.0  
+SEQ7A.1.0	Utr3    +       3967    4910      944     NA      NA      NA      NA     0.0  
+SEQ7A.1.0	Utr3    +       5460    5983      524     NA      NA      NA      NA    23.0  
+SEQ7A.1.0	Utr3    +       6121    7313     1193     NA      NA      NA      NA    31.0  
 
 SEQ8A.1.0	Utr3    -        141     190       50     NA      NA      NA      NA   100.0  
 SEQ8A.1.0	Utr3    -        260     343       84     NA      NA      NA      NA   100.0  
@@ -121,8 +121,8 @@ SEQ8A.1.-6	Intr    -       7080    7154       75     -2      -3    7155    7079 
 SEQ8A.1.-7	Intr    -       7212    7607      396     -2      -3    7608    7211   100.0  
 SEQ8A.1.-8	Init    -       7971    8361      391     -1      -3    8362    7970   100.0  
 SEQ8A.1.0	Utr5    -       8362    8647      286     NA      NA      NA      NA     2.0  
-SEQ8A.2.0	Utr5    -       8955    9411      457     NA      NA      NA      NA     0.0  
-SEQ8A.3.0	Utr5    -       9691    9997      307     NA      NA      NA      NA     0.0  
+SEQ8A.1.0	Utr5    -       8955    9411      457     NA      NA      NA      NA     0.0  
+SEQ8A.1.0	Utr5    -       9691    9997      307     NA      NA      NA      NA     0.0  
 
 SEQ10.1.0	Utr5    +          1      60       60     NA      NA      NA      NA     0.0  
 SEQ10.1.0	Utr5    +        568     901      334     NA      NA      NA      NA    44.0  
@@ -145,13 +145,13 @@ SEQ10.1.14	Intr    +       5241    5423      183     +1      +3    5240    5424 
 SEQ10.1.15	Intr    +       5512    5631      120     +1      +1    5511    5632   100.0  
 SEQ10.1.16	Term    +       5735    5782       48     +1      +2    5734    5783   100.0  
 SEQ10.1.0	Utr3    +       5783    6594      812     NA      NA      NA      NA    26.0  
-SEQ10.2.0	Utr3    +       6677    6740       64     NA      NA      NA      NA     0.0  
-SEQ10.3.0	Utr3    +       6955    7557      603     NA      NA      NA      NA     0.0  
-SEQ10.4.0	Utr3    +       7688    8078      391     NA      NA      NA      NA     0.50 
-SEQ10.5.0	Utr3    +       9010    9673      664     NA      NA      NA      NA   100.0  
-SEQ10.6.0	Utr3    +       9868   10220      353     NA      NA      NA      NA   100.0  
-SEQ10.7.0	Utr3    +      10786   12538     1753     NA      NA      NA      NA    23.0  
-SEQ10.8.0	Utr3    +      12617   13147      531     NA      NA      NA      NA     0.0  
+SEQ10.1.0	Utr3    +       6677    6740       64     NA      NA      NA      NA     0.0  
+SEQ10.1.0	Utr3    +       6955    7557      603     NA      NA      NA      NA     0.0  
+SEQ10.1.0	Utr3    +       7688    8078      391     NA      NA      NA      NA     0.50 
+SEQ10.1.0	Utr3    +       9010    9673      664     NA      NA      NA      NA   100.0  
+SEQ10.1.0	Utr3    +       9868   10220      353     NA      NA      NA      NA   100.0  
+SEQ10.1.0	Utr3    +      10786   12538     1753     NA      NA      NA      NA    23.0  
+SEQ10.1.0	Utr3    +      12617   13147      531     NA      NA      NA      NA     0.0  
 
 SEQ11.1.1	Intr    +       2114    2255      142     +3      +3    2113    2256     0.0  
 SEQ11.1.2	Intr    +       2354    2485      132     +1      +2    2353    2486     0.0  
@@ -165,9 +165,9 @@ SEQ11.1.9	Intr    +       3933    4126      194     +1      +3    3932    4127  
 SEQ11.1.10	Intr    +       4637    5357      721     +3      +3    4636    5358   100.0  
 SEQ11.1.11	Term    +       5883    6044      162     +1      +3    5882    6045   100.0  
 SEQ11.1.0	Utr3    +       6045    6357      313     NA      NA      NA      NA    68.0  
-SEQ11.2.0	Utr3    +       6454    6744      291     NA      NA      NA      NA     0.0  
-SEQ11.3.0	Utr3    +       7064    7145       82     NA      NA      NA      NA     0.0  
-SEQ11.4.0	Utr3    +       7300    8044      745     NA      NA      NA      NA     0.0  
+SEQ11.1.0	Utr3    +       6454    6744      291     NA      NA      NA      NA     0.0  
+SEQ11.1.0	Utr3    +       7064    7145       82     NA      NA      NA      NA     0.0  
+SEQ11.1.0	Utr3    +       7300    8044      745     NA      NA      NA      NA     0.0  
 
 SEQ12.1.0	Utr3    -          1     100      100     NA      NA      NA      NA     0.0  
 SEQ12.1.0	Utr3    -        239     621      383     NA      NA      NA      NA     0.0  
@@ -212,16 +212,16 @@ SEQ16.1.2	Intr    +       2193    2255       63     +1      +3    2192    2256  
 SEQ16.1.3	Intr    +       2344    2583      240     +1      +1    2343    2584   100.0  
 SEQ16.1.4	Term    +       2670    3341      672     +1      +3    2669    3342   100.0  
 SEQ16.1.0	Utr3    +       3342    4037      696     NA      NA      NA      NA    63.0  
-SEQ16.2.0	Utr3    +       4182    4284      103     NA      NA      NA      NA   100.0  
-SEQ16.3.0	Utr3    +       4402    4475       74     NA      NA      NA      NA   100.0  
-SEQ16.4.0	Utr3    +       4597    4698      102     NA      NA      NA      NA   100.0  
-SEQ16.5.0	Utr3    +       5076    5167       92     NA      NA      NA      NA   100.0  
-SEQ16.6.0	Utr3    +       5232    5320       89     NA      NA      NA      NA   100.0  
-SEQ16.7.0	Utr3    +       5432    5593      162     NA      NA      NA      NA   100.0  
-SEQ16.8.0	Utr3    +       5863    5947       85     NA      NA      NA      NA   100.0  
-SEQ16.9.0	Utr3    +       6066    7107     1042     NA      NA      NA      NA    25.0  
-SEQ16.10.0	Utr3    +       7191    7678      488     NA      NA      NA      NA     0.0  
-SEQ16.11.0	Utr3    +       7834    8115      282     NA      NA      NA      NA     0.0  
+SEQ16.1.0	Utr3    +       4182    4284      103     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       4402    4475       74     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       4597    4698      102     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       5076    5167       92     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       5232    5320       89     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       5432    5593      162     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       5863    5947       85     NA      NA      NA      NA   100.0  
+SEQ16.1.0	Utr3    +       6066    7107     1042     NA      NA      NA      NA    25.0  
+SEQ16.1.0	Utr3    +       7191    7678      488     NA      NA      NA      NA     0.0  
+SEQ16.1.0	Utr3    +       7834    8115      282     NA      NA      NA      NA     0.0  
 
 SEQ17.1.0	Utr3    -          1    1256     1256     NA      NA      NA      NA    33.0  
 SEQ17.1.0	Utr3    -       1483    1665      183     NA      NA      NA      NA     0.0  
@@ -256,9 +256,9 @@ SEQ18.1.3	Intr    -      13325   13416       92     -3      -3   13417   13324  
 SEQ18.1.2	Intr    -      13553   13614       62     -1      -2   13615   13552     0.0  
 SEQ18.1.1	Init    -      13687   13746       60     -1      -2   13747   13686     0.0  
 SEQ18.1.0	Utr5    -      13747   13965      219     NA      NA      NA      NA     0.0  
-SEQ18.2.0	Utr5    -      14134   14368      235     NA      NA      NA      NA     0.0  
-SEQ18.3.0	Utr5    -      14437   14537      101     NA      NA      NA      NA     0.0  
-SEQ18.4.0	Utr5    -      14627   14722       96     NA      NA      NA      NA     0.0  
+SEQ18.1.0	Utr5    -      14134   14368      235     NA      NA      NA      NA     0.0  
+SEQ18.1.0	Utr5    -      14437   14537      101     NA      NA      NA      NA     0.0  
+SEQ18.1.0	Utr5    -      14627   14722       96     NA      NA      NA      NA     0.0  
 
 SEQ19.1.1	Intr    +       1947    2182      236     +1      +3    1946    2183   100.0  
 SEQ19.1.2	Intr    +       2683    2761       79     +3      +2    2682    2762   100.0  
@@ -269,13 +269,13 @@ SEQ19.1.6	Intr    +       3366    3407       42     +1      +3    3365    3408  
 SEQ19.1.7	Intr    +       3501    3655      155     +1      +3    3500    3656   100.0  
 SEQ19.1.8	Term    +       3743    3839       97     +3      +3    3742    3840   100.0  
 SEQ19.1.0	Utr3    +       3840    4065      226     NA      NA      NA      NA   100.0  
-SEQ19.2.0	Utr3    +       4196    4905      710     NA      NA      NA      NA     0.0  
-SEQ19.3.0	Utr3    +       5003    5259      257     NA      NA      NA      NA     0.11 
-SEQ19.4.0	Utr3    +       5341    5773      433     NA      NA      NA      NA     0.100
-SEQ19.5.0	Utr3    +       6755    7331      577     NA      NA      NA      NA     0.0  
-SEQ19.6.0	Utr3    +       7810    8936     1127     NA      NA      NA      NA     0.0  
-SEQ19.7.0	Utr3    +       8993    9027       35     NA      NA      NA      NA     0.0  
-SEQ19.8.0	Utr3    +       9129    9741      613     NA      NA      NA      NA     0.0  
+SEQ19.1.0	Utr3    +       4196    4905      710     NA      NA      NA      NA     0.0  
+SEQ19.1.0	Utr3    +       5003    5259      257     NA      NA      NA      NA     0.11 
+SEQ19.1.0	Utr3    +       5341    5773      433     NA      NA      NA      NA     0.100
+SEQ19.1.0	Utr3    +       6755    7331      577     NA      NA      NA      NA     0.0  
+SEQ19.1.0	Utr3    +       7810    8936     1127     NA      NA      NA      NA     0.0  
+SEQ19.1.0	Utr3    +       8993    9027       35     NA      NA      NA      NA     0.0  
+SEQ19.1.0	Utr3    +       9129    9741      613     NA      NA      NA      NA     0.0  
 
 SEQ21.1.0	Utr5    +        403     451       49     NA      NA      NA      NA     0.0  
 SEQ21.1.0	Utr5    +        548     710      163     NA      NA      NA      NA     0.0  
@@ -318,8 +318,8 @@ SEQ22.1.3	Intr    -      10147   10638      492     -1      -1   10639   10146  
 SEQ22.1.2	Intr    -      11365   11433       69     -1      -1   11434   11364     0.0  
 SEQ22.1.1	Init    -      11543   11800      258     -1      -3   11801   11542     0.0  
 SEQ22.1.0	Utr5    -      11801   12198      398     NA      NA      NA      NA     0.0  
-SEQ22.2.0	Utr5    -      12299   12775      477     NA      NA      NA      NA     0.0  
-SEQ22.3.0	Utr5    -      12990   13409      420     NA      NA      NA      NA     0.0  
+SEQ22.1.0	Utr5    -      12299   12775      477     NA      NA      NA      NA     0.0  
+SEQ22.1.0	Utr5    -      12990   13409      420     NA      NA      NA      NA     0.0  
 
 SEQ24.1.0	Utr5    +        125     484      360     NA      NA      NA      NA    34.0  
 SEQ24.1.1	Init    +        485    1365      881     +1      +2     484    1366   100.0  
@@ -341,7 +341,7 @@ SEQ24.1.16	Intr    +      10690   10747       58     +1      +1   10689   10748 
 SEQ24.1.17	Intr    +      10834   10919       86     +2      +3   10833   10920   100.0  
 SEQ24.1.18	Term    +      11001   11066       66     +1      +3   11000   11067   100.0  
 SEQ24.1.0	Utr3    +      11067   12504     1438     NA      NA      NA      NA    22.0  
-SEQ24.2.0	Utr3    +      12606   13066      461     NA      NA      NA      NA     0.0  
+SEQ24.1.0	Utr3    +      12606   13066      461     NA      NA      NA      NA     0.0  
 
 SEQ25.1.0	Utr5    +          1     387      387     NA      NA      NA      NA    33.0  
 SEQ25.1.0	Utr5    +        470     545       76     NA      NA      NA      NA   100.0  
@@ -410,7 +410,7 @@ SEQ28.1.18	Intr    +       6240    6306       67     +3      +1    6239    6307 
 SEQ28.1.19	Intr    +       6404    6587      184     +1      +2    6403    6588   100.0  
 SEQ28.1.20	Term    +       6813    6955      143     +2      +2    6812    6956   100.0  
 SEQ28.1.0	Utr3    +       6956    7673      718     NA      NA      NA      NA    57.0  
-SEQ28.2.0	Utr3    +       7747    8955     1209     NA      NA      NA      NA     0.0  
+SEQ28.1.0	Utr3    +       7747    8955     1209     NA      NA      NA      NA     0.0  
 
 SEQ29.1.0	Utr3    -        337     559      223     NA      NA      NA      NA     0.0  
 SEQ29.1.0	Utr3    -        677    1003      327     NA      NA      NA      NA     0.0  
@@ -426,7 +426,7 @@ SEQ29.1.-7	Intr    -       6088    6218      131     -1      -2    6219    6087 
 SEQ29.1.-8	Intr    -       7252    7337       86     -2      -1    7338    7251   100.0  
 SEQ29.1.-9	Init    -       7423    7894      472     -1      -3    7895    7422   100.0  
 SEQ29.1.0	Utr5    -       7895    7994      100     NA      NA      NA      NA    17.0  
-SEQ29.2.0	Utr5    -       9629    9753      125     NA      NA      NA      NA     0.0  
+SEQ29.1.0	Utr5    -       9629    9753      125     NA      NA      NA      NA     0.0  
 
 SEQ30.1.0	Utr3    -          1    1233     1233     NA      NA      NA      NA     0.0  
 SEQ30.1.0	Utr3    -       1361    1444       84     NA      NA      NA      NA     0.0  
@@ -453,16 +453,16 @@ SEQ31.1.6	Intr    +       3145    3247      103     +1      +1    3144    3248  
 SEQ31.1.7	Intr    +       3338    3475      138     +2      +1    3337    3476   100.0  
 SEQ31.1.8	Term    +       3561    3811      251     +2      +2    3560    3812   100.0  
 SEQ31.1.0	Utr3    +       3812    4111      300     NA      NA      NA      NA    52.0  
-SEQ31.2.0	Utr3    +       4335    5015      681     NA      NA      NA      NA    96.0  
-SEQ31.3.0	Utr3    +       5102    5190       89     NA      NA      NA      NA   100.0  
-SEQ31.4.0	Utr3    +       5262    6007      746     NA      NA      NA      NA    58.0  
-SEQ31.5.0	Utr3    +       6088    7230     1143     NA      NA      NA      NA     0.0  
-SEQ31.6.0	Utr3    +       7344    7530      187     NA      NA      NA      NA     0.0  
+SEQ31.1.0	Utr3    +       4335    5015      681     NA      NA      NA      NA    96.0  
+SEQ31.1.0	Utr3    +       5102    5190       89     NA      NA      NA      NA   100.0  
+SEQ31.1.0	Utr3    +       5262    6007      746     NA      NA      NA      NA    58.0  
+SEQ31.1.0	Utr3    +       6088    7230     1143     NA      NA      NA      NA     0.0  
+SEQ31.1.0	Utr3    +       7344    7530      187     NA      NA      NA      NA     0.0  
 
 SEQ33.1.1	Intr    +       1661    1778      118     +1      +2    1660    1779     0.0  
 SEQ33.1.2	Term    +       1990    4490     2501     +2      +3    1989    4491    20.0  
 SEQ33.1.0	Utr3    +       4491    4646      156     NA      NA      NA      NA   100.0  
-SEQ33.2.0	Utr3    +       4704    6362     1659     NA      NA      NA      NA    33.0  
+SEQ33.1.0	Utr3    +       4704    6362     1659     NA      NA      NA      NA    33.0  
 
 SEQ34.1.0	Utr5    +          1     158      158     NA      NA      NA      NA     0.0  
 SEQ34.1.0	Utr5    +        258    1228      971     NA      NA      NA      NA     0.0  
@@ -506,7 +506,7 @@ SEQ34.1.36	Intr    +      12220   12333      114     +1      +1   12219   12334 
 SEQ34.1.37	Intr    +      12429   12509       81     +1      +3   12428   12510   100.0  
 SEQ34.1.38	Term    +      12710   13084      375     +1      +2   12709   13085   100.0  
 SEQ34.1.0	Utr3    +      13085   13423      339     NA      NA      NA      NA    62.0  
-SEQ34.2.0	Utr3    +      13506   15084     1579     NA      NA      NA      NA     0.0  
+SEQ34.1.0	Utr3    +      13506   15084     1579     NA      NA      NA      NA     0.0  
 
 SEQ36.1.0	Utr5    +        132     367      236     NA      NA      NA      NA    62.0  
 SEQ36.1.0	Utr5    +        439     542      104     NA      NA      NA      NA   100.0  
@@ -524,9 +524,9 @@ SEQ36.1.6	Intr    +       5921    5947       27     +1      +2    5920    5948  
 SEQ36.1.7	Intr    +       6036    6059       24     +1      +3    6035    6060   100.0  
 SEQ36.1.8	Term    +       6155    6280      126     +1      +2    6154    6281   100.0  
 SEQ36.1.0	Utr3    +       6281    6660      380     NA      NA      NA      NA    72.0  
-SEQ36.2.0	Utr3    +       6995    7035       41     NA      NA      NA      NA     0.0  
-SEQ36.3.0	Utr3    +       7233    7320       88     NA      NA      NA      NA     0.0  
-SEQ36.4.0	Utr3    +       8048    8280      233     NA      NA      NA      NA     0.0  
+SEQ36.1.0	Utr3    +       6995    7035       41     NA      NA      NA      NA     0.0  
+SEQ36.1.0	Utr3    +       7233    7320       88     NA      NA      NA      NA     0.0  
+SEQ36.1.0	Utr3    +       8048    8280      233     NA      NA      NA      NA     0.0  
 
 SEQ37.1.0	Utr3    -          1     835      835     NA      NA      NA      NA     0.0  
 SEQ37.1.0	Utr3    -       1147    1732      586     NA      NA      NA      NA     0.0  
@@ -598,8 +598,8 @@ SEQ39.1.-12	Intr    -      10737   11131      395     -2      -1   11132   10736
 SEQ39.1.-13	Intr    -      11432   11594      163     -1      -1   11595   11431   100.0  
 SEQ39.1.-14	Init    -      11704   12123      420     -1      -3   12124   11703   100.0  
 SEQ39.1.0	Utr5    -      12124   12513      390     NA      NA      NA      NA    11.0  
-SEQ39.2.0	Utr5    -      12636   12833      198     NA      NA      NA      NA     0.0  
-SEQ39.3.0	Utr5    -      14037   14123       87     NA      NA      NA      NA     0.0  
+SEQ39.1.0	Utr5    -      12636   12833      198     NA      NA      NA      NA     0.0  
+SEQ39.1.0	Utr5    -      14037   14123       87     NA      NA      NA      NA     0.0  
 
 SEQ40.1.0	Utr3    -          1     973      973     NA      NA      NA      NA     0.0  
 SEQ40.1.0	Utr3    -       1188    1651      464     NA      NA      NA      NA     0.0  
@@ -621,7 +621,7 @@ SEQ40.1.-9	Intr    -      11676   11740       65     -1      -3   11741   11675 
 SEQ40.1.-10	Intr    -      11826   11904       79     -3      -2   11905   11825   100.0  
 SEQ40.1.-11	Init    -      12798   12982      185     -1      -3   12983   12797   100.0  
 SEQ40.1.0	Utr5    -      12983   13318      336     NA      NA      NA      NA    30.0  
-SEQ40.2.0	Utr5    -      14831   14875       45     NA      NA      NA      NA     0.0  
+SEQ40.1.0	Utr5    -      14831   14875       45     NA      NA      NA      NA     0.0  
 
 SEQ41.1.0	Utr3    -          1     899      899     NA      NA      NA      NA     0.0  
 SEQ41.1.0	Utr3    -       1045    2000      956     NA      NA      NA      NA    24.0  
@@ -633,14 +633,14 @@ SEQ41.1.-4	Intr    -       3442    3594      153     -2      -2    3595    3441 
 SEQ41.1.-5	Intr    -       3690    3833      144     -2      -3    3834    3689   100.0  
 SEQ41.1.-6	Init    -       3951    4863      913     -1      -3    4864    3950   100.0  
 SEQ41.1.0	Utr5    -       4864    5052      189     NA      NA      NA      NA    79.0  
-SEQ41.2.0	Utr5    -       5432    6658     1227     NA      NA      NA      NA    36.7  
-SEQ41.3.0	Utr5    -       7277    7559      283     NA      NA      NA      NA     0.0  
-SEQ41.4.0	Utr5    -       7643    8550      908     NA      NA      NA      NA     0.0  
-SEQ41.5.0	Utr5    -      10815   10906       92     NA      NA      NA      NA     0.100
-SEQ41.6.0	Utr5    -      11281   11745      465     NA      NA      NA      NA     0.0  
-SEQ41.7.0	Utr5    -      12232   12313       82     NA      NA      NA      NA     0.100
-SEQ41.8.0	Utr5    -      12432   12968      537     NA      NA      NA      NA     1.99 
-SEQ41.9.0	Utr5    -      13223   13328      106     NA      NA      NA      NA     0.100
+SEQ41.1.0	Utr5    -       5432    6658     1227     NA      NA      NA      NA    36.7  
+SEQ41.1.0	Utr5    -       7277    7559      283     NA      NA      NA      NA     0.0  
+SEQ41.1.0	Utr5    -       7643    8550      908     NA      NA      NA      NA     0.0  
+SEQ41.1.0	Utr5    -      10815   10906       92     NA      NA      NA      NA     0.100
+SEQ41.1.0	Utr5    -      11281   11745      465     NA      NA      NA      NA     0.0  
+SEQ41.1.0	Utr5    -      12232   12313       82     NA      NA      NA      NA     0.100
+SEQ41.1.0	Utr5    -      12432   12968      537     NA      NA      NA      NA     1.99 
+SEQ41.1.0	Utr5    -      13223   13328      106     NA      NA      NA      NA     0.100
 
 SEQ42.1.0	Utr3    -        129     203       75     NA      NA      NA      NA     0.0  
 SEQ42.1.0	Utr3    -        339     669      331     NA      NA      NA      NA     0.0  
@@ -656,7 +656,7 @@ SEQ42.1.-7	Intr    -       4395    4421       27     -1      -3    4422    4394 
 SEQ42.1.-8	Intr    -       4504    5829     1326     -1      -2    5830    4503    38.0  
 SEQ42.1.-9	Init    -       6479    6526       48     -1      -1    6527    6478     0.100
 SEQ42.1.0	Utr5    -       6527    6828      302     NA      NA      NA      NA     0.100
-SEQ42.2.0	Utr5    -       7619    9648     2030     NA      NA      NA      NA    57.8  
+SEQ42.1.0	Utr5    -       7619    9648     2030     NA      NA      NA      NA    57.8  
 
 SEQ44.1.0	Utr3    -          1    2000     2000     NA      NA      NA      NA    23.0  
 SEQ44.1.7	Term    -       2001    2090       90     -1      -3    2091    2000   100.0  
@@ -717,9 +717,9 @@ SEQ48.1.4	Intr    +       3240    3274       35     +3      +1    3239    3275  
 SEQ48.1.5	Intr    +       3531    4109      579     +2      +2    3530    4110    92.0  
 SEQ48.1.6	Term    +       4193    4644      452     +2      +1    4192    4645   100.0  
 SEQ48.1.0	Utr3    +       4645    4970      326     NA      NA      NA      NA    36.0  
-SEQ48.2.0	Utr3    +       5084    5281      198     NA      NA      NA      NA     0.0  
-SEQ48.3.0	Utr3    +       5339    5583      245     NA      NA      NA      NA     0.0  
-SEQ48.4.0	Utr3    +       6579    6644       66     NA      NA      NA      NA     0.0  
+SEQ48.1.0	Utr3    +       5084    5281      198     NA      NA      NA      NA     0.0  
+SEQ48.1.0	Utr3    +       5339    5583      245     NA      NA      NA      NA     0.0  
+SEQ48.1.0	Utr3    +       6579    6644       66     NA      NA      NA      NA     0.0  
 
 SEQ49.1.0	Utr5    +          1    1130     1130     NA      NA      NA      NA     8.28 
 SEQ49.1.0	Utr5    +       1333    1400       68     NA      NA      NA      NA     0.100
@@ -746,8 +746,8 @@ SEQ49.1.17	Intr    +       6251    6522      272     +2      +1    6250    6523 
 SEQ49.1.18	Intr    +       6602    6847      246     +1      +2    6601    6848   100.0  
 SEQ49.1.19	Term    +       6932    7078      147     +1      +2    6931    7079   100.0  
 SEQ49.1.0	Utr3    +       7079    7526      448     NA      NA      NA      NA    57.0  
-SEQ49.2.0	Utr3    +       7654    7975      322     NA      NA      NA      NA     0.5  
-SEQ49.3.0	Utr3    +       8039    9078     1040     NA      NA      NA      NA     0.74 
+SEQ49.1.0	Utr3    +       7654    7975      322     NA      NA      NA      NA     0.5  
+SEQ49.1.0	Utr3    +       8039    9078     1040     NA      NA      NA      NA     0.74 
 
 SEQ50.1.27	Intr    -          1     396      396     -3      -2     397       0     0.0  
 SEQ50.1.26	Intr    -        483     884      402     -3      -3     885     482    80.0  
@@ -818,7 +818,7 @@ SEQ52.1.38	Intr    +      12501   12572       72     +1      +3   12500   12573 
 SEQ52.1.39	Intr    +      12672   12872      201     +1      +3   12671   12873     0.0  
 SEQ52.1.40	Term    +      12956   13069      114     +1      +2   12955   13070    69.0  
 SEQ52.1.0	Utr3    +      13070   13999      930     NA      NA      NA      NA    31.0  
-SEQ52.2.0	Utr3    +      14269   14561      293     NA      NA      NA      NA     0.0  
+SEQ52.1.0	Utr3    +      14269   14561      293     NA      NA      NA      NA     0.0  
 
 SEQ53.1.0	Utr3    -          1     416      416     NA      NA      NA      NA     0.0  
 SEQ53.1.0	Utr3    -        516    2000     1485     NA      NA      NA      NA    21.0  
@@ -835,9 +835,9 @@ SEQ53.1.-9	Intr    -       5144    5293      150     -3      -3    5294    5143 
 SEQ53.1.-10	Intr    -       5389    5473       85     -2      -1    5474    5388   100.0  
 SEQ53.1.-11	Init    -       5583    5676       94     -1      -3    5677    5582   100.0  
 SEQ53.1.0	Utr5    -       5677    6037      361     NA      NA      NA      NA    27.0  
-SEQ53.2.0	Utr5    -       6336    6453      118     NA      NA      NA      NA     0.0  
-SEQ53.3.0	Utr5    -       6573    6801      229     NA      NA      NA      NA     0.0  
-SEQ53.4.0	Utr5    -       7632    7676       45     NA      NA      NA      NA     0.0  
+SEQ53.1.0	Utr5    -       6336    6453      118     NA      NA      NA      NA     0.0  
+SEQ53.1.0	Utr5    -       6573    6801      229     NA      NA      NA      NA     0.0  
+SEQ53.1.0	Utr5    -       7632    7676       45     NA      NA      NA      NA     0.0  
 
 SEQ54.1.0	Utr3    -          1     189      189     NA      NA      NA      NA     0.0  
 SEQ54.1.0	Utr3    -        253     338       86     NA      NA      NA      NA    91.0  
@@ -895,21 +895,21 @@ SEQ56.1.4	Intr    +       3124    3210       87     +1      +1    3123    3211  
 SEQ56.1.5	Intr    +       3302    3510      209     +1      +2    3301    3511   100.0  
 SEQ56.1.6	Term    +       3595    3901      307     +3      +2    3594    3902   100.0  
 SEQ56.1.0	Utr3    +       3902    5480     1579     NA      NA      NA      NA    45.0  
-SEQ56.2.0	Utr3    +       5582    6359      778     NA      NA      NA      NA     0.0  
+SEQ56.1.0	Utr3    +       5582    6359      778     NA      NA      NA      NA     0.0  
 
 SEQ57.1.0	Utr3    -          1    2000     2000     NA      NA      NA      NA     7.0  
 SEQ57.1.2	Term    -       2001    2280      280     -3      -1    2281    2000   100.0  
 SEQ57.1.1	Init    -       2686    2765       80     -1      -1    2766    2685   100.0  
 SEQ57.1.0	Utr5    -       2766    2804       39     NA      NA      NA      NA   100.0  
-SEQ57.2.0	Utr5    -       2935    3016       82     NA      NA      NA      NA    18.0  
-SEQ57.3.0	Utr5    -       4902    4969       68     NA      NA      NA      NA     0.0  
-SEQ57.4.0	Utr5    -       5055    5290      236     NA      NA      NA      NA     0.0  
-SEQ57.5.0	Utr5    -       5345    5425       81     NA      NA      NA      NA     0.0  
-SEQ57.6.0	Utr5    -       5521    5835      315     NA      NA      NA      NA     0.0  
-SEQ57.7.0	Utr5    -       5912    5995       84     NA      NA      NA      NA     0.0  
-SEQ57.8.0	Utr5    -       6113    6194       82     NA      NA      NA      NA     0.0  
-SEQ57.9.0	Utr5    -       6493    6584       92     NA      NA      NA      NA     0.0  
-SEQ57.10.0	Utr5    -       6665    6716       52     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       2935    3016       82     NA      NA      NA      NA    18.0  
+SEQ57.1.0	Utr5    -       4902    4969       68     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       5055    5290      236     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       5345    5425       81     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       5521    5835      315     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       5912    5995       84     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       6113    6194       82     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       6493    6584       92     NA      NA      NA      NA     0.0  
+SEQ57.1.0	Utr5    -       6665    6716       52     NA      NA      NA      NA     0.0  
 
 SEQ59.1.0	Utr5    +        454     792      339     NA      NA      NA      NA     0.0  
 SEQ59.1.0	Utr5    +       1354    1542      189     NA      NA      NA      NA     0.0  
@@ -930,10 +930,10 @@ SEQ59.1.10	Intr    +       9676    9927      252     +1      +1    9675    9928 
 SEQ59.1.11	Intr    +      10014   10074       61     +1      +3   10013   10075   100.0  
 SEQ59.1.12	Term    +      10155   10294      140     +2      +2   10154   10295   100.0  
 SEQ59.1.0	Utr3    +      10295   10477      183     NA      NA      NA      NA   100.0  
-SEQ59.2.0	Utr3    +      10537   10925      389     NA      NA      NA      NA     0.0  
-SEQ59.3.0	Utr3    +      11017   11374      358     NA      NA      NA      NA     0.0  
-SEQ59.4.0	Utr3    +      11673   11994      322     NA      NA      NA      NA     0.0  
-SEQ59.5.0	Utr3    +      12087   12294      208     NA      NA      NA      NA     0.0  
+SEQ59.1.0	Utr3    +      10537   10925      389     NA      NA      NA      NA     0.0  
+SEQ59.1.0	Utr3    +      11017   11374      358     NA      NA      NA      NA     0.0  
+SEQ59.1.0	Utr3    +      11673   11994      322     NA      NA      NA      NA     0.0  
+SEQ59.1.0	Utr3    +      12087   12294      208     NA      NA      NA      NA     0.0  
 
 SEQ60.1.0	Utr3    -          1    1815     1815     NA      NA      NA      NA     1.82 
 SEQ60.1.0	Utr3    -       2430    3204      775     NA      NA      NA      NA     0.100
@@ -974,8 +974,8 @@ SEQ61.1.12	Intr    +       7672    8246      575     +2      +3    7671    8247 
 SEQ61.1.13	Intr    +       8866    9255      390     +1      +1    8865    9256    43.0  
 SEQ61.1.14	Term    +       9762   10418      657     +1      +3    9761   10419    60.0  
 SEQ61.1.0	Utr3    +      10419   10896      478     NA      NA      NA      NA    81.0  
-SEQ61.2.0	Utr3    +      10956   11757      802     NA      NA      NA      NA     0.96 
-SEQ61.3.0	Utr3    +      12013   12418      406     NA      NA      NA      NA     0.0  
+SEQ61.1.0	Utr3    +      10956   11757      802     NA      NA      NA      NA     0.96 
+SEQ61.1.0	Utr3    +      12013   12418      406     NA      NA      NA      NA     0.0  
 
 SEQ62.1.1	Intr    +       1984    2105      122     +2      +3    1983    2106   100.0  
 SEQ62.1.2	Intr    +       2352    2533      182     +1      +3    2351    2534   100.0  
@@ -1003,7 +1003,7 @@ SEQ62.1.23	Intr    +      10751   11053      303     +1      +2   10750   11054 
 SEQ62.1.24	Intr    +      11461   11636      176     +1      +1   11460   11637   100.0  
 SEQ62.1.25	Term    +      11732   11798       67     +3      +3   11731   11799   100.0  
 SEQ62.1.0	Utr3    +      11799   11831       33     NA      NA      NA      NA    82.0  
-SEQ62.2.0	Utr3    +      13454   13798      345     NA      NA      NA      NA     0.0  
+SEQ62.1.0	Utr3    +      13454   13798      345     NA      NA      NA      NA     0.0  
 
 SEQ63.1.0	Utr3    -          1      88       88     NA      NA      NA      NA     0.0  
 SEQ63.1.0	Utr3    -        222     391      170     NA      NA      NA      NA     0.0  
@@ -1016,7 +1016,7 @@ SEQ63.1.-3	Intr    -       3188    3276       89     -3      -3    3277    3187 
 SEQ63.1.-4	Intr    -       3374    3444       71     -1      -2    3445    3373   100.0  
 SEQ63.1.-5	Init    -       3990    4106      117     -1      -3    4107    3989   100.0  
 SEQ63.1.0	Utr5    -       4107    5474     1368     NA      NA      NA      NA    48.28 
-SEQ63.2.0	Utr5    -       6580    7288      709     NA      NA      NA      NA     0.0  
+SEQ63.1.0	Utr5    -       6580    7288      709     NA      NA      NA      NA     0.0  
 
 SEQ64.1.1	Intr    +        120     178       59     +3      +1     119     179     0.0  
 SEQ64.1.2	Intr    +       1241    1305       65     +2      +1    1240    1306     0.0  
@@ -1030,7 +1030,7 @@ SEQ64.1.9	Intr    +       6442    6731      290     +1      +1    6441    6732  
 SEQ64.1.10	Intr    +       6821    7049      229     +3      +3    6820    7050     0.0  
 SEQ64.1.11	Term    +       7139    7357      219     +1      +2    7138    7358     0.0  
 SEQ64.1.0	Utr3    +       7358    7485      128     NA      NA      NA      NA     0.0  
-SEQ64.2.0	Utr3    +       8432    9357      926     NA      NA      NA      NA     0.0  
+SEQ64.1.0	Utr3    +       8432    9357      926     NA      NA      NA      NA     0.0  
 
 SEQ65.1.0	Utr5    +          1     417      417     NA      NA      NA      NA     0.0  
 SEQ65.1.0	Utr5    +        732    1500      769     NA      NA      NA      NA    67.0  
@@ -1049,9 +1049,9 @@ SEQ65.1.11	Intr    +       4549    4759      211     +3      +2    4548    4760 
 SEQ65.1.12	Intr    +       4842    4916       75     +1      +3    4841    4917   100.0  
 SEQ65.1.13	Term    +       5008    5061       54     +1      +1    5007    5062   100.0  
 SEQ65.1.0	Utr3    +       5062    5674      613     NA      NA      NA      NA    40.0  
-SEQ65.2.0	Utr3    +       8758    9661      904     NA      NA      NA      NA    44.0  
-SEQ65.3.0	Utr3    +      10687   11220      534     NA      NA      NA      NA     0.56 
-SEQ65.4.0	Utr3    +      11656   12614      959     NA      NA      NA      NA     0.0  
+SEQ65.1.0	Utr3    +       8758    9661      904     NA      NA      NA      NA    44.0  
+SEQ65.1.0	Utr3    +      10687   11220      534     NA      NA      NA      NA     0.56 
+SEQ65.1.0	Utr3    +      11656   12614      959     NA      NA      NA      NA     0.0  
 
 SEQ66.1.0	Utr3    -          1     289      289     NA      NA      NA      NA     0.0  
 SEQ66.1.0	Utr3    -        354     854      501     NA      NA      NA      NA     0.0  
@@ -1067,9 +1067,9 @@ SEQ66.1.-7	Intr    -       3553    3747      195     -1      -3    3748    3552 
 SEQ66.1.-8	Intr    -       3867    3996      130     -3      -1    3997    3866   100.0  
 SEQ66.1.-9	Init    -       4331    4710      380     -1      -3    4711    4330    95.0  
 SEQ66.1.0	Utr5    -       4711    5007      297     NA      NA      NA      NA     6.0  
-SEQ66.2.0	Utr5    -       7419    7615      197     NA      NA      NA      NA    96.4  
-SEQ66.3.0	Utr5    -       7890    7930       41     NA      NA      NA      NA   100.0  
-SEQ66.4.0	Utr5    -       8038    8618      581     NA      NA      NA      NA    24.0  
+SEQ66.1.0	Utr5    -       7419    7615      197     NA      NA      NA      NA    96.4  
+SEQ66.1.0	Utr5    -       7890    7930       41     NA      NA      NA      NA   100.0  
+SEQ66.1.0	Utr5    -       8038    8618      581     NA      NA      NA      NA    24.0  
 
 SEQ67.1.0	Utr3    -          1    2000     2000     NA      NA      NA      NA    20.0  
 SEQ67.1.9	Term    -       2001    2252      252     -1      -2    2253    2000   100.0  
@@ -1123,7 +1123,7 @@ SEQ69.1.-33	Intr    -      12606   12689       84     -1      -3   12690   12605
 SEQ69.1.-34	Intr    -      12873   13047      175     -3      -3   13048   12872    99.0  
 SEQ69.1.-35	Init    -      13183   13403      221     -1      -3   13404   13182   100.0  
 SEQ69.1.0	Utr5    -      13404   13553      150     NA      NA      NA      NA   100.0  
-SEQ69.2.0	Utr5    -      13819   14380      562     NA      NA      NA      NA    28.50 
+SEQ69.1.0	Utr5    -      13819   14380      562     NA      NA      NA      NA    28.50 
 
 SEQ70.1.0	Utr3    -          1     551      551     NA      NA      NA      NA    81.0  
 SEQ70.1.0	Utr3    -        654    1703     1050     NA      NA      NA      NA     0.0  
@@ -1149,9 +1149,9 @@ SEQ70.1.-12	Intr    -      16173   16274      102     -1      -3   16275   16172
 SEQ70.1.-13	Intr    -      17557   17618       62     -2      -2   17619   17556     0.0  
 SEQ70.1.-14	Init    -      18214   18310       97     -1      -1   18311   18213     0.0  
 SEQ70.1.0	Utr5    -      18311   18384       74     NA      NA      NA      NA     0.0  
-SEQ70.2.0	Utr5    -      19284   19315       32     NA      NA      NA      NA     0.0  
-SEQ70.3.0	Utr5    -      19438   19625      188     NA      NA      NA      NA     0.0  
-SEQ70.4.0	Utr5    -      19884   20651      768     NA      NA      NA      NA     0.0  
+SEQ70.1.0	Utr5    -      19284   19315       32     NA      NA      NA      NA     0.0  
+SEQ70.1.0	Utr5    -      19438   19625      188     NA      NA      NA      NA     0.0  
+SEQ70.1.0	Utr5    -      19884   20651      768     NA      NA      NA      NA     0.0  
 
 SEQ71.1.1	Intr    +         49     223      175     +3      +2      48     224     0.0  
 SEQ71.1.2	Intr    +        300     966      667     +1      +3     299     967    25.0  
@@ -1176,8 +1176,8 @@ SEQ71.1.20	Intr    +       4975    5039       65     +3      +2    4974    5040 
 SEQ71.1.21	Intr    +       5154    5231       78     +2      +2    5153    5232   100.0  
 SEQ71.1.22	Term    +       5497    5669      173     +2      +3    5496    5670   100.0  
 SEQ71.1.0	Utr3    +       5670    6965     1296     NA      NA      NA      NA    37.0  
-SEQ71.2.0	Utr3    +       7264    7618      355     NA      NA      NA      NA   100.0  
-SEQ71.3.0	Utr3    +       8323    9494     1172     NA      NA      NA      NA    27.0  
+SEQ71.1.0	Utr3    +       7264    7618      355     NA      NA      NA      NA   100.0  
+SEQ71.1.0	Utr3    +       8323    9494     1172     NA      NA      NA      NA    27.0  
 
 SEQ72.1.0	Utr5    +          1    1137     1137     NA      NA      NA      NA     0.0  
 SEQ72.1.0	Utr5    +       1238    1311       74     NA      NA      NA      NA     0.0  
@@ -1212,8 +1212,8 @@ SEQ72.1.26	Intr    +       9407    9726      320     +2      +1    9406    9727 
 SEQ72.1.27	Intr    +       9917   10543      627     +1      +2    9916   10544     0.0  
 SEQ72.1.28	Term    +      10614   11060      447     +1      +3   10613   11061     0.0  
 SEQ72.1.0	Utr3    +      11061   11389      329     NA      NA      NA      NA     0.0  
-SEQ72.2.0	Utr3    +      11728   12297      570     NA      NA      NA      NA     0.0  
-SEQ72.3.0	Utr3    +      12359   12957      599     NA      NA      NA      NA     0.0  
+SEQ72.1.0	Utr3    +      11728   12297      570     NA      NA      NA      NA     0.0  
+SEQ72.1.0	Utr3    +      12359   12957      599     NA      NA      NA      NA     0.0  
 
 SEQ73.1.0	Utr5    +        658    1586      929     NA      NA      NA      NA    61.0  
 SEQ73.1.0	Utr5    +       1942    1964       23     NA      NA      NA      NA     0.0  
@@ -1248,7 +1248,7 @@ SEQ74.1.10	Intr    +       3876    4007      132     +3      +1    3875    4008 
 SEQ74.1.11	Intr    +       4101    4126       26     +3      +1    4100    4127   100.0  
 SEQ74.1.12	Term    +       4421    5754     1334     +2      +1    4420    5755   100.0  
 SEQ74.1.0	Utr3    +       5755    6139      385     NA      NA      NA      NA    58.0  
-SEQ74.2.0	Utr3    +       7679    7754       76     NA      NA      NA      NA     0.0  
+SEQ74.1.0	Utr3    +       7679    7754       76     NA      NA      NA      NA     0.0  
 
 SEQ75.1.1	Intr    +       1969    2114      146     +2      +3    1968    2115   100.0  
 SEQ75.1.2	Intr    +       2212    2438      227     +1      +1    2211    2439   100.0  
@@ -1288,8 +1288,8 @@ SEQ78.1.-12	Intr    -       5168    5177       10     -1      -2    5178    5167
 SEQ78.1.-13	Intr    -       5422    5598      177     -1      -1    5599    5421   100.0  
 SEQ78.1.-14	Init    -       5837    6052      216     -1      -3    6053    5836   100.0  
 SEQ78.1.0	Utr5    -       6053    6387      335     NA      NA      NA      NA    15.0  
-SEQ78.2.0	Utr5    -       6911    7027      117     NA      NA      NA      NA     0.0  
-SEQ78.3.0	Utr5    -       7752    8052      301     NA      NA      NA      NA     0.0  
+SEQ78.1.0	Utr5    -       6911    7027      117     NA      NA      NA      NA     0.0  
+SEQ78.1.0	Utr5    -       7752    8052      301     NA      NA      NA      NA     0.0  
 
 SEQ79.1.0	Utr5    +        447     631      185     NA      NA      NA      NA     0.0  
 SEQ79.1.0	Utr5    +       1224    1709      486     NA      NA      NA      NA    27.0  
@@ -1309,9 +1309,9 @@ SEQ79.1.12	Intr    +       7672    8017      346     +1      +1    7671    8018 
 SEQ79.1.13	Intr    +       8407    8508      102     +2      +3    8406    8509     0.0  
 SEQ79.1.14	Term    +       8674   10940     2267     +2      +3    8673   10941     0.0  
 SEQ79.1.0	Utr3    +      10941   11088      148     NA      NA      NA      NA     0.0  
-SEQ79.2.0	Utr3    +      11163   11189       27     NA      NA      NA      NA     0.0  
-SEQ79.3.0	Utr3    +      12332   12942      611     NA      NA      NA      NA     2.90 
-SEQ79.4.0	Utr3    +      13200   14485     1286     NA      NA      NA      NA    35.0  
+SEQ79.1.0	Utr3    +      11163   11189       27     NA      NA      NA      NA     0.0  
+SEQ79.1.0	Utr3    +      12332   12942      611     NA      NA      NA      NA     2.90 
+SEQ79.1.0	Utr3    +      13200   14485     1286     NA      NA      NA      NA    35.0  
 
 SEQ80.1.1	Intr    +          1      34       34   Unk.      +2       0      35     0.0  
 SEQ80.1.2	Intr    +        193     289       97     +1      +1     192     290    20.0  
@@ -1445,7 +1445,7 @@ SEQ84.1.17	Intr    +       8060    8409      350     +1      +2    8059    8410 
 SEQ84.1.18	Intr    +       8504    8638      135     +3      +3    8503    8639     0.0  
 SEQ84.1.19	Term    +       8716    8755       40     +3      +2    8715    8756    65.0  
 SEQ84.1.0	Utr3    +       8756   10210     1455     NA      NA      NA      NA    62.0  
-SEQ84.2.0	Utr3    +      10320   10642      323     NA      NA      NA      NA     0.0  
+SEQ84.1.0	Utr3    +      10320   10642      323     NA      NA      NA      NA     0.0  
 
 SEQ85.1.0	Utr3    -        194    1912     1719     NA      NA      NA      NA     0.0  
 SEQ85.1.0	Utr3    -       2636    2701       66     NA      NA      NA      NA     9.91 
@@ -1456,9 +1456,9 @@ SEQ85.1.-2	Intr    -       4248    5064      817     -2      -1    5065    4247 
 SEQ85.1.-3	Intr    -       5263    7328     2066     -3      -1    7329    5262   100.0  
 SEQ85.1.-4	Init    -       7635    7648       14     -1      -1    7649    7634     0.100
 SEQ85.1.0	Utr5    -       7649    7671       23     NA      NA      NA      NA     0.100
-SEQ85.2.0	Utr5    -       7754    7812       59     NA      NA      NA      NA     0.100
-SEQ85.3.0	Utr5    -       7872    8186      315     NA      NA      NA      NA     0.100
-SEQ85.4.0	Utr5    -       8252    9322     1071     NA      NA      NA      NA    17.0  
+SEQ85.1.0	Utr5    -       7754    7812       59     NA      NA      NA      NA     0.100
+SEQ85.1.0	Utr5    -       7872    8186      315     NA      NA      NA      NA     0.100
+SEQ85.1.0	Utr5    -       8252    9322     1071     NA      NA      NA      NA    17.0  
 
 SEQ86.1.0	Utr3    -          1    2006     2006     NA      NA      NA      NA    58.34 
 SEQ86.1.0	Utr3    -       2103    2177       75     NA      NA      NA      NA   100.0  
@@ -1506,11 +1506,11 @@ SEQ87.1.14	Intr    +       9153    9197       45     +2      +2    9152    9198 
 SEQ87.1.15	Intr    +       9281    9349       69     +2      +1    9280    9350   100.0  
 SEQ87.1.16	Term    +       9439    9512       74     +2      +3    9438    9513   100.0  
 SEQ87.1.0	Utr3    +       9513    9781      269     NA      NA      NA      NA    98.0  
-SEQ87.2.0	Utr3    +       9849   10146      298     NA      NA      NA      NA     0.0  
-SEQ87.3.0	Utr3    +      10233   10470      238     NA      NA      NA      NA     0.0  
-SEQ87.4.0	Utr3    +      10565   10951      387     NA      NA      NA      NA     0.0  
-SEQ87.5.0	Utr3    +      11193   11285       93     NA      NA      NA      NA     0.0  
-SEQ87.6.0	Utr3    +      11358   11512      155     NA      NA      NA      NA     0.0  
+SEQ87.1.0	Utr3    +       9849   10146      298     NA      NA      NA      NA     0.0  
+SEQ87.1.0	Utr3    +      10233   10470      238     NA      NA      NA      NA     0.0  
+SEQ87.1.0	Utr3    +      10565   10951      387     NA      NA      NA      NA     0.0  
+SEQ87.1.0	Utr3    +      11193   11285       93     NA      NA      NA      NA     0.0  
+SEQ87.1.0	Utr3    +      11358   11512      155     NA      NA      NA      NA     0.0  
 
 SEQ88.1.0	Utr3    -          1     510      510     NA      NA      NA      NA     0.0  
 SEQ88.1.0	Utr3    -       1537    2000      464     NA      NA      NA      NA    28.0  
@@ -1554,14 +1554,14 @@ SEQ88.1.-36	Intr    -      12791   13008      218     -2      -2   13009   12790
 SEQ88.1.-37	Intr    -      14614   14675       62     -3      -2   14676   14613     0.0  
 SEQ88.1.-38	Init    -      14837   14883       47     -1      -3   14884   14836     0.0  
 SEQ88.1.0	Utr5    -      14884   15105      222     NA      NA      NA      NA     0.0  
-SEQ88.2.0	Utr5    -      15506   15947      442     NA      NA      NA      NA     0.0  
-SEQ88.3.0	Utr5    -      16487   17120      634     NA      NA      NA      NA     0.0  
-SEQ88.4.0	Utr5    -      18888   18929       42     NA      NA      NA      NA     0.0  
-SEQ88.5.0	Utr5    -      21034   21422      389     NA      NA      NA      NA     0.0  
-SEQ88.6.0	Utr5    -      21542   21959      418     NA      NA      NA      NA     0.0  
-SEQ88.7.0	Utr5    -      24820   24930      111     NA      NA      NA      NA     0.51 
-SEQ88.8.0	Utr5    -      25769   26425      657     NA      NA      NA      NA     0.0  
-SEQ88.9.0	Utr5    -      26869   27158      290     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      15506   15947      442     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      16487   17120      634     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      18888   18929       42     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      21034   21422      389     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      21542   21959      418     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      24820   24930      111     NA      NA      NA      NA     0.51 
+SEQ88.1.0	Utr5    -      25769   26425      657     NA      NA      NA      NA     0.0  
+SEQ88.1.0	Utr5    -      26869   27158      290     NA      NA      NA      NA     0.0  
 
 SEQ89.1.0	Utr3    -          1     263      263     NA      NA      NA      NA     0.0  
 SEQ89.1.0	Utr3    -        479    1076      598     NA      NA      NA      NA     0.0  
