@@ -411,7 +411,7 @@ int main  (int argc, char * argv [])
 	
 	// Insertion d'un aiguillage sous-optimal car il peut etre
 	// optimal in fine du fait des contraintes de longueur single
-	if (best != Subbest)
+	if ((best != Subbest) && (Submaxi > NINFINITY))
 	  LBP[k]->InsertNew(Subbest,SwitchAcc,i,Submaxi,PrevBP[Subbest],false);
 	LBP[k]->Update(Data.contents[k]);
       }
@@ -490,7 +490,7 @@ int main  (int argc, char * argv [])
 
 	// Insertion d'un aiguillage sous-optimal car il peut etre
 	// optimal in fine du fait des contraintes de longueur single
-	if (best != Subbest)
+	if ((best != Subbest) && (Submaxi > NINFINITY))
 	  LBP[k]->InsertNew(Subbest,SwitchDon,i,Submaxi,PrevBP[Subbest],false);
 	LBP[k]->Update(Data.contents[k]);
       }
