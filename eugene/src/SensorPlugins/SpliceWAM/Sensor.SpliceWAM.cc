@@ -1,16 +1,28 @@
-//=================================================
-//           Copyright (c) 2002 by INRA. All rights reserved.
-//                 Redistribution is not permitted without
-//                 the express written permission of INRA.
-//                     Mail : tschiex@toulouse.inra.fr
-//-----------------------------------------------------------------------------------------
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Sensor.SpliceWAM.cc
+// Contents: Sensor SpliceWAM
+// A simple splice site detection sensor based on a Weight Array Model
+// ------------------------------------------------------------------
 
-// File                 : EuGeneTk/SensorPlugins/SpliceWAM/Sensor.SpliceWAM.cc
-// Description  :A simple splice site detection sensor based on a Weight Array Model
-// Authors         : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex
-
-#include "Sensor.SpliceWAM.h"
 #include <ctype.h>
+#include "Sensor.SpliceWAM.h"
+
+extern Parameters PAR;
+
 //#define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 #define NORM(x,n) ( (Min(x,n))/(n))
 #define plotscoreincrease 10
@@ -18,8 +30,6 @@
 /*************************************************************
  **                  SensorSpliceWAM                   **
  *************************************************************/
-
-extern Parameters PAR;
 
 // ----------------------
 //  Default constructor.

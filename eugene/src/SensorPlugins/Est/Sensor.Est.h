@@ -1,20 +1,27 @@
-/*****************************************************************************/
-/*             Copyright (c) 2004 by INRA. All rights reserved.              */
-/*                 Redistribution is not permitted  without                  */
-/*                 the express written permission of  INRA.                  */
-/*                   Mail : eugene@ossau.toulouse.inra.fr                    */
-/*---------------------------------------------------------------------------*/
-/* File         : EuGeneTk/SensorPlugins/Est/Sensor.Est.h                    */
-/* Description  : Sensor Est                                                 */
-/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
-/* History      : July 2004                                                  */
-/*****************************************************************************/
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Sensor.Est.h
+// Contents: Sensor Est
+// ------------------------------------------------------------------
 
 #ifndef  SENSOR_EST_H_INCLUDED
 #define  SENSOR_EST_H_INCLUDED
 
-#include "../../EuGene/Sensor.h"
-#include "../../EuGene/Hits.h"
+#include "../../Sensor.h"
+#include "../../Hits.h"
 
 /*************************************************************
  **                       SensorEst                         **

@@ -1,15 +1,31 @@
-#include "Sensor.Riken.h"
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Sensor.Riken.cc
+// Contents: Sensor Riken
+// RAFL: Riken Arabidopsis Full Length cDNA
+// ------------------------------------------------------------------
 
-/*************************************************************
- **                        SensorRiken                      **
- *************************************************************/
+#include "Sensor.Riken.h"
 
 extern Parameters PAR;
 
 
-
 bool Before(const RAFLgene A, const RAFLgene B)
 { return (A.deb < B.deb); };
+
 
 // ************
 // * RAFLgene *     // RAFL: Riken Arabidopsis Full Length cDNA 
@@ -26,13 +42,12 @@ RAFLgene :: ~RAFLgene () {}
 
 
 
-// ****************
-// * Sensor Riken *
-// ****************
+/*************************************************************
+ **                        SensorRiken                      **
+ *************************************************************/
 // ----------------------
 // Default constructor.
 // ----------------------
-//
 // ------------->> WARNING: VIRER CE RAFL_A_TRAITER ! << -------------------
 // (pour le -pd entre autres)
 SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)

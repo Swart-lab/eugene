@@ -1,23 +1,31 @@
-/*****************************************************************************/
-/*             Copyright (c) 2002 by INRA. All rights reserved.              */
-/*                 Redistribution is not permitted without                   */
-/*                 the express written permission of INRA.                   */
-/*                     Mail : tschiex@toulouse.inra.fr                       */
-/*---------------------------------------------------------------------------*/
-/* File         : EuGeneTk/SensorPlugins/NStart/Sensor.NStart.cc             */
-/* Description  : Sensor Netstart                                            */
-/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
-/* History      : May 2003                                                   */
-/*****************************************************************************/
+// ------------------------------------------------------------------
+// Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+//
+// This program is open source; you can redistribute it and/or modify
+// it under the terms of the Artistic License (see LICENSE file).
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+//
+// You should have received a copy of Artistic License along with
+// this program; if not, please see http://www.opensource.org
+//
+// $Id$
+// ------------------------------------------------------------------
+// File:     Sensor.NStart.cc
+// Contents: Sensor NStart
+// ------------------------------------------------------------------
 
 #include "Sensor.NStart.h"
+
+extern Parameters PAR;
+
 #define NORM(x,n) (((n)+(Max(-(n),x)))/(n))
 
 /*************************************************************
  **                       SensorNStart                      **
  *************************************************************/
-
-extern Parameters PAR;
 
 // ----------------------
 // Default constructor.
