@@ -802,8 +802,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
       ThisBlock = ThisBlock->Next;
     }
     
-    // Si EST non filtrée et "consistente"
-    if (!HitTable[EstIndex]->Rejected  &&  ConsistentEST) {
+    // Si EST "consistente"
+    if (ConsistentEST) {
       vSupEstI.push_back( EstIndex );
     }
     EstIndex++;
@@ -869,7 +869,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 
 	    // On affiche les ppNumber premiers hits supportant
 	    for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
-	      printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
+	      printf("%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
 	    printf("\n");
 	  }
 	}
@@ -909,7 +909,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 
 	// On affiche les ppNumber premiers hits supportant
 	for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
-	  printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
+	  printf("%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
        	printf("\n");
       }
     }
