@@ -3,6 +3,7 @@ Loading Sensor.StartWAM.......0
 Loading WAM models...  0 1 2 3 4 5 6 7 8 ... done
 Loading Sensor.EuStop.........0
 Loading Sensor.Homology.......0
+Loading Sensor.MarkovConst....0
 Loading Sensor.MarkovProt.....0
 Loading MarkovProt model...done
 Loading Sensor.SpliceWAM......0
@@ -16,7 +17,7 @@ Loading protmat file.........done
 Reading tblastx data.........done
 Loading user data............done
 Reading GFF file.............done
-Optimal path length = 1875.3985
+Optimal path length = 1875.4084
 
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
 

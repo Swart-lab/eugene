@@ -3,6 +3,7 @@ Loading Sensor.GSplicer.......0.
 Loading Sensor.IfElse.........0.
  -If  : Sensor.NG2	1.
  -Else: Sensor.SPred	1.
+Loading Sensor.MarkovConst....0.
 Loading Sensor.MarkovIMM......0.
 Loading IMM...1 2 3 4 5 6 7 done.
 Loading Sensor.NStart.........0.
@@ -21,7 +22,7 @@ Reading cDNA hits............13 sequences read.
    \[AV565933\]: Gapless EST with strong donor \[1510-1854\].
 A total of 4/13 sequences rejected.
 Reading Blastx data, level...0 done.
-Optimal path length = 20236.5861.
+Optimal path length = 20236.5871.
 .
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
 .

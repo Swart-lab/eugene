@@ -4,6 +4,7 @@ Loading Sensor.FrameShift.....0
 Loading Sensor.IfElse.........0
  -If  : Sensor.NG2	1
  -Else: Sensor.SPred	1
+Loading Sensor.MarkovConst....0
 Loading Sensor.MarkovIMM......0
 Loading IMM...1 2 3 4 5 6 7 done
 Loading Sensor.NStart.........0
