@@ -14,14 +14,15 @@
 # $Id$
 # ------------------------------------------------------------------
 # File:     Makefile.am
-# Contents: compilation of the SensorPlugins directory
+# Contents: compilation of the AnnotaStruct directory
 # ------------------------------------------------------------------
 
+CXXFLAGS = $(eugene_CXXFLAGS)
 
-export eugene_LDFLAGS = -shared -mimpure-text
 
-SUBDIRS = 0_SensorTk AnnotaStruct ATGpr BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript User
-
+bin_PROGRAMS = Sensor.AnnotaStruct.so
+Sensor_AnnotaStruct_so_SOURCES = Sensor.AnnotaStruct.cc Sensor.AnnotaStruct.h 
+Sensor_AnnotaStruct_so_LDFLAGS = $(eugene_LDFLAGS) 
 
 
 CLEANFILES = *~
