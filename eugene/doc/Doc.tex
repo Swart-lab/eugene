@@ -15,8 +15,8 @@
 
 \newcommand{\EuGenie}{\textsc{EuG\`ene}}
 % comment one of the above line to hide or not the developpers documentation
-\newcommand{\shrink}[1]{}   % hide text
-%\newcommand{\shrink}[1]{#1} % no effect
+%\newcommand{\shrink}[1]{}   % hide text
+\newcommand{\shrink}[1]{#1} % no effect
 
 \author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, Annick Moisan,Thomas Schiex\\Biometry and AI Dept.\\ INRA Toulouse\\France}
 
@@ -33,7 +33,7 @@ Here is a small example followed by a minimal documentation on
 For our example, we have used the \texttt{SYNO\_ARATH.fasta} sequence.
 
 \begin{Verbatim}[fontsize=\scriptsize]
-> ls seqs/
+> ls Sequences/
 SYNO_ARATH.fasta
 \end{Verbatim}
 
@@ -46,15 +46,15 @@ you have installed these programs locally, you can use the
 the paths to the executables). 
 
 \begin{Verbatim}[fontsize=\scriptsize]
-> ./getsites4eugene.pl seqs/SYNO_ARATH.fasta 
-started on sam d\'ec 7 13:44:35 CET 2002
+> ./getsites4eugene.pl Sequences/SYNO_ARATH.fasta 
+started on sam déc 7 13:44:35 CET 2002
 
-processing seqs/SYNO_ARATH.fasta
+processing Sequences/SYNO_ARATH.fasta
 
 NetStart [2*1 request(s)]: F1..R1..done
 NetGene2 [1   request(s)]: 1..FR..done
 SplicePredictor: done
-finished on sam d\'ec 7 13:47:14 CET 2002
+finished on sam déc 7 13:47:14 CET 2002
 \end{Verbatim}
 
 The script creates the files that contains information about the
@@ -94,14 +94,14 @@ databank of EST and cDNA using a patched version of \texttt{sim4}. The
 patch is provided with \EuGenie.
 
 \begin{Verbatim}[fontsize=\scriptsize]
-> sim4 seqs/SYNO_ARATH.fasta cDNA A=6 > seqs/SYNO_ARATH.fasta.est
+> sim4 Sequences/SYNO_ARATH.fasta cDNA A=6 > seqs/SYNO_ARATH.fasta.est
 \end{Verbatim}
 
 With an old dbEST databank completed with the cDNA databank PlantGene,
 we get the following file:
 
 \begin{Verbatim}[fontsize=\scriptsize]
-> cat seqs/SYNO_ARATH.fasta.est
+> cat Sequences/SYNO_ARATH.fasta.est
     32    421 1844 0 0 ATAJ644    1  390
    514    582 1844 0 0 ATAJ644  391  459
    699    809 1844 0 0 ATAJ644  460  570
@@ -169,7 +169,7 @@ defined in \EuGenie's parameter file. Usually, 3 databases are used:
 SwissProt, PIR and TrEMBL (from the highest confidence to the
 lowest). Each collection of similarity is stored in a file with an
 extension \texttt{.blast} followed by the level of the database
-(\texttt{ .blast0}, \texttt{.blast1}, ..., \texttt{.blast7}).  The
+(\texttt{ .blast0}, \texttt{.blast1}, ..., \texttt{.blast9}).  The
 script used create these files from the output of NCBI-BLASTX is
 copyrighted and is therefore not distributed with \EuGenie. It is not
 difficult to design another one. Here is an extract from
@@ -409,6 +409,8 @@ sensitive. The definition order is not important.
   current directory.
 \end{itemize}
 
+
+
 \section{Plugins}
 \label{plug}
 
@@ -538,6 +540,121 @@ We now descrive each plugin, its behavior and parameters.
 \input {../SensorPlugins/Plotter/Doc.tex}
 \input {../SensorPlugins/GCPlot/Doc.tex}
 \input {../SensorPlugins/Tester/Doc.tex}
+
+
+
+
+
+\section{Optimization of Plugins parameters}
+
+The value of some numerical plugins parameters (specified in the parameter file) migth be optimized on a reference set of sequences (with their related information) for which genes positions are known. The idea is to adapt the values of parameters to increase as much as possible the prediction of genes and exons. The figure \ref{fig:ParaOptimization} details the general functioning of the software with input and ouput files.\\
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=7cm]{ParaOptimization}
+  \end{center}
+  \caption{Input and output files for parameters optimization} 
+  \label{fig:ParaOptimization}
+\end{figure}
+
+The optimization can be lauched with the \texttt{-Z} argument \index{CmdFlags}{[parameters optimization] Z} on the command line or with the \texttt{ParaOptimization.Use} parameter set to \texttt{TRUE}.\\
+After updating the parameter file EuGeneAS.par (which sensors to use, ...), the software is lauched with the usual command line specifying in argument the sequences to consider. At the end, the software creates a new parameter file called \texttt{EuGeneAS.<date>.OPTI.par} (for example, \texttt{EuGeneAS.30Sep2003.OPTI.par}) with the new value for the optimized parameters.\\
+For parameters optimization, the inputs to be specified in the parameter file are:
+\begin{itemize}
+\item the parameters to optimize with their value domain,
+\item the optimization algorithm to use: genetic algorithm, Line Search, genetic algorithm and Line Search,
+\item the parameters of the optimization algorithm, and for the Line Search algorithm complementary information on the parameters to optimize (initial value, step of discretization, ...),
+\item a file with the coordinates of genes for the sequences set.
+\end{itemize}
+
+Here is a simplified example of optimization parameters definition in the parameter file. 
+{\scriptsize \begin{verbatim}
+#################################################################
+################### PARAMETERS OPTIMIZATION #####################
+#################################################################
+ParaOptimization.Use           TRUE
+ParaOptimization.TrueCoordFile Araset.coord
+ParaOptimization.Algorithm     GENETIC+LINESEARCH
+ParaOptimization.Test          FALSE
+ParaOptimization.Trace         TRUE
+#
+ParaOptimization.NbParameter   3
+#
+ParaOptimization.Para.Name[0]   NStart.startP
+ParaOptimization.Para.Min[0]    0.001
+ParaOptimization.Para.Max[0]    15      
+#
+ParaOptimization.Para.Name[1]   NStart.startB
+ParaOptimization.Para.Min[1]    0.001
+ParaOptimization.Para.Max[1]    15      
+#
+ParaOptimization.Para.Name[2]   EuStop.stopP
+ParaOptimization.Para.Min[2]    0
+ParaOptimization.Para.Max[2]    6       
+#
+################## Genetic ######################################
+Genetic.NbRun 2
+Genetic.NbGeneration 20
+Genetic.NbElement 50
+Genetic.Seed 4
+Genetic.CrossOverProbability 0.6
+Genetic.MutationProbability 0.2
+Genetic.SelectionType 1         # 0: roulette wheel 
+#                                 1:stochastic remainder without replacement
+Genetic.ScalingType 1           # 0: no scaling 
+#                                 1: Sigma Truncation scaling 
+#                                 2: Power Law scaling
+Genetic.Sharing 0.9             # 0: no sharing 
+#                                 1: sharing, looking for clusters which best 
+#                                    elt fitness is at least n% of the overall 
+#                                    best element of the population
+Genetic.Clustering TRUE
+Genetic.Elitism 0.9             # 0: none
+#                                 n: elitism; keeps the best elt if no sharing,
+#                                    and keeps the best elt of each cluster 
+#                                    which best_elt fitness is at
+#                                    least n% of the overallbest elt if sharing 
+Genetic.SA.Mutation FALSE          # Simulated Annealing mutation
+Genetic.SA.CrossOver FALSE         # Simulated Annealing crossover
+#
+#
+######### LINESEARCH ###########################################
+LineSearch.NbMaxCycle 1
+LineSearch.NbMinCycle 1
+LineSearch.NbMaxStab 2
+LineSearch.DivInter 10
+LineSearch.Alpha 0.6
+LineSearch.EvolutionMini 0.001
+LineSearch.Seed ALEA
+#
+LineSearch.NbCluster 2
+LineSearch.Cluster[0] LINKED
+LineSearch.Cluster[1] IDENTICAL
+#
+LineSearch.Para.Step[0]         0.001
+LineSearch.Para.Init[0]         7.5
+LineSearch.Para.MinInit[0]      0.001
+LineSearch.Para.MaxInit[0]      15
+LineSearch.Para.Cluster[0]      0
+#
+LineSearch.Para.Step[1]         0.001
+LineSearch.Para.Init[1]         7.5
+LineSearch.Para.MinInit[1]      0.001
+LineSearch.Para.MaxInit[1]      15
+LineSearch.Para.Cluster[1]      0
+#
+LineSearch.Para.Step[2]         0.001
+LineSearch.Para.Init[2]         3
+LineSearch.Para.MinInit[2]      0
+LineSearch.Para.MaxInit[2]      6
+LineSearch.Para.Cluster[2]      1
+#
+\end{verbatim} }
+
+
+
+
+
 
 \section{Command line flags}
  
@@ -682,13 +799,19 @@ where
 \end{itemize}
 
 
+
 \printindex{CmdFlags}{Index of command line flags for sensors}
+
+
 
 
 For more information, have a look to
 \textsf{www-bia.inra.fr/T/EuGene}. This gives a rough idea of
 \EuGenie\ reliability and the meaning of the graphical output (PDF
 file, poster on \EuGenie).
+
+
+
 \end{document}
 
 
