@@ -270,10 +270,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   // check usage
   if (errflag) {
-    fprintf(stderr, "\nUsage: EuGene [-h] [-m matrix] [-n 0|1|2] [-s] [-p h|g|s|l|d|a]\n"
-	    "              [-w window] [-b {levels}] [-d] [-R] [-E] [-U] [-o offset]\n"
-	    "              [-g {graphArg}] [-G] [-u start] [-v end] [-l len] [-c olap]\n"
-	    "              [-x xres] [-y yres] [-Z coord] FASTA files\n");
+    fprintf(stderr, "\nUsage: EuGene [-b [levels] ] [-B] [-c olap] [-d] [-D<parameter>=<value>] [-E] [-f]\n"
+	            "              [-g [graph_name]] [G  [-h] [-l len] [-m matrix] [-M matrix] [-n 0|1|2]]\n"
+                    "              [-o offset] [-O] [-p a|d|g|h|H|l|s] [-r] [-R] [-s] [-t] [-u start]\n"
+                    "              [-v end] [-w window] [-x xres] [-y yres] [-Z coord] FASTA files\n");
     exit(1);
   }
 
