@@ -1,10 +1,10 @@
 #
-# Edité pour EuGeneAS 1.49 (161002)
+# Edité pour EuGeneAS 1.55 (150203)
 #
-EuGene.key		HVGNNJUDTJDQDF	# Software key 
+EuGene.key		FUHEOEXIBMMNXK	# Software key 
 EuGene.versionPAR	16_10_02	# Parameter file version (date)
 #
-# Minimum lengths
+##### Minimum lengths #####
 #
 EuGene.minEx		3
 EuGene.minIn		50
@@ -15,15 +15,20 @@ EuGene.minDiv		100
 EuGene.min5Prime	20
 EuGene.min3Prime	20
 #
-# Priors
+##### Priors #####
 #
 EuGene.ExonPrior	0.33		# Prior on the initial states
 EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
+#EuGene.ExonPrior	0.0
+#EuGene.IntronPrior	0.0
+#EuGene.InterPrior	1.0
+#EuGene.FivePrimePrior	1.0
+#EuGene.ThreePrimePrior	1.0
 #
-# States penalties
+##### States penalties #####
 #
 EuGene.transCodant	1.0
 EuGene.transIntron	1.0
@@ -31,7 +36,7 @@ EuGene.transUTR5	0.999
 EuGene.transUTR3	0.999
 EuGene.transInter	1.0
 #
-# Output control
+##### Output control ######
 #
 Output.graph		FALSE		# don't produce a graphical output
 Output.resx		900
@@ -46,67 +51,69 @@ Output.offset		0
 Output.normopt		1
 Output.Prefix		./
 #
-# Transcript parameters
+##### Transcript parameters #####
 #
 Transcript.Start	4.155
 Transcript.Stop		4.155
 #
-# EuStop parameters
+##### EuStop parameters #####
 #
 EuStop.stopP            4.155
 #
-# FrameShift parameters
+##### FrameShift parameters #####
 #
 FrameShift.Ins	999.0
 FrameShift.Del	999.0
 #
-# NetStart parameters
+##### NetStart parameters #####
 #
 NStart.startP	0.052
 NStart.startB	0.308
 #
-# IfElse
+##### IfElse #####
 #
-IfElse.SensorIf	NG2
+IfElse.SensorIf		NG2
 IfElse.SensorElse	SPred
 #
-# NetGene2 parameters
+# NetGene2 parameters #####
 #
 NG2.accP	0.903
 NG2.accB	5.585
 NG2.donP	0.980
 NG2.donB	27.670
 #
-# SplicePredictor parameters
+##### SplicePredictor parameters #####
 #
 SPred.accP	0.987
 SPred.accB	3.850
 SPred.donP	0.929
 SPred.donB	10.800
 #
-# Interpolated Markov Models parameters
-MarkovIMM.matname[0]	default.mat 
+##### Interpolated Markov Models parameters #####
+#
+MarkovIMM.matname[0]	PLUGINS/Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
-#MarkovIMM.matname[1]	default.mat
+#MarkovIMM.matname[1]	PLUGINS/Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
 #
-# Markov proteic model parameters
+##### Markov proteic model parameters #####
 #
-MarkovProt.matname[0]	default_prot.mat
+MarkovProt.matname[0]	PLUGINS/swissprot.maxorder2.bin
 MarkovProt.minGC[0]	0
 MarkovProt.maxGC[0]	100
 MarkovProt.maxorder     2
 MarkovProt.order        2
 #
-# Est sensor parameters
+##### Est sensor parameters #####
 #
 Est.PostProcess	FALSE
 Est.estP	-0.4
+#Est.estP	-1e4 # forces EuGene to match with est
 Est.estM	6
 #
-# Proteic similarity sensor parameters
+##### Proteic similarity sensor parameters #####
 #
 BlastX.levels	123
 BlastX.level0	0.2
@@ -118,73 +125,96 @@ BlastX.level5	0.0
 BlastX.level6	0.0
 BlastX.level7	0.0
 #
-# Repeat sensor parameters
+##### Repeat sensor parameters #####
 #
 Repeat.UTRPenalty	0.0
 Repeat.IntronPenalty	0.1
 Repeat.ExonPenalty	1.0
 #
-# Homology Sensor parameters
+##### Homology Sensor parameters #####
 #
-Homology.TblastxP 	0.0094
-Homology.TblastxB 	0.0177
-Homology.protmatname	BLOSUM62
+Homology.TblastxP 	0
+Homology.TblastxB 	0.0595
+Homology.protmatname	PLUGINS/BLOSUM80
 #
-# Sensors with uniform penalties
+##### Sensors with uniform penalties #####
 #
-SpliceConst.accP	10e-9
+SpliceConst.accP	1e-9
 SpliceConst.accPNo	0
-SpliceConst.donP	10e-9
+SpliceConst.donP	1e-9
 SpliceConst.donPNo	0
-StartConst.startP	10e-9
+StartConst.startP	2.897949
 StartConst.startPNo	0
 MarkovConst.val		0.25
 MarkovConst.minGC[0]	0
 MarkovConst.maxGC[0]	100
 #
-# Sensor SplicePlantWAM
+##### Sensor SplicePlantWAM #####
 #
-SplicePlantWAM.TPdonfile	PLUGINS/WAMsensor/WAM.ARA.DON.L9.TP.
-SplicePlantWAM.FPdonfile	PLUGINS/WAMsensor/WAM.ARA.DON.L9.FP.
-SplicePlantWAM.TPaccfile	PLUGINS/WAMsensor/WAM.ARA.ACC.L7.TP.
-SplicePlantWAM.FPaccfile	PLUGINS/WAMsensor/WAM.ARA.ACC.L7.FP.
+SplicePlantWAM.TPdonfile	PLUGINS/WAM.ARA.DON.L9.TP.
+SplicePlantWAM.FPdonfile	PLUGINS/WAM.ARA.DON.L9.FP.
+SplicePlantWAM.TPaccfile	PLUGINS/WAM.ARA.ACC.L7.TP.
+SplicePlantWAM.FPaccfile	PLUGINS/WAM.ARA.ACC.L7.FP.
 SplicePlantWAM.beforedon	3
 SplicePlantWAM.afterdon		4
 SplicePlantWAM.beforeacc	2
 SplicePlantWAM.afteracc		3
 SplicePlantWAM.order		1
-SplicePlantWAM.coef		5
+SplicePlantWAM.coef		2.9004
+SplicePlantWAM.pen		7.5877
 #
-# Sensors activation
+##### Sensor StartWAM #####
 #
-Sensor.Transcript.use	TRUE
-Sensor.FrameShift.use	TRUE
-Sensor.EuStop.use	TRUE
-Sensor.NStart.use	TRUE
-Sensor.NG2.use			FALSE
-Sensor.SPred.use		FALSE
-Sensor.IfElse.use	TRUE
-Sensor.MarkovIMM.use	TRUE
+StartWAM.TPstartfile	PLUGINS/WAM.ARA.START9.
+StartWAM.FPstartfile	PLUGINS/WAM.ARA.START9.FP.
+StartWAM.beforestart	3
+StartWAM.afterstart	3
+StartWAM.order		1
+StartWAM.coef		0.1594
+StartWAM.pen		3.1439
+#
+##### Sensors activation #####
+#
+Sensor.Transcript.use		TRUE
+Sensor.FrameShift.use		TRUE
+Sensor.EuStop.use		TRUE
+#
+# START SENSORS:
+Sensor.NStart.use		TRUE
+Sensor.StartConst.use	FALSE
+Sensor.StartWAM.use	FALSE
+#
+# SPLICES SENSORS:
+Sensor.NG2.use		FALSE
+Sensor.SPred.use	FALSE
+Sensor.SplicePlantWAM.use FALSE
+Sensor.SpliceConst.use	FALSE
+Sensor.IfElse.use		TRUE
+#
+# MARKOV CONTENT:
+Sensor.MarkovIMM.use		TRUE
 #Sensor.MarkovIMM.use	2
-Sensor.BlastX.use		FALSE
-Sensor.Repeat.use		FALSE
-Sensor.Riken.use		FALSE
-Sensor.Est.use			FALSE
-Sensor.User.use			FALSE
-Sensor.Homology.use		FALSE
-Sensor.StartConst.use		FALSE
-Sensor.SpliceConst.use		FALSE
-Sensor.MarkovConst.use		FALSE
-Sensor.MarkovProt.use		FALSE
-Sensor.SplicePlantWAM.use	FALSE
+Sensor.MarkovProt.use	FALSE
+Sensor.MarkovConst.use	FALSE
 #
-# Sensor priorities		  Sensor.Name Priority
+# Similarities:
+Sensor.Est.use		FALSE
+Sensor.Riken.use	FALSE
+Sensor.BlastX.use	FALSE
+Sensor.Homology.use	FALSE
 #
+Sensor.Repeat.use	FALSE
+Sensor.User.use		FALSE
+#
+##### Sensor priorities	 #####
+#	          Sensor.Name Priority
 Sensor.Transcript	1	#
 Sensor.FrameShift	1	#
+Sensor.Homology 	1	#
 Sensor.EuStop		1	#
 Sensor.NStart		1	#
 Sensor.StartConst	1	#
+Sensor.StartWAM		1	#
 Sensor.IfElse		1	#
 Sensor.NG2		1	#
 Sensor.SPred		1	#
@@ -195,7 +225,6 @@ Sensor.MarkovProt	1	#
 Sensor.MarkovConst	1	#
 Sensor.Est		2	#
 Sensor.BlastX		2	#  Priority 0 -> First
-Sensor.Homology 	2	#
 Sensor.Riken		7	#  Priority 1 -> Second
 Sensor.Repeat		9	#  ...
 Sensor.User		10	#  Priority n -> Last
