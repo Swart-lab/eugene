@@ -100,6 +100,7 @@ GSplicer.penDon* 	0
 MarkovIMM.matname[0]	Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
+MarkovIMM.useM0asIG	0
 #MarkovIMM.matname[1]	Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
