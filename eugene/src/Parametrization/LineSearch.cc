@@ -123,7 +123,7 @@ void LineSearch :: Optimize(bool is_chaining)
   while ((n < NbMaxCycle) && ((n < NbMinCycle) || (STOP < NbMaxStab))) {
     std::cout <<std::endl <<"Cycle: " << (n + 1)
 	 << " -----------------------------------------------------\n";
-    std::cout << MsgParaNames << std::endl;
+    if (IsTracing) std::cout << MsgParaNames << std::endl;
     
     for (int k = 0; k < NbParaCluster; k++) { 
       ScanCluster(k);
@@ -141,6 +141,11 @@ void LineSearch :: Optimize(bool is_chaining)
      
     ReduceSearch();
     n++;
+
+  std::cout <<std::endl << "Optimal point of the cycle:" <<std::endl; 
+  for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
+  for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
+  std::cout <<"Fitness="<<FitOpt<<std::endl;
   }
   
   std::cout <<std::endl<< "---------------------------------------------------------------"<<std::endl;
@@ -149,7 +154,8 @@ void LineSearch :: Optimize(bool is_chaining)
   if (STOP==NbMaxStab) std::cout <<"Fitness is stable since "<<NbMaxStab<<" cycles." <<std::endl;
   std::cout <<std::endl << "Final Optimal Point:" <<std::endl; 
   for (i=0; i<ParaName.size(); i++) std::cout << ReduceName(ParaName[i]) << "\t"; std::cout <<std::endl;
-  for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; std::cout <<std::endl;
+  for (i=0; i<ParaName.size(); i++) std::cout << Para[i] << "\t"; 
+  std::cout <<"Fitness="<<FitOpt<<std::endl;
   std::cout << "---------------------------------------------------------------"<<std::endl;
   std::cerr <<std::endl<< warning_message ;
 }
