@@ -540,7 +540,7 @@ void SensorTester :: AnalyzeSPSN(void)
     fdon.open((SensorName + ".Don").c_str(), std::ios::out);
   }
 
-  std::cout << "Thres.\t\tNb\tTP\tFP\tTN\tFN\tSens.\tSpec.\n";
+  std::cout << "Thres.\t\tNb\tTP\tFP\tTN\tFN\tSpec.\tSens.\n";
   for (n=0; n<(int)Thresholds.size(); n++) {
     nb = Nb[n][0]; tp = TP[n][0]; fn = FN[n][0]; fp = FP[n][0]; tn = TN[n][0];
     if (SensorType == Type_Splice) 
@@ -555,7 +555,7 @@ void SensorTester :: AnalyzeSPSN(void)
   }
 
   if (SensorType == Type_Splice) {
-    std::cout << "\nThres.\t\tNbacc\tTPacc\tFPacc\tTNacc\tFNacc\tSens.\tSpec.\n";
+    std::cout << "\nThres.\t\tNbacc\tTPacc\tFPacc\tTNacc\tFNacc\tSpec.\tSens.\n";
     for (n=0; n<(int)Thresholds.size(); n++) {
       sn = 100* (TP[n][0]/(double)(TP[n][0]+FN[n][0]));
       sp = 100* (TP[n][0]/(double)(TP[n][0]+FP[n][0]));
@@ -565,7 +565,7 @@ void SensorTester :: AnalyzeSPSN(void)
       if ((TP[n][0]+FP[n][0] > MinNumbers) && (TP[n][0]+FN[n][0] > MinNumbers)) 
 	facc <<sp<<"\t"<<sn<<"\n";
     }
-    std::cout << "\nThres.\t\tNbdon\tTPdon\tFPdon\tTNdon\tFNdon\tSens.\tSpec.\n";
+    std::cout << "\nThres.\t\tNbdon\tTPdon\tFPdon\tTNdon\tFNdon\tSpec.\tSens.\n";
     for (n=0; n<(int)Thresholds.size(); n++) {
       sn = 100* (TP[n][1]/(double)(TP[n][1]+FN[n][1]));
       sp = 100* (TP[n][1]/(double)(TP[n][1]+FP[n][1]));
