@@ -27,11 +27,11 @@
 #               of the 2sd argument (array)
 #               which contains the new values of parameters
 # Example     : tcl> set V(EuGene.minEx) 4
-#               tcl> set V(Output.graph) TRUE
+#               tcl> set V(Output.graph) 1
 #               tcl> ModifyParaValue eugeneTest.par V
 #               After execution, in the file eugeneTest.par 
 #               the line 'EuGene.minEx   3' will be ' EuGene.minEx   4' 
-#               the line 'Output.graph   FALSE' will be 'Output.graph  TRUE'   
+#               the line 'Output.graph   0' will be 'Output.graph  1'   
 # Note that if there is no ambiguity, it is sufficient to give 
 # the end of parameter name
 # In the example, set V(minEx) 4 would produces the same result 
@@ -115,7 +115,7 @@ set NewValue1(EuGene.ThreePrimePrior)	0.07
 ##### Output control ######
 set NewValue1(Output.truncate)		5
 set NewValue1(Output.stepid)		1
-set NewValue1(Output.graph)		FALSE	
+set NewValue1(Output.graph)		0	
 set NewValue1(Output.resx)		900
 set NewValue1(Output.resy)		400
 set NewValue1(Output.glen)		-1
@@ -207,7 +207,7 @@ set NewValue1(Transcript.Stop*)		4.155
 ################# CONTENT SENSORS PARAMETERS ####################
 #################################################################
 ##### Proteic similarity sensor parameters #####
-set NewValue1(BlastX.PostProcess) FALSE
+set NewValue1(BlastX.PostProcess) 0
 set NewValue1(BlastX.levels)	0
 set NewValue1(BlastX.level0*)	0.2
 set NewValue1(BlastX.level1*)	0.05
@@ -222,7 +222,7 @@ set NewValue1(BlastX.level9*)	0.0
 set NewValue1(BlastX.blastxM*)	10	
 set NewValue1(BlastX.minIn) 50
 ##### Est sensor parameters #####
-set NewValue1(Est.PostProcess)	FALSE
+set NewValue1(Est.PostProcess)	0
 set NewValue1(Est.PPNumber)     2
 set NewValue1(Est.estP*)	-0.4
 set NewValue1(Est.estM)	        6
@@ -304,7 +304,7 @@ set NewValue1(GCPlot.Up)	GC
 set NewValue1(GCPlot.Over)	ATGC
 set NewValue1(GCPlot.Smooth)	100
 ##### GFF sensor parameters #####
-set NewValue1(GFF.PostProcess)		FALSE
+set NewValue1(GFF.PostProcess)		0
 ##### Sensor Plotter
 set NewValue1(Plotter.GC\[0\])	 1 
 set NewValue1(Plotter.GC3\[0\])	 1 
@@ -320,37 +320,37 @@ set NewValue1(Tester.SPSN.MinNumbers)	100
 #################################################################
 ##### Sensors desactivation #####
 # SIGNAL SENSORS
-set NewValue1(Sensor.ATGpr.use)	        FALSE
-set NewValue1(Sensor.EuStop.use)	FALSE
-set NewValue1(Sensor.FrameShift.use)	FALSE
-set NewValue1(Sensor.GSplicer.use)	FALSE
-set NewValue1(Sensor.SMachine.use)	FALSE
-set NewValue1(Sensor.NG2.use)		FALSE
-set NewValue1(Sensor.NStart.use)	FALSE
-set NewValue1(Sensor.PatConst.use)	FALSE
-set NewValue1(Sensor.PepSignal.use)	FALSE
-set NewValue1(Sensor.SpliceWAM.use) 	FALSE
-set NewValue1(Sensor.SPred.use)	        FALSE
-set NewValue1(Sensor.StartWAM.use)	FALSE
-set NewValue1(Sensor.Transcript.use)	FALSE
+set NewValue1(Sensor.ATGpr.use)	        0
+set NewValue1(Sensor.EuStop.use)	0
+set NewValue1(Sensor.FrameShift.use)	0
+set NewValue1(Sensor.GSplicer.use)	0
+set NewValue1(Sensor.SMachine.use)	0
+set NewValue1(Sensor.NG2.use)		0
+set NewValue1(Sensor.NStart.use)	0
+set NewValue1(Sensor.PatConst.use)	0
+set NewValue1(Sensor.PepSignal.use)	0
+set NewValue1(Sensor.SpliceWAM.use) 	0
+set NewValue1(Sensor.SPred.use)	        0
+set NewValue1(Sensor.StartWAM.use)	0
+set NewValue1(Sensor.Transcript.use)	0
 # CONTENT SENSORS
-set NewValue1(Sensor.BlastX.use)	FALSE
-set NewValue1(Sensor.Est.use)		FALSE
-set NewValue1(Sensor.Homology.use)	FALSE
-set NewValue1(Sensor.MarkovConst.use)	FALSE
-set NewValue1(Sensor.MarkovIMM.use)	FALSE
-set NewValue1(Sensor.MarkovProt.use)	FALSE
-set NewValue1(Sensor.Repeat.use)	FALSE
+set NewValue1(Sensor.BlastX.use)	0
+set NewValue1(Sensor.Est.use)		0
+set NewValue1(Sensor.Homology.use)	0
+set NewValue1(Sensor.MarkovConst.use)	0
+set NewValue1(Sensor.MarkovIMM.use)	0
+set NewValue1(Sensor.MarkovProt.use)	0
+set NewValue1(Sensor.Repeat.use)	0
 # SIGNAL/CONTENT SENSORS
-set NewValue1(Sensor.AnnotaStruct.use)  FALSE
-set NewValue1(Sensor.IfElse.use)	FALSE
-set NewValue1(Sensor.Riken.use)	        FALSE
-set NewValue1(Sensor.User.use)		FALSE
+set NewValue1(Sensor.AnnotaStruct.use)  0
+set NewValue1(Sensor.IfElse.use)	0
+set NewValue1(Sensor.Riken.use)	        0
+set NewValue1(Sensor.User.use)		0
 # OTHERS SENSORS
-set NewValue1(Sensor.GCPlot.use)	FALSE
-set NewValue1(Sensor.GFF.use)		FALSE
-set NewValue1(Sensor.Plotter.use)	FALSE
-set NewValue1(Sensor.Tester.use)	FALSE
+set NewValue1(Sensor.GCPlot.use)	0
+set NewValue1(Sensor.GFF.use)		0
+set NewValue1(Sensor.Plotter.use)	0
+set NewValue1(Sensor.Tester.use)	0
 #
 ##### Sensor priorities	 #####
 # SIGNAL SENSORS
@@ -388,11 +388,11 @@ set NewValue1(Sensor.Tester$space)	1
 #################################################################
 ################### PARAMETERS OPTIMIZATION #####################
 #################################################################
-set NewValue1(ParaOptimization.Use)	        FALSE
+set NewValue1(ParaOptimization.Use)	        0
 set NewValue1(ParaOptimization.TrueCoordFile) 	---
 set NewValue1(ParaOptimization.Algorithm)	GENETIC+LINESEARCH
-set NewValue1(ParaOptimization.Test)	        TRUE
-set NewValue1(ParaOptimization.Trace)		TRUE
+set NewValue1(ParaOptimization.Test)	        1
+set NewValue1(ParaOptimization.Trace)		1
 #
 set NewValue1(ParaOptimization.NbCluster) 3
 set NewValue1(ParaOptimization.Cluster\[0\]) LINKED
@@ -435,10 +435,10 @@ set NewValue1(Genetic.MutationProbability)	0.2
 set NewValue1(Genetic.SelectionType)	1    
 set NewValue1(Genetic.ScalingType)	1
 set NewValue1(Genetic.Sharing)		0.9
-set NewValue1(Genetic.Clustering)	TRUE
+set NewValue1(Genetic.Clustering)	1
 set NewValue1(Genetic.Elitism)		0.9
-set NewValue1(Genetic.SA.Mutation)	FALSE
-set NewValue1(Genetic.SA.CrossOver)	FALSE
+set NewValue1(Genetic.SA.Mutation)	0
+set NewValue1(Genetic.SA.CrossOver)	0
 set NewValue1(Genetic.Seed)		4
 #
 #
