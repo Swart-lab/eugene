@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2004 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted  without                  */
+/*                 the express written permission of  INRA.                  */
+/*                   Mail : eugene@ossau.toulouse.inra.fr                    */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/Est/Sensor.Est.h                    */
+/* Description  : Sensor Est                                                 */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : July 2004                                                  */
+/*****************************************************************************/
+
 #ifndef  SENSOR_EST_H_INCLUDED
 #define  SENSOR_EST_H_INCLUDED
 
@@ -21,6 +33,7 @@ class SensorEst : public Sensor
   double DonorThreshold;
   double spliceBoost;
   int    estM, utrM;
+  int    ppNumber;
   int    N;
   
   Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);

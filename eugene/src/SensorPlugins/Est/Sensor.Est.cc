@@ -1,3 +1,15 @@
+/*****************************************************************************/
+/*             Copyright (c) 2004 by INRA. All rights reserved.              */
+/*                 Redistribution is not permitted  without                  */
+/*                 the express written permission of  INRA.                  */
+/*                   Mail : eugene@ossau.toulouse.inra.fr                    */
+/*---------------------------------------------------------------------------*/
+/* File         : EuGeneTk/SensorPlugins/Est/Sensor.Est.cc                   */
+/* Description  : Sensor Est                                                 */
+/* Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex          */
+/* History      : July 2004                                                  */
+/*****************************************************************************/
+
 #include "Sensor.Est.h"
 #include "../../EuGene/MSensor.h"
 
@@ -40,14 +52,26 @@ int HitsCompareLex(const void *A, const void *B)
   return 0;
 }
 
+int HitsCompareSup(const void *A, const void *B)
+{
+  Hits **UA,**UB;
+  
+  UA = (Hits **) A;
+  UB = (Hits **) B;
+  
+  if ((*UA)->Support > (*UB)->Support) return -1;
+  if ((*UA)->Support < (*UB)->Support) return 1;
+  return 0;
+}
+
 // ----------------------
 //  Default constructor.
 // ----------------------
 SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 {
-  type = Type_Content;
+  type     = Type_Content;
   HitTable = NULL;
-  N = n;
+  N        = n;
 }
 
 // ----------------------
@@ -82,7 +106,8 @@ void SensorEst :: Init (DNASeq *X)
   estM = PAR.getI("Est.estM",N);
   utrP = PAR.getD("Est.utrP*",N);
   utrM = PAR.getI("Est.utrM",N);
-  spliceBoost = PAR.getD("Est.SpliceBoost*",N);
+  ppNumber       = PAR.getI("Est.PPNumber",N);
+  spliceBoost    = PAR.getD("Est.SpliceBoost*",N);
   DonorThreshold = PAR.getD("Est.StrongDonor*");
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
@@ -266,7 +291,8 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   fprintf(stderr,"Reading cDNA hits............");
   fflush(stderr);
 
-  AllEST = AllEST->ReadFromFile(ESTFile,NumEST);
+  // ReadFromFile (EstFile  EstNumber  Level  Margin)
+  AllEST = AllEST->ReadFromFile(ESTFile, NumEST, -1, 0);
   
   fprintf(stderr,"%d sequences read\n",*NumEST);
   fflush(stderr);
@@ -276,13 +302,12 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   // favoriser la longueur de toute facon.
   
   Hits **HitTable = new Hits *[*NumEST+1];
-  
   for (i = 0, ThisEST = AllEST; i < *NumEST; i++, ThisEST = ThisEST->Next)
     HitTable[i] = ThisEST;
 
   // pour memorise le premier (a liberer)
   HitTable[*NumEST] = AllEST;
-  
+
   qsort( (void *)HitTable, *NumEST, sizeof(void *), HitsCompare );
 
   for (int index = 0; index < *NumEST; index++) {
@@ -543,7 +568,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
 
   if (NumEST == 0) return;
 
-  qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
+  qsort((void *)HitTable, NumEST, sizeof(void *), HitsCompareLex);
   
   // Reset static in EST Support or FEA Support
   if (pprocess == 1)  ESTSupport(NULL,100,0,100,0,NULL,0);
@@ -577,6 +602,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
       else
 	// Analyse de la prédiction (des features) par rapport aux EST
 	FEASupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST,NumGene);
+      
       GStart = TStart = GEnd = TEnd = -1;
     }
   }
@@ -719,7 +745,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   int from = 0, to = 0, ESTEnd = 0;
   int state;
   std::vector <int> vSupEstI;  // index des transcrits supportant la pred
-  
+  Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sort by % support
+
   if (pred == NULL) {
     EstIndex = 0;
     return;
@@ -733,8 +760,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   if (fin == -1) fin = Tfin;
   if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
   
-  //si l'iteration precendete a atteint l'extremite 
-  if (EstIndex >= Size) EstIndex = Max(0,Size-1);
+  // si l'iteration precedente a atteint l'extremite 
+  if (EstIndex >= Size) EstIndex = Max(0, Size-1);
 
   // on rembobine....
   while ((EstIndex > 0) && (HitTable[EstIndex]->End > Tdebut))
@@ -743,7 +770,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   if (EstIndex >= 0  &&  HitTable[EstIndex]->End < Tdebut) EstIndex++;
   
   while (EstIndex >=0  &&  EstIndex < Size) {
-     // le dernier transcrit exploitable est passe
+    // le dernier transcrit exploitable est passe
     if (HitTable[EstIndex]->Start > Tfin) break;
     
     ConsistentEST = 1;
@@ -753,8 +780,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
       // si on a un gap
       if (ThisBlock->Prev != NULL) {
 	// intersection
-	from = Max(Tdebut,ThisBlock->Prev->End+1);
-	to = Min(Tfin,ThisBlock->Start-1);
+	from = Max(Tdebut, ThisBlock->Prev->End+1);
+	to   = Min(Tfin,   ThisBlock->Start-1);
 	
 	for (i = from; i <= to; i++) {
 	  state = pred->getStateForPos(i+1);
@@ -762,8 +789,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	    ConsistentEST = 0;
 	}
       }      
-      from = Max(Tdebut,ThisBlock->Start);
-      to = Min(Tfin,ThisBlock->End);
+      from   = Max(Tdebut, ThisBlock->Start);
+      to     = Min(Tfin,   ThisBlock->End);
       ESTEnd = ThisBlock->End;
       
       for (i = from; i <= to; i++) {
@@ -822,15 +849,24 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	  if(len > 0) {
 	    printf("%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
 		   NumGene, numF, fea, start, end, len, strand);
-	    printf("%.1f\t", (float)len/(end-start+1)*100);
+	    printf("%d\t", (int)((float)len/(end-start+1)*100));
 	    
+	    for (int k=0;  k<NumEST;  k++)
+	      HitTable[k]->Support = 0;
+
 	    for(j=0; j<(int)vSupEstI.size(); j++) {
 	      // Longueur supportée par le transcrit
 	      len =  LenSup(HitTable, vSupEstI, j, start, end);
-	      if(len > 0)
-		printf("%s(%.1f) ", HitTable[vSupEstI[j]]->Name,
-		       (float)len/(end-start+1)*100);
+	      HitTable[vSupEstI[j]]->Support = (int)((float)len/(end-start+1)*100);
 	    }
+	    // On copie la hittable pour trier sur le % supporté
+	    for (int k=0; k<NumEST; k++)
+	      TMPHitTable[k] = HitTable[k];
+	    qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
+
+	    // On affiche les ppNumber premiers hits supportant
+	    for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+	      printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
 	    printf("\n");
 	  }
 	}
@@ -853,20 +889,31 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
       if(len > 0) {
 	printf("%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
 	       NumGene, fea, start+1, end+1, len, strand);
-	printf("%.1f\t", (float)len/(end-start+1)*100);
+	printf("%d\t", (int)((float)len/(end-start+1)*100));
 	
+	for (int k=0;  k<NumEST;  k++)
+	  HitTable[k]->Support = 0;
+
 	for(j=0; j<(int)vSupEstI.size(); j++) {
 	  // Longueur supportée par le transcrit
 	  len =  LenSup(HitTable, vSupEstI, j, start, end);
-	  if(len > 0)
-	    printf("%s(%.1f) ", HitTable[vSupEstI[j]]->Name,
-		   (float)len/(end-start+1)*100);
+	  HitTable[vSupEstI[j]]->Support = (int)((float)len/(end-start+1)*100);
 	}
+	// On copie la hittable pour trier sur le % supporté
+	for (int k=0; k<NumEST; k++)
+	  TMPHitTable[k] = HitTable[k];
+	qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
+	
+	// On affiche les ppNumber premiers hits supportant
+	for(j=0; j<ppNumber && TMPHitTable[j]->Support!=0; j++)   
+	  printf("%s(%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support);
 	printf("\n");
       }
     }
   }
   vSupEstI.clear();
+  if(TMPHitTable != NULL) delete [] TMPHitTable;
+  TMPHitTable = NULL;
   return;
 }
 
