@@ -186,22 +186,53 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 // ----------------------------------------------------------------
 // BackTrace and build a prediction object
 // ----------------------------------------------------------------
-Prediction* Track :: BackTrace ()
+Prediction* Track :: BackTrace (int MinCDSLen)
 {
   Prediction *pred = new Prediction();
   BackPoint  *It   = Path.Next;
   int  pos;
   char etat;
-  
+  int igpos = -1;
+  int prevpos;
+  int CDSlen = 0;
+
+  // initialisation by the terminal state
   pos  = It->StartPos;
   etat = It->State;
   It   = It->Origin;
-  
+  pred->add(pos, etat);
+
+  prevpos = pos;
+  if (etat == InterGen) igpos = pos;
+
   while (It != NULL) {
-    pred->add(pos, etat);
+
     pos  = It->StartPos;
     etat = It->State;
     It   = It->Origin;
+
+    printf("pos %d etat %d CDSlen %d igpos %d prevpos %d\n",
+	   pos,etat,CDSlen,igpos,prevpos);
+
+    if (etat <= TermR3)  // codant
+      CDSlen += prevpos-pos;
+
+    prevpos = pos;
+
+    if ((etat == InterGen) && (pos >=0))
+      if (CDSlen <= MinCDSLen) {
+	CDSlen = 0;
+	pred->poptill(igpos);
+	printf("CDSLen %d, je pope jusqu'a pos=%d (exclus)\n",
+	       CDSlen,igpos);
+      }
+      else {
+	igpos = pos;
+	CDSlen = 0;
+	pred->add(pos, etat);
+      }
+    else
+      pred->add(pos, etat);
   }
   pred->setPos(0, pred->getPos(0)-1);
 
