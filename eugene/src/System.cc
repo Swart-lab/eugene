@@ -68,7 +68,8 @@ int ProbeFile(char *path)
 // search in local directory and if not found in directory defdir
 // ------------------------------------------------------------------
 
-FILE *FileOpen(const char *defdir, const char *filename, const char *mode)
+FILE *FileOpen(const char *defdir, const char *filename,
+	       const char *mode,   int sloppy)
 {
   FILE  *fp;
   char buffer[FILENAME_MAX];
@@ -82,9 +83,13 @@ FILE *FileOpen(const char *defdir, const char *filename, const char *mode)
   }
   
   if  (!fp) {
-    fprintf (stderr, "ERROR:  Could not open file %s \n", filename);
-    exit (1);
-  }  
+    if (sloppy)
+      fprintf (stderr, "WARNING: Could not open file %s ", filename);
+    else {
+      fprintf (stderr, "ERROR: Could not open file %s \n", filename);
+      exit (1);
+    }
+  }
   return  fp;
 }
 // ------------------------------------------------------------------
