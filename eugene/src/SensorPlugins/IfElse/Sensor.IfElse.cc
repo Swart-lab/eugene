@@ -15,13 +15,16 @@ SensorIfElse :: SensorIfElse (int n, DNASeq *X) : Sensor(n)
 {
   std::string name;
 
-  type = Type_Multiple;
-
   // create instance of sensors
   name = ((std::string) "Sensor.") + PAR.getC("IfElse.SensorIf",n);
   sensorIf   = MS->MakeSensor( name.c_str(), n+1, X);
   name = ((std::string) "Sensor.") + PAR.getC("IfElse.SensorElse",n);
   sensorElse = MS->MakeSensor( name.c_str(), n+1, X);
+
+  if (sensorIf->type != sensorElse->type)
+    {std::cerr<<"ERROR: different type of sensors given at the IfElse sensor.\n"; exit(2);}
+  else
+    type = sensorIf->type;
 }
 
 
