@@ -30,6 +30,14 @@ RAFLgene :: ~RAFLgene () {}
 // ----------------------
 SensorRiken :: SensorRiken (int n) : Sensor(n)
 {
+  StrandRespect=PAR.getI("Riken.StrandRespect");
+  MAX_RIKEN_LENGTH=PAR.getI("Riken.Max_riken_length"); // default = 60000;
+  MAX_RIKEN_EST_LENGTH=PAR.getI("Riken.Max_riken_est_length"); //default  = 3000;
+  MIN_RIKEN_LENGTH=PAR.getI("Riken.Min_riken_length"); //default  = 120; // 2* riken overlap (60)
+  MIN_RIKEN_EST_LENGTH=PAR.getI("Riken.Min_riken_est_length"); //default  = 10;
+  MAX_OVERLAP = PAR.getI("Riken.Max_overlap"); //default  = 60
+  MIN_EST_DIFF = PAR.getI("Riken.Min_est_diff"); //def=100
+  RAFLPenalty=PAR.getD("Riken.RAFLPenalty"); //default  = -120;
 }
 
 // ----------------------
@@ -43,6 +51,10 @@ SensorRiken :: ~SensorRiken ()
 // ----------------------
 //  Init Riken.
 // ----------------------
+//
+// ------------->> WARNING: VIRER CE RAFL_A_TRAITER ! << -------------------
+// (pour le -pd entre autres)
+
 void SensorRiken :: Init (DNASeq *X)
 {
   RAFLpos = RAFLindex = 0;
@@ -71,9 +83,15 @@ void SensorRiken :: Init (DNASeq *X)
     tmp.fin = Max(beg3, Max(end3, Max(beg5, end5)));
     strcpy(tmp.ID, name);
     tmp.sens = (((beg5+end5) <= (beg3+end3)) ? 1 : -1);
+    if (StrandRespect==0) tmp.sens=0;
 
     // si le gene est trop court, on ne peut pas connaitre le sens !
-    if (abs((beg5+end5) - (beg3+end3)) <100) tmp.sens = 0;
+    if ( (StrandRespect) && (abs((beg5+end5) - (beg3+end3)) < MIN_EST_DIFF) ) {
+      tmp.sens = 0;
+      fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s has no significative orientation\n",
+	      name);
+      continue;
+    }
 
     if (abs(tmp.deb-tmp.fin) > MAX_RIKEN_LENGTH) {
       fprintf(stderr, "\nWARNING: Check RAFL data: Riken %s rejected, too long transcript (%d kb)\n",
@@ -127,27 +145,27 @@ void SensorRiken :: Init (DNASeq *X)
   int RAFLindice=0;
   int RAFLtmpindice=0;
 
-  //  for (RAFLtmpindice=0; RAFLtmpindice< RAFLtmp.size(); RAFLtmpindice++) {
-  //  fprintf(stderr, "\nRAFLtmp[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFLtmp[RAFLtmpindice].deb,RAFLtmp[RAFLtmpindice].fin,RAFLtmp[RAFLtmpindice].sens,RAFLtmp[RAFLtmpindice].ID);
-  // }
+  //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFLtmp.size(); RAFLtmpindice++) {
+  //     fprintf(stderr, "\nRAFLtmp[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFLtmp[RAFLtmpindice].deb,RAFLtmp[RAFLtmpindice].fin,RAFLtmp[RAFLtmpindice].sens,RAFLtmp[RAFLtmpindice].ID);
+  //  }
 
     if ((int)RAFLtmp.size()>0) RAFL.push_back(RAFLtmp[RAFLtmpindice]); // on retient le premier
 
     for (RAFLtmpindice=1; RAFLtmpindice<(int)RAFLtmp.size(); RAFLtmpindice++) { 
       // on analyse chaque tmp que l'on compare avec le dernier rafl retenu
   
-      if (RAFL[RAFLindice].fin < RAFLtmp[RAFLtmpindice].deb) { // pas d'overlap
+      if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb < -3) { // pas d'overlap
 	RAFL.push_back(RAFLtmp[RAFLtmpindice]);
 	RAFLindice++;
 	continue; // tt va bien, on passe au tmp suivant
       }
-      if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb >= 60) { // cas de grand overlap
+      if (RAFL[RAFLindice].fin - RAFLtmp[RAFLtmpindice].deb >= MAX_OVERLAP) { // cas de grand overlap
 	fprintf(stderr,"fusion %s-%s...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
-	if ( (RAFL[RAFLindice].sens!=0) && 
+	if ((RAFL[RAFLindice].sens!=0) && 
 	     (RAFLtmp[RAFLtmpindice].sens!=0) && 
 	     (RAFL[RAFLindice].sens!=RAFLtmp[RAFLtmpindice].sens) &&
 	     (RAFL[RAFLindice].sens!=2) ) { // orientations contraires
-	  fprintf(stderr, "\nWARNING: Check RAFL data: contig containing rikens in different orientations (%s and %s)\n",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
+	  fprintf(stderr, "\nWARNING: RAFL data inconsistent : contig containing rikens in different orientations (%s and %s)\n",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
 	  RAFL[RAFLindice].sens = 2;
 	}
 	// grand overlap, fusion des deux riken (meme gene)
@@ -158,16 +176,19 @@ void SensorRiken :: Init (DNASeq *X)
 	continue;
       }
 
+      
       else { // little overlap, real overlapping genes
+	int const HALF_HOLE_SIZE = 3;
+
 	fprintf(stderr,"%s-%s overlapping...",RAFL[RAFLindice].ID,RAFLtmp[RAFLtmpindice].ID);
-	j= RAFLtmp[RAFLtmpindice].deb; // on memorise l'endroit ou tronquer le dernier rafl
+	RAFL[RAFLindice].fin = ((RAFLtmp[RAFLtmpindice].deb+RAFL[RAFLindice].fin)/2)-HALF_HOLE_SIZE;
 	i=RAFLtmpindice; // on raccourcit le debut de tous les petits chevauchant:
-	while ( (i<(int)RAFLtmp.size()) && (RAFL[RAFLindice].fin >= RAFLtmp[i].deb) ) {
-	  RAFLtmp[i].deb= RAFL[RAFLindice].fin;
+
+	while ( (i<(int)RAFLtmp.size()) && (RAFL[RAFLindice].fin >= RAFLtmp[i].deb-2*HALF_HOLE_SIZE) ) {
+	  RAFLtmp[i].deb= RAFL[RAFLindice].fin+2*HALF_HOLE_SIZE;
 	  i++;
 	}
-	RAFL[RAFLindice].fin = j;// on raccourcit la fin du dernier
-	
+
 	RAFL.push_back(RAFLtmp[RAFLtmpindice]);
 	RAFLindice++;
 	continue;
@@ -177,6 +198,10 @@ void SensorRiken :: Init (DNASeq *X)
     fprintf(stderr,"resulting %d\n",RAFL.size());
     fflush(stderr);
     if (RAFL.size() < 1) RAFL_A_Traiter = FALSE;
+
+ //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFL.size(); RAFLtmpindice++) {
+//       fprintf(stderr, "\nRAFL[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFL[RAFLtmpindice].deb,RAFL[RAFLtmpindice].fin,RAFL[RAFLtmpindice].sens,RAFL[RAFLtmpindice].ID);
+//     }
 
     if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -192,6 +217,11 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
   // 1-> frontiere 5prime (intergenique ou UTR5  obligatoire),
   // 2-> frontiere 3prime (intergenique ou UTR3  obligatoire),
   // 3-> dedans(penalisation IG)
+  // 4-> bordure min (StrandRespect==0)
+  // 5-> bordure max  (StrandRespect==0)
+
+  // Out of seq range, do nothing
+  if (pos<0 || pos>=X->SeqLen) return;
 
   if(RAFL_A_Traiter) {
     RAFLpos = 0;
@@ -208,59 +238,73 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	if ((RAFL[RAFLindex].sens== 1) || (RAFL[RAFLindex].sens== -1))
 	  RAFLpos = ( (RAFL[RAFLindex].sens == 1) ? 1 : 2);
 	else 
-	  RAFLpos=0;
+	  RAFLpos=4;
       }
       else {
 	if (pos < RAFL[RAFLindex].fin) RAFLpos = 3;
 	else {
-	  // frontiere max:
-	  if (pos == RAFL[RAFLindex].fin) {
+	  if (pos == RAFL[RAFLindex].fin) { // frontiere max:
 	    if ((RAFL[RAFLindex].sens== 1) || (RAFL[RAFLindex].sens== -1))
 	      RAFLpos = ( (RAFL[RAFLindex].sens == -1) ? 1 : 2);
 	    else 
-	      RAFLpos=0;
+	      RAFLpos=5;
 	  }
 	}
       }
     }
 
+    //    fprintf(stdout,"i=%d, raflpos= %d\n",pos,RAFLpos);
+
+    // Exons forward
     for(int i=0; i<3; i++)
-      if ((RAFLpos == 1) || (RAFLpos == 2) ||
+      if ((RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex].sens == -1)) )
-	d->contents[i] += RAFLPenalty;   //ExonF
+	d->contents[i] += RAFLPenalty;  
 
+    // Exons Reverse
     for(int i=3; i<6; i++)
-      if ((RAFLpos == 1) || (RAFLpos == 2) ||
+      if ((RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	  ((RAFLpos == 3) && (RAFL[RAFLindex].sens == 1)) )
-	d->contents[i] += RAFLPenalty;   //ExonR
+	d->contents[i] += RAFLPenalty; 
 
-    if ( (RAFLpos == 1) || (RAFLpos == 2) || 
+    // IntronF
+    if ( (RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex].sens == -1)) )
-      d->contents[6] += RAFLPenalty;     //IntronF
+      d->contents[6] += RAFLPenalty;
 
-    if ( (RAFLpos == 1) || (RAFLpos == 2) ||
+    //IntronR
+    if ( (RAFLpos == 1) || (RAFLpos == 2) || (RAFLpos >= 4) ||
 	 ( (RAFLpos == 3) && (RAFL[RAFLindex].sens == 1)) )
-      d->contents[7] += RAFLPenalty;     //IntronR
+      d->contents[7] += RAFLPenalty;     
 
+    //InterG
     if (RAFLpos == 3) {
-      d->contents[8] += RAFLPenalty;     //InterG
+      d->contents[8] += RAFLPenalty;     
       
       // Warning SIGNAL START MODIFICATION //
       d->sig[DATA::Start].weight[Signal::ForwardNo] = 0.0;
       d->sig[DATA::Start].weight[Signal::ReverseNo] = 0.0;
     }
+
+    //UTR5'F
+    if ( (RAFLpos == 2) || (RAFLpos == 5) || 
+	 ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
+      d->contents[9] += RAFLPenalty;     
     
-    if ( (RAFLpos == 2) || ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
-      d->contents[9] += RAFLPenalty;     //UTR5'F
+    //UTR5'R
+    if ( (RAFLpos == 2) || (RAFLpos == 4) || 
+	 ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
+      d->contents[10]+= RAFLPenalty;     
     
-    if ( (RAFLpos == 2) || ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
-      d->contents[10]+= RAFLPenalty;     //UTR5'R
+    //UTR3'F
+    if ( (RAFLpos == 1) || (RAFLpos == 4) || 
+	 ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
+      d->contents[11]+= RAFLPenalty; 
     
-    if ( (RAFLpos == 1) || ((RAFL[RAFLindex].sens == -1) && (RAFLpos >= 1) ) )
-      d->contents[11]+= RAFLPenalty;     //UTR3'F
-    
-    if ( (RAFLpos == 1) || ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
-      d->contents[12]+= RAFLPenalty;     //UTR3'R
+    //UTR3'R
+    if ( (RAFLpos == 1) || (RAFLpos == 5) || 
+	 ((RAFL[RAFLindex].sens == 1) && (RAFLpos >= 1) ) )
+      d->contents[12]+= RAFLPenalty;
   }
 }
 

@@ -7,12 +7,6 @@
 #include "../../EuGene/Sensor.h"
 
 // RAFL: Riken Arabidopsis Full Length cDNA
-static const int MAX_RIKEN_LENGTH = 60000;
-static const int MAX_RIKEN_EST_LENGTH = 3000;
-static const int MIN_RIKEN_LENGTH = 120; // 2* riken overlap (60)
-static const int MIN_RIKEN_EST_LENGTH = 10;
-const REAL RAFLPenalty = -120;
-
 /*************************************************************
  **                     SensorRiken                         **
  *************************************************************/
@@ -43,6 +37,14 @@ class SensorRiken : public Sensor
   int RAFLpos;                  // Position par rapport a un gene RAFL
   int RAFLindex;                // Index du RIKEN en cours
   int RAFL_A_Traiter;           // Index du RIKEN en cours
+  int StrandRespect;
+  int MIN_EST_DIFF; // default = 100;
+  int MAX_OVERLAP; // default = 60;
+  int MAX_RIKEN_LENGTH; // default = 60000;
+  int MAX_RIKEN_EST_LENGTH; // default  = 3000;
+  int MIN_RIKEN_LENGTH; // default  = 120; // 2* riken overlap (60)
+  int MIN_RIKEN_EST_LENGTH; // default  = 10;
+  REAL RAFLPenalty; // default  = -120;
 
  public:
   SensorRiken   (int);
