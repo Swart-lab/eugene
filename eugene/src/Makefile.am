@@ -29,6 +29,7 @@ eugene_SOURCES = EuGene.cc Output.cc Output.h Hits.cc Hits.h DNASeq.cc DNASeq.h 
 eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl -lnsl
 
 
+export host_alias = @host@
 TEST = 
 RUNTESTDEFAULTFLAGS =  --tool TestSuite --srcdir ../Test --objdir . --outdir ../Test/TestTrace $(TEST)
 
