@@ -51,14 +51,15 @@ foreach TEST $FunctionalTestList {
 	    pass "${TEST}"
 	    exec rm $IMG($TEST)
 	} else {
-	    fail "${TEST}"
-	    if {$test_std == 0} {
+	    if {$test_std != 1} {
+		fail "${TEST} (text)"
 		eval exec $EUGENE_DIR/$EUGENE $OPTIONS($TEST) -l $l \
 		    $SEQ_DIR/$seq >& $TRACE_DIR/$FILE_REF($TEST)
 		# Remove the first lines related to version number
 		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
 	    }
-	    if {$test_png == 0} {
+	    if {$test_png != 1} {
+		fail "${TEST} (graph)"
 		exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).png
 	    }
 	    catch {exec rm $IMG($TEST)}
