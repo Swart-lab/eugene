@@ -97,6 +97,7 @@ set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
 ##### Output control ######
 set NewValue1(Output.truncate)		5
+set NewValue1(Output.stepid)		1
 set NewValue1(Output.graph)		FALSE	
 set NewValue1(Output.resx)		900
 set NewValue1(Output.resy)		400
@@ -171,12 +172,13 @@ set NewValue1(MarkovProt.maxorder)    2
 set NewValue1(MarkovProt.order)        2
 ##### Est sensor parameters #####
 set NewValue1(Est.PostProcess)	FALSE
+set NewValue1(Est.PPNumber)     2
 set NewValue1(Est.estP*)	-0.4
-set NewValue1(Est.estM)	6
+set NewValue1(Est.estM)	        6
 set NewValue1(Est.utrP*)	0.35
-set NewValue1(Est.utrM)	5
+set NewValue1(Est.utrM)	        5
 set NewValue1(Est.SpliceBoost*) 0.0
-set NewValue1(Est.StrongDonor*)	0.95
+set NewValue1(Est.StrongDonor)	0.95
 ##### Riken sensor parameters #####
 set NewValue1(Riken.StrandRespect)		0
 set NewValue1(Riken.Min\_est\_diff)		100
@@ -221,6 +223,7 @@ set NewValue1(PatConst.patPNo*\[0\])	0
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
 set NewValue1(MarkovConst.Coding*) 	1.0
+set NewValue1(MarkovConst.IntronUTR*)	0.98
 set NewValue1(MarkovConst.Intron*) 	1.0
 set NewValue1(MarkovConst.UTR5*)	0.999
 set NewValue1(MarkovConst.UTR3*) 	0.999
