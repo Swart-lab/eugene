@@ -211,7 +211,7 @@ void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
 //  Retourne TRUE si les sensors sont porteurs
 //  d'infos de type "type" FALSE sinon.
 // --------------------------------------------
-int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
+int MasterSensor :: GetInfoSpAt (unsigned char type,
 				 DNASeq *X, int pos, DATA *d)
 {
   int i;
@@ -225,7 +225,7 @@ int MasterSensor :: GetInfoSpAt (TYPE_SENSOR type,
   d->ESTMATCH_TMP = 0; // WARNING temporaire : EST -> on est dans intron
 
   for(i=0; i<(int)theSensors.size(); i++) 
-    if (theSensors[i]->type == type || theSensors[i]->type == Type_Multiple) {
+    if (theSensors[i]->type & type) {
       theSensors[i]->GiveInfo(X, pos, d);
       info = TRUE;
     }

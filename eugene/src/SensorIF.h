@@ -40,12 +40,15 @@ class DATA
 };
 
 // Type de sensor
-enum TYPE_SENSOR {Type_Stop,     //               : Stop
-		  Type_Start,    // Sensor SIGNAL : Start
-		  Type_Splice,   //               : Splice
-		  Type_Content,  // Sensor CONTENT
-		  Type_Multiple, // Sensor porteur de multiple info (Ex : User)
-		  Type_Unknown}; // Sensor de type inconnu (non encore initialisé)
-
-
+enum TYPE_SENSOR {Type_Stop    = 1,    //               : Stop
+		  Type_Start   = 2,    // Sensor SIGNAL : Start
+		  Type_Acc     = 4,    //               : Acceptor
+		  Type_Don     = 8,    //               : Donor
+		  Type_TStop   = 16,   //               : Tr. Stop
+		  Type_TStart  = 32,   //               : Tr. Start
+		  Type_FS      = 64,   //               : FShift
+		  Type_Content = 128,  //               : Contenu
+		  Type_Any     = 255,  //               : Tous types
+		  Type_None    = 0     //               : Type indefini
+                  }; // Sensor de type inconnu (non encore initialisé)
 #endif

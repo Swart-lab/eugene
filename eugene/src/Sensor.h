@@ -32,7 +32,7 @@ class Sensor
   int  GetNumber    (void) { return instanceNumber; }
 
  public:
-  TYPE_SENSOR type;
+  unsigned char type;
   
   Sensor  (int n);
   virtual ~Sensor (void);

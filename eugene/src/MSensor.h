@@ -57,7 +57,7 @@ class MasterSensor
   void InitSensors  (DNASeq *X);
   void GetInfoAt    (DNASeq *X, int pos, DATA *d);
   void PrintDataAt  (DNASeq *X, int pos, DATA *d);
-  int  GetInfoSpAt  (TYPE_SENSOR type, DNASeq *X, int pos, DATA *d);
+  int  GetInfoSpAt  (unsigned char type, DNASeq *X, int pos, DATA *d);
   void PostAnalyse  (Prediction *pred);
   Sensor* MakeSensor (std::string name, int n, DNASeq *X);  // create an instance of a sensor and 
                                       // load before the corresponding .so if it is not yet loaded

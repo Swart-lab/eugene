@@ -281,8 +281,20 @@ void Parameters :: ReadPar(char *argv)
     if (line[0] != '#') {
       key = new char[FILENAME_MAX+1];
       val = new char[FILENAME_MAX+1];
-      if(sscanf(line, "%s %s", key, val) == 2)  
+      if(sscanf(line, "%s %s", key, val) == 2) {
+	if (val[0] == '"') {
+	  char *from = index(line,'"');
+	  char *to = rindex(from,'"');
+	  if (from == to) {
+	    fprintf(stderr, "\nIncorrect parameter file %s line %d\n",
+		    BaseName(tempname),n);
+	    exit(2);
+	  }
+	  *to = 0;
+	  strcpy(val,from+1);
+	}
 	m[key] = val;
+      }
       else {
 	if (EugDir != NULL)
 	  fprintf(stderr, "\nIncorrect parameter file %s/%s\n",EugDir,BaseName(tempname));
@@ -384,7 +396,7 @@ int Parameters :: getI(char *key,int index)
 int Parameters :: getUseSensor(char **key, int *val)
 {
   int l;
-  char *s; s = new char[FILENAME_MAX+1];
+  char s[FILENAME_MAX+1];
 
   while(iter != m.end()) {
     while(iter != m.end() &&
@@ -398,18 +410,16 @@ int Parameters :: getUseSensor(char **key, int *val)
 	++iter;
       else {
 	strcpy(s,iter->first); strcat(s,".use"); 
-	if (strcmp(m[s],"FALSE")) {
+	if (m[s] && strcmp(m[s],"FALSE")) {
 	  *key = (char*)iter->first;
 	  *val = atoi(iter->second);
 	  ++iter;
-	  delete [] s;
 	  return TRUE;
 	}
 	++iter;
       }
     }
   }
-  delete [] s;
   return FALSE;
 }
 

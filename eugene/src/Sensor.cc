@@ -9,7 +9,7 @@
 Sensor :: Sensor (int n)
 {
   instanceNumber = n;
-  type = Type_Unknown;
+  type = Type_None;
 }
 
 // ----------------------
