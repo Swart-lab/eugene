@@ -117,7 +117,7 @@ void SensorRepeat :: Plot(DNASeq *TheSeq)
   int i,j;
   
   for (i =0; i < (int)vDeb.size(); i++)
-    PlotRepeat(vDeb[i],vFin[1]);
+    PlotRepeat(vDeb[i],vFin[i]);
 }
 
 // ------------------
