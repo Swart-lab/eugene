@@ -20,7 +20,7 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
   sensorLIf =  new SensorLoader (sensorName);
 
   if (!sensorLIf->LastError()) {
-    fprintf(stderr,"Loading Sensor.%s, %d\n",PAR.getC("IfElse.SensorIf"),0);
+    fprintf(stderr," Loading Sensor.%s\t%d\n",PAR.getC("IfElse.SensorIf"),0);
     sensorIf = sensorLIf->MakeSensor(0);
   } else 
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -31,7 +31,7 @@ SensorIfElse :: SensorIfElse (int n) : Sensor(n)
   strcat(sensorName, ".so");
   sensorLElse =  new SensorLoader (sensorName);
   if (!sensorLElse->LastError()) {
-    fprintf(stderr,"Loading Sensor.%s, %d\n",PAR.getC("IfElse.SensorElse"),0);
+    fprintf(stderr," Loading Sensor.%s\t%d\n",PAR.getC("IfElse.SensorElse"),0);
     sensorElse = sensorLElse->MakeSensor(0);
   } else 
     fprintf(stderr,"WARNING: ignored plugin (invalid or not found) : %s\n",
@@ -50,6 +50,7 @@ SensorIfElse :: ~SensorIfElse ()
 // ----------------------
 void SensorIfElse :: Init (DNASeq *X)
 {
+  type = Type_Splice;
   sensorIf->Init(X);
   sensorElse->Init(X);
 }
