@@ -44,12 +44,6 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 
-  // vectors for reverse are put in the increasing order
-  reverse(vPosAccR.begin(), vPosAccR.end()); 
-  reverse(vValAccR.begin(), vValAccR.end());
-  reverse(vPosDonR.begin(), vPosDonR.end());
-  reverse(vValDonR.begin(), vValDonR.end());
-
   fprintf(stderr, "Probing SpliceMachine (starts)................");  
   fflush(stderr);
 
@@ -61,10 +55,6 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   fprintf(stderr,"  done\n");
 
   CheckStart(X,vPosF, vPosR);
-
-  // vectors for reverse are put in the increasing order
-  reverse(vPosR.begin(), vPosR.end()); 
-  reverse(vValR.begin(), vValR.end()); 
 }
 
 // ----------------------
