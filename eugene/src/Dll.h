@@ -3,34 +3,18 @@
 
 #include "Sensor.h"
 
-class DLLManager
+class SensorLoader
 {
  protected:
   void *h;
   const char *err;
-  void *(*factory_func)(void);	
+  Sensor *(*builder_func)();	
 
  public:
-  DLLManager (const char *fname, const char *func_name=0);
-  ~DLLManager ();
-  bool GetSymbol ( void **, const char *sym_name );
+  SensorLoader (const char *fname, const char *func_name=0);
+  ~SensorLoader ();
+  Sensor *MakeSensor();
   const char *LastError () { return err; }
-};
-
-class DLLFactory : public DLLManager
-{
- public:
-  SensorFactory *factory;
-  
-  DLLFactory(const char *fname,
-	     const char *func_name=0) : DLLManager( fname, func_name ) {
-    if( factory_func )
-      factory = (SensorFactory *)factory_func();
-    else 
-      factory = 0;
-  }
-  
-  ~DLLFactory() { delete factory; }
 };
 
 #endif
