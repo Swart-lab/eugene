@@ -55,7 +55,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
   
   m["fstname"] = "\000";        // no default input
 
-  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::")) != -1) {
+  while ((carg = getopt(argc, argv, "UREdrshm:w:f:n:o:p:x:y:c:u:v:g::b::l:O:D:t::M:")) != -1) {
     
     switch (carg) {
       
@@ -164,8 +164,14 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	errflag++;
       break;
       
-    case 'm':           /* -m matrix                        */
-      m["Markov.matname"] = optarg;
+    case 'm':           /* -m IMM matrix                    */
+      m["Sensor.MarkovIMM.use"] = "TRUE" ;
+      m["MarkovIMM.matname"] = optarg;
+      break;
+
+    case 'M':           /* -M proteic markovian matrix      */
+      m["Sensor.MarkovProt.use"] = "TRUE";
+      m["MarkovProt.matname"] = optarg;
       break;
 
     case 'O':           /* -O output                        */
