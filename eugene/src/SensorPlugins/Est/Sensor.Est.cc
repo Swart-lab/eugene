@@ -46,10 +46,11 @@ int HitsCompareLex(const void *A, const void *B)
 SensorEst :: SensorEst (int n) : Sensor(n)
 {
   HitTable = NULL;
-  estP = PAR.getD("Est.estP");
-  estM = PAR.getI("Est.estM");
-  utrP = PAR.getD("Est.utrP");
-  utrM = PAR.getI("Est.utrM");
+
+  estP = PAR.getD("Est.estP",n);
+  estM = PAR.getI("Est.estM",n);
+  utrP = PAR.getD("Est.utrP",n);
+  utrM = PAR.getI("Est.utrM",n);
 }
 
 // ----------------------
@@ -499,7 +500,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
   int state, stateNext = 0, stateBack = 0;
   int pos,   posNext   = 0, posBack   = 0;
   
-  if (!PAR.getI("Est.PostProcess")) return;
+  if (!PAR.getI("Est.PostProcess",GetNumber())) return;
 
   qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
   
