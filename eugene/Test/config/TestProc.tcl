@@ -1,13 +1,22 @@
-#============================================================================
-#=             Copyright (c) 2002 by INRA. All rights reserved.             
-#=                 Redistribution is not permitted without                  
-#=                 the express written permission of INRA.                 
-#=                     Mail : tschiex@toulouse.inra.fr                     
-#=-------------------------------------------------------------------------
-#= File         : EuGeneTk/Test/Reference/TestProc.tcl
-#= Description  : Procedures for test of EuGene sofware
-#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
-#===========================================================================
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     TestProc.tcl
+# Contents: Procedures testing the eugene software
+# ------------------------------------------------------------------
+
 
 
 
@@ -19,8 +28,8 @@
 #               which contains the new values of parameters
 # Example     : tcl> set V(EuGene.minEx) 4
 #               tcl> set V(Output.graph) TRUE
-#               tcl> ModifyParaValue EuGeneAS.par V
-#               After execution, in the file EuGeneAS.par 
+#               tcl> ModifyParaValue eugeneTest.par V
+#               After execution, in the file eugeneTest.par 
 #               the line 'EuGene.minEx   3' will be ' EuGene.minEx   4' 
 #               the line 'Output.graph   FALSE' will be 'Output.graph  TRUE'   
 # Note that if there is no ambiguity, it is sufficient to give 
@@ -69,9 +78,10 @@ proc ModifyParaValue {FileName NewValues} {
 #               Arguments: FileName = name of the parameter file
 #                          SensorsList = list of sensors that will be specified 
 #                                        not to use
+#                          EuGeneDir = directory of the executable
 # BEWARE      : Priority of sensors are not updated
 ###############################################################################
-proc InitParameterFile {FileName SensorsList} {
+proc InitParameterFile {FileName SensorsList EuGeneDir} {
 
 # when name of parameter is include in an other
 # (example SpliceConst.accP is included in SpliceConst.accPNo)
@@ -80,6 +90,7 @@ proc InitParameterFile {FileName SensorsList} {
 set space " "
 
 # Set the parameter to wanted values
+set NewValue1(EuGene.PluginsDir)        $EuGeneDir/PLUGINS/
 ##### Lengths #####
 set NewValue1(EuGene.InitExDist)	init.dist
 set NewValue1(EuGene.IntrExDist)	intr.dist
@@ -395,7 +406,7 @@ proc BackQuoteLine {OldLine} {
 #                 - move the end of stderr bad placed at the end of the file
 #                 - back quote '+', '(', ')', '|'
 #               Argument : FileName = name of an output file obtained
-#                          with a command EuGeneAS -g ... >& FileName
+#                          with a command eugene -g ... >& FileName
 #                          (write first all stderr, then all stdout)
 # BEWARE      : MUST be an output with graph (-g command argument)
 #############################################################################

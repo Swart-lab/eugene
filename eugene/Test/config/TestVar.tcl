@@ -1,25 +1,34 @@
-#============================================================================
-#=             Copyright (c) 2002 by INRA. All rights reserved.             
-#=                 Redistribution is not permitted without                  
-#=                 the express written permission of INRA.                 
-#=                     Mail : tschie@toulouse.inra.fr                     
-#=-------------------------------------------------------------------------
-#= File         : EuGeneTk/Test/config/TestVar.exp
-#= Description  : Environment variables definition
-#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
-#===========================================================================
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     TestVar.tcl
+# Contents: Environment variables definition
+# ------------------------------------------------------------------
 
 
 ############################# Environment variables ###########################
-set EUGENE EuGeneTest
+set EUGENE eugeneTest
+set EUGENE_REF eugene
 
 if {$action=="Test"} {
-    set EUGENE_DIR .
+    set EUGENE_DIR [exec pwd]
     set OUTPUT_DIR ../Test/Outputs
     set SEQ_DIR ../Test/Sequences
     set TRACE_DIR ../Test/TestTrace
 } elseif {$action=="Generate"} {
-    set EUGENE_DIR ../../EuGene
+    set EUGENE_DIR [exec pwd]/../../src
     set OUTPUT_DIR ../Outputs
     set SEQ_DIR ../Sequences
     set TRACE_DIR ../TestTrace
@@ -66,7 +75,6 @@ set OPTIONS(SeqHom) "-gtest"
 set NewValueSeqHom(Transcript.Start*) 1e-9
 set NewValueSeqHom(Transcript.Stop*)  1e-9
 set NewValueSeqHom(EuStop.stopP*)     3.1439
-set NewValueSeqHom(BlastX.level1*)    0.0
 
 ##################### SeqRest test variables #################################
 set SensorsList(SeqRest) {MarkovIMM EuStop PatConst IfElse Riken Repeat}

@@ -1,16 +1,25 @@
 #!/usr/bin/tclsh
-#============================================================================
-#=             Copyright (c) 2002 by INRA. All rights reserved.             
-#=                 Redistribution is not permitted without                  
-#=                 the express written permission of INRA.                 
-#=                     Mail : tschiex@toulouse.inra.fr                     
-#=-------------------------------------------------------------------------
-#= File         : EuGeneTk/Test/config/GenerateOutputs.tcl
-#= Description  : Generation of the reference files for the test suite
-#=                Save the reference output (both stdout and stderr)
-#=                for each test
-#= Authors      : P.Bardou, S.Foissac, M.J.Cros, A.Moisan, T.Schiex         
-#===========================================================================
+
+# ------------------------------------------------------------------
+# Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
+#
+# This program is open source; you can redistribute it and/or modify
+# it under the terms of the Artistic License (see LICENSE file).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#
+# You should have received a copy of Artistic License along with
+# this program; if not, please see http://www.opensource.org
+#
+# $Id$
+# ------------------------------------------------------------------
+# File:     GenerateOutput.tcl
+# Contents: Generation of the reference files for the test suite
+# Save the reference output (both stdout and stderr) for each test
+# ------------------------------------------------------------------
+
 
 
 ############################# Environment variables ############################
@@ -50,9 +59,9 @@ if {$key=="Y"} {
 #             BEWARE does not concern sensor use parameters
 ###########################################################################
 # Copy locally the default parameter file
-exec cp  ${EUGENE_DIR}/${EUGENE}.par .
+exec cp  ${EUGENE_DIR}/${EUGENE_REF}.par ${EUGENE}.par
 # Init parameters values
-InitParameterFile ${EUGENE}.par $AllSensorsList
+InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
 
 
 ########################################################################
@@ -190,7 +199,7 @@ foreach TEST $FunctionalTestList {
     exec rm tmp%stderr tmp%stdout tmp%FunctionalTest
 
     # Restore initial parameters values
-    InitParameterFile ${EUGENE}.par $AllSensorsList
+    InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
 
     puts "Reference files for $TEST functional test created or checked."
 }
@@ -225,7 +234,7 @@ foreach TEST $ArabidopsisTestList {
     exec rm tmp%stdout
     
     # Restore initial parameters values
-    InitParameterFile ${EUGENE}.par $AllSensorsList
+    InitParameterFile ${EUGENE}.par $AllSensorsList $EUGENE_DIR
 
     puts "Reference files for $TEST test created or checked."
 
