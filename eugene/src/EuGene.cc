@@ -39,7 +39,7 @@
 // pour etre utilisable). Il faudrait faire 3 pistes single + 3 pistes
 // non single.
 
-#define  VERSION "1.2a (110602)"
+#define  VERSION "1.2b (280802)"
 #define  VERSION_PAR "21_08_02"
 #define PAYTOIGNORE 1
 
@@ -176,10 +176,7 @@ typedef struct RAFLgene{
   char ID[FILENAME_MAX+1];
 } RAFLgene;
 
-bool Before(const RAFLgene &A,const RAFLgene &B) {
-//  int m1 = A.deb+A.fin;
-//  int m2  = B.deb+B.fin;
-//  return (m1 < m2);
+inline bool Before(const RAFLgene &A,const RAFLgene &B) {
   return (A.deb < B.deb);
 }
 
@@ -820,15 +817,16 @@ int main  (int argc, char * argv [])
 
   std::vector <RAFLgene> RAFL;
   int              RAFLpos = 0;  //position par rapport a un gene RAFL
-
+  int              RAFLindex = 0;   // index du RIKEN en cours
+  const REAL RAFLPenalty = NINFINITY; 
+  
   // prior on the initial state, selon Sato et al 1999 / Terryn et
   // al. 1999
   REAL ExonPrior = 0.33,IntronPrior = 0.17;
   REAL InterPrior = 0.4,FivePrimePrior = 0.03,ThreePrimePrior = 0.07;
 
   const REAL DontCrossStop = NINFINITY;
-  const REAL IGPenalty = NINFINITY; 
-  const REAL RAFLPenalty = NINFINITY; 
+  const REAL IGPenalty = -1.0; 
 
   // Les longueurs. 
 
@@ -956,7 +954,7 @@ int main  (int argc, char * argv [])
       (void) strcpy(matname, optarg);
       break;
 
-    case 'O':           /* -m matrix                        */
+    case 'O':           /* -O output                        */
       (void) strcpy(outputname, optarg);
       break;
 
@@ -1250,6 +1248,8 @@ int main  (int argc, char * argv [])
   strcat(tempname,".startsR");
   Read_Start(tempname,Data_Len, exp(-StartP), StartB, Start[1],1);
   fprintf(stderr," reverse done\n");
+
+  Check_Start(TheSeq,Start);
   
   fprintf(stderr, "Reading splice site files...");  
   fflush(stderr);
@@ -1260,7 +1260,9 @@ int main  (int argc, char * argv [])
   
   Read_Splice(fstname,-1,Data_Len, Acc[1], Don[1],AccP,AccB,DonP,DonB);
   fprintf(stderr," reverse done\n");
-  
+
+   Check_Splices(TheSeq,Acc,Don);
+
   // ---------------------------------------------------------------------------
   // Lecture donnees user
   // ---------------------------------------------------------------------------
@@ -1406,29 +1408,37 @@ int main  (int argc, char * argv [])
       RAFLtmp.push_back(tmp);
     }
     fclose(fRAFL);
+    if (j != EOF) {
+      fprintf(stderr,"Incorrect RAFL file\n");
+      exit(2);
+    }
     fprintf(stderr,"%d RAFL EST pairs read, ",RAFLtmp.size());
-    if (j != EOF) fprintf(stderr,"Incorrect RAFL file\n");
     
     sort(RAFLtmp.begin(),RAFLtmp.end(),Before);
-    
-    for (j = 0; j<(int)RAFLtmp.size()-1 ;j++) {
-      /*	if (RAFLtmp[j].fin - RAFLtmp[j+1].deb < 60)  {
-		RAFLtmp[j].fin = (RAFLtmp[j].fin+RAFLtmp[j+1].deb)/2;
-		RAFLtmp[j+1].deb = RAFLtmp[j].fin +2;
-		} else continue;
-		RAFL.push_back(RAFLtmp[j]);
-      */
-      if (RAFLtmp[j].fin - RAFLtmp[j+1].deb < 60) {// pas de grand overlap
-	RAFL.push_back(RAFLtmp[j]);
+
+    for (j =0; j<(int)RAFLtmp.size()-1 ;j++) {
+      if (RAFLtmp[j].fin - RAFLtmp[j+1].deb >= 60) { // grand overlap
+        fprintf(stderr,"fusion...");
+        // grand overlap, on fusionne les deux riken (meme gene)
+        RAFLtmp[j].deb = Min( RAFLtmp[j].deb , RAFLtmp[j+1].deb );
+        RAFLtmp[j].fin = Max( RAFLtmp[j].fin , RAFLtmp[j+1].fin );
+        if ( (RAFLtmp[j].sens==RAFLtmp[j+1].sens) || 
+             ((RAFLtmp[j].sens==0) || (RAFLtmp[j+1].sens==0))) {
+          RAFLtmp[j].sens= ( (RAFLtmp[j].sens==0) ? RAFLtmp[j+1].sens : RAFLtmp[j].sens );
+          RAFL.push_back(RAFLtmp[j]); 
+          // si pas de contradiction dans les sens, on prend le gene resultant 
+        }
+        j++;
+        //on saute le suivant
       }
-      else { 
-	fprintf(stderr,"fusion...");
-	// grand overlap, on fusionne les deux riken (meme gene)
-	RAFLtmp[j].deb = Min( RAFLtmp[j].deb , RAFLtmp[j+1].deb );
-	RAFLtmp[j].fin = Max( RAFLtmp[j].fin , RAFLtmp[j+1].fin );
-	RAFL.push_back(RAFLtmp[j]); 
-	// on prend le gene resultant et on saute le suivant
-	j++;
+      else{
+        if (RAFLtmp[j].fin - RAFLtmp[j+1].deb > 0) {
+          fprintf(stderr,"overlap...");
+          i= RAFLtmp[j].fin;
+          RAFLtmp[j].fin= Min(i,RAFLtmp[j+1].deb);
+          RAFLtmp[j+1].deb= Max(i,RAFLtmp[j+1].deb);
+        }
+        RAFL.push_back(RAFLtmp[j]);
       }
     }
     if(j==(int)RAFLtmp.size()-1) RAFL.push_back(RAFLtmp[j]);
@@ -1448,9 +1458,6 @@ int main  (int argc, char * argv [])
     fflush(stderr);
     if (RAFL.size() < 1) raflopt=FALSE;
   }
-  
-  // index du RIKEN en cours
-  int RAFLindex = 0;
   
   // ---------------------------------------------------------------------------
   // Analysing NC input
@@ -1555,7 +1562,7 @@ int main  (int argc, char * argv [])
 		      ProtMatchPhase[i]=0;
 		    }
 		    else{
-		      if (PGlobalScore > fabs(ProtMatch[i])){
+		      if (PGlobalScore >= fabs(ProtMatch[i])){
 			ProtMatch[i]= -PGlobalScore;
 			ProtMatchPhase[i]= 0;
 		      }
@@ -1573,7 +1580,7 @@ int main  (int argc, char * argv [])
 		      ProtMatchPhase[i]=0;
 		    }
 		    else {
-		      if (PGlobalScore > fabs(ProtMatch[i])){
+		      if (PGlobalScore >= fabs(ProtMatch[i])){
 			ProtMatch[i]= -GlobalScore;
 			ProtMatchPhase[i]= 0;
 		      }
@@ -1617,7 +1624,7 @@ int main  (int argc, char * argv [])
 		  ProtMatchPhase[i]= PhaseAdapt(phase);
 		}
 		else{
-		  if (GlobalScore > fabs(ProtMatch[i])){ 
+		  if (GlobalScore >= fabs(ProtMatch[i])){ 
 		    ProtMatch[i] = GlobalScore;
 		    ProtMatchPhase[i]= PhaseAdapt(phase);
 		  }
@@ -1748,37 +1755,33 @@ int main  (int argc, char * argv [])
     // ---------------------------------------------------------------------------
     // Calcul de la position par rapport aux genes RAFL (Riken Ara.Full-Length)
     // valeurs de RAFLpos:
-    // 0-> en dehors, 1-> frontiere(intergenique obligatoire), 2-> dedans(penalisation IG)
-    // 3-> debut d'un overlap entre 2 genes riken (UTR obligatoire)
-    // 4-> fin d'un overlap
+    // 0-> en dehors,
+    // 1-> frontiere 5prime (intergenique ou UTR5  obligatoire),
+    // 2-> frontiere 3prime (intergenique ou UTR3  obligatoire),
+    // 3-> dedans(penalisation IG)
     // ---------------------------------------------------------------------------
-    if (raflopt){
-      if (i > RAFL[RAFLindex].fin){
-	// si on depasse le RAFL, on prend l'eventuel prochain
-	(RAFLindex+1 < (int)RAFL.size()) ? RAFLindex++ : raflopt=FALSE ;
-      }
-      
+    if (raflopt) {
       RAFLpos=0;
-      if (RAFLindex+1 == (int)RAFL.size()) {
-	// pas d'autre gene riken apres celui-ci
-	if ( (i >= RAFL[RAFLindex].deb-2) && (i < RAFL[RAFLindex].fin+1) ){
-	  RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
-	}
+      if (i > RAFL[RAFLindex].fin) {
+        // si on depasse le RAFL, on prend l'eventuel prochain
+        if (RAFLindex+1 < (int)RAFL.size()) RAFLindex++; 
+        else raflopt=FALSE;
       }
-      else{
-	// il en reste au moins un
-	if ( (i >= RAFL[RAFLindex].deb-2) && 
-	     (i <= Min(RAFL[RAFLindex].fin,RAFL[RAFLindex+1].deb-2)) ){ 
-	  // dans le gene riken courant
-	  RAFLpos= ( ((i==RAFL[RAFLindex].deb-2) || (i==RAFL[RAFLindex].fin)) ? 1 : 2);
-	}
-	// si chevauchement
-	if ( (RAFL[RAFLindex+1].deb-2) < (RAFL[RAFLindex].fin) ){
-	  if ( (i <= RAFL[RAFLindex].fin)&&(i >= RAFL[RAFLindex+1].deb-2)){  // dans overlap
-	    if (i==RAFL[RAFLindex+1].deb-2) RAFLpos=3;
-	    if (i==RAFL[RAFLindex].fin) RAFLpos=4;
-	  }
-	}
+
+      // dans le Riken:
+      if (i >= RAFL[RAFLindex].deb-2) {
+        // bordure min:
+        if (i == RAFL[RAFLindex].deb-2)
+          RAFLpos= ( (RAFL[RAFLindex].sens== 1) ? 1 : 2);
+        else {
+          if (i < RAFL[RAFLindex].fin) RAFLpos=3;
+          else {
+            // frontiere max:
+            if (i== RAFL[RAFLindex].fin) {
+              RAFLpos= ( (RAFL[RAFLindex].sens==-1) ? 1 : 2);
+            }
+          }
+        }
       }
     } 
     // ----------------------------------------------------------------
@@ -1851,7 +1854,8 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(IGPenalty);
       
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== -1)) || (RAFLpos>=3)) 
+	if ((RAFLpos==1) || (RAFLpos==2) ||
+	    ((RAFLpos==3) && (RAFL[RAFLindex].sens==-1)) )
 	  LBP[k]->Update(RAFLPenalty);
       }
     }
@@ -1923,7 +1927,8 @@ int main  (int argc, char * argv [])
 	LBP[k]->Update(IGPenalty);
 
       if (raflopt){
-	if ((RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens== 1)) || (RAFLpos>=3)) 
+	if ((RAFLpos==1) || (RAFLpos==2) ||
+	    ((RAFLpos==3) && (RAFL[RAFLindex].sens== 1)) )
 	  LBP[k]->Update(RAFLPenalty);
       }
     }
@@ -1969,7 +1974,7 @@ int main  (int argc, char * argv [])
       LBP[InterGen5]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==2) || (RAFLpos>=3)) LBP[InterGen5]->Update(RAFLPenalty);
+      if (RAFLpos==3) LBP[InterGen5]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -2008,7 +2013,7 @@ int main  (int argc, char * argv [])
       LBP[InterGen3]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ((RAFLpos==2) || (RAFLpos>=3)) LBP[InterGen3]->Update(RAFLPenalty);
+      if (RAFLpos==3) LBP[InterGen3]->Update(RAFLPenalty);
     }
 
     // ----------------------------------------------------------------
@@ -2069,7 +2074,8 @@ int main  (int argc, char * argv [])
       LBP[UTR5F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==-1) && ((RAFLpos==2)||(RAFLpos==4))) || (RAFLpos==3) ) 
+      if ( (RAFLpos==2) ||
+	   ((RAFL[RAFLindex].sens==-1) && (RAFLpos>=1) ) )
 	LBP[UTR5F]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
@@ -2108,7 +2114,8 @@ int main  (int argc, char * argv [])
       LBP[UTR3F]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==-1) && ((RAFLpos==2)||(RAFLpos==3))) || (RAFLpos==4) ) 
+      if ( (RAFLpos==1) ||
+	   ((RAFL[RAFLindex].sens==-1) && (RAFLpos>=1) ) )
 	LBP[UTR3F]->Update(RAFLPenalty);
     }
 
@@ -2158,7 +2165,8 @@ int main  (int argc, char * argv [])
       LBP[UTR5R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==1) && ((RAFLpos==2)||RAFLpos==3)) || (RAFLpos==4) ) 
+      if ( (RAFLpos==2) || 
+	   ((RAFL[RAFLindex].sens== 1) && (RAFLpos>=1) ) )
 	LBP[UTR5R]->Update(RAFLPenalty);
     }
     // ----------------------------------------------------------------
@@ -2213,7 +2221,8 @@ int main  (int argc, char * argv [])
       LBP[UTR3R]->Update(-fabs(ProtMatch[i])*ProtMatchLevel[i]);
 
     if (raflopt){
-      if ( (RAFLpos==1) || ((RAFL[RAFLindex].sens==1) && ((RAFLpos==2)||(RAFLpos==4))) || (RAFLpos==3) ) 
+      if ( (RAFLpos==1) ||
+	   ((RAFL[RAFLindex].sens== 1) && (RAFLpos>=1)))
 	LBP[UTR3R]->Update(RAFLPenalty);
     }
 
@@ -2264,7 +2273,8 @@ int main  (int argc, char * argv [])
 	LBP[6+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==-1)) || (RAFLpos>=3)) 
+	if ( (RAFLpos==1) || (RAFLpos==2) || 
+		 ( (RAFLpos==3) && (RAFL[RAFLindex].sens==-1) ) )
 	  LBP[6+k]->Update(RAFLPenalty);
       }
     }
@@ -2316,7 +2326,8 @@ int main  (int argc, char * argv [])
 	LBP[9+k]->Update(-ProtMatch[i]*ProtMatchLevel[i]);
 
       if (raflopt){
-	if ( (RAFLpos==1) || ((RAFLpos==2) && (RAFL[RAFLindex].sens==1)) || (RAFLpos>=3)) 
+	if ( (RAFLpos==1) || (RAFLpos==2) || 
+		 ( (RAFLpos==3) && (RAFL[RAFLindex].sens== 1)) )
 	  LBP[9+k]->Update(RAFLPenalty);
       }
     }
@@ -2373,6 +2384,10 @@ int main  (int argc, char * argv [])
     exit(2);
   
   fprintf(stderr,"Optimal path length = %#f\n",-maxi+log(4)*(Data_Len+1));
+
+  // Sanity check ! A feasible path has not been found ?
+  if (isnan(maxi))
+    fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
 
   if (graph) PlotPredictions(Data_Len,Choice,Stop,Start,Acc,Don);
   
