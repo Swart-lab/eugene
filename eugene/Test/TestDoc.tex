@@ -3,7 +3,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{times}
 
-\newcommand{\EuGenie}{\textsc{EuG\`ene}}
+\newcommand{\EuGenie}{\textsc{EuG{\`e}ne}}
 
 
 \begin{document}
@@ -11,6 +11,10 @@
 
 \title{Projet \EuGenie: Tests description}
 \maketitle
+
+This document updates the first version of July 23, 2003.
+Due to insufficient buffer size memory with the spawn command for the SeqBig test, the SeqBig test is removed from the functionals tests and a new test Big (that used the same sequence as SeqBig, with a more complete list o
+f sensors, that does not test the graph, and just test the stdout output) is defined in a new list called Arabidopsis also including the Araset test.
 
 \section{Implemented tests}
 
@@ -25,54 +29,55 @@ The textual output (except the 2 first lines due to version reference in them) i
 Theses tests are implemented in the EuGeneTk/Test/TestSuite/Functionals.exp file.
 
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|} \hline \hline
-{\bf Functional Tests}& {\bf SeqAra}& {\bf SeqHom}& {\bf SeqDoc}& {\bf SeqRest}& {\bf SeqBig}\\ \hline \hline
+\begin{tabular}{|c|c|c|c|c|} \hline \hline
+{\bf Functional Tests}& {\bf SeqAra}& {\bf SeqHom}& {\bf SeqDoc}& {\bf SeqRest}\\ \hline \hline
 
-{\bf Sequences}& & & & &\\ \hline \hline
-seq25... (15 Kb)            & x &   &   & x &  \\
-(araset)                 &   &   &   &   &  \\ \hline 
-exSeqHom.fasta (3 Kb)    &   & x &   &   &  \\ 
-(EugeneHom)              &   &   &   &   &  \\ \hline 
-SYNO\_ARATH.fasta (4 Kb) &   &   & x &   &  \\ 
-(documentation)          &   &   &   &   &  \\ \hline 
-chr1... (508 Kb)            &   &   &   &   & x\\ 
-(bug)                    &   &   &   &   &  \\ \hline \hline 
+{\bf Sequences}& & & & \\ \hline \hline
+seq25... (15 Kb)            & x &   &   & x   \\
+(araset)                 &   &   &   &     \\ \hline 
+exSeqHom.fasta (3 Kb)    &   & x &   &     \\ 
+(EugeneHom)              &   &   &   &    \\ \hline 
+SYNO\_ARATH.fasta (4 Kb) &   &   & x &     \\ 
+(documentation)          &   &   &   &    \\ \hline 
+chr1... (508 Kb)            &   &   &   &   \\ 
+(bug)                    &   &   &   &    \\ \hline \hline 
 
-{\bf Sensors}& & & & &\\ \hline \hline
-MarkovIMM      &       x        &                   &     x    &   & x\\ \hline
-MarkovConst    &                &                   &          & x & \\ \hline
-MarkovProt     &                &        x          &          &   & \\ \hline
-EuStop         &       x        &        x          &     x    & x & x\\ \hline
-NStart         &       x        &                   &     x    &   & x\\ \hline
-StartConst     &                &                   &          & x & \\ \hline
-StartWAM       &                &        x          &          &   & \\ \hline
-NG2            & used by IfElse &                   &          &   & used by IfElse\\  \hline
-SPred          & used by IfElse &                   &          &   & used by IfElse\\  \hline
-GSplicer       &       x        &                   &          &   & x\\ \hline
-SpliceConst    &                &                   &          & x & \\ \hline
-SpliceWAM      &                &        x          &          &   & \\ \hline
-Est            &       x        &                   &          &   & x\\  \hline
-Riken          &                &                   &          & x & \\ \hline
-BlastX         &       x        &                   &          &   & x\\  \hline
-Homology       &                &        x          &          &   & \\ \hline
-FrameShift     &                &                   &    x     &   & \\ \hline
-Transcript     &                &        x          &    x     &   & \\ \hline
-Repeat         &                &                   &          & x & \\ \hline
-User           &                &        x          &    x     &   & \\ \hline
-GFF            &                &        x          &          &   & \\ \hline
-IfElse         &       x        &                   &    x     &   & x\\ \hline \hline
+{\bf Sensors}& & & & \\ \hline \hline
+MarkovIMM      &       x        &                   &     x    &   \\ \hline
+MarkovConst    &                &                   &          & x  \\ \hline
+MarkovProt     &                &        x          &          &    \\ \hline
+EuStop         &       x        &        x          &     x    & x \\ \hline
+NStart         &       x        &                   &     x    &   \\ \hline
+StartConst     &                &                   &          & x  \\ \hline
+StartWAM       &                &        x          &          &    \\ \hline
+NG2            & used by IfElse &                   &          &   \\  \hline
+SPred          & used by IfElse &                   &          &   \\  \hline
+GSplicer       &       x        &                   &          &   \\ \hline
+SpliceConst    &                &                   &          & x  \\ \hline
+SpliceWAM      &                &        x          &          &    \\ \hline
+Est            &       x        &                   &          &   \\  \hline
+Riken          &                &                   &          & x  \\ \hline
+BlastX         &       x        &                   &          &   \\  \hline
+Homology       &                &        x          &          &    \\ \hline
+FrameShift     &                &                   &    x     &    \\ \hline
+Transcript     &                &        x          &    x     &    \\ \hline
+Repeat         &                &                   &          & x  \\ \hline
+User           &                &        x          &    x     &    \\ \hline
+GFF            &                &        x          &          &    \\ \hline
+IfElse         &       x        &                   &    x     &   \\ \hline \hline
 
-{\bf Arguments}& & & & &\\ \hline \hline
-E, B           &       x        &                   &          &   &\\ \hline 
-g              &       x        &        x          &    x     & x & x\\ \hline
+{\bf Arguments}& & & & \\ \hline \hline
+E, B           &       x        &                   &          &   \\ \hline 
+g              &       x        &        x          &    x     & x \\ \hline
 \end{tabular}
 \end{center}
 \vspace{0.5cm}
 
 
-\subsection{Araset test}
-This test compares only the predictions (no check of optimal path length) realized on all the sequence of the araset set: /Annotation/Arabidopsis/araset/Genes.\\
-The sensors used are MarkovIMM, EuStop, NStart, IfElse, GSplicer, Est, BlastX.\\
+\subsection{Arabidopsis tests}
+Two tests are performed on Arabidopsis sequences, just checking the stdout outputs (no check of optimal path length).\\
+The Araset test compares only the predictions realized on all the sequence of the araset set: /Annotation/Arabidopsis/araset/Genes. The sensors used are MarkovIMM, EuStop, NStart, IfElse, GSplicer, Est, BlastX.\\
+The Big test checks the predictions done on the chr1\_2002.tfa\_22540000-23040000.tfa (508 Kb) file. The sensors used are MarkovIMM, Transcript, MarkovConst, EuStop, NStart, GSplicer, Est, BlastX.\\
 
 
 \section{How to run tests}
@@ -130,7 +135,7 @@ To add a different test: need to write adapted code.
 \end{enumerate}
 
 \section{Notes}
-At the moment, some differences exist between Linux (debian 3.0, gcc 2.95.4) and SUN OS (solaris 2.9, gcc 2.8.1). \\
+In July 2003, some differences exist between Linux (debian 3.0, gcc 2.95.4) and SUN OS (solaris 2.9, gcc 2.8.1). \\
 \\
 With SUN OS:
 \begin{itemize}
@@ -139,6 +144,10 @@ With SUN OS:
 \item Inf is written instead of inf, diff is then used with the -i argument to ignore the case of letter,
 \item optimal path value may be a little different (for MarkovProt test after the 4th decimal digit), the display of optimal path has been limited to 4 decimal digits.
 \end{itemize}
+
+In September 2004, some test results are differents depending on the used g++ compiler.\\
+Output\_BlastX have a false 5130 line with g++ 2.95 and a true one with g++ 3.3 and higher.\\
+In Output\_AraSeq, the value of the optimum path is slightly different with those 2 compilers.\\
 
 \end{document}
 
