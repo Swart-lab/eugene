@@ -48,6 +48,17 @@ class Sensor
   void CheckStart   (DNASeq *,std::vector<int> a, std::vector<int> b);
   void CheckStop    (DNASeq *,std::vector<int> a, std::vector<int> b);
   void CheckSplices (DNASeq *,std::vector<int> a, std::vector<int> b, std::vector<int> c, std::vector<int> d);
+  void PlotStop     (int pos,int phase, int sure);
+  void PlotStart    (int pos,int phase, double strength);
+  void PlotAcc      (int pos, int strand, double strength);
+  void PlotDon      (int pos, int strand, double strength);
+  void PlotESTHit   (int start, int end, int strand, int filtered);
+  void PlotESTGap   (int start, int end, int strand, int filtered);
+  void PlotBlastHit (int start, int end, int phase, int level);
+  void PlotBlastGap (int start, int phase1, int end, int phase2, int level);
+  void PlotStartReg (int pos, int phase, int color);
+  void PlotEndReg   (int pos, int phase, int color);
+  void PlotRepeat   (int start, int end);
   int  GetNumber    (void) { return instanceNumber; }
 
  public:
