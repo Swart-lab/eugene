@@ -30,7 +30,6 @@
 // Mon May 13 09:52:35 2002: PAYFORIGNORE flag: indique si on paye
 //                              quand on ne prend pas un aiguillage.
 // TODO:
-// supprimer Choice
 // remettre Frameshifts
 // alignement cds cDNA et proteines sur les splice sites
 
@@ -71,8 +70,8 @@
 #include "BackP.h"
 #include "Const.h"
 #include "clef.h"
-#include "Plot.h"
 #include "Output.h"
+#include "Prediction.h"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX        1024
@@ -174,7 +173,7 @@ int main  (int argc, char * argv [])
     
     Data_Len = TheSeq->SeqLen;
     
-    fprintf(stderr,"%s, %d bases read\n",TheSeq->Name, Data_Len);
+    fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, Data_Len);
     
     fprintf (stderr,"GC Proportion = %.1f%%\n", 
 	     (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
@@ -255,15 +254,12 @@ int main  (int argc, char * argv [])
     // 16 UTR 3' reverse
     // 17 Intergenique
     // ---------------------------------------------------------------------------
-    char *Choice;
-    BackPoint *LBP[18];
+    Prediction *pred;
+    BackPoint  *LBP[18];
     REAL BestU;
     double NormalizingPath = 0.0;
     signed   char best   = 0;
     unsigned char Switch = 0;
-    
-    Choice =  new char[Data_Len+2];
-    for (i = 0; i < Data_Len +2; i++) Choice[i] = 0;
     
     for (i = 0; i < 18; i++) {
       LBP[i] = new BackPoint(i, -1,0.0);
@@ -820,9 +816,9 @@ int main  (int argc, char * argv [])
 	j = i;
       }
     }
-    
-    LBP[j]->BackTrace(Choice);
-    
+        
+    pred = LBP[j]->BackTrace();
+        
     for  (i = 0;  i < 18;  i ++) LBP[i]->Zap();
     
     if (!PorteOuverte && Data_Len > 6000) 
@@ -831,14 +827,14 @@ int main  (int argc, char * argv [])
     fprintf(stderr,"Optimal path length = %#f\n",-maxi-NormalizingPath);
     
     // Sanity check ! A feasible path has not been found ?
-  if (isnan(maxi+NormalizingPath) || maxi+NormalizingPath == NINFINITY)
+    if (isnan(maxi+NormalizingPath) || maxi+NormalizingPath == NINFINITY)
       fprintf(stderr,"WARNING: no feasible path, inconsistent data !\n");
     
     if (graph)
-      PlotPredictions(Data_Len, Choice);
+      pred->plotPred();
     
-    Output(TheSeq, Choice, sequence, argc, argv);
-
+    Output(TheSeq, pred, sequence, argc, argv);
+    
     // Free used memory
     if (graph) {
       fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
@@ -846,11 +842,12 @@ int main  (int argc, char * argv [])
       ClosePNG();
       fprintf(stderr, "done\n\n");
     }
+
     delete TheSeq;
-    
-    delete [] Choice;
+    pred->resetPred();
     MS.ResetType();
-  } // fin de traitement de chaque séquence....
+
+  }// fin de traitement de chaque séquence....
  
   MS.ResetSensors();
   
