@@ -25,33 +25,34 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
     int nbGene  = 1;
     int nbExon  = 0;
     int cons = 0, incons = 0;
-    int TStart = 0, GStart = 0, GEnd = 0;
     int forward,init,term,Lend,Rend,Phase;
     int Don,Acc;
     char seqn[6] = "";
     char *position;
     int stateBack = 0, state, stateNext = 0;
-    int posBack   = 0, pos,   posNext   = 0;
-
-    //if (estopt) {    
-    //qsort((void *)HitTable,NumEST,sizeof(void *),HitsCompareLex);
-    // reset static in EST Support
-    //if (PAR.estanal) ESTSupport(NULL,100,0,100,0,NULL,0);
-    //}
-
+    int posBack   = 0, pos;
+        
+    fprintf(stderr,"\n");
+      
     if (printopt0 == 'h') {
       printf("<HTML><TITLE>EuGene</TITLE><BODY><CENTER><H1>EuGene prediction</H1></CENTER>\n");
       printf("<center><listing>\n");
-      printf("\n\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
+      printf("\n\t      Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
     }
     
-    if (printopt0 != 'a')
-      fprintf(stderr,"\n    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
-    else
-      fprintf(stderr,"\nSeq     Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n\n");
-
+    else if (printopt0 == 'l')
+      fprintf(stderr,"    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
+    
+    else if (printopt0 == 'a')
+      fprintf(stderr,"Seq   Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do     Pr.\n");
+    
     if (printopt0 == 'g' && sequence == optind)
       printf("name\tsource\tfeature\tstart\tend\tscore\tstrand\tframe\n");
+    
+    if(printopt0 != 'g')
+      if(sequence != optind)
+	printf("\n");
+      else fprintf(stderr,"\n");
     
     //position = strstr(argv[sequence],"/seq");
     position = BaseName(argv[sequence]);
@@ -73,17 +74,11 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       }
       state = pred->getState(i);
       pos   = pred->getPos(i);
-      if(i != 0) {
+      if(i != 0)
 	stateNext = pred->getState(i-1);
-	posNext   = pred->getPos(i-1);
-      }
-      
+	      
       if (estopt)
        	CheckConsistency(posBack, pos, state, &cons, &incons, X);
-      // Demarrage exon extreme. Noter pour verif EST
-      if ((stateNext == UTR5F) || (stateNext == UTR3R)) TStart = pos;
-      if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
-      if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
       
       // An exon is finishing
       if (state <= ExonR3) {
@@ -120,6 +115,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
 
 	if (printopt0 == 'g') printf("\tEuGene\t");
+	else if (printopt0 == 'a') printf(" ");
 	else printf("\t");
 	
 	if (init && term) {
@@ -167,6 +163,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	  printf("%s.%d.%d.%d",seqn,sequence-optind+1,nbGene,nbExon);
 	
 	if (printopt0 == 'g') printf("\tEuGene\t");
+	else if (printopt0 == 'a') printf(" ");
 	else printf("\t");
 	
 	switch (state) {
@@ -210,16 +207,10 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 	}
 	if(stateNext >= ExonR1 && stateNext <= ExonR3)
 	  nbExon = pred->nbExon(nbGene) + 1;
-        
-     	//if ((Choice[i+1] == InterGen5) || (Choice[i+1] == InterGen3))
-	//if (estopt && PAR.estanal) {
-	//  ESTSupport(Choice,TStart,i-1,GStart,GEnd,HitTable,NumEST);
-	//  GStart = TStart = GEnd = -1;
-	//}
       }
+      if(pos == Data_Len)
+	break;
     }
-    
-    if (printopt0 != 'g')  printf("\n");
     
     if (printopt0 == 'h')   {
       //position = BaseName(argv[sequence]);
@@ -235,7 +226,7 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
       printf("<a href=%s.blastx1.html>BlastX PIR</a><br>",position);
       printf("<a href=%s.blastx2.html>BlastX TrEMBL</a><br>",position);
       
-      //OutputHTMLFileNames();
+      OutputHTMLFileNames();
       printf("</body></html>\n");
     }
   }
@@ -271,31 +262,6 @@ void Output (DNASeq *X, Prediction *pred, int sequence, int argc, char * argv[])
 }
 
 //--------------------------------------------------
-int HitsCompareLex(const void *A, const void *B)
-{
-  Hits **UA,**UB;
-  
-  UA = (Hits **) A;
-  UB = (Hits **) B;
-  
-  if ((*UA)->Start < (*UB)->Start) return -1;
-  if ((*UA)->Start > (*UB)->Start) return 1;
-  if ((*UA)->NGaps > (*UB)->NGaps) return -1;
-  if ((*UA)->NGaps < (*UB)->NGaps) return 1;
-  if ((*UA)->Length > (*UB)->Length) return -1;
-  if ((*UA)->Length < (*UB)->Length) return 1;
-  return 0;
-}
-
-//--------------------------------------------------
-int IsPhaseOn(char p, int pp)
-{
-  if (p == 6) return FALSE;
-  if (p == pp) return TRUE;
-  return FALSE;
-}
-
-//--------------------------------------------------
 // Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
 //--------------------------------------------------
 int PhaseAdapt(char p)
@@ -305,110 +271,6 @@ int PhaseAdapt(char p)
   else if (p < 6) return (2-p);
   else if (p < 9) return (p-2);
   else return (5-p);
-}
-
-//--------------------------------------------------
-void PrintPhase(char p)
-{
-  switch (p) {
-  case 0:
-    printf("E1 ");
-    return;
-    
-  case 1:
-    printf("E2 ");
-    return;
-
-  case 2:
-    printf("E3 ");
-    return;
-
-  case 3:
-    printf("e1 ");
-    return;
-
-  case 4:
-    printf("e2 ");
-    return;
-
-  case 5:
-    printf("e3 ");
-    return;
-
-  case 6:
-    printf("I1 ");
-    return;
-
-  case 7:
-    printf("I2 ");
-    return;
-
-  case 8:
-    printf("I3 ");
-    return;
-
-  case 9:
-    printf("i1 ");
-    return;
-
-  case 10:
-    printf("i2 ");
-    return;
-
-  case 11:
-    printf("i3 ");
-    return;
-
-  case 12:
-    printf("IG ");
-    return;
-
-  case 13:
-    printf("U5 ");
-    return;
-
-  case 14:
-    printf("U3 ");
-    return;
-
-  case 15:
-    printf("u5 ");
-    return;
-
-  case 16:
-    printf("u3 ");
-    return;
-
-  case 17:
-    printf("IG ");
-    return;
-
-  default:
-    fprintf(stderr,"ERROR: unexpected Choice value\n");
-    exit(1);
-  }
-  return;
-}
-
-//--------------------------------------------------
-// Dump les signaux au format util user
-//--------------------------------------------------
-void DumpSignals(int Len, REAL** Donor, REAL **Acceptor,REAL** Stop, REAL **Start,FILE* flot)
-{
-  int i;
-  for (i=0; i< Len; i++) {
-    //    if (Stop[0][i]) fprintf(flot,"stop f %d %a\n",i+1,Stop[0][i]);
-    //    if (Stop[1][i]) fprintf(flot,"stop r %d %a\n",i+1,Stop[1][i]);
-
-    if (Start[0][i]) fprintf(flot,"start f %d %a\n",i+1,Start[0][i]);
-    if (Start[1][i]) fprintf(flot,"start r %d %a\n",i+1,Start[1][i]);
-
-    if (Donor[0][i]) fprintf(flot,"donor f %d %a\n",i+1,Donor[0][i]);
-    if (Donor[1][i]) fprintf(flot,"donor r %d %a\n",i+1,Donor[1][i]);
-
-    if (Acceptor[0][i]) fprintf(flot,"acceptor f %d %a\n",i+1,Acceptor[0][i]);
-    if (Acceptor[1][i]) fprintf(flot,"acceptor r %d %a\n",i+1,Acceptor[1][i]);
-  }
 }
 
 // -------------------------------------------------------------------------
@@ -466,117 +328,4 @@ void CheckConsistency(int debut, int fin, int etat,
   }
   *cons = con;
   *incons = inc;
-}
-
-// -------------------------------------------------------------------------
-// Tdebut/fin = debut/fin de transcript
-// debut/fin = debut/fin de traduit
-// -------------------------------------------------------------------------
-void ESTSupport(char * Choice, int Tdebut, int Tfin, int debut,int fin,  Hits **HitTable, int Size)
-{
-  static int EstIndex;
-  int supported = 0;
-  int CDSsupported = 0;
-  unsigned char *Sup;
-  Block *ThisBlock;
-  int ConsistentEST,i;
-  int from = 0, to = 0, ESTEnd = 0;
-  
-  if (Choice == NULL) { 
-    EstIndex = 0;
-    return;
-  }
-
-  Sup = new unsigned char[Tfin-Tdebut+1]; 
-
-  for (i=0; i <= Tfin-Tdebut; i++)
-    Sup[i]=0;
-  
-  // si la fin du codant n'a pas ete rencontree
-  if (fin == -1) fin = Tfin;
-  if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
-
-  while (EstIndex < Size) {
-    // le dernier transcrit exploitable est passe
-    if (HitTable[EstIndex]->Start > Tfin) break;
-
-    ConsistentEST = 1;
-    ThisBlock = HitTable[EstIndex]->Match;
-
-     while (ThisBlock && ConsistentEST) {
-       // si on a un gap
-       if (ThisBlock->Prev != NULL) {
-	 // intersection
-	 from = Max(Tdebut,ThisBlock->Prev->End+1);
-	 to = Min(Tfin,ThisBlock->Start-1);
-	 
-	 for (i = from; i <=to; i++)
-	   if ((Choice[i+1] < IntronF1) || Choice[i+1] == InterGen5 || Choice[i+1] == InterGen3)
-	     ConsistentEST = 0;
-       }
-
-       from = Max(Tdebut,ThisBlock->Start);
-       to = Min(Tfin,ThisBlock->End);
-       ESTEnd = ThisBlock->End;
-
-
-       for (i = from; i <= to; i++)
-	 if (((Choice[i+1] > ExonR3) && (Choice[i+1] <= InterGen5)) || Choice[i+1] == InterGen3)
-	   ConsistentEST = 0;
-
-       ThisBlock = ThisBlock->Next;
-     }
-      
-
-     printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",HitTable[EstIndex]->Name,
-	    HitTable[EstIndex]->Start+1,ESTEnd+1,
-	    HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
-
-     if (HitTable[EstIndex]->Rejected) printf("Filtered ");
-     else if (!ConsistentEST) printf("Inconsistent");
-     else {
-       if ((HitTable[EstIndex]->Start) <= Tdebut && (ESTEnd >= Tfin))
-	 printf("Full Transcript Support");
-       else if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
-	 printf("Full Coding Support");
-       else printf("Support");
-       
-
-       ThisBlock = HitTable[EstIndex]->Match;
-       while (ThisBlock) {
-	 if (ThisBlock->Prev != NULL) {
-	   // intersection
-	   from = Max(Tdebut,ThisBlock->Prev->End+1);
-	   to = Min(Tfin,ThisBlock->Start-1);
-
-	   for (i= from; i <= to; i++) 
-	     if (!Sup[i-Tdebut]) {
-	       Sup[i-Tdebut] = TRUE;
-	       supported++;
-	       if ((i >=debut) && (i <=fin)) CDSsupported++;
-	     }
-	 }
-
-	 from = Max(Tdebut,ThisBlock->Start);
-	 to = Min(Tfin,ThisBlock->End);
-
-	 for (i= from; i <= to; i++) 
-	   if (!Sup[i-Tdebut]) {
-	     Sup[i-Tdebut] = TRUE;
-	     supported++;
-	     if ((i >=debut) && (i <=fin)) CDSsupported++;
-	   }
-	 ThisBlock = ThisBlock->Next;
-       }
-     }
-     printf("\n");
-     EstIndex++;
-  }
-  if (fin >= debut)
-  printf("      CDS          %7d %7d    %5d     supported on %d bases\n",
-	 debut+1,fin+1,fin-debut+1,CDSsupported);
-  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",
-	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
-  delete Sup;
-  return;
 }
