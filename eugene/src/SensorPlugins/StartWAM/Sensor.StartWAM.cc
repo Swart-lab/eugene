@@ -85,7 +85,7 @@ void SensorStartWAM ::
 ReadModelFile (TabChaine<ChaineADN, unsigned short int> &model, char* filename)
 {
   FILE* fp;
-  if (! (fp = FileOpen(EugDir, filename, "rb"))) {
+  if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir"), filename, "rb"))) {
     fprintf(stderr, "cannot open model file %s\n", filename);
     exit(2);
   }

@@ -72,7 +72,7 @@ SensorMarkovProt :: SensorMarkovProt (int n) : Sensor(n)
   maxorder = PAR.getI("MarkovProt.maxorder");
   order    = PAR.getI("MarkovProt.order");
 
-  if (! (fp = FileOpen(EugDir, PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
+  if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir"), PAR.getC("MarkovProt.matname",GetNumber()), "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
     exit(2);
   }

@@ -109,7 +109,7 @@ void SensorHomology :: Init (DNASeq *X)
 
   strcpy(tempname,PAR.getC("Homology.protmatname"));
   // Lecture de la matrice proteique ("BLOSUM62" par defaut)
-  protmatfile=FileOpen(NULL, tempname, "rt");
+  protmatfile=FileOpen(PAR.getC("EuGene.PluginsDir"), tempname, "rt");
   if (protmatfile == NULL) {
     fprintf (stderr,"\ncannot open protein matrix file %s\n",tempname); exit (2);
   }

@@ -70,7 +70,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n) : Sensor(n)
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
   
-  if (! (fp = FileOpen(EugDir, PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
+  if (! (fp = FileOpen(PAR.getC("EuGene.PluginsDir") , PAR.getC("MarkovIMM.matname",GetNumber()), "rb"))) {
     fprintf(stderr, "cannot open matrix file %s\n", PAR.getC("matname"));
     exit(2);
   }
