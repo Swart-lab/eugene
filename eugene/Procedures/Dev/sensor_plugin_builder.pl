@@ -21,7 +21,7 @@ use IO::Handle;
 
 # input
 my $sensorName = "";
-my $nbParam    = "";
+#my $nbParam    = "";
 my $makefile;
 
 # output
@@ -46,14 +46,14 @@ while($sensorName eq "") {
 $sensorH  = "Sensor.".$sensorName.".h";
 $sensorCC = "Sensor.".$sensorName.".cc";
 
-print STDOUT "    - How many parameters do you need.....";
-$nbParam = <STDIN>;
-chomp $nbParam;
-while($nbParam =~ /[^0-9]/ || $nbParam eq "") {
-    print STDOUT "\t=> Warning: Integer required......";
-    $nbParam = <STDIN>;
-    chomp $nbParam;
-}
+#print STDOUT "    - How many parameters do you need.....";
+#$nbParam = <STDIN>;
+#chomp $nbParam;
+#while($nbParam =~ /[^0-9]/ || $nbParam eq "") {
+#    print STDOUT "\t=> Warning: Integer required......";
+#    $nbParam = <STDIN>;
+#    chomp $nbParam;
+#}
 
 print STDOUT "---------------------------------------------------------\n";
 print STDOUT "| Output :\n";
@@ -209,5 +209,5 @@ while (my $line=<MAKE>) {
 print STDOUT "created\n";
 print STDOUT "---------------------------------------------------------\n";
 print STDOUT "| After the new sensor implementation, don't forget  to |\n";
-print STDOUT "| modify the parameter file (parameters, use, prioty) |\n";
+print STDOUT "| modify the parameter file (parameters, use, prioty).  |\n";
 print STDOUT "=========================================================\n\n";
