@@ -215,18 +215,56 @@ void ClosePNG()
     SaveClosePNG(&images[i],i);
 }
 
-void OutputHTMLFileNames()
+// Parametre = 1 -> toute 1ere image de la 1ere sequence traitée
+// Parametre = 0 -> la suite....*.fasta
+void OutputHTMLFileNames(int firstImg)
 {
   int i;
   char str[12];
   char *basename;
 
-  printf("<center>\n");
   basename = rindex(FName,'/');
   if (basename == NULL) basename = FName;
   else basename++;
   
-  for (i=0; i< NbIm; i++) {
+  if (firstImg) {
+    strcpy(TName,basename);
+    sprintf(str,".%03d",0);
+    strcat(TName,str);
+#if GIF
+    strcat(TName,".gif");
+#else
+    strcat(TName,".png");
+#endif
+    printf("				  <img src=\"%s\" name=\"show\"\n",
+	   TName);
+    printf("				       width=\"%d\" height=\"%d\">\n",
+	   rx+40, ry+40);
+    printf("				</td>\n"
+	   "			      </tr>\n"
+	   "			      <tr>\n"
+	   "				<td width=\"100\" align=\"center\"\n"
+	   "				    bgcolor=\"#c0dbe2\">\n"
+	   "				  <img src=\"WEB/Images/first.jpg\"\n"
+	   "				       onclick=\"first();\"\n"
+	   "				       title=\"Jump to beginning\" "
+	   "align=\"middle\">\n"
+	   "				  &nbsp; &nbsp; &nbsp;\n"
+	   "				  <img src=\"WEB/Images/back.jpg\"\n"
+	   "				       onclick=\"previous();\"\n"
+	   "				       title=\"Back\" "
+	   "align=\"middle\">\n"
+	   "				</td>\n"
+	   "				<td align=\"center\" "
+	   "bgcolor=\"#9bc7d0\">\n"
+	   "				  <select name=\"slide\" "
+	   "onChange=\"change();\" size=\"1\">\n");
+    printf("				    <option value=\"%s\"\n",TName);
+    printf("					    selected>%s : %d -> %d"
+	   "</option>\n",TName,From,ImgLen+From);
+  }
+ 
+  for (i=firstImg; i< NbIm; i++) {
     strcpy(TName,basename);
     sprintf(str,".%03d",i);
     strcat(TName,str);
@@ -235,8 +273,14 @@ void OutputHTMLFileNames()
 #else
     strcat(TName,".png");
 #endif
-    printf("<img src=%s>\n",TName);
+    printf("                                    <option value=\"%s\">",TName);
+    if (i==0)
+      printf("%s : %d -> %d</option>\n",
+	     TName, ImgLen*i+From,
+	     (ImgLen*(i+1))+From < Len ? (ImgLen*(i+1))+From : Len);
+    else
+      printf("%s : %d -> %d</option>\n",
+	     TName, ImgLen*i+From-OvLap,
+	     (ImgLen*(i+1))+From-OvLap < Len ? (ImgLen*(i+1))+From-OvLap :Len);
   }
-  printf("</center>\n");
 }
-
