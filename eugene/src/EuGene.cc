@@ -164,7 +164,8 @@ int main  (int argc, char * argv [])
       exit(3);
     }
     
-    fprintf(stderr,"Loading sequence...");
+    fprintf(stderr,"-----------------------------------");
+    fprintf(stderr,"--------------------------------\nLoading sequence...");
     fflush(stderr);
     
     TheSeq = new DNASeq(fp);
@@ -834,13 +835,14 @@ int main  (int argc, char * argv [])
       pred->plotPred();
     
     Output(TheSeq, pred, sequence, argc, argv);
+    MS.PostAnalyse(pred);
     
     // Free used memory
     if (graph) {
-      fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
+      fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
       fflush(stderr);
       ClosePNG();
-      fprintf(stderr, "done\n\n");
+      fprintf(stderr, "done\n");
     }
 
     delete TheSeq;
@@ -850,6 +852,9 @@ int main  (int argc, char * argv [])
   }// fin de traitement de chaque séquence....
  
   MS.ResetSensors();
+
+  fprintf(stderr,"-----------------------------------");
+  fprintf(stderr,"--------------------------------\n");
   
   return  0;
 }
