@@ -43,6 +43,7 @@ class SensorBlastX : public Sensor
   int    ppNumber;
   int    stepid;
   int    N;
+  int    sloppy;
 
   void LoadContentScore (DNASeq *);
   char ph06             (char);

@@ -70,11 +70,12 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   N        = n;
   type     = Type_Content;
   HitTable = NULL;
+  sloppy   = PAR.getI("EuGene.sloppy");
   ppNumber = PAR.getI("BlastX.PPNumber",N);
   stepid   = PAR.getI("Output.stepid");
   minIn    = PAR.getI("BlastX.minIn");
-  levels   = PAR.getC("BlastX.levels",  N);  
- 
+  levels   = PAR.getC("BlastX.levels",  N);
+   
   Hits   *AllProt = NULL;
   NumProt = 0;
   
@@ -90,17 +91,14 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
     tempname[i]   = levels[k];
     tempname[i+1] = 0;
     // check the corresponding .blastN file (N=level given in arg)
-    fblast = FileOpen(NULL,tempname, "r");
-    if (fblast == NULL) {
-      fprintf(stderr, "BlastX error : unable to open file %s\n",tempname);
-      exit(1);
+    fblast = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+    
+    if (fblast) {
+      AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20);
+      fprintf(stderr,"%c ",levels[k]);
+      fflush(stderr);
+      fclose(fblast);  
     }
-    
-    AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20);
-    fprintf(stderr,"%c ",levels[k]);
-    fflush(stderr);
-    
-    fclose(fblast);       
   }
   fprintf(stderr,"done\n");
   
@@ -132,10 +130,9 @@ SensorBlastX :: ~SensorBlastX ()
 // ----------------------
 void SensorBlastX :: Init (DNASeq *X)
 {
-  int i, j;
-  int Len = X->SeqLen;
-  const int LevelColor[3] = {6,7,8}; 
-  int   level, levelidx, Pphase = 0;
+  int    i, j;
+  int    Len = X->SeqLen;
+  int    level, levelidx, Pphase = 0;
   double GlobalScore,    PGlobalScore = 0;
  
   vPos.clear();
@@ -143,16 +140,16 @@ void SensorBlastX :: Init (DNASeq *X)
   vPMLevel.clear();
   vPMPhase.clear();
 
-  keyBXLevel[0] = PAR.getD("BlastX.level0*", N);
-  keyBXLevel[1] = PAR.getD("BlastX.level1*", N);
-  keyBXLevel[2] = PAR.getD("BlastX.level2*", N);
-  keyBXLevel[3] = PAR.getD("BlastX.level3*", N);
-  keyBXLevel[4] = PAR.getD("BlastX.level4*", N);
-  keyBXLevel[5] = PAR.getD("BlastX.level5*", N);
-  keyBXLevel[6] = PAR.getD("BlastX.level6*", N);
-  keyBXLevel[7] = PAR.getD("BlastX.level7*", N);
-  keyBXLevel[8] = PAR.getD("BlastX.level8*", N);
-  keyBXLevel[9] = PAR.getD("BlastX.level9*", N);
+  keyBXLevel[0] = PAR.getD("BlastX.level0*", N, sloppy);
+  keyBXLevel[1] = PAR.getD("BlastX.level1*", N, sloppy);
+  keyBXLevel[2] = PAR.getD("BlastX.level2*", N, sloppy);
+  keyBXLevel[3] = PAR.getD("BlastX.level3*", N, sloppy);
+  keyBXLevel[4] = PAR.getD("BlastX.level4*", N, sloppy);
+  keyBXLevel[5] = PAR.getD("BlastX.level5*", N, sloppy);
+  keyBXLevel[6] = PAR.getD("BlastX.level6*", N, sloppy);
+  keyBXLevel[7] = PAR.getD("BlastX.level7*", N, sloppy);
+  keyBXLevel[8] = PAR.getD("BlastX.level8*", N, sloppy);
+  keyBXLevel[9] = PAR.getD("BlastX.level9*", N, sloppy);
   blastxM       = PAR.getI("BlastX.blastxM*",N);
   ProtMatch      = new double[Len+1];
   ProtMatchLevel = new double[Len+1];
@@ -583,7 +580,7 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
       for (j=from; j<=to; j++) {
 	state = pred->getStateForPos(j);
 	if (!Sup[j-beg]  &&  State2Phase[state] == ThisBlock->Phase) {
-	  Sup[j-beg] = TRUE;
+	  Sup[j-beg] = 1;
 	  supported++;
 	}
       }
