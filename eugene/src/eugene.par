@@ -11,9 +11,9 @@ EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 EuGene.minEx		3
 EuGene.minIn		50
 EuGene.minSg		150
-EuGene.minFlow		50
-EuGene.minConv		0
-EuGene.minDiv		100
+EuGene.minFlow		0		#50
+EuGene.minConv		0		#0
+EuGene.minDiv		0		#100
 EuGene.min5Prime	20
 EuGene.min3Prime	20
 #
@@ -32,6 +32,7 @@ EuGene.ThreePrimePrior	0.07
 #
 ##### Output control ######
 #
+Output.truncate		5
 Output.graph		FALSE		# Don't produce a graphical output
 Output.resx		900
 Output.resy		400
