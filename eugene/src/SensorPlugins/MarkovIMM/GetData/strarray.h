@@ -197,8 +197,8 @@ void  String_Array :: Normalize  () {
       }
     }
     // Bug ?
-    //     if  (++ Ct == Size) {
-    if  ((Ct += Alphabet_Size) == Size) {
+    //    if  ((Ct += Alphabet_Size) == Size) {
+    if  (++ Ct == Size) {
       Ct = 0;
       Prev_Start += Prev_Size;
       Prev_Size = Size;
