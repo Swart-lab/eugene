@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/times.h>
 
 // ------------------------------------------------------------------
 // BASENAME: returns a pointer to the filename, w/o any
@@ -111,4 +112,15 @@ void GetStrDate (char* d)
   strcpy(d,j);strcat(d,m);strcat(d,a);
 
   delete [] m; delete [] j; delete [] a;
+}
+// --------------------------------------------------------------------
+// Timer management functions
+// -------------------------------------------------------------------- 
+double cpuTime()
+{
+  static struct tms buf;
+  
+  times(&buf);
+  return ((double) (buf.tms_utime+buf.tms_stime+buf.tms_cutime+buf.tms_cstime))
+    / ((double) sysconf(_SC_CLK_TCK));
 }

@@ -1,21 +1,20 @@
 #
-# Edité pour EuGeneAS 1.64 (291003)
+# Edité pour EuGeneAS 2.0 (8080704)
 #
-EuGene.key		FUHEOEXIBMMNXK	# Software key 
-EuGene.versionPAR	291003          # Parameter file version (date)
+EuGene.versionPAR	8080704          # Parameter file version (date)
 EuGene.organism		Arabidopsis
 EuGene.PluginsDir	./PLUGINS/      # The plugins directory
 #
-##### Minimum lengths #####
+##### Lengths #####
 #
-EuGene.minEx		3
-EuGene.minIn		50
-EuGene.minSg		150
-EuGene.minFlow		0		#50
-EuGene.minConv		0		#0
-EuGene.minDiv		0		#100
-EuGene.min5Prime	20
-EuGene.min3Prime	20
+EuGene.InitExDist	init.dist
+EuGene.IntrExDist	intr.dist
+EuGene.TermExDist	term.dist
+EuGene.SnglExDist	sngl.dist
+EuGene.IntronDist	intron.dist
+EuGene.InterGDist	intergenic.dist
+EuGene.5PrimeDist	utr.dist
+EuGene.3PrimeDist	utr.dist
 #
 ##### Priors #####
 #
@@ -26,7 +25,7 @@ EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
 #EuGene.ExonPrior	0.0
 #EuGene.IntronPrior	0.0
-#EuGene.InterPrior	1.0
+#EuGene.InterPrior	0.0
 #EuGene.FivePrimePrior	1.0
 #EuGene.ThreePrimePrior	1.0
 #
@@ -77,13 +76,13 @@ IfElse.SensorElse	SPred
 #
 # SpliceMachine parameters #####
 #
-SMachine.cmd            "/homes/thomas/Annotation/SpliceMachine/splicemachine.pl "
-SMachine.accP*          0.903
-SMachine.accB*          5.585
-SMachine.donP*          0.980
-SMachine.donB*          27.670
-SMachine.startP*                0.052
-SMachine.startB*                0.308
+SMachine.cmd		"/homes/thomas/Annotation/SpliceMachine/splicemachine.pl "
+SMachine.accP*		0.903
+SMachine.accB*		5.585
+SMachine.donP*		0.980
+SMachine.donB*		27.670
+SMachine.startP*		0.052
+SMachine.startB*		0.308
 #
 # NetGene2 parameters #####
 #
@@ -201,14 +200,15 @@ PatConst.newStatePos[2] 1
 PatConst.patP*[2]	2.897949
 PatConst.patPNo*[2]	0
 #
-##### State penalties (exp length distributions) #####
+##### State penalties per position #####
 #
 MarkovConst.minGC[0]	-1
 MarkovConst.maxGC[0]	100
 MarkovConst.Coding*	1.0
 MarkovConst.Intron*	1.0
-MarkovConst.UTR5*	0.999
-MarkovConst.UTR3*	0.999
+MarkovConst.IntronUTR*	0.98
+MarkovConst.UTR5*	0.99
+MarkovConst.UTR3*	0.99
 MarkovConst.Inter*	1.0
 #
 ##### Sensor SpliceWAM #####
@@ -258,28 +258,28 @@ Tester.SPSN.MinNumbers	100     # greater than 0
 #
 ##### Sensors activation #####
 #
-Sensor.Transcript.use		TRUE
-Sensor.FrameShift.use		TRUE
-Sensor.EuStop.use		TRUE
+Sensor.Transcript.use	TRUE
+Sensor.FrameShift.use	FALSE
+Sensor.EuStop.use	TRUE
 #
 # START SENSORS:
-Sensor.NStart.use		TRUE
+Sensor.NStart.use	TRUE
 Sensor.ATGpr.use	FALSE
 Sensor.StartWAM.use	FALSE
 #
 # SPLICES SENSORS:
-Sensor.SMachine.use     FALSE
+Sensor.SMachine.use	FALSE
 Sensor.NG2.use		FALSE
 Sensor.SPred.use	FALSE
 Sensor.GSplicer.use	FALSE
 Sensor.SpliceWAM.use 	FALSE
-Sensor.IfElse.use		TRUE
+Sensor.IfElse.use	TRUE
 #
 # MARKOV CONTENT:
-Sensor.MarkovIMM.use		TRUE
+Sensor.MarkovIMM.use	TRUE
 #Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	FALSE
-Sensor.MarkovConst.use		TRUE
+Sensor.MarkovConst.use	TRUE
 #
 # SIMILARITIES:
 Sensor.Est.use		FALSE
@@ -293,7 +293,7 @@ Sensor.Repeat.use	FALSE
 Sensor.User.use		FALSE
 Sensor.GFF.use		FALSE
 Sensor.GCPlot.use	FALSE
-Sensor.Plotter.use		TRUE
+Sensor.Plotter.use	TRUE
 #
 # TEST
 Sensor.Tester.use	FALSE

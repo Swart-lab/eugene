@@ -31,12 +31,13 @@ class DATA
     IntronF = 6, IntronR = 7,
     InterG = 8,
     UTR5F = 9, UTR5R = 10,
-    UTR3F = 11, UTR3R =12, LastContentsType = 13};
+    UTR3F = 11, UTR3R =12,
+    IntronUTRF = 13, IntronUTRR = 14, 
+    LastContentsType = 15};
 
   double  contents[LastContentsType];
 
-  // WARNING temporaire : EST -> on est dans intron
-  unsigned char ESTMATCH_TMP; 
+  unsigned char EstMatch; 
 };
 
 // Type de sensor

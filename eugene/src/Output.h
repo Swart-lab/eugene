@@ -33,6 +33,5 @@ int PhaseAdapt(char);
 // incoherents avec les match est
 // debut/fin/etat: debut et fin de la seq. dont l'etat est etat
 // cons/incons: retour des valeurs
-// WARNING : A modifier, utilise ESTMATCH_TMP (Cf struct DATA) !!!!!!!!!!!!
 void CheckConsistency(int debut, int fin, int etat, 
 		      int * cons, int* incons, DNASeq *, MasterSensor *);

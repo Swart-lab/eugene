@@ -13,32 +13,33 @@
 
 #include "BackP.h"
 #include <stdio.h>
+#include <math.h>
+#include "System.h"
 
 // ----------------------------------------------------------------
 // Default constructor.
 // ----------------------------------------------------------------
 BackPoint :: BackPoint  ()
-  {
-    Optimal = true;
-    State = -1;
-    StartPos = -1;
-    SwitchType = SwitchAny;
-    Cost = Additional = 0.0;
-    Next = Prev = Origin = NULL;
-  }
-
+{
+  State = -1;
+  StartPos = -1;
+  Cost = 0.0;
+  Additional = 0.0;
+  Next = Prev = this;
+  Origin = NULL;
+  Optimal = false;
+}
 // ----------------------------------------------------------------
 //  Default constructor.
 // ----------------------------------------------------------------
 BackPoint :: BackPoint  (char state, int pos, double cost)
 {
-  Optimal = true;
   State = state;
   StartPos = pos;
-  SwitchType = SwitchAny;
   Cost = cost;
   Additional = 0.0;
   Next = Prev = Origin = NULL;
+  Optimal = false;
 }
 
 // ----------------------------------------------------------------
@@ -51,56 +52,136 @@ BackPoint :: ~BackPoint  ()
 }
 
 // ----------------------------------------------------------------
-// Insert  a new backpoint
-// ----------------------------------------------------------------
-void BackPoint :: InsertNew(char state, unsigned char Switch, int pos, 
-			    double cost, BackPoint *Or, bool opt)
-{
-  BackPoint *It = this->Next;
-
-  if (cost > NINFINITY) {
-    It =  new BackPoint(state,pos,cost);
-    It->Optimal = opt;
-    It->Next = this->Next;
-    It->Prev = this->Next->Prev;
-    It->Origin = Or;
-    It->SwitchType = Switch;
-    this->Next->Prev = It;
-    this->Next = It;
-  }
-}
-
-// ----------------------------------------------------------------
 // Prints the BackPoint contents
 // ----------------------------------------------------------------
 void BackPoint :: Print()
 {
   printf("pos = %d, state = %d\n", StartPos,State);
 }
-
 // ----------------------------------------------------------------
-// Dumps the contents of all the BackPoints
+// Track creator
 // ----------------------------------------------------------------
-void BackPoint :: Dump ()
+Track :: Track()
 {
-  BackPoint* It = this->Next;
-  double add = 0.0;
-    
-  do {
-    add += It->Additional;
-    printf("pos = %d, state = %d, cost = %f, real cost = %f\n",
-	   It->StartPos,It->State,It->Cost,add+It->Cost);
-    It = It->Next;
-  }  while (It != this->Next);
+  NumBP = 0;
+  Optimal = 0.0;
+  OptPos =0;
 }
+// ----------------------------------------------------------------
+// Track destructor
+// ----------------------------------------------------------------
+Track :: ~Track()
+{
+  Zap();
+}
+// ----------------------------------------------------------------
+// Zap  the path data of a  whole track
+// ----------------------------------------------------------------
+void Track :: Zap()
+{
+  BackPoint *Dead = Path.Next,*Skip;
 
+  while (Dead != &Path) {
+    Skip = Dead->Next;
+    delete Dead;
+    Dead = Skip;
+  }
+}
 // ----------------------------------------------------------------
-// BackTrace along a BackPoint and build a prediction object
+// Insert  a new backpoint
 // ----------------------------------------------------------------
-Prediction* BackPoint :: BackTrace ()
+void Track :: InsertNew(char state, int pos, double cost, BackPoint *Or)
+{
+  BackPoint *It = Path.Next;
+  
+  //  if (cost > NINFINITY) {
+  //  if (cost > Optimal-PenD.MaxDelta) {
+  //  if (cost > Optimal-PenD.GetDelta(pos-OptPos)) {
+  //  if (cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
+  if (cost > Optimal-PenD.GetDelta(pos-OptPos) && 
+      cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
+    NumBP++;
+    It =  new BackPoint(state,pos,cost);
+    if (cost > Optimal) { 
+      Optimal =cost; 
+      It->Optimal = true;
+      OptPos = pos;
+    }
+    It->Next = Path.Next;
+    It->Prev = Path.Next->Prev;
+    It->Origin = Or;
+    Path.Next->Prev = It;
+    Path.Next = It;
+  }
+}
+// ----------------------------------------------------------------
+// Insert  a new backpoint
+// ----------------------------------------------------------------
+void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
+{
+  BackPoint *It = Path.Next;
+  
+  NumBP++;
+  It =  new BackPoint(state,pos,cost);
+  if (cost > Optimal) { Optimal =cost; It->Optimal = true;}
+  It->Next = Path.Next;
+  It->Prev = Path.Next->Prev;
+  It->Origin = Or;
+  Path.Next->Prev = It;
+  Path.Next = It;
+}
+// ----------------------------------------------------------------
+// Returns the best BackPoint and the BackPoint is at least len
+// nuc. far from pos
+// ----------------------------------------------------------------
+BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
+{
+  BackPoint *BestBP = NULL;
+  double BestCost = NINFINITY;
+  int Len;
+  BackPoint *It = Path.Next;
+  double LenPen,Add = 0.0;
+
+  do {
+    if (isinf(It->Additional)) break;
+    Add += It->Additional;
+
+    // when pen == 0 or StartPos is -1, this means we reach the
+    // extremities of the sequence. Therefore we account for an
+    // optimistic penality (MinPen) given that the length can only be
+    // longer than the actual length. Because we use -1/Data_Len+1 as
+    // indicators for sequence extremities we substract 1 from the
+    // length in this case. Finally, in all cases, we discount the
+    // Slope penalty on the length.
+
+    if (pen && (It->StartPos >= 0)) {
+      Len = pos-It->StartPos;
+      LenPen = PenD[Len] - PenD.FinalSlope*Len;
+    } else {
+      Len = pos-It->StartPos-1;
+      LenPen = PenD.MinPen(Len) - PenD.FinalSlope*Len;
+    }
+
+    if ((Add + It->Cost - LenPen) > BestCost) {
+      BestCost = Add+It->Cost - LenPen;
+      BestBP = It;
+    }
+    if (It->Optimal && Len >= PenD.MaxLen) break;
+
+    It = It -> Next;
+  } while (It != Path.Next);
+  
+
+  *cost = BestCost;
+  return BestBP;
+}
+// ----------------------------------------------------------------
+// BackTrace and build a prediction object
+// ----------------------------------------------------------------
+Prediction* Track :: BackTrace ()
 {
   Prediction *pred = new Prediction();
-  BackPoint  *It   = this->Next;
+  BackPoint  *It   = Path.Next;
   int  pos;
   char etat;
   
@@ -119,69 +200,22 @@ Prediction* BackPoint :: BackTrace ()
   return pred;
 }
 // ----------------------------------------------------------------
-// Returns the best BackPoint. If the SwitchType matches the mask
-// given, then the BackPoint MUST BE at least len nuc. far from pos
-// else it must be at least len2 nuc. far
+// Dumps the contents of all the Backpoints in the path
 // ----------------------------------------------------------------
-BackPoint *BackPoint :: BestUsable(int pos, unsigned char mask,
-				   int len, double *cost, int len2)
+void Track :: Dump ()
 {
-  BackPoint *It = this->Next;
-  BackPoint *BestBP = NULL;
-  double BestScore = NINFINITY;
-  double add = 0.0;
+  BackPoint* It = Path.Next;
+
+  printf("Number of BP allocated: %d\n\n",NumBP);
 
   do {
-    add += It->Additional;
-    // la condition filtre les aiguillages interdits: trop pres (len2)
-    // ou trop pres (len) et de mauvais type
-    if ((It->StartPos <= pos-len) ||
-	( (!(It->SwitchType & mask)) && (It->StartPos <= pos-len2)) ||
-	(It->StartPos < 0)) {
-      // on regarde si on ameliore
-      if ((add+It->Cost) > BestScore) {
-	BestScore = add+It->Cost;
-	BestBP = It;
-      }
-      // si c'est un aiguillage autorise optimal, c'est fini sinon on continue.
-      if (It->Optimal) {
-	*cost = BestScore;
-	return BestBP;
-      }
-    }
-    It = It -> Next;
-  } while (It != this->Next);
-
-  *cost = NINFINITY;
-  return NULL;
-}
-// ----------------------------------------------------------------
-// Returns the best BackPoint and the BackPoint is at least len
-// nuc. far from pos
-// ----------------------------------------------------------------
-BackPoint *BackPoint :: StrictBestUsable(int pos, int len, double *cost)
-{
-  BackPoint *It = this->Next;
-  double add = 0.0;
-
-  do {
-    add += It->Additional;
-    if (It->Optimal && ((It->StartPos <= pos-len) || (It->StartPos < 0))) {
-      *cost = add+It->Cost;
-      return It;
-    }
-    It = It -> Next;
-  } while (It != this->Next);
-
-  *cost = NINFINITY;
-  return NULL;
+    printf("pos = %d, state = %d, cost = %f%s, additional = %f",
+	   It->StartPos,It->State,It->Cost,
+	   (It->Optimal ? "*" : ""), It->Additional);
+    if (It->Origin)
+      printf(" Or.state = %d Or.pos = %d",It->Origin->State,It->Origin->StartPos);
+    printf("\n");
+    It = It->Next;
+  }  while (It != Path.Next);
 }
 
-// ----------------------------------------------------------------
-// Zap  a whole list
-// ----------------------------------------------------------------
-void BackPoint :: Zap()
-{
-  while (Next != this) delete this->Next;
-  delete this;
-}

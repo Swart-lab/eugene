@@ -1,8 +1,7 @@
 #include "Output.h"
-
 #include<iostream>
 
-extern Parameters   PAR;
+extern Parameters PAR;
 
 std::vector <std::string>  vhtml; // (-ph)
 
@@ -66,12 +65,11 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
   }
   
   if (printopt0 == 'd') {
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R  IU5F IU5FR FW: tSta  tSto  Sta  Sto  Acc  Don  Ins  Del REV tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noF tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
     for(int i=0; i<Data_Len ; i++) {
       ms->GetInfoAt   (X, i, &Data);      ms->PrintDataAt (X, i, &Data);
     }
-    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R FW: tSta tSto  Sta  Sto  Acc  Don  Ins  Del REV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noFWD: tSta tSto  Sta  Sto  Acc  Don  Ins  Del noREV: tSta tSto  Sta  Sto  Acc  Don  Ins  Del\n");
-    
+    printf("   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R  IU5F IU5FR FW: tSta  tSto  Sta  Sto  Acc  Don  Ins  Del REV tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noF tSta  tSto  Sta  Sto  Acc  Don  Ins  Del noR tSta  tSto  Sta  Sto  Acc  Don  Ins  Del\n");
   } else 
     if ((printopt0 == 'l') || (printopt0 == 'a') || (printopt0 == 'g') ||
 	(printopt0 == 'h') || (printopt0 == 'H')) { 
@@ -183,21 +181,21 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	  CheckConsistency(posBack, pos, state, &cons, &incons, X, ms);
 	
 	// An exon is finishing
-	if (state <= ExonR3) {
+	if (state <= TermR3) {
 	  // strand ?
-	  forward = (state < 3);
+	  forward = (1 <= PhaseAdapt(state) && PhaseAdapt(state) <= 3);
 	  if(forward) nbExon++;
 	  else        nbExon--;
 	  if(!forward && (i == pred->size()-1 ||
-			  (i == pred->size()-2 && stateBack < InterGen5)))
+			  (i == pred->size()-2 && stateBack < InterGen)))
 	    nbExon = pred->nbExon(1);
 	  
 	  // first or last exon ?
-	  init = ((forward  && stateBack >= InterGen5) ||
-		  (!forward && stateNext >= InterGen5));
+	  init = ((forward  && stateBack >= InterGen) ||
+		  (!forward && stateNext >= InterGen));
 	  
-	  term = ((!forward && stateBack >=InterGen5) ||
-		  (forward  && stateNext >= InterGen5));
+	  term = ((!forward && stateBack >=InterGen) ||
+		  (forward  && stateNext >= InterGen));
 	  
 	  Lend = offset+posBack+1;
 	  Rend = offset+pos;
@@ -315,10 +313,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  fprintf(f,"<TD>%+2d</TD>", ((forward) ? 1: -1));
 		else {
 		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack-6) :
-			   -PhaseAdapt(stateNext-9));
+			   PhaseAdapt(stateBack-IntronF1) :
+			   -PhaseAdapt(stateNext-IntronR1));
 		  
-		  if (abs(Phase) <= 3) fprintf(f,"<TD>%+2d</TD>",Phase);
+		  if (abs(Phase) <= 3 && abs(Phase) >=1) fprintf(f,"<TD>%+2d</TD>",Phase);
 		  else fprintf(f,"<TD>Unk.</TD>");
 		}
 		fprintf(f,"<TD>%+2d</TD>\n   </TR>\n",PhaseAdapt(state));
@@ -331,10 +329,10 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		  fprintf(f,"   %+2d", ((forward) ? 1: -1));
 		else {
 		  Phase = ((forward) ?
-			   PhaseAdapt(stateBack-6) :
-			   -PhaseAdapt(stateNext-9));
+			   PhaseAdapt(stateBack-IntronF1) :
+			   -PhaseAdapt(stateNext-IntronR1));
 		  
-		  if (abs(Phase) <= 3) fprintf(f,"   %+2d",Phase);
+		  if (abs(Phase) <= 3 && abs(Phase) >=1) fprintf(f,"   %+2d",Phase);
 		  else fprintf(f," Unk.");
 		}
 		fprintf(f,"      %+2d",PhaseAdapt(state));
@@ -376,7 +374,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	    else if (printopt0 != 'H' && printopt0 != 'h') fprintf(f,"\t");
 	    
 	    switch (state) {
-	    case 13: // UTR5' F
+	    case UTR5F: // UTR5' F
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
 				"  <font face=\"monospace\">Utr5</font></td>\n"
@@ -400,7 +398,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		else fprintf(f,"Utr5    +");
 	      break;
 	      
-	    case 14: // UTR 3' F
+	    case UTR3F: // UTR 3' F
 	      nbGene++;
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
@@ -425,7 +423,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		else fprintf(f,"Utr3    +");
 	      break;
 	      
-	    case 15: // UTR5' R
+	    case UTR5R: // UTR5' R
 	      nbGene++;
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
@@ -450,7 +448,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 		else fprintf(f,"Utr5    -");
 	      break;
 	      
-	    case 16:// UTR 3' R
+	    case UTR3R:// UTR 3' R
 	      if (printopt0 == 'h')
 		vhtml.push_back(" <td align=\"center\">\n"
 				"  <font face=\"monospace\">Utr3</font></td>\n"
@@ -489,7 +487,7 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
 	      printf("<TD>%4d</TD>",  pos - (posBack+1) +1);
 	      printf("<TD>NA</TD><TD>NA</TD>\n   </TR>\n");
 	    }
-	    if(stateNext >= ExonR1 && stateNext <= ExonR3)
+	    if(-3 <= PhaseAdapt(stateNext) && PhaseAdapt(stateNext) <= -1)
 	      nbExon = pred->nbExon(nbGene) + 1;
 	  }
 	if(pos == Data_Len)
@@ -508,11 +506,11 @@ void Output (DNASeq *X, MasterSensor* ms, Prediction *pred, int sequence, int ar
        state = pred->getState(i);
        pos   = pred->getPos(i);
        
-       if (state <= ExonR3) {
+       if (state <= TermR3) {
 	 fprintf(f,"%d %d ",decalage+posBack+1, decalage+pos);
 	 line = 0;
        } else 
-	 if(i != pred->size()-1 && state == InterGen5 || state == InterGen3) {
+	 if(i != pred->size()-1 && state == InterGen) {
 	   line = 1;
 	   fprintf(f,"\n");
 	 }
@@ -661,24 +659,11 @@ std::string to_string(int i)
   return (os.str()); // extrait la valeur 
 }
 
-//--------------------------------------------------
-// Convertit les phases 0-6 en 1 2 3 -1 -2 -3 0
-//--------------------------------------------------
-int PhaseAdapt(char p)
-{
-  if (p >= 12) return 0;
-  else if (p < 3) return (1+p);
-  else if (p < 6) return (2-p);
-  else if (p < 9) return (p-2);
-  else return (5-p);
-}
-
 // -------------------------------------------------------------------------
 // Verif coherence EST: calcul le nombre de nuc. coherents et
 // incoherents avec les match est
 // debut/fin/etat: debut et fin de la seq. dont l'etat est etat
 // cons/incons: retour des valeurs
-// WARNING : A modifier, utilise ESTMATCH_TMP (Cf struct DATA) !!!!!!!!!!!!
 // -------------------------------------------------------------------------
 void CheckConsistency(int debut, int fin, int etat, 
 		      int * cons, int* incons, DNASeq *X, MasterSensor* ms)
@@ -687,26 +672,38 @@ void CheckConsistency(int debut, int fin, int etat,
   DATA dTMP;
 
   // les valeurs qui sont coherentes avec chaque etat
-  const unsigned char Consistent[18] = {
+  const unsigned char Consistent[NbTracks] = {
+    HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
+    HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
+    HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
+    HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
+    HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
+    HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
     HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
     HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
     GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
     GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
     0,
-    HitForward|MForward|GapForward, HitForward|MForward|GapForward,
-    HitReverse|MReverse|GapReverse, HitReverse|MReverse|GapReverse,
-    0
+    HitForward|MForward, HitForward|MForward|GapForward,
+    HitReverse|MReverse, HitReverse|MReverse|GapReverse,
+    GapForward|MForward, GapReverse|MReverse,
+    GapForward|MForward, GapReverse|MReverse
   };
   
-  const unsigned char MaskConsistent[18] = {
+  const unsigned char MaskConsistent[NbTracks] = {
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
+    Hit|Margin,    Hit|Margin,    Hit|Margin,    
     Hit|Margin,    Hit|Margin,    Hit|Margin,    
     Hit|Margin,    Hit|Margin,    Hit|Margin,    
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     0,
-    Margin|Hit|Gap,    Margin|Hit|Gap,
-    Margin|Hit|Gap,    Margin|Hit|Gap,
-    0
+    Margin|Hit,    Margin|Hit|Gap,
+    Margin|Hit,    Margin|Hit|Gap,
+    Gap|Margin,    Gap|Margin,
+    Gap|Margin,    Gap|Margin
   };
 
   if (debut == -1) debut = 0;
@@ -716,11 +713,11 @@ void CheckConsistency(int debut, int fin, int etat,
     ms->GetInfoSpAt(Type_Content, X, i, &dTMP);
     
     // y a t'il de l'info
-    if (dTMP.ESTMATCH_TMP) {
+    if (dTMP.EstMatch) {
       // y a t'il une info incoherente avec l'etat
-      if (dTMP.ESTMATCH_TMP & ~MaskConsistent[etat]) 
+      if (dTMP.EstMatch & ~MaskConsistent[etat]) 
 	inc++;
-      else if (dTMP.ESTMATCH_TMP & Consistent[etat]) 
+      else if (dTMP.EstMatch & Consistent[etat]) 
 	con++;
       else 
 	inc++;

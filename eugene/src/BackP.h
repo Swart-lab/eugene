@@ -3,52 +3,64 @@
 
 // Une liste doublement chainee et circulaire de point de retour
 // arriere pour le plus court chemin avec contrainte de duree minimum.
-// Le premier element A ne doit pas etre efface. A.Next est le dernier
-// insere (le moins couteux de tous), A.Prev est le plus vieux (le
-// plus cher).
+// Le premier element Path (dans Track) ne doit pas etre
+// efface. Path.Next est le dernier insere, Path.Prev est le plus vieux
+// ??? A t on vraimen t besoin de Prev ?
 
 #include "Const.h"
 #include "Prediction.h"
-
-const unsigned char SwitchStart      = 0x1;
-const unsigned char SwitchStop       = 0x2;
-const unsigned char SwitchAcc        = 0x4;
-const unsigned char SwitchDon        = 0x8;
-const unsigned char SwitchTransStart = 0x10;
-const unsigned char SwitchTransStop  = 0x20;
-const unsigned char SwitchIns        = 0x40;
-const unsigned char SwitchDel        = 0x80;
-const unsigned char SwitchAny        = 0xFF; 
+#include "PenaltyDist.h"
 
 class BackPoint
-  {
-  private:
-    bool Optimal;
-    signed char State;
-    unsigned char SwitchType;
-    int StartPos;  
-    double Cost;
-    double Additional;
-    BackPoint *Origin;
-    
-  public:
-    BackPoint *Next;
-    BackPoint *Prev;    
+{
+  friend class Track;
+  // private:
+ public:
+  signed char State;
+  char Optimal;
+  int StartPos;  
+  double Cost;
+  double Additional;
+  BackPoint *Origin;
+  
+ public:
+  
+  BackPoint *Next;
+  BackPoint *Prev;    
+  
+  BackPoint ();
+  BackPoint  (char state, int pos, double cost);
+  ~BackPoint();
 
-    BackPoint ();
-    BackPoint  (char state, int pos, double cost);
-    ~BackPoint();
-    void InsertNew(char state, unsigned char Switch, int pos,
-		   double cost, BackPoint *Or,bool opt = true);
-    void Print();
-    void Dump();
-    Prediction* BackTrace();
-    inline void Update(double cost) {  Next->Additional += cost; };
-    BackPoint *BestUsable(int pos, unsigned char mask, int len,
-			  double *cost, int len2 = 0);
-    BackPoint *StrictBestUsable(int pos, int len, double *cost);
-    void Zap();
-  };
+  inline void SetState(int i) { State = i; };
+  void Print();
+};
 
+
+class Track 
+{
+ public: 
+
+  int NumBP;
+  BackPoint Path;
+  PenaltyDist PenD;
+  double Optimal;
+  int OptPos;
+
+  inline void LoadPenalty(char* name) { PenD.LoadPenaltyDist(name); };
+  inline void Update(double cost) {  Path.Next->Additional += cost; Optimal += cost;};
+  inline void PayTheSlope() {Path.Next->Additional -= PenD.FinalSlope;
+                             Optimal  -= PenD.FinalSlope;  };
+  void InsertNew(char state,  int pos, double cost, BackPoint *Or);
+  void ForceNew(char state, int pos, double cost, BackPoint *Or);
+  BackPoint *BestUsable(int pos, double *cost, int pen = 1);
+  Prediction* BackTrace();
+  void Dump();
+  void Zap();
+
+  Track ();
+  ~Track();
+  
+};
 
 #endif

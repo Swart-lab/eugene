@@ -104,7 +104,7 @@ int Prediction :: nbExon (int geneNumber)
   int nbUtr = 0;    // Pb UTR :
                     //  - seq.1.1.0 Utr5 - ...  Gene 1
                     //  - seq.1.2.0 Utr5 + ...  Gene 2
-  while(vState[i] >= InterGen5) {
+  while(vState[i] >= InterGen) {
     if (vState[i] >= UTR5F  &&  vState[i] <= UTR3R)
       nbUtr++;
     if (nbUtr > 1)
@@ -113,13 +113,13 @@ int Prediction :: nbExon (int geneNumber)
   }
 
   for(int j=1; j<geneNumber; j++) {
-    while(vState[i] <= InterGen5)
+    while(vState[i] <= InterGen)
       i--;
-    while(vState[i] >= InterGen5)
+    while(vState[i] >= InterGen)
       i--;
   }
-  while(vState[i] <= InterGen5 && i != -1) {
-    if(vState[i] <= ExonR3)
+  while(vState[i] <= InterGen && i != -1) {
+    if(vState[i] <= TermR3)
       nb++;
     i--;
   }
@@ -140,13 +140,13 @@ void Prediction :: reversePred()
 // ------------------------
 char* Prediction :: isStart(int p)
 {
-  char state  = getStateForPos (p);
-  char nState = getStateForPos (p+1);
+  int state  = getStateForPos (p);
+  int nState = getStateForPos (p+1);
   
-  if(nState <= ExonF3  &&  state >= InterGen5)
+  if(1 <= State2Phase[nState] && State2Phase[nState] <= 3  &&  state >= InterGen)
     return "True";
-  if(state >= ExonR1  &&  state <= ExonR3  && 
-     (nState >= InterGen5 || p+1 >= vPos[0]))
+  if(-3 <= State2Phase[state] && State2Phase[state] <= -1  && 
+     (nState >= InterGen || p+1 >= vPos[0]))
     return "True";
   return "False";
 }
@@ -156,13 +156,13 @@ char* Prediction :: isStart(int p)
 // ------------------------
 char* Prediction :: isStop(int p)
 {
-  char state  = getStateForPos (p);
-  char nState = getStateForPos (p+1);
+  int state  = getStateForPos (p);
+  int nState = getStateForPos (p+1);
   
-  if(state != -1  &&  state <= ExonF3  &&  
-     (nState >= InterGen5 || p+1 >= vPos[0]))
+  if(state != -1  &&  1 <= State2Phase[state] && State2Phase[state] <= 3  &&  
+     (nState >= InterGen || p+1 >= vPos[0]))
     return "True";
-  if(nState >= ExonR1  &&  nState <= ExonR3  &&  state >= InterGen5)
+  if(-3 <= State2Phase[nState] && State2Phase[nState] <= -1 &&  state >= InterGen)
     return "True";
   return "False";
 }
@@ -172,12 +172,12 @@ char* Prediction :: isStop(int p)
 // ------------------------
 char* Prediction :: isDon(int p)
 {
-  char state  = getStateForPos (p);
-  char nState = getStateForPos (p+1);
+  int state  = getStateForPos (p);
+  int nState = getStateForPos (p+1);
   
-  if(state <= ExonF3  &&  nState == IntronF1)
+  if(1 <= State2Phase[state] && State2Phase[state] <= 3 &&  nState == IntronF1)
     return "True";
-  if(nState >= ExonR1  &&  nState <= ExonR3  &&  state == IntronR1)
+  if(-3 <= State2Phase[nState] && State2Phase[nState] <= -1 &&  state == IntronR1)
     return "True";
   return "False";
 }
@@ -187,16 +187,15 @@ char* Prediction :: isDon(int p)
 // ------------------------
 char* Prediction :: isAcc(int p)
 {
-  char pState = getStateForPos (p);
-  char state  = getStateForPos (p+1);
+  int pState = getStateForPos (p);
+  int state  = getStateForPos (p+1);
   
-  if(state <= ExonF3  &&  pState == IntronF1)
+  if(1 <= State2Phase[state] && State2Phase[state] <= 3 &&  pState == IntronF1)
     return "True";
-  if(pState >= ExonR1  &&  pState <= ExonR3  &&  state == IntronR1)
+  if(-3 <= State2Phase[pState] && State2Phase[pState] <= -1  &&  state == IntronR1)
     return "True";
   return "False";
 }
-
  
 // ------------------------
 // IsState: Is a nucleotid in a given state ? 
@@ -205,7 +204,7 @@ char* Prediction :: isAcc(int p)
 //         the prediction could be the representation of an external gff annotation 
 //         that could not specify the UTR. In this case, the state from 0 to the first exon
 //         in the annotation (the first element of vPos and vState)
-//         is InterGen5 and the state after the last exon 
+//         is InterGen and the state after the last exon 
 //         in the annotation (the last element of vPos and vState)
 //         is not set (getStateForPos returns -1).
 //         To identify Start Reverse and Stop Forward, an other condition is used
@@ -217,50 +216,51 @@ bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
 {
   bool is_state = false;
   bool bad_strand = false;
-  char state, nState, pState;
+  int state, nState, pState;
 
   if (sig_type == DATA::Start) {
     state  = getStateForPos (pos);
     nState = getStateForPos (pos+1);
     if (strand == '+') {
-      if( (nState == ExonF1 || nState == ExonF2 || nState == ExonF3 ) &&  
-	  state == InterGen5) is_state = true;
+      if ((1 <= State2Phase[nState] && State2Phase[nState] <= 3) && state == InterGen) 
+	is_state = true;
     } else if (strand == '-') {
-      if( (state == ExonR1 || state == ExonR2 || state == ExonR3)  &&  
-	  (nState == UTR5R ||  pos == vPos[0]) ) is_state = true;
+      if ((-3 <= State2Phase[state] && State2Phase[state] <= -1)  &&  
+	  (nState == UTR5R ||  pos == vPos[0])) 
+	is_state = true;
     } else bad_strand = true;
 
   } else if (sig_type == DATA::Stop) {
     state  = getStateForPos (pos);
     nState = getStateForPos (pos+1);
     if (strand == '+') {
-      if( (state == ExonF1 || state == ExonF2  || state == ExonF3) &&  
+      if( (1 <= State2Phase[state] && State2Phase[state] <= 3) &&  
 	  (nState == UTR3F || pos == vPos[0])) is_state = true;
     } else if (strand == '-') {
-      if( (nState == ExonR1 || nState == ExonR2 || nState == ExonR3)  &&  
-	  (state == UTR3R || state == InterGen5) ) is_state = true;
+      if( (-3 <= State2Phase[nState] && State2Phase[nState] <= -1)  &&  
+	  (state == UTR3R || state == InterGen) ) is_state = true;
     } else bad_strand = true;
 
   } else if (sig_type == DATA::Acc) {
     pState  = getStateForPos (pos);
     state = getStateForPos (pos+1);
     if (strand == '+') {
-      if( (state == ExonF1 || state == ExonF2 || state == ExonF3)  &&  
-	  (pState == IntronF1 || pState == IntronF2 || pState == IntronF3) ) is_state = true;
+      if ((1 <= State2Phase[state] && State2Phase[state]<= 3) &&  
+	  (4 <= State2Frame[pState] && State2Frame[pState] <= 6)) is_state = true;
     } else if (strand == '-') {
-      if( (pState == ExonR1 || pState == ExonR2 || pState == ExonR3)  &&  
-	  (state == IntronR1 || state == IntronR2 || state == IntronR3) ) is_state = true;
+      if( (-3 <= State2Phase[pState] && State2Phase[pState] <= -1)  &&  
+	  (-6 <= State2Frame[state] && State2Frame[state] <= -4)) is_state = true;
     } else bad_strand = true;
 
   } else if (sig_type == DATA::Don) {
     state  = getStateForPos (pos);
     nState = getStateForPos (pos+1);
     if (strand == '+') {
-      if( (state == ExonF1 || state == ExonF2 || state == ExonF3) &&  
-	  (nState == IntronF1 || nState == IntronF2 || nState == IntronF3) ) is_state = true;
+      if ((1 <= State2Phase[state] && State2Phase[state] <= 3) &&  
+	  (4 <= State2Frame[nState] && State2Frame[nState] <= 6)) is_state = true;
     } else if (strand == '-') {
-      if( (nState == ExonR1 || nState == ExonR2 || nState == ExonR3) &&  
-	  (state == IntronR1 || state == IntronR2 || state == IntronR3) ) is_state = true;
+      if( (-3 <= State2Phase[nState] && State2Phase[nState] <= -1) &&  
+	  (-6 <= State2Frame[state] && State2Frame[state] <= -4)) is_state = true;
     } else bad_strand = true;
 
   } else 

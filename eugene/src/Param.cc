@@ -312,14 +312,6 @@ void Parameters :: ReadPar(char *argv)
     fprintf(stderr,"Version %s required\n", VERSION_PAR);
     exit(2);
   }
-  
-  // Remplir le tableau des longueurs min de chaque etat (+ 6 pour les Single)
-  m["EuGene.minL0"] = m["EuGene.minL1"] = m["EuGene.minL2"] = m["EuGene.minEx"];
-  m["EuGene.minL3"] = m["EuGene.minL4"] = m["EuGene.minL5"] = m["EuGene.minEx"];
-  m["EuGene.minL6"] = m["EuGene.minL7"] = m["EuGene.minL8"] = m["EuGene.minIn"];
-  m["EuGene.minL9"] = m["EuGene.minL10"]= m["EuGene.minL11"]= m["EuGene.minIn"];
-  m["EuGene.minL12"]= m["EuGene.minL13"]= m["EuGene.minL14"]= m["EuGene.minSg"];
-  m["EuGene.minL15"]= m["EuGene.minL16"]= m["EuGene.minL17"]= m["EuGene.minSg"];
 }
 
 // ------------------------
