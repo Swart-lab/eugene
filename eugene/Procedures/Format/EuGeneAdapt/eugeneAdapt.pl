@@ -41,7 +41,7 @@ use gffUtils;
 #       -> Eu-imm2UTR       : Matrices builder
 #       -> WAMbuilder       : WAM builder
 #       -> seqlogo          : Plot signal consensus (WAM)
-#       -> For the second approch sim4.
+#       -> For the second approch sim4 and GeneSeqer.
 #  - eugeneAdapt creates temporary files deleted at the end of procedure.
 #=============================================================================#
 
@@ -55,7 +55,7 @@ use gffUtils;
   EuGene to a new specie.
   Two approaches could be used. The first one (1) is based  on  the
   gene  coordinates  knowledge about  genomic  sequences.  And  the
-  second (2 or 3) one is based on sim4  program (cDNA  and  Genomic
+  second (2)  one  is  based  on  sim4  program (cDNA  and  Genomic
   DNA Alignment).
 
 =head1 OPTIONS
@@ -75,26 +75,30 @@ use gffUtils;
        File containing  ATG  and  STOP for each cDNA,  in  the same
        order than the others lists (separated by a tabulation).
 
-  -i, --input [FILE NAME] (3)
+  -i, --input [FILE NAME] (2)
        Each line contain: genomic file name / cDNA file name /
        Start / Stop.
 
-  -o, --offset [INT] (1) & (2) & (3)
+  -a, --auto (2)
+       Optional: For  an  automatic  process   (each  sequence   is
+       automatically excluded).
+
+  -o, --offset [INT] (1) & (2)
        Optional: offset (default = 1000) max number  of  nucleotids
        on each side of the START and STOP position.
 
-  -w, --wam [INT] (1) & (2) & (3)
+  -w, --wam [INT] (1) & (2)
        Optional: build  the  WAM  files  and  test  the  new  fasta
        sequences.
 
-  -d, --dirOutput [DIR NAME] (1) & (2) & (3)
+  -d, --dirOutput [DIR NAME] (1) & (2)
        Optional: output directory (default = EuAdaptOutput).
 
 =head1 EXAMPLES
 
   (1) eugeneAdapt -g genoListFile -c coordFile -w
   (2) eugeneAdapt -g genoListFile -m cDnaListFile -s ATGStopFile -w
-  (3) eugeneAdapt -i inputsFile   -w
+  (2) eugeneAdapt -i inputsFile   -w
 
 =head1 Copyright (c) 2003 by INRA. All rights reserved.
 
@@ -106,6 +110,7 @@ use gffUtils;
 
 # Program used
 my $cmd_sim4       = "sim4";          # cDNA and Genomic DNA Alignment
+my $cmd_gseqer     = "GeneSeqer";     # cDNA and Genomic DNA Alignment
 my $cmd_extractseq = "extractseq";    # EMBOSS
 my $cmd_revseq     = "revseq";        # EMBOSS
 
@@ -122,9 +127,10 @@ my $cmd_seqlogo =
   "perl -I/usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt /usr/local/bioinfo/INRA_Tlse/EuGene1.6/EuGeneTk/Procedures/Format/EuGeneAdapt/seqlogo";
 
 # For the ouput files (extension or file name)
-my $sim4_out_ext  = ".sim4.A3";
-my $sim4_out_ext2 = ".sim4.UTR5.A3";
-my $sim4_out_ext3 = ".sim4.UTR3.A3";
+my $sim4_out_ext   = ".sim4.A3";
+my $sim4_out_ext2  = ".sim4.UTR5.A3";
+my $sim4_out_ext3  = ".sim4.UTR3.A3";
+my $gseqer_out_ext = ".gseqer";
 my $newdna_ext    = ".fasta";
 my $gff_ext       = ".fasta.gff";
 my $info_ext      = ".fasta.info";
@@ -135,7 +141,6 @@ my $utr5File      = "utr5.txt";
 my $utr3File      = "utr3.txt";
 my $matFile       = "matrice.mat";
 my $matLogFile    = "matrice.log";
-my $warning       = "WARNING";
 my $wam_sta_fp    = "WAM.START.FP";
 my $wam_don_fp    = "WAM.DON.FP";
 my $wam_acc_fp    = "WAM.ACC.FP";
@@ -145,9 +150,10 @@ my $wam_don_tp    = "WAM.DON.TP";
 my $wam_acc_tp    = "WAM.ACC.TP";
 my $wam_sto_tp    = "WAM.STOP.TP";
 my $verif         = "verif.txt";
+my $eugAdaptLog   = "EUGADAPT.LOG";
 
 # For print info
-my $excluSeq     = 9;         # first method (seq excluded when exon < N nt)
+my $seqInEALog   = 9;         # first method (seq in ealog when exon < N nt)
 my $nbExclu      = 0;         # number of excluded sequence
 my $nbNoUTR5     = 0;         # number of sequence without utr5
 my $nbNoUTR3     = 0;         # number of sequence without utr3
@@ -176,11 +182,12 @@ my $cDna;
 my $ssCoord;
 my $coord;
 my $input;
+my $auto;
 my $offset    = 1000;
 my $outputDir = "EuAdaptOutput";
 my $wam;
 
-# For the -i option (3)
+# For the -i option (2)
 my $i_geno = "tmp_geno";
 my $i_cdna = "tmp_cdna";
 my $i_ss   = "tmp_ss";
@@ -194,6 +201,7 @@ MAIN:
                     "ssCoord=s"   => \$ssCoord,
                     "coord=s"     => \$coord,
                     "input=s"     => \$input,
+		    "auto"        => \$auto,
 		    "offset=i"    => \$offset,
                     "wam"         => \$wam,
                     "dirOutput=s" => \$outputDir
@@ -208,11 +216,12 @@ MAIN:
 
     ## Open output files ##
     my $error = "no";
-    open(COORD_OUT, ">$coordFile") || die $error = $coordFile;
-    open(EXON,      ">$exonFile")  || die $error = $exonFile;
-    open(INTRON,    ">$intFile")   || die $error = $intFile;
-    open(UTR5,      ">$utr5File")  || die $error = $utr5File;
-    open(UTR3,      ">$utr3File")  || die $error = $utr3File;
+    open(COORD_OUT, ">$coordFile")  || die $error = $coordFile;
+    open(EXON,      ">$exonFile")   || die $error = $exonFile;
+    open(INTRON,    ">$intFile")    || die $error = $intFile;
+    open(UTR5,      ">$utr5File")   || die $error = $utr5File;
+    open(UTR3,      ">$utr3File")   || die $error = $utr3File;
+    open(EALOG,     ">$eugAdaptLog")|| die $error = $eugAdaptLog;
     if (defined($wam))
     {
         open(FPSTART, ">$wam_sta_fp") || die $error = $wam_sta_fp;
@@ -232,7 +241,8 @@ MAIN:
     else                 {GenoSim4();}     # second method
 
     ## Build matrices ##
-    print "------------------------------------" . "-------------------------------\n";
+    print "------------------------------------";
+    print "-------------------------------\n";
     print "Launch TrainImm (Build matrices)..";
     system "$cmd_IMM $exonFile $intFile -5 $utr5File -3 $utr3File > $matLogFile";
     system "mv $outputDir/exon.txt.bin $matFile";
@@ -241,7 +251,8 @@ MAIN:
     ## Build WAM ##
     if (defined($wam))
     {
-        print "------------------------------------" . "-------------------------------\n";
+        print "------------------------------------";
+	print "-------------------------------\n";
         print "Launch WAMBuilder (Build WAM)..";
         print "StartTF..";
         my $arg = "$worder " . ($wamstaB + $wamstaA + 3) . " " . ($worder + 1);
@@ -263,7 +274,7 @@ MAIN:
 
         ## Build logos ##
         print "Launch $cmd_seqlogo (Build logo)....";
-        $arg = "-b -c -n -Y -F PNG";    # JER je modifie pour utiliser l'option -o
+        $arg = "-b -c -n -Y -F PNG";
         print "StartTF..";
         system "$cmd_seqlogo $arg -x StartTP -f $wam_sta_tp -o $wam_sta_tp";
         system "$cmd_seqlogo $arg -x StartFP -f $wam_sta_fp -o $wam_sta_fp";
@@ -376,7 +387,7 @@ sub OptVerif
         $utr3File   = $outputDir . "/" . $utr3File;
         $matFile    = $outputDir . "/" . $matFile;
         $matLogFile = $outputDir . "/" . $matLogFile;
-	$warning    = $outputDir . "/" . $warning;
+	$eugAdaptLog= $outputDir . "/" . $eugAdaptLog;
         if (defined($wam))
         {
             mkdir $outputDir . "/WAM";
@@ -401,14 +412,15 @@ sub FileClose
 
     # Close input files
     close GENOMIC;
-    if (defined($cDna)) {close CDNA; close SSCOORD;}
-    else {close COORD_IN;}
+    if (defined($cDna)) { close CDNA; close SSCOORD; }
+    else                { close COORD_IN; }
 
     # Close output files
     close EXON;
     close INTRON;
     close UTR5;
     close UTR3;
+    close EALOG;
     if (defined($wam))
     {
         close FPSTART;
@@ -441,7 +453,8 @@ sub GenoCoord
 {
     while (my $genofile = <GENOMIC>)
     {
-        print "------------------------------------" . "-------------------------------\n";
+        print "------------------------------------";
+	print "-------------------------------\n";
         print($nbSeq+ 1);
         flush STDOUT;
         print STDERR ".";
@@ -453,17 +466,20 @@ sub GenoCoord
         print " $id :\n";
 
         ## Read Coord (.gff) file ##
-        print "  - Read coordinates file (.gff)...............................";
+        print"  - Read coordinates file (.gff)...............................";
         my $gfffile = <COORD_IN>;
         chomp $gfffile;
         my @geneCoord = gffUtils::gffGetCoord("$gfffile");
         print "done\n";
 
         ## Launch extractseq (EMBOSS) : + offset (DNA) ##
-        print "  - Launch extractseq (Create new genomic file," . " offset:$offset)...";
-        my $begin = ((abs($geneCoord[1]) - $offset > 0) ? abs($geneCoord[1]) - $offset : 1);
+        print "  - Launch extractseq (Create new genomic file,";
+	print " offset:$offset)...";
+        my $begin = ((abs($geneCoord[1]) - $offset > 0)
+		     ? abs($geneCoord[1]) - $offset : 1);
         my $end = abs($geneCoord[$#geneCoord - 1]) + $offset;
-        ExtractSeq($genofile, $begin, $end, " $outputDir" . "/Genes/" . $id . $newdna_ext);
+        ExtractSeq($genofile, $begin, $end,
+		   " $outputDir" . "/Genes/" . $id . $newdna_ext);
         print "done\n";
 
         ## Recomputing coord for the new genomic sequence ##
@@ -475,7 +491,8 @@ sub GenoCoord
         print "  - Recompute coordinates :\n";
         print "\t-> Write in coord file...........................";
         my $newcoord = 0;
-        my $modif = (($begin < $offset) ? $begin - 1 : (abs($geneCoord[1]) - $offset - 1));
+        my $modif = (($begin < $offset)
+		     ? $begin - 1 : (abs($geneCoord[1]) - $offset - 1));
         print COORD_OUT "$id";
         if ($geneCoord[0] == 0) {push(@newCoord, 0);}
         else {push(@newCoord, abs($geneCoord[0]) - $modif);}
@@ -489,15 +506,17 @@ sub GenoCoord
         else {push(@newCoord, abs($geneCoord[-1]) - $modif);}
         print COORD_OUT "\n\n";
         print "done\n";
-        print "\t-> Write a gff file..............................";
+        print "\t-> Write the gff and info files..................";
         gffUtils::gffWrite($id, "$outputDir/Genes/$id$gff_ext",
-			   "$outputDir/Genes/$id$info_ext", "$newFastaFile", @newCoord);
+			   "$outputDir/Genes/$id$info_ext",
+			   "$newFastaFile", @newCoord);
         print "done\n";
 
         ## Extract Exons - UTR - Introns ##
         print "  - For build IMM matrices :\n";
         ExtractExon2($id, $newFastaFile, @newCoord);
-        ExtractUTRs($id, $newFastaFile, $newCoord[0], $newCoord[1], $newCoord[-2], $newCoord[-1]);
+        ExtractUTRs($id, $newFastaFile, $newCoord[0],
+		    $newCoord[1], $newCoord[-2], $newCoord[-1]);
         ExtractIntr($id, $newFastaFile, $sens, @newCoord);
 
         ## Build WAM files ##
@@ -517,159 +536,247 @@ sub GenoCoord
 #   For each cDNA seq :
 #     - Read Start & Stop
 #     - Launch the EMBOSS extractseq on the cDNA file (to extract the CDS)
-#     - Launch sim4 against the extracted CDS (with options R=2 A=3 P=1 N=1
+#     - Launch Sim4 against the extracted CDS (with options R=2 A=3 P=1 N=1
 #       C=14) and generate an output file.
-#     - Read in the sim4 output file the gene coordinates (exons-introns).
-# !      A problem was found with very small terminal exon. sim4 was not able
-# !      to make the correct alignment.
-# !      Because of this problem eugeneAdapt scans all the exon and if one is
-# !      minor than $excluSeq :
-# !        1) write in the WARNING file the ID of the seq and the exon length
-# !        2) the sequence is excluded
+#     - Read in the Sim4 output file the gene coordinates (exons-introns).
+#     - Test the Sim4 output file : exclusion if no exon found or if the CDS
+#       is not completely aligned.
+#     - Launch GeneSeqer against the extracted CDS and generate an output file.
+#     - Read in the GeneSeqer output file the gene coordinates (exons-introns).
+#     - Test the GeneSeqer output file : exclusion if no exon found or if the
+#       CDS is not completely aligned.
+#     - Choice the alignment Sim4 or GeneSeqer.
+#     - Sim4 is use to find the UTR coordinates.
 #     - Launch the EMBOSS extractseq on the genomic file (to extract the CDS +
 #       a maximum offset on each side) and generate a new genomic file
 #     - Add in the coord.txt file the gene coordinates (recomputed for the new
-#       genomic sequence) and generate a GFF file (ID.fasta.gff).
+#       genomic sequence) and generate a GFF file (ID.fasta.gff) and a INFO
+#       file  (ID.fasta.info).
 #     - Extract Intron - Exon - UTR5/3 and add the sequence in each file :
 #          -> Launch the EMBOSS extractseq on the cDNA file for exon and
 #	      utr5/3
 #          -> Launch the EMBOSS extractseq on the entire genomic file for
-#             introns, and if the cDNA align by sim4 is the reverse complement
+#             introns, and if the cDNA align by Sim4 is the reverse complement
 #             launch the EMBOSS revseq on the extracted seq
+#
+# Informations about sequences (exclusion...) are in the $eugAdaptLog.
 #-----------------------------------------------------------------------------#
 sub GenoSim4
 {
-    open(WARNING, ">$warning") || die "ERROR: Could not open file $warning\n";
-
     while (my $cdnafile = <CDNA>)
     {
-        print "------------------------------------" . "-------------------------------\n";
-        print($nbSeq+ 1);
+        print "------------------------------------";
+	print "-------------------------------\n".($nbSeq + 1);
         flush STDOUT;
         print STDERR ".";
-        my $exclusion = 0;    # short exon ?  ->  Warning file
-        $nbSeq++;
+
         my $genofile = <GENOMIC>;
-        chomp $cdnafile;
+	chomp $cdnafile;
         chomp $genofile;
+	$nbSeq++;
 
         ## ID extraction ##
         my $id = IDExtract($genofile);
         print " $id :\n";
 
         ## Read Start Stop file ##
-        print "  - Read Start and Stop positions..............................";
+        print"  - Read Start and Stop positions..............................";
         my $ssline = <SSCOORD>;
-        chomp $ssline;
         my $start;
         my $stop;
+	my $lenSS;       # Longueur Start->Stop (CDS)
+        chomp $ssline;
         if ($ssline =~ /([0-9]+)\s+([0-9]+)/)
-        {
+	  {
             $start = $1;
             $stop  = $2;
-        }
+	    $lenSS = $stop-$start+1;
+	  }
         print "done\n";
 
         ## Launch extractseq (EMBOSS) ##
 	# start -> stop (cDNA)
-        print "  - Launch extractseq (CDS from cDNA file).....................";
+        print"  - Launch extractseq (CDS from cDNA file).....................";
         ExtractSeq($cdnafile, $start, $stop, "s2e_mRNAStartStop");
         print "done\n";
 	# utr5
-        print "  - Launch extractseq (UTR5 from cDNA file)....................";
+        print"  - Launch extractseq (UTR5 from cDNA file)....................";
         ExtractSeq($cdnafile, 1, $start, "s2e_utr5");
         print "done\n";
 	# utr3
-        print "  - Launch extractseq (UTR3 from cDNA file)....................";
+        print"  - Launch extractseq (UTR3 from cDNA file)....................";
         ExtractSeq($cdnafile, $stop, 1000000, "s2e_utr3");
         print "done\n";
 
-        my $simOut     = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext";
-        my $simOutUTR5 = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext2";
-        my $simOutUTR3 = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext3";
-        my $sens       = "";
-        my @coord     = ();
-        my @newCoord  = ();
-	my $posUTR5 = 0;
-	my $posUTR3 = 0;
+        my $simOut      = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext";
+	my @coordSim4   = ();
+	my $sensSim4    = "";
+        my $exclSim4    = 0;
+	my $gseqerOut   = "$outputDir" . "/Genes/" . "$id" . "$gseqer_out_ext";
+	my @coordGSeqer = ();
+	my $sensGSeqer  = "";
+        my $exclGSeqer  = 0;
+        my @newCoord    = ();
+	my $sens        = "";
+        my $exclusion   = 0;
+        my $simOutUTR5  = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext2";
+        my $simOutUTR3  = "$outputDir" . "/Genes/" . "$id" . "$sim4_out_ext3";
+ 	my $posUTR5     = 0;
+	my $posUTR3     = 0;
 
         ## Launch sim4 ##
 	# mRNA start stop contre genomique
-	print "  - Launch sim4 (CDS against genomic file).....................";
+	print"  - Launch sim4 (CDS against genomic file).....................";
 	Sim4($simOut, $genofile, "s2e_mRNAStartStop");
 	# utr5 contre genomique
-	print "  - Launch sim4 (UTR5 against genomic file)....................";
+	print"  - Launch sim4 (UTR5 against genomic file)....................";
 	Sim4($simOutUTR5, $genofile, "s2e_utr5");
 	# utr3 contre genomique
-	print "  - Launch sim4 (UTR3 against genomic file)....................";
+	print"  - Launch sim4 (UTR3 against genomic file)....................";
         Sim4($simOutUTR3, $genofile, "s2e_utr3");
 
         ## Sim4 output parsing ##
-        Sim4Parsing($simOut, \$sens, \@coord, $id, \$exclusion);
-        Sim4ParsingUTR($simOutUTR5, \$posUTR5, $id, "UTR5");
+        Sim4Parsing($simOut, \$sensSim4, \@coordSim4);
+	Sim4ParsingUTR($simOutUTR5, \$posUTR5, $id, "UTR5");
         Sim4ParsingUTR($simOutUTR3, \$posUTR3, $id, "UTR3");
 
-        if ($exclusion == 0)
-        {
-            ## Launch extractseq (EMBOSS) : + offset (DNA) ##
-            print "  - Launch extractseq (Create new genomic file," . " offset:$offset)...";
-            my $newFastaFile = "$outputDir/Genes/$id$newdna_ext";
-            my $begin        = (($coord[0] - $offset > 0) ? $coord[0] - $offset : 1);
-            my $end          = $coord[$#coord] + $offset;
-            ExtractSeq($genofile, $begin, $end, " $newFastaFile");
-            print "done\n";
+	## Sim4 alignment test ##
+	alignTest($lenSS, \$exclSim4, @coordSim4);
+	##### End Sim4 #####
 
-            ## Recomputing coord for the new genomic sequence ##
-            print "  - Recompute coordinates :\n";
-            print "\t-> Write in coord file...........................";
-            my $modif    = (($begin < $offset) ? $begin - 1 : ($coord[0] - $offset - 1));
-            my $newcoord = 0;
-
-            print COORD_OUT "$id";
+	## Launch GeneSeqer ##
+	# mRNA start stop contre genomique
+	print"  - Launch GeneSeqer (CDS against genomic file)................";
+	GeneSeqer($gseqerOut, $genofile, "s2e_mRNAStartStop");
+	
+	## GeneSeqer output parsing ##
+        GeneSeqerParsing($gseqerOut, \$sensGSeqer, \@coordGSeqer);
+	
+	## GeneSeqer alignment test ##
+	alignTest($lenSS, \$exclGSeqer, @coordGSeqer);
+	##### End GeneSeqer #####
+	
+	## GeneSeqer / Sim4 ?
+	# Aucun alignement valide on exclue la seq
+	if ($exclSim4 + $exclGSeqer == 2)
+	  {
+	    print EALOG $id . " :\t Sim4->";
+	    if (@coordSim4 == 0) { print EALOG "NO EXON"; }
+	    else { print EALOG "CDS isn't completely aligned";}
+	    print EALOG "  GeneSeqer->";
+	    if (@coordGSeqer == 0) { print EALOG "NO EXON\n"; }
+	    else { print EALOG "CDS isn't completely aligned\n";}
+	    $exclusion = 1;
+	    $nbExclu++;
+	  }
+	# Seul GeneSeqer valide on utilise GeneSeqer
+	elsif ($exclSim4   == 1)
+	  {
+	    @coordSim4 = @coordGSeqer;
+	    $sens = $sensGSeqer;
+	  }
+	# Seul Sim4 valide on utilise Sim4
+	elsif ($exclGSeqer == 1)
+	  {
+	    $sens = $sensSim4;
+	  }
+	# GeneSeqer et Sim4 valide mais differents
+	elsif (join('', @coordGSeqer) ne join('', @coordSim4))
+	  {
+	    if (defined($auto))
+	      {
+		print EALOG $id . " :\t GeneSeqer / Sim4 ";
+		print EALOG "(excluded by automatic process)\n";
+	      }
+	    else {
+	      alignExpert($id, $simOut, $gseqerOut,
+			  \@coordSim4,  \@coordGSeqer,
+			  \$sensSim4,   \$sensGSeqer,  \$sens, \$exclusion);
+	    }
+	  }
+	else { $sens = $sensSim4; }
+	
+	## Alignement sélectionné on continu...(si seq non exclue)
+	if ($exclusion == 0)
+	  {
+	    for (my $i=0; $i<$#coordSim4; $i+=2)
+	      {
+		my $lenEx = $coordSim4[$i+1] - $coordSim4[$i] + 1;
+		if ($lenEx > $exonMaxLen) { $exonMaxLen = $lenEx; }
+		if ($lenEx < $exonMinLen) { $exonMinLen = $lenEx; }
+		if ($lenEx < $seqInEALog)
+		  {
+		    print EALOG "$id :\t Contains exon < $seqInEALog";
+		    print EALOG "        (seq not excluded !)\n";
+		  }
+	      }
+	    if ($sens eq "-") {  $nbSeqRev++; }
+	
+	    ## Launch extractseq (EMBOSS) : + offset (DNA) ##
+	    print "  - Launch extractseq (Create new genomic file,";
+	    print " offset:$offset)...";
+	    my $newFastaFile = "$outputDir/Genes/$id$newdna_ext";
+	    my $begin = (($coordSim4[0] - $offset > 0)
+			 ? $coordSim4[0] - $offset : 1);
+	    my $end   = $coordSim4[$#coordSim4] + $offset;
+	    ExtractSeq($genofile, $begin, $end, " $newFastaFile");
+	    print "done\n";
+	
+	    ## Recomputing coord for the new genomic sequence ##
+	    print "  - Recompute coordinates :\n";
+	    print "\t-> Write in coord file...........................";
+	    my $modif    = (($begin < $offset)
+			    ? $begin - 1 : ($coordSim4[0] - $offset - 1));
+	    my $newcoord = 0;
+	
+	    print COORD_OUT "$id";
 	    if ($posUTR5 != 0) { $posUTR5 = $posUTR5 - $modif; }
 	    if ($posUTR3 != 0) { $posUTR3 = $posUTR3 - $modif; }
 	    if ($sens eq "")
-	      { push(@newCoord, ($posUTR5 < 0) ? $sens."1" : "$sens$posUTR5"); }
+	      {
+		push(@newCoord, ($posUTR5 < 0) ? $sens."1" : "$sens$posUTR5");
+	      }
 	    else
-	      { push(@newCoord, ($posUTR3 < 0) ? $sens."1" : "$sens$posUTR3"); }
-            foreach $newcoord (@coord)
-            {
-                my $c = $newcoord - $modif;
-                push(@newCoord, "$sens$c");
-                print COORD_OUT " $sens$c";
-            }
+	      {
+		push(@newCoord, ($posUTR3 < 0) ? $sens."1" : "$sens$posUTR3");
+	      }
+	    foreach $newcoord (@coordSim4)
+	      {
+		my $c = $newcoord - $modif;
+		push(@newCoord, "$sens$c");
+		print COORD_OUT " $sens$c";
+	      }
 	    if ($sens eq "") { push(@newCoord, "$sens$posUTR3"); }
 	    else             { push(@newCoord, "$sens$posUTR5"); }
-            print COORD_OUT "\n\n";
-            print "done\n";
-            print "\t-> Write a gff file..............................";
-            gffUtils::gffWrite($id, "$outputDir/Genes/$id$gff_ext",
-			   "$outputDir/Genes/$id$info_ext", "$newFastaFile", @newCoord);
-            print "done\n";
-
-            ## Extract Exons - UTR - Introns ##
-            print "  - For build IMM matrices :\n";
-            ExtractExon($id, $cdnafile, $start, $stop);
-            ExtractUTRs($id, $cdnafile, $start, $start, $stop, 10000000);
-            unshift(@coord, 0);
-            push(@coord, 0);
-            ExtractIntr($id, $genofile, $sens, @coord);
-
-            ## Build WAM files ##
-            if (defined($wam))
-            {
-                print "  - Build the WAM files....";
-                WAM_FP_TP($id, $newFastaFile, @newCoord);
-                print "..done\n";
-            }
-        }
+	    print COORD_OUT "\n\n";
+	    print "done\n";
+	    print "\t-> Write the gff and info files..................";
+	    gffUtils::gffWrite($id, "$outputDir/Genes/$id$gff_ext",
+			       "$outputDir/Genes/$id$info_ext",
+			       "$newFastaFile", @newCoord);
+	    print "done\n";
+	
+	    ## Extract Exons - UTR - Introns ##
+	    print "  - For build IMM matrices :\n";
+	    ExtractExon($id, $cdnafile, $start, $stop);
+	    ExtractUTRs($id, $cdnafile, $start, $start, $stop, 10000000);
+	    unshift(@coordSim4, 0);
+	    push(@coordSim4, 0);
+	    ExtractIntr($id, $genofile, $sens, @coordSim4);
+	
+	    ## Build WAM files ##
+	    if (defined($wam))
+	      {
+		print "  - Build the WAM files....";
+		WAM_FP_TP($id, $newFastaFile, @newCoord);
+		print "..done\n";
+	      }
+	  }
         else
-        {
+	  {
             print "\n  ----> EXCLUSION :  !! WARNING !!\n";
-        }
-    }
-
-    close WARNING;
+	  }
+      }
 
     unlink("s2e_mRNAStartStop");
     unlink("s2e_utr5");
@@ -681,14 +788,16 @@ sub GenoSim4
 #-----------------------------------------------------------------------------#
 sub IDExtract
 {
-    my $lgenofile = shift;
-	if ( $lgenofile =~ /Mt[CDS]/ )	# JER, 19 avril 2004  je fais ma bidouille pour les ID MENS sans toucher a l'existant
-	{	
-		my($id) = $lgenofile =~ /(Mt[CDS].+_GC)/;
-		return ($id) if ( $id ne "" );
-	}
-    if ($lgenofile =~ /\/?(.+\/)*([^\.]+)/) {return $2;}
-    else {die "ERROR: Incorrect genomic list (line:$lgenofile)\n"}
+  my $lgenofile = shift;
+  # JER, 19 avril 2004  je fais ma bidouille pour les ID MENS sans
+  # toucher a l'existant
+  if ( $lgenofile =~ /Mt[CDS]/ )
+    {	
+      my($id) = $lgenofile =~ /(Mt[CDS].+_GC)/;
+      return ($id) if ( $id ne "" );
+    }
+  if ($lgenofile =~ /\/?(.+\/)*([^\.]+)/) { return $2; }
+  else { die "ERROR: Incorrect genomic list (line:$lgenofile)\n" }
 }
 
 #-----------------------------------------------------------------------------#
@@ -713,57 +822,34 @@ sub Sim4
 }
 
 #-----------------------------------------------------------------------------#
-#-  Parse the sim4 output for extract the coordinates. (2)                   -#
+#-  Launch GeneSeqer. (2)                                                    -#
 #-----------------------------------------------------------------------------#
-#-  On exclue toutes les séquences :                                         -#
-#-      - qui présentent un exons < $excluSeq                                -#
-#-      - sans match                                                         -#
-#-      - dont la longueur [Start-Stop] != à la longueur de l'alignement     -#
+sub GeneSeqer
+{
+    my ($lout, $lgeno, $lcdna) = @_;
+    system"$cmd_gseqer -s Arabidopsis -l $lgeno -e $lcdna -o $lout>&/dev/null";
+    print "done\n";
+}
+
+#-----------------------------------------------------------------------------#
+#-  Parse the sim4 output for extract the coordinates. (2)                   -#
 #-----------------------------------------------------------------------------#
 sub Sim4Parsing
 {
-  my ($lsimOut, $refsens, $refcoord, $lid, $refexclu) = @_;
+  my ($lsimOut, $refsens, $refcoord) = @_;
   open(SIM, $lsimOut) || die "ERROR: Could not open file $lsimOut\n";
-  my $nb_exons = 0;
-  my $lenAllEx = 0;
-  my $lenSS;
 
   while (my $line = <SIM>)
     {
-      if ($line =~ /\(complement\)/)  {$$refsens = "-"; $nbSeqRev++;}
-
-      if ($line =~ /s2e_mRNAStartStop, ([0-9]+) bp/)  { $lenSS = $1; }
+      if ($line =~ /\(complement\)/) { $$refsens = "-"; }
 
       if ($line =~ /\(([0-9]+)\-([0-9]+)\)/)
         {
 	  push(@{$refcoord}, $1);
 	  push(@{$refcoord}, $2);
-	  my $lenEx = $2 - $1 + 1;
-	  $lenAllEx += $lenEx;
-	  if ($lenEx < $excluSeq)
-	    {
-	      print WARNING $lid . " :\t" . $lenEx . "\n";
-	      $$refexclu = 1;
-	      $nbExclu++;
-	    }
-	  $nb_exons++; # JER
-	  if ($lenEx > $exonMaxLen) {$exonMaxLen = $lenEx;}
-	  if ($lenEx < $exonMinLen) {$exonMinLen = $lenEx;}
 	}
     }
-  if ( $nb_exons == 0 ) # JER
-    {
-      print WARNING $lid . " :\t NO EXON \n";
-      $$refexclu = 1;
-      $nbExclu++;
-    }
-  elsif ( $lenAllEx != $lenSS )
-    {
-      print WARNING $lid . " :\t [Start-Stop] length ($lenSS) and exons length".
-	"($lenAllEx) are different \n";
-      $$refexclu = 1;
-      $nbExclu++;
-    }
+  close SIM;
 }
 
 #-----------------------------------------------------------------------------#
@@ -777,23 +863,23 @@ sub Sim4ParsingUTR
   my ($lsimOut, $refposUTR, $lid, $lutr) = @_;
   open(SIM, $lsimOut) || die "ERROR: Could not open file $lsimOut\n";
   my $nb_match = 0;
-  my $sens = "+";
+  my $sensUTR = "+";
   my $pos;
 
   while (my $line = <SIM>)
     {
-      if ($line =~ /\(complement\)/) { $sens = "-"; }
+      if ($line =~ /\(complement\)/) { $sensUTR = "-"; }
 
       if ($line =~ /\(([0-9]+)\-([0-9]+)\)/)
         {
 	  if ( $line =~ /==/ ) # JER
 	    {
-	      print WARNING $lid . " :\t $lutr result not reliable".
+	      print EALOG $lid . " :\t $lutr result not reliable".
 		" (seq not excluded !)\n";
 	      $nb_match = -1;
 	      last;
 	    }
-	  if ($sens eq "+")
+	  if ($sensUTR eq "+")
 	    {
 	      if ($lutr eq "UTR5") { $pos = $1;	}
 	      else                 { $pos = $2;	}
@@ -810,15 +896,186 @@ sub Sim4ParsingUTR
     {
       if ( $nb_match == 0 ) # JER
 	{
-	  print WARNING $lid . " :\t $lutr NO MATCH (seq not excluded !)\n";
+	  print EALOG $lid . " :\t $lutr NO MATCH            ";
+	  print EALOG "(seq not excluded !)\n";
 	}
       elsif ( $nb_match != 1 )
 	{
-	  print WARNING $lid . " :\t intron in $lutr ? (seq not excluded !)\n";
+	  print EALOG $lid . " :\t $lutr with intron ?       ";
+	  print EALOG "(seq not excluded !)\n";
 	}
       else
 	{
 	  $$refposUTR = $pos;
+	}
+    }
+  close SIM;
+}
+
+#-----------------------------------------------------------------------------#
+#-  Parse the GeneSeqer output for extract the coordinates OF THE BEST       -#
+#-  (%couverture*score moyen) ALIGNMENT. (2)                                 -#
+#-----------------------------------------------------------------------------#
+sub GeneSeqerParsing
+  {
+  my ($lgseqerOut, $refsens, $refcoord) = @_;
+  open(GSEQER, $lgseqerOut) || die "ERROR: Could not open file $lgseqerOut\n";
+
+  my $i = -1;
+  my $j;
+  my @coord;
+  my @score;      # score
+  my @lenAl;      # couverture
+  my @nbVal;
+  my $lencDNA = "";
+
+  while (my $line = <GSEQER>)
+    {
+      if ($lencDNA eq ""  &&  $line =~ /EST sequence/)
+	{
+	  $line = <GSEQER>; $line = <GSEQER>;
+	  while (1)
+	    {
+	      if ($line =~ /\s+[0-9]+\s+([ATCG ]+)/)
+		{
+		  $lencDNA .= $1;
+		}
+	      else
+		{
+		  $lencDNA =~ s/\s//g;
+		  $lencDNA = length($lencDNA);
+		  last;
+		}
+	      $line = <GSEQER>;
+	    }
+	}
+      if ($line =~ /Exon/  &&  $line =~ /cDNA/)
+	{
+	  my @tab = split (/\s+/, $line);
+	  if ($tab[2] == 1)
+	    {
+	      $i++;
+	      $j = 0;
+	      $lenAl[$i] = 0;
+	      $score[$i] = 0;
+	    }
+	  $coord[$i][$j++] =  $tab[3];
+	  $coord[$i][$j++] =  $tab[4];
+	
+	  if ($line =~ /([0-9]+) n\); score:/)   { $lenAl[$i] += $1; }
+	  if ($line =~ /score: ([0-9]+.[0-9]+)/) { $score[$i] += $1; }
+	  $nbVal[$i] =  $j;
+	}
+    }
+
+  # On recherche l'indice correspondant au meilleur
+  # alignement : $c_s = %couverture*score moyen.
+  my $index = 0;
+  my $c_s   = 0;
+
+  for (my $k=0; $k<=$#score; $k++)
+    {
+      my $c = $lenAl[$k] / ($lencDNA * 100);
+      my $s = $score[$k] / ($nbVal[$k]/2);
+      if (($c * $s) > $c_s)
+	{
+	  $c_s   = $c * $s;
+	  $index = $k;
+	}
+    }
+  if (@score != 0)      # Si il y a au moins 1 match
+    {
+      if ($coord[$index][0] > $coord[$index][1])
+	{
+	  $$refsens = "-";
+	  for (my $k=$nbVal[$index]-1; $k>=0; $k--)
+	    {
+	      push(@{$refcoord}, $coord[$index][$k]);
+	    }
+	}
+      else
+	{
+	  for (my $k=0; $k<$nbVal[$index]; $k++)
+	    {
+	      push(@{$refcoord}, $coord[$index][$k]);
+	    }
+	}
+    }
+  close GSEQER;
+}
+
+#-----------------------------------------------------------------------------#
+#-  Test alignment (2).                                                      -#
+#-----------------------------------------------------------------------------#
+#-  On exclue les séquences :                                                -#
+#-      - sans match                                                         -#
+#-      - dont la longueur [Start-Stop] != à la longueur de l'alignement     -#
+#-----------------------------------------------------------------------------#
+sub alignTest
+{
+  my ($llenSS, $refexcl, @lcoord) = @_;
+  my $lenAllEx = 0;
+  my $nbExon   = 0;
+
+  for (my $i=0; $i<$#lcoord; $i+=2)
+    {
+      $lenAllEx += $lcoord[$i+1] - $lcoord[$i] + 1;
+      $nbExon++;
+    }
+  if ($nbExon == 0  ||  $lenAllEx != $llenSS) { $$refexcl = 1; }
+}
+
+#-----------------------------------------------------------------------------#
+#-  Expert alignment : choice Sim4, GeneSeqer, exclusion or auto process (2) -#
+#-----------------------------------------------------------------------------#
+sub alignExpert
+{
+  my ($lid, $lsimOut, $lgseqerOut, $refCdSim, $refCdGS,
+      $refsensSim, $refsensGS, $refsens, $refexcl) = @_;
+  my $choice = "";
+  $$refsens = $$refsensSim;
+
+  print "  - Sim4 / GeneSeqer give different alignments :\n";
+  print "\t-> Sim4 :\n";
+  for (my $i=0; $i<$#{$refCdSim}; $i+=2)
+    {
+      my $c = @{$refCdSim}[$i];
+      print "\t   ";
+      system "grep \"%\" $lsimOut | grep $c";
+    }
+
+  print "\t-> GeneSeqer :\n";
+  for (my $i=0; $i<$#{$refCdGS}; $i+=2)
+    {
+      my $c = @{$refCdGS}[$i];
+      print "\t  ";
+      system "grep \"cDNA\" $lgseqerOut | grep $c";
+    }
+  print "\n\tFor more details about these alignments see the";
+  print "\n\tsim4  ($lsimOut)  and  the";
+  print "\n\tGeneSeqer ($lgseqerOut) files.\n";
+  while (1)
+    {
+      print "\n\tEnter  your  choice :  Sim4 (s),  GeneSeqer (g),";
+      print "\n\texclusion (e) or choice an automatic process (a)";
+      print ".......";
+
+      $choice = <STDIN>;
+      chomp $choice;
+      if ($choice eq 'e' || $choice eq 'a')
+	{
+	  print EALOG $lid . " :\t GeneSeqer / Sim4 (excluded by user)\n";
+	  $nbExclu++;
+	  $$refexcl = 1;
+	  if ($choice eq 'a') { $auto = 'a'; }
+	  last;
+	}
+      elsif ($choice eq 's') { last; }
+      elsif ($choice eq 'g')
+	{
+	  @{$refCdSim} = @{$refCdGS};
+	  $$refsens    = $$refsensGS;
+	  last;
 	}
     }
 }
@@ -959,7 +1216,8 @@ sub ExtractIntr
         {
             print($i/ 2);
             print INTRON "$lid.[" . ($i / 2) . "] ";
-            ExtractSeq($lgenofile, abs($lcoord[$i]) + 1, abs($lcoord[$i + 1]) - 1, "s2e_t.txt");
+            ExtractSeq($lgenofile, abs($lcoord[$i]) + 1,
+		       abs($lcoord[$i + 1]) - 1, "s2e_t.txt");
             my $lenInt = abs($lcoord[$i + 1]) - 1 - abs($lcoord[$i]);
             if ($lenInt > $intronMaxLen) {$intronMaxLen = $lenInt;}
             if ($lenInt < $intronMinLen) {$intronMinLen = $lenInt;}
@@ -1156,7 +1414,7 @@ sub WAM_FP_TP
 }
 
 #-----------------------------------------------------------------------------#
-#-  Print (stdout) some informations about sequences. (1) & (2)              -#
+#-  Print (stdout && EALOG) some informations about sequences. (1) & (2)     -#
 #-----------------------------------------------------------------------------#
 sub PrintInfo
 {
@@ -1165,13 +1423,13 @@ sub PrintInfo
     if ($nbExclu != 0)
     {
         print "! WARNING $nbExclu / $nbSeq sequence(s) have been excluded."
-          . "\n!         You MUST read the WARNING file.\n";
+          . "\n!         You MUST read the $eugAdaptLog file.\n";
         print "---------------------------------"
 	  . "----------------------------------\n";
     }
-    print "Informations (for $nbSeq sequence(s)) :\n";
+    print "Informations (for ".($nbSeq-$nbExclu)."/$nbSeq sequence(s)) :\n";
     print "   - Number of :\n";
-    print "\t-> Sequences forward : " . ($nbSeq - $nbSeqRev) . "\n";
+    print "\t-> Sequences forward : " . ($nbSeq-$nbSeqRev-$nbExclu) . "\n";
     print "\t-> Sequences reverse : $nbSeqRev\n";
     print "\t-> Sequences without utr5   : $nbNoUTR5\n";
     print "\t-> Sequences without utr3   : $nbNoUTR3\n";
@@ -1186,4 +1444,21 @@ sub PrintInfo
       . "--------------------------------\n";
     flush STDOUT;
     print STDERR "\n";
+
+    print EALOG "----------------------------------"
+      . "---------------------------------\n";
+    print EALOG "Informations (for ".($nbSeq-$nbExclu)."/$nbSeq sequence(s))";
+    print EALOG " :\n   - Number of :\n";
+    print EALOG "\t-> Sequences forward : ".($nbSeq-$nbSeqRev-$nbExclu)."\n";
+    print EALOG "\t-> Sequences reverse : $nbSeqRev\n";
+    print EALOG "\t-> Sequences without utr5   : $nbNoUTR5\n";
+    print EALOG "\t-> Sequences without utr3   : $nbNoUTR3\n";
+    print EALOG "\t-> Sequences without intron : $nbNoIntron\n";
+    print EALOG "   - Length of :\n";
+    print EALOG "\t-> Exon min.   : $exonMinLen\n";
+    print EALOG "\t-> Exon max.   : $exonMaxLen\n";
+    print EALOG "\t-> Intron min. : $intronMinLen\n";
+    print EALOG "\t-> Intron max. : $intronMaxLen\n";
+    print EALOG "-----------------------------------"
+      . "--------------------------------\n";
 }
