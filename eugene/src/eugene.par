@@ -74,26 +74,26 @@ NStart.startB	0.308
 ##### IfElse #####
 #
 IfElse.SensorIf		NG2
-IfElse.SensorElse	SPred
+IfElse.SensorElse		SPred
 #
 # NetGene2 parameters #####
 #
-NG2.accP	0.903
-NG2.accB	5.585
-NG2.donP	0.980
-NG2.donB	27.670
+NG2.accP[1]	0.903
+NG2.accB[1]	5.585
+NG2.donP[1]	0.980
+NG2.donB[1]	27.670
 #
 ##### SplicePredictor parameters #####
 #
-SPred.accP	0.987
-SPred.accB	3.850
-SPred.donP	0.929
-SPred.donB	10.800
+SPred.accP[1]	0.987
+SPred.accB[1]	3.850
+SPred.donP[1]	0.929
+SPred.donB[1]	10.800
 #
 ##### GeneSplicer parameters #####
 #
 GSplicer.coefAcc	1
-GSplicer.penAcc 	0
+GSplicer.penAcc		0
 GSplicer.coefDon	1
 GSplicer.penDon 	0
 #
