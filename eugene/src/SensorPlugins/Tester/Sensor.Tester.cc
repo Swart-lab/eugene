@@ -248,7 +248,8 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
   DATA Data;
   char * predSigType = new char[10];
   char * tf;
-  
+  char * truthState;
+
   for(int i=0; i<nbTest; i++) {
     for(int j=0; j<DATA::LastSigType; j++)
       Data.sig[j].Clear();
@@ -258,20 +259,30 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
       // Forward
       if (Data.sig[j].weight[Signal::Forward] != 0.0) {
 	tf = SigType_TF(j, pos, &predSigType);
+
+	truthState = State(pos);
+	if (!strcmp(truthState, "ExonR") || !strcmp(truthState, "IntronR"))
+	tf = "False";
+	
 	fprintf(fp[i],"%7.7s\t%7.7s\t%7s\t%7d\t      ."
 		"\t%7.2f\t      +\t      .\t%7s\t%7s\n",
 		seqName, source[i], predSigType, pos,
 		Data.sig[j].weight[Signal::Forward],
-		tf, State(pos));
+		tf, truthState);
       }
       // Reverse
       if(Data.sig[j].weight[Signal::Reverse] != 0.0) {
 	tf = SigType_TF(j, pos, &predSigType);
+
+	truthState = State(pos);
+	if (!strcmp(truthState, "ExonF") || !strcmp(truthState, "IntronF"))
+	tf = "False";
+
 	fprintf(fp[i],"%7.7s\t%7.7s\t%7s\t%7d\t      ."
 		"\t%7.2f\t      -\t      .\t%7s\t%7s\n",
 		seqName, source[i], predSigType, pos,
 		Data.sig[j].weight[Signal::Reverse],
-		tf, State(pos));
+		tf, truthState);
       }
     }
   }
