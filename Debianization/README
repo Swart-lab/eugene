@@ -1,0 +1,43 @@
+=======================
+Debianization of eugene
+=======================
+
+Content of the directory
+------------------------
+Binary and source files of the debian package inra-eugene:
+inra-eugene_3.2-1.diff.gz
+inra-eugene_3.2-1.dsc
+inra-eugene_3.2-1_i386.build
+inra-eugene_3.2-1_i386.changes
+inra-eugene_3.2-1_i386.deb
+inra-eugene_3.2.orig.tar.gz
+Memory of the original debian directory:
+debian
+
+
+How was done the package
+------------------------
+
+1. Copie of a tar.gz distribution of eugene
+2. Move of eugene-3.2 in inra-eugene-3.2 directory
+3. Remove x access for group on all files under models
+4. dh_make  -c artistic -e cros@ossau.toulouse.inra.fr -s
+5. Update of the inra-eugene-3.2/debian directory 
+   Generation of man file with docbook-to-man eugene.sgml > eugene.1
+6. Set empty environnement variable for CFLAGS, CXXFLAGS, CPPFLAGS
+7. debuild -rfakeroot --preserve-env
+
+Note that the following packages need to be installed:
+* dh-make (for dh_make)
+* devscript (for debuild)
+* lintian 
+* fakeroot
+* gnupg (generation of a key with gpg --gen-key)
+
+
+What remains
+------------
+1. Check of the Build-Depends defined in the debian/control file
+2. Improve of the man documentation
+
+

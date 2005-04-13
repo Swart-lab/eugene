@@ -1,0 +1,830 @@
+dpkg-buildpackage: source package is inra-eugene
+dpkg-buildpackage: source version is 3.2-1
+dpkg-buildpackage: source maintainer is Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+dpkg-buildpackage: host architecture is i386
+ fakeroot debian/rules clean
+dh_testdir
+dh_testroot
+rm -f build-stamp 
+# Add here commands to clean up after the build process.
+/usr/bin/make distclean
+make[1]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[1]: *** No rule to make target `distclean'.  Stop.
+make[1]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make: [clean] Error 2 (ignored)
+cp -f /usr/share/misc/config.sub config.sub
+cp -f /usr/share/misc/config.guess config.guess
+dh_clean 
+ dpkg-source -b inra-eugene-3.2
+dpkg-source: building inra-eugene in inra-eugene_3.2.orig.tar.gz
+dpkg-source: building inra-eugene in inra-eugene_3.2-1.diff.gz
+dpkg-source: building inra-eugene in inra-eugene_3.2-1.dsc
+ debian/rules build
+dh_testdir
+# Add here commands to configure the package.
+./configure --host=i386-linux --build=i386-linux --prefix=/usr --mandir=\${prefix}/share/man --infodir=\${prefix}/share/info
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking whether make sets $(MAKE)... yes
+checking for working aclocal-1.4... found
+checking for working autoconf... found
+checking for working automake-1.4... found
+checking for working autoheader... found
+checking for working makeinfo... found
+checking for i386-linux-g++... i386-linux-g++
+checking for C++ compiler default output file name... a.out
+checking whether the C++ compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C++ compiler... yes
+checking whether i386-linux-g++ accepts -g... yes
+checking for i386-linux-gcc... i386-linux-gcc
+checking whether we are using the GNU C compiler... yes
+checking whether i386-linux-gcc accepts -g... yes
+checking for i386-linux-gcc option to accept ANSI C... none needed
+checking for flex... flex
+checking for flex... (cached) flex
+checking for yywrap in -lfl... yes
+checking lex output file root... lex.yy
+checking whether yytext is a pointer... yes
+checking for bison... bison -y
+checking for gawk... no
+checking for mawk... mawk
+checking whether ln -s works... yes
+checking for i386-linux-ranlib... no
+checking for ranlib... ranlib
+checking for main in -lc... yes
+checking for main in -ldl... yes
+checking for main in -lgcc... yes
+checking for main in -lgd... yes
+checking for main in -lm... yes
+checking for main in -lpng... yes
+checking for main in -lz... yes
+checking how to run the C preprocessor... i386-linux-gcc -E
+checking for egrep... grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking netdb.h usability... yes
+checking netdb.h presence... yes
+checking for netdb.h... yes
+checking for stdlib.h... (cached) yes
+checking for string.h... (cached) yes
+checking for strings.h... (cached) yes
+checking for unistd.h... (cached) yes
+checking values.h usability... yes
+checking values.h presence... yes
+checking for values.h... yes
+checking getopt.h usability... yes
+checking getopt.h presence... yes
+checking for getopt.h... yes
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
+checking whether struct tm is in sys/time.h or time.h... time.h
+checking for size_t... yes
+checking for stdlib.h... (cached) yes
+checking for GNU libc compatible malloc... yes
+checking whether lstat dereferences a symlink specified with a trailing slash... yes
+checking whether stat accepts an empty string... no
+checking for floor... yes
+checking for pow... yes
+checking for sqrt... yes
+checking for strchr... yes
+checking for strspn... yes
+checking for uname... yes
+checking for getopt... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating README
+config.status: creating src/Makefile
+config.status: creating src/GDIF/Makefile
+config.status: creating src/Parametrization/Makefile
+config.status: creating src/SensorPlugins/Makefile
+config.status: creating src/SensorPlugins/0_SensorTk/Makefile
+config.status: creating src/SensorPlugins/0_SensorTk/GetData/Makefile
+config.status: creating src/SensorPlugins/AnnotaStruct/Makefile
+config.status: creating src/SensorPlugins/ATGpr/Makefile
+config.status: creating src/SensorPlugins/BlastX/Makefile
+config.status: creating src/SensorPlugins/Est/Makefile
+config.status: creating src/SensorPlugins/EuStop/Makefile
+config.status: creating src/SensorPlugins/FrameShift/Makefile
+config.status: creating src/SensorPlugins/GCPlot/Makefile
+config.status: creating src/SensorPlugins/GFF/Makefile
+config.status: creating src/SensorPlugins/GSplicer/Makefile
+config.status: creating src/SensorPlugins/Homology/Makefile
+config.status: creating src/SensorPlugins/IfElse/Makefile
+config.status: creating src/SensorPlugins/MarkovConst/Makefile
+config.status: creating src/SensorPlugins/MarkovIMM/Makefile
+config.status: creating src/SensorPlugins/MarkovIMM/GetData/Makefile
+config.status: creating src/SensorPlugins/MarkovProt/Makefile
+config.status: creating src/SensorPlugins/MarkovProt/GetData/Makefile
+config.status: creating src/SensorPlugins/NG2/Makefile
+config.status: creating src/SensorPlugins/NStart/Makefile
+config.status: creating src/SensorPlugins/PatConst/Makefile
+config.status: creating src/SensorPlugins/PepSignal/Makefile
+config.status: creating src/SensorPlugins/Plotter/Makefile
+config.status: creating src/SensorPlugins/Repeat/Makefile
+config.status: creating src/SensorPlugins/Riken/Makefile
+config.status: creating src/SensorPlugins/SMachine/Makefile
+config.status: creating src/SensorPlugins/SPred/Makefile
+config.status: creating src/SensorPlugins/SpliceWAM/Makefile
+config.status: creating src/SensorPlugins/StartWAM/Makefile
+config.status: creating src/SensorPlugins/Tester/Makefile
+config.status: creating src/SensorPlugins/Transcript/Makefile
+config.status: creating src/SensorPlugins/User/Makefile
+config.status: creating plugins/Makefile
+config.status: creating doc/Makefile
+config.status: creating config.h
+config.status: executing default-1 commands
+dh_testdir
+# Add here commands to compile the package.
+/usr/bin/make
+make[1]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+cd . \
+  && CONFIG_FILES=Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating Makefile
+config.status: executing default-1 commands
+make[1]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[1]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+/usr/bin/make  all-recursive
+make[2]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+Making all in src
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+cd .. \
+  && CONFIG_FILES=src/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/Makefile
+config.status: executing default-1 commands
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making all in Parametrization
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+cd ../.. \
+  && CONFIG_FILES=src/Parametrization/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/Parametrization/Makefile
+config.status: executing default-1 commands
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c ParaOptimization.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c OptiAlgorithm.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Random.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c LineSearch.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Genetic.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c CrossingOver.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Mutating.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Scaling.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Selecting.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Sharing.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c SimulatedAnnealing.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../..    -rdynamic  -c Chromosome.cc
+rm -f libParametrization.a
+ar cru libParametrization.a ParaOptimization.o OptiAlgorithm.o Random.o LineSearch.o Genetic.o CrossingOver.o Mutating.o Scaling.o Selecting.o Sharing.o SimulatedAnnealing.o Chromosome.o 
+ranlib libParametrization.a
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+Making all in GDIF
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+cd ../.. \
+  && CONFIG_FILES=src/GDIF/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/GDIF/Makefile
+config.status: executing default-1 commands
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+i386-linux-gcc -DHAVE_CONFIG_H -I. -I. -I../..      -c gdIF.c
+rm -f libGDIF.a
+ar cru libGDIF.a gdIF.o 
+ranlib libGDIF.a
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+Making all in .
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c EuGene.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Output.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Hits.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c DNASeq.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c System.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Prediction.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c BackP.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Sensor.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Dll.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c MSensor.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c Param.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I..    -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"  -c PenaltyDist.cc
+i386-linux-g++ -rdynamic -DDEFAULT_EUGENE_DIR=\"/usr/share/eugene\"   -o eugene  EuGene.o Output.o Hits.o DNASeq.o System.o Prediction.o BackP.o Sensor.o Dll.o MSensor.o Param.o PenaltyDist.o Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making all in SensorPlugins
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+cd ../.. \
+  && CONFIG_FILES=src/SensorPlugins/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/Makefile
+config.status: executing default-1 commands
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+Making all in 0_SensorTk
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/0_SensorTk/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/0_SensorTk/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+Making all in GetData
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+cd ../../../.. \
+  && CONFIG_FILES=src/SensorPlugins/0_SensorTk/GetData/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/0_SensorTk/GetData/Makefile
+config.status: executing default-1 commands
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../../..      -c WAMbuilder.cc
+i386-linux-g++    -o egn_WAMbuilder  WAMbuilder.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c BStrArray.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c WAM.cc
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c markov.cc
+rm -f libSensorTk.a
+ar cru libSensorTk.a BStrArray.o WAM.o markov.o 
+ranlib libSensorTk.a
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+Making all in AnnotaStruct
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/AnnotaStruct/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/AnnotaStruct/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.AnnotaStruct.cc
+i386-linux-g++ -rdynamic   -o Sensor.AnnotaStruct.so -shared  Sensor.AnnotaStruct.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+Making all in ATGpr
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/ATGpr/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/ATGpr/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.ATGpr.cc
+i386-linux-g++ -rdynamic   -o Sensor.ATGpr.so -shared Sensor.ATGpr.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+Making all in BlastX
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/BlastX/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/BlastX/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.BlastX.cc
+i386-linux-g++ -rdynamic   -o Sensor.BlastX.so -shared Sensor.BlastX.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+Making all in Est
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/Est/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/Est/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Est.cc
+i386-linux-g++ -rdynamic   -o Sensor.Est.so -shared Sensor.Est.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+Making all in EuStop
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/EuStop/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/EuStop/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.EuStop.cc
+i386-linux-g++ -rdynamic   -o Sensor.EuStop.so -shared Sensor.EuStop.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+Making all in FrameShift
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+cd ../../.. \
+  && CONFIG_FILES=src/SensorPlugins/FrameShift/Makefile CONFIG_HEADERS= /bin/sh ./config.status
+config.status: creating src/SensorPlugins/FrameShift/Makefile
+config.status: executing default-1 commands
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.FrameShift.cc
+i386-linux-g++ -rdynamic   -o Sensor.FrameShift.so -shared Sensor.FrameShift.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+Making all in GCPlot
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.GCPlot.cc
+i386-linux-g++ -rdynamic   -o Sensor.GCPlot.so -shared Sensor.GCPlot.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+Making all in GFF
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.GFF.cc
+i386-linux-g++ -rdynamic   -o Sensor.GFF.so -shared Sensor.GFF.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+Making all in GSplicer
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.GSplicer.cc
+i386-linux-g++ -rdynamic   -o Sensor.GSplicer.so -shared Sensor.GSplicer.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+Making all in Homology
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Homology.cc
+i386-linux-g++ -rdynamic   -o Sensor.Homology.so -shared Sensor.Homology.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+Making all in IfElse
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.IfElse.cc
+i386-linux-g++ -rdynamic   -o Sensor.IfElse.so -shared  Sensor.IfElse.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+Making all in MarkovConst
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.MarkovConst.cc
+i386-linux-g++ -rdynamic   -o Sensor.MarkovConst.so -shared  Sensor.MarkovConst.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+Making all in MarkovIMM
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+Making all in GetData
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../../..      -c TrainIMM.cc
+i386-linux-g++    -o egn_TrainIMM  TrainIMM.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.MarkovIMM.cc
+i386-linux-g++ -rdynamic   -o Sensor.MarkovIMM.so -shared  Sensor.MarkovIMM.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+Making all in MarkovProt
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+Making all in GetData
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../../..      -c buildMarkovProt.cc
+i386-linux-g++    -o egn_buildMarkovProt  buildMarkovProt.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.MarkovProt.cc
+i386-linux-g++ -rdynamic   -o Sensor.MarkovProt.so -shared  Sensor.MarkovProt.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+Making all in NG2
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.NG2.cc
+i386-linux-g++ -rdynamic   -o Sensor.NG2.so -shared  Sensor.NG2.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+Making all in NStart
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.NStart.cc
+i386-linux-g++ -rdynamic   -o Sensor.NStart.so -shared  Sensor.NStart.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+Making all in PatConst
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.PatConst.cc
+i386-linux-g++ -rdynamic   -o Sensor.PatConst.so -shared  Sensor.PatConst.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+Making all in PepSignal
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.PepSignal.cc
+i386-linux-g++ -rdynamic   -o Sensor.PepSignal.so -shared  Sensor.PepSignal.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+Making all in Plotter
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Plotter.cc
+i386-linux-g++ -rdynamic   -o Sensor.Plotter.so -shared  Sensor.Plotter.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+Making all in Repeat
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Repeat.cc
+i386-linux-g++ -rdynamic   -o Sensor.Repeat.so -shared  Sensor.Repeat.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+Making all in Riken
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Riken.cc
+i386-linux-g++ -rdynamic   -o Sensor.Riken.so -shared  Sensor.Riken.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+Making all in SMachine
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.SMachine.cc
+i386-linux-g++ -rdynamic   -o Sensor.SMachine.so -shared  Sensor.SMachine.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+Making all in SPred
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.SPred.cc
+i386-linux-g++ -rdynamic   -o Sensor.SPred.so -shared  Sensor.SPred.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+Making all in SpliceWAM
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.SpliceWAM.cc
+i386-linux-g++ -rdynamic   -o Sensor.SpliceWAM.so -shared  Sensor.SpliceWAM.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+Making all in StartWAM
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.StartWAM.cc
+i386-linux-g++ -rdynamic   -o Sensor.StartWAM.so -shared  Sensor.StartWAM.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+Making all in Tester
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Tester.cc
+i386-linux-g++ -rdynamic   -o Sensor.Tester.so -shared  Sensor.Tester.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+Making all in Transcript
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.Transcript.cc
+i386-linux-g++ -rdynamic   -o Sensor.Transcript.so -shared  Sensor.Transcript.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+Making all in User
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+bison -y -d  yacc.y && mv y.tab.c yacc.c
+if test -f y.tab.h; then \
+if cmp -s y.tab.h yacc.h; then rm -f y.tab.h; else mv y.tab.h yacc.h; fi; \
+else :; fi
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..      -c yacc.c
+flex   lex.l && mv lex.yy.c lex.c
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..      -c lex.c
+i386-linux-g++ -DHAVE_CONFIG_H -I. -I. -I../../..    -rdynamic  -c Sensor.User.cc
+i386-linux-g++ -rdynamic   -o Sensor.User.so -shared yacc.o lex.o Sensor.User.o  -lz -lpng -lm -lgd -lgcc -ldl -lc 
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[5]: Nothing to be done for `all-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making all in plugins
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+cp -f ../src/SensorPlugins/*/*.so .
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+Making all in doc
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[2]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[1]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+#docbook-to-man debian/inra-eugene.sgml > inra-eugene.1
+touch build-stamp
+ fakeroot debian/rules binary
+dh_testdir
+dh_testroot
+dh_clean -k 
+dh_installdirs
+# Add here commands to install the package into debian/inra-eugene.
+/usr/bin/make install DESTDIR=/home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene
+make[1]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+Making install in src
+make[2]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making install in Parametrization
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+make[4]: Nothing to be done for `install-exec-am'.
+make[4]: Nothing to be done for `install-data-am'.
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/Parametrization'
+Making install in GDIF
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+make[4]: Nothing to be done for `install-exec-am'.
+make[4]: Nothing to be done for `install-data-am'.
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/GDIF'
+Making install in .
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+/bin/sh ../config/mkinstalldirs /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin
+mkdir /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene
+mkdir /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr
+mkdir /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin
+  /usr/bin/install -c  eugene /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin/eugene
+make[4]: Nothing to be done for `install-data-am'.
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making install in SensorPlugins
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+Making install in 0_SensorTk
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+Making install in GetData
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+/bin/sh ../../../../config/mkinstalldirs /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin
+  /usr/bin/install -c  egn_WAMbuilder /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin/egn_WAMbuilder
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk/GetData'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[6]: Nothing to be done for `install-exec-am'.
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/0_SensorTk'
+Making install in AnnotaStruct
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/AnnotaStruct'
+Making install in ATGpr
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/ATGpr'
+Making install in BlastX
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/BlastX'
+Making install in Est
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Est'
+Making install in EuStop
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/EuStop'
+Making install in FrameShift
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/FrameShift'
+Making install in GCPlot
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GCPlot'
+Making install in GFF
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GFF'
+Making install in GSplicer
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/GSplicer'
+Making install in Homology
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Homology'
+Making install in IfElse
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/IfElse'
+Making install in MarkovConst
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovConst'
+Making install in MarkovIMM
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+Making install in GetData
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+/bin/sh ../../../../config/mkinstalldirs /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin
+  /usr/bin/install -c  egn_TrainIMM /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin/egn_TrainIMM
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM/GetData'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+make[6]: Nothing to be done for `install-exec-am'.
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovIMM'
+Making install in MarkovProt
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+Making install in GetData
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+/bin/sh ../../../../config/mkinstalldirs /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin
+  /usr/bin/install -c  egn_buildMarkovProt /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene/usr/bin/egn_buildMarkovProt
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt/GetData'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+make[6]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+make[6]: Nothing to be done for `install-exec-am'.
+make[6]: Nothing to be done for `install-data-am'.
+make[6]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/MarkovProt'
+Making install in NG2
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NG2'
+Making install in NStart
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/NStart'
+Making install in PatConst
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PatConst'
+Making install in PepSignal
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/PepSignal'
+Making install in Plotter
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Plotter'
+Making install in Repeat
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Repeat'
+Making install in Riken
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Riken'
+Making install in SMachine
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SMachine'
+Making install in SPred
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SPred'
+Making install in SpliceWAM
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/SpliceWAM'
+Making install in StartWAM
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/StartWAM'
+Making install in Tester
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Tester'
+Making install in Transcript
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/Transcript'
+Making install in User
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins/User'
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[5]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[5]: Nothing to be done for `install-exec-am'.
+make[5]: Nothing to be done for `install-data-am'.
+make[5]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src/SensorPlugins'
+make[2]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/src'
+Making install in plugins
+make[2]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+make[3]: Nothing to be done for `install-exec-am'.
+make[3]: Nothing to be done for `install-data-am'.
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+make[2]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/plugins'
+Making install in doc
+make[2]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[3]: Nothing to be done for `install-exec-am'.
+make[3]: Nothing to be done for `install-data-am'.
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[2]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2/doc'
+make[2]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[3]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[3]: Nothing to be done for `install-exec-am'.
+/usr/bin/make  install-data-hook
+make[4]: Entering directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/doc 
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/doc/Sequences 
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Style
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Javascripts
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Images
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/plugins
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/cfg
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models/WAM
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/Procedures
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/Procedures/Eval
+install -d /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/Procedures/Get
+install ./doc/EuGeneDoc.pdf /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/doc
+install ./doc/Sequences/SYNO_ARATH.fasta* /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/doc/Sequences
+install ./models/*.dist /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models
+install ./models/*.mat /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models
+install ./models/*.bin /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models
+install ./models/BLOSUM* /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models
+install ./models/WAM/WAM* /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/models/WAM
+install ./web/Style/eugene.css /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Style
+install ./web/Javascripts/diap.js /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Javascripts
+install ./web/Images/*jpg /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/web/Images
+install ./cfg/*.par /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/cfg
+install src/SensorPlugins/*/*.so  /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/plugins
+install ./Procedures/Eval/egn_* /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/Procedures/Eval
+install ./Procedures/Get/egn_* /home/cros/EUGENE/FAIRE/inra-eugene-3.2/debian/inra-eugene//usr/share/eugene/Procedures/Get
+make[4]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[3]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[2]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+make[1]: Leaving directory `/home/cros/EUGENE/FAIRE/inra-eugene-3.2'
+dh_testdir
+dh_testroot
+dh_installchangelogs ChangeLog
+dh_installdocs
+dh_installexamples
+dh_install
+dh_installman
+dh_link
+dh_strip
+dh_compress
+dh_fixperms
+dh_installdeb
+dh_shlibdeps
+dh_gencontrol
+dpkg-gencontrol: warning: unknown substitution variable ${shlibs:Depends}
+dpkg-gencontrol: warning: unknown substitution variable ${misc:Depends}
+dh_md5sums
+dh_builddeb
+dpkg-deb: building package `inra-eugene' in `../inra-eugene_3.2-1_i386.deb'.
+ dpkg-genchanges
+dpkg-genchanges: including full source code in upload
+dpkg-buildpackage: full upload (original source is included)
+Now running lintian...
+Finished running lintian.
+Now signing changes and any dsc files...
+ signfile inra-eugene_3.2-1.dsc Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+
+ signfile inra-eugene_3.2-1_i386.changes Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+
+Successfully signed dsc and changes files
