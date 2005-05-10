@@ -1,5 +1,5 @@
 /*
-** Feuille de style EuGeneHom
+** Feuille de style eugene
 */
 
 <style type=text/css>
@@ -54,7 +54,18 @@ TR.A1 {background-color : #c0dbe2;}
 .clLevel1over{background-color:#daeaee; layer-background-color:#daeaee; color:#06768c; cursor:pointer; cursor:hand; }
 .clLevel1border{position:absolute; visibility:hidden; background-color:#71b1bd; layer-background-color:#71b1bd;}
 
-#divNewsCont {position:absolute; left:910px; top:10px; width:103px; height:80px; clip:rect(0px 103px 80px 0px); visibility:hidden; overflow:hidden;}
-#divNews     {position:absolute;} 
+
+/* Pour la frame scrollable : textual output */
+.conteneur {
+height: 200px;
+width: 100%;
+}
+.frame {
+margin-left: 0px;
+width: auto;
+height: 200px;
+overflow: auto;
+font-size: 14px;
+}
 
 </style>
