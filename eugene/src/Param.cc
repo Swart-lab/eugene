@@ -335,40 +335,40 @@ void Parameters :: ReadArg(int argc, char * argv[])
 void Parameters :: ShowUsage (void)
 {
   fprintf(stderr, "\nUsage: EuGene [options] FASTA-files\n\n");
-  fprintf(stderr, "Options::\n");
+  fprintf(stderr, "Options:\n");
   fprintf(stderr, "  General:\n");
-  fprintf(stderr, "    -A paramfile\t\t Selects another parameter file\n");
-  fprintf(stderr, "    -D<parameter>=<value>\t\t Changes the parameter value\n"); 
-  fprintf(stderr, "    -s\t\t Forbids partial gene prediction\n");
-  fprintf(stderr, "    -Z\t\t Select the parameters optimization mode\n");
-  fprintf(stderr, "    -h\t\t Print this help\n\n");
+  fprintf(stderr, "    -A paramfile            Selects another parameter file\n");
+  fprintf(stderr, "    -D<parameter>=<value>   Changes the parameter value\n"); 
+  fprintf(stderr, "    -s                      Forbids partial gene prediction\n");
+  fprintf(stderr, "    -Z                      Select the parameters optimization mode\n");
+  fprintf(stderr, "    -h                      Print this help\n\n");
 
   fprintf(stderr, "  Output control:\n");
-  fprintf(stderr, "    -p a|d|g|h|H|l|s\t\t Changes text output format\n");
-  fprintf(stderr, "    -g filename\t\t Activate graphical output\n");
-  fprintf(stderr, "    -c overlap\t\t Controls overlap between images\n");
-  fprintf(stderr, "    -l length\t\t Length of sequence per image\n");
-  fprintf(stderr, "    -u position\t\t Specifies the first base plotted\n");
-  fprintf(stderr, "    -v position\t\t Specifies the last base plotted\n");
-  fprintf(stderr, "    -x resolution\t\t Specifies the horizontal resolution\n");
-  fprintf(stderr, "    -y resolution\t\t Specifies the vertical resolution\n");
-  fprintf(stderr, "    -w width\t\t Changes the score smoothing window width\n");
-  fprintf(stderr, "    -n 0|1|2\t\t Changes the normalization of scores in graphs\n");
-  fprintf(stderr, "    -o offset\t\t Offset the base count in text/images\n");
-  fprintf(stderr, "    -O dir\t\t Specifies an output directory\n\n");
+  fprintf(stderr, "    -p a|d|g|h|H|l|s        Changes text output format\n");
+  fprintf(stderr, "    -g filename             Activates graphical output\n");
+  fprintf(stderr, "    -c overlap              Controls overlap between images\n");
+  fprintf(stderr, "    -l length               Length of sequence per image\n");
+  fprintf(stderr, "    -u position             Specifies the first base plotted\n");
+  fprintf(stderr, "    -v position             Specifies the last base plotted\n");
+  fprintf(stderr, "    -x resolution           Specifies the horizontal resolution\n");
+  fprintf(stderr, "    -y resolution           Specifies the vertical resolution\n");
+  fprintf(stderr, "    -w width                Changes the score smoothing window width\n");
+  fprintf(stderr, "    -n 0|1|2                Changes the normalization of scores in graphs\n");
+  fprintf(stderr, "    -o offset               Offset the base count in text/images\n");
+  fprintf(stderr, "    -O dir                  Specifies an output directory\n\n");
 
   fprintf(stderr, "  Plugin control:\n");
-  fprintf(stderr, "    -b levels\t\t Activate BlastX plugin\n");
-  fprintf(stderr, "    -B\t\t Activate postprocessing in BlastX plugin\n");
-  fprintf(stderr, "    -d\t\t Activate the EST plugin\n");
-  fprintf(stderr, "    -E\t\t Activate postprocessing in EST plugin\n");
-  fprintf(stderr, "    -f\t\t Changes the frameshift penalty\n");
-  fprintf(stderr, "    -G\t\t Activate the GFF plugin\n");
-  fprintf(stderr, "    -m DNA Markov matrix\t\t Changes the Markov matrix used (IMM)\n");
-  fprintf(stderr, "    -M AA Markov matrix\t\t Activates the MarkovProt plugin\n");
-  fprintf(stderr, "    -r\t\t Activate the Repeat plugin\n");
-  fprintf(stderr, "    -r\t\t Activate the Riken (FL cDNA) plugin\n");
-  fprintf(stderr, "    -t AA similarity matrix\t\t Activates the Homology plugin\n\n");
+  fprintf(stderr, "    -b levels               Activates BlastX plugin\n");
+  fprintf(stderr, "    -B                      Activates postprocessing in BlastX plugin\n");
+  fprintf(stderr, "    -d                      Activates the EST plugin\n");
+  fprintf(stderr, "    -E                      Activates postprocessing in EST plugin\n");
+  fprintf(stderr, "    -f                      Changes the frameshift penalty\n");
+  fprintf(stderr, "    -G                      Activates the GFF plugin\n");
+  fprintf(stderr, "    -m DNA Markov matrix    Changes the Markov matrix used (IMM)\n");
+  fprintf(stderr, "    -M AA Markov matrix     Activates the MarkovProt plugin\n");
+  fprintf(stderr, "    -r                      Activates the Repeat plugin\n");
+  fprintf(stderr, "    -R                      Activates the Riken (FL cDNA) plugin\n");
+  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n\n");
 
   exit(1);
 }
