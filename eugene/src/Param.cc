@@ -368,8 +368,9 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -M AA Markov matrix     Activates the MarkovProt plugin\n");
   fprintf(stderr, "    -r                      Activates the Repeat plugin\n");
   fprintf(stderr, "    -R                      Activates the Riken (FL cDNA) plugin\n");
-  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n\n");
-
+  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n");
+  fprintf(stderr, "    -U                      Activates the User plugin (obsolete)\n\n");
+	
   exit(1);
 }
 
