@@ -19,10 +19,8 @@
 
 
 
-if LINUX_OS
 export sensors_ldflags = -shared
 export eugene_cxxflags = -rdynamic
-endif
 
 if SOLARIS_OS
 export sensors_ldflags = -shared -mimpure-text

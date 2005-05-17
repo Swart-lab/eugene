@@ -80,7 +80,6 @@ AC_FUNC_STAT
 AC_CHECK_FUNCS([floor pow sqrt strchr strspn uname getopt])
 
 #check for OS
-AM_CONDITIONAL(LINUX_OS, test "$OSTYPE" = linux)
 AM_CONDITIONAL(SOLARIS_OS, test "$OSTYPE" = solaris)
 AM_CONDITIONAL(MACOS_OS, test "$OSTYPE" = darwin)
 
