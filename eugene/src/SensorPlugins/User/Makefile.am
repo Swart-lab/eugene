@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------
 
 AM_CXXFLAGS = $(eugene_cxxflags)
-AM_CFLAGS = 
+AM_CFLAGS = $(eugene_cflags)
 CC = $(CXX)
 AM_YFLAGS = -d
 
