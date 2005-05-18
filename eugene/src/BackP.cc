@@ -30,7 +30,7 @@
 BackPoint :: BackPoint  ()
 {
   State = -1;
-  StartPos = -1;
+  StartPos = INITIALSHIFT;
   Cost = 0.0;
   Additional = 0.0;
   Next = Prev = this;
@@ -142,7 +142,7 @@ void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
 // Returns the best BackPoint and the BackPoint is at least len
 // nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
+BackPoint *Track :: BestUsable(int pos, double *cost, int Forward, int pen)
 {
   BackPoint *BestBP = NULL;
   double BestCost = NINFINITY;
@@ -163,10 +163,10 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
     // Slope penalty on the length.
 
     if (pen && (It->StartPos >= 0)) {
-      Len = pos-It->StartPos;
+      Len = (Forward ? pos-It->StartPos : It->StartPos-pos);
       LenPen = PenD[Len] - PenD.FinalSlope*Len;
     } else {
-      Len = pos-It->StartPos-1;
+      Len = (Forward ? pos-It->StartPos-1 : It->StartPos-pos-1);
       LenPen = PenD.MinPen(Len) - PenD.FinalSlope*Len;
     }
 
@@ -186,7 +186,7 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 // ----------------------------------------------------------------
 // BackTrace and build a prediction object
 // ----------------------------------------------------------------
-Prediction* Track :: BackTrace (int MinCDSLen)
+Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 {
   Prediction *pred = new Prediction();
   BackPoint  *It   = Path.Next;
@@ -197,7 +197,7 @@ Prediction* Track :: BackTrace (int MinCDSLen)
   int CDSlen = 0;
 
   // initialisation by the terminal state
-  pos  = It->StartPos;
+  pos  = (Forward ? It->StartPos : It->StartPos+1);
   etat = It->State;
   It   = It->Origin;
   pred->add(pos, etat);
@@ -208,7 +208,7 @@ Prediction* Track :: BackTrace (int MinCDSLen)
 
   while (It != NULL) {
 
-    pos  = It->StartPos;
+    pos  = (Forward ? It->StartPos : It->StartPos+1);
     etat = It->State;
     It   = It->Origin;
 
@@ -236,7 +236,14 @@ Prediction* Track :: BackTrace (int MinCDSLen)
     else if (pos >=0)
       pred->add(pos, etat);
   }
-  pred->setPos(0, pred->getPos(0)-1);
+
+  if (Forward) {
+    pred->setPos(0, pred->getPos(0)-1);
+  }
+  else {
+    pred->reversePred();
+    pred->setPos(0,INITIALSHIFT+1-pred->getPos(0));
+  }
 
   return pred;
 }

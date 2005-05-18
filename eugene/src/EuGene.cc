@@ -74,9 +74,12 @@ ParaOptimization OPTIM;
 Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
 
-  int    j, k;
-  int    Data_Len = TheSeq->SeqLen;
-  DATA	 Data;
+  int   j, k;
+  int   Data_Len = TheSeq->SeqLen;
+  DATA	Data;
+  int   Forward = 1;
+  int	FirstNuc = (Forward ? 0 : Data_Len-1);
+  int   LastNuc  = (Forward ? Data_Len+1 : -2);
   
   DAG Dag(0, Data_Len, PAR,TheSeq);
   
@@ -86,15 +89,18 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   // --------------------------------------------------------------------------
   // Demarrage de la programmation dynamique
   // --------------------------------------------------------------------------
-  for (int nuc = 0; nuc <= Data_Len; nuc++) {
+  for (int nuc = FirstNuc; nuc != LastNuc; nuc+= (Forward ? 1 : -1)) {
     
     // recuperation des infos
     MSensor->GetInfoAt(TheSeq, nuc, &Data);
-    Dag.ShortestPathAlgoForward(nuc,Data);
+    if (Forward) 
+      Dag.ShortestPathAlgoForward(nuc,Data);
+    else
+      Dag.ShortestPathAlgoBackward(nuc,Data);
   }
-  
+
   Dag.WeightThePrior();
-  Dag.BuildPrediction();
+  Dag.BuildPrediction(Forward);
 
   return Dag.pred;
 }

@@ -62,4 +62,6 @@ const unsigned char Margin        = MRight        | MLeft;
 
 const unsigned char NotAHit       = Margin | Gap;
 
+const int INITIALSHIFT =-5;
+
 #endif

@@ -53,13 +53,13 @@ class DAG
   void LoadDistLength();
   void ShortestPathAlgoForward (int position, DATA Data);
 
-  //  void ShortestPathAlgoBackward (int position, DATA Data, int Data_Len, int NoContentsUpdate=0);
+  void ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpdate=0);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, int sense);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, DAG* DagR);
   //  void InsertLastBestUsableBP (int position, int sense=1);
   //  void SubstractContents (DATA *data);
   //  double ConnectDag (DAG *RightDag, int position, DATA * data, int datalength);
-  double BuildPrediction ();
+  double BuildPrediction (int Forward = 1);
   void BuildReversePrediction (DAG* dag);
   //  void CleanPrediction (DAG* dag, DAG* dagrev);
   
