@@ -5,6 +5,6 @@ EuGeneDoc.pdf : GenerateDoc.tcl Doc.tex ParaOptimization.fig ParaOptimization.pd
 	tclsh GenerateDoc.tcl
 
 
-clean :
+cleandoc :
 	rm -f CmdFlags.* EuGeneDoc.* *~
 
