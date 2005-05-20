@@ -95,7 +95,7 @@ set space " "
 #################################################################
 # Avoid to set set EuGene.version
 set NewValue1(EuGene.organism) 		Arabidopsis
-set NewValue1(EuGene.PluginsDir)        $EuGeneDir/PLUGINS/
+set NewValue1(EuGene.sloppy)            0
 ##### Lengths #####
 set NewValue1(EuGene.InitExDist)	init.dist
 set NewValue1(EuGene.IntrExDist)	intr.dist
@@ -113,6 +113,7 @@ set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
 ##### Output control ######
+set NewValue1(Output.MinCDSLen)		60
 set NewValue1(Output.truncate)		5
 set NewValue1(Output.stepid)		1
 set NewValue1(Output.graph)		0	
@@ -127,6 +128,7 @@ set NewValue1(Output.format)		l
 set NewValue1(Output.offset)		0
 set NewValue1(Output.normopt)		1
 set NewValue1(Output.Prefix)		./
+set NewValue1(Output.webdir)            LOCAL
 #################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
@@ -143,7 +145,18 @@ set NewValue1(GSplicer.coefAcc*)	1
 set NewValue1(GSplicer.penAcc*)	        0
 set NewValue1(GSplicer.coefDon*)	1
 set NewValue1(GSplicer.penDon*) 	0
-# NetGene2 parameters #####
+##### PepSignal #####
+set NewValue1(PepSignal.startP*)	1
+set NewValue1(PepSignal.startB*)	0
+##### SpliceMachine parameters #####
+set NewValue1(SMachine.cmd)		"splicemachine.pl "
+set NewValue1(SMachine.accP*)		0.102032725565
+set NewValue1(SMachine.accB*)		5.585
+set NewValue1(SMachine.donP*)		0.020202707318
+set NewValue1(SMachine.donB*)		27.670
+set NewValue1(SMachine.startP*)	        0.052
+set NewValue1(SMachine.startB*)	        0.308
+##### NetGene2 parameters #####
 set NewValue1(NG2.accP*\[0\])     0.903
 set NewValue1(NG2.accB*\[0\])     5.585
 set NewValue1(NG2.donP*\[0\])     0.980
@@ -161,17 +174,6 @@ set NewValue1(PatConst.pat\[0\])	ATG
 set NewValue1(PatConst.newStatePos\[0\]) 1
 set NewValue1(PatConst.patP*\[0\])	2.897949
 set NewValue1(PatConst.patPNo*\[0\])	0
-##### PepSignal #####
-set NewValue1(PepSignal.startP*)	1
-set NewValue1(PepSignal.startB*)	0
-# SpliceMachine parameters #####
-set NewValue1(SMachine.cmd)		"cat "
-set NewValue1(SMachine.accP*)		0.102032725565
-set NewValue1(SMachine.accB*)		5.585
-set NewValue1(SMachine.donP*)		0.020202707318
-set NewValue1(SMachine.donB*)		27.670
-set NewValue1(SMachine.startP*)	        0.052
-set NewValue1(SMachine.startB*)	        0.308
 ##### Sensor SpliceWAM #####
 set NewValue1(SpliceWAM.MarkovianOrder)	1
 set NewValue1(SpliceWAM.donmodelfilename)	WAM/WAM.ARA.DON.L9
@@ -208,6 +210,7 @@ set NewValue1(Transcript.Stop*)		4.155
 #################################################################
 ##### Proteic similarity sensor parameters #####
 set NewValue1(BlastX.PostProcess) 0
+set NewValue1(BlastX.PPNumber) 5
 set NewValue1(BlastX.levels)	0
 set NewValue1(BlastX.level0*)	0.2
 set NewValue1(BlastX.level1*)	0.05
@@ -390,6 +393,7 @@ set NewValue1(Sensor.Tester$space)	1
 #################################################################
 set NewValue1(ParaOptimization.Use)	        0
 set NewValue1(ParaOptimization.TrueCoordFile) 	---
+set NewValue1(ParaOptimization.EvalPredDir)     ../Procedures/Eval
 set NewValue1(ParaOptimization.Algorithm)	GENETIC+LINESEARCH
 set NewValue1(ParaOptimization.Test)	        1
 set NewValue1(ParaOptimization.Trace)		1
