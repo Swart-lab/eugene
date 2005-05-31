@@ -30,7 +30,10 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/inra-eugene.sgml > inra-eugene.1
+	docbook-to-man debian/eugene.sgml |gzip -9 > debian/eugene.1.gz
+	docbook-to-man debian/egn_TrainIMM.sgml |gzip -9  > debian/egn_TrainIMM.1.gz
+	docbook-to-man debian/egn_WAMbuilder.sgml |gzip -9 > debian/egn_WAMbuilder.1.gz
+	docbook-to-man debian/egn_buildMarkovProt.sgml |gzip -9 > debian/egn_buildMarkovProt.1.gz
 
 	touch build-stamp
 
@@ -73,6 +76,9 @@ binary-arch: build install
 	dh_installdocs
 	dh_installexamples
 	dh_install
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+	install -d $(CURDIR)/debian/tmp/usr/share/man/man1
+	install -m a-x $(CURDIR)/debian/*.1.gz $(CURDIR)/debian/tmp/usr/share/man/man1
 #	dh_installmenu
 #	dh_installdebconf	
 #	dh_installlogrotate
