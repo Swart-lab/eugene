@@ -2,7 +2,7 @@ Source: inra-eugene
 Section: science
 Priority: optional
 Maintainer: Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
-Build-Depends: debhelper (>= 4.0.0), libstdc++5 (>= 1 ), libc6 (>= 2.3.2.ds1-20 ), libgd2-noxpm (>= 2.0.33-1.1 )
+Build-Depends: debhelper (>= 4.0.0), libstdc++5 (>= 1 ), libc6 (>= 2.3.2.ds1-20 ), libgd2 (>= 2.0.33-1.1 )
 Standards-Version: 3.6.1
 
 Package: inra-eugene
