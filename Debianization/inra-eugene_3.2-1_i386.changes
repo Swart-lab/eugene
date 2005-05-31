@@ -18,15 +18,15 @@ Changes:
  .
    * Initial Release.
 Files: 
- 3848d5f57724b63e626d08a97373c2db 663 science optional inra-eugene_3.2-1.dsc
- 51ef656c7f1ac82e0513519afd13eef1 5008603 science optional inra-eugene_3.2.orig.tar.gz
- 9650fb182e0ac83e2877f353de0dd50f 25198 science optional inra-eugene_3.2-1.diff.gz
- ad6a6989307ed2a01abac0e9a336a76b 3030 science optional inra-eugene_3.2-1_i386.deb
+ afd46764def30a5f31e28874883ee4f4 657 science optional inra-eugene_3.2-1.dsc
+ a5f2c30f3c88696326fa6e5c71febbd7 5008621 science optional inra-eugene_3.2.orig.tar.gz
+ ae0c8904101775313fcda863f683c116 25110 science optional inra-eugene_3.2-1.diff.gz
+ c9fa85d88633ea04ee1085863a5bc893 5135250 science optional inra-eugene_3.2-1_i386.deb
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.5 (GNU/Linux)
 
-iD8DBQFCWoNvmoqVLia3ZCgRAqdzAJ9dksubG6y9hUda4X1u5fqoqI6kiACeMmGJ
-bBNqxfClqHess3IW00puWL4=
-=9qwz
+iD8DBQFCnBDOmoqVLia3ZCgRAnlEAJ4j6xAn4N5s31uE79eFp8fHS03cXQCfYDCG
+UPZjvsUR2H2chihl18aTC5I=
+=nOlj
 -----END PGP SIGNATURE-----
