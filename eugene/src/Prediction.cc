@@ -18,7 +18,6 @@
 // ------------------------------------------------------------------
 
 #include<iostream>
-
 #include "Prediction.h"
 
 // ------------------------
@@ -51,12 +50,11 @@ void Prediction :: add (int pos, signed char state)
 }
 
 // ------------------------
-//  add.
+//  PopTill To reomve part of a prediction.
 // ------------------------
-void Prediction :: poptill (int pos)
+void Prediction :: popn (int n)
 {
-
-  while (vPos.back() < pos) {
+  for (int i = 0; i < n; i++) {
     vPos.pop_back();
     vState.pop_back();
     nb--;
@@ -227,6 +225,8 @@ int Prediction :: lenCDS (int geneNumber)
 // ----------------
 void Prediction :: reversePred()
 {
+  int i;
+
   reverse(vState.begin(), vState.end());
   reverse(vPos.begin(),   vPos.end());
 }

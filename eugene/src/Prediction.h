@@ -48,7 +48,7 @@ class Prediction
   double OptimalPath;
 
   void  add           (int, signed char);
-  void  poptill       (int);
+  void  popn          (int);
   void  print         ();
   void  setPos        (int, int);
   char  getNextState  (int); 
@@ -87,6 +87,29 @@ enum Tracks {
   IntronU5F = 41, IntronU5R = 42, 
   IntronU3F = 43, IntronU3R = 44, 
   NbTracks = 45};
+
+const short int UnorientedTracks[1] = {InterGen};
+
+const short int ForwardTracks[(NbTracks-1)/2] = {
+  InitF1,InitF2,InitF3,
+  SnglF1,SnglF2,SnglF3,
+  IntrF1,IntrF2,IntrF3,
+  TermF1,TermF2,TermF3,
+  IntronF1,IntronF2,IntronF3,
+  IntronF2T,IntronF3TG,IntronF3TA,
+  UTR5F,UTR3F, 
+  IntronU5F,IntronU3F};
+
+const short int ReverseTracks[(NbTracks-1)/2] = {
+  InitR1,InitR2,InitR3,
+  SnglR1,SnglR2,SnglR3,
+  IntrR1,IntrR2,IntrR3,
+  TermR1,TermR2,TermR3,
+  IntronR1,IntronR2,IntronR3,
+  IntronR3G,IntronR3A,IntronR2AG,
+  UTR5R,UTR3R, 
+  IntronU5R,IntronU3R};
+
 
 const short int State2Phase[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,

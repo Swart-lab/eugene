@@ -20,23 +20,35 @@
 #include "DAG.h"
 #include <stdio.h>
 
+//#define DEBUGME 1
+
 extern Parameters PAR;
 
-int verbose = 0;
-int verbose2 = 0;
+int ReverseTrack(int track)
+{
+  if (track < 0) return track;
+  if (track == InterGen) return InterGen;
+  
+  // look in forward
+  for (int i = 0; i< (NbTracks-1)/2; i++)
+    if (ForwardTracks[i] == track) return ReverseTracks[i];
+
+  // look in forward
+  for (int i = 0; i< (NbTracks-1)/2; i++)
+    if (ReverseTracks[i] == track) return ForwardTracks[i];
+  return track;
+}
 
 // ----------------------------------------------------------------
 // Default constructor.
 // ----------------------------------------------------------------
 DAG :: DAG ()
 {
-  int i;
-
-  StartPosition=INITIALSHIFT;
-  EndPosition=INITIALSHIFT;
+  StartPosition=0;
+    EndPosition=0;
   EvidenceName[0]=0;
   pred = NULL;
-  for (i = 0; i < NbTracks; i++) LBP[i].Path.SetState(i);
+  for (int i = 0; i < NbTracks; i++) LBP[i].Path.InitState(i,StartPosition);
   NormalizingPath= 0.0;
   TheSeq = NULL;
 }
@@ -50,6 +62,7 @@ DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
   EndPosition=end;
   strcpy(EvidenceName,"OPTIMAL");
   pred = NULL;
+  for (int i = 0; i < NbTracks; i++) LBP[i].Path.InitState(i,StartPosition);
   NormalizingPath = 0.0;
   TheSeq = Seq;
 
@@ -75,6 +88,7 @@ DAG :: DAG (int start, int end, DAG *RefDag,char* name)
    StartPosition=start;
    EndPosition=end;
    pred = NULL;
+   for (int i = 0; i < NbTracks; i++) LBP[i].Path.InitState(i,StartPosition);
    strcpy(EvidenceName,name);
    NormalizingPath = RefDag->NormalizingPath;
 
@@ -177,12 +191,7 @@ void DAG :: WeightThePrior()
 // ---------------------------------------------------------------------------
 void DAG :: LoadDistLength()
 {
-  int j;
 
-  for (j = 0; j < NbTracks; j++) {
-    LBP[j].Path.SetState(j);
-  }
-  
   LBP[InitF1].LoadPenalty(PAR.getC("EuGene.InitExDist"));
   LBP[InitF2].LoadPenalty(PAR.getC("EuGene.InitExDist"));
   LBP[InitF3].LoadPenalty(PAR.getC("EuGene.InitExDist"));
@@ -241,7 +250,6 @@ void DAG :: LoadDistLength()
   LBP[IntronU3F].LoadPenalty(PAR.getC("EuGene.IntronDist"));
   LBP[IntronU3R].LoadPenalty(PAR.getC("EuGene.IntronDist"));
 }
-
 // ----------------------------------------------------------------
 //  Build the prediction by backtracing.
 // ----------------------------------------------------------------
@@ -250,16 +258,16 @@ double DAG :: BuildPrediction (int Forward)
   double maxi,BestU,PBest[NbTracks];
   BackPoint *PrevBP[NbTracks];
   
-  int j,k;
+  int j,k = (Forward ? TheSeq->SeqLen+1 :-1);
 
-  // Insert best possible backpoint at the end of the algo (the
-  // last insert is not automatically possible, cf cost dist. 
+  // Insert best possible backpoint at the start of the algo (the
+  // insert is not automatically possible, cf cost dist. 
   // on length)
   for (j = 0; j < NbTracks; j++) {
-    PrevBP[j] = LBP[j].BestUsable(TheSeq->SeqLen+1,&PBest[j],Forward,0);
-    LBP[j].ForceNew(j,TheSeq->SeqLen+1,PBest[j],PrevBP[j]);
+    PrevBP[j] = LBP[j].BestUsable(k,&PBest[j],0);
+    LBP[j].ForceNew(j,k,PBest[j],PrevBP[j]);
   }
-  
+
   // Select where Backtrace should start
   j = 0;
   maxi = PBest[0];
@@ -319,7 +327,10 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
   maxi = -NINFINITY;
   for (k = 0 ; k < NbTracks; k++) {
     BestU = LBP[k].Optimal;
-    if ((BestU > NINFINITY) && (BestU < maxi)) maxi =BestU;
+    if ((BestU > NINFINITY) && (BestU < maxi)) {
+      best = k;
+      maxi =BestU;
+    }
   }
 
   for (k = 0 ; k < NbTracks; k++) 
@@ -327,19 +338,39 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
   NormalizingPath += maxi;
 
 #define ISPOSSIBLE(X,Y) (!(isinf(Data.sig[DATA::X].weight[Signal::Y])))
+  //  ((1 && printf("IsPossible(%d,%d)=%d\n",(DATA::X),(Signal::Y),(!(isinf(Data.sig[DATA::X].weight[Signal::Y]))))) ? \
+//   (!(isinf(Data.sig[DATA::X].weight[Signal::Y]))) : 0)
 #define INEED(K) if (!PrevBP[K]) PrevBP[K] = LBP[K].BestUsable(position, &PBest[K])
-#define PICOMP(C,S,B,O) if (C && ISPOSSIBLE(S,B)) {\
-	BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B];\
-	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
-#define PICOMPEN(C,S,B,O,P) if (C && ISPOSSIBLE(S,B)) {\
-      BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+(P);		\
-	if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
-#define INSERTANDPAYTHESLOPE(P,C)					\
-    LBP[P].InsertNew(best, position, maxi,PrevBP[best]);\
-    if (position < Data_Len){\
-      LBP[P].Update(Data.contents[C]);\
-      LBP[P].PayTheSlope();\
-    }
+  //        printf("INeed BestU[%d]=%f\n",(K),PBest[K])
+#define PICOMP(C,S,B,O) if ((C) && ISPOSSIBLE(S,B)) {           \
+        BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B];\
+        if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
+
+  //  	printf("PiComp NewBestU[%d]=%f, Signal[%d][%d]=%f Line %d\n",ReverseTrack(O),BestU+NormalizingPath,DATA::S,1-Signal::B,Data.sig[DATA::S].weight[Signal::B],__LINE__); \
+
+
+#define PICOMPR(C,S,B,O) if ((C) && ISPOSSIBLE(S,B)) {           \
+        BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B];\
+        if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
+
+  //	printf("PiComp NewBestU[%d]=%f, Signal[%d][%d]=%f Line %d\n",(O),BestU+NormalizingPath,DATA::S,Signal::B,Data.sig[DATA::S].weight[Signal::B],__LINE__); \
+
+
+
+
+#define PICOMPEN(C,S,B,O,P) if ((C) && ISPOSSIBLE(S,B)) {               \
+        BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+(P);       \
+        if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
+#define INSERTANDPAYTHESLOPE(P,C)                                       \
+  LBP[P].InsertNew(best, position, maxi,PrevBP[best]);			\
+  if (position < Data_Len){						\
+    LBP[P].Update(Data.contents[C]);					\
+    LBP[P].PayTheSlope();						\
+  }
+
+  //  printf("Ins Cost %f From %d Track %d Line %d\n",maxi,ReverseTrack(best),(ReverseTrack(P)),000); \
+
+//      printf("InsPS ContentUpdate %f [%d] Track %d\n",Data.contents[C],(C),(P)); \
 
     // ----------------------------------------------------------------
     // Calcul des meilleures opening edges
@@ -350,75 +381,54 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
 
     // Exons F (No splice)
-    for (k = 0; k <= 3; k++) {
-      if ((position % 3 == k) && ISPOSSIBLE(Start,Forward))             INEED(UTR5F);
-      if (ISPOSSIBLE(Ins,Forward)) { 	                           INEED(InitF1+(k+2)%3);
-								   INEED(IntrF1+(k+2)%3);
-      								   INEED(TermF1+(k+2)%3); }
-      if (ISPOSSIBLE(Del,Forward)) {	                           INEED(InitF1+(k+1)%3);
-      								   INEED(IntrF1+(k+1)%3);
-      								   INEED(TermF1+(k+1)%3); }
+    if (ISPOSSIBLE(Start,Forward))
+      INEED(UTR5F);
+    
+    if (ISPOSSIBLE(Ins,Forward) || ISPOSSIBLE(Del,Forward)) {
+      INEED(InitF1); INEED(InitF2); INEED(InitF3);
+      INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
+      INEED(TermF1); INEED(TermF2); INEED(TermF3); 
+      INEED(SnglF1); INEED(SnglF2); INEED(SnglF3); 
     }
 
     // Exons F  (splicing, with and without spliced stops)
     if (ISPOSSIBLE(Acc,Forward)) {
-      //      if (!(StopStop & DNASeq::StopAfterT))
-	INEED(IntronF2T);
-      
-	//      if (!(StopStop & DNASeq::StopAfterTG))
-	INEED(IntronF3TG);
-   
-	//      if (!(StopStop & DNASeq::StopAfterTA)) 
-	INEED(IntronF3TA);
-      
-      // No spliced stops
-      INEED(IntronF1+(position%3));
-      INEED(IntronF1+((position+1)%3));
-      INEED(IntronF1+((position+2)%3));
+      INEED(IntronF2T);
+      INEED(IntronF3TG);
+      INEED(IntronF3TA);      
+      INEED(IntronF1); INEED(IntronF2); INEED(IntronF3);
     }
 
     // Exons R  (No Splice)
-    for (k = 3; k <= 6; k++) {
-      if (((Data_Len-position) % 3 == k-3) && ISPOSSIBLE(Stop,Reverse)) INEED(UTR3R);
-      if (ISPOSSIBLE(Ins,Reverse)) {				   INEED(InitR1+(k+2)%3);
-								   INEED(IntrR1+(k+2)%3);
-							  	   INEED(TermR1+(k+2)%3); }
-      if (ISPOSSIBLE(Del,Reverse)) {				   INEED(InitR1+(k+1)%3);
-								   INEED(IntrR1+(k+1)%3);
-								   INEED(TermR1+(k+1)%3); }
+    if (ISPOSSIBLE(Stop,Reverse)) 
+      INEED(UTR3R);
+    
+    if (ISPOSSIBLE(Ins,Reverse) || ISPOSSIBLE(Del,Reverse)) {
+      INEED(InitR1); INEED(InitR2); INEED(InitR3);
+      INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
+      INEED(TermR1); INEED(TermR2); INEED(TermR3); 
+      INEED(SnglR1); INEED(SnglR2); INEED(SnglR3); 
     }
-  
+      
     // Exons R (splicing, with and without spliced stops)
     if (ISPOSSIBLE(Don,Reverse)) {
-      //      if (!(StartStop & DNASeq::StopAfterG))
-	INEED(IntronR3G);
-      
-	//      if (!(StartStop & DNASeq::StopAfterA))
-	INEED(IntronR3A);
-   
-	//      if (!(StartStop & DNASeq::StopAfterAG)) 
-	INEED(IntronR2AG);
-
-      // No spliced stops
-      INEED(IntronR1+((Data_Len-position) % 3));
-      INEED(IntronR1+((Data_Len-position+2) % 3));
-      INEED(IntronR1+((Data_Len-position+1) % 3));
+      INEED(IntronR3G);
+      INEED(IntronR3A);
+      INEED(IntronR2AG);
+      INEED(IntronR1); INEED(IntronR2); INEED(IntronR3);
     }
 
     // Introns F et R (with no spliceable stops)
-    if (ISPOSSIBLE(Don,Forward)) 
-      for (k=0; k<3; k++) {	
-	INEED(InitF1+((position-k+3) % 3));
-	INEED(IntrF1+((position-k+3) % 3)); 
-      }
+    if (ISPOSSIBLE(Don,Forward)) {
+      INEED(InitF1); INEED(InitF2); INEED(InitF3);
+      INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
+    }
 
-    if (ISPOSSIBLE(Acc,Reverse)) 
-      for (k=0; k<3; k++) {
-      INEED(IntrR1+((Data_Len-position-k+3) % 3));
-      INEED(TermR1+((Data_Len-position-k+3) % 3));
-      }
+    if (ISPOSSIBLE(Acc,Reverse)) {
+      INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
+      INEED(TermR1); INEED(TermR2); INEED(TermR3); 
+    }
 
-    
     // Intergenique
     if (ISPOSSIBLE(tStart,Reverse))     			   INEED(UTR5R);
     if (ISPOSSIBLE(tStop,Forward))			           INEED(UTR3F);
@@ -452,18 +462,36 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     if (ISPOSSIBLE(tStop,Reverse))                                 INEED(InterGen);
     if (ISPOSSIBLE(Don,Reverse))                                   INEED(IntronU3R);
 
+#ifdef DEBUGME
+    for (k=0; k<(NbTracks-1)/2;k++)
+      if (PrevBP[ReverseTracks[k]]) 
+	printf("Cost %f Track %d a From %d\n",
+	       PBest[ReverseTracks[k]],k,ReverseTrack(PrevBP[ReverseTracks[k]]->State));
+
+      if (PrevBP[UnorientedTracks[0]]) 
+	printf("Cost %f Track %d From %d\n",
+	       PBest[UnorientedTracks[0]],k,ReverseTrack(PrevBP[UnorientedTracks[0]]->State));
+
+    for (k=0; k<(NbTracks-1)/2;k++)
+      if (PrevBP[ForwardTracks[k]]) 
+	printf("Cost %f Track %d b From %d\n",
+	       PBest[ForwardTracks[k]],k,ReverseTrack(PrevBP[ForwardTracks[k]]->State));
+
+    printf("---------- pos %d/%d, best %d norm %f ----------\n",position,Data_Len-position,ReverseTrack((int)best),NormalizingPath);
+#endif
+      
     // ----------------------------------------------------------------
     // ------------------ Inits en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
+      maxi = NINFINITY; best = -1;     
       
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
-      // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,InitF1+(k+2)%3);
+      // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+      //     PICOMP(true,Ins,Forward,InitF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,InitF1+(k+1)%3);
+      //PICOMP(true,Del,Forward,InitF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -477,21 +505,26 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------------- Inits en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 3; k<6; k++) {
-      maxi = NINFINITY;
-      
+      maxi = NINFINITY; best = -1;
+
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-      PICOMPEN(true,Don,Reverse,IntronR1+((Data_Len-position-k) % 3),((((Data_Len-position) % 3) == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+      PICOMPEN(true,Don,Reverse,IntronR1+((Data_Len-position-k) % 3),
+	       ((((Data_Len-position) % 3) == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+
       // Not AfterG
-      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
+      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3G ,
+	       ((StartStop & DNASeq::isTAr) ? SplicedStopPen : 0.0));
       // Not AfterA
-      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3A ,((StartStop & DNASeq::StopAfterA)  ? SplicedStopPen : 0.0));
+      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3A ,
+	       ((StartStop & (DNASeq::isTGr | DNASeq::isTAr))  ? SplicedStopPen : 0.0));
       // Not AfterAG
-      PICOMPEN(((Data_Len-position-k) % 3) == 1,Don,Reverse,IntronR2AG,((StartStop & DNASeq::StopAfterAG) ? SplicedStopPen : 0.0));
+      PICOMPEN(((Data_Len-position-k) % 3) == 1,Don,Reverse,IntronR2AG,
+	       ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift)
-      PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
+      //      PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Reverse, InitR1+(k+1)%3);
+      ///      PICOMP(true,Del,Reverse, InitR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -503,14 +536,14 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------ Sngl en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
+      maxi = NINFINITY; best = -1;     
       
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,SnglF1+(k+2)%3);
+      //      PICOMP(true,Ins,Forward,SnglF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,SnglF1+(k+1)%3);
+      //      PICOMP(true,Del,Forward,SnglF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -524,14 +557,14 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------------- Sngl en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 3; k<6; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
       PICOMP(((Data_Len-position) % 3 == k-3),Stop,Reverse,UTR3R);
       // Il y a une insertion (frameshift)
-      PICOMP(true,Ins,Reverse, SnglR1+(k+2)%3);
+      //      PICOMP(true,Ins,Reverse, SnglR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Reverse, SnglR1+(k+1)%3);
+      //      PICOMP(true,Del,Reverse, SnglR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -543,20 +576,25 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------ Intrs en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
+      maxi = NINFINITY; best = -1;     
 
       // On recommence a coder (Accepteur). Ca vient d'un intron (no spliceable stop)
       PICOMP(true,Acc,Forward,IntronF1+((position-k+3) % 3));
+
       // Not AfterT
-      PICOMPEN(((position-k+3) % 3) == 1,Acc,Forward,IntronF2T ,((StopStop & DNASeq::StopAfterT)  ? SplicedStopPen : 0.0));
+      PICOMPEN(((position-k+3) % 3) == 1,Acc,Forward,IntronF2T ,
+	       ((StopStop & (DNASeq::isGAf | DNASeq::isARf))  ? SplicedStopPen : 0.0));
       // Not AfterTG
-      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TG,((StopStop & DNASeq::StopAfterTG) ? SplicedStopPen : 0.0));
+      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TG,
+	       ((StopStop & DNASeq::isAf) ? SplicedStopPen : 0.0));
       // Not AfterTA
-      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TA,((StopStop & DNASeq::StopAfterTA) ? SplicedStopPen : 0.0));
-      // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
+      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TA,
+	       ((StopStop & (DNASeq::isGf | DNASeq::isAf)) ? SplicedStopPen : 0.0));
+
+      // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+      //      PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,IntrF1+(k+1)%3);
+      //      PICOMP(true,Del,Forward,IntrF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -570,20 +608,25 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------------- Intrs en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 3; k<6; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
       PICOMPEN(true,Don,Reverse,IntronR1+((Data_Len-position-k) % 3),((((Data_Len-position) % 3) == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+      
       // Not AfterG
-      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3G ,((StartStop & DNASeq::StopAfterG)  ? SplicedStopPen : 0.0));
+      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3G ,
+	       ((StartStop & DNASeq::isTAr)  ? SplicedStopPen : 0.0));
       // Not AfterA
-      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3A ,((StartStop & DNASeq::StopAfterA)  ? SplicedStopPen : 0.0));
+      PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse,IntronR3A ,
+	       ((StartStop & (DNASeq::isTAr | DNASeq::isTGr))  ? SplicedStopPen : 0.0));
       // Not AfterAG
-      PICOMPEN(((Data_Len-position-k) % 3) == 1,Don,Reverse,IntronR2AG,((StartStop & DNASeq::StopAfterAG) ? SplicedStopPen : 0.0));
-        // Il y a une insertion (frameshift)
-      PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
+      PICOMPEN(((Data_Len-position-k) % 3) == 1,Don,Reverse,IntronR2AG,
+	       ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
+
+      // Il y a une insertion (frameshift)
+      //      PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
+      //      PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -595,20 +638,25 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------ Terms en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
+      maxi = NINFINITY; best = -1;     
       
       // On recommence a coder (Accepteur). Ca vient d'un intron
       PICOMP(true,Acc,Forward,IntronF1+((position-k+3) % 3));
+
       // Not AfterT
-      PICOMPEN(((position-k+3) % 3) == 1,Acc,Forward,IntronF2T ,((StopStop & DNASeq::StopAfterT)  ? SplicedStopPen :0.0));
+      PICOMPEN(((position-k+3) % 3) == 1,Acc,Forward,IntronF2T ,
+	       ((StopStop & (DNASeq::isGAf | DNASeq::isARf))  ? SplicedStopPen :0.0));
       // Not AfterTG
-      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TG,((StopStop & DNASeq::StopAfterTG) ? SplicedStopPen : 0.0));
+      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TG,
+	       ((StopStop & DNASeq::isAf) ? SplicedStopPen : 0.0));
       // Not AfterTA
-      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TA,((StopStop & DNASeq::StopAfterTA) ? SplicedStopPen : 0.0));
+      PICOMPEN(((position-k+3) % 3) == 2,Acc,Forward,IntronF3TA,
+	       ((StopStop & (DNASeq::isAf | DNASeq::isGf)) ? SplicedStopPen : 0.0));
+
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
+      //      PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,TermF1+(k+1)%3);
+      //      PICOMP(true,Del,Forward,TermF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -622,14 +670,14 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------------- Terms en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 3; k<6; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
       PICOMP(((Data_Len-position) % 3 == k-3),Stop,Reverse,UTR3R);
       // Il y a une insertion (frameshift)
-      PICOMP(true,Ins,Reverse, TermR1+(k+2)%3);
+      //      PICOMP(true,Ins,Reverse, TermR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Reverse, TermR1+(k+1)%3);
+      //      PICOMP(true,Del,Reverse, TermR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -641,7 +689,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ------------------------ Intergenique --------------------------
     // ----------------------------------------------------------------
     // Ca peut venir d'une fin de 3' direct ou de 5' reverse
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // From 5' reverse
     PICOMP(true,tStart,Reverse, UTR5R);
@@ -650,13 +698,12 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
  
     // On reste intergenique
     // et les transstartNO/TransstopNO ???
-    LBP[InterGen].InsertNew(best, position, maxi,PrevBP[best]);
 
     INSERTANDPAYTHESLOPE(InterGen,DATA::InterG);
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On vient de l'intergenique. 
     PICOMP(true,tStart,Forward, InterGen);
@@ -670,7 +717,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5F ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
       
     // on quitte l'UTR 
     PICOMP(true,Don,Forward, UTR5F);
@@ -682,7 +729,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3F ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
       
     // on quitte l'UTR 
     PICOMP(true,Don,Forward, UTR3F);
@@ -694,7 +741,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
 
     // Ca vient d'un Term ou d'un Sngl direct + STOP
     PICOMP(true,Stop,Forward, TermF1+position%3);
@@ -703,13 +750,12 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     PICOMP(true,Acc,Forward, IntronU3F);
 
     // On reste 3' direct
-    LBP[UTR3F].InsertNew(best, position, maxi,PrevBP[best]);
 
     INSERTANDPAYTHESLOPE(UTR3F,DATA::UTR3F);
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // Ca vient d'un Sngl ou Init reverse + START
     PICOMP(true,Start,Reverse, InitR1+((Data_Len-position) % 3));
@@ -724,7 +770,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5R ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On quitte une UTR5R
     PICOMP(true,Acc,Reverse, UTR5R);
@@ -736,7 +782,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3R ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On quitte une UTR5R
     PICOMP(true,Acc,Reverse, UTR3R);
@@ -748,7 +794,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On demarre depuis l'intergenique
     PICOMP(true,tStop,Reverse, InterGen);
@@ -756,23 +802,24 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     PICOMP(true,Don,Reverse, IntronU3R);
 
     // On reste 3' reverse
-    LBP[UTR3R].InsertNew(best, position, maxi,PrevBP[best]);
 
     INSERTANDPAYTHESLOPE(UTR3R,DATA::UTR3R);
     // ----------------------------------------------------------------
     // ---------------- Introns de phase k forward --------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
-      
+      maxi = NINFINITY; best = -1;
+
       // - on quitte un Init ou un Intr
       // no spliceable stop: 
-      if (!(((StartStop & DNASeq::StopAfterT) && k == 1) ||
-			((StartStop & (DNASeq::StopAfterTG|DNASeq::StopAfterTA)) && k == 2)))
-	  {
-		  PICOMPEN(true,Don,Forward, InitF1+((position-k+3) % 3),(k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
-		  PICOMPEN(true,Don,Forward, IntrF1+((position-k+3) % 3),(k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
-	  }
+      if (!(((StartStop & DNASeq::isTf) && k == 1) ||
+	    ((StartStop & (DNASeq::isTGf|DNASeq::isTAf)) && k == 2))) {
+	PICOMPEN(true,Don,Forward, InitF1+((position-k+3) % 3),
+		 (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+	PICOMPEN(true,Don,Forward, IntrF1+((position-k+3) % 3),
+		 (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+      }
+
       // On reste intronique
       LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
       
@@ -784,9 +831,10 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     // --- Intron Phase 1 after a T (GA|AA|AG)
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
+  
     k = 1;
-    if (StartStop & DNASeq::StopAfterT) {
+    if (StartStop & DNASeq::isTf) {
       // - on quitte un Init ou un Intr
       PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
       PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
@@ -798,9 +846,10 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     // --- Intron Phase 2 after an TG|A
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
+
     k = 2;
-    if (StartStop & DNASeq::StopAfterTG) {
+    if (StartStop & DNASeq::isTGf) {
       // - on quitte un Init ou un Intr
       PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
       PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
@@ -812,9 +861,10 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     // --- Intron Phase 2 after a TA(A|G)
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
+
     k = 2;
-    if (StartStop & DNASeq::StopAfterTA) {
+    if (StartStop & DNASeq::isTAf) {
       // - on quitte un Init ou un Intr
       PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
       PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
@@ -822,20 +872,20 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
     INSERTANDPAYTHESLOPE(IntronF3TA,DATA::IntronF);
-
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On quitte un Intr ou un Term reverse
       // no spliceable stop: 
-      if (!(((StopStop & (DNASeq::StopAfterG|DNASeq::StopAfterA)) && k == 2) ||
-	    ((StopStop & DNASeq::StopAfterAG) && k == 1)))  {
+      if (!(((StopStop & (DNASeq::isGr|DNASeq::isAr)) && k == 2) ||
+	    ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) && k == 1)))  {
 	PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
 	PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
-      }
+	}
+
       // On reste intronique
       LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
@@ -847,9 +897,10 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     // --- Intron Phase 1 after a G (AT)
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
+
     k = 2;
-    if (StopStop & DNASeq::StopAfterG) {
+    if (StopStop & DNASeq::isGr) {
       // - on quitte un Intr ou un Term
       PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
       PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
@@ -857,13 +908,14 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
     INSERTANDPAYTHESLOPE(IntronR3G,DATA::IntronR);
-
+    
     //
     // --- Intron Phase 1 after an A (GT|AT)
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     k = 2;
-    if (StopStop & DNASeq::StopAfterA) {
+    
+    if (StopStop & DNASeq::isAr) {
       // - on quitte un Intr ou un Term
       PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
       PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
@@ -875,9 +927,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     // --- Intron Phase 2 after an AG, AA ou GA (T)
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     k = 1;
-    if (StopStop & DNASeq::StopAfterAG) {
+if (StopStop & (DNASeq::isGAr | DNASeq::isARr)) {
       // - on quitte un Intr ou un Term
       PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
       PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
@@ -886,7 +938,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
     INSERTANDPAYTHESLOPE(IntronR2AG,DATA::IntronR);
 }
-
 
 // ----------------------------------------------------------------
 //  Shortest Path Algorithm with length constraint (reverse)
@@ -900,36 +951,72 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
   double PBest[NbTracks];
   BackPoint *PrevBP[NbTracks];
   signed   char best = 'Z';
+  
+#define INSERT(P,C)					\
+  LBP[P].InsertNew(best, position, maxi,PrevBP[best]);
+  
+  //  printf("Ins Cost %f From %d Track %d Line %d\n",maxi,best,(P),000); \
 
+  
+#define PAYTHESLOPE(P,C)			\
+  if (position < Data_Len){			\
+    if (!NoContentsUpdate) {			\
+      LBP[P].Update(Data.contents[C]);		\
+      LBP[P].PayTheSlope();			\
+    }}
+  
+  //	printf("InsPS ContentUpdate %f [%d] Track %d\n",Data.contents[C],(C),(P)); \
+  
   // Get information on possible spliced stops
   int StopStop = TheSeq->IsStopStop(position);
   int StartStop = TheSeq->IsStartStop(position);
-    
-  // normalisation des couts 
+  
+  for (k=0; k<3; k++){
+    PAYTHESLOPE(InitR1+k,k+3);
+    PAYTHESLOPE(InitF1+k,k);
+    PAYTHESLOPE(SnglR1+k,k+3);
+    PAYTHESLOPE(SnglF1+k,k);
+    PAYTHESLOPE(IntrR1+k,k+3);
+    PAYTHESLOPE(IntrF1+k,k);
+    PAYTHESLOPE(TermR1+k,k+3);
+    PAYTHESLOPE(TermF1+k,k);
+    PAYTHESLOPE(IntronR1+k,DATA::IntronR);
+    PAYTHESLOPE(IntronF1+k,DATA::IntronF);
+  }
+  PAYTHESLOPE(IntronF2T,DATA::IntronF);
+  PAYTHESLOPE(IntronF3TG,DATA::IntronF);
+  PAYTHESLOPE(IntronF3TA,DATA::IntronF);
+  PAYTHESLOPE(IntronR3G,DATA::IntronR);
+  PAYTHESLOPE(IntronR3A,DATA::IntronR);
+  PAYTHESLOPE(IntronR2AG,DATA::IntronR);
+  PAYTHESLOPE(InterGen,DATA::InterG);
+  PAYTHESLOPE(UTR5R,DATA::UTR5R);
+  PAYTHESLOPE(IntronU5R,DATA::IntronUTRR);
+  PAYTHESLOPE(IntronU3R,DATA::IntronUTRR);
+  PAYTHESLOPE(UTR3R,DATA::UTR3R);
+  PAYTHESLOPE(UTR5F,DATA::UTR5F);
+  PAYTHESLOPE(IntronU5F,DATA::IntronUTRF);
+  PAYTHESLOPE(IntronU3F,DATA::IntronUTRF);
+  PAYTHESLOPE(UTR3F,DATA::UTR3F);
+  
+   // normalisation des couts 
   maxi = -NINFINITY;
   for (k = 0 ; k < NbTracks; k++) {
     BestU = LBP[k].Optimal;
-    if ((BestU > NINFINITY) && (BestU < maxi)) maxi =BestU;
+    if ((BestU > NINFINITY) && (BestU < maxi)) {
+      best = k;
+      maxi =BestU;
+    }
   }
-
+  
   for (k = 0 ; k < NbTracks; k++) 
     LBP[k].Update(-maxi);
   NormalizingPath += maxi;
-
-#define INEEDR(K) if (!PrevBP[K]) PrevBP[K] = LBP[K].BestUsable(position, &PBest[K],1)
-#define INSERTANDPAYTHESLOPER(P,C)					\
-    LBP[P].InsertNew(best, position, maxi,PrevBP[best]);\
-    if (position < Data_Len){\
-      if (!NoContentsUpdate) {\
-	LBP[P].Update(Data.contents[C]);	\
-	LBP[P].PayTheSlope();			\
-      }\
-    }
-
-    // ----------------------------------------------------------------
-    // Calcul des meilleures opening edges
-    // ----------------------------------------------------------------
-    for (k = 0; k < NbTracks; k++) {
+  
+  // ----------------------------------------------------------------
+  // Calcul des meilleures opening edges
+  // ----------------------------------------------------------------
+  for (k = 0; k < NbTracks; k++) {
       PrevBP[k] = NULL;
       PBest[k] = NINFINITY;
     }
@@ -937,512 +1024,568 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // 1- Exons F spliced (from Intron)
     // ---------------------------
     if (ISPOSSIBLE(Don,Forward)) {
-      INEEDR(IntronF1);
-      INEEDR(IntronF2);
-      INEEDR(IntronF3);
-      INEEDR(IntronF2T);
-      INEEDR(IntronF3TG);
-      INEEDR(IntronF3TA);
+      INEED(IntronF1);
+      INEED(IntronF2);
+      INEED(IntronF3);
+      INEED(IntronF2T);
+      INEED(IntronF3TG);
+      INEED(IntronF3TA);
     }
     // ---------------------------
     // 2- Exons F (from UTR3F)
     // ---------------------------
     if (ISPOSSIBLE(Stop,Forward))           
-      INEEDR(UTR3F);
+      INEED(UTR3F);
     // ---------------------------
     // 3- Intron F (from ExonF)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Forward)) {
-      INEEDR(IntrF1);
-      INEEDR(IntrF2);
-      INEEDR(IntrF3);
-      INEEDR(TermF1);
-      INEEDR(TermF2);
-      INEEDR(TermF3);
+      INEED(IntrF1);
+      INEED(IntrF2);
+      INEED(IntrF3);
+      INEED(TermF1);
+      INEED(TermF2);
+      INEED(TermF3);
     }
     // ---------------------------
     // 4- UTR5F (from SnglF) - check
     // ---------------------------
     if (ISPOSSIBLE(Start,Forward)) {
-      INEEDR(SnglF1+((position+1)%3));
-      INEEDR(InitF1+((position+1)%3));
+      INEED(SnglF1+((position)%3));
+      INEED(InitF1+((position)%3));
     }
     // ---------------------------
     // 5- UTR5F (from IntronU5F)
     // ---------------------------
     if (ISPOSSIBLE(Don,Forward))
-      INEEDR(IntronU5F);
+      INEED(IntronU5F);
     // ---------------------------
     // 6- IntronU5F (from UTR5F)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Forward))
-      INEEDR(UTR5F);
+      INEED(UTR5F);
     // ---------------------------
     // 7- UTR3F (from InterGen)
     // ---------------------------
-    if (ISPOSSIBLE(tStart,Forward))
-      INEEDR(InterGen);
+    if (ISPOSSIBLE(tStop,Forward))
+      INEED(InterGen);
     // ---------------------------
     // 8- UTR3F (from IntronU3F)
     // ---------------------------
     if (ISPOSSIBLE(Don,Forward))
-      INEEDR(IntronU3F);
+      INEED(IntronU3F);
     // ---------------------------
     // 9- IntronU3F (from UTR3F)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Forward))
-      INEEDR(UTR3F);
+      INEED(UTR3F);
     // ---------------------------
     // 10- InterG (from UTR5F)
     // ---------------------------
     if (ISPOSSIBLE(tStart,Forward))
-      INEEDR(UTR5F);
+      INEED(UTR5F);
     // ---------------------------
     // 11- InterG (from UTR3R)
     // ---------------------------
     if (ISPOSSIBLE(tStop,Reverse))
-      INEEDR(UTR3R);
+      INEED(UTR3R);
     // ---------------------------
     // 12- IntronU5R (from UTR5R)
     // ---------------------------
     if (ISPOSSIBLE(Don,Reverse))
-      INEEDR(UTR5R);
+      INEED(UTR5R);
     // ---------------------------
     // 13- UTR5R (from InterGen)
     // ---------------------------
     if (ISPOSSIBLE(tStart,Reverse))
-      INEEDR(InterGen);
+      INEED(InterGen);
     // ---------------------------
     // 14- UTR5R (from IntronU5R)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Reverse))
-      INEEDR(IntronU5R);
+      INEED(IntronU5R);
     // ---------------------------
     // 15- IntronU3R (from UTR3R)
     // ---------------------------
     if (ISPOSSIBLE(Don,Reverse))
-      INEEDR(UTR3R);
+      INEED(UTR3R);
     // ---------------------------
     // 16- UTR3R (from IntronU3R)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Reverse))
-      INEEDR(IntronU3R);
+      INEED(IntronU3R);
     // ---------------------------
     // 17- UTR3R (from ExonR)
     // ---------------------------
     if (ISPOSSIBLE(Stop,Reverse)) {
-      INEEDR(SnglR1+(Data_Len-position-1)%3);
-      INEEDR(TermR1+(Data_Len-position-1)%3);
+      INEED(SnglR1+(Data_Len-position)%3);
+      INEED(TermR1+(Data_Len-position)%3);
     }
     // ---------------------------
     // 18- ExonR (from UTR5R)
     // ---------------------------
     if (ISPOSSIBLE(Start,Reverse))
-      INEEDR(UTR5R);
+      INEED(UTR5R);
     // ---------------------------
     // 19- ExonR (from IntronR)
     // ---------------------------
     if (ISPOSSIBLE(Acc,Reverse)){
-      INEEDR(IntronR1);
-      INEEDR(IntronR2);
-      INEEDR(IntronR3);
-      INEEDR(IntronR2AG);
-      INEEDR(IntronR3A);
-      INEEDR(IntronR3G);
+      INEED(IntronR1);
+      INEED(IntronR2);
+      INEED(IntronR3);
+      INEED(IntronR2AG);
+      INEED(IntronR3A);
+      INEED(IntronR3G);
     }
     // ---------------------------
     // 20- IntronR (from ExonR)
     // ---------------------------
     if (ISPOSSIBLE(Don,Reverse)) {
-      INEEDR(InitR1);
-      INEEDR(InitR2);
-      INEEDR(InitR3);
-      INEEDR(IntrR1);
-      INEEDR(IntrR2);
-      INEEDR(IntrR3);
+      INEED(InitR1);
+      INEED(InitR2);
+      INEED(InitR3);
+      INEED(IntrR1);
+      INEED(IntrR2);
+      INEED(IntrR3);
     }
 
-    // ----------------------------------------------------------------
-    // ------------------ Inits en forward ----------------------------
-    // ----------------------------------------------------------------
-    for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
-      
-      // Début à partit d'un IntronF
-      PICOMP(true,Don,Forward,IntronF1+(position-k+4)%3);
-      // TODO 1- spliceable STOPs
-      // TODO 2- prise en compte STOP dans le PICOMP (cf. Init Reverse en AlgoForward)
-    
-      // On va tout droit.
-      // S'il y  a un STOP en phase on ne peut continuer
-      if (((position+1)%3 == k))
-	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-      LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+#ifdef DEBUGME
+    for (k=0; k<(NbTracks-1)/2;k++)
+      if (PrevBP[ForwardTracks[k]]) 
+	printf("Cost %f Track %d a From %d\n",
+	       PBest[ForwardTracks[k]],k,(PrevBP[ForwardTracks[k]]->State));
 
-      INSERTANDPAYTHESLOPER(InitF1+k,k);
-    }
+      if (PrevBP[UnorientedTracks[0]]) 
+	printf("Cost %f Track %d From %d\n",
+	       PBest[UnorientedTracks[0]],k,(PrevBP[UnorientedTracks[0]]->State));
+
+    for (k=0; k<(NbTracks-1)/2;k++)
+      if (PrevBP[ReverseTracks[k]]) 
+	printf("Cost %f Track %d b From %d\n",
+	       PBest[ReverseTracks[k]],k,(PrevBP[ReverseTracks[k]]->State));
+
+    printf("---------- pos %d/%d, best %d norm %f ----------\n",Data_Len-position,position,(int)best,NormalizingPath);
+#endif    
+
     // ----------------------------------------------------------------
     // ------------------------- Inits en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // - on recommence a coder (Start) d'une UTR5R
-      PICOMP((Data_Len-position-1)%3 == k,Start,Reverse,UTR5R);
+      PICOMPR((Data_Len-position)%3 == k,Start,Reverse,UTR5R);
       // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
 
-      if (((Data_Len-position-1) % 3 == k)) 
+      if (((Data_Len-position) % 3 == k)) 
 	LBP[InitR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[InitR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(InitR1+k,k+3);
+      INSERT(InitR1+k,k+3);
     }
     // ----------------------------------------------------------------
-    // ------------------ Sngl en forward ----------------------------
+    // ------------------ Inits en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
+      maxi = NINFINITY; best = -1;     
       
-      // On commence a coder (Stop) sur une UTR3F
-      PICOMP(((position+1)%3 == k),Stop,Forward,UTR3F);
-      // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
-      
+      // Début à partit d'un IntronF. Avoid Stop at end.
+      PICOMPEN(true,Don,Forward,IntronF1+(position-k+3)%3,
+	       ((position%3 == k) ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+
+      // Not after T (GA|AA|AG)
+      PICOMPEN(((position-k+3)%3 == 1),Don,Forward,IntronF2T,
+	       ((StartStop & DNASeq::isTf) ? SplicedStopPen : 0.0));
+      // Not after TG|A
+      PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TG,
+	       ((StartStop & DNASeq::isTGf) ? SplicedStopPen : 0.0));
+      // Not after TA(A|G)
+      PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TA,
+	       ((StartStop & DNASeq::isTAf) ? SplicedStopPen : 0.0));
+
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
-      if (((position+1)%3 == k))
-	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-      LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
-      
-      INSERTANDPAYTHESLOPE(SnglF1+k,k);
+      if (((position)%3 == k))
+	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
+      LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+
+      INSERT(InitF1+k,k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Sngl en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On commence a coder (Start). Ca vient d'une UTR 5' reverse
-      PICOMP(((Data_Len-position-1)%3 == k),Start,Reverse,UTR5R);
+      PICOMPR(((Data_Len-position)%3 == k),Start,Reverse,UTR5R);
       // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
 
-      if (((Data_Len-position-1)%3 == k)) 
+      if (((Data_Len-position)%3 == k)) 
 	LBP[SnglR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[SnglR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(SnglR1+k,k+3);
+      INSERT(SnglR1+k,k+3);
     }
     // ----------------------------------------------------------------
-    // ------------------ Intrs en forward ----------------------------
+    // ------------------ Sngl en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
-
-      // On recommence a coder (Donneur). Ca vient d'un intronF
-      PICOMP(true,Don,Forward,IntronF1+((position-k+4) % 3));
-      // TODO 1- spliceable STOPs
-      // TODO 2- prise en compte STOP dans le PICOMP (cf. Init Reverse en AlgoForward)
-
+      maxi = NINFINITY; best = -1;     
+      
+      // On commence a coder (Stop) sur une UTR3F
+      PICOMPR(((position)%3 == k),Stop,Forward,UTR3F);
+      // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
+      
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
-      if (((position+1)%3 == k))
-	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-      LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
-
-      INSERTANDPAYTHESLOPE(IntrF1+k,k);
+      if (((position)%3 == k))
+	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
+      LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      
+      INSERT(SnglF1+k,k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Intrs en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // - on recommence a coder (Acc) Ca vient d'un intronR
-      PICOMP(true,Acc,Reverse,IntronR1+((Data_Len-position-k-1)%3));
-      // TODO 1- spliceable STOPs
-      // TODO 2- prise en compte STOP dans le PICOMP (cf. Init Reverse en AlgoForward)
+      PICOMPR(true,Acc,Reverse,IntronR1+((Data_Len-position-k)%3));
+      
+      // Not AfterG
+      PICOMPEN(((Data_Len-position-k)%3 == 2),Acc,Reverse,IntronR3G,
+               ((StopStop & DNASeq::isGr)  ? SplicedStopPen : 0.0));
+      // Not AfterA
+      PICOMPEN(((Data_Len-position-k)%3 == 2),Acc,Reverse,IntronR3A,
+               ((StopStop & DNASeq::isAr) ? SplicedStopPen : 0.0));
+      // Not AfterAG
+      PICOMPEN(((Data_Len-position-k)%3 == 1),Acc,Reverse,IntronR2AG,
+               ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) ? SplicedStopPen : 0.0));
 
-      if (((Data_Len-position-1)%3 == k)) 
-	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
-      LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
+      if (((Data_Len-position)%3 == k)) 
+	LBP[IntrR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
+      LBP[IntrR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(IntrR1+k,k+3);
+      INSERT(IntrR1+k,k+3);
     }
     // ----------------------------------------------------------------
-    // ------------------ Terms en forward ----------------------------
+    // ------------------ Intrs en forward ----------------------------
     // ----------------------------------------------------------------
     for (k = 0; k < 3; k++) {
-      maxi = NINFINITY;     
-      
-      // On recommence a coder (Stop). Ca vient d'une UTR3R
-      PICOMP(((Data_Len-position-1)%3 == k),Stop,Forward,UTR3R);
-      // TODO 2- prise en compte STOP dans le PICOMP (cf. Init Reverse en AlgoForward)
+      maxi = NINFINITY; best = -1;     
+
+      // On recommence a coder (Donneur). Ca vient d'un intronF
+      PICOMPEN(true,Don,Forward,IntronF1+((position-k+3) % 3),
+	       ((position%3) == k) ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0);
+
+      // Not AfterG
+      PICOMPEN(((position-k+3)%3 == 1),Don,Forward,IntronF2T,
+               ((StartStop & DNASeq::isTf)  ? SplicedStopPen : 0.0));
+      // Not AfterA
+      PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TG ,
+               ((StartStop & DNASeq::isTGf) ? SplicedStopPen : 0.0));
+      // Not AfterAG
+      PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TA,
+               ((StartStop & DNASeq::isTAf) ? SplicedStopPen : 0.0));
+
 
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
-      if (((position+1)%3 == k))
-	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-      LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      if (((position)%3 == k))
+	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
+      LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERTANDPAYTHESLOPE(TermF1+k,k);
+      INSERT(IntrF1+k,k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Terms en reverse ---------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On commence a coder (Acc). Ca vient d'un intronR
-      PICOMP(true,Acc,Reverse,IntronR1+(Data_Len-position-1-k)%3);
+      PICOMPR(true,Acc,Reverse,IntronR1+(Data_Len-position-k)%3);
 
-      if (((Data_Len-position-1)%3 == k)) 
+      // Not AfterG
+      PICOMPEN(((Data_Len-position-k)%3 == 2),Acc,Reverse,IntronR3G,
+               ((StopStop & DNASeq::isGr)  ? SplicedStopPen : 0.0));
+      // Not AfterA
+      PICOMPEN(((Data_Len-position-k)%3 == 2),Acc,Reverse,IntronR3A,
+               ((StopStop & DNASeq::isAr) ? SplicedStopPen : 0.0));
+      // Not AfterAG
+      PICOMPEN(((Data_Len-position-k)%3 == 1),Acc,Reverse,IntronR2AG,
+               ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) ? SplicedStopPen : 0.0));
+
+      if (((Data_Len-position)%3 == k)) 
 	LBP[TermR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[TermR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(TermR1+k,k+3);
+      INSERT(TermR1+k,k+3);
+    }
+    // ----------------------------------------------------------------
+    // ------------------ Terms en forward ----------------------------
+    // ----------------------------------------------------------------
+    for (k = 0; k < 3; k++) {
+      maxi = NINFINITY; best = -1;     
+      
+      // On recommence a coder (Stop). Ca vient d'une UTR3R
+      PICOMPR((position%3 ==k),Stop,Forward,UTR3F);
+
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
+      if (((position)%3 == k))
+	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
+      LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+
+      INSERT(TermF1+k,k);
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
     // ----------------------------------------------------------------
     // Ca peut venir d'une fin de 3' direct ou de 5' reverse
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // From 5' forward
-    PICOMP(true,tStart,Forward, UTR5F);
+    PICOMPR(true,tStart,Forward, UTR5F);
     // From 3' reverse
-    PICOMP(true,tStop,Reverse, UTR3R);
+    PICOMPR(true,tStop,Reverse, UTR3R);
  
     // On reste intergenique
     // et les transstartNO/TransstopNO ???
-    LBP[InterGen].InsertNew(best, position, maxi,PrevBP[best]);
 
-    INSERTANDPAYTHESLOPE(InterGen,DATA::InterG);
-    // ----------------------------------------------------------------
-    // ---------------------- UTR 5' direct ---------------------------
-    // ----------------------------------------------------------------
-    maxi = NINFINITY;
-    
-    // On vient d'un exon (SnglF ou InitF) sur un Start
-    PICOMP(true,Start,Forward, SnglF1+(position+1)%3);
-    // On peut venir aussi d'un intron d'UTR.
-    PICOMP(true,Don,Forward, IntronU5F);
-
-    // On reste 5' direct. On ne prend pas le Start eventuel.
-    LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
-
-    INSERTANDPAYTHESLOPE(UTR5F,DATA::UTR5F);
-    // ----------------------------------------------------------------
-    // ------------------- Introns d'UTR5F ----------------------------
-    // ----------------------------------------------------------------
-    maxi = NINFINITY;
-      
-    // on quitte l'UTR 
-    PICOMP(true,Acc,Forward, UTR5F);
-
-    // On reste intronique
-    LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-
-    INSERTANDPAYTHESLOPE(IntronU5F,DATA::IntronUTRF);
-    // ----------------------------------------------------------------
-    // ------------------- Introns d'UTR3F ----------------------------
-    // ----------------------------------------------------------------
-    maxi = NINFINITY;
-      
-    // on quitte l'UTR 
-    PICOMP(true,Acc,Forward, UTR3F);
-
-    // On reste intronique
-    LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-
-    INSERTANDPAYTHESLOPE(IntronU3F,DATA::IntronUTRF);
-    // ----------------------------------------------------------------
-    // ---------------------- UTR 3' direct ---------------------------
-    // ----------------------------------------------------------------
-    maxi = NINFINITY;
-
-    // Ca vient d'InterG (tStop)
-    PICOMP(true,tStop,Forward, InterGen);
-    // On peut venir aussi d'un intron d'UTR.
-    PICOMP(true,Don,Forward, IntronU3F);
-
-    // On reste 3' direct
-    LBP[UTR3F].InsertNew(best, position, maxi,PrevBP[best]);
-
-    INSERTANDPAYTHESLOPE(UTR3F,DATA::UTR3F);
+    INSERT(InterGen,DATA::InterG);
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // Ca vient d'interG (tStartR)
-    PICOMP(true,tStart,Reverse, InterGen);
+    PICOMPR(true,tStart,Reverse, InterGen);
     // On peut venir aussi d'un intron d'UTR.
-    PICOMP(true,Acc,Reverse, IntronU5R);
+    PICOMPR(true,Acc,Reverse, IntronU5R);
 
     // On reste 5' reverse
     LBP[UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(UTR5R,DATA::UTR5R);
+    INSERT(UTR5R,DATA::UTR5R);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5R ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On quitte une UTR5R
-    PICOMP(true,Don,Reverse, UTR5R);
+    PICOMPR(true,Don,Reverse, UTR5R);
 
     // On reste intronique
     LBP[IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU5R,DATA::IntronUTRR);
+    INSERT(IntronU5R,DATA::IntronUTRR);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3R ----------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On quitte une UTR5R
-    PICOMP(true,Don,Reverse, UTR3R);
+    PICOMPR(true,Don,Reverse, UTR3R);
 
     // On reste intronique
     LBP[IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU3R,DATA::IntronUTRR);
+    INSERT(IntronU3R,DATA::IntronUTRR);
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     
     // On demarre depuis Sngl ou Term (Stop)
-    PICOMP(true,Stop,Reverse, SnglR1+(Data_Len-position-1)%3);
-    PICOMP(true,Stop,Reverse, TermR1+(Data_Len-position-1)%3);
+    PICOMPR(true,Stop,Reverse, TermR1+(Data_Len-position)%3);
+    PICOMPR(true,Stop,Reverse, SnglR1+(Data_Len-position)%3);
     // On peut venir aussi d'un intron d'UTR.
-    PICOMP(true,Acc,Reverse, IntronU3R);
+    PICOMPR(true,Acc,Reverse, IntronU3R);
 
     // On reste 3' reverse
-    LBP[UTR3R].InsertNew(best, position, maxi,PrevBP[best]);
 
-    INSERTANDPAYTHESLOPE(UTR3R,DATA::UTR3R);
+    INSERT(UTR3R,DATA::UTR3R);
     // ----------------------------------------------------------------
-    // ---------------- Introns de phase k forward --------------------
+    // ---------------------- UTR 5' direct ---------------------------
     // ----------------------------------------------------------------
-    for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
-      
-      // - on quitte un Term ou un Intr sur un Acc
-      // TODO: no spliceable stop
-      PICOMP(true,Acc,Forward,IntrF1+(position-k+4)%3);
-      PICOMP(true,Acc,Forward,TermF1+(position-k+4)%3);
+    maxi = NINFINITY; best = -1;
     
-      // On reste intronique
-      LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    // On vient d'un exon (SnglF ou InitF) sur un Start
+    PICOMPR(true,Start,Forward, InitF1+(position)%3);
+    PICOMPR(true,Start,Forward, SnglF1+(position)%3);
+    // On peut venir aussi d'un intron d'UTR.
+    PICOMPR(true,Don,Forward, IntronU5F);
+
+    // On reste 5' direct. On ne prend pas le Start eventuel.
+    LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
+
+    INSERT(UTR5F,DATA::UTR5F);
+    // ----------------------------------------------------------------
+    // ------------------- Introns d'UTR5F ----------------------------
+    // ----------------------------------------------------------------
+    maxi = NINFINITY; best = -1;
       
-      INSERTANDPAYTHESLOPE(IntronF1+k,DATA::IntronF);
-    }
-    // ----------------------------------------------------------------
-    // ----------------- Introns forward speciaux ---------------------
-    // ----------------------------------------------------------------
-    //
-    // --- Intron Phase 1 after a T (GA|AA|AG)
-    //
-    /* TODO Spliceable stops
-    maxi = NINFINITY;
-    k = 1;
-    if (StartStop & DNASeq::StopAfterT) {
-      // - on quitte un Init ou un Intr
-      PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
-      PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
-    }
-    // On reste intronique
-    LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF2T,DATA::IntronF);
+    // on quitte l'UTR 
+    PICOMPR(true,Acc,Forward, UTR5F);
 
-    //
-    // --- Intron Phase 2 after an TG|A
-    //
-    maxi = NINFINITY;
-    k = 2;
-    if (StartStop & DNASeq::StopAfterTG) {
-      // - on quitte un Init ou un Intr
-      PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
-      PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
-    }
     // On reste intronique
-    LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF3TG,DATA::IntronF);
+    LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 
-    //
-    // --- Intron Phase 2 after a TA(A|G)
-    //
-    maxi = NINFINITY;
-    k = 2;
-    if (StartStop & DNASeq::StopAfterTA) {
-      // - on quitte un Init ou un Intr
-      PICOMP(true,Don,Forward, InitF1+((position-k+3) % 3));
-      PICOMP(true,Don,Forward, IntrF1+((position-k+3) % 3));
-    }
+    INSERT(IntronU5F,DATA::IntronUTRF);
+    // ----------------------------------------------------------------
+    // ------------------- Introns d'UTR3F ----------------------------
+    // ----------------------------------------------------------------
+    maxi = NINFINITY; best = -1;
+      
+    // on quitte l'UTR 
+    PICOMPR(true,Acc,Forward, UTR3F);
+
     // On reste intronique
-    LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF3TA,DATA::IntronF);
-    */
+    LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+
+    INSERT(IntronU3F,DATA::IntronUTRF);
+    // ----------------------------------------------------------------
+    // ---------------------- UTR 3' direct ---------------------------
+    // ----------------------------------------------------------------
+    maxi = NINFINITY; best = -1;
+
+    // Ca vient d'InterG (tStop)
+    PICOMPR(true,tStop,Forward, InterGen);
+    // On peut venir aussi d'un intron d'UTR.
+    PICOMPR(true,Don,Forward, IntronU3F);
+
+    // On reste 3' direct
+
+    INSERT(UTR3F,DATA::UTR3F);
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
     for (k = 0; k<3; k++) {
-      maxi = NINFINITY;
+      maxi = NINFINITY; best = -1;
       
       // On quitte un Intr ou un Init reverse
-      // TODO: no spliceable stop
-      PICOMP(true,Don,Reverse, IntrR1+((Data_Len-position-1-k)%3));
-      PICOMP(true,Don,Reverse, InitR1+((Data_Len-position-1-k)%3));
+      if (!(((StartStop & DNASeq::isTr) && k == 1) ||
+            ((StartStop & (DNASeq::isTAr|DNASeq::isTGr)) && k == 2))) {
+	PICOMPEN(true,Don,Reverse, InitR1+((Data_Len-position-k)%3),
+		 (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+	PICOMPEN(true,Don,Reverse, IntrR1+((Data_Len-position-k)%3),
+		 (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+      }
 
       // On reste intronique
       LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(IntronR1+k,DATA::IntronR);
+      INSERT(IntronR1+k,DATA::IntronR);
     }
     // ----------------------------------------------------------------
     // ----------------- Introns reverse speciaux ---------------------
     // ----------------------------------------------------------------
     //
-    // --- Intron Phase 1 after a G (AT)
+    // --- Intron Phase 1 [G]---[AT]
     //
-    /* TODO spliceable STOPs
-       maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     k = 2;
-    if (StopStop & DNASeq::StopAfterG) {
-      // - on quitte un Intr ou un Term
-      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
-      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
+    if (StartStop & DNASeq::isTAr) {
+      // - on quitte un Init ou un Intr
+      PICOMPR(true,Don,Reverse, InitR1+((Data_Len-position-k) % 3));
+      PICOMPR(true,Don,Reverse, IntrR1+((Data_Len-position-k) % 3));
     }
     // On reste intronique
     LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR3G,DATA::IntronR);
+    INSERT(IntronR3G,DATA::IntronR);
 
     //
-    // --- Intron Phase 1 after an A (GT|AT)
+    // --- Intron Phase 1  [A]---[GT|AT]
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     k = 2;
-    if (StopStop & DNASeq::StopAfterA) {
+    if (StartStop & (DNASeq::isTGr | DNASeq::isTAr)) {
       // - on quitte un Intr ou un Term
-      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
-      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
+      PICOMPR(true,Don,Reverse, InitR1+((Data_Len-position-k) % 3));
+      PICOMPR(true,Don,Reverse, IntrR1+((Data_Len-position-k) % 3));
     }
     // On reste intronique
     LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR3A,DATA::IntronR);
+    INSERT(IntronR3A,DATA::IntronR);
 
     //
-    // --- Intron Phase 2 after an AG, AA ou GA (T)
+    // --- Intron Phase 2 after an [AG|AA|GA]---[T]
     //
-    maxi = NINFINITY;
+    maxi = NINFINITY; best = -1;
     k = 1;
-    if (StopStop & DNASeq::StopAfterAG) {
+    if (StartStop & DNASeq::isTr) {
       // - on quitte un Intr ou un Term
-      PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
-      PICOMP(true,Acc,Reverse, TermR1+((Data_Len-position-k) % 3));
+      PICOMPR(true,Don,Reverse, InitR1+((Data_Len-position-k) % 3));
+      PICOMPR(true,Don,Reverse, IntrR1+((Data_Len-position-k) % 3));
     }
     // On reste intronique
     LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR2AG,DATA::IntronR);
-    */
+    INSERT(IntronR2AG,DATA::IntronR);
+    // ----------------------------------------------------------------
+    // ---------------- Introns de phase k forward --------------------
+    // ----------------------------------------------------------------
+    for (k = 0; k<3; k++) {
+      maxi = NINFINITY; best = -1;
+      
+      // - on quitte un Term ou un Intr sur un Acc
+      if (!(((StopStop & (DNASeq::isAf|DNASeq::isGf)) && k == 2) ||
+            ((StopStop & (DNASeq::isGAf | DNASeq::isARf)) && k == 1)))  {
+	PICOMPR(true,Acc,Forward,IntrF1+(position-k+3)%3);
+	PICOMPR(true,Acc,Forward,TermF1+(position-k+3)%3);
+      }
+
+      // On reste intronique
+      LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+      
+      INSERT(IntronF1+k,DATA::IntronF);
+    }
+    // ----------------------------------------------------------------
+    // ----------------- Introns forward speciaux ---------------------
+    // ----------------------------------------------------------------
+    //
+    //
+    // --- Intron Phase 2 [TG]---[A]
+    //
+    maxi = NINFINITY; best = -1;
+    k = 2;
+    if (StopStop & DNASeq::isAf) {
+      // - on quitte un  Intr ou un Term
+      PICOMPR(true,Acc,Forward, IntrF1+((position-k+3) % 3));
+      PICOMPR(true,Acc,Forward, TermF1+((position-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERT(IntronF3TG,DATA::IntronF);
+
+    //
+    // --- Intron Phase 2 after a [TA]---[A|G]
+    //
+    maxi = NINFINITY; best = -1;
+    k = 2;
+    if (StopStop & (DNASeq::isAf | DNASeq::isGf)) {
+      // - on quitte un Intr ou un Term
+      PICOMPR(true,Acc,Forward, IntrF1+((position-k+3) % 3));
+      PICOMPR(true,Acc,Forward, TermF1+((position-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERT(IntronF3TA,DATA::IntronF);
+
+    // --- Intron Phase 1  [T]---[GA|AA|AG]. 
+    //
+
+    maxi = NINFINITY; best = -1;
+    k = 1;
+    if (StopStop & (DNASeq::isGAf | DNASeq::isARf)) {
+      // - on quitte un Intr ou un Term
+      PICOMPR(true,Acc,Forward, IntrF1+((position-k+3) % 3));
+      PICOMPR(true,Acc,Forward, TermF1+((position-k+3) % 3));
+    }
+    // On reste intronique
+    LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    INSERT(IntronF2T,DATA::IntronF);
+
 }

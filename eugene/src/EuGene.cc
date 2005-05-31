@@ -77,19 +77,20 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   int   j, k;
   int   Data_Len = TheSeq->SeqLen;
   DATA	Data;
-  int   Forward = 1;
-  int	FirstNuc = (Forward ? 0 : Data_Len-1);
-  int   LastNuc  = (Forward ? Data_Len+1 : -2);
+  int   Forward =   1;//PAR.getI("Sense"); 
+  int   Dir = (Forward ? 1 : -1);
+  int	FirstNuc = (Forward ? 0 : Data_Len);
+  int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
   
-  DAG Dag(0, Data_Len, PAR,TheSeq);
+  DAG Dag(FirstNuc-Dir, LastNuc, PAR,TheSeq);
   
   Dag.LoadDistLength();
   Dag.WeightThePrior();
-  
+
   // --------------------------------------------------------------------------
   // Demarrage de la programmation dynamique
   // --------------------------------------------------------------------------
-  for (int nuc = FirstNuc; nuc != LastNuc; nuc+= (Forward ? 1 : -1)) {
+  for (int nuc = FirstNuc; nuc != LastNuc; nuc += Dir) {
     
     // recuperation des infos
     MSensor->GetInfoAt(TheSeq, nuc, &Data);

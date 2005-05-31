@@ -30,7 +30,7 @@
 BackPoint :: BackPoint  ()
 {
   State = -1;
-  StartPos = INITIALSHIFT;
+  StartPos = 0;
   Cost = 0.0;
   Additional = 0.0;
   Next = Prev = this;
@@ -106,8 +106,8 @@ void Track :: InsertNew(char state, int pos, double cost, BackPoint *Or)
   //  if (cost > Optimal-PenD.MaxDelta) {
   //  if (cost > Optimal-PenD.GetDelta(pos-OptPos)) {
   //  if (cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
-  if (cost > Optimal-PenD.GetDelta(pos-OptPos) && 
-      cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
+  if (cost > Optimal-PenD.GetDelta(abs(pos-OptPos)) && 
+      cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(abs(pos-Path.Next->StartPos))) {
     NumBP++;
     It =  new BackPoint(state,pos,cost);
     if (cost > Optimal) { 
@@ -142,7 +142,7 @@ void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
 // Returns the best BackPoint and the BackPoint is at least len
 // nuc. far from pos
 // ----------------------------------------------------------------
-BackPoint *Track :: BestUsable(int pos, double *cost, int Forward, int pen)
+BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 {
   BackPoint *BestBP = NULL;
   double BestCost = NINFINITY;
@@ -153,22 +153,19 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int Forward, int pen)
   do {
     if (isinf(It->Additional)) break;
     Add += It->Additional;
+    Len = abs(pos-It->StartPos);
 
-    // when pen == 0 or StartPos is -1, this means we reach the
+    // when pen == 0 or Origin is NULL, this means we reach the
     // extremities of the sequence. Therefore we account for an
     // optimistic penality (MinPen) given that the length can only be
-    // longer than the actual length. Because we use -1/Data_Len+1 as
-    // indicators for sequence extremities we substract 1 from the
-    // length in this case. Finally, in all cases, we discount the
-    // Slope penalty on the length.
+    // longer than the actual length. In all cases, we discount the
+    // Slope penalty on the length. We further discount one on extremities 
+    // (because -1 and Data_Len+1 are used).
 
-    if (pen && (It->StartPos >= 0)) {
-      Len = (Forward ? pos-It->StartPos : It->StartPos-pos);
+    if (pen && It->Origin) 
       LenPen = PenD[Len] - PenD.FinalSlope*Len;
-    } else {
-      Len = (Forward ? pos-It->StartPos-1 : It->StartPos-pos-1);
-      LenPen = PenD.MinPen(Len) - PenD.FinalSlope*Len;
-    }
+    else 
+      LenPen = PenD.MinPen(Len) - PenD.FinalSlope*(Len-1);
 
     if ((Add + It->Cost - LenPen) > BestCost) {
       BestCost = Add+It->Cost - LenPen;
@@ -189,61 +186,74 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int Forward, int pen)
 Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 {
   Prediction *pred = new Prediction();
-  BackPoint  *It   = Path.Next;
+  BackPoint  *It;
   int  pos;
   char etat;
-  int igpos = -1;
+  int ntopop = -1;
   int prevpos,prevstate;
   int CDSlen = 0;
 
+  // put state back on correct transitions for backward predictions
+  if (!Forward) {
+    It = Path.Next;
+    etat = It-> State;
+    It = It->Origin;
+    
+    while (It != NULL) {
+      prevstate = etat;
+      etat = It->State;
+      It->State = prevstate;
+      It = It->Origin;
+    }
+  }
+
+  It = Path.Next;
+  
   // initialisation by the terminal state
-  pos  = (Forward ? It->StartPos : It->StartPos+1);
+  pos  = It->StartPos;
   etat = It->State;
   It   = It->Origin;
-  pred->add(pos, etat);
+  if (pos >= 0) pred->add(pos, etat);
 
   prevpos = pos;
   prevstate = etat;
-  if (etat == InterGen) igpos = pos;
+  if (prevstate == InterGen) ntopop=0;
+
+  //  printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
   while (It != NULL) {
 
-    pos  = (Forward ? It->StartPos : It->StartPos+1);
+    pos  = It->StartPos;
     etat = It->State;
     It   = It->Origin;
 
-    //    printf("pos %d etat %d CDSlen %d igpos %d prevpos %d\n",
-    //	   pos,etat,CDSlen,igpos,prevpos);
+ //       printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
-    if (prevstate <= TermR3)  // codant
-      CDSlen += prevpos-pos;
+    if (prevstate <= TermR3) CDSlen += abs(prevpos-pos); // codant
+    if (ntopop >= 0) ntopop++;
 
-    prevpos = pos;
-    prevstate = etat;
-
-    if ((etat == InterGen) && (pos >=0))
-      if (CDSlen <= MinCDSLen) {
+    if ((etat == InterGen) && (pos >= 0))
+      if ((CDSlen > 0)  && (CDSlen <= MinCDSLen)) {
 	CDSlen = 0;
-	pred->poptill(igpos);
-	//	printf("CDSLen %d, je pope jusqu'a pos=%d (exclus)\n",
-	//	       CDSlen,igpos);
+	pred->popn(ntopop-1);
+//		printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop);
       }
       else {
-	igpos = pos;
+	ntopop = 0;
 	CDSlen = 0;
 	pred->add(pos, etat);
       }
-    else if (pos >=0)
+    else if (pos >= 0)
       pred->add(pos, etat);
-  }
 
-  if (Forward) {
-    pred->setPos(0, pred->getPos(0)-1);
+    prevpos = pos;
+    prevstate = etat;
   }
-  else {
-    pred->reversePred();
-    pred->setPos(0,INITIALSHIFT+1-pred->getPos(0));
-  }
+  
+  if (!Forward) pred->reversePred();
+  pred->setPos(0, pred->getPos(0)-1);  
+  
+  //  pred->print();
 
   return pred;
 }

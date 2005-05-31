@@ -62,12 +62,21 @@ class  DNASeq
 
   unsigned char Degeneracy(int i, int sens);
 
-  static const int StopAfterT  = 1;
-  static const int StopAfterTG = 2;
-  static const int StopAfterTA = 4;
-  static const int StopAfterG = 8;
-  static const int StopAfterA = 16;
-  static const int StopAfterAG = 32;
+  static const int isTf  = 1;
+  static const int isTGf = 2;
+  static const int isTAf = 4;
+  static const int isTr  = 8;
+  static const int isTGr = 16;
+  static const int isTAr = 32;
+
+  static const int isGf  = 1;
+  static const int isGAf = 2;
+  static const int isAf  = 4;
+  static const int isARf = 8;
+  static const int isGr  = 16;
+  static const int isGAr = 32;
+  static const int isAr  = 64;
+  static const int isARr = 128;
 
   int    IsStartStop(int i);
   int    IsStopStop(int i);

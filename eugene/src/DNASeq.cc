@@ -532,25 +532,24 @@ int DNASeq :: IsStartStop(int i)
 {
   int stop = 0;
 
-  
   // le T
-  if (((*this)(i-1,0)) & CodeT) stop |= StopAfterT;
+  if (((*this)(i-1,0)) & CodeT) stop |= isTf; //StopAfterT;
 
   // le cas du TG/TA
   if (((*this)(i-2,0)) & CodeT) {
-    if (((*this)(i-1,0)) & CodeG) stop |= StopAfterTG;
-    if (((*this)(i-1,0)) & CodeA) stop |= StopAfterTA;
+    if (((*this)(i-1,0)) & CodeG) stop |= isTGf; //StopAfterTG
+    if (((*this)(i-1,0)) & CodeA) stop |= isTAf; //StopAfterTA
   }
 
   i = SeqLen -i -1;
     
   // le T
-  if (((*this)(i,2)) & CodeT) stop |= StopAfterAG;
+  if (((*this)(i,2)) & CodeT) stop |= isTr; //StopAfterAG
 
   // le cas du GT/AT
   if (((*this)(i-1,2)) & CodeT) {
-    if (((*this)(i,2)) & CodeG) stop |= StopAfterA;
-    if (((*this)(i,2)) & CodeA) stop |= StopAfterG+StopAfterA;
+    if (((*this)(i,2)) & CodeG) stop |= isTGr; //StopAfterA
+    if (((*this)(i,2)) & CodeA) stop |= isTAr; // StopAfterG+StopAfterA
   }
 
   return stop;
@@ -574,29 +573,29 @@ int DNASeq :: IsStopStop(int i)
   int stop = 0;
 
   if (((*this)(i,0)) & CodeG) {
-    stop |= StopAfterTA;
+    stop |= isGf; //StopAfterTA
     if (((*this)(i+1,0)) & CodeA)
-      stop |= StopAfterT;
+      stop |= isGAf; //StopAfterT
   }
 
   if (((*this)(i,0)) & CodeA) {
-    stop |= (StopAfterTA+StopAfterTG);
+    stop |= isAf; //StopAfterTA+StopAfterTG
     if (((*this)(i+1,0)) & (CodeA|CodeG))
-      stop |= StopAfterT;
+      stop |= isARf; //StopAfterT
   }
 
   i = SeqLen -i -1;
 
   if (((*this)(i+1,2)) & CodeG) {
-    stop |= StopAfterG;
+    stop |= isGr; //StopAfterG
     if (((*this)(i+2,2)) & CodeA)
-      stop |= StopAfterAG;
+      stop |= isGAr;// StopAfterAG
   }
   
   if (((*this)(i+1,2)) & CodeA) {
-    stop |= StopAfterA;
+    stop |= isAr; //StopAfterA
     if (((*this)(i+2,2)) & (CodeA|CodeG))
-      stop |= StopAfterAG;
+      stop |= isARr; //StopAfterAG
   }
 
   return stop;
