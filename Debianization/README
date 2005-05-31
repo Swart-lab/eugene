@@ -18,13 +18,14 @@ debian
 How was done the package
 ------------------------
 
-1. Copie of a tar.gz distribution of eugene
-2. Move of eugene-3.2 in inra-eugene-3.2 directory
-3. Remove x access for group on all files under models
+1. Copy a tar.gz distribution of eugene
+2. Move eugene-3.2 in inra-eugene-3.2 directory
+   (be sure to have the last Makefile.am and .in that 
+    does not provide execute permision when no necessary,
+    this avoid a lintian warning)
 4. dh_make  -c artistic -e cros@ossau.toulouse.inra.fr -s
-5. Update of the inra-eugene-3.2/debian directory 
-   Generation of man file with docbook-to-man eugene.sgml > eugene.1
-6. Set empty environnement variable for CFLAGS, CXXFLAGS, CPPFLAGS
+5. Update the inra-eugene-3.2/debian directory 
+6. Empty environnement variables: CFLAGS, CXXFLAGS, CPPFLAGS
 7. debuild -rfakeroot --preserve-env
 
 Note that the following packages need to be installed:
