@@ -142,7 +142,6 @@ SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)
   
   int RAFLindice=0;
   int RAFLtmpindice=0;
-  RAFL_A_Traiter = 1;
   
   //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFLtmp.size(); RAFLtmpindice++) {
   //     fprintf(stderr, "\nRAFLtmp[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFLtmp[RAFLtmpindice].deb,RAFLtmp[RAFLtmpindice].fin,RAFLtmp[RAFLtmpindice].sens,RAFLtmp[RAFLtmpindice].ID);
@@ -195,8 +194,6 @@ SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)
   
   fprintf(stderr,"resulting %d\n",RAFL.size());
   fflush(stderr);
-  if (RAFL.size() < 1) RAFL_A_Traiter = 0;
-  RAFL_A_Traiter_Remenber = RAFL_A_Traiter;
 
   //    for (RAFLtmpindice=0; RAFLtmpindice< (int)RAFL.size(); RAFLtmpindice++) {
   //       fprintf(stderr, "\nRAFL[%d]: deb=%d fin=%d sens=%d ID=%s\n",RAFLtmpindice,RAFL[RAFLtmpindice].deb,RAFL[RAFLtmpindice].fin,RAFL[RAFLtmpindice].sens,RAFL[RAFLtmpindice].ID);
@@ -217,7 +214,6 @@ SensorRiken :: ~SensorRiken ()
 void SensorRiken :: Init (DNASeq *X)
 {
   RAFLPenalty = PAR.getD("Riken.RAFLPenalty*"); //default  = -120;
-  RAFL_A_Traiter = RAFL_A_Traiter_Remenber;
 
   RAFLpos = RAFLindex = 0;
 
@@ -240,15 +236,21 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
   // Out of seq range, do nothing
   if (pos<0 || pos>=X->SeqLen) return;
-
-  if(RAFL_A_Traiter) {
+  
+  if(!RAFL.empty()) {
     RAFLpos = 0;
-    if (pos > RAFL[RAFLindex].fin) {
+    
+    while (pos < RAFL[RAFLindex].deb-2) {
+      if (RAFLindex-1 >= 0) RAFLindex--; 
+      else return;
+    }
+    
+    while (pos > RAFL[RAFLindex].fin) {
       // si on depasse le RAFL, on prend l'eventuel prochain
       if (RAFLindex+1 < (int)RAFL.size()) RAFLindex++; 
-      else RAFL_A_Traiter = 0;
+      else return;
     }
-
+    
     // dans le Riken:
     if (pos >= RAFL[RAFLindex].deb-2) {
       // bordure min:

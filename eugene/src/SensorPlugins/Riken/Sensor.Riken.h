@@ -52,8 +52,6 @@ class SensorRiken : public Sensor
   std::vector <RAFLgene> RAFL;
   int RAFLpos;                  // Position par rapport a un gene RAFL
   int RAFLindex;                // Index du RIKEN en cours
-  int RAFL_A_Traiter;           // Index du RIKEN en cours
-  int RAFL_A_Traiter_Remenber;
   int StrandRespect;
   int MIN_EST_DIFF;         // default = 100;
   int MAX_OVERLAP;          // default = 60;
