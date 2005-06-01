@@ -127,8 +127,6 @@ void ExecuteRegle(ptUTIL ut, DATA *d)
 //---------------------------------------------------------------------------------
 void Util(int i, ptUTIL ut, DATA *d)
 {
-  ptUTIL tmp;
-  
   // liste epuisee ou elements trop avances: on sort
   if ((ut == NULL) || (ut->suiv == NULL) ||  (ut->suiv->n1-1) > i) return;
   
@@ -136,13 +134,8 @@ void Util(int i, ptUTIL ut, DATA *d)
   if ((i >= (ut->suiv->n1-1)) && (i <= (ut->suiv->n2-1)))
     ExecuteRegle(ut->suiv, d); 
   
-  // element obsolete, on efface
-  if ((ut->suiv->n2-1) <= i) {
-    tmp = ut->suiv;
-    ut->suiv = ut->suiv->suiv;
-    free(tmp);
-    Util(i, ut, d);
-  } else  Util(i, ut->suiv, d);
+  // on avance
+  Util(i, ut->suiv, d);
 }
 //---------------------------------------------------------------------------------
 // Ecrire un util au format texte dans un flot
