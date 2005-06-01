@@ -217,7 +217,7 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 
   prevpos = pos;
   prevstate = etat;
-  if (prevstate == InterGen) ntopop=0;
+  if (etat == InterGen) ntopop=0;
 
   //  printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
@@ -227,22 +227,25 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
     etat = It->State;
     It   = It->Origin;
 
- //       printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
+    //    printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
-    if (prevstate <= TermR3) CDSlen += abs(prevpos-pos); // codant
+    if ((Forward ? prevstate : etat) <= TermR3) {
+	    CDSlen += abs(prevpos-pos); // codant
+	    //	    printf("Extra %d CDS, Len = %d\n",abs(prevpos-pos),CDSlen);
+    }
     if (ntopop >= 0) ntopop++;
 
-    if ((etat == InterGen) && (pos >= 0))
-      if ((CDSlen > 0)  && (CDSlen <= MinCDSLen)) {
-	CDSlen = 0;
+    if ((etat == InterGen)) {
+      if ((CDSlen > 0)  && (CDSlen <= MinCDSLen) && (ntopop >= 0)) {
+	//	printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop);
 	pred->popn(ntopop-1);
-//		printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop);
       }
       else {
-	ntopop = 0;
-	CDSlen = 0;
 	pred->add(pos, etat);
       }
+      CDSlen = 0;
+      ntopop = 0;
+    }
     else if (pos >= 0)
       pred->add(pos, etat);
 
@@ -253,7 +256,7 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
   if (!Forward) pred->reversePred();
   pred->setPos(0, pred->getPos(0)-1);  
   
-  //  pred->print();
+    //pred->print();
 
   return pred;
 }
