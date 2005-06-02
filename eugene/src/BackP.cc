@@ -227,28 +227,37 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
     etat = It->State;
     It   = It->Origin;
 
-    //    printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
+    //printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
+    // We count CDS. According to the direction the state to account
+    // for is the current styate (forward) or the previous one
+    // (backward).
     if ((Forward ? prevstate : etat) <= TermR3) {
-	    CDSlen += abs(prevpos-pos); // codant
-	    //	    printf("Extra %d CDS, Len = %d\n",abs(prevpos-pos),CDSlen);
+      CDSlen += abs(prevpos-pos); // codant
+      //      printf("Extra %d CDS, Len = %d\n",abs(prevpos-pos),CDSlen);
     }
+    //  this is one more state change to count for possible removal
     if (ntopop >= 0) ntopop++;
 
     if ((etat == InterGen)) {
       if ((CDSlen > 0)  && (CDSlen <= MinCDSLen) && (ntopop >= 0)) {
-	//	printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop);
-	pred->popn(ntopop-1);
+	//	printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop-1);
+	// we want to keep the same change state. In forward, we keep
+	// the first IG state (pop n-1) and don't put back this one.
+	if (Forward) pred->popn(ntopop-1);
+	// in Backward, we pop n but insert this one.
+	else {
+	  pred->popn(ntopop);
+	  pred->add(pos, etat);
+	}
       }
-      else {
-	pred->add(pos, etat);
-      }
+      else pred->add(pos, etat);
       CDSlen = 0;
       ntopop = 0;
     }
     else if (pos >= 0)
       pred->add(pos, etat);
-
+    
     prevpos = pos;
     prevstate = etat;
   }
@@ -256,7 +265,7 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
   if (!Forward) pred->reversePred();
   pred->setPos(0, pred->getPos(0)-1);  
   
-    //pred->print();
+  //    pred->print();
 
   return pred;
 }
