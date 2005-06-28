@@ -156,9 +156,9 @@ void SensorPatConst :: Plot(DNASeq *X)
       if (sigTypeIndex == DATA::Start)
 	PlotStart(l,-((X->SeqLen-l)%3)-1,0.5);
       else if (sigTypeIndex == DATA::Don)
-	PlotDon(l,1,0.5);
+	PlotDon(l,-1,0.5);
       else if(sigTypeIndex == DATA::Acc)
-	PlotAcc(l,1,0.5);
+	PlotAcc(l,-1,0.5);
       else if(sigTypeIndex == DATA::Stop)
 	PlotStop(l,-((X->SeqLen-l)%3)-1,1);
     }
