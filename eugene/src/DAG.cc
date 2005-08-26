@@ -489,9 +489,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
       // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-      //     PICOMP(true,Ins,Forward,InitF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,InitF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //PICOMP(true,Del,Forward,InitF1+(k+1)%3);
+      PICOMP(true,Del,Forward,InitF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -522,9 +522,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift)
-      //      PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
+      PICOMP(true,Ins,Reverse, InitR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      ///      PICOMP(true,Del,Reverse, InitR1+(k+1)%3);
+      PICOMP(true,Del,Reverse, InitR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -541,9 +541,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      //      PICOMP(true,Ins,Forward,SnglF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,SnglF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Forward,SnglF1+(k+1)%3);
+      PICOMP(true,Del,Forward,SnglF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -562,9 +562,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
       PICOMP(((Data_Len-position) % 3 == k-3),Stop,Reverse,UTR3R);
       // Il y a une insertion (frameshift)
-      //      PICOMP(true,Ins,Reverse, SnglR1+(k+2)%3);
+      PICOMP(true,Ins,Reverse, SnglR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Reverse, SnglR1+(k+1)%3);
+      PICOMP(true,Del,Reverse, SnglR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -592,9 +592,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StopStop & (DNASeq::isGf | DNASeq::isAf)) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-      //      PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Forward,IntrF1+(k+1)%3);
+      PICOMP(true,Del,Forward,IntrF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -624,9 +624,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift)
-      //      PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
+      PICOMP(true,Ins,Reverse, IntrR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
+      PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
@@ -654,9 +654,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StopStop & (DNASeq::isAf | DNASeq::isGf)) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      //      PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Forward,TermF1+(k+1)%3);
+      PICOMP(true,Del,Forward,TermF1+(k+1)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -675,9 +675,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
       PICOMP(((Data_Len-position) % 3 == k-3),Stop,Reverse,UTR3R);
       // Il y a une insertion (frameshift)
-      //      PICOMP(true,Ins,Reverse, TermR1+(k+2)%3);
+      PICOMP(true,Ins,Reverse, TermR1+(k+2)%3);
       // Il y a une deletion (frameshift)
-      //      PICOMP(true,Del,Reverse, TermR1+(k+1)%3);
+      PICOMP(true,Del,Reverse, TermR1+(k+1)%3);
 
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
