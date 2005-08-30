@@ -29,7 +29,6 @@
 #include "../Prediction.h"
 #include "../DNASeq.h"
 #include "../MSensor.h"
-#include "../Output.h"
 #include "LineSearch.h"
 #include "Genetic.h"
 
@@ -176,7 +175,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       for (i=0; i<Sequences.size(); i++) {
 	PAR.set("fstname", SeqNames[i].c_str());
 	pred = Predict(Sequences[i], MSensors[i]);  
-	Output(Sequences[i], MSensors[i], pred, 1, 0, cc, fp);
+	pred->Print(Sequences[i],  MSensors[i], fp);
 	if (i!=Sequences.size()-1) fprintf(fp,"\n");
 	delete pred;
       }
