@@ -27,27 +27,31 @@ foreach TEST $AllSensorsList {
     if {$TEST != "Est" && $TEST != "Tester"} {
 	eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 	    $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor) \
-	2> tmp%stderr > tmp%stdout
+	    -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor).tfa \
+	2> tmp%stderr
     } else {
 	if {$TEST == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		$OPTIONS(Sensor) \
 		-D Sensor.${TEST}.use=1 -D Sensor.NG2.use=1 \
-		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
+		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
 	} else {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		$OPTIONS(Sensor) \
 		-D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta  \
-		2> tmp%stderr > tmp%stdout
+		>& tmp%stderr
 	}
     }
-
-    set out [open tmp%stdout {RDONLY}]
+    
+    if {$TEST == "Tester"} {
+	set out  [open exSeqHom.egn.debug {RDONLY}]
+    } else {
+	set out [open $SEQ(Sensor).egn.debug {RDONLY}]
+    }
     set err [open tmp%stderr {RDONLY}]
     set std [open tmp%$TEST w+]
-    
-    # Copy stderr and stdout in the reference file
+
+    # Copy stderr and $SEQ(Sensor).egn.debug in the reference file
     set f [read -nonewline $err]
     puts $std $f
     set f [read -nonewline $out]
@@ -57,7 +61,7 @@ foreach TEST $AllSensorsList {
     close $err
     close $std
 
-    exec rm tmp%stderr tmp%stdout
+    exec rm tmp%stderr
 
     # Remove the first lines related to version number
     RemoveFirstLines tmp%$TEST
@@ -81,7 +85,10 @@ foreach TEST $AllSensorsList {
 }
 
 # Remove temporary files
-catch {exec rm tmp%stdout}
 catch {exec rm tmp%stderr}
 catch {exec rm tmp%testdiff}
 exec rm Sensor.EuStop.SpSn
+catch {exec rm exSeqHom.egn.debug}
+catch {exec rm exSeqHom.misc_info}
+catch {exec rm $SEQ(Sensor).egn.debug}
+catch {exec rm $SEQ(Sensor).misc_info}

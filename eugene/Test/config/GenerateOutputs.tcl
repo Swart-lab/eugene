@@ -72,23 +72,27 @@ foreach sensor $AllSensorsList {
 	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 	    -A $EUGENE_TEST_PAR \
 	    -D Sensor.${sensor}.use=1 \
-	    $SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
+	    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
     } else {
 	if {$sensor == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-A $EUGENE_TEST_PAR \
 		-D Sensor.${sensor}.use=1 -D Sensor.NG2.use=1 \
-		$SEQ_DIR/$SEQ(Sensor) 2> tmp%stderr > tmp%stdout
+		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
 	} else {
 	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-A $EUGENE_TEST_PAR \
 		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta  \
-		2> tmp%stderr > tmp%stdout
+		>& tmp%stderr
 	}
     }
     
     # Open files
-    set out [open tmp%stdout {RDONLY}]
+    if {$sensor == "Tester"} {
+	set out  [open exSeqHom.egn.debug {RDONLY}]
+    } else {
+	set out [open $SEQ(Sensor).egn.debug {RDONLY}]
+    }
     set err [open tmp%stderr {RDONLY}]
     set std [open tmp%GenerateOutputs w+]
 
@@ -118,7 +122,8 @@ foreach sensor $AllSensorsList {
     }
 
     # Remove all temporary files
-    catch {exec rm tmp%GenerateOutputs tmp%stderr tmp%stdout}
+    catch {exec rm tmp%GenerateOutputs tmp%stderr}
+    catch {exec rm $SEQ(Sensor).egn.debug $SEQ(Sensor).misc_info exSeqHom.egn.debug exSeqHom.misc_info}
     # Remove created files, note that eugeneTest.par.<date>.OPTI remains
     catch {exec rm Sensor.EuStop.SpSn}
 
@@ -209,6 +214,13 @@ foreach TEST $FunctionalTestList {
     puts "Reference files for $TEST functional test created or checked."
 }
 
+# Remove temporary files (misc_info)
+set seq [eval exec ls .]
+foreach f $seq {
+    if { [string match *.misc_info $f]} {
+	exec rm $f
+    }
+}
 
 
 ########################################################################
@@ -223,7 +235,7 @@ foreach TEST $ArabidopsisTestList {
     ModifyParaValue $EUGENE_TEST_PAR  NewValueBase
     
 
-    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $SEQ($TEST) > tmp%stdout}
+    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $OPTIONS($TEST) $SEQ($TEST) > tmp%stdout}
    
     if {$erase == 1 || ![file exists $OUTPUT_DIR/$FILE_REF($TEST)]} {
 	exec cp tmp%stdout $OUTPUT_DIR/$FILE_REF($TEST)
@@ -238,6 +250,12 @@ foreach TEST $ArabidopsisTestList {
     
     # remove temporary file	
     exec rm tmp%stdout
+    set seq [eval exec ls .]
+    foreach f $seq {
+	if { [string match *.misc_info $f] || [string match *.egn.debug $f]} {
+	    exec rm $f
+	}
+    }
     
     # Restore initial parameters values
     InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR

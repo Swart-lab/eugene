@@ -45,9 +45,8 @@ set AllSensorsList {ATGpr AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF G
 
 ############################################################################
 ##################### Units tests variables ################################
-set SEQ(Sensor) {seq14ac002535g4g5.tfa}
+set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
-
 
 ############################################################################# 
 set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest}
@@ -55,25 +54,25 @@ set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest}
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(SeqAra) {seq25ab005234g10g11.tfa}
-set IMG(SeqAra) {seq25ab005234g10g11.test.000.png}
+set IMG(SeqAra) {seq25ab005234g10g11.000.png}
 set FILE_REF(SeqAra) Output_SeqAra
-set OPTIONS(SeqAra) "-gtest -E -B"
+set OPTIONS(SeqAra) "-po -g"
 
 ##################### SeqDoc test variables ############################
 set SensorsList(SeqDoc) {MarkovIMM MarkovConst EuStop NStart IfElse Transcript \
 			     FrameShift User}
 set SEQ(SeqDoc) {SYNO_ARATH.fasta}
-set IMG(SeqDoc) {SYNO_ARATH.test.000.png}
+set IMG(SeqDoc) {SYNO_ARATH.000.png}
 set FILE_REF(SeqDoc) Output_SeqDoc
-set OPTIONS(SeqDoc) "-gtest"
+set OPTIONS(SeqDoc) "-po -g"
 
 ##################### SeqHom test variables ################################
 set SensorsList(SeqHom) {MarkovProt MarkovConst EuStop StartWAM SpliceWAM Homology \
 			     Transcript User GFF}
 set SEQ(SeqHom) {exSeqHom.fasta}
-set IMG(SeqHom) {exSeqHom.test.000.png}
+set IMG(SeqHom) {exSeqHom.000.png}
 set FILE_REF(SeqHom) Output_SeqHom
-set OPTIONS(SeqHom) "-gtest"
+set OPTIONS(SeqHom) "-po -g"
 set NewValueSeqHom(Transcript.Start*) 1e-9
 set NewValueSeqHom(Transcript.Stop*)  1e-9
 set NewValueSeqHom(EuStop.stopP*)     3.1439
@@ -81,16 +80,17 @@ set NewValueSeqHom(EuStop.stopP*)     3.1439
 ##################### SeqRest test variables #################################
 set SensorsList(SeqRest) {MarkovIMM EuStop PatConst IfElse Riken Repeat}
 set SEQ(SeqRest) {seq25ab005234g10g11.tfa}
-set IMG(SeqRest) {seq25ab005234g10g11.test.000.png}
+set IMG(SeqRest) {seq25ab005234g10g11.000.png}
 set FILE_REF(SeqRest) Output_SeqRest
-set OPTIONS(SeqRest) "-gtest"
+set OPTIONS(SeqRest) "-po -g"
 
 
 ############################################################################
 set ArabidopsisTestList {Araset Big}
 
 ##################### Araset test variables ################################
-set SEQBASE_DIR "/Annotation/Arabidopsis/araset/Genes"
+set SEQBASE_DIR "/home/bardou/araset/Genes"
+#/Annotation/Arabidopsis/araset/Genes"
 set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(Araset) {}
 set seq [eval exec ls $SEQBASE_DIR]
@@ -101,11 +101,13 @@ foreach f $seq {
     }
 }
 set FILE_REF(Araset) Output_Araset
+set OPTIONS(Araset) "-po"
 
 ##################### Big test variables ################################
 set SensorsList(Big) {MarkovIMM  Transcript MarkovConst EuStop NStart  GSplicer Est BlastX}
 set SEQ(Big) $SEQ_DIR/chr1_2002.tfa_22540000-23040000.tfa
 set FILE_REF(Big) Output_Big
+set OPTIONS(Big) "-po"
 
 
 

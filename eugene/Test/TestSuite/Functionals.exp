@@ -78,3 +78,11 @@ foreach TEST $FunctionalTestList {
 	InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
     }
 }
+
+# Remove temporary files (misc_info)
+set seq [eval exec ls .]
+foreach f $seq {
+    if { [string match *.misc_info $f]} {
+	exec rm $f
+    }
+}
