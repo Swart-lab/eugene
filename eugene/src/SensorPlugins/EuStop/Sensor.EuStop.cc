@@ -86,6 +86,6 @@ void SensorEuStop :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorEuStop :: PostAnalyse(Prediction *pred)
+void SensorEuStop :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

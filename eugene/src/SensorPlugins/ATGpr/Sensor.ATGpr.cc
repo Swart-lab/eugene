@@ -208,6 +208,6 @@ void SensorATGpr :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorATGpr :: PostAnalyse(Prediction *pred)
+void SensorATGpr :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

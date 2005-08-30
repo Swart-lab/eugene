@@ -36,12 +36,12 @@ class SensorGCPlot : public Sensor
   double Zoom3;
 
  public:
-  SensorGCPlot          (int n, DNASeq *X);
-  virtual ~SensorGCPlot ();
+  SensorGCPlot            (int n, DNASeq *X);
+  virtual ~SensorGCPlot   ();
   virtual void Init       (DNASeq *X);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorGCPlot* builder0( int n, DNASeq *X) { return new SensorGCPlot(n, X);}

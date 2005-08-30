@@ -31,12 +31,12 @@ class SensorEuStop : public Sensor
   double   stopP;
 
  public:
-  SensorEuStop  (int n, DNASeq *X);
+  SensorEuStop            (int n, DNASeq *X);
   virtual ~SensorEuStop   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorEuStop * builder0(int n, DNASeq *X) {  return new SensorEuStop(n, X); }
