@@ -208,20 +208,20 @@ void MasterSensor :: GetInfoAt (DNASeq *X, int pos, DATA *d)
 // --------------------------
 //  Print informations at pos.
 // --------------------------
-void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d)
+void MasterSensor :: PrintDataAt (DNASeq *X, int pos, DATA *d, FILE *OUT)
 {
   int i,j;
-  printf("%6d %c", 1+pos, (*X)[pos]);
+  fprintf(OUT, "%6d %c", 1+pos, (*X)[pos]);
 
   for(i=0; i<DATA::LastContentsType; i++)
-    printf (" %5.3g",d->contents[i]);
+    fprintf(OUT, " %5.3g",d->contents[i]);
 
   for(i=0; i< Signal::LastEdge;  i++) {
-    printf (" ||");
+    fprintf(OUT, " ||");
     for (j=0; j< DATA::LastSigType; j++)
-      printf(" %5.3g",d->sig[j].weight[i]);
+      fprintf(OUT, " %5.3g",d->sig[j].weight[i]);
   }
-  printf("\n");
+  fprintf(OUT, "\n");
 }
 
 // --------------------------------------------
@@ -257,9 +257,9 @@ int MasterSensor :: GetInfoSpAt (unsigned char type,
 // --------------------------
 //  Post analyse the sensors.
 // --------------------------
-void MasterSensor :: PostAnalyse (Prediction *pred)
+void MasterSensor :: PostAnalyse (Prediction *pred, FILE *MISC_INFO)
 {
   for(int i=0; i<(int)theSensors.size(); i++)
-    theSensors[i]->PostAnalyse(pred);
+    theSensors[i]->PostAnalyse(pred, MISC_INFO);
 }
 
