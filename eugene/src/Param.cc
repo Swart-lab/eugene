@@ -200,43 +200,28 @@ void Parameters :: ReadArg(int argc, char * argv[])
       else m["Output.resy"] = optarg;
       break;
       
-    case 'g':          /* -g "Graphic File" */
-      if (optarg) {
-	if (strspn(".fasta", optarg)    != 6 
-	    && strspn(".fsa", optarg)   != 4
-	    && strspn(".tfa", optarg)   != 4
-	    && strspn(".txt", optarg)   != 4
-	    && optarg[0] != '-') {
-	  if(strcmp(optarg, "NO"))     // Argument suivant le -g
-	    m["grnameArg"] = optarg;   // != NO pris en compte
-	  else 
-	    m["grnameArg"] = "0";      // == NO non pris en compte
-	  m["Output.graph"] = "1";
-	}
-	else errflag++;
-      }
-      else {
-	m["Output.graph"] = "1";
-	m["grnameArg"] = "0";
-      }
+    case 'g':          /* -g activate graphical output */
+      m["Output.graph"] = "1";
       break;
 
     case 'O':           /* -O output */
       m["Output.Prefix"] = optarg;
       break;
       
-    case 'p':           /* -p print opt: s -> short, l -> long, d -> detailed
-                                         h -> html,  H -> HTML(EuGeneHom)
-                                         g -> GFF,   a -> araset */
+    case 'p':           /* -p print opt: s -> short, l -> long,   d -> detailed
+			                 g -> GFF,   a -> araset, o -> stdout(l) 
+                                         h -> html */
+
       m["Output.format"] = optarg;
-      if ((optarg[0] == 'h') && getI("Output.graph") == 0) {
-	m["Output.graph"] = "1"; // HTML output means graphical output 
-	m["grnameArg"]    = "0";
+      for (int i=0; i<strlen(optarg); i++) {
+	if (getI("Output.graph") == 0  &&  (optarg[i] == 'h')) {
+	  m["Output.graph"] = "1"; // HTML output means graphical output 
+	}
+	if ((optarg[i] != 's') && (optarg[i] != 'l') && (optarg[i] != 'g') &&
+	    (optarg[i] != 'd') && (optarg[i] != 'h') && (optarg[i] != 'a') &&
+	    (optarg[i] != 'o'))
+	  errflag++;
       }
-      if ((optarg[0] != 's') && (optarg[0] != 'l') && (optarg[0] != 'g') &&
-	  (optarg[0] != 'd') && (optarg[0] != 'h') && (optarg[0] != 'a') &&
-          (optarg[0] != 'H'))
-	errflag++;
       break;
       
     case 'm':           /* -m IMM matrix */
@@ -271,11 +256,11 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
 
     case 'E':
-      m["Est.PostProcess"] = "1";
+      m["Est.PostProcess"] = "2";
       break;
 
     case 'B':
-      m["BlastX.PostProcess"] = "1";
+      m["BlastX.PostProcess"] = "2";
       break;
 
     case 'U':
@@ -344,8 +329,8 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -h                      Print this help\n\n");
 
   fprintf(stderr, "  Output control:\n");
-  fprintf(stderr, "    -p a|d|g|h|H|l|s        Changes text output format\n");
-  fprintf(stderr, "    -g filename             Activates graphical output\n");
+  fprintf(stderr, "    -p a|d|g|h|l|s|o        Changes text output format (-pgh: html and gff)\n");
+  fprintf(stderr, "    -g                      Activates graphical output\n");
   fprintf(stderr, "    -c overlap              Controls overlap between images\n");
   fprintf(stderr, "    -l length               Length of sequence per image\n");
   fprintf(stderr, "    -u position             Specifies the first base plotted\n");
@@ -365,7 +350,7 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -f                      Changes the frameshift penalty\n");
   fprintf(stderr, "    -G                      Activates the GFF plugin\n");
   fprintf(stderr, "    -m DNA Markov matrix    Changes the Markov matrix used (IMM)\n");
-  fprintf(stderr, "    -M AA Markov matrix     Activates the MarkovProt plugin\n");
+  fprintf(stderr, "    -M AA  Markov matrix    Activates the MarkovProt plugin\n");
   fprintf(stderr, "    -r                      Activates the Repeat plugin\n");
   fprintf(stderr, "    -R                      Activates the Riken (FL cDNA) plugin\n");
   fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n");
