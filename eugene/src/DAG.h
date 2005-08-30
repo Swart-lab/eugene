@@ -60,7 +60,6 @@ class DAG
   //  void SubstractContents (DATA *data);
   //  double ConnectDag (DAG *RightDag, int position, DATA * data, int datalength);
   double BuildPrediction (int Forward = 1);
-  void BuildReversePrediction (DAG* dag);
   //  void CleanPrediction (DAG* dag, DAG* dagrev);
   
   inline double NormalizingPathScore() { return NormalizingPath; };

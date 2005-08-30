@@ -282,18 +282,8 @@ double DAG :: BuildPrediction (int Forward)
   }
 
   pred = LBP[j].BackTrace(MinCDSLen,Forward);
-  pred->OptimalPath = maxi+NormalizingPath;
+  pred->optimalPath = maxi+NormalizingPath;
   return maxi+NormalizingPath;
-}
-
-// ----------------------------------------------------------------
-//  Build a prediction by reverting another one
-// ----------------------------------------------------------------
-void DAG :: BuildReversePrediction (DAG* dag)
-{
-  this->pred=new Prediction();
-  for (int i= (dag->pred->size())-1; i>=0; i--)
-    this->pred->add(dag->pred->getPos(i),dag->pred->getState(i));
 }
 
 // ----------------------------------------------------------------
