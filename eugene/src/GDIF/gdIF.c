@@ -239,7 +239,7 @@ void ClosePNG()
 
 // Parametre = 1 -> toute 1ere image de la 1ere sequence traitée
 // Parametre = 0 -> la suite....*.fasta
-void OutputHTMLFileNames(int firstImg, char* html_dir)
+void OutputHTMLFileNames(int firstImg, char* html_dir, FILE* OUT)
 {
   int i;
   char str[12];
@@ -258,32 +258,32 @@ void OutputHTMLFileNames(int firstImg, char* html_dir)
 #else
     strcat(TName,".png");
 #endif
-    printf("				  <img src=\"%s\" name=\"show\"\n",
-	   TName);
-    printf("				       width=\"%d\" height=\"%d\">\n",
-	   rx+40, ry+40);
-    printf("				</td>\n"
-	   "			      </tr>\n"
-	   "			      <tr>\n"
-	   "				<td width=\"100\" align=\"center\"\n"
-	   "				    bgcolor=\"#c0dbe2\">\n"
-	   "				  <img src=\"%s/Images/first.jpg\"\n"
-	   "				       onclick=\"first();\"\n"
-	   "				       title=\"Jump to beginning\" "
-	   "align=\"middle\">\n"
-	   "				  &nbsp; &nbsp; &nbsp;\n"
-	   "				  <img src=\"%s/Images/back.jpg\"\n"
-	   "				       onclick=\"previous();\"\n"
-	   "				       title=\"Back\" "
-	   "align=\"middle\">\n"
-	   "				</td>\n"
-	   "				<td align=\"center\" "
-	   "bgcolor=\"#9bc7d0\">\n"
-	   "				  <select name=\"slide\" "
-	   "onChange=\"change();\" size=\"1\">\n", html_dir, html_dir);
-    printf("				    <option value=\"%s\"\n",TName);
-    printf("					    selected>%s : %d -> %d"
-	   "</option>\n",TName,From,ImgLen+From);
+    fprintf(OUT, "				  <img src=\"%s\" name=\"show\"\n",
+	    TName);
+    fprintf(OUT, "				       width=\"%d\" height=\"%d\">\n",
+	    rx+40, ry+40);
+    fprintf(OUT, "				</td>\n"
+	    "			      </tr>\n"
+	    "			      <tr>\n"
+	    "				<td width=\"100\" align=\"center\"\n"
+	    "				    bgcolor=\"#c0dbe2\">\n"
+	    "				  <img src=\"%s/Images/first.jpg\"\n"
+	    "				       onclick=\"first();\"\n"
+	    "				       title=\"Jump to beginning\" "
+	    "align=\"middle\">\n"
+	    "				  &nbsp; &nbsp; &nbsp;\n"
+	    "				  <img src=\"%s/Images/back.jpg\"\n"
+	    "				       onclick=\"previous();\"\n"
+	    "				       title=\"Back\" "
+	    "align=\"middle\">\n"
+	    "				</td>\n"
+	    "				<td align=\"center\" "
+	    "bgcolor=\"#9bc7d0\">\n"
+	    "				  <select name=\"slide\" "
+	    "onChange=\"change();\" size=\"1\">\n", html_dir, html_dir);
+    fprintf(OUT, "				    <option value=\"%s\"\n",TName);
+    fprintf(OUT, "					    selected>%s : %d -> %d"
+	    "</option>\n",TName,From,ImgLen+From);
   }
  
   for (i=firstImg; i< NbIm; i++) {
@@ -295,14 +295,14 @@ void OutputHTMLFileNames(int firstImg, char* html_dir)
 #else
     strcat(TName,".png");
 #endif
-    printf("                                    <option value=\"%s\">",TName);
+    fprintf(OUT, "                                    <option value=\"%s\">",TName);
     if (i==0)
-      printf("%s : %d -> %d</option>\n",
-	     TName, ImgLen*i+From,
-	     (ImgLen*(i+1))+From < Len ? (ImgLen*(i+1))+From : Len);
+      fprintf(OUT, "%s : %d -> %d</option>\n",
+	      TName, ImgLen*i+From,
+	      (ImgLen*(i+1))+From < Len ? (ImgLen*(i+1))+From : Len);
     else
-      printf("%s : %d -> %d</option>\n",
-	     TName, ImgLen*i+From-(OvLap*i),
-	     (ImgLen*(i+1))+From-(OvLap*i) < Len ? (ImgLen*(i+1))+From-(OvLap*i) :Len);
+      fprintf(OUT, "%s : %d -> %d</option>\n",
+	      TName, ImgLen*i+From-(OvLap*i),
+	      (ImgLen*(i+1))+From-(OvLap*i) < Len ? (ImgLen*(i+1))+From-(OvLap*i) :Len);
   }
 }
