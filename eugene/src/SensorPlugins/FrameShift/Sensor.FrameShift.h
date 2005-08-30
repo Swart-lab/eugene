@@ -33,12 +33,12 @@ class SensorFrameShift : public Sensor
   double delProb;
 
  public:
-  SensorFrameShift  (int n, DNASeq *X);
-  virtual ~SensorFrameShift   ();
-  virtual void Init       (DNASeq *X);
-  virtual void GiveInfo   (DNASeq *X, int, DATA *);
-  virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  SensorFrameShift          (int n, DNASeq *X);
+  virtual ~SensorFrameShift ();
+  virtual void Init         (DNASeq *X);
+  virtual void GiveInfo     (DNASeq *X, int, DATA *);
+  virtual void Plot         (DNASeq *X);
+  virtual void PostAnalyse  (Prediction *, FILE *);
 };
 
 extern "C" SensorFrameShift * builder0(int n, DNASeq *X) {  return new SensorFrameShift(n, X); }

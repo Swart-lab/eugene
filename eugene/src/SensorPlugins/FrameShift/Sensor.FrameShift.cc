@@ -74,31 +74,33 @@ void SensorFrameShift :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorFrameShift :: PostAnalyse(Prediction *pred)
+void SensorFrameShift :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
   int state;
   int stateBack = 0;
   int posFs = -1;
   
   if (PAR.getI("Output.graph")) {
-    for(int i=pred->size()-1; i!=-1; i--) {
-      state = pred->getState(i);
-      if(state <= TermR3)
-	if(posFs != -1) { // Frameshift plot
-	  if(1 <= State2Phase[state] <= 3)	 
-	    PlotLine(posFs, posFs, state+1, stateBack+1, 0.4, 0.4, 1);
-	  else
-	    PlotLine(posFs, posFs, -state+2, -stateBack+2, 0.4, 0.4, 1);
-	  
-	  posFs = pred->getPos(i);
-	  stateBack = state;
-	}
-	else {            // No frameshift
-	  posFs = pred->getPos(i);
-	  stateBack = state;
-	}
-      else                // Ig, UTR, or Intron 
-	posFs = -1;
+    for(int i=0; i<pred->nbGene; i++) {
+      for(int j=0; j<pred->vGene[i]->nbFea; j++) {
+	state = pred->vGene[i]->vFea[j]->state;
+	if(state <= TermR3)
+	  if(posFs != -1) { // Frameshift plot
+	    if(1 <= State2Phase[state] <= 3)	 
+	      PlotLine(posFs, posFs, state+1, stateBack+1, 0.4, 0.4, 1);
+	    else
+	      PlotLine(posFs, posFs, -state+2, -stateBack+2, 0.4, 0.4, 1);
+	    
+	    posFs = pred->vGene[i]->vFea[j]->end;
+	    stateBack = state;
+	  }
+	  else {            // No frameshift
+	    posFs = pred->vGene[i]->vFea[j]->end;
+	    stateBack = state;
+	  }
+	else                // Ig, UTR, or Intron 
+	  posFs = -1;
+      }
     }
   }
 }
