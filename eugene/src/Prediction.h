@@ -29,6 +29,59 @@ extern "C"{
 #include "GDIF/gdIF.h"
 }
 #include "SensorIF.h"
+#include "Param.h"
+
+class MasterSensor;
+class DNASeq;
+
+
+/*************************************************************
+ **                       Feature Object                    **
+ *************************************************************/
+class Feature
+{
+ private:
+
+ public:
+  int  number;
+  signed char state;
+  int  start;
+  int  end;
+  char strand;
+  int  phase;
+  int  framegff;
+  int  frame;
+  
+  Feature  ();
+  Feature  (signed char, int, int, char, int);
+  ~Feature ();
+};
+
+
+/*************************************************************
+ **                         Gene Object                     **
+ *************************************************************/
+class Gene
+{
+ private:
+  int complete;  //+1:init|sngl +2:term|sngl 3:ALL 
+  int exNumber;
+  int inNumber,  inLength;
+  int utrLength, mrnaLength, geneLength;
+
+ public:
+  int cdsStart, cdsEnd, trStart, trEnd;
+  int exLength;
+  int nbFea;
+  std::vector <Feature*> vFea;
+ 
+  Gene  ();
+  ~Gene ();
+  void AddFeature(signed char state, int start, int end);
+  void Update    ();
+  void PrintInfo (FILE*, int, char*);
+};
+
 
 /*************************************************************
  **                        Prediction                       **
@@ -36,57 +89,76 @@ extern "C"{
 class Prediction
 {
  private:
-  int index;
-  int nb;
-  std::vector <int> vPos;
-  std::vector <signed char> vState;
+  MasterSensor *MS;
+  DNASeq       *X;
+ 
+  void  PrintGff        (FILE*, char*);
+  void  PrintEgnL       (FILE*, char*, int a=0);
+  void  PrintEgnS       (FILE*);
+  void  PrintEgnD       (FILE*);
+  void  PrintHtml       (FILE*, char*);
+ 
+  // Convert state in string
+  char* State2EGNString (int);
+  char* State2GFFString (int);
   
+  // Verif coherence EST: calcul le nombre de nuc. coherents et
+  // incoherents avec les match est
+  // debut/fin/etat: debut et fin de la seq. dont l'etat est etat
+  // cons/incons: retour des valeurs
+  void  CheckConsistency(int debut, int fin, int etat,
+			 int* cons, int* incons);
+  
+  // PrintHtml : -ph print the start of the HTML output
+  void  StartHTML       (char*, FILE*);
+  
+  // PrintHtml : -ph print the end of the HTML output
+  void  EndHTML         (FILE*);
+
+
  public:
+  std::vector <Gene*> vGene;
+  int    nbGene;
+  char   seqName[FILENAME_MAX+1];
+  double optimalPath;
+
   Prediction  ();
+  Prediction  (std::vector <int> vPos,
+	       std::vector <signed char> vState);
   ~Prediction ();
+  void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL);
+  void  PrintGeneInfo (FILE*);
+  void  PlotPred      ();
+  char  GetStateForPos(int);
 
-  double OptimalPath;
-
-  void  add           (int, signed char);
-  void  popn          (int);
-  void  print         ();
-  void  setPos        (int, int);
-  char  getNextState  (int); 
-  char  getStateForPos(int);
-  char  getState      (int i) { return vState[i]; }
-  int   getPos        (int i) { return vPos[i];   }
-  int   size          ()      { return nb;        } 
-  void  plotPred      ();
-  void  resetPred     ();
-  int   nbExon        (int);
-  int   lenCDS        (int);
-  void  reversePred   ();
-  char* isStart       (int);
-  char* isStop        (int);
-  char* isDon         (int);
-  char* isAcc         (int);
-  bool IsState (DATA::SigType sig_type, int pos, char strand);
+  // Need by Sensor Tester
+  char* IsStart       (int);
+  char* IsStop        (int);
+  char* IsDon         (int);
+  char* IsAcc         (int);
+  bool  IsState       (DATA::SigType sig_type, int pos, char strand);
 };
 
+
 enum Tracks {
-  InitF1 = 0, InitF2 = 1, InitF3 = 2,
-  InitR1 = 3, InitR2 = 4, InitR3 = 5,
-  SnglF1 = 6, SnglF2 = 7, SnglF3 = 8,
-  SnglR1 = 9, SnglR2 = 10, SnglR3 = 11,
-  IntrF1 = 12, IntrF2 = 13, IntrF3 = 14,
-  IntrR1 = 15, IntrR2 = 16, IntrR3 = 17,
-  TermF1 = 18, TermF2 = 19, TermF3 = 20,
-  TermR1 = 21, TermR2 = 22, TermR3 = 23,
-  IntronF1 = 24,IntronF2 = 25, IntronF3 = 26,
-  IntronR1 = 27, IntronR2 = 28, IntronR3 = 29,
+  InitF1    = 0,  InitF2     = 1,  InitF3     = 2,
+  InitR1    = 3,  InitR2     = 4,  InitR3     = 5,
+  SnglF1    = 6,  SnglF2     = 7,  SnglF3     = 8,
+  SnglR1    = 9,  SnglR2     = 10, SnglR3     = 11,
+  IntrF1    = 12, IntrF2     = 13, IntrF3     = 14,
+  IntrR1    = 15, IntrR2     = 16, IntrR3     = 17,
+  TermF1    = 18, TermF2     = 19, TermF3     = 20,
+  TermR1    = 21, TermR2     = 22, TermR3     = 23,
+  IntronF1  = 24, IntronF2   = 25, IntronF3   = 26,
+  IntronR1  = 27, IntronR2   = 28, IntronR3   = 29,
   IntronF2T = 30, IntronF3TG = 31, IntronF3TA = 32,
-  IntronR3G = 33, IntronR3A = 34, IntronR2AG = 35,
-  InterGen = 36, 
-  UTR5F = 37, UTR3F = 38, 
-  UTR5R = 39,UTR3R = 40, 
-  IntronU5F = 41, IntronU5R = 42, 
-  IntronU3F = 43, IntronU3R = 44, 
-  NbTracks = 45};
+  IntronR3G = 33, IntronR3A  = 34, IntronR2AG = 35,
+  InterGen  = 36, 
+  UTR5F     = 37, UTR3F      = 38, 
+  UTR5R     = 39, UTR3R      = 40, 
+  IntronU5F = 41, IntronU5R  = 42, 
+  IntronU3F = 43, IntronU3R  = 44, 
+  NbTracks  = 45};
 
 const short int UnorientedTracks[1] = {InterGen};
 
@@ -110,6 +182,16 @@ const short int ReverseTracks[(NbTracks-1)/2] = {
   UTR5R,UTR3R, 
   IntronU5R,IntronU3R};
 
+const short int State2Str[NbTracks] = {1,2,3,-1,-2,-3,
+					 1,2,3,-1,-2,-3,
+					 1,2,3,-1,-2,-3,
+					 1,2,3,-1,-2,-3,
+					 4,4,4,
+					 -4,-4,-4,
+					 4,4,4,
+					 -4,-4,-4,
+					 0,0,0,0,0,
+					 4,-4,4,-4};
 
 const short int State2Phase[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
