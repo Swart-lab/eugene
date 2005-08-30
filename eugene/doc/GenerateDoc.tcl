@@ -32,12 +32,12 @@ set FIC_TMP "tmp"
 set CMDFLAGS_INDEX "CmdFlags"
 
 set Cmd_end " >& $FIC_TMP"
-set Flag(1) EXECUTION_TRACE1; set Cmd_begin(1) ""; set Cmd(1) "$EUGENE -s $SEQ"
-set Flag(2) EXECUTION_TRACE2; set Cmd_begin(2) ""; set Cmd(2) "$EUGENE -s -d $SEQ"
-set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE -s -d -E -DEst.PostProcess=2 $SEQ"
-set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE -s -d -b012 $SEQ"
-set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) "cp $SEQ.user1 $SEQ.user;"; set Cmd(5) "$EUGENE -U $SEQ"
-set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) "cp $SEQ.user2 $SEQ.user;"; set Cmd(6) "$EUGENE -U $SEQ"
+set Flag(1) EXECUTION_TRACE1; set Cmd_begin(1) ""; set Cmd(1) "$EUGENE -s -po $SEQ"
+set Flag(2) EXECUTION_TRACE2; set Cmd_begin(2) ""; set Cmd(2) "$EUGENE -s -po -d $SEQ"
+set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE -s -po -d -E $SEQ"
+set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE -s -po -d -b012 -B $SEQ"
+set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) "cp $SEQ.user1 $SEQ.user;"; set Cmd(5) "$EUGENE -po -U $SEQ"
+set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) "cp $SEQ.user2 $SEQ.user;"; set Cmd(6) "$EUGENE -po -U $SEQ"
 set nbflags 6
 #===========================================================================
 
@@ -68,10 +68,18 @@ for {set i 1} {$i<= $nbflags} {incr i} {
 	eval exec $Cmd($i) $Cmd_end
 
 	# write the executed command in the documentation before the result
-	set new_content "$new_content >$Cmd($i)\n"
+	set new_content "$new_content>$Cmd($i)\n"
 	set f [open $FIC_TMP r]
-	set new_content "$new_content [read $f]"
+	set new_content "$new_content[read $f]"
 	close $f
+
+	# for (3) & (4) print the misc_info file
+	if { $i==3 || $i==4 } {
+	    set new_content "$new_content> cat SYNO_ARATH.misc_info\n"
+	    set f [open SYNO_ARATH.misc_info r]
+	    set new_content "$new_content[read $f]"
+	    close $f
+	}
     }	
 }
 set new_content "$new_content $content"
@@ -83,6 +91,7 @@ close $f
 
 # clean directory (beware except image .png)
 exec rm  $FIC_TMP
+exec rm  SYNO_ARATH.misc_info
 
 # ask for compilation
 exec pdflatex $FIC_TEX_TMP.tex
