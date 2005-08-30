@@ -48,9 +48,9 @@ class SensorEst : public Sensor
   int MaxIntron;
   
   Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);
-  void   ESTSupport (Prediction *pred,   int Tdebut,      int Tfin,
+  void   ESTSupport (Prediction *, FILE *, int Tdebut,    int Tfin,
 		     int debut, int fin, Hits **HitTable, int Size);
-  void   FEASupport (Prediction *pred,   int Tdebut,      int Tfin,
+  void   FEASupport (Prediction *, FILE *, int Tdebut,    int Tfin,
 		     int debut, int fin, Hits **HitTable, int Size, int NumG);
   int    LenSup     (Hits **HitTable, std::vector<int> vSupEstI,
 		     int index, int beg, int end);
@@ -61,7 +61,7 @@ class SensorEst : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorEst * builder0( int n, DNASeq *X) { return new SensorEst(n, X);}

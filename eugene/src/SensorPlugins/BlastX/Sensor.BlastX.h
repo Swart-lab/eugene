@@ -35,7 +35,7 @@ class SensorBlastX : public Sensor
   std::vector<int>    vPos,     vPMPhase;
   std::vector<double> vPMLevel, vPMatch;
   std::vector<int>::iterator iter;
-  char *levels;
+  char  *levels;
   int    index;
   double keyBXLevel[10];
   int    minIn;
@@ -51,19 +51,19 @@ class SensorBlastX : public Sensor
   // For postprocess 2
   Hits **HitTable;
   int  NumProt;
-  void ProtSupport (Prediction *pred, int debut, int fin,
+  void ProtSupport (Prediction *, FILE *, int debut, int fin,
 		    Hits **HitTable,  int Size,  int NumG);
   int  LenSup      (Hits **HitTable, Prediction *pred,
 		    std::vector<int> vSupProtI,
 		    int index, int beg, int end);
   
  public:
-  SensorBlastX  (int n, DNASeq *X);
+  SensorBlastX            (int n, DNASeq *X);
   virtual ~SensorBlastX   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorBlastX * builder0( int n, DNASeq *X) { return new SensorBlastX(n, X); }

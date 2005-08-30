@@ -571,59 +571,36 @@ void SensorEst :: Plot(DNASeq *TheSeq)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorEst :: PostAnalyse(Prediction *pred)
+void SensorEst :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
-  int TStart = 0, TEnd = 0, GStart = 0, GEnd = 0;
-  int state, stateNext = 0, stateBack = 0;
-  int pos,   posNext   = 0, posBack   = 0;
-  int NumGene = 0;  
-
+  int trStart = 0, trEnd = 0, cdsStart = 0, cdsEnd = 0;
   int pprocess = PAR.getI("Est.PostProcess",GetNumber());
-  if (!pprocess) return;
 
+  if (!pprocess)   return;
   if (NumEST == 0) return;
+
+  fprintf(MINFO, "#=========================================#\n");
+  fprintf(MINFO, "#=             Est evidences             =#\n");
+  fprintf(MINFO, "#=========================================#\n");
 
   qsort((void *)HitTable, NumEST, sizeof(void *), HitsCompareLex);
 
   // Reset static in EST Support or FEA Support
-  if (pprocess == 1)  ESTSupport(NULL,100,0,100,0,NULL,0);
-  else                FEASupport(NULL,100,0,100,0,NULL,0,0);
+  if (pprocess == 1)  ESTSupport(NULL,NULL,100,0,100,0,NULL,0);
+  else                FEASupport(NULL,NULL,100,0,100,0,NULL,0,0);
 
-
-  for(int i=pred->size()-1; i!=-1; i--) {
-
-    if(i != pred->size()-1) {
-      stateBack = pred->getState(i+1);
-      posBack   = pred->getPos(i+1);
-    }
-
-    state = pred->getState(i);
-    pos   = pred->getPos(i);
-
-    if(i != 0) {
-      stateNext = pred->getState(i-1);
-      posNext   = pred->getPos(i-1);
-    }
+  for(int i=0; i<pred->nbGene; i++) {
+    trStart  = pred->vGene[i]->trStart;
+    trEnd    = pred->vGene[i]->trEnd;
+    cdsStart = pred->vGene[i]->cdsStart;
+    cdsEnd   = pred->vGene[i]->cdsEnd;
     
-    // Demarrage exon extreme. Noter pour verif EST
-    if ((state     == UTR5F) || (state     == UTR3R)) GStart = pos;
-    if ((stateNext == UTR3F) || (stateNext == UTR5R)) GEnd   = pos-1;
-    if ((state     == UTR5F) || (state     == UTR3R)) TStart = posBack;
-    if ((stateNext == UTR3F) || (stateNext == UTR5R) || i==0) TEnd = posNext-1;
-        
-    // Si fin de gene ou fin seq gene en cours
-    if (((state == UTR3F || state == UTR5R) && stateNext == InterGen) ||
-	(i==0 && (state != InterGen))) {
-      NumGene++;
-      if (pprocess == 1)
-	// Analyse des ESTs par rapport à la prédiction
-	ESTSupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST);
-      else
-	// Analyse de la prédiction (des features) par rapport aux EST
-	FEASupport(pred,TStart,TEnd,GStart,GEnd,HitTable,NumEST,NumGene);
-      
-      GStart = TStart = GEnd = TEnd = -1;
-    }
+    if (pprocess == 1)
+      // Analyse des ESTs par rapport à la prédiction
+      ESTSupport(pred, MINFO, trStart, trEnd, cdsStart, cdsEnd, HitTable, NumEST);
+    else
+      // Analyse de la prédiction (des features) par rapport aux EST
+      FEASupport(pred, MINFO, trStart, trEnd, cdsStart, cdsEnd, HitTable, NumEST, i+1);
   }
 }
 
@@ -632,7 +609,7 @@ void SensorEst :: PostAnalyse(Prediction *pred)
 //    Tdebut/fin = debut/fin de transcript
 //    debut/fin  = debut/fin de traduit
 // -------------------------------------------------------------------------
-void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
+void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin,
 			     int debut, int fin,  Hits **HitTable, int Size)
 {
   static int EstIndex;
@@ -682,7 +659,7 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	to = Min(Tfin,ThisBlock->Start-1);
 	
 	for (i = from; i <= to; i++) {
-	  state = pred->getStateForPos(i+1);
+	  state = pred->GetStateForPos(i+1);
 	  if ((state < IntronF1) || state == InterGen)
 	    ConsistentEST = 0;
 	}
@@ -692,25 +669,26 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
       ESTEnd = ThisBlock->End;
       
       for (i = from; i <= to; i++) {
-	state = pred->getStateForPos(i+1);
+	state = pred->GetStateForPos(i+1);
 	if ((state > TermR3) && (state <= InterGen))
 	  ConsistentEST = 0;
       }
       ThisBlock = ThisBlock->Next;
     }
-    printf("cDNA  %-12s %7d %7d     %4d     %2d introns    ",
-	   HitTable[EstIndex]->Name,
-	   HitTable[EstIndex]->Start+1,HitTable[EstIndex]->End+1,
-	   HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
+    fprintf(MINFO, "cDNA  %-12s %7d %7d     %4d     %2d introns    ",
+	    HitTable[EstIndex]->Name,
+	    HitTable[EstIndex]->Start+1,HitTable[EstIndex]->End+1,
+	    HitTable[EstIndex]->Length,HitTable[EstIndex]->NGaps);
     
-    if (HitTable[EstIndex]->Rejected) printf("Filtered ");
-    else if (!ConsistentEST) printf("Inconsistent");
+    if (HitTable[EstIndex]->Rejected) fprintf(MINFO, "Filtered ");
+    else if (!ConsistentEST)          fprintf(MINFO, "Inconsistent");
     else {
       if ((HitTable[EstIndex]->Start) <= Tdebut && (ESTEnd >= Tfin))
-	printf("Full Transcript Support");
+	fprintf(MINFO, "Full Transcript Support");
       else if ((HitTable[EstIndex]->Start) <= debut && (ESTEnd >= fin))
-	printf("Full Coding Support");
-      else printf("Support");
+	fprintf(MINFO, "Full Coding Support");
+      else
+	fprintf(MINFO, "Support");
        
       ThisBlock = HitTable[EstIndex]->Match;
       while (ThisBlock) {
@@ -738,14 +716,14 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 	ThisBlock = ThisBlock->Next;
       }
     }
-    printf("\n");
+    fprintf(MINFO, "\n");
     EstIndex++;
   }
   if (fin >= debut)
-    printf("      CDS          %7d %7d    %5d     supported on %d bases\n",
-	   debut+1,fin+1,fin-debut+1,CDSsupported);
-  printf("      Gene         %7d %7d    %5d     supported on %d bases\n",
-	 Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
+    fprintf(MINFO, "      CDS          %7d %7d    %5d     supported on %d bases\n",
+	    debut+1,fin+1,fin-debut+1,CDSsupported);
+  fprintf(MINFO, "      Gene         %7d %7d    %5d     supported on %d bases\n",
+	  Tdebut+1,Tfin+1,Tfin-Tdebut+1,supported);
   delete [] Sup;
   return;
 }
@@ -755,8 +733,8 @@ void SensorEst :: ESTSupport(Prediction *pred, int Tdebut, int Tfin,
 //    Tdebut/fin = debut/fin de transcript
 //    debut/fin  = debut/fin de traduit
 // -------------------------------------------------------------------------
-void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
-			     int fin, Hits **HitTable, int Size, int NumGene)
+void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
+			     int debut,int fin,Hits **HitTable,int Size,int NumGene)
 {
   static int EstIndex;
   Block *ThisBlock;
@@ -804,7 +782,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	to   = Min(Tfin,   ThisBlock->Start-1);
 	
 	for (i = from; i <= to; i++) {
-	  state = pred->getStateForPos(i+1);
+	  state = pred->GetStateForPos(i+1);
 	  if ((state < IntronF1) || state ==  InterGen )
 	    ConsistentEST = 0;
 	}
@@ -814,7 +792,7 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
       ESTEnd = ThisBlock->End;
       
       for (i = from; i <= to; i++) {
-	state = pred->getStateForPos(i+1);
+	state = pred->GetStateForPos(i+1);
 	if ((state > TermR3) && (state <= InterGen))
 	  ConsistentEST = 0;
       }
@@ -833,35 +811,24 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
   /***********************************************************************/
   int  start, end, len;
   char fea[5];
-  char strand = '+';
-  if (PhaseAdapt(pred->getStateForPos(debut+1)) < 0) strand = '-';
-  int NumFEA = 0;
-  if(strand == '-') NumFEA = pred->nbExon(NumGene) + 1;
+  char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
     
-  for(i=pred->size()-1; i!=-1; i--) {
-    state = pred->getState(i);
-    end   = pred->getPos(i); 
-    if(i != pred->size()-1) start = pred->getPos(i+1) + 1;
-    else                    start = 1;
+  for(i=0; i<pred->vGene[NumGene-1]->nbFea; i++) {
+    state = pred->vGene[NumGene-1]->vFea[i]->state;
+    start = pred->vGene[NumGene-1]->vFea[i]->start;
+    end   = pred->vGene[NumGene-1]->vFea[i]->end;
 
     if(end >= Tdebut-1  &&  end <= Tfin+1)
       {
 	len      = 0;
 	int numF = -1;
+	
+	if(state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
+	  numF = pred->vGene[NumGene-1]->vFea[i]->number;
 
-	if(state <= TermR3) {
-	  (strand == '-') ? NumFEA-- : NumFEA++;
-	  strcpy(fea, "Exon");
-	  numF = NumFEA;
-	}
-	else if(state == UTR5F  ||  state == UTR5R) {
-	  strcpy(fea, "UTR5");
-	  numF = 0;
-	}
-	else if(state == UTR3F  ||  state == UTR3R) {
-	  strcpy(fea, "UTR3");
-	  numF = 0;
-	}
+	if(state <= TermR3)                         strcpy(fea, "Exon");
+	else if(state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
+	else if(state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
 
 	if(numF != -1) {
 	  if((int)vSupEstI.size() > 0)
@@ -869,9 +836,10 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	    len = LenSup(HitTable, vSupEstI, -1, start, end);
 	  
 	  if(len > 0) {
-	    printf("%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-		   (((NumGene-1)*stepid)+1),numF,fea,start,end,len,strand);
-	    printf("%d\t", (int)((float)len/(end-start+1)*100));
+	    fprintf(MINFO, "%s.%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
+		    pred->seqName, (((NumGene-1)*stepid)+1), numF,
+		    fea, start, end, len, strand);
+	    fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 	    
 	    for (int k=0;  k<NumEST;  k++)
 	      HitTable[k]->Support = 0;
@@ -888,8 +856,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 
 	    // On affiche les ppNumber premiers hits supportant
 	    for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
-	      printf("%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
-	    printf("\n");
+	      fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
+	    fprintf(MINFO, "\n");
 	  }
 	}
       }	
@@ -909,9 +877,10 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 	len = LenSup(HitTable, vSupEstI, -1, start, end);
      
       if(len > 0) {
-	printf("%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-	       (((NumGene-1)*stepid)+1), fea, start+1, end+1, len, strand);
-	printf("%d\t", (int)((float)len/(end-start+1)*100));
+	fprintf(MINFO, "%s.%d  \tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
+		pred->seqName, (((NumGene-1)*stepid)+1), fea,
+		start+1, end+1, len, strand);
+	fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 	
 	for (int k=0;  k<NumEST;  k++)
 	  HitTable[k]->Support = 0;
@@ -928,8 +897,8 @@ void SensorEst :: FEASupport(Prediction *pred, int Tdebut, int Tfin, int debut,
 
 	// On affiche les ppNumber premiers hits supportant
 	for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
-	  printf("%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
-       	printf("\n");
+	  fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
+       	fprintf(MINFO, "\n");
       }
     }
   }

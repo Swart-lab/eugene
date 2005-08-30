@@ -313,75 +313,57 @@ void SensorBlastX :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorBlastX :: PostAnalyse(Prediction *pred)
+void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
-  int state  = 0, stateNext = 0, stateBack = 0;
-  int pos    = 0, posNext   = 0, posBack   = 0;
-  int begCDS = 1, endCDS    = 0;
+  int state    = 0, start  = 0, end = 0;
+  int cdsStart = 0, cdsEnd = 0;
   int CodingNuc    = 0;
   int SupportedNuc = 0;
-  int NumGene      = 0;  
 
   int pprocess = PAR.getI("BlastX.PostProcess",GetNumber());
   if (!pprocess)    return;
   if (NumProt == 0) return;
 
+  fprintf(MINFO, "#=========================================#\n");
+  fprintf(MINFO, "#=           Protein evidences           =#\n");
+  fprintf(MINFO, "#=========================================#\n");
+
   index=0;
   qsort((void *)HitTable, NumProt, sizeof(void *), HitsCompareLex);
+
   // Reset static in Prot Support or FEA Support
-  ProtSupport(NULL, 100, 0, NULL, 0, 0);
+  ProtSupport(NULL, NULL, 100, 0, NULL, 0, 0);
   
-  for(int i=pred->size()-1; i!=-1; i--) {
-    if(i != pred->size()-1) {
-      stateBack = pred->getState(i+1);
-      posBack   = pred->getPos(i+1);
-    }
-    state = pred->getState(i);
-    pos   = pred->getPos(i);
-    if(i != 0) {
-      stateNext = pred->getState(i-1);
-      posNext   = pred->getPos(i-1);
-    }
-    
-    if (state <= TermR3) { // EXON
-      if (stateBack >= UTR5F) { // c'est le premier (ou dernier) d'une CDS
-	CodingNuc = 0;
-	SupportedNuc = 0;
-	begCDS=posBack+1;
-      }
-      
-      CodingNuc += pos-posBack;
-      
-      if (pprocess == 1) {
-	while ( (index < (int)vPos.size()) && (vPos[index] < posBack)) index++;
-	// index=indice du premier match etant > ou = au debut de l'exon
-	// fprintf(stderr,"premier match > ou = au debut de l'exon: pos %d,
-	// index=%d\n",vPos[index],index);
-	
-	if (index < (int)vPos.size()) { // il reste des hits
-	  // pour chaque nuc de l'exon supporte par un hit
-	  while (index < (int)vPos.size() && vPos[index]<pos) {
-	    if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
-	    index++;
+  for(int i=0; i<pred->nbGene; i++) {
+    SupportedNuc = 0;
+    CodingNuc    = pred->vGene[i]->exLength;
+    cdsStart     = pred->vGene[i]->cdsStart + 1;
+    cdsEnd       = pred->vGene[i]->cdsEnd   + 1;
+   
+    if (pprocess == 1) {
+      for(int j=0; j<pred->vGene[i]->nbFea; j++) {
+	state = pred->vGene[i]->vFea[j]->state;
+	start = pred->vGene[i]->vFea[j]->start;
+	end   = pred->vGene[i]->vFea[j]->end;
+	if(state <= TermR3) {
+	  // index=indice du premier match etant > ou = au debut de l'exon
+	  while( (index < (int)vPos.size()) && (vPos[index] < start-1) ) index++;
+	  
+	  if (index < (int)vPos.size()) { // il reste des hits
+	    // pour chaque nuc de l'exon supporte par un hit
+	    while (index < (int)vPos.size() && vPos[index]<end) {
+	      if (State2Phase[state] ==  vPMPhase[index]) SupportedNuc++;
+	      index++;
+	    }
 	  }
 	}
       }
-
-      // Si fin de gene ou fin seq gene en cours
-      if ((state <= TermR3 && stateNext >= InterGen) ||
-	  (i==0 && (state <= IntronR3))) {
-	endCDS = pos;
-	if (pprocess == 1) {
-	  printf("      CDS (prot.)  %7d %7d    %5d     ",
-		 begCDS,endCDS,endCDS-begCDS+1);
-	    printf("supported on %d/%d coding.\n", SupportedNuc,CodingNuc);
-	}
-	else {
-	  NumGene++;
-	  ProtSupport(pred, begCDS, endCDS, HitTable, NumProt, NumGene);
-	}
-      }
+      fprintf(MINFO, "      CDS (prot.)  %7d %7d    %5d     ",
+	      cdsStart, cdsEnd, cdsEnd - cdsStart + 1);
+      fprintf(MINFO, "supported on %d/%d coding.\n", SupportedNuc, CodingNuc);
     }
+    else
+      ProtSupport(pred, MINFO, cdsStart, cdsEnd, HitTable, NumProt, i+1);
   }
 }
 
@@ -389,8 +371,8 @@ void SensorBlastX :: PostAnalyse(Prediction *pred)
 //  Post analyse (Analyse de la prédiction (features) par rapport aux Prot)
 //    debut/fin  = debut/fin de traduit
 // -------------------------------------------------------------------------
-void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
-				 Hits **HitTable,  int Size,  int NumGene)
+void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
+				 int fin, Hits **HitTable, int Size, int NumGene)
 {
   static int ProtIndex;
   Block *ThisBlock;
@@ -445,44 +427,39 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
   /***********************************************************************/
   int  start = 0, end = 0, len;
   char fea[5];
-  char strand = '+';
-  if (PhaseAdapt(pred->getStateForPos(debut+1)) < 0) strand = '-';
-  int NumFEA    = 0;
-  int codingNuc = 0;
-  if(strand == '-') NumFEA = pred->nbExon(NumGene) + 1;
+  char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
+  int  codingNuc = 0;
     
-  for(i=pred->size()-1; i!=-1; i--) {
-    state = pred->getState(i);
-    end   = pred->getPos(i);
-    if(i != pred->size()-1) start = pred->getPos(i+1) + 1;
-    else                    start = 1;
-     
+  for(i=0; i<pred->vGene[NumGene-1]->nbFea; i++) {
+    state = pred->vGene[NumGene-1]->vFea[i]->state;
+    start = pred->vGene[NumGene-1]->vFea[i]->start;
+    end   = pred->vGene[NumGene-1]->vFea[i]->end;
+    
     if(end > debut  &&  end <= fin+1)
       {
 	len      = 0;
 	int numF = -1;
 
+	if(state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
+	  numF = pred->vGene[NumGene-1]->vFea[i]->number;
+	
 	if(state <= TermR3) {
-	  (strand == '-') ? NumFEA-- : NumFEA++;
 	  strcpy(fea, "Exon");
-	  numF = NumFEA;
 	  codingNuc += end - start + 1;
 	}
-	else if(state == UTR5F  ||  state == UTR5R  ||
-		state == UTR3F  ||  state == UTR3R) {
-	  strcpy(fea, "UTR");
-	  numF      = 0;
-	}
-
+	else if(state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
+	else if(state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
+	
       	if(numF != -1) {
 	  if((int)vSupProtI.size() > 0)
 	    // Longueur totale supportée par les prots
 	    len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
 	  
 	  if(len > 0) {
-	    printf("%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-		   (((NumGene-1)*stepid)+1),numF,fea,start,end,len,strand);
-	    printf("%d\t", (int)((float)len/(end-start+1)*100));
+	    fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
+		    pred->seqName, (((NumGene-1)*stepid)+1), numF,
+		    fea,start,end,len,strand);
+	    fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 	    
 	    for (int k=0;  k<NumProt;  k++)
 	      HitTable[k]->Support = 0;
@@ -499,9 +476,9 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
 	   
 	    // On affiche les ppNumber premiers hits supportant
 	    for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
-	      printf("%s(%d,%d) ", TMPHitTable[j]->Name,
-		     TMPHitTable[j]->Support, TMPHitTable[j]->Level);
-	    printf("\n");
+	      fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
+		      TMPHitTable[j]->Support, TMPHitTable[j]->Level);
+	    fprintf(MINFO, "\n");
 	  }
 	}
       }
@@ -511,7 +488,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
   /* Objectif : Analyser la CDS et le gene predit -> supportée ?         */
   /***********************************************************************/
   start = debut;
-  end = fin;
+  end   = fin;
   strcpy(fea, "CDS");
 
   if (end >= start) {
@@ -521,9 +498,10 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
       len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
     
     if(len > 0) {
-      printf("%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-	     (((NumGene-1)*stepid)+1), fea, start, end, len, strand);
-      printf("%d\t", (int)((float)len/codingNuc*100));
+      fprintf(MINFO, "%s.%d  \tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
+	      pred->seqName, (((NumGene-1)*stepid)+1), fea,
+	      start, end, len, strand);
+      fprintf(MINFO, "%d\t", (int)((float)len/codingNuc*100));
       for (int k=0;  k<NumProt;  k++)
 	HitTable[k]->Support = 0;
 	
@@ -539,9 +517,9 @@ void SensorBlastX :: ProtSupport(Prediction *pred, int debut, int fin,
     
       // On affiche les ppNumber premiers hits supportant
       for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0; j++)   
-	printf("%s(%d,%d) ", TMPHitTable[j]->Name,
-	       TMPHitTable[j]->Support, TMPHitTable[j]->Level);
-      printf("\n");
+	fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
+		TMPHitTable[j]->Support, TMPHitTable[j]->Level);
+      fprintf(MINFO, "\n");
     }
   }
   vSupProtI.clear();
@@ -578,7 +556,7 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
       to   = Min(end, ThisBlock->End+1);
        
       for (j=from; j<=to; j++) {
-	state = pred->getStateForPos(j);
+	state = pred->GetStateForPos(j);
 	if (!Sup[j-beg]  &&  State2Phase[state] == ThisBlock->Phase) {
 	  Sup[j-beg] = 1;
 	  supported++;
