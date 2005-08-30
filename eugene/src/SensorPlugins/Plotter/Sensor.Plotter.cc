@@ -176,6 +176,6 @@ void SensorPlotter :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse.
 // ------------------
-void SensorPlotter :: PostAnalyse(Prediction *pred)
+void SensorPlotter :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

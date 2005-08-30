@@ -571,6 +571,6 @@ void SensorAnnotaStruct :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse.
 // ------------------
-void SensorAnnotaStruct :: PostAnalyse(Prediction *pred)
+void SensorAnnotaStruct :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

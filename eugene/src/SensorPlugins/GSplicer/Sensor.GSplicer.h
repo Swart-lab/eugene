@@ -46,7 +46,7 @@ class SensorGSplicer : public Sensor
   virtual void Init       (DNASeq *X);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorGSplicer* builder0( int n, DNASeq *X) { return new SensorGSplicer(n, X);}

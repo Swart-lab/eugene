@@ -45,7 +45,7 @@ class SensorNG2 : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorNG2 * builder0( int n, DNASeq *X) {  return new SensorNG2(n, X);}

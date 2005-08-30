@@ -123,6 +123,6 @@ void SensorRepeat :: Plot(DNASeq *TheSeq)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorRepeat :: PostAnalyse(Prediction *pred)
+void SensorRepeat :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

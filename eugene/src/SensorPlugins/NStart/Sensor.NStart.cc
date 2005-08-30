@@ -200,6 +200,6 @@ void SensorNStart :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorNStart :: PostAnalyse(Prediction *pred)
+void SensorNStart :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

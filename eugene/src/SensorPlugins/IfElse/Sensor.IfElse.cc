@@ -124,8 +124,8 @@ void SensorIfElse :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorIfElse :: PostAnalyse(Prediction *pred)
+void SensorIfElse :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
-  sensorIf->PostAnalyse(pred);
-  sensorElse->PostAnalyse(pred);
+  sensorIf->PostAnalyse(pred, MINFO);
+  sensorElse->PostAnalyse(pred, MINFO);
 }

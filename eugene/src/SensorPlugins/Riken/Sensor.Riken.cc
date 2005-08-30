@@ -345,6 +345,6 @@ void SensorRiken :: Plot(DNASeq *TheSeq)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorRiken :: PostAnalyse(Prediction *pred)
+void SensorRiken :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

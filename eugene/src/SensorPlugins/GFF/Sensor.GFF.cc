@@ -123,7 +123,7 @@ void SensorGFF :: Init (DNASeq *X)
 
   if (!IsInitialized) {
     if (PAR.getI("GFF.PostProcess")  &&  gffList[0]->GC != -1.0) {
-      if (!(ppfile = fopen("statSeqs.txt", "w"))) {
+      if (!(ppfile = FileOpen(NULL, "statSeqs.txt", "w"))) {
 	fprintf(stderr, "cannot open GFF file %s\n", "statSeqs.txt");
 	exit(2);
       }
@@ -160,7 +160,7 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1], int seqlen)
   int   a  = -1, t = -1, c = -1, g = -1, n = -1;
   float gc = -1.0;
 
-  if (!(fp = fopen(name, "r"))) {
+  if (!(fp = FileOpen(NULL, name, "r"))) {
     fprintf(stderr, "cannot open GFF file %s\n", name);
     exit(2);
   }
@@ -251,7 +251,7 @@ void SensorGFF :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse.
 // ------------------
-void SensorGFF :: PostAnalyse(Prediction *pred)
+void SensorGFF :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
   if (!PAR.getI("GFF.PostProcess")) return;
   

@@ -210,6 +210,6 @@ double SensorGSplicer :: Norm(double x, double n) {
 // ------------------
 //  Post analyse.
 // ------------------
-void SensorGSplicer :: PostAnalyse(Prediction *pred)
+void SensorGSplicer :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

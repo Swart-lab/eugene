@@ -315,6 +315,6 @@ void SensorMarkovIMM :: Plot(DNASeq *TheSeq)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorMarkovIMM :: PostAnalyse(Prediction *pred)
+void SensorMarkovIMM :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

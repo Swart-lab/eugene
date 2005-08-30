@@ -42,7 +42,7 @@ class SensorPatConst : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorPatConst* builder0( int n ) { return new SensorPatConst(n);}

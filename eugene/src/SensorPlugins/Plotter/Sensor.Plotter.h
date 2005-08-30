@@ -37,7 +37,7 @@ class SensorPlotter : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorPlotter* builder0( int n, DNASeq *X) { return new SensorPlotter(n, X);}

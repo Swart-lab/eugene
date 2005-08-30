@@ -330,7 +330,7 @@ void SensorSMachine :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorSMachine :: PostAnalyse(Prediction *pred)
+void SensorSMachine :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }
 // -----------------------

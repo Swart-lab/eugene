@@ -208,7 +208,6 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     }
  
     gene = ReadGFFAnnotation();
-    
     sensor = MS->MakeSensor( "Sensor."+SensorName, SensorInstance, X );
     sensor->Init(X);
     
@@ -302,7 +301,7 @@ void SensorTester :: Plot(DNASeq *X)
 // --------------
 //  Post analyse
 // --------------
-void SensorTester :: PostAnalyse(Prediction *pred)
+void SensorTester :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }
 
@@ -329,7 +328,9 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
   char *feature = new char[FILENAME_MAX];
   int  start,  end;
   char strand, frame;
-  gene = new Prediction();
+
+  std::vector <int>         vPos;
+  std::vector <signed char> vState;
 
   std::cerr <<"Reading coordinates file......................"; fflush(stderr);
 
@@ -350,16 +351,31 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
 	  {std::cerr<<"\nError in gff file "<<gff_file_name<<" line "<<j<<".\n";exit(2);}
       } else if (strcmp(feature,"Intron") != 0) {
 	if (j==1) {
-	  gene->add(start-1, InterGen);
+	  vPos.push_back  ( start-1  );
+	  vState.push_back( InterGen );
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
-	    if (Todo=="TEST") gene->add(end, UTR5F);
-	  } else if (strcmp(feature, "E.Init") == 0)
-	    gene->add(end, InitF1);
-	  else if (strcmp(feature, "E.Term") == 0)
-	    gene->add(end, InitR1);
+	    if (Todo=="TEST") {
+	      vPos.push_back  ( end   );
+	      vState.push_back( UTR5F );
+	    }
+	  }
+	  else if (strcmp(feature, "E.Init") == 0) {
+	    vPos.push_back  ( end    );
+	    vState.push_back( InitF1 );
+	  }
+	  else if (strcmp(feature, "E.Term") == 0) {
+	    vPos.push_back  ( end    );
+	    vState.push_back( InitR1 );
+	  }
 	  else if (strcmp(feature, "E.Sngl") == 0)
-	    if (strand == '+') gene->add(end, InitF1);
-	    else               gene->add(end, InitR1);
+	    if (strand == '+') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitF1 );
+	    }
+	    else {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
 	  else {
 	    std::cerr <<"\n Error in gff file "<<gff_file_name
 		      <<" line "<<j<<".\n"
@@ -372,30 +388,54 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
 	}
 	else {
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
-	    if (Todo=="TEST") gene->add(end, UTR5F);
-	  } else if (strcmp(feature,"E.Init") == 0)
-	    if (strand == '+') gene->add(end, InitF1);
+	    if (Todo=="TEST") {
+	      vPos.push_back  ( end   );
+	      vState.push_back( UTR5F );
+	    }
+	  }
+	  else if (strcmp(feature,"E.Init") == 0)
+	    if (strand == '+') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitF1 );
+	    }
 	    else {
-	      gene->add(start-1, IntronR1);
-	      gene->add(end, InitR1);
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronR1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitR1   );
 	    }
 	  else if (strcmp(feature,"E.Term") == 0)
-	    if (strand == '-') gene->add(end, InitR1);
+	    if (strand == '-') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
 	    else {
-	      gene->add(start-1, IntronF1);
-	      gene->add(end, InitF1);
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronF1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitF1   );
 	    }
 	  else if (strcmp(feature,"E.Sngl") == 0)
-	    if (strand == '+') gene->add(end, InitF1);
-	    else               gene->add(end, InitR1); 
-	  else if (strcmp(feature,"E.Intr") == 0) {
 	    if (strand == '+') {
-	      gene->add(start-1, IntronF1);
-	      gene->add(end, IntrF1);
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitF1   );
 	    }
 	    else {
-	      gene->add(start-1, IntronR1);
-	      gene->add(end, InitR1);
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
+	  else if (strcmp(feature,"E.Intr") == 0) {
+	    if (strand == '+') {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronF1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( IntrF1   );
+	    }
+	    else {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronR1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitR1   );
 	    }
 	  }
 	  else {
@@ -420,15 +460,15 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
       std::cerr <<" WARNING : complete genes only in gff file.\n";
       exit(2);
     }
-  
-  // The prediction method have been develop for vector vPos & vESTMatch
-  // describing the sequence form end to start...
-  gene->reversePred();
-
-  //printf("\n"); gene->print();
+ 
   std::cerr <<"done\n";
-  
+
   delete [] feature;
+
+  gene = new Prediction(vPos, vState);
+
+  vPos.clear();
+  vState.clear();
 
   return gene;
 }
@@ -442,16 +482,16 @@ char* SensorTester :: SigType_TF(int i, int pos, char **sType)
   switch (i) {
   case 2:
     *sType = "Start";
-    return gene->isStart(pos);
+    return gene->IsStart(pos);
   case 3:
     *sType = "Stop";
-    return gene->isStop(pos);
+    return gene->IsStop(pos);
   case 4:
     *sType = "Acc";
-    return gene->isAcc(pos);
+    return gene->IsAcc(pos);
   case 5:
     *sType = "Don";
-    return gene->isDon(pos);
+    return gene->IsDon(pos);
   default:
     *sType = "Unknown";
     return "- ? -";
@@ -463,7 +503,7 @@ char* SensorTester :: SigType_TF(int i, int pos, char **sType)
 // -------
 char* SensorTester :: State(int pos)
 {
-  switch (gene->getStateForPos(pos)) {
+  switch (gene->GetStateForPos(pos)) {
   case 0:
     return "InitF";
   case 3:

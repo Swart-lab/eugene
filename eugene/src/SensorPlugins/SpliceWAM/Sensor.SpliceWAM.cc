@@ -206,6 +206,6 @@ void SensorSpliceWAM :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorSpliceWAM :: PostAnalyse(Prediction *pred)
+void SensorSpliceWAM :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

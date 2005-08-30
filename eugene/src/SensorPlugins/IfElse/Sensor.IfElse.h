@@ -36,7 +36,7 @@ class SensorIfElse : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot(DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorIfElse * builder0(int n, DNASeq *X) {  return new SensorIfElse(n, X); }

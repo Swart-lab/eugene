@@ -302,6 +302,6 @@ void SensorHomology :: PlotAt(int pos)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorHomology :: PostAnalyse(Prediction *pred)
+void SensorHomology :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

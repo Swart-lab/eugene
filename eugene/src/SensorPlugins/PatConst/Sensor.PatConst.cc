@@ -168,6 +168,6 @@ void SensorPatConst :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse.
 // ------------------
-void SensorPatConst :: PostAnalyse(Prediction *pred)
+void SensorPatConst :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

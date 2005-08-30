@@ -74,6 +74,6 @@ void SensorTranscript :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorTranscript :: PostAnalyse(Prediction *pred)
+void SensorTranscript :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

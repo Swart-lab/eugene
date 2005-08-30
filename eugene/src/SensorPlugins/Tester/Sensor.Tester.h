@@ -91,7 +91,7 @@ class SensorTester : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorTester * builder0(int n, DNASeq *X) { return new SensorTester(n, X); }

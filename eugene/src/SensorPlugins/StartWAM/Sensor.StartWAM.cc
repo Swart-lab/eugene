@@ -163,6 +163,6 @@ void SensorStartWAM :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorStartWAM :: PostAnalyse(Prediction *pred)
+void SensorStartWAM :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

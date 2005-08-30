@@ -49,7 +49,7 @@ class SensorStartWAM : public Sensor
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
   virtual void Plot       (DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorStartWAM * builder0(int n, DNASeq *X) {  return new SensorStartWAM(n, X); }

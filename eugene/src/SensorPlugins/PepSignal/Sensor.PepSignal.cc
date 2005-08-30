@@ -178,6 +178,6 @@ void SensorPepSignal :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorPepSignal :: PostAnalyse(Prediction *pred)
+void SensorPepSignal :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }

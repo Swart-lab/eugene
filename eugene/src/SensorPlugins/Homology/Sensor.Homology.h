@@ -47,7 +47,7 @@ class SensorHomology : public Sensor
   char   ph06        (char);
   virtual void Plot  (DNASeq *);
   virtual void PlotAt(int pos);
-  virtual void PostAnalyse(Prediction *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 
 };
 

@@ -48,8 +48,8 @@ class SensorMarkovProt : public Sensor
   virtual ~SensorMarkovProt   ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);
-  virtual void Plot(DNASeq *);
-  virtual void PostAnalyse(Prediction *);
+  virtual void Plot       (DNASeq *);
+  virtual void PostAnalyse(Prediction *, FILE *);
 };
 
 extern "C" SensorMarkovProt * builder0( int n, DNASeq *X) { return new SensorMarkovProt(n, X);}

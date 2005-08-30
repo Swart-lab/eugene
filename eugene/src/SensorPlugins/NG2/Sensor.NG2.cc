@@ -264,6 +264,6 @@ void SensorNG2 :: Plot(DNASeq *X)
 // ------------------
 //  Post analyse
 // ------------------
-void SensorNG2 :: PostAnalyse(Prediction *pred)
+void SensorNG2 :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }
