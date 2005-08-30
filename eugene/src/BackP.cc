@@ -185,18 +185,20 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 // ----------------------------------------------------------------
 Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 {
-  Prediction *pred = new Prediction();
+  std::vector <int>         vPos;
+  std::vector <signed char> vState;
+  Prediction *pred;
   BackPoint  *It;
   int  pos;
   char etat;
-  int ntopop = -1;
-  int prevpos,prevstate;
-  int CDSlen = 0;
+  int  ntopop = -1;
+  int  prevpos, prevstate;
+  int  CDSlen = 0;
 
   // put state back on correct transitions for backward predictions
   if (!Forward) {
     It = Path.Next;
-    etat = It-> State;
+    etat = It->State;
     It = It->Origin;
     
     while (It != NULL) {
@@ -213,7 +215,10 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
   pos  = It->StartPos;
   etat = It->State;
   It   = It->Origin;
-  if (pos >= 0) pred->add(pos, etat);
+  if (pos >= 0) {
+    vPos.push_back  ( pos  );
+    vState.push_back( etat );
+  }
 
   prevpos = pos;
   prevstate = etat;
@@ -244,28 +249,48 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 	//	printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop-1);
 	// we want to keep the same change state. In forward, we keep
 	// the first IG state (pop n-1) and don't put back this one.
-	if (Forward) pred->popn(ntopop-1);
+	if (Forward) {
+	  for (int i = 0; i < ntopop-1; i++) {
+	    vPos.pop_back();
+	    vState.pop_back();
+	  }
+	}
 	// in Backward, we pop n but insert this one.
 	else {
-	  pred->popn(ntopop);
-	  pred->add(pos, etat);
+	  for (int i = 0; i < ntopop; i++) {
+	    vPos.pop_back();
+	    vState.pop_back();
+	  }
+	  vPos.push_back  ( pos  );
+	  vState.push_back( etat );
 	}
       }
-      else pred->add(pos, etat);
+      else {
+	vPos.push_back  ( pos  );
+	vState.push_back( etat );
+      }
       CDSlen = 0;
       ntopop = 0;
     }
-    else if (pos >= 0)
-      pred->add(pos, etat);
+    else if (pos >= 0) {
+      vPos.push_back  ( pos  );
+      vState.push_back( etat );
+    }
     
-    prevpos = pos;
+    prevpos   = pos;
     prevstate = etat;
   }
   
-  if (!Forward) pred->reversePred();
-  pred->setPos(0, pred->getPos(0)-1);  
+  vPos[0] -=  1;  
   
-  //    pred->print();
+  if (Forward) {
+    reverse(vState.begin(), vState.end());
+    reverse(vPos.begin(),   vPos.end());
+  }
+  
+  pred = new Prediction(vPos, vState);
+  vPos.clear();
+  vState.clear();
 
   return pred;
 }

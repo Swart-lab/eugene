@@ -24,7 +24,9 @@ AM_CXXFLAGS = $(eugene_cxxflags) -DDEFAULT_EUGENE_DIR=\"${pkgdatadir}\"
 AM_CFLAGS = 
 
 bin_PROGRAMS = eugene
-eugene_SOURCES = EuGene.cc DAG.cc Output.cc Output.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h
+
+eugene_SOURCES = EuGene.cc DAG.cc Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h AltEst.cc Alt.Est.h
+
 eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl
 
 

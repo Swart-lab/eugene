@@ -55,7 +55,6 @@ inline int (isnan)(double r) { return isnan(r); }
 #include "DNASeq.h"
 #include "BackP.h"
 #include "PenaltyDist.h"
-#include "Output.h"
 #include "Prediction.h"
 #include "Parametrization/ParaOptimization.h"
 
@@ -132,15 +131,16 @@ DNASeq* ReadSequence (char* sequence_name)
 // -------------------------------------------------------------------------
 int main  (int argc, char * argv [])
 {
-  DNASeq *TheSeq;
-  int    Data_Len;
+  DNASeq     *TheSeq;
+  int        Data_Len;
   Prediction *pred;
-  char   grnameFile[FILENAME_MAX+1];
-  char   grname[FILENAME_MAX+1];
-  int    graph;
+  FILE       *MISC_INFO;
+  char       prefixName[FILENAME_MAX+1];
+  char       grname[FILENAME_MAX+1];
+  int        graph;
 
-  fprintf(stderr,"-------------------------------------");
-  fprintf(stderr,"--------------------------------\n");
+  fprintf(stderr,"-------------------------------------"
+	  "--------------------------------\n");
 
   // Lecture de la ligne d'arg et du fichier .par
   PAR.initParam(argc, argv);
@@ -151,11 +151,12 @@ int main  (int argc, char * argv [])
     {
       // Objectif : limiter les appels à la MAP
       graph = PAR.getI("Output.graph");
-      
+
       int sequence;
       for (sequence = optind; sequence < argc ; sequence++) {
 	
 	PAR.set("fstname", argv[sequence]);
+
 	// --------------------------------------------------------------------
 	// Lecture de la sequence    
 	// --------------------------------------------------------------------
@@ -163,25 +164,29 @@ int main  (int argc, char * argv [])
 	Data_Len = TheSeq->SeqLen;
     
 	// --------------------------------------------------------------------
+	// Prefix output file name
+	// --------------------------------------------------------------------
+	strcpy(prefixName, PAR.getC("Output.Prefix"));
+	strcat(prefixName, BaseName(PAR.getC("fstname")));
+	if ( rindex(prefixName, '.') != NULL ) {
+	  if (!strcmp(rindex(prefixName, '.'), ".fasta") ||
+	      !strcmp(rindex(prefixName, '.'), ".fsa")   ||
+	      !strcmp(rindex(prefixName, '.'), ".tfa")   ||
+	      !strcmp(rindex(prefixName, '.'), ".txt"))
+	    *rindex(prefixName, '.') = 0;     // on enleve l'extension
+	}
+	PAR.set("prefixName", prefixName);
+
+	// --------------------------------------------------------------------
 	// Preparation sortie graphique + Scores
 	// --------------------------------------------------------------------
 	if (graph) {
 	  int gto       = PAR.getI("Output.gto");
 	  int gfrom     = PAR.getI("Output.gfrom");
 	  int glen      = PAR.getI("Output.glen");
-      
-	  // Récupération du nom du fichier d'origine
-	  strcpy(grnameFile, BaseName(PAR.getC("fstname")));
-	  if ( rindex(grnameFile, '.') != NULL )
-	    *rindex(grnameFile, '.') = 0;     // on enleve l'extension
-		  
+      		  
 	  // Construction du nom de sortie (*.png)
-	  strcpy(grname, PAR.getC("Output.Prefix"));
-	  strcat(grname, grnameFile);
-	  if(PAR.getC("grnameArg")[0]!='0') { // -ph sans -g ou -g NO pas d'arg
-	    strcat(grname,".");
-	    strcat(grname,PAR.getC("grnameArg"));
-	  }
+	  strcpy(grname, prefixName);
 	  
 	  if ((gfrom <= 0)|| (gfrom >= Data_Len))
 	    gfrom = 1;
@@ -210,33 +215,45 @@ int main  (int argc, char * argv [])
 	MS = new MasterSensor();
 	MS->InitMaster(TheSeq);
 
+	// --------------------------------------------------------------------
+	// Predict
+	// --------------------------------------------------------------------
 	pred = Predict(TheSeq, MS);
-    
-	fprintf(stderr,"Optimal path length = %.4f\n",- pred->OptimalPath);
+       	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
 	
+	// --------------------------------------------------------------------
+	// Textual and graphical output
+	// --------------------------------------------------------------------
 	if (graph)
-	  pred->plotPred();
-    
-	Output(TheSeq, MS, pred, sequence, argc, argv, stdout);
-	MS->PostAnalyse(pred);
-    
-	if (graph) {
+	  pred->PlotPred();
+
+	pred->Print(TheSeq, MS);
+
+    	if (graph) {
 	  fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
 	  fflush(stderr);
 	  ClosePNG();
 	  fprintf(stderr, "done\n");
 	}
-	
+
+	strcpy(grname, prefixName);
+	MISC_INFO = FileOpen(NULL, strcat(grname, ".misc_info"), "wb");
+	pred->PrintGeneInfo(MISC_INFO);
+	MS->PostAnalyse(pred, MISC_INFO);
+	fclose(MISC_INFO);
+
 	// Free used memory
 	delete TheSeq; 
 	delete MS;
-	delete pred;//->resetPred();
+	delete pred;
 	
+	fflush(stderr);
+	fflush(stdout);
       } // fin de traitement de chaque séquence....
-  
-      fprintf(stderr,"-------------------------------------");
-      fprintf(stderr,"--------------------------------\n");
-  
+	    
+      fprintf(stderr,"-------------------------------------"
+	      "--------------------------------\n");
+    
       return  0;
     }
 }
