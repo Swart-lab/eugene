@@ -479,9 +479,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
       // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-      PICOMP(true,Ins,Forward,InitF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,InitF1+(k+1)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,InitF1+(k+1)%3);
+      PICOMP(true,Del,Forward,InitF1+(k+2)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -531,9 +531,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
       PICOMP((position % 3 == k),Start,Forward,UTR5F);
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,SnglF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,SnglF1+(k+1)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,SnglF1+(k+1)%3);
+      PICOMP(true,Del,Forward,SnglF1+(k+2)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -582,9 +582,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StopStop & (DNASeq::isGf | DNASeq::isAf)) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-      PICOMP(true,Ins,Forward,IntrF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,IntrF1+(k+1)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,IntrF1+(k+1)%3);
+      PICOMP(true,Del,Forward,IntrF1+(k+2)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -644,9 +644,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	       ((StopStop & (DNASeq::isAf | DNASeq::isGf)) ? SplicedStopPen : 0.0));
 
       // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-      PICOMP(true,Ins,Forward,TermF1+(k+2)%3);
+      PICOMP(true,Ins,Forward,TermF1+(k+1)%3);
       // Il y a une deletion (frameshift)
-      PICOMP(true,Del,Forward,TermF1+(k+1)%3);
+      PICOMP(true,Del,Forward,TermF1+(k+2)%3);
     
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
