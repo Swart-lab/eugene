@@ -35,9 +35,10 @@ Output.golap		-1
 Output.gfrom		-1
 Output.gto		-1
 Output.window		48
-Output.format		l
 Output.offset		0
 Output.normopt		1
+Output.intron		0
+Output.format		l
 Output.Prefix		./
 Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
@@ -149,7 +150,7 @@ Transcript.Stop*	4.155
 #################################################################
 #
 ##### Proteic similarity sensor parameters #####
-BlastX.PostProcess 2    # 0 1 OR 2
+BlastX.PostProcess 0    # 0 1 OR 2
 BlastX.PPNumber	   5    # For PostProcess = "2"
 BlastX.levels	012
 BlastX.level0*	0.2
