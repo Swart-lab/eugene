@@ -160,6 +160,25 @@ enum Tracks {
   IntronU3F = 43, IntronU3R  = 44, 
   NbTracks  = 45};
 
+const short int ReverseIt[NbTracks] = {
+  InitR1, InitR2, InitR3,  
+  InitF1, InitF2, InitF3,
+  SnglR1, SnglR2, SnglR3,
+  SnglF1, SnglF2, SnglF3,
+  IntrR1, IntrR2, IntrR3,
+  IntrF1, IntrF2, IntrF3,
+  TermR1, TermR2, TermR3,
+  TermF1, TermF2, TermF3,
+  IntronR1, IntronR2, IntronR3,
+  IntronF1,IntronF2, IntronF3,
+  IntronR3G, IntronR3A, IntronR2AG,
+  IntronF2T, IntronF3TG, IntronF3TA,
+  InterGen, 
+  UTR5R,UTR3R, 
+  UTR5F, UTR3F, 
+  IntronU3F, IntronU3R, 
+  IntronU5F, IntronU5R};
+
 const short int UnorientedTracks[1] = {InterGen};
 
 const short int ForwardTracks[(NbTracks-1)/2] = {
