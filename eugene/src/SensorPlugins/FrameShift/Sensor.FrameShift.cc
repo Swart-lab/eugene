@@ -87,9 +87,9 @@ void SensorFrameShift :: PostAnalyse(Prediction *pred, FILE *MINFO)
 	if(state <= TermR3)
 	  if(posFs != -1) { // Frameshift plot
 	    if(1 <= State2Phase[state] <= 3)	 
-	      PlotLine(posFs, posFs, state+1, stateBack+1, 0.4, 0.4, 1);
+	      PlotLine(posFs, posFs, State2Phase[state], State2Phase[stateBack], 0.4, 0.4, 1);
 	    else
-	      PlotLine(posFs, posFs, -state+2, -stateBack+2, 0.4, 0.4, 1);
+	      PlotLine(posFs, posFs, State2Phase[state], State2Phase[stateBack], 0.4, 0.4, 1);
 	    
 	    posFs = pred->vGene[i]->vFea[j]->end;
 	    stateBack = state;
