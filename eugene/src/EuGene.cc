@@ -137,6 +137,7 @@ int main  (int argc, char * argv [])
   FILE       *MISC_INFO;
   char       prefixName[FILENAME_MAX+1];
   char       grname[FILENAME_MAX+1];
+  char       miname[FILENAME_MAX+1];
   int        graph;
 
   fprintf(stderr,"-------------------------------------"
@@ -229,18 +230,18 @@ int main  (int argc, char * argv [])
 
 	pred->Print(TheSeq, MS);
 
+	strcpy(miname, prefixName);
+	MISC_INFO = FileOpen(NULL, strcat(miname, ".misc_info"), "wb");
+	pred->PrintGeneInfo(MISC_INFO);
+	MS->PostAnalyse(pred, MISC_INFO);
+	fclose(MISC_INFO);
+
     	if (graph) {
-	  fprintf(stderr,"\nDumping images (\"%s.---.png\")...", grname);
+	  fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
 	  fflush(stderr);
 	  ClosePNG();
 	  fprintf(stderr, "done\n");
 	}
-
-	strcpy(grname, prefixName);
-	MISC_INFO = FileOpen(NULL, strcat(grname, ".misc_info"), "wb");
-	pred->PrintGeneInfo(MISC_INFO);
-	MS->PostAnalyse(pred, MISC_INFO);
-	fclose(MISC_INFO);
 
 	// Free used memory
 	delete TheSeq; 
