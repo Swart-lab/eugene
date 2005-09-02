@@ -1,6 +1,5 @@
-inra-eugene (3.2-1) unstable; urgency=low
+inra-eugene (3.3-1) unstable; urgency=low
 
-  * Initial Release.
+  * Initial release.
 
- -- Marie-Josee Cros <cros@ossau.toulouse.inra.fr>  Fri,  1 Apr 2005 19:32:11 +0200
-
+ -- Marie-Josee Cros <cros@ossau.toulouse.inra.fr>  Fri,  2 Sep 2005 11:45:49 +0200

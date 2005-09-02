@@ -1,0 +1,32 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Format: 1.7
+Date: Fri,  2 Sep 2005 11:45:49 +0200
+Source: inra-eugene
+Binary: inra-eugene
+Architecture: source i386
+Version: 3.3-1
+Distribution: unstable
+Urgency: low
+Maintainer: Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+Changed-By: Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+Description: 
+ inra-eugene - [Biology] A gene finder for Eukaryotics
+Changes: 
+ inra-eugene (3.3-1) unstable; urgency=low
+ .
+   * Initial release.
+Files: 
+ f7e5683cc2bcd0f7d75321e79e0f6432 657 science optional inra-eugene_3.3-1.dsc
+ b58ac27398a2e4a8996d30067ff8c687 5019189 science optional inra-eugene_3.3.orig.tar.gz
+ 8a6f81ec8a7b1c8b9ebbe0a85421446c 25682 science optional inra-eugene_3.3-1.diff.gz
+ fd95a069cae6bd230b7ac81f621da9e0 5222494 science optional inra-eugene_3.3-1_i386.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.1 (GNU/Linux)
+
+iD8DBQFDGCLcmoqVLia3ZCgRAlK3AJwP3fr6l/e6P0NW4bWoSkWoeBVvzwCfczsi
+eQYRoDA74jgQOq+kO6uLTUM=
+=tWkq
+-----END PGP SIGNATURE-----
