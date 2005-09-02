@@ -89,8 +89,8 @@ set OPTIONS(SeqRest) "-po -g"
 set ArabidopsisTestList {Araset Big}
 
 ##################### Araset test variables ################################
-set SEQBASE_DIR "/home/bardou/araset/Genes"
-#/Annotation/Arabidopsis/araset/Genes"
+set SEQBASE_DIR "/Annotation/Arabidopsis/araset/Genes"
+#"/home/bardou/araset/Genes"
 set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
 set SEQ(Araset) {}
 set seq [eval exec ls $SEQBASE_DIR]
