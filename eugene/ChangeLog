@@ -1,4 +1,20 @@
 -------------------------------------------------------------------------------
+v3.3 released 2 Sept. 2005 
+-------------------------------------------------------------------------------
+
+* Output.cc Output.h disapear. Now eugene textual outputs are printed by Prediction class.
+
+* Multiple textual output are possible by using -pa|d|g|h|l|s|o (example:-phg for a gff and html output)
+  Each -p create a file composed by the name of the input fasta file + an extension .gff or .html ...
+
+* For each prediction a *.misc_info file is created. This file contains some informations of the prediction and the postprocess (-E -B)
+
+* The -g argument to activate the graphical output not take argument now.
+
+* New parameter in the eugene.par to print intron in the textual output : Output.intron
+	
+
+-------------------------------------------------------------------------------
 v3.2 released 1 Apr. 2005 
 -------------------------------------------------------------------------------
 
