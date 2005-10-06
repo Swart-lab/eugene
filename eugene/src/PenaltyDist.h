@@ -36,6 +36,7 @@
 class PenaltyDist
 {
   friend class Track;
+  friend class DAG;
  private:
 
   int MinLen;

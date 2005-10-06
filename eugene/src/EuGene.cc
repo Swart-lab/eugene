@@ -97,6 +97,8 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
       Dag.ShortestPathAlgoForward(nuc,Data);
     else
       Dag.ShortestPathAlgoBackward(nuc,Data);
+
+    //if (nuc && (nuc % GCLATENCY) == 0) Dag.MarkAndSweep(nuc);
   }
 
   Dag.WeightThePrior();

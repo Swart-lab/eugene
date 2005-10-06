@@ -295,7 +295,64 @@ void DAG :: Print()
   //	  EvidenceName,NormalizingPath,StartPosition,EndPosition,pred->getHashKey(),pred->getcodingdiffkey());
   //  fflush(stdout);
 }
+// ----------------------------------------------------------------
+//  Print active BP stats
+// ----------------------------------------------------------------
+void DAG :: StatActive() {
+  int BPalloc = 0;
 
+  for (int k = 0;k < NbTracks ; k++) 
+    BPalloc += LBP[k].NumBPAlloc;
+  
+   printf("Number of active BP: %d\n",BPalloc);
+}
+// ----------------------------------------------------------------
+//  Print collected BP stats
+// ----------------------------------------------------------------
+void DAG :: StatGC() {
+  int BPcollect = 0;
+
+  for (int k = 0;k < NbTracks ; k++) 
+    BPcollect += LBP[k].NumBPCollect;
+  
+   printf("Number of collected BP: %d\n",BPcollect);
+}
+// ----------------------------------------------------------------
+//  MarkandSweep garbage collector
+// ----------------------------------------------------------------
+void DAG :: MarkAndSweep(int pos){
+  
+  int k;
+  int Horizon = pos;
+
+  printf("GC started, ");
+  StatActive();
+
+  // We first compute the maximum horizon that will be GC'd. This is
+  // a purely approximative approach. There is a priori non guarantee
+  // that everything will be GC'd with this but most things should.
+  // For each track, the penalty distribution may have a different
+  // length and everything inside this length is a source pointeur for
+  // tracing. The horizon is therefore the Minimum over all Tracks, of
+  // the maximum of 0 and (currentpos - PenD.MaxLen - k*GCLATENCY). k
+  // = 2 should be nice.
+
+  
+  for (k = 0; k < NbTracks ; k++) 
+    Horizon = Min(Horizon,Max(0,pos - LBP[k].PenD.MaxLen - k*GCLATENCY));
+
+  for (k = 0; k < NbTracks ; k++)
+    LBP[k].ClearMark(Horizon);
+
+  for (k = 0; k < NbTracks ; k++) 
+    LBP[k].Mark(Horizon);
+  
+  for (k = 0; k < NbTracks ; k++) 
+    LBP[k].Sweep(Horizon);
+
+  printf("GC finished, ");
+  StatGC();
+}
 // ----------------------------------------------------------------
 //  Shortest Path Algorithm with length constraint
 // ----------------------------------------------------------------
@@ -516,6 +573,8 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // Il y a une deletion (frameshift)
       PICOMP(true,Del,Reverse, InitR1+(k+1)%3);
 
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -556,6 +615,8 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // Il y a une deletion (frameshift)
       PICOMP(true,Del,Reverse, SnglR1+(k+1)%3);
 
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -618,6 +679,8 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // Il y a une deletion (frameshift)
       PICOMP(true,Del,Reverse, IntrR1+(k+1)%3);
 
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -669,6 +732,8 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // Il y a une deletion (frameshift)
       PICOMP(true,Del,Reverse, TermR1+(k+1)%3);
 
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position) % 3 == k-3)) 
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -822,7 +887,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // --- Intron Phase 1 after a T (GA|AA|AG)
     //
     maxi = NINFINITY; best = -1;
-  
     k = 1;
     if (StartStop & DNASeq::isTf) {
       // - on quitte un Init ou un Intr
@@ -837,7 +901,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // --- Intron Phase 2 after an TG|A
     //
     maxi = NINFINITY; best = -1;
-
     k = 2;
     if (StartStop & DNASeq::isTGf) {
       // - on quitte un Init ou un Intr
@@ -852,7 +915,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // --- Intron Phase 2 after a TA(A|G)
     //
     maxi = NINFINITY; best = -1;
-
     k = 2;
     if (StartStop & DNASeq::isTAf) {
       // - on quitte un Init ou un Intr
@@ -888,7 +950,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // --- Intron Phase 1 after a G (AT)
     //
     maxi = NINFINITY; best = -1;
-
     k = 2;
     if (StopStop & DNASeq::isGr) {
       // - on quitte un Intr ou un Term
@@ -904,7 +965,6 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     //
     maxi = NINFINITY; best = -1;
     k = 2;
-    
     if (StopStop & DNASeq::isAr) {
       // - on quitte un Intr ou un Term
       PICOMP(true,Acc,Reverse, IntrR1+((Data_Len-position-k) % 3));
@@ -1026,6 +1086,17 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // ---------------------------
     if (ISPOSSIBLE(Stop,Forward))           
       INEED(UTR3F);
+
+    // ---------------------------
+    // 2b- Exons F (from frameshift)
+    // ---------------------------
+    if (ISPOSSIBLE(Ins,Forward) || ISPOSSIBLE(Del,Forward)) {
+      INEED(InitF1); INEED(InitF2); INEED(InitF3);
+      INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
+      INEED(TermF1); INEED(TermF2); INEED(TermF3); 
+      INEED(SnglF1); INEED(SnglF2); INEED(SnglF3); 
+    }
+
     // ---------------------------
     // 3- Intron F (from ExonF)
     // ---------------------------
@@ -1128,6 +1199,16 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       INEED(IntronR3G);
     }
     // ---------------------------
+    // 19b- ExonR (from frameshift)
+    // ---------------------------
+    if (ISPOSSIBLE(Ins,Reverse) || ISPOSSIBLE(Del,Reverse)) {
+      INEED(InitR1); INEED(InitR2); INEED(InitR3);
+      INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
+      INEED(TermR1); INEED(TermR2); INEED(TermR3); 
+      INEED(SnglR1); INEED(SnglR2); INEED(SnglR3); 
+    }
+
+    // ---------------------------
     // 20- IntronR (from ExonR)
     // ---------------------------
     if (ISPOSSIBLE(Don,Reverse)) {
@@ -1165,8 +1246,13 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       
       // - on recommence a coder (Start) d'une UTR5R
       PICOMPR((Data_Len-position)%3 == k,Start,Reverse,UTR5R);
-      // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
+      // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+      PICOMPR(true,Ins,Reverse,InitR1+(k+1)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Reverse,InitR1+(k+2)%3);
 
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position) % 3 == k)) 
 	LBP[InitR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[InitR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -1193,6 +1279,11 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TA,
 	       ((StartStop & DNASeq::isTAf) ? SplicedStopPen : 0.0));
 
+      // Il y a une insertion (frameshift)
+      PICOMPR(true,Ins,Forward, InitF1+(k+2)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Forward, InitF1+(k+1)%3);
+
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
       if (((position)%3 == k))
@@ -1209,8 +1300,13 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       
       // On commence a coder (Start). Ca vient d'une UTR 5' reverse
       PICOMPR(((Data_Len-position)%3 == k),Start,Reverse,UTR5R);
-      // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
-
+      // Il y a une insertion (frameshift). Saut de positionléotide ignore.
+      PICOMPR(true,Ins,Reverse,SnglR1+(k+1)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Reverse,SnglR1+(k+2)%3);
+    
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position)%3 == k)) 
 	LBP[SnglR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[SnglR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -1225,7 +1321,10 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       
       // On commence a coder (Stop) sur une UTR3F
       PICOMPR(((position)%3 == k),Stop,Forward,UTR3F);
-      // TODO prise en compte STOP dans le PICOMP (cf Init Reverse en Forward)
+      // Il y a une insertion (frameshift)
+      PICOMPR(true,Ins,Forward, SnglF1+(k+2)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Forward, SnglF1+(k+1)%3);
       
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -1254,6 +1353,13 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       PICOMPEN(((Data_Len-position-k)%3 == 1),Acc,Reverse,IntronR2AG,
                ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) ? SplicedStopPen : 0.0));
 
+      // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+      PICOMPR(true,Ins,Reverse,IntrR1+(k+1)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Reverse,IntrR1+(k+2)%3);
+    
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position)%3 == k)) 
 	LBP[IntrR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[IntrR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -1280,6 +1386,10 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       PICOMPEN(((position-k+3)%3 == 2),Don,Forward,IntronF3TA,
                ((StartStop & DNASeq::isTAf) ? SplicedStopPen : 0.0));
 
+      // Il y a une insertion (frameshift)
+      PICOMPR(true,Ins,Forward, IntrF1+(k+2)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Forward, IntrF1+(k+1)%3);
 
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -1308,6 +1418,13 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       PICOMPEN(((Data_Len-position-k)%3 == 1),Acc,Reverse,IntronR2AG,
                ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) ? SplicedStopPen : 0.0));
 
+      // Il y a une insertion (frameshift). Saut de positionléotide ignore.
+      PICOMPR(true,Ins,Reverse,TermR1+(k+1)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Reverse,TermR1+(k+2)%3);
+    
+      // On va tout droit.
+      // S'il y  a un STOP en phase on ne peut continuer
       if (((Data_Len-position)%3 == k)) 
 	LBP[TermR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[TermR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
@@ -1322,6 +1439,10 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       
       // On recommence a coder (Stop). Ca vient d'une UTR3R
       PICOMPR((position%3 ==k),Stop,Forward,UTR3F);
+      // Il y a une insertion (frameshift)
+      PICOMPR(true,Ins,Forward, TermF1+(k+2)%3);
+      // Il y a une deletion (frameshift)
+      PICOMPR(true,Del,Forward, TermF1+(k+1)%3);
 
       // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -1457,6 +1578,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       maxi = NINFINITY; best = -1;
       
       // On quitte un Intr ou un Init reverse
+      // no spliceable stop: 
       if (!(((StartStop & DNASeq::isTr) && k == 1) ||
             ((StartStop & (DNASeq::isTAr|DNASeq::isTGr)) && k == 2))) {
 	PICOMPEN(true,Don,Reverse, InitR1+((Data_Len-position-k)%3),
@@ -1521,6 +1643,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       maxi = NINFINITY; best = -1;
       
       // - on quitte un Term ou un Intr sur un Acc
+      // no spliceable stop: 
       if (!(((StopStop & (DNASeq::isAf|DNASeq::isGf)) && k == 2) ||
             ((StopStop & (DNASeq::isGAf | DNASeq::isARf)) && k == 1)))  {
 	PICOMPR(true,Acc,Forward,IntrF1+(position-k+3)%3);
@@ -1535,7 +1658,6 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // ----------------------------------------------------------------
     // ----------------- Introns forward speciaux ---------------------
     // ----------------------------------------------------------------
-    //
     //
     // --- Intron Phase 2 [TG]---[A]
     //
@@ -1564,9 +1686,9 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
     INSERT(IntronF3TA,DATA::IntronF);
 
+    //
     // --- Intron Phase 1  [T]---[GA|AA|AG]. 
     //
-
     maxi = NINFINITY; best = -1;
     k = 1;
     if (StopStop & (DNASeq::isGAf | DNASeq::isARf)) {
@@ -1577,5 +1699,4 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intronique
     LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
     INSERT(IntronF2T,DATA::IntronF);
-
 }

@@ -33,16 +33,21 @@
 class BackPoint
 {
   friend class Track;
-  // private:
+ private:
+  char Status;
  public:
+  char IsOptimal();
+  void SetOptimal();
+  void ClearOptimal();
+  char IsMarked();
+  void SetMark();
+  void ClearMark();
+  
   signed char State;
-  char Optimal;
   int StartPos;  
   double Cost;
   double Additional;
   BackPoint *Origin;
-  
- public:
   
   BackPoint *Next;
   BackPoint *Prev;    
@@ -60,7 +65,8 @@ class Track
 {
  public: 
 
-  int NumBP;
+  unsigned int NumBPAlloc; 
+  unsigned int NumBPCollect;
   BackPoint Path;
   PenaltyDist PenD;
   double Optimal;
@@ -76,6 +82,9 @@ class Track
   Prediction* BackTrace(int MinCDSLen, int Forward = 1);
   void Dump();
   void Zap();
+  void ClearMark(int);
+  void Mark(int);
+  void Sweep(int);
 
   Track ();
   ~Track();

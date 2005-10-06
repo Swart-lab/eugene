@@ -66,5 +66,8 @@ class DAG
   inline int GetStart() { return StartPosition; };
   inline void NormalizingPathUpdate(double maxi) {NormalizingPath+=maxi;};
   void Print();
+  void StatActive();
+  void StatGC();
+  void MarkAndSweep(int);
 };
 // **  a passer en private

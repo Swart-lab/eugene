@@ -19,11 +19,23 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "assert.h"
 
 #include "BackP.h"
-
 #include "System.h"
 
+// Bit masks in the Status field
+const char OptimalMask = 0x01;
+const char MarkedMask  = 0x02;
+// ----------------------------------------------------------------
+// Status handling
+// ----------------------------------------------------------------
+inline char BackPoint :: IsOptimal() { return (Status & OptimalMask); }
+inline char BackPoint :: IsMarked() { return (Status & MarkedMask); }
+inline void BackPoint :: SetOptimal() { Status |= OptimalMask; }
+inline void BackPoint :: SetMark() { Status |= MarkedMask; }
+inline void BackPoint :: ClearOptimal(){ Status &= (0xff^OptimalMask); }
+inline void BackPoint :: ClearMark(){ Status &= (0xff^MarkedMask); }
 // ----------------------------------------------------------------
 // Default constructor.
 // ----------------------------------------------------------------
@@ -35,7 +47,7 @@ BackPoint :: BackPoint  ()
   Additional = 0.0;
   Next = Prev = this;
   Origin = NULL;
-  Optimal = false;
+  Status = 0;
 }
 // ----------------------------------------------------------------
 //  Default constructor.
@@ -47,7 +59,7 @@ BackPoint :: BackPoint  (char state, int pos, double cost)
   Cost = cost;
   Additional = 0.0;
   Next = Prev = Origin = NULL;
-  Optimal = false;
+  Status = 0;
 }
 
 // ----------------------------------------------------------------
@@ -71,7 +83,8 @@ void BackPoint :: Print()
 // ----------------------------------------------------------------
 Track :: Track()
 {
-  NumBP = 0;
+  NumBPAlloc = 0;
+  NumBPCollect = 0;
   Optimal = 0.0;
   OptPos =0;
 }
@@ -96,6 +109,77 @@ void Track :: Zap()
   }
 }
 // ----------------------------------------------------------------
+// Clear Mark of all BP in a whole track
+// ----------------------------------------------------------------
+void Track :: ClearMark(int pos)
+{
+  BackPoint *It = Path.Next;
+
+  while ((It != &Path) && (It->StartPos >= pos)) {
+    It->ClearMark();
+    It = It->Next;
+  }
+}
+// ----------------------------------------------------------------
+// Mark all backpoint from a useful one following Origin
+// ----------------------------------------------------------------
+void MarkTrace(int pos, BackPoint *Source) {
+
+  while ((Source) &&  (Source->StartPos >= pos) && 
+	 (!Source->IsMarked())) {
+    Source->SetMark();
+    Source = Source->Origin;
+  }
+}
+// ----------------------------------------------------------------
+// Mark all useful BP in a whole track
+// ----------------------------------------------------------------
+void Track :: Mark(int pos)
+{
+  BackPoint *It = Path.Next;
+
+  do {
+    MarkTrace(pos,It);
+    if (isinf(It->Additional)) break;
+
+    if (It->IsOptimal() &&  
+	(abs(pos-It->StartPos) > PenD.MaxLen)) break;
+
+    It = It -> Next;
+  } while (It != Path.Next);
+}
+// ----------------------------------------------------------------
+// Sweep for Mark and Sweep
+// ---------------------------------------------------------------- We
+// have marked any BP accessible from Origin of "young" (not in the
+// linear tail). So remaining BP are old BP unaccessible by any Origin
+// backtracing from young BP. They can be deleted once the information
+// inside is taken into account in existing BP.
+// Among Optimal/Mark/State/StartPos/Cost/additional/Origin/Prev/Next
+// only Additional will be "saved" by including it in the Additional
+// field of the next BackP structure
+
+void Track :: Sweep(int pos) {
+
+  BackPoint *It = Path.Next;
+  NumBPCollect = 0;
+
+  while ( (It != &Path)){// && (It->StartPos >= pos)) {
+    if (!It->IsMarked()) {
+      It->Next->Additional += It->Additional;
+      It->Next->Prev = It->Prev;
+      It->Prev->Next = It->Next;
+      delete It;
+      NumBPCollect++;
+      fflush(stdout);
+    }
+
+    It = It->Next;
+  }
+  NumBPAlloc -= NumBPCollect;
+
+}
+// ----------------------------------------------------------------
 // Insert  a new backpoint
 // ----------------------------------------------------------------
 void Track :: InsertNew(char state, int pos, double cost, BackPoint *Or)
@@ -108,11 +192,11 @@ void Track :: InsertNew(char state, int pos, double cost, BackPoint *Or)
   //  if (cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
   if (cost > Optimal-PenD.GetDelta(abs(pos-OptPos)) && 
       cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(abs(pos-Path.Next->StartPos))) {
-    NumBP++;
+    NumBPAlloc++;
     It =  new BackPoint(state,pos,cost);
     if (cost > Optimal) { 
-      Optimal =cost; 
-      It->Optimal = true;
+      Optimal = cost; 
+      It->SetOptimal();
       OptPos = pos;
     }
     It->Next = Path.Next;
@@ -129,9 +213,9 @@ void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
 {
   BackPoint *It = Path.Next;
   
-  NumBP++;
+  NumBPAlloc++;
   It =  new BackPoint(state,pos,cost);
-  if (cost > Optimal) { Optimal =cost; It->Optimal = true;}
+  if (cost > Optimal) { Optimal =cost; It->SetOptimal();}
   It->Next = Path.Next;
   It->Prev = Path.Next->Prev;
   It->Origin = Or;
@@ -139,8 +223,7 @@ void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
   Path.Next = It;
 }
 // ----------------------------------------------------------------
-// Returns the best BackPoint and the BackPoint is at least len
-// nuc. far from pos
+// Returns the best BackPoint taking into account length penalties
 // ----------------------------------------------------------------
 BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 {
@@ -171,7 +254,7 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
       BestCost = Add+It->Cost - LenPen;
       BestBP = It;
     }
-    if (It->Optimal && Len >= PenD.MaxLen) break;
+    if (It->IsOptimal() && Len >= PenD.MaxLen) break;
 
     It = It -> Next;
   } while (It != Path.Next);
@@ -210,7 +293,7 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
   }
 
   It = Path.Next;
-  
+
   // initialisation by the terminal state
   pos  = It->StartPos;
   etat = It->State;
@@ -301,16 +384,17 @@ void Track :: Dump ()
 {
   BackPoint* It = Path.Next;
 
-  printf("Number of BP allocated: %d\n\n",NumBP);
+  printf("Number of BP allocated: %d\n",NumBPAlloc);
+  printf("Number of BP garbage collected: %d\n",NumBPAlloc);
+  printf("Number of active BP: %d\n\n",NumBPAlloc-NumBPCollect);
 
   do {
     printf("pos = %d, state = %d, cost = %f%s, additional = %f",
 	   It->StartPos,It->State,It->Cost,
-	   (It->Optimal ? "*" : ""), It->Additional);
+	   (It->IsOptimal() ? "*" : ""), It->Additional);
     if (It->Origin)
       printf(" Or.state = %d Or.pos = %d",It->Origin->State,It->Origin->StartPos);
     printf("\n");
     It = It->Next;
   }  while (It != Path.Next);
 }
-
