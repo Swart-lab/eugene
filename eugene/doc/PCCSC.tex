@@ -129,7 +129,7 @@ par le sous-chemin repr\'esent\'e par le \texttt{BackP} point\'e par
 
 Initialement, on instancie un BackP par piste (18 instances) stock\'ees
 dans le tableau \texttt{LBP} (Liste de BackP). Ces premi\`eres instances
-serviront de marqueurs de fin de liste est sont donc sp\'ecifiques~:
+serviront de marqueurs de fin de liste et sont donc sp\'ecifiques~:
 \begin{itemize}
 \item \texttt{StartPos} vaut -1,
 \item \texttt{Prev} et \texttt{Next} pointent tous deux sur l'instance
@@ -146,7 +146,7 @@ respecter la contraite de longueur impos\'ee par \texttt{len}) et
 retourner le co\^ut correspondant dans \texttt{cost} ainsi que le
 \texttt{BackP} correspondant.
 
-S'il s'av\`ere que le meilleur chemin (selui de co\^ut le meilleur) pour
+S'il s'av\`ere que le meilleur chemin (celui de co\^ut le meilleur) pour
 arriver \`a un sommet consiste \`a faire autre chose que de continuer sur
 la m\^eme piste, on va cr\'eer une nouvelle instance de \texttt{BackP}
 avec \texttt{InsertNew} en indiquant la position courante comme
