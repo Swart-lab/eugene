@@ -341,10 +341,8 @@ void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
   FILE *OUT;
   char nameformat[20];
   char outputFormat[20];
-  char pfilename[FILENAME_MAX+1];
   int  trunclen =      PAR.getI("Output.truncate");
   strcpy(outputFormat, PAR.getC("Output.format"));
-  strcpy(pfilename,    PAR.getC("prefixName"));
 
   // SeqName
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
@@ -358,7 +356,7 @@ void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
   else{
     for (int i=0; i<strlen(outputFormat); i++) {
       char filename[FILENAME_MAX];
-      strcpy(filename,pfilename);
+      strcpy(filename,PAR.getC("prefixName"));
       switch (outputFormat[i]) {
       case 'a':
 	OUT = FileOpen(NULL, strcat(filename, ".egn.ara"), "wb");
