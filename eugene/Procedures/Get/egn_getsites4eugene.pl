@@ -387,7 +387,7 @@ sub getsites( $ )
       $ua->agent("AgentName/0.1 " . $ua->agent);
 
       # Create a request
-      $req = POST 'http://bioinformatics.iastate.edu/cgi-bin/sp.cgi',
+      $req = POST 'http://deepc2.psi.iastate.edu/cgi-bin/sp.cgi',
 	[
 	 "ufname" => "schiex_id", 
 	 "-gdnap" => $sequence,
