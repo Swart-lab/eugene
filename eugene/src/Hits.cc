@@ -40,6 +40,7 @@
 Block :: Block ()
 {
   Prev = Next = NULL;
+  HitSeq = NULL;
 }
 
 // ---------------------------------------------------------------------
@@ -54,16 +55,18 @@ Block ::  Block(int start, int end,int lstart,int lend,int Ph,int Scr)
   Phase  = Ph;
   Score  = Scr;
   Prev   = Next = NULL;
+  HitSeq = NULL;
 }
 
 // ---------------------------------------------------------------------
 //  Insere apres
 // ---------------------------------------------------------------------
-void Block ::  AddBlockAfter(int start,int end,int lstart,int lend,int Ph,int Scr)
+void Block ::  AddBlockAfter(int start,int end,int lstart,int lend,int Ph,int Scr, char *HSP)
 {
   Block *ABlock = new Block(start,end,lstart,lend,Ph,Scr);
   this->Next    = ABlock;
   ABlock->Prev  = this;
+  HitSeq = HSP;
 }
 
 // ---------------------------------------------------------------------
@@ -71,6 +74,7 @@ void Block ::  AddBlockAfter(int start,int end,int lstart,int lend,int Ph,int Sc
 // ---------------------------------------------------------------------
 Block :: ~ Block  ()
 {
+  if (HitSeq) free(HitSeq);
   delete Next;
 }
 
@@ -124,6 +128,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
   int    deb, fin, phase, Pphase, HSPDeb, HSPFin, poids, read;
   double evalue, Pevalue;
   char   A[512], B[512];
+  char *HSP = NULL;
   Block *ThisBlock = NULL;
   Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
   const int MaxHitLen = 15000;
@@ -137,9 +142,10 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
   if (ThisHit != NULL)
     for (int i=0; i<*NumHits-1; i++) ThisHit = ThisHit->Next;
 
-  while ((read=fscanf(HitFile,"%d %d %d %lf %d %s %d %d\n", &deb, &fin, 
-		      &poids, &evalue, &phase, HitId, &HSPDeb, &HSPFin)) == 8)
+  while ((read=fscanf(HitFile,"%d %d %d %lf %d %s %d %d %as\n", &deb, &fin, 
+		      &poids, &evalue, &phase, HitId, &HSPDeb, &HSPFin,HSP)) >= 8)
     {
+      // if (HSP) fprintf(stderr,HSP);
       if (phase < 0  &&  deb > fin) {
 	int tmp = deb;
 	deb     = fin;

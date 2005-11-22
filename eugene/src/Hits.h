@@ -31,7 +31,7 @@ class Block
   Block(int Start, int End, int LStart, int LEnd, int Ph, int Scr);
   ~Block ();
   
-  void AddBlockAfter(int Start,int End,int LStart,int LEnd,int Ph,int Scr);
+  void AddBlockAfter(int Start,int End,int LStart,int LEnd,int Ph,int Scr,char *HSP = NULL);
   
   int Start;
   int End;
@@ -39,6 +39,7 @@ class Block
   int Score;
   int LStart;
   int LEnd;
+  char *HitSeq;
   Block *Prev,*Next;
 };
 
