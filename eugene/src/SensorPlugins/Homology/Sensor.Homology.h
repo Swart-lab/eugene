@@ -30,9 +30,8 @@
 class SensorHomology : public Sensor
 {
  private:
-  int    **TblastxNumber;
-  double **TblastxScore;
-  double **TblastxGlobalScore;
+  short int    **TblastxNumber;
+  float **TblastxScore;
   double TblastxP;
   double TblastxB;
 

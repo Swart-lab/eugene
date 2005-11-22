@@ -38,8 +38,7 @@ extern Parameters PAR;
 // fonction temporaire
 // etude de la prise en compte possible des tblastx
 // ----------------------
-double SensorHomology :: tblastxupdate (int hitnb, double hitscore,
-				      double pen, double base) {
+double SensorHomology :: tblastxupdate (int hitnb, double hitscore, double pen, double base) {
   // return (pen); // test avec score constant pour chq nt d'un hit
   // test d'integration de la donnee nbre de hits:
   //	return (hitnb);    
@@ -60,7 +59,7 @@ int SensorHomology :: hitsmaxnumber (int position, int frame, int maxlen) {
   int maxnumber=0;
   for (int i=position; i<=maxlen ; i++) {
     if (TblastxNumber[frame][i] == 0) return maxnumber;
-    maxnumber = Max(maxnumber,TblastxNumber[frame][i]);
+    maxnumber = Max(maxnumber,(int)TblastxNumber[frame][i]);
   }
   return maxnumber; // case of hit reaching the end of the seq
 }
@@ -79,7 +78,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int deb,fin,phase,ProtDeb,ProtFin,sens;
   int score = 0;
   double bits;
-  double GlobalBits;
   const int MaxHitLen  = 15000;
   char tampon;
   char* paire= new char[3];
@@ -91,17 +89,14 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int contigbeg;
   char *tmpdir = new char[FILENAME_MAX+1];
 
-  TblastxNumber = new int*[6];
-  TblastxScore = new double*[6];
-  TblastxGlobalScore = new double*[6];
+  TblastxNumber = new short int*[6];
+  TblastxScore = new float*[6];
   for (j = 0; j < 6; j++) {
-    TblastxNumber[j]= new int[Len+1];
-    TblastxScore[j] = new double[Len+1];
-    TblastxGlobalScore[j] = new double[Len+1];
+    TblastxNumber[j]= new short int[Len+1];
+    TblastxScore[j] = new float[Len+1];
     for (i = 0; i<= Len; i++) {
       TblastxNumber[j][i]=0;
       TblastxScore[j][i]=0.0;
-      TblastxGlobalScore[j][i]=0.0;
     }
   }
 
@@ -152,7 +147,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     j=deb;
     deb= Min (deb,fin);
     fin= Max (j,fin);
-    GlobalBits=((double)bits)/((double)abs(fin-deb));
     
     // lecture de la suite (sequence hit subject)
     tampon=fgetc(ftblastx);
@@ -175,14 +169,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
       TblastxNumber[phase][i] ++;
       
       TblastxScore[phase][i]  += score;
-      
-      // if (GlobalBits>TblastxGlobalScore[phase][i]) {
-      //    TblastxGlobalScore[phase][i] = GlobalBits;
-      //    TblastxScore[phase][i]= score;
-      // }
-      
-      // TblastxScore[phase][i]= ( (TblastxScore[phase][i]==0) ? score : Max ( (int)TblastxScore[phase][i],score));
-      // TblastxScore[phase][i]= Max (TblastxScore[phase][i],GlobalBits);
     }
   }
   fclose(ftblastx);
@@ -218,11 +204,9 @@ SensorHomology :: ~SensorHomology ()
   for(int i=0;i<6;i++){
     delete TblastxNumber[i];
     delete TblastxScore[i];
-    delete TblastxGlobalScore[i];
   }
   delete [] TblastxNumber;
   delete [] TblastxScore;
-  delete [] TblastxGlobalScore;
 }
 // ----------------------
 //  Init Homol.
@@ -277,7 +261,6 @@ void SensorHomology :: Plot(DNASeq *X)
   for (int pos =0; pos < X->SeqLen ; pos++){
     for(int j=0;j<6;j++) {
       if (TblastxNumber[j][pos]>0) {
-	//      PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
 	PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,1+(int)TblastxScore[j][pos]/4)) : 8 ) );
       }
     }
@@ -292,8 +275,6 @@ void SensorHomology :: PlotAt(int pos)
   //  if (PAR.getI("Output.graph")) {
   for(int j=0;j<6;j++) {
     if (TblastxNumber[j][pos]>0) {
-      //PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos]/2 , 8- (int)(1.7*TblastxScore[j][pos]) );
-      //PlotBarI  (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], 8- (int) (Min(2,(int)TblastxGlobalScore[j][pos]/5)) );
       PlotBarI (pos,PhaseAdapt(j),0.6, TblastxNumber[j][pos], ((TblastxScore[j][pos]>0)? 8- (int) (Min(2,1+(int)TblastxScore[j][pos]/4)) : 8 ) );
     }
   }
