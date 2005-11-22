@@ -93,8 +93,8 @@ void InitImg(struct Image *image, int n)
 	      ry+TMargin+5, Col[3]);
   
   for (i = -NLigne; i <= NLigne; i++) {
-    gdImageString(image->im,gdFontTiny,5, ToY(i,0.6),Ylab[i+4],Col[3]);
-    gdImageString(image->im,gdFontTiny,rx+LMargin+5, ToY(i,0.6),Ylab[i+4],Col[3]);
+    gdImageString(image->im,gdFontTiny,5, ToY(i,0.6),(unsigned char *)Ylab[i+4],Col[3]);
+    gdImageString(image->im,gdFontTiny,rx+LMargin+5, ToY(i,0.6),(unsigned char *)Ylab[i+4],Col[3]);
   }
   
   image->Left = n*(ImgLen-OvLap)+From;
@@ -102,23 +102,23 @@ void InitImg(struct Image *image, int n)
   
   sprintf(str,"%d",image->Right+Offset);
   gdImageString(image->im,gdFontTiny,
-		rx+LMargin - (strlen(str)*gdFontTiny->w/2), ry+TMargin+9,str,Col[3]);
+		rx+LMargin - (strlen(str)*gdFontTiny->w/2), ry+TMargin+9,(unsigned char *)str,Col[3]);
   gdImageString(image->im,gdFontTiny,
-		rx+LMargin - (strlen(str)*gdFontTiny->w/2), TMargin-15,str,Col[3]);
+		rx+LMargin - (strlen(str)*gdFontTiny->w/2), TMargin-15,(unsigned char *)str,Col[3]);
   
   sprintf(str,"%d",image->Left+Offset);
   gdImageString(image->im,gdFontTiny,
-		LMargin - gdFontTiny->w/2, ry+TMargin+9,str,Col[3]);
+		LMargin - gdFontTiny->w/2, ry+TMargin+9,(unsigned char *)str,Col[3]);
   gdImageString(image->im,gdFontTiny,
-		LMargin - gdFontTiny->w/2, TMargin-15,str,Col[3]);
+		LMargin - gdFontTiny->w/2, TMargin-15,(unsigned char *)str,Col[3]);
   
   
   for (i = Step; i<= ImgLen-Step; i+= Step) {
     sprintf(str,"%i",i+image->Left+Offset);
     gdImageString(image->im,gdFontTiny,
-		  ToX(i) - (strlen(str)*gdFontTiny->w/2), ry+TMargin+9,str,Col[3]);
+		  ToX(i) - (strlen(str)*gdFontTiny->w/2), ry+TMargin+9,(unsigned char *)str,Col[3]);
     gdImageString(image->im,gdFontTiny,
-		  ToX(i) - (strlen(str)*gdFontTiny->w/2), TMargin-15,str,Col[3]);
+		  ToX(i) - (strlen(str)*gdFontTiny->w/2), TMargin-15,(unsigned char *)str,Col[3]);
     gdImageLine(image->im,ToX(i),ry+TMargin,ToX(i),ry+TMargin+5,Col[3]);
     gdImageLine(image->im,ToX(i),TMargin,ToX(i),TMargin-5,Col[3]);
   }
@@ -226,7 +226,7 @@ void PlotString(unsigned int nuc, signed char phase, double pos, char st[], int 
     if (CheckIn(nuc, &images[i]))
       gdImageString(images[i].im, gdFontTiny,
 		    (ToX(nuc-images[i].Left)-(strlen(st)*gdFontTiny->w/2)),
-		    ToY(phase, pos), st, Col[col]);
+		    ToY(phase, pos), (unsigned char *)st, Col[col]);
 }
 
 void ClosePNG()
