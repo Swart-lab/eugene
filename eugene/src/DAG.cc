@@ -384,9 +384,9 @@ void DAG::ApplyScore(int position, DATA Data, int NoContentsUpdate)
       LBP[k].Update(Data.contents[SensorContents[k]]);
   }
 }
-
+// ----------------------------------------------------------------
 // A first set of macros
-
+// ----------------------------------------------------------------
 #define ISPOSSIBLE(X,Y) (!(isinf(Data.sig[DATA::X].weight[Signal::Y])))
 
 #define INEED(K) if (!PrevBP[K])					\
@@ -586,8 +586,9 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
     printf("---------- pos %d/%d, best %d norm %f ----------\n",position,Data_Len-position,ReverseIt[(int)best],NormalizingPath);
 #endif
 }
-
+// ----------------------------------------------------------------
 // A second set of macros
+// ----------------------------------------------------------------
 #define PICOMPEN(C,S,B,O,P) if ((C) && ISPOSSIBLE(S,B)) {               \
     BestU = PBest[Strand ? ReverseIt[O] :O]+Data.sig[DATA::S].weight[Signal::B]+(P); \
     if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = (Strand ? ReverseIt[O] :O);}}
@@ -629,8 +630,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
     if (PhaseF == k)
-      LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-    LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
+    LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
     INSERT(InitF1+k);
   }
@@ -642,7 +643,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
     PICOMPEN(true,Don,Reverse-Strand,IntronR1+((Data_Len-position-k) % 3),
-	     ((PhaseR == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+	     ((PhaseR == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
     PICOMPEN((Data_Len-position-k) % 3 == 2,Don,Reverse-Strand,IntronR3G,
@@ -662,8 +663,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if ((PhaseR % 3 == k-3)) 
-      LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
-    LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
+      LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
+    LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
     INSERT(InitF1+k);
   }
@@ -683,8 +684,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if ((PhaseF == k))
-      LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-    LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
+    LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
     INSERT(SnglF1+k);
   }
@@ -704,8 +705,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if (PhaseR == k-3)
-      LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
-    LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
+      LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
+    LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
     INSERT(SnglF1+k);
   }
@@ -736,8 +737,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if (PhaseF == k)
-      LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-    LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
+    LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
     INSERT(IntrF1+k);
   }
@@ -748,7 +749,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-    PICOMPEN(true,Don,Reverse-Strand,IntronR1+((Data_Len-position-k) % 3),((PhaseR == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo] : 0.0));
+    PICOMPEN(true,Don,Reverse-Strand,IntronR1+((Data_Len-position-k) % 3),((PhaseR == k-3) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
     PICOMPEN(((Data_Len-position-k) % 3) == 2,Don,Reverse-Strand,IntronR3G ,
@@ -768,8 +769,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if (PhaseR == k-3) 
-      LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
-    LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
+      LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
+    LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
     INSERT(IntrF1+k);
   }
@@ -800,8 +801,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if (PhaseF == k)
-      LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
-    LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
+      LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
+    LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
     INSERT(TermF1+k);
   }
@@ -821,8 +822,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if ((PhaseR == k-3)) 
-      LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
-    LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
+      LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
+    LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
     INSERT(TermF1+k);
   }
@@ -852,7 +853,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Acc,Forward+Strand, IntronU5F);
   
   // On reste 5' direct. On ne prend pas le Start eventuel.
-  LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
+  LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo+Strand]);
   
   INSERT(UTR5F);
   // ----------------------------------------------------------------
@@ -864,7 +865,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Don,Forward+Strand, UTR5F);
   
   // On reste intronique
-  LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+  LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
   
   INSERT(IntronU5F);
   // ----------------------------------------------------------------
@@ -876,7 +877,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Don,Forward+Strand, UTR3F);
   
   // On reste intronique
-  LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+  LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
   
   INSERT(IntronU3F);
   // ----------------------------------------------------------------
@@ -905,7 +906,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Don,Reverse-Strand, IntronU5R);
   
   // On reste 5' reverse
-  LBP[UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo]);
+  LBP[UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo-Strand]);
   
   INSERT(UTR5R);
   // ----------------------------------------------------------------
@@ -917,7 +918,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Acc,Reverse-Strand, UTR5R);
   
   // On reste intronique
-  LBP[IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+  LBP[IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
   
   INSERT(IntronU5R);
   // ----------------------------------------------------------------
@@ -929,7 +930,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   PICOMP(true,Acc,Reverse-Strand, UTR3R);
   
   // On reste intronique
-  LBP[IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+  LBP[IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
   
   INSERT(IntronU3R);
   // ----------------------------------------------------------------
@@ -956,13 +957,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     if (!(((StartStop & DNASeq::isTf) && k == 1) ||
 	  ((StartStop & (DNASeq::isTGf|DNASeq::isTAf)) && k == 2))) {
       PICOMPEN(true,Don,Forward+Strand, InitF1+((position-k+3) % 3),
-	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
       PICOMPEN(true,Don,Forward+Strand, IntrF1+((position-k+3) % 3),
-	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo] : 0.0));
+	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
     }
     
     // On reste intronique
-    LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+    LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
     
     INSERT(IntronF1+k);
   }
@@ -980,7 +981,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Don,Forward+Strand, IntrF1+((position-k+3) % 3));
   }
   // On reste intronique
-  LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+  LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
   INSERT(IntronF2T);
   
   //
@@ -994,7 +995,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Don,Forward+Strand, IntrF1+((position-k+3) % 3));
   }
   // On reste intronique
-  LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+  LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
   INSERT(IntronF3TG);
   
   //
@@ -1008,7 +1009,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Don,Forward+Strand, IntrF1+((position-k+3) % 3));
   }
   // On reste intronique
-  LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
+  LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
   INSERT(IntronF3TA);
   // ----------------------------------------------------------------
   // ----------------- Introns de phase -k reverse ------------------
@@ -1025,7 +1026,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     }
     
     // On reste intronique
-    LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+    LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
     
     INSERT(IntronR1+k);
   }
@@ -1043,7 +1044,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Acc,Reverse-Strand, TermR1+((Data_Len-position-k) % 3));
   }
   // On reste intronique
-  LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+  LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
   INSERT(IntronR3G);
   
   //
@@ -1057,7 +1058,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Acc,Reverse-Strand, TermR1+((Data_Len-position-k) % 3));
   }
   // On reste intronique
-  LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+  LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
   INSERT(IntronR3A);
   
   //
@@ -1071,7 +1072,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMP(true,Acc,Reverse-Strand, TermR1+((Data_Len-position-k) % 3));
   }
   // On reste intronique
-  LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
+  LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
   INSERT(IntronR2AG); 
 }
 
