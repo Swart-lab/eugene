@@ -160,6 +160,29 @@ enum Tracks {
   IntronU3F = 43, IntronU3R  = 44, 
   NbTracks  = 45};
 
+
+// Sensor Contents used by each track
+const short int SensorContents[NbTracks] = {
+  DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
+  DATA::ExonR1, DATA::ExonR2, DATA::ExonR3,
+  DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
+  DATA::ExonR1, DATA::ExonR2, DATA::ExonR3,
+  DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
+  DATA::ExonR1, DATA::ExonR2, DATA::ExonR3,
+  DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
+  DATA::ExonR1, DATA::ExonR2, DATA::ExonR3,
+  DATA::IntronF, DATA::IntronF, DATA::IntronF,
+  DATA::IntronR, DATA::IntronR, DATA::IntronR,
+  DATA::IntronF, DATA::IntronF, DATA::IntronF,
+  DATA::IntronR, DATA::IntronR, DATA::IntronR,
+  DATA::InterG, 
+  DATA::UTR5F, DATA::UTR3F, 
+  DATA::UTR5R, DATA::UTR3R, 
+  DATA::IntronUTRF, DATA::IntronUTRR, 
+  DATA::IntronUTRF, DATA::IntronUTRR
+};
+
+// Reverse the tracks
 const short int ReverseIt[NbTracks] = {
   InitR1, InitR2, InitR3,  
   InitF1, InitF2, InitF3,
@@ -176,8 +199,9 @@ const short int ReverseIt[NbTracks] = {
   InterGen, 
   UTR5R,UTR3R, 
   UTR5F, UTR3F, 
-  IntronU3F, IntronU3R, 
-  IntronU5F, IntronU5R};
+  IntronU5R, IntronU5F, 
+  IntronU3R, IntronU3F
+};
 
 const short int UnorientedTracks[1] = {InterGen};
 
