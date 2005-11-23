@@ -162,7 +162,7 @@ enum Tracks {
 
 
 // Sensor Contents used by each track
-const short int SensorContents[NbTracks] = {
+const enum DATA::ContentsType SensorContents[NbTracks] = {
   DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
   DATA::ExonR1, DATA::ExonR2, DATA::ExonR3,
   DATA::ExonF1, DATA::ExonF2, DATA::ExonF3,
@@ -183,7 +183,7 @@ const short int SensorContents[NbTracks] = {
 };
 
 // Reverse the tracks
-const short int ReverseIt[NbTracks] = {
+const enum Tracks ReverseIt[NbTracks] = {
   InitR1, InitR2, InitR3,  
   InitF1, InitF2, InitF3,
   SnglR1, SnglR2, SnglR3,
