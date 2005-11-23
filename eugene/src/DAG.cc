@@ -353,36 +353,53 @@ void DAG :: MarkAndSweep(int pos){
   printf("GC finished, ");
   StatGC();
 }
+
+
 // ----------------------------------------------------------------
-//  Shortest Path Algorithm with length constraint
+//  Normalize to avoid rounding errors
 // ----------------------------------------------------------------
-void DAG :: ShortestPathAlgoForward (int position, DATA Data)
+inline void DAG::Normalize()
 {
-  
-  int k;
-  int Data_Len = TheSeq->SeqLen;
-  double BestU, maxi = -NINFINITY;
-  double PBest[NbTracks];
-  BackPoint *PrevBP[NbTracks];
-  signed   char best = 'Z';
+  double BestU,maxi = -NINFINITY;
 
-  // Get information on possible spliced stops
-  int StopStop = TheSeq->IsStopStop(position);
-  int StartStop = TheSeq->IsStartStop(position);
-    
-  // normalisation des couts 
-  maxi = -NINFINITY;
-  for (k = 0 ; k < NbTracks; k++) {
+  for (int k = 0 ; k < NbTracks; k++) {
     BestU = LBP[k].Optimal;
-    if ((BestU > NINFINITY) && (BestU < maxi)) {
-      best = k;
-      maxi =BestU;
-    }
+    if ((BestU > NINFINITY) && (BestU < maxi)) 
+      maxi = BestU;
   }
-
-  for (k = 0 ; k < NbTracks; k++) 
+  
+  for (int k = 0 ; k < NbTracks; k++) 
     LBP[k].Update(-maxi);
   NormalizingPath += maxi;
+}
+
+// ----------------------------------------------------------------
+//  Account for length penalty distributions
+// ----------------------------------------------------------------
+inline void DAG::ApplyLengthPenalty(int position, DATA Data, int NoContentsUpdate)
+{
+  int Data_Len = TheSeq->SeqLen;
+    
+  if ((position < Data_Len) && (!NoContentsUpdate))
+    for (int k=0; k < NbTracks; k++)
+      LBP[k].PayTheSlope();
+}
+
+// ----------------------------------------------------------------
+//  Account for contents score
+// ----------------------------------------------------------------
+void DAG::ApplyScore(int position, DATA Data, int NoContentsUpdate)
+{
+  int Data_Len = TheSeq->SeqLen;
+  
+  if ((position < Data_Len) && (!NoContentsUpdate)){
+
+    for (int k=0; k< NbTracks; k++)
+      LBP[k].Update(Data.contents[SensorContents[k]]);
+  }
+}
+
+// My ugly macros
 
 #define ISPOSSIBLE(X,Y) (!(isinf(Data.sig[DATA::X].weight[Signal::Y])))
   //  ((1 && printf("IsPossible(%d,%d)=%d\n",(DATA::X),(Signal::Y),(!(isinf(Data.sig[DATA::X].weight[Signal::Y]))))) ? \
@@ -402,26 +419,40 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 
   //	printf("PiComp NewBestU[%d]=%f, Signal[%d][%d]=%f Line %d\n",(O),BestU+NormalizingPath,DATA::S,Signal::B,Data.sig[DATA::S].weight[Signal::B],__LINE__); \
 
-
-
-
 #define PICOMPEN(C,S,B,O,P) if ((C) && ISPOSSIBLE(S,B)) {               \
         BestU = PBest[O]+Data.sig[DATA::S].weight[Signal::B]+(P);       \
         if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = O;}}
-#define INSERTANDPAYTHESLOPE(P,C)                                       \
-  LBP[P].InsertNew(best, position, maxi,PrevBP[best]);			\
-  if (position < Data_Len){						\
-    LBP[P].Update(Data.contents[C]);					\
-    LBP[P].PayTheSlope();						\
-  }
 
+#define INSERT(P)					\
+  LBP[P].InsertNew(best, position, maxi,PrevBP[best]);
+  
+  //  printf("Ins Cost %f From %d Track %d Line %d\n",maxi,best,(P),000); \
   //  printf("Ins Cost %f From %d Track %d Line %d\n",maxi,ReverseTrack(best),(ReverseTrack(P)),000); \
 
-//      printf("InsPS ContentUpdate %f [%d] Track %d\n",Data.contents[C],(C),(P)); \
 
-    // ----------------------------------------------------------------
-    // Calcul des meilleures opening edges
-    // ----------------------------------------------------------------
+// ----------------------------------------------------------------
+//  Shortest Path Algorithm with length constraint
+// ----------------------------------------------------------------
+void DAG :: ShortestPathAlgoForward (int position, DATA Data)
+{
+  
+  int k;
+  int Data_Len = TheSeq->SeqLen;
+  double BestU, maxi = -NINFINITY;
+  double PBest[NbTracks];
+  BackPoint *PrevBP[NbTracks];
+  signed   char best = 'Z';
+
+  // Get information on possible spliced stops
+  int StopStop = TheSeq->IsStopStop(position);
+  int StartStop = TheSeq->IsStartStop(position);
+
+  // Avoid rounding errors on long sequences
+  Normalize();
+
+  // ----------------------------------------------------------------
+  // Calcul des meilleures opening edges
+  // ----------------------------------------------------------------
     for (k = 0; k < NbTracks; k++) {
       PrevBP[k] = NULL;
       PBest[k] = NINFINITY;
@@ -443,7 +474,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       INEED(IntronF2T);
       INEED(IntronF3TG);
       INEED(IntronF3TA);      
-      INEED(IntronF1); INEED(IntronF2); INEED(IntronF3);
+      INEED(IntronF1); 
+      INEED(IntronF2); 
+      INEED(IntronF3);
     }
 
     // Exons R  (No Splice)
@@ -462,7 +495,9 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       INEED(IntronR3G);
       INEED(IntronR3A);
       INEED(IntronR2AG);
-      INEED(IntronR1); INEED(IntronR2); INEED(IntronR3);
+      INEED(IntronR1); 
+      INEED(IntronR2); 
+      INEED(IntronR3);
     }
 
     // Introns F et R (with no spliceable stops)
@@ -477,37 +512,56 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
 
     // Intergenique
-    if (ISPOSSIBLE(tStart,Reverse))     			   INEED(UTR5R);
-    if (ISPOSSIBLE(tStop,Forward))			           INEED(UTR3F);
+    if (ISPOSSIBLE(tStart,Reverse))
+      INEED(UTR5R);
+    if (ISPOSSIBLE(tStop,Forward))
+      INEED(UTR3F);
 
     // UTR 5' direct
-    if (ISPOSSIBLE(tStart,Forward))			           INEED(InterGen);
-    if (ISPOSSIBLE(Acc,Forward))			           INEED(IntronU5F);
+    if (ISPOSSIBLE(tStart,Forward))
+      INEED(InterGen);
+    if (ISPOSSIBLE(Acc,Forward))
+      INEED(IntronU5F);
 
     // Introns d'UTR5F
-    if (ISPOSSIBLE(Don,Forward))                                   INEED(UTR5F);
+    if (ISPOSSIBLE(Don,Forward))
+      INEED(UTR5F);
 
     // Introns d'UTR3F
-    if (ISPOSSIBLE(Don,Forward))                                   INEED(UTR3F);
+    if (ISPOSSIBLE(Don,Forward))
+      INEED(UTR3F);
 
     // UTR 3' direct
-    if (ISPOSSIBLE(Acc,Forward))			           INEED(IntronU3F);
-    if (ISPOSSIBLE(Stop,Forward)) {			           INEED(TermF1+position%3);
-			   			                   INEED(SnglF1+position%3); }
+    if (ISPOSSIBLE(Acc,Forward))
+      INEED(IntronU3F);
+    if (ISPOSSIBLE(Stop,Forward)) {
+      INEED(TermF1+position%3);
+      INEED(SnglF1+position%3); 
+    }
+
     // UTR 5'reverse
-    if (ISPOSSIBLE(Start,Reverse)) {                               INEED(InitR1+((Data_Len-position) % 3));
-    				                                   INEED(SnglR1+((Data_Len-position) % 3)); }
-    if (ISPOSSIBLE(Don,Reverse))                                   INEED(IntronU5R);
+    if (ISPOSSIBLE(Start,Reverse)) {
+      INEED(InitR1+((Data_Len-position) % 3));
+      INEED(SnglR1+((Data_Len-position) % 3)); 
+    }
+
+    if (ISPOSSIBLE(Don,Reverse))
+      INEED(IntronU5R);
 
     // Introns d'UTR5R
-    if (ISPOSSIBLE(Acc,Reverse))                                   INEED(UTR5R);
+    if (ISPOSSIBLE(Acc,Reverse))
+      INEED(UTR5R);
 
     // Introns d'UTR5R
-    if (ISPOSSIBLE(Acc,Reverse))                                   INEED(UTR3R);
+    if (ISPOSSIBLE(Acc,Reverse))
+      INEED(UTR3R);
 
     // UTR 3' reverse
-    if (ISPOSSIBLE(tStop,Reverse))                                 INEED(InterGen);
-    if (ISPOSSIBLE(Don,Reverse))                                   INEED(IntronU3R);
+    if (ISPOSSIBLE(tStop,Reverse))
+      INEED(InterGen);
+
+    if (ISPOSSIBLE(Don,Reverse))
+      INEED(IntronU3R);
 
 #ifdef DEBUGME
     for (k=0; k<(NbTracks-1)/2;k++)
@@ -546,7 +600,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERTANDPAYTHESLOPE(InitF1+k,k);
+      INSERT(InitF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Inits en reverse ---------------------
@@ -579,7 +633,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(InitF1+k,k);
+      INSERT(InitF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Sngl en forward ----------------------------
@@ -600,7 +654,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
       
-      INSERTANDPAYTHESLOPE(SnglF1+k,k);
+      INSERT(SnglF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Sngl en reverse ---------------------
@@ -621,7 +675,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(SnglF1+k,k);
+      INSERT(SnglF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Intrs en forward ----------------------------
@@ -653,7 +707,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERTANDPAYTHESLOPE(IntrF1+k,k);
+      INSERT(IntrF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Intrs en reverse ---------------------
@@ -685,7 +739,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(IntrF1+k,k);
+      INSERT(IntrF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Terms en forward ----------------------------
@@ -717,7 +771,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERTANDPAYTHESLOPE(TermF1+k,k);
+      INSERT(TermF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Terms en reverse ---------------------
@@ -738,7 +792,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(TermF1+k,k);
+      INSERT(TermF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
@@ -754,7 +808,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intergenique
     // et les transstartNO/TransstopNO ???
 
-    INSERTANDPAYTHESLOPE(InterGen,DATA::InterG);
+    INSERT(InterGen);
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
     // ----------------------------------------------------------------
@@ -768,7 +822,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste 5' direct. On ne prend pas le Start eventuel.
     LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
 
-    INSERTANDPAYTHESLOPE(UTR5F,DATA::UTR5F);
+    INSERT(UTR5F);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5F ----------------------------
     // ----------------------------------------------------------------
@@ -780,7 +834,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU5F,DATA::IntronUTRF);
+    INSERT(IntronU5F);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3F ----------------------------
     // ----------------------------------------------------------------
@@ -792,7 +846,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU3F,DATA::IntronUTRF);
+    INSERT(IntronU3F);
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
     // ----------------------------------------------------------------
@@ -806,7 +860,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 
     // On reste 3' direct
 
-    INSERTANDPAYTHESLOPE(UTR3F,DATA::UTR3F);
+    INSERT(UTR3F);
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
     // ----------------------------------------------------------------
@@ -821,7 +875,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste 5' reverse
     LBP[UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(UTR5R,DATA::UTR5R);
+    INSERT(UTR5R);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5R ----------------------------
     // ----------------------------------------------------------------
@@ -833,7 +887,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU5R,DATA::IntronUTRR);
+    INSERT(IntronU5R);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3R ----------------------------
     // ----------------------------------------------------------------
@@ -845,7 +899,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     // On reste intronique
     LBP[IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERTANDPAYTHESLOPE(IntronU3R,DATA::IntronUTRR);
+    INSERT(IntronU3R);
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
@@ -858,7 +912,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 
     // On reste 3' reverse
 
-    INSERTANDPAYTHESLOPE(UTR3R,DATA::UTR3R);
+    INSERT(UTR3R);
     // ----------------------------------------------------------------
     // ---------------- Introns de phase k forward --------------------
     // ----------------------------------------------------------------
@@ -878,7 +932,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On reste intronique
       LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
       
-      INSERTANDPAYTHESLOPE(IntronF1+k,DATA::IntronF);
+      INSERT(IntronF1+k);
     }
     // ----------------------------------------------------------------
     // ----------------- Introns forward speciaux ---------------------
@@ -895,7 +949,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
     // On reste intronique
     LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF2T,DATA::IntronF);
+    INSERT(IntronF2T);
 
     //
     // --- Intron Phase 2 after an TG|A
@@ -909,7 +963,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
     // On reste intronique
     LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF3TG,DATA::IntronF);
+    INSERT(IntronF3TG);
 
     //
     // --- Intron Phase 2 after a TA(A|G)
@@ -923,7 +977,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
     // On reste intronique
     LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERTANDPAYTHESLOPE(IntronF3TA,DATA::IntronF);
+    INSERT(IntronF3TA);
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
@@ -941,7 +995,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
       // On reste intronique
       LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-      INSERTANDPAYTHESLOPE(IntronR1+k,DATA::IntronR);
+      INSERT(IntronR1+k);
     }
     // ----------------------------------------------------------------
     // ----------------- Introns reverse speciaux ---------------------
@@ -958,7 +1012,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
     // On reste intronique
     LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR3G,DATA::IntronR);
+    INSERT(IntronR3G);
     
     //
     // --- Intron Phase 1 after an A (GT|AT)
@@ -972,7 +1026,7 @@ void DAG :: ShortestPathAlgoForward (int position, DATA Data)
     }
     // On reste intronique
     LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR3A,DATA::IntronR);
+    INSERT(IntronR3A);
 
     //
     // --- Intron Phase 2 after an AG, AA ou GA (T)
@@ -986,7 +1040,11 @@ if (StopStop & (DNASeq::isGAr | DNASeq::isARr)) {
     }
     // On reste intronique
     LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERTANDPAYTHESLOPE(IntronR2AG,DATA::IntronR);
+    INSERT(IntronR2AG);
+
+    // Account for Score and length penalty 
+    ApplyScore(position, Data, 0);
+    ApplyLengthPenalty(position, Data, 0);
 }
 
 // ----------------------------------------------------------------
@@ -1001,67 +1059,16 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
   double PBest[NbTracks];
   BackPoint *PrevBP[NbTracks];
   signed   char best = 'Z';
-  
-#define INSERT(P,C)					\
-  LBP[P].InsertNew(best, position, maxi,PrevBP[best]);
-  
-  //  printf("Ins Cost %f From %d Track %d Line %d\n",maxi,best,(P),000); \
-
-  
-#define PAYTHESLOPE(P,C)			\
-  if (position < Data_Len){			\
-    if (!NoContentsUpdate) {			\
-      LBP[P].Update(Data.contents[C]);		\
-      LBP[P].PayTheSlope();			\
-    }}
-  
-  //	printf("InsPS ContentUpdate %f [%d] Track %d\n",Data.contents[C],(C),(P)); \
-  
+    
   // Get information on possible spliced stops
   int StopStop = TheSeq->IsStopStop(position);
   int StartStop = TheSeq->IsStartStop(position);
+
+  ApplyScore(position, Data, NoContentsUpdate);
+  ApplyLengthPenalty(position, Data, NoContentsUpdate);
   
-  for (k=0; k<3; k++){
-    PAYTHESLOPE(InitR1+k,k+3);
-    PAYTHESLOPE(InitF1+k,k);
-    PAYTHESLOPE(SnglR1+k,k+3);
-    PAYTHESLOPE(SnglF1+k,k);
-    PAYTHESLOPE(IntrR1+k,k+3);
-    PAYTHESLOPE(IntrF1+k,k);
-    PAYTHESLOPE(TermR1+k,k+3);
-    PAYTHESLOPE(TermF1+k,k);
-    PAYTHESLOPE(IntronR1+k,DATA::IntronR);
-    PAYTHESLOPE(IntronF1+k,DATA::IntronF);
-  }
-  PAYTHESLOPE(IntronF2T,DATA::IntronF);
-  PAYTHESLOPE(IntronF3TG,DATA::IntronF);
-  PAYTHESLOPE(IntronF3TA,DATA::IntronF);
-  PAYTHESLOPE(IntronR3G,DATA::IntronR);
-  PAYTHESLOPE(IntronR3A,DATA::IntronR);
-  PAYTHESLOPE(IntronR2AG,DATA::IntronR);
-  PAYTHESLOPE(InterGen,DATA::InterG);
-  PAYTHESLOPE(UTR5R,DATA::UTR5R);
-  PAYTHESLOPE(IntronU5R,DATA::IntronUTRR);
-  PAYTHESLOPE(IntronU3R,DATA::IntronUTRR);
-  PAYTHESLOPE(UTR3R,DATA::UTR3R);
-  PAYTHESLOPE(UTR5F,DATA::UTR5F);
-  PAYTHESLOPE(IntronU5F,DATA::IntronUTRF);
-  PAYTHESLOPE(IntronU3F,DATA::IntronUTRF);
-  PAYTHESLOPE(UTR3F,DATA::UTR3F);
-  
-   // normalisation des couts 
-  maxi = -NINFINITY;
-  for (k = 0 ; k < NbTracks; k++) {
-    BestU = LBP[k].Optimal;
-    if ((BestU > NINFINITY) && (BestU < maxi)) {
-      best = k;
-      maxi =BestU;
-    }
-  }
-  
-  for (k = 0 ; k < NbTracks; k++) 
-    LBP[k].Update(-maxi);
-  NormalizingPath += maxi;
+  // Avoid rounding errors on long sequences
+  Normalize();
   
   // ----------------------------------------------------------------
   // Calcul des meilleures opening edges
@@ -1257,7 +1264,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[InitR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[InitR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERT(InitR1+k,k+3);
+      INSERT(InitR1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Inits en forward ----------------------------
@@ -1290,7 +1297,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERT(InitF1+k,k);
+      INSERT(InitF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Sngl en reverse ---------------------
@@ -1311,7 +1318,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[SnglR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[SnglR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERT(SnglR1+k,k+3);
+      INSERT(SnglR1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Sngl en forward ----------------------------
@@ -1332,7 +1339,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
       
-      INSERT(SnglF1+k,k);
+      INSERT(SnglF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Intrs en reverse ---------------------
@@ -1364,7 +1371,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[IntrR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[IntrR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERT(IntrR1+k,k+3);
+      INSERT(IntrR1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Intrs en forward ----------------------------
@@ -1397,7 +1404,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERT(IntrF1+k,k);
+      INSERT(IntrF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------- Terms en reverse ---------------------
@@ -1429,7 +1436,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[TermR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo]);
       LBP[TermR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo]);
 
-      INSERT(TermR1+k,k+3);
+      INSERT(TermR1+k);
     }
     // ----------------------------------------------------------------
     // ------------------ Terms en forward ----------------------------
@@ -1450,7 +1457,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 	LBP[TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo]);
       LBP[TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo]);
 
-      INSERT(TermF1+k,k);
+      INSERT(TermF1+k);
     }
     // ----------------------------------------------------------------
     // ------------------------ Intergenique --------------------------
@@ -1466,7 +1473,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intergenique
     // et les transstartNO/TransstopNO ???
 
-    INSERT(InterGen,DATA::InterG);
+    INSERT(InterGen);
     // ----------------------------------------------------------------
     // ----------------------- UTR 5'reverse --------------------------
     // ----------------------------------------------------------------
@@ -1480,7 +1487,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste 5' reverse
     LBP[UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo]);
 
-    INSERT(UTR5R,DATA::UTR5R);
+    INSERT(UTR5R);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5R ----------------------------
     // ----------------------------------------------------------------
@@ -1492,7 +1499,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intronique
     LBP[IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERT(IntronU5R,DATA::IntronUTRR);
+    INSERT(IntronU5R);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3R ----------------------------
     // ----------------------------------------------------------------
@@ -1504,7 +1511,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intronique
     LBP[IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-    INSERT(IntronU3R,DATA::IntronUTRR);
+    INSERT(IntronU3R);
     // ----------------------------------------------------------------
     // ----------------------- UTR 3'reverse --------------------------
     // ----------------------------------------------------------------
@@ -1518,7 +1525,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 
     // On reste 3' reverse
 
-    INSERT(UTR3R,DATA::UTR3R);
+    INSERT(UTR3R);
     // ----------------------------------------------------------------
     // ---------------------- UTR 5' direct ---------------------------
     // ----------------------------------------------------------------
@@ -1533,7 +1540,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste 5' direct. On ne prend pas le Start eventuel.
     LBP[UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo]);
 
-    INSERT(UTR5F,DATA::UTR5F);
+    INSERT(UTR5F);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR5F ----------------------------
     // ----------------------------------------------------------------
@@ -1545,7 +1552,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intronique
     LBP[IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 
-    INSERT(IntronU5F,DATA::IntronUTRF);
+    INSERT(IntronU5F);
     // ----------------------------------------------------------------
     // ------------------- Introns d'UTR3F ----------------------------
     // ----------------------------------------------------------------
@@ -1557,7 +1564,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     // On reste intronique
     LBP[IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
 
-    INSERT(IntronU3F,DATA::IntronUTRF);
+    INSERT(IntronU3F);
     // ----------------------------------------------------------------
     // ---------------------- UTR 3' direct ---------------------------
     // ----------------------------------------------------------------
@@ -1570,7 +1577,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
 
     // On reste 3' direct
 
-    INSERT(UTR3F,DATA::UTR3F);
+    INSERT(UTR3F);
     // ----------------------------------------------------------------
     // ----------------- Introns de phase -k reverse ------------------
     // ----------------------------------------------------------------
@@ -1590,7 +1597,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       // On reste intronique
       LBP[IntronR1+k].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
 
-      INSERT(IntronR1+k,DATA::IntronR);
+      INSERT(IntronR1+k);
     }
     // ----------------------------------------------------------------
     // ----------------- Introns reverse speciaux ---------------------
@@ -1607,7 +1614,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERT(IntronR3G,DATA::IntronR);
+    INSERT(IntronR3G);
 
     //
     // --- Intron Phase 1  [A]---[GT|AT]
@@ -1621,7 +1628,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERT(IntronR3A,DATA::IntronR);
+    INSERT(IntronR3A);
 
     //
     // --- Intron Phase 2 after an [AG|AA|GA]---[T]
@@ -1635,7 +1642,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo]);
-    INSERT(IntronR2AG,DATA::IntronR);
+    INSERT(IntronR2AG);
     // ----------------------------------------------------------------
     // ---------------- Introns de phase k forward --------------------
     // ----------------------------------------------------------------
@@ -1653,7 +1660,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
       // On reste intronique
       LBP[IntronF1+k].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
       
-      INSERT(IntronF1+k,DATA::IntronF);
+      INSERT(IntronF1+k);
     }
     // ----------------------------------------------------------------
     // ----------------- Introns forward speciaux ---------------------
@@ -1670,7 +1677,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERT(IntronF3TG,DATA::IntronF);
+    INSERT(IntronF3TG);
 
     //
     // --- Intron Phase 2 after a [TA]---[A|G]
@@ -1684,7 +1691,7 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERT(IntronF3TA,DATA::IntronF);
+    INSERT(IntronF3TA);
 
     //
     // --- Intron Phase 1  [T]---[GA|AA|AG]. 
@@ -1698,5 +1705,5 @@ void DAG :: ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpd
     }
     // On reste intronique
     LBP[IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo]);
-    INSERT(IntronF2T,DATA::IntronF);
+    INSERT(IntronF2T);
 }

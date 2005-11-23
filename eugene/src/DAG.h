@@ -61,7 +61,10 @@ class DAG
   //  double ConnectDag (DAG *RightDag, int position, DATA * data, int datalength);
   double BuildPrediction (int Forward = 1);
   //  void CleanPrediction (DAG* dag, DAG* dagrev);
-  
+
+  void Normalize();
+  void ApplyScore(int position, DATA Data, int NoContentsUpdate);  
+  void ApplyLengthPenalty(int position, DATA Data, int NoContentsUpdate);  
   inline double NormalizingPathScore() { return NormalizingPath; };
   inline int GetStart() { return StartPosition; };
   inline void NormalizingPathUpdate(double maxi) {NormalizingPath+=maxi;};
