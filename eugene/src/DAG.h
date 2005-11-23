@@ -14,7 +14,7 @@
 // $Id$
 // ------------------------------------------------------------------
 // File:     DAG.h
-// Contents: Modeling genes as a DAG and exploring it - Header
+// Contents: Modeling genes as a DAG and exploring it - Header
 // ------------------------------------------------------------------
 
 #ifndef DAG_H_INCLUDED
@@ -40,6 +40,8 @@ class DAG
   int estuse;
   double NormalizingPath;
   Track  LBP[NbTracks];
+  double PBest[NbTracks];
+  BackPoint *PrevBP[NbTracks];
 
  public:
   char EvidenceName[FILENAME_MAX+1];//   **
@@ -62,12 +64,14 @@ class DAG
   double BuildPrediction (int Forward = 1);
   //  void CleanPrediction (DAG* dag, DAG* dagrev);
 
+ private:
   void Normalize();
+  void ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int position);
+  void ComputeRequired(Signal::Edge, DATA, int);
   void ApplyScore(int position, DATA Data, int NoContentsUpdate);  
   void ApplyLengthPenalty(int position, DATA Data, int NoContentsUpdate);  
-  inline double NormalizingPathScore() { return NormalizingPath; };
+
   inline int GetStart() { return StartPosition; };
-  inline void NormalizingPathUpdate(double maxi) {NormalizingPath+=maxi;};
   void Print();
   void StatActive();
   void StatGC();
