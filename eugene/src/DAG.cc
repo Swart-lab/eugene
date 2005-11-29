@@ -385,7 +385,7 @@ void DAG::ApplyScore(int position, DATA Data, int NoContentsUpdate)
 // ----------------------------------------------------------------
 // A first set of macros
 // ----------------------------------------------------------------
-#define ISPOSSIBLE(X,Y) (!(isinf(Data.sig[DATA::X].weight[Signal::Y])))
+#define ISPOSSIBLE(X,Y) (!(isinf(Data.sig[DATA::X].weight[Y])))
 
 #define INEED(K) if (!PrevBP[Strand ?  ReverseIt[K] : K])		\
     (PrevBP[Strand ?  ReverseIt[K] : K] =				\
@@ -400,6 +400,9 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   int PhaseF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
   int PhaseR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
 
+  enum Signal::Edge FStrand = (Strand ? Signal::Reverse : Signal::Forward);
+  enum Signal::Edge RStrand = (Strand ? Signal::Forward : Signal::Reverse);
+
   for (int k = 0; k < NbTracks; k++) {
     PrevBP[k] = NULL;
     PBest[k] = NINFINITY;
@@ -408,7 +411,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonsR spliced (from Intron)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Reverse-Strand)) {
+  if (ISPOSSIBLE(Don,RStrand)) {
     INEED(IntronR1); 
     INEED(IntronR2); 
     INEED(IntronR3);
@@ -420,13 +423,13 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonsR (from UTR3R)
   // ---------------------------
-  if (ISPOSSIBLE(Stop,Reverse-Strand)) 
+  if (ISPOSSIBLE(Stop,RStrand)) 
     INEED(UTR3R);
     
   // ---------------------------
   // ExonsR (from frameshift)
   // ---------------------------
-  if (ISPOSSIBLE(Ins,Reverse-Strand) || ISPOSSIBLE(Del,Reverse-Strand)) {
+  if (ISPOSSIBLE(Ins,RStrand) || ISPOSSIBLE(Del,RStrand)) {
     INEED(InitR1); INEED(InitR2); INEED(InitR3);
     INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
     INEED(TermR1); INEED(TermR2); INEED(TermR3); 
@@ -436,7 +439,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // IntronR (from ExonR)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Reverse-Strand)) {
+  if (ISPOSSIBLE(Acc,RStrand)) {
     INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
     INEED(TermR1); INEED(TermR2); INEED(TermR3); 
   }
@@ -444,7 +447,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // UTR5R (from Init/SnglR) - check
   // ---------------------------
-  if (ISPOSSIBLE(Start,Reverse-Strand)) {
+  if (ISPOSSIBLE(Start,RStrand)) {
     INEED(InitR1+PhaseR);
     INEED(SnglR1+PhaseR); 
   }
@@ -452,79 +455,79 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // UTR5R (from IntronU5R)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Reverse-Strand))
+  if (ISPOSSIBLE(Don,RStrand))
     INEED(IntronU5R);
 
   // ---------------------------
   // IntronU5R (from UTR5R)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Reverse-Strand))
+  if (ISPOSSIBLE(Acc,RStrand))
     INEED(UTR5R);
 
   // ---------------------------
   // UTR3R (from InterGen)
   // ---------------------------
-  if (ISPOSSIBLE(tStop,Reverse-Strand))
+  if (ISPOSSIBLE(tStop,RStrand))
     INEED(InterGen);
 
   // ---------------------------
   // UTR3R (from IntronU3R)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Reverse-Strand))
+  if (ISPOSSIBLE(Don,RStrand))
     INEED(IntronU3R);
 
   // ---------------------------
   // IntronU3R (from UTR3R)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Reverse-Strand))
+  if (ISPOSSIBLE(Acc,RStrand))
     INEED(UTR3R);
 
   // ---------------------------
   // InterG (from UTR5R)
   // ---------------------------
-  if (ISPOSSIBLE(tStart,Reverse-Strand))
+  if (ISPOSSIBLE(tStart,RStrand))
     INEED(UTR5R);
 
   // ---------------------------
   // InterG (from UTR3F)
   // ---------------------------
-  if (ISPOSSIBLE(tStop,Forward+Strand))
+  if (ISPOSSIBLE(tStop,FStrand))
     INEED(UTR3F);
 
   // ---------------------------
   // IntronU5F (from UTR5F)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Forward+Strand))
+  if (ISPOSSIBLE(Don,FStrand))
     INEED(UTR5F);
 
   // ---------------------------
   // UTR5F (from InterGen)
   // ---------------------------
-  if (ISPOSSIBLE(tStart,Forward+Strand))
+  if (ISPOSSIBLE(tStart,FStrand))
     INEED(InterGen);
 
   // ---------------------------
   // UTR5F (from IntronU5F)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Forward+Strand))
+  if (ISPOSSIBLE(Acc,FStrand))
     INEED(IntronU5F);
 
   // ---------------------------
   // IntronU3R (from UTR3F)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Forward+Strand))
+  if (ISPOSSIBLE(Don,FStrand))
     INEED(UTR3F);
 
   // ---------------------------
   // UTR3F (from IntronU3F)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Forward+Strand))
+  if (ISPOSSIBLE(Acc,FStrand))
     INEED(IntronU3F);
 
   // ---------------------------
   // UTR3F (from ExonF)
   // ---------------------------
-  if (ISPOSSIBLE(Stop,Forward+Strand)) {
+  if (ISPOSSIBLE(Stop,FStrand)) {
     INEED(TermF1+PhaseF);
     INEED(SnglF1+PhaseF); 
   }
@@ -532,13 +535,13 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonF (from UTR5F)
   // ---------------------------
-  if (ISPOSSIBLE(Start,Forward+Strand))
+  if (ISPOSSIBLE(Start,FStrand))
     INEED(UTR5F);
 
   // ---------------------------
   // ExonF (from IntronF)
   // ---------------------------
-  if (ISPOSSIBLE(Acc,Forward+Strand)) {
+  if (ISPOSSIBLE(Acc,FStrand)) {
     INEED(IntronF2T);
     INEED(IntronF3TG);
     INEED(IntronF3TA);      
@@ -550,8 +553,8 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonF (from frameshift)
   // ---------------------------
-  if (ISPOSSIBLE(Ins,Forward+Strand) || 
-      ISPOSSIBLE(Del,Forward+Strand)) {
+  if (ISPOSSIBLE(Ins,FStrand) || 
+      ISPOSSIBLE(Del,FStrand)) {
     INEED(InitF1); INEED(InitF2); INEED(InitF3);
     INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
     INEED(TermF1); INEED(TermF2); INEED(TermF3); 
@@ -561,7 +564,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // IntronF (from ExonF)
   // ---------------------------
-  if (ISPOSSIBLE(Don,Forward+Strand)) {
+  if (ISPOSSIBLE(Don,FStrand)) {
     INEED(InitF1); INEED(InitF2); INEED(InitF3);
     INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
   }
@@ -584,11 +587,62 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
     printf("---------- pos %d/%d, norm %f ----------\n",position,Data_Len-position,NormalizingPath);
 #endif
 }
+
+// ----------------------------------------------------------------
+// Spliceable stops... there is probably a nice small automata for this
+// ----------------------------------------------------------------
+inline bool spliceStopPreTAx(int StartStop, enum Signal::Edge Strand)  //TAx
+{
+  if (Strand == Signal::Forward) 
+    return (StartStop & DNASeq::isTAf);
+  else
+    return (StartStop & DNASeq::isTAr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostTAx(int StopStop, enum Signal::Edge Strand)  //xx(G|A) xxG
+{
+  if (Strand == Signal::Forward) 
+    return (StopStop & (DNASeq::isGf | DNASeq::isAf));
+  else
+    return (StopStop & DNASeq::isGr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPrexxA(int StartStop, enum Signal::Edge Strand)  //TGx (TG|TA)x
+{
+  if (Strand == Signal::Forward) 
+    return (StartStop & DNASeq::isTGf);
+  else
+    return (StartStop & (DNASeq::isTGr|DNASeq::isTAr));
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostxxA(int StopStop, enum Signal::Edge Strand)  //xxA
+{
+  if (Strand == Signal::Forward) 
+    return (StopStop & DNASeq::isAf);
+  else
+    return (StopStop & DNASeq::isAr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPreTxx(int StartStop, enum Signal::Edge Strand)  //Txx
+{
+  if (Strand == Signal::Forward) 
+    return (StartStop & DNASeq::isTf);
+  else
+    return (StartStop & DNASeq::isTr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostTxx(int StopStop, enum Signal::Edge Strand)  //x(GA|A(A|G))
+{
+  if (Strand == Signal::Forward) 
+    return (StopStop & (DNASeq::isGAf | DNASeq::isARf));
+  else
+    return (StopStop & (DNASeq::isGAr | DNASeq::isARr));
+}
 // ----------------------------------------------------------------
 // A second set of macros
 // ----------------------------------------------------------------
 #define PICOMPEN(C,S,B,O,P) if ((C) && ISPOSSIBLE(S,B)) {               \
-    BestU = PBest[Strand ? ReverseIt[O] :O]+Data.sig[DATA::S].weight[Signal::B]+(P); \
+    BestU = PBest[Strand ? ReverseIt[O] :O]+Data.sig[DATA::S].weight[B]+(P); \
     if (isnan(maxi) || (BestU > maxi)) {maxi = BestU; best = (Strand ? ReverseIt[O] :O);}}
 
 #define PICOMP(C,S,B,O) PICOMPEN(C,S,B,O,0.0)
@@ -605,6 +659,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   int Data_Len = TheSeq->SeqLen;
   int PhaseF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
   int PhaseR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
+
+  enum Signal::Edge FStrand = (Strand ? Signal::Reverse : Signal::Forward);
+  enum Signal::Edge RStrand = (Strand ? Signal::Forward : Signal::Reverse);
+
   double BestU, maxi = -NINFINITY;
   signed   char best = 'Z';
 
@@ -612,6 +670,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   int StopStop = TheSeq->IsStopStop(position);
   int StartStop = TheSeq->IsStartStop(position);
 
+  Data.EstMatch = true;
   // ----------------------------------------------------------------
   // ------------------ Inits en forward ----------------------------
   // ----------------------------------------------------------------
@@ -619,11 +678,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
-    PICOMP((PhaseF == k),Start,Forward+Strand,UTR5F);
+    PICOMP((PhaseF == k),Start,FStrand,UTR5F);
     // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-    PICOMP(true,Ins,Forward+Strand,InitF1+(k+1)%3);
+    PICOMP(true,Ins,FStrand,InitF1+(k+1)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Forward+Strand,InitF1+(k+2)%3);
+    PICOMP(true,Del,FStrand,InitF1+(k+2)%3);
     
     // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
@@ -640,23 +699,23 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-    PICOMPEN(true,Don,Reverse-Strand,IntronR1+((PhaseR+3-k) % 3),
+    PICOMPEN(true,Don,RStrand,IntronR1+((PhaseR+3-k) % 3),
 	     ((PhaseR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
-    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,Reverse-Strand,IntronR3G,
-	     ((StartStop & DNASeq::isTAr) ? SplicedStopPen : 0.0));
+    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,RStrand,IntronR3G,
+	     (spliceStopPreTAx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterA
-    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,Reverse-Strand,IntronR3A ,
-	     ((StartStop & (DNASeq::isTGr | DNASeq::isTAr))  ? SplicedStopPen : 0.0));
+    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,RStrand,IntronR3A ,
+	     (spliceStopPrexxA(StartStop,RStrand)  ? SplicedStopPen : 0.0));
     // Not AfterAG
-    PICOMPEN((PhaseR+3-k) % 3 == 1,Don,Reverse-Strand,IntronR2AG,
-	     ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
+    PICOMPEN((PhaseR+3-k) % 3 == 1,Don,RStrand,IntronR2AG,
+	     (spliceStopPreTxx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     
     // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,Reverse-Strand, InitR1+(k+2)%3);
+    PICOMP(true,Ins,RStrand, InitR1+(k+2)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Reverse-Strand, InitR1+(k+1)%3);
+    PICOMP(true,Del,RStrand, InitR1+(k+1)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -673,11 +732,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
-    PICOMP((PhaseF == k),Start,Forward+Strand,UTR5F);
+    PICOMP((PhaseF == k),Start,FStrand,UTR5F);
     // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-    PICOMP(true,Ins,Forward+Strand,SnglF1+(k+1)%3);
+    PICOMP(true,Ins,FStrand,SnglF1+(k+1)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Forward+Strand,SnglF1+(k+2)%3);
+    PICOMP(true,Del,FStrand,SnglF1+(k+2)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -694,11 +753,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
-    PICOMP((PhaseR == k),Stop,Reverse-Strand,UTR3R);
+    PICOMP((PhaseR == k),Stop,RStrand,UTR3R);
     // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,Reverse-Strand, SnglR1+(k+2)%3);
+    PICOMP(true,Ins,RStrand, SnglR1+(k+2)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Reverse-Strand, SnglR1+(k+1)%3);
+    PICOMP(true,Del,RStrand, SnglR1+(k+1)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -715,22 +774,22 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On recommence a coder (Accepteur). Ca vient d'un intron (no spliceable stop)
-    PICOMP(true,Acc,Forward+Strand,IntronF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Acc,FStrand,IntronF1+((PhaseF-k+3) % 3));
     
     // Not AfterT
-    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,Forward+Strand,IntronF2T ,
-	     ((StopStop & (DNASeq::isGAf | DNASeq::isARf))  ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
+	     (spliceStopPostTxx(StopStop,FStrand)  ? SplicedStopPen : 0.0));
     // Not AfterTG
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,Forward+Strand,IntronF3TG,
-	     ((StopStop & DNASeq::isAf) ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
+	     (spliceStopPostxxA(StopStop,FStrand) ? SplicedStopPen : 0.0));
     // Not AfterTA
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,Forward+Strand,IntronF3TA,
-	     ((StopStop & (DNASeq::isGf | DNASeq::isAf)) ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
+	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
     // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
-    PICOMP(true,Ins,Forward+Strand,IntrF1+(k+1)%3);
+    PICOMP(true,Ins,FStrand,IntrF1+(k+1)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Forward+Strand,IntrF1+(k+2)%3);
+    PICOMP(true,Del,FStrand,IntrF1+(k+2)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -747,22 +806,22 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-    PICOMPEN(true,Don,Reverse-Strand,IntronR1+((PhaseR+3-k) % 3),((PhaseR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
+    PICOMPEN(true,Don,RStrand,IntronR1+((PhaseR+3-k) % 3),((PhaseR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
-    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,Reverse-Strand,IntronR3G ,
-	     ((StartStop & DNASeq::isTAr)  ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,RStrand,IntronR3G ,
+	     (spliceStopPreTAx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterA
-    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,Reverse-Strand,IntronR3A ,
-	     ((StartStop & (DNASeq::isTAr | DNASeq::isTGr))  ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,RStrand,IntronR3A ,
+	     (spliceStopPrexxA(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterAG
-    PICOMPEN(((PhaseR+3-k) % 3) == 1,Don,Reverse-Strand,IntronR2AG,
-	     ((StartStop & DNASeq::isTr) ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseR+3-k) % 3) == 1,Don,RStrand,IntronR2AG,
+	     (spliceStopPreTxx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     
     // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,Reverse-Strand, IntrR1+(k+2)%3);
+    PICOMP(true,Ins,RStrand, IntrR1+(k+2)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Reverse-Strand, IntrR1+(k+1)%3);
+    PICOMP(true,Del,RStrand, IntrR1+(k+1)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -779,22 +838,22 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On recommence a coder (Accepteur). Ca vient d'un intron
-    PICOMP(true,Acc,Forward+Strand,IntronF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Acc,FStrand,IntronF1+((PhaseF-k+3) % 3));
     
     // Not AfterT
-    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,Forward+Strand,IntronF2T ,
-	     ((StopStop & (DNASeq::isGAf | DNASeq::isARf))  ? SplicedStopPen :0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
+	     (spliceStopPostTxx(StopStop,FStrand)  ? SplicedStopPen :0.0));
     // Not AfterTG
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,Forward+Strand,IntronF3TG,
-	     ((StopStop & DNASeq::isAf) ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
+	     (spliceStopPostxxA(StopStop,FStrand) ? SplicedStopPen : 0.0));
     // Not AfterTA
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,Forward+Strand,IntronF3TA,
-	     ((StopStop & (DNASeq::isAf | DNASeq::isGf)) ? SplicedStopPen : 0.0));
+    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
+	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
     // Il y a une insertion (frameshift). Saut de positionléotide ignore.
-    PICOMP(true,Ins,Forward+Strand,TermF1+(k+1)%3);
+    PICOMP(true,Ins,FStrand,TermF1+(k+1)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Forward+Strand,TermF1+(k+2)%3);
+    PICOMP(true,Del,FStrand,TermF1+(k+2)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -811,11 +870,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
-    PICOMP((PhaseR == k),Stop,Reverse-Strand,UTR3R);
+    PICOMP((PhaseR == k),Stop,RStrand,UTR3R);
     // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,Reverse-Strand, TermR1+(k+2)%3);
+    PICOMP(true,Ins,RStrand, TermR1+(k+2)%3);
     // Il y a une deletion (frameshift)
-    PICOMP(true,Del,Reverse-Strand, TermR1+(k+1)%3);
+    PICOMP(true,Del,RStrand, TermR1+(k+1)%3);
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -832,9 +891,9 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // From 5' reverse
-  PICOMP(true,tStart,Reverse-Strand, UTR5R);
+  PICOMP(true,tStart,RStrand, UTR5R);
   // From 3' direct
-  PICOMP(true,tStop,Forward+Strand, UTR3F);
+  PICOMP(true,tStop,FStrand, UTR3F);
   
   // On reste intergenique
   // et les transstartNO/TransstopNO ???
@@ -846,9 +905,9 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // On vient de l'intergenique. 
-  PICOMP(true,tStart,Forward+Strand, InterGen);
+  PICOMP(true,tStart,FStrand, InterGen);
   // On peut venir aussi d'un intron d'UTR.
-  PICOMP(true,Acc,Forward+Strand, IntronU5F);
+  PICOMP((Data.EstMatch),Acc,FStrand, IntronU5F);
   
   // On reste 5' direct. On ne prend pas le Start eventuel.
   LBP[Strand ? ReverseIt[UTR5F]: UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo+Strand]);
@@ -860,7 +919,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // on quitte l'UTR 
-  PICOMP(true,Don,Forward+Strand, UTR5F);
+  PICOMP((Data.EstMatch),Don,FStrand, UTR5F);
   
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronU5F]: IntronU5F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -872,7 +931,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // on quitte l'UTR 
-  PICOMP(true,Don,Forward+Strand, UTR3F);
+  PICOMP((Data.EstMatch),Don,FStrand, UTR3F);
   
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronU3F]: IntronU3F].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -884,10 +943,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // Ca vient d'un Term ou d'un Sngl direct + STOP
-  PICOMP(true,Stop,Forward+Strand, TermF1+PhaseF);
-  PICOMP(true,Stop,Forward+Strand, SnglF1+PhaseF);
+  PICOMP(true,Stop,FStrand, TermF1+PhaseF);
+  PICOMP(true,Stop,FStrand, SnglF1+PhaseF);
   // On peut venir aussi d'un intron d'UTR.
-  PICOMP(true,Acc,Forward+Strand, IntronU3F);
+  PICOMP((Data.EstMatch),Acc,FStrand, IntronU3F);
   
   // On reste 3' direct
   
@@ -898,10 +957,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // Ca vient d'un Sngl ou Init reverse + START
-  PICOMP(true,Start,Reverse-Strand, InitR1+PhaseR);
-  PICOMP(true,Start,Reverse-Strand, SnglR1+PhaseR);
+  PICOMP(true,Start,RStrand, InitR1+PhaseR);
+  PICOMP(true,Start,RStrand, SnglR1+PhaseR);
   // On peut venir aussi d'un intron d'UTR.
-  PICOMP(true,Don,Reverse-Strand, IntronU5R);
+  PICOMP((Data.EstMatch),Don,RStrand, IntronU5R);
   
   // On reste 5' reverse
   LBP[Strand ? ReverseIt[UTR5R]: UTR5R].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo-Strand]);
@@ -913,7 +972,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // On quitte une UTR5R
-  PICOMP(true,Acc,Reverse-Strand, UTR5R);
+  PICOMP((Data.EstMatch),Acc,RStrand, UTR5R);
   
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronU5R]: IntronU5R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -925,7 +984,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // On quitte une UTR5R
-  PICOMP(true,Acc,Reverse-Strand, UTR3R);
+  PICOMP((Data.EstMatch),Acc,RStrand, UTR3R);
   
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronU3R]: IntronU3R].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -937,9 +996,9 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // On demarre depuis l'intergenique
-  PICOMP(true,tStop,Reverse-Strand, InterGen);
+  PICOMP(true,tStop,RStrand, InterGen);
   // On peut venir aussi d'un intron d'UTR.
-  PICOMP(true,Don,Reverse-Strand, IntronU3R);
+  PICOMP((Data.EstMatch),Don,RStrand, IntronU3R);
   
   // On reste 3' reverse
   
@@ -952,11 +1011,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // - on quitte un Init ou un Intr
     // no spliceable stop: 
-    if (!(((StartStop & DNASeq::isTf) && k == 1) ||
-	  ((StartStop & (DNASeq::isTGf|DNASeq::isTAf)) && k == 2))) {
-      PICOMPEN(true,Don,Forward+Strand, InitF1+((PhaseF-k+3) % 3),
+    if (!((spliceStopPreTxx(StartStop,FStrand) && k == 1) ||
+	  (spliceStopPrexxA(StartStop,FStrand) && k == 2))) {
+      PICOMPEN(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3),
 	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
-      PICOMPEN(true,Don,Forward+Strand, IntrF1+((PhaseF-k+3) % 3),
+      PICOMPEN(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3),
 	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
     }
     
@@ -973,10 +1032,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 1;
-  if (StartStop & DNASeq::isTf) {
+  if (spliceStopPreTxx(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,Forward+Strand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,Forward+Strand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF2T]: IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -987,10 +1046,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 2;
-  if (StartStop & DNASeq::isTGf) {
+  if (spliceStopPrexxA(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,Forward+Strand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,Forward+Strand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF3TG]: IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -1001,10 +1060,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 2;
-  if (StartStop & DNASeq::isTAf) {
+  if (spliceStopPreTAx(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,Forward+Strand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,Forward+Strand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF3TA]: IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -1017,10 +1076,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // On quitte un Intr ou un Term reverse
     // no spliceable stop: 
-    if (!(((StopStop & (DNASeq::isGr|DNASeq::isAr)) && k == 2) ||
-	  ((StopStop & (DNASeq::isGAr | DNASeq::isARr)) && k == 1)))  {
-      PICOMP(true,Acc,Reverse-Strand, IntrR1+((PhaseR+3-k) % 3));
-      PICOMP(true,Acc,Reverse-Strand, TermR1+((PhaseR+3-k) % 3));
+    if (!(((k == 2) && spliceStopPostTAx(StopStop,RStrand)) ||
+	  ((k == 2) && spliceStopPostxxA(StopStop,RStrand)) ||
+	  ((k == 1) && spliceStopPostTxx(StopStop,RStrand))))  {
+      PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
+      PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
     }
     
     // On reste intronique
@@ -1036,10 +1096,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 2;
-  if (StopStop & DNASeq::isGr) {
+  if (spliceStopPostTAx(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,Reverse-Strand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,Reverse-Strand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR3G]: IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -1050,10 +1110,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 2;
-  if (StopStop & DNASeq::isAr) {
+  if (spliceStopPostxxA(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,Reverse-Strand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,Reverse-Strand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR3A]: IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -1064,10 +1124,10 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   //
   maxi = NINFINITY; best = -1;
   k = 1;
-  if (StopStop & (DNASeq::isGAr | DNASeq::isARr)) {
+  if (spliceStopPostTxx(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,Reverse-Strand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,Reverse-Strand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR2AG]: IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
