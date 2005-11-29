@@ -266,7 +266,7 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 // ----------------------------------------------------------------
 // BackTrace and build a prediction object
 // ----------------------------------------------------------------
-Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
+Prediction* Track :: BackTrace (int Forward)
 {
   std::vector <int>         vPos;
   std::vector <signed char> vState;
@@ -274,9 +274,7 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
   BackPoint  *It;
   int  pos;
   char etat;
-  int  ntopop = -1;
   int  prevpos, prevstate;
-  int  CDSlen = 0;
 
   // put state back on correct transitions for backward predictions
   if (!Forward) {
@@ -305,7 +303,6 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
 
   prevpos = pos;
   prevstate = etat;
-  if (etat == InterGen) ntopop=0;
 
   //  printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
@@ -315,47 +312,9 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
     etat = It->State;
     It   = It->Origin;
 
-    //printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
+    //    printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
-    // We count CDS. According to the direction the state to account
-    // for is the current styate (forward) or the previous one
-    // (backward).
-    if ((Forward ? prevstate : etat) <= TermR3) {
-      CDSlen += abs(prevpos-pos); // codant
-      //      printf("Extra %d CDS, Len = %d\n",abs(prevpos-pos),CDSlen);
-    }
-    //  this is one more state change to count for possible removal
-    if (ntopop >= 0) ntopop++;
-
-    if ((etat == InterGen)) {
-      if ((CDSlen > 0)  && (CDSlen <= MinCDSLen) && (ntopop >= 0)) {
-	//	printf("CDSLen %d, je pope %d elements\n", CDSlen,ntopop-1);
-	// we want to keep the same change state. In forward, we keep
-	// the first IG state (pop n-1) and don't put back this one.
-	if (Forward) {
-	  for (int i = 0; i < ntopop-1; i++) {
-	    vPos.pop_back();
-	    vState.pop_back();
-	  }
-	}
-	// in Backward, we pop n but insert this one.
-	else {
-	  for (int i = 0; i < ntopop; i++) {
-	    vPos.pop_back();
-	    vState.pop_back();
-	  }
-	  vPos.push_back  ( pos  );
-	  vState.push_back( etat );
-	}
-      }
-      else {
-	vPos.push_back  ( pos  );
-	vState.push_back( etat );
-      }
-      CDSlen = 0;
-      ntopop = 0;
-    }
-    else if (pos >= 0) {
+    if (pos >= 0) {
       vPos.push_back  ( pos  );
       vState.push_back( etat );
     }
@@ -364,9 +323,8 @@ Prediction* Track :: BackTrace (int MinCDSLen, int Forward)
     prevstate = etat;
   }
   
-  vPos[0] -=  1;  
-  
   if (Forward) {
+    vPos[0] -=  1;  
     reverse(vState.begin(), vState.end());
     reverse(vPos.begin(),   vPos.end());
   }

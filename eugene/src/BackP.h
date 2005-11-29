@@ -79,7 +79,7 @@ class Track
   void InsertNew(char state,  int pos, double cost, BackPoint *Or);
   void ForceNew(char state, int pos, double cost, BackPoint *Or);
   BackPoint *BestUsable(int pos, double *cost, int pen = 1);
-  Prediction* BackTrace(int MinCDSLen, int Forward = 1);
+  Prediction* BackTrace(int Forward = 1);
   void Dump();
   void Zap();
   void ClearMark(int);

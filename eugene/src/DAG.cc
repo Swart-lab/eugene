@@ -61,7 +61,6 @@ DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
   FivePrior  = PAR.getD("EuGene.FivePrimePrior");
   ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
   IntronFivePrior = InPrior;
-  MinCDSLen = PAR.getI("Output.MinCDSLen");
   estuse = PAR.getI("Sensor.Est.use");
 }
 
@@ -91,7 +90,6 @@ DAG :: DAG (int start, int end, DAG *RefDag,char* name)
    FivePrior  = RefDag->FivePrior ;
    ThreePrior = RefDag->ThreePrior;
 
-   MinCDSLen = RefDag->MinCDSLen;
    estuse =   RefDag->estuse ;
 }
 
@@ -268,7 +266,7 @@ double DAG :: BuildPrediction (int Forward)
     }
   }
 
-  pred = LBP[j].BackTrace(MinCDSLen,Forward);
+  pred = LBP[j].BackTrace(Forward);
   pred->optimalPath = maxi+NormalizingPath;
   return maxi+NormalizingPath;
 }

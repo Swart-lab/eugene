@@ -35,7 +35,6 @@ class DAG
   int StartPosition;
   int EndPosition;
   double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior;
-  int    MinCDSLen;
   double SplicedStopPen;
   int estuse;
   double NormalizingPath;
