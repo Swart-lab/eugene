@@ -106,6 +106,11 @@ DAG :: ~DAG ()
 // ---------------------------------------------------------------------------
 void DAG :: WeightThePrior()
 {
+  // to marginally prefer Intr/Term over Init/Sngl on the borders
+  // A better (operational) solution would be to use the good order
+  // for finding optimum origin
+  const double epsilon = 1e-6;
+
   // Codant
   LBP[InitF1].Update(log(ExPrior/6.0)/2.0);
   LBP[InitF2].Update(log(ExPrior/6.0)/2.0);
@@ -138,20 +143,20 @@ void DAG :: WeightThePrior()
   LBP[SnglR3].Update(log(ExPrior/6.0)/2.0);
 
   // Intr 
-  LBP[IntrF1].Update(log(ExPrior/6.0)/2.0);
-  LBP[IntrF2].Update(log(ExPrior/6.0)/2.0);
-  LBP[IntrF3].Update(log(ExPrior/6.0)/2.0);
-  LBP[IntrR1].Update(log(ExPrior/6.0)/2.0);
-  LBP[IntrR2].Update(log(ExPrior/6.0)/2.0);
-  LBP[IntrR3].Update(log(ExPrior/6.0)/2.0);
+  LBP[IntrF1].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[IntrF2].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[IntrF3].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[IntrR1].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[IntrR2].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[IntrR3].Update(log(ExPrior/6.0)/2.0+epsilon);
 
   // Term
-  LBP[TermF1].Update(log(ExPrior/6.0)/2.0);
-  LBP[TermF2].Update(log(ExPrior/6.0)/2.0);
-  LBP[TermF3].Update(log(ExPrior/6.0)/2.0);
-  LBP[TermR1].Update(log(ExPrior/6.0)/2.0);
-  LBP[TermR2].Update(log(ExPrior/6.0)/2.0);
-  LBP[TermR3].Update(log(ExPrior/6.0)/2.0);
+  LBP[TermF1].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[TermF2].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[TermF3].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[TermR1].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[TermR2].Update(log(ExPrior/6.0)/2.0+epsilon);
+  LBP[TermR3].Update(log(ExPrior/6.0)/2.0+epsilon);
 
   // Intergenique 
   LBP[InterGen].Update(log(IGPrior)/2.0); 

@@ -287,21 +287,10 @@ Prediction :: Prediction (std::vector <int> vPos,
   optimalPath = 0;
   
   int i;
+  int MinCDSLen = PAR.getI("Output.MinCDSLen");
   int start = 1;
   int nbPos = vPos.size()-1;  // == vState.size()-1;
 
-  /*** Probleme lié au exon extreme Init ou Intr ? ***/
-  //  - Un exon InitF en 1er state => IntrF
-  //  - Un exon SnglF en 1er state => TermF
-  if ( (vState[0] <= InitF3)  ||
-       (vState[0] >= SnglF1 && vState[0] <= SnglF3) )
-    vState[0] += 12;
-  //  - Un exon InitR en dernier state => IntrR
-  //  - Un exon SnglR en dernier state => TermR
-  if ( (vState[nbPos] >= InitR1 && vState[nbPos] <= InitR3)  ||
-       (vState[nbPos] >= SnglR1 && vState[nbPos] <= SnglR3) )
-    vState[nbPos] += 12;
-  
   for(i=0; i<(int)vPos.size(); i++) {
     if(i!=0) start = vPos[i-1] + 1;
 
@@ -319,8 +308,16 @@ Prediction :: Prediction (std::vector <int> vPos,
     vGene[nbGene-1]->AddFeature(vState[i], start, vPos[i]);
   }
   
-  for(i=0; i<nbGene; i++)
-    vGene[i]->Update();
+  // Gene update and deletion of short genes
+  std::vector <Gene*>::iterator geneindex;
+  for (geneindex = vGene.begin(); geneindex != vGene.end(); )
+  {
+    (*geneindex)->Update();
+    if ((*geneindex)->exLength <= MinCDSLen) {
+      nbGene--;
+      geneindex = vGene.erase(geneindex);
+    } else geneindex++;
+  }
 }
 
 // ------------------------
@@ -995,7 +992,7 @@ char* Prediction :: IsAcc(int p)
 }
  
 // ------------------------
-// IsState: Is a nucleotid in a given state ? 
+// IsState: Is a nucleotide in a given state ? 
 // BE CAREFUL: 
 // this method could be used only for a prediction with one complete gene.
 //         the prediction could be the representation of an external gff annotation 
