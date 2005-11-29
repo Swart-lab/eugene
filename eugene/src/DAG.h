@@ -54,8 +54,8 @@ class DAG
   void WeightThePrior();
   void LoadDistLength();
   void ShortestPathAlgoForward (int position, DATA Data);
-
   void ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpdate=0);
+  void MarkAndSweep(int);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, int sense);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, DAG* DagR);
   //  void InsertLastBestUsableBP (int position, int sense=1);
@@ -75,6 +75,5 @@ class DAG
   void Print();
   void StatActive();
   void StatGC();
-  void MarkAndSweep(int);
 };
 // **  a passer en private
