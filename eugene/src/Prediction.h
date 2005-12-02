@@ -225,28 +225,35 @@ const short int ReverseTracks[(NbTracks-1)/2] = {
   UTR5R,UTR3R, 
   IntronU5R,IntronU3R};
 
-const short int State2Str[NbTracks] = {1,2,3,-1,-2,-3,
-					 1,2,3,-1,-2,-3,
-					 1,2,3,-1,-2,-3,
-					 1,2,3,-1,-2,-3,
-					 4,4,4,
-					 -4,-4,-4,
-					 4,4,4,
-					 -4,-4,-4,
-					 0,0,0,0,0,
-					 4,-4,4,-4};
+// 0: untranscribed
+// 1: transcribed but spliced
+// 2: transcribed and in matured transcript but not translated
+// 3: translated
+const short int State2Status[NbTracks] = {3,3,3,3,3,3,
+					  3,3,3,3,3,3,
+					  3,3,3,3,3,3,
+					  3,3,3,3,3,3,
+					  1,1,1,1,1,1,
+					  1,1,1,1,1,1,
+					  0,
+					  2,2,2,2,
+					  1,1,1,1};
 
+
+// 0 = interG, 1,2,3 = coding phase. 4 = intron. sign = strandness
 const short int State2Phase[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
-					 4,4,4,
+					  4, 4, 4,
 					 -4,-4,-4,
-					 4,4,4,
+					  4, 4, 4,
 					 -4,-4,-4,
-					 0,0,0,0,0,
+					 0,
+					 0, 0,0, 0,
 					 4,-4,4,-4};
 
+// same with intron phase
 const short int State2Frame[NbTracks] = {1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
 					 1,2,3,-1,-2,-3,
