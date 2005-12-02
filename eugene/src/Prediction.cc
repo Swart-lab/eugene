@@ -694,12 +694,12 @@ char* Prediction :: State2GFFString (int state)
   if(state >= IntronU5F)               return "Intron";
 }
 
-// ------------------------------------------------------------
+// ----------------------------------------------------------------
 // Verif coherence EST: calcul le nombre de nuc. coherents et
-// incoherents avec les match est
-// debut/fin/etat: debut et fin de la seq. dont l'etat est etat
-// cons/incons: retour des valeurs
-// ------------------------------------------------------------
+// incoherents avec les match est debut/fin/etat: debut et fin de la
+// seq. dont l'etat est etat cons/incons: retour des valeurs.  Seuls
+// les EST informant ESTmatch (non filtrés) sont pris en compte.
+// ----------------------------------------------------------------
 void Prediction :: CheckConsistency(int debut, int fin, int etat, 
 				    int* cons, int* incons)
 {
@@ -721,8 +721,8 @@ void Prediction :: CheckConsistency(int debut, int fin, int etat,
     GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
     GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
     0,
-    HitForward|MForward, HitForward|MForward|GapForward,
-    HitReverse|MReverse, HitReverse|MReverse|GapReverse,
+    HitForward|MForward, HitForward|MForward,
+    HitReverse|MReverse, HitReverse|MReverse,
     GapForward|MForward, GapReverse|MReverse,
     GapForward|MForward, GapReverse|MReverse
   };
@@ -741,8 +741,8 @@ void Prediction :: CheckConsistency(int debut, int fin, int etat,
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin,    Gap|Margin,
     0,
-    Margin|Hit,    Margin|Hit|Gap,
-    Margin|Hit,    Margin|Hit|Gap,
+    Hit|Margin,    Hit|Margin,
+    Hit|Margin,    Hit|Margin,
     Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin
   };
