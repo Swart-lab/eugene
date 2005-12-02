@@ -93,6 +93,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
   stepid         = PAR.getI("Output.stepid",N);
   MinDangling    = PAR.getI("Est.MinDangling",N);
   MaxIntron      = PAR.getI("Est.MaxIntron",N);
+  MaxIntIntron   = PAR.getI("Est.MaxInternalIntron",N);
   DonorThreshold = PAR.getD("Est.StrongDonor",N);
   DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
@@ -226,16 +227,14 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       d->contents[DATA::IntronUTRR] += estP;
     }
 
-
     // Intergenique: tout le temps si on a un match
     d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
     
-
     d->EstMatch = cESTMatch;  // WARNING : EST -> on est dans intron
     index++;
   }
 
-   // Pour que les UTR soient supportés par un EST
+  // Pour que les UTR soient supportés par un EST
   if (cESTMatch == 0  &&  (int)vPos.size() != 0) {
     // Left
     for (int k=1; k<=utrM; k++) {
@@ -297,10 +296,10 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
   for (i = 0, ThisEST = AllEST; i < *NumEST; i++, ThisEST = ThisEST->Next)
     HitTable[i] = ThisEST;
 
-  // pour memorise le premier (a liberer)
+  // pour memoriser le premier (a liberer)
   HitTable[*NumEST] = AllEST;
 
-  qsort( (void *)HitTable, *NumEST, sizeof(void *), HitsCompare );
+  qsort((void *)HitTable, *NumEST, sizeof(void *), HitsCompare);
 
   for (int index = 0; index < *NumEST; index++) {
     int Inc;
@@ -327,8 +326,9 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
       ThisEST->Match = ThisBlock->Next;
       ThisBlock->Next->Prev = NULL;
       fprintf(stderr,
-	      "   [%s]: Suspicious dangling match removed [%d-%d]\n",
-	      ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+	      "   [%s]: Suspicious dangling match removed (len. %d, gap %d)\n",
+	      ThisEST->Name,abs(ThisBlock->Start - ThisBlock->End),
+	      abs(ThisBlock->End - ThisBlock->Next->Start));
       ThisBlock->Next = NULL;
       delete ThisBlock;
       ThisEST->NGaps--;
@@ -344,8 +344,9 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	   (abs(ThisBlock->Start-ThisBlock->Prev->End) >= MaxIntron))) {
 	ThisBlock->Prev->Next = NULL;
 	fprintf(stderr,
-		"   [%s]: Suspicious dangling match removed [%d-%d]\n",
-		ThisEST->Name,ThisBlock->Start+1,ThisBlock->End+1);
+		"   [%s]: Suspicious dangling match removed (len. %d, gap %d)\n",
+		ThisEST->Name,abs(ThisBlock->Start-ThisBlock->End),
+		abs(ThisBlock->Start-ThisBlock->Prev->End));
 	delete  ThisBlock;
 	ThisBlock = NULL;
 	ThisEST->NGaps--;
@@ -532,11 +533,17 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
 	    else
 	      ESTMatch[i] |= TheStrand << HitToMLeft;
 	  
-	  for (i = ThisBlock->Prev->End+1; i <= ThisBlock->Start-1; i++)
-	    if ((Info = (ESTMatch[i] & Gap)))
-	      ESTMatch[i] |= (Info & (TheStrand << HitToGap));
-	    else
-	      ESTMatch[i] |= TheStrand << HitToGap;
+	  if (abs(ThisBlock->Prev->End - ThisBlock->Start) < MaxIntIntron) {
+
+	    for (i = ThisBlock->Prev->End+1; i <= ThisBlock->Start-1; i++)
+	      if ((Info = (ESTMatch[i] & Gap)))
+		ESTMatch[i] |= (Info & (TheStrand << HitToGap));
+	      else
+		ESTMatch[i] |= TheStrand << HitToGap;
+	  }
+	  else
+	    fprintf(stderr, "   [%s]: long intron ignored (%d bases)\n",
+		    ThisEST->Name,abs(ThisBlock->Prev->End - ThisBlock->Start));
 
 	  for (i =  Max(0,ThisBlock->Start-1-EstM);
 	       i <  Min(X->SeqLen, ThisBlock->Start-1+EstM); i++)
@@ -613,13 +620,13 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 			     int debut, int fin,  Hits **HitTable, int Size)
 {
   static int EstIndex;
+
   int supported = 0;
   int CDSsupported = 0;
   unsigned char *Sup;
   Block *ThisBlock;
   int ConsistentEST,i;
   int from = 0, to = 0, ESTEnd = 0;
-  int state;
 
   if (pred == NULL) {
     EstIndex = 0;
@@ -635,7 +642,7 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
   if (fin == -1) fin = Tfin;
   if ((debut == -1) || (debut > Tfin)) debut = Tfin+1;
   
-  //si l'iteration precendete a atteint l'extremite 
+  //si l'iteration precedente a atteint l'extremite 
   if (EstIndex >= Size) EstIndex = Max(0,Size-1);
 
   // on rembobine....
@@ -659,18 +666,17 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 	to = Min(Tfin,ThisBlock->Start-1);
 	
 	for (i = from; i <= to; i++) {
-	  state = pred->GetStateForPos(i+1);
-	  if ((state < IntronF1) || state == InterGen)
+	  if (State2Status[pred->GetStateForPos(i+1)] != 1) // 1 = transcribed and spliced
 	    ConsistentEST = 0;
 	}
-      }      
+      }
+      
       from = Max(Tdebut,ThisBlock->Start);
       to = Min(Tfin,ThisBlock->End);
       ESTEnd = ThisBlock->End;
       
       for (i = from; i <= to; i++) {
-	state = pred->GetStateForPos(i+1);
-	if ((state > TermR3) && (state <= InterGen))
+	if (State2Status[pred->GetStateForPos(i+1)] >= 2) // 2 = transcribed and not spliced
 	  ConsistentEST = 0;
       }
       ThisBlock = ThisBlock->Next;
@@ -697,11 +703,11 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 	  from = Max(Tdebut,ThisBlock->Prev->End+1);
 	  to = Min(Tfin,ThisBlock->Start-1);
 	  
-	  for (i= from; i <= to; i++) 
+	  for (i = from; i <= to; i++) 
 	    if (!Sup[i-Tdebut]) {
 	      Sup[i-Tdebut] = 1;
-	      supported++;
-	      if ((i >=debut) && (i <=fin)) CDSsupported++;
+	      supported++;   // no need to test intron/gap consistency (consistent EST)
+	      if ((i >=debut) && (i <=fin)) CDSsupported++; // !! introns, should not be counted
 	    }
 	}
 	from = Max(Tdebut,ThisBlock->Start);
@@ -710,8 +716,8 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 	for (i= from; i <= to; i++) 
 	  if (!Sup[i-Tdebut]) {
 	    Sup[i-Tdebut] = 1;
-	    supported++;
-	    if ((i >=debut) && (i <=fin)) CDSsupported++;
+	    supported++;    // no need to test exon/hit compatibility (consistent EST)
+	    if ((i >=debut) && (i <=fin)) CDSsupported++; 
 	  }
 	ThisBlock = ThisBlock->Next;
       }
@@ -737,6 +743,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 			     int debut,int fin,Hits **HitTable,int Size,int NumGene)
 {
   static int EstIndex;
+
   Block *ThisBlock;
   int ConsistentEST, i, j;
   int from = 0, to = 0, ESTEnd = 0;
@@ -748,7 +755,6 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
     return;
   }
 
-  Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sort by % support
   
   /***********************************************************************/
   /** Objectif : obtenir un vecteur contenant les index des transcripts **/
@@ -767,7 +773,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 
   if (EstIndex >= 0  &&  HitTable[EstIndex]->End < Tdebut) EstIndex++;
   
-  while (EstIndex >=0  &&  EstIndex < Size) {
+  while (EstIndex >= 0  &&  EstIndex < Size) {
     // le dernier transcrit exploitable est passe
     if (HitTable[EstIndex]->Start > Tfin) break;
     
@@ -782,101 +788,100 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	to   = Min(Tfin,   ThisBlock->Start-1);
 	
 	for (i = from; i <= to; i++) {
-	  state = pred->GetStateForPos(i+1);
-	  if ((state < IntronF1) || state ==  InterGen )
+	  if (State2Status[pred->GetStateForPos(i+1)] != 1) // 1 = transcrit, épissé
 	    ConsistentEST = 0;
 	}
-      }      
+      }
+
       from   = Max(Tdebut, ThisBlock->Start);
       to     = Min(Tfin,   ThisBlock->End);
       ESTEnd = ThisBlock->End;
       
       for (i = from; i <= to; i++) {
-	state = pred->GetStateForPos(i+1);
-	if ((state > TermR3) && (state <= InterGen))
+	if (State2Status[pred->GetStateForPos(i+1)] >= 2) // >= 2 = transcrit non épissé
 	  ConsistentEST = 0;
       }
       ThisBlock = ThisBlock->Next;
     }
     
-    // Si EST "consistente"
-    if (ConsistentEST) {
-      vSupEstI.push_back( EstIndex );
-    }
+    // Si EST "coherente"
+    if (ConsistentEST) vSupEstI.push_back( EstIndex );
     EstIndex++;
   }
 
   /***********************************************************************/
+  /* now, vSupEstI is a set of EST consistent with the analyzed gene     */
   /* Objectif : Analyser chaque feature predite -> supportée ?           */
   /***********************************************************************/
   int  start, end, len;
   char fea[5];
   char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
-    
-  for(i=0; i<pred->vGene[NumGene-1]->nbFea; i++) {
+  Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sorting by % support
+
+  for (i = 0; i < pred->vGene[NumGene-1]->nbFea; i++) {
     state = pred->vGene[NumGene-1]->vFea[i]->state;
     start = pred->vGene[NumGene-1]->vFea[i]->start;
     end   = pred->vGene[NumGene-1]->vFea[i]->end;
 
-    if(end >= Tdebut-1  &&  end <= Tfin+1)
-      {
-	len      = 0;
-	int numF = -1;
+    if (end >= Tdebut-1  &&  end <= Tfin+1) { // !! assert here ?
+      len      = 0;
+      int numF = -1;
+      
+      if (State2Status[state] >= 2) // >= 2: transcribed unspliced
+	numF = pred->vGene[NumGene-1]->vFea[i]->number;
+
+      if (state <= TermR3)                         strcpy(fea, "Exon");
+      else if (state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
+      else if (state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
+
+      if (numF != -1) {
+	if (!vSupEstI.empty())
+	  // Longueur totale supportée par les transcrits
+	  len = LenSup(HitTable, vSupEstI, -1, start, end);
 	
-	if(state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
-	  numF = pred->vGene[NumGene-1]->vFea[i]->number;
-
-	if(state <= TermR3)                         strcpy(fea, "Exon");
-	else if(state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
-	else if(state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
-
-	if(numF != -1) {
-	  if((int)vSupEstI.size() > 0)
-	    // Longueur totale supportée par les transcrits
-	    len = LenSup(HitTable, vSupEstI, -1, start, end);
+	if (len > 0) {
+	  fprintf(MINFO, "%s.%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
+		  pred->seqName, (((NumGene-1)*stepid)+1), numF,
+		  fea, start, end, len, strand);
+	  fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 	  
-	  if(len > 0) {
-	    fprintf(MINFO, "%s.%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-		    pred->seqName, (((NumGene-1)*stepid)+1), numF,
-		    fea, start, end, len, strand);
-	    fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
-	    
-	    for (int k=0;  k<NumEST;  k++)
-	      HitTable[k]->Support = 0;
-
-	    for(j=0; j<(int)vSupEstI.size(); j++) {
-	      // Longueur supportée par le transcrit
-	      len =  LenSup(HitTable, vSupEstI, j, start, end);
-	      HitTable[vSupEstI[j]]->Support = (int)((float)len/(end-start+1)*100);
-	    }
-	    // On copie la hittable pour trier sur le % supporté
-	    for (int k=0; k<NumEST; k++)
-	      TMPHitTable[k] = HitTable[k];
-	    qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
-
-	    // On affiche les ppNumber premiers hits supportant
-	    for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
-	      fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
-	    fprintf(MINFO, "\n");
+	  for (int k=0;  k<NumEST;  k++)
+	    HitTable[k]->Support = 0;
+	  
+	  // ugly duplicated work here. Would be nice also if EST
+	  // consistent with JUST the feature could be analyzed
+	  for (j=0; j<(int)vSupEstI.size(); j++) {
+	    // Longueur supportée par le transcrit
+	    len =  LenSup(HitTable, vSupEstI, j, start, end);
+	    HitTable[vSupEstI[j]]->Support = (int)((float)len/(end-start+1)*100);
 	  }
+	  // On copie la hittable pour trier sur le % supporté
+	  for (int k=0; k<NumEST; k++) TMPHitTable[k] = HitTable[k];
+	  qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
+	  
+	  // On affiche les ppNumber premiers hits supportant
+	  for (j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+	    fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
+	  fprintf(MINFO, "\n");
 	}
-      }	
+      }
+    }
   }
  
   /***********************************************************************/
   /* Objectif : Analyser la CDS et le gene predit -> supportée ?         */
   /***********************************************************************/
-  for(int i=0; i<2; i++) {
-    if(i==0) { start = debut;  end = fin;  strcpy(fea, "CDS");  }
-    else     { start = Tdebut; end = Tfin; strcpy(fea, "Gene"); }
+  for (int i=0; i<2; i++) {
+    if (i==0) { start = debut;  end = fin;  strcpy(fea, "CDS");  }
+    else      { start = Tdebut; end = Tfin; strcpy(fea, "Gene"); }
     
-    if (end >= start) {
+    if (end >= start) { // assert ?
       len = 0;
-      if((int)vSupEstI.size() > 0)
+      if (!vSupEstI.empty())
 	// Longueur totale supportée par les transcrits
 	len = LenSup(HitTable, vSupEstI, -1, start, end);
      
-      if(len > 0) {
+      if (len > 0) {
 	fprintf(MINFO, "%s.%d  \tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
 		pred->seqName, (((NumGene-1)*stepid)+1), fea,
 		start+1, end+1, len, strand);
@@ -885,7 +890,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	for (int k=0;  k<NumEST;  k++)
 	  HitTable[k]->Support = 0;
 
-	for(j=0; j<(int)vSupEstI.size(); j++) {
+	for (j=0; j<(int)vSupEstI.size(); j++) {
 	  // Longueur supportée par le transcrit
 	  len =  LenSup(HitTable, vSupEstI, j, start, end);
 	  HitTable[vSupEstI[j]]->Support = (int)((float)len/(end-start+1)*100);
@@ -896,7 +901,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	qsort((void*)TMPHitTable, NumEST, sizeof(void*), HitsCompareSup);
 
 	// On affiche les ppNumber premiers hits supportant
-	for(j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+	for (j=0; j<NumEST && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
 	  fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name, TMPHitTable[j]->Support, !TMPHitTable[j]->Rejected);
        	fprintf(MINFO, "\n");
       }
@@ -910,7 +915,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 }
 
 // -------------------------------------------------------------------------
-//  Lenght supported by EST.
+//  Length supported by EST.
 //    If index = -1 -> Lenght supported by ALL EST.
 //    Else          -> Lenght supported by ONE EST.
 // -------------------------------------------------------------------------
@@ -925,13 +930,13 @@ int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
   int j;
 
   Sup = new unsigned char[end-beg+1]; 
-  for (i=0; i<=end-beg; i++)
-    Sup[i]=0;
+  for (i=0; i<=end-beg; i++) Sup[i]=0;
   
-  index == -1  ?  i=0 : i=index;
-  for(; i<(int)vSupEstI.size() || i==index; i++) {
+  i = (index == -1  ?  0 : index);
+  for (; i<(int)vSupEstI.size() || i==index; i++) {
     ThisBlock = HitTable[vSupEstI[i]]->Match;
-    while (ThisBlock) {
+ 
+   while (ThisBlock) {
       if (ThisBlock->Prev != NULL) {
  	// intersection
  	from = Max(beg, ThisBlock->Prev->End+1);
