@@ -178,6 +178,7 @@ Est.SpliceBoost* 0.0
 Est.StrongDonor 0.95
 Est.MinDangling 10
 Est.MaxIntron   15000
+Est.MaxInternalIntron   15000
 #
 ##### Homology Sensor parameters #####
 Homology.TblastxP*	0
