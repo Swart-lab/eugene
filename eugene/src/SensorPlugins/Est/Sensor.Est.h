@@ -46,6 +46,7 @@ class SensorEst : public Sensor
 
   int MinDangling;
   int MaxIntron;
+  int MaxIntIntron;
   
   Hits** ESTAnalyzer(FILE *, unsigned char *, int, int *, DNASeq *);
   void   ESTSupport (Prediction *, FILE *, int Tdebut,    int Tfin,
