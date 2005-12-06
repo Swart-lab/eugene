@@ -82,7 +82,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   fprintf(stderr,"Reading BlastX data, level...");
   fflush(stderr);
   
-  for( k=0; k<(int)strlen(levels); k++ ) {
+  for (k = 0; k < (int)strlen(levels); k++) {
     // for each level given in arg: 
     // e.g. with -b09 : 1st: level 0 (k=0), 2nd: level 9 (k=1)
     strcpy(tempname,PAR.getC("fstname"));
@@ -105,7 +105,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   
   Hits *ThisProt = AllProt;
   HitTable = new Hits *[NumProt+1];
-  for (i=0;  i<NumProt;  i++, ThisProt=ThisProt->Next)
+  for (i = 0;  i < NumProt;  i++, ThisProt = ThisProt->Next)
     HitTable[i] = ThisProt;
   
   //for (i=0;  i<NumProt;  i++)
@@ -119,7 +119,6 @@ SensorBlastX :: ~SensorBlastX ()
 {
   vPos.clear();
   vPMatch.clear();
-  vPMLevel.clear();
   vPMPhase.clear();
   if(HitTable != NULL) delete [] HitTable;
   HitTable = NULL;
@@ -133,11 +132,10 @@ void SensorBlastX :: Init (DNASeq *X)
   int    i, j;
   int    Len = X->SeqLen;
   int    level, levelidx, Pphase = 0;
-  double GlobalScore,    PGlobalScore = 0;
+  float GlobalScore,    PGlobalScore = 0;
  
   vPos.clear();
   vPMatch.clear();
-  vPMLevel.clear();
   vPMPhase.clear();
 
   keyBXLevel[0] = PAR.getD("BlastX.level0*", N, sloppy);
@@ -151,8 +149,8 @@ void SensorBlastX :: Init (DNASeq *X)
   keyBXLevel[8] = PAR.getD("BlastX.level8*", N, sloppy);
   keyBXLevel[9] = PAR.getD("BlastX.level9*", N, sloppy);
   blastxM       = PAR.getI("BlastX.blastxM*",N);
-  ProtMatch      = new double[Len+1];
-  ProtMatchLevel = new double[Len+1];
+  ProtMatch      = new float[Len+1];
+  ProtMatchLevel = new float[Len+1];
   ProtMatchPhase = new int[Len+1];
 
   for (i=0; i<= Len; i++) {
@@ -169,7 +167,7 @@ void SensorBlastX :: Init (DNASeq *X)
 
     while (MyHSP != NULL) {
       
-      GlobalScore = (double)(MyHSP->Score) / (double)abs(MyHSP->End-MyHSP->Start);
+      GlobalScore = (float)(MyHSP->Score) / (float)abs(MyHSP->End-MyHSP->Start);
       
       // GAPS -> INTRONS ; the "intron" consideration between 2 HSP
       // requires close prot boundaries (blastxM param)
@@ -186,12 +184,12 @@ void SensorBlastX :: Init (DNASeq *X)
 	      if (keyBXLevel[level] > ProtMatchLevel[j]) {
 		ProtMatchLevel[j]= keyBXLevel[level];
 		ProtMatch[j]= -PGlobalScore;
-		ProtMatchPhase[j]=0;
+		ProtMatchPhase[j] = (MyHSP->Phase > 0 ? 4 : -4);
 	      }
 	      else {
 		if (PGlobalScore >= fabs(ProtMatch[j])){
 		  ProtMatch[j]= -PGlobalScore;
-		  ProtMatchPhase[j]= 0;
+		  ProtMatchPhase[j] = (MyHSP->Phase > 0 ? 4 : -4);
 		}
 	      }
 	    }
@@ -203,16 +201,46 @@ void SensorBlastX :: Init (DNASeq *X)
 	      if (keyBXLevel[level] > fabs(ProtMatchLevel[j])) {
 		ProtMatchLevel[j]= keyBXLevel[level];
 		ProtMatch[j]= -GlobalScore;
-		ProtMatchPhase[j]=0;
+		ProtMatchPhase[j] = (MyHSP->Phase > 0 ? 4 : -4);
 	      }
 	      else
 		if (GlobalScore >= fabs(ProtMatch[j])) {
 		  ProtMatch[j]= -GlobalScore;
-		  ProtMatchPhase[j]= 0;
+		  ProtMatchPhase[j] = (MyHSP->Phase > 0 ? 4 : -4);
 		}
 	    }
 	  }
 	}
+
+
+	
+        // INTERG: to separate InterG from Intron, 4/-4 is used to represent intron phase,
+        // 0 for interG phase
+        int from,to;
+        if ((MyHSP->Start-MyHSP->Prev->End) >= minIn) {
+          from = MyHSP->Prev->End+1+(minIn)/2;
+          to   = MyHSP->Start - minIn/2;
+        } else {
+          from = MyHSP->Prev->End+1;
+          to = MyHSP->Start;
+        }
+	
+        for (j = from; j <= to; j++) {
+          // ...and the intergenic regions
+          if (keyBXLevel[level] >= ProtMatchLevel[j]) {
+            if (keyBXLevel[level] > fabs(ProtMatchLevel[j])) {
+              ProtMatchLevel[j]= keyBXLevel[level];
+              ProtMatch[j]= -(PGlobalScore+GlobalScore)/2;
+              ProtMatchPhase[j] = 0;
+            }
+            else
+              if (GlobalScore >= fabs(ProtMatch[j])) {
+                ProtMatch[j]= -(PGlobalScore+GlobalScore)/2;
+                ProtMatchPhase[j]= 0;
+              }
+          }
+        }
+        
 	if (PAR.getI("Output.graph") && levelidx <3) 
 	  PlotBlastGap(MyHSP->Prev->End,Pphase,MyHSP->Start,MyHSP->Phase,levelidx);
       }
@@ -244,8 +272,7 @@ void SensorBlastX :: Init (DNASeq *X)
   for (i = 0; i<= Len; i++)
     if(ProtMatch[i] != 0.0) {
       vPos.push_back    ( i );
-      vPMatch.push_back ( ProtMatch[i] );
-      vPMLevel.push_back( ProtMatchLevel[i] );
+      vPMatch.push_back ( ProtMatch[i]*ProtMatchLevel[i] );
       vPMPhase.push_back( ProtMatchPhase[i] );
     }
 
@@ -256,6 +283,7 @@ void SensorBlastX :: Init (DNASeq *X)
   index = 0;
 }
 
+
 // --------------------------
 //  GiveInfo Content BlastX.
 // --------------------------
@@ -263,44 +291,54 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
   int i;
 
-  if((index != 0                &&  vPos[index-1] >= pos) ||
-     (index < (int)vPos.size()  &&  vPos[index]   <  pos))
-    {
-      iter = lower_bound(vPos.begin(), vPos.end(), pos);
-      if(*iter == pos) {
-	for(i=0; i<6; i++)       //exons
-	  if(vPMatch[iter-vPos.begin()] < 0 ||
-	     ((vPMatch[iter-vPos.begin()] > 0) &&
-	      (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
-	    d->contents[i] += -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
-	
-	for(i=8; i<13; i++)      //inter & UTRs
-	  if(vPMatch[iter-vPos.begin()] != 0)
-	    d->contents[i] +=  -fabs(vPMatch[iter-vPos.begin()])*vPMLevel[iter-vPos.begin()];
-	
-	for(i=6; i<8; i++)       //introns
-	  if(vPMatch[iter-vPos.begin()] > 0)
-	    d->contents[i] +=  -vPMatch[iter-vPos.begin()]*vPMLevel[iter-vPos.begin()];
-	index = iter-vPos.begin() + 1;
-      }
-      else index = iter-vPos.begin();
-    }
-  else if( index < (int)vPos.size()  &&  vPos[index] == pos )
-    {
-      for(i=0; i<6; i++)       //exons
-	if(vPMatch[index] < 0 || 
-	   ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
-	  d->contents[i] +=  -fabs(vPMatch[index])*vPMLevel[index];
+  if ((index != 0                &&  vPos[index-1] >= pos) ||
+      (index < (int)vPos.size()  &&  vPos[index]   <  pos)) {
+
+    iter = lower_bound(vPos.begin(), vPos.end(), pos);
+
+    if (*iter == pos) {
+
+      // EXON: phase is non 0 and different then penalize
+      for (i = DATA::ExonF1; i<= DATA::ExonR3; i++)       //exons
+	if (vPMPhase[iter-vPos.begin()] && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i)))
+	//	if(vPMatch[iter-vPos.begin()] < 0 ||
+	//	   ((vPMatch[iter-vPos.begin()] > 0) &&
+	//	    (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
+	  d->contents[i] += -fabs(vPMatch[iter-vPos.begin()]);
       
-      for(i=8; i<13; i++)      //inter & UTRs
-	if(vPMatch[index] != 0)
-	  d->contents[i] +=  -fabs(vPMatch[index])*vPMLevel[index];
+      // always penalize these 
+      for (i= DATA::InterG; i<= DATA::IntronUTRR; i++)      //inter & UTRs & UTR introns
+	if (vPMatch[iter-vPos.begin()] != 0)
+	  d->contents[i] +=  -fabs(vPMatch[iter-vPos.begin()]);
       
-      for(i=6; i<8; i++)       //introns
-	if(vPMatch[index] > 0)
-	  d->contents[i] += -vPMatch[index]*vPMLevel[index];
-      index++;
+      // penalize only vs hits
+      for (i=DATA::IntronF; i<=DATA::IntronR; i++)       //introns
+	if (vPMatch[iter-vPos.begin()] > 0)
+	  d->contents[i] +=  -vPMatch[iter-vPos.begin()];
+      index = iter-vPos.begin() + 1;
+
     }
+    else index = iter-vPos.begin();
+  }
+  else if( index < (int)vPos.size()  &&  vPos[index] == pos ) {
+    // EXON: phase is non 0 and different then penalize
+    for (i = DATA::ExonF1; i<= DATA::ExonR3; i++)       //exons
+      if (vPMPhase[index] && (vPMPhase[index] != PhaseAdapt(i)))
+	//if(vPMatch[index] < 0 || 
+	//	 ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
+	d->contents[i] += -fabs(vPMatch[index]);
+    
+    // always penalize these 
+    for (i= DATA::InterG; i<= DATA::IntronUTRR; i++)      //inter & UTRs & UTR introns  !! mettre IntronUTRR
+      if (vPMatch[index] != 0)
+	d->contents[i] +=  -fabs(vPMatch[index]);
+    
+    // penalize only vs hits
+    for (i=DATA::IntronF; i<=DATA::IntronR; i++)       //introns
+      if (vPMatch[index] > 0)
+	d->contents[i] +=  -vPMatch[index];
+    index++;
+  }
 }
 
 // ----------------------------
@@ -308,6 +346,7 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
 // ----------------------------
 void SensorBlastX :: Plot(DNASeq *X)
 {
+  //  Plot done in init
 }
 
 // ------------------
@@ -334,18 +373,18 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
   // Reset static in Prot Support or FEA Support
   ProtSupport(NULL, NULL, 100, 0, NULL, 0, 0);
   
-  for(int i=0; i<pred->nbGene; i++) {
+  for (int i=0; i<pred->nbGene; i++) {
     SupportedNuc = 0;
     CodingNuc    = pred->vGene[i]->exLength;
     cdsStart     = pred->vGene[i]->cdsStart + 1;
     cdsEnd       = pred->vGene[i]->cdsEnd   + 1;
    
     if (pprocess == 1) {
-      for(int j=0; j<pred->vGene[i]->nbFea; j++) {
+      for (int j=0; j<pred->vGene[i]->nbFea; j++) {
 	state = pred->vGene[i]->vFea[j]->state;
 	start = pred->vGene[i]->vFea[j]->start;
 	end   = pred->vGene[i]->vFea[j]->end;
-	if(state <= TermR3) {
+	if (State2Status[state] == 3) { //coding
 	  // index=indice du premier match etant > ou = au debut de l'exon
 	  while( (index < (int)vPos.size()) && (vPos[index] < start-1) ) index++;
 	  

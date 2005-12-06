@@ -30,14 +30,14 @@
 class SensorBlastX : public Sensor
 {
  private:
-  double *ProtMatch, *ProtMatchLevel;
+  float *ProtMatch, *ProtMatchLevel;
   int    *ProtMatchPhase;
   std::vector<int>    vPos,     vPMPhase;
-  std::vector<double> vPMLevel, vPMatch;
+  std::vector<float> vPMatch;
   std::vector<int>::iterator iter;
   char  *levels;
   int    index;
-  double keyBXLevel[10];
+  float keyBXLevel[10];
   int    minIn;
   int    blastxM;
   int    ppNumber;
