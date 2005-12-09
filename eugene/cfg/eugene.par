@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.3a
+EuGene.version		3.3b
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -154,7 +154,8 @@ Transcript.Stop*	4.155
 ##### Proteic similarity sensor parameters #####
 BlastX.PostProcess 0    # 0 1 OR 2
 BlastX.PPNumber	   5    # For PostProcess = "2"
-BlastX.levels	012
+BlastX.levels	  012
+BlastX.activegaps NONE
 BlastX.level0*	0.2
 BlastX.level1*	0.05
 BlastX.level2*	0.0
