@@ -40,6 +40,7 @@ Here is an example of BlastX parameters definition.
 \begin{Verbatim}[fontsize=\small]
 BlastX.postProcess 1     # analyse prediction accorded to BlastX information
 BlastX.levels      012      # use levels 0, 1, and 2
+BlastX.levels      0        # make gap active on level 0
 BlastX.level0*     0.2      # confidence in the level 0
 BlastX.level1*     0.0      # confidence in the level 1
 BlastX.level2*     0.0      # confidence in the level 2
@@ -149,7 +150,7 @@ Intron is only possible if:
 \end{itemize}
 Considering a similarity S with 2 similarities before and after in
 accordance with these conditions, an intron is incitated on a small
-length of \texttt{BlastX.minIn}/2 on both sides of S.
+length of \texttt{BlastX.minIn}/2 on both sides of S. 
 \begin{itemize}
 \item from $i = b^S -$ BlastX.minIn$/2$ to $i = b^S$ 
 \item from $i = e^S$ to $i = e^S +$ BlastX.minIn$/2$ 
@@ -161,13 +162,18 @@ length of \texttt{BlastX.minIn}/2 on both sides of S.
   \end{itemize}
 \end{itemize}
 
+If the \texttt{activegaps} parameter is active for a level, then all the bases
+in the gap and not mentionned above are also penalized but only for
+intergenic, UTR and UTR introns states. The penality used is the minimum
+of the weights used for the left and right HSP.
+
 A-2/ Combining extracted information\\
 
 When all the similarities have been handled, if a position has several
 set of variables, the set with the highest confidence is kept. In
 case of egal confidence, the set with the higher score is kept.
 
-B/ Weigthing the graph\\
+B/ Weighting the graph\\
 
 For each $i$ with a set of variables:
 \begin{itemize}
