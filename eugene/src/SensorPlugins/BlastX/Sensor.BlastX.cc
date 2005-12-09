@@ -67,15 +67,16 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   char   tempname[FILENAME_MAX+1];
   FILE * fblast;
 
-  N        = n;
-  type     = Type_Content;
-  HitTable = NULL;
-  sloppy   = PAR.getI("EuGene.sloppy");
-  ppNumber = PAR.getI("BlastX.PPNumber",N);
-  stepid   = PAR.getI("Output.stepid");
-  minIn    = PAR.getI("BlastX.minIn");
-  levels   = PAR.getC("BlastX.levels",  N);
-   
+  N            = n;
+  type         = Type_Content;
+  HitTable     = NULL;
+  sloppy       = PAR.getI("EuGene.sloppy");
+  ppNumber     = PAR.getI("BlastX.PPNumber",N);
+  stepid       = PAR.getI("Output.stepid");
+  minIn        = PAR.getI("BlastX.minIn");
+  levels       = PAR.getC("BlastX.levels",  N);
+  intronlevels = PAR.getC("BlastX.activegaps",  N);
+
   Hits   *AllProt = NULL;
   NumProt = 0;
   
@@ -164,6 +165,7 @@ void SensorBlastX :: Init (DNASeq *X)
     Block *MyHSP = HitTable[i]->Match;
     level = HitTable[i]->Level;
     levelidx = rindex(levels,'0'+level)-levels;
+    bool activegap = (rindex(intronlevels,'0'+level) != NULL);
 
     while (MyHSP != NULL) {
       
@@ -215,39 +217,40 @@ void SensorBlastX :: Init (DNASeq *X)
 	// The following piece of code will take into acccount "gaps"
 	// between HSP and penalise UTR/UTR introns/InterGenic
 	// later. Because of protein modularity, this gives some
-	// unexpected behavior and is commented out for the
-	// moment. The penalty enforced is also related to bordering
+	// unexpected behavior and is activable per proteic bank.
+	// The penalty enforced is also related to bordering
 	// HSP lengths. It probably (?) would be better using the GAP
 	// length.
 	
-	/*
+	
         // INTERG: to separate InterG from Intron, 4/-4 is used to represent intron phase,
         // 0 for interG phase
-        int from,to;
-        if ((MyHSP->Start-MyHSP->Prev->End) >= minIn) {
-          from = MyHSP->Prev->End+1+(minIn)/2;
-          to   = MyHSP->Start - minIn/2;
-        } else {
-          from = MyHSP->Prev->End+1;
-          to = MyHSP->Start;
-        }
-	
-        for (j = from; j <= to; j++) {
-          // ...and the intergenic regions
-          if (keyBXLevel[level] >= ProtMatchLevel[j]) {
-            if (keyBXLevel[level] > fabs(ProtMatchLevel[j])) {
-              ProtMatchLevel[j]= keyBXLevel[level];
-              ProtMatch[j]= -(PGlobalScore+GlobalScore)/2;
-              ProtMatchPhase[j] = 0;
-            }
-            else
-              if (GlobalScore >= fabs(ProtMatch[j])) {
-                ProtMatch[j]= -(PGlobalScore+GlobalScore)/2;
-                ProtMatchPhase[j]= 0;
-              }
-          }
-        }
-	*/
+	if (activegap) {
+	  int from,to;
+	  if ((MyHSP->Start-MyHSP->Prev->End) >= minIn) {
+	    from = MyHSP->Prev->End+1+(minIn)/2;
+	    to   = MyHSP->Start - minIn/2;
+	  } else {
+	    from = MyHSP->Prev->End+1;
+	    to = MyHSP->Start;
+	  }
+	  
+	  for (j = from; j <= to; j++) {
+	    // ...and the intergenic regions
+	    if (keyBXLevel[level] >= ProtMatchLevel[j]) {
+	      if (keyBXLevel[level] > fabs(ProtMatchLevel[j])) {
+		ProtMatchLevel[j]= keyBXLevel[level];
+		ProtMatch[j]= -(Min(PGlobalScore,GlobalScore));
+		ProtMatchPhase[j] = 0;
+	      }
+	      else
+		if (GlobalScore >= fabs(ProtMatch[j])) {
+		  ProtMatch[j]= -(Min(PGlobalScore,GlobalScore));
+		  ProtMatchPhase[j]= 0;
+		}
+	    }
+	  }
+	}
         
 	if (PAR.getI("Output.graph") && levelidx <3) 
 	  PlotBlastGap(MyHSP->Prev->End,Pphase,MyHSP->Start,MyHSP->Phase,levelidx);

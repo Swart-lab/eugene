@@ -36,6 +36,7 @@ class SensorBlastX : public Sensor
   std::vector<float> vPMatch;
   std::vector<int>::iterator iter;
   char  *levels;
+  char  *intronlevels;
   int    index;
   float keyBXLevel[10];
   int    minIn;
