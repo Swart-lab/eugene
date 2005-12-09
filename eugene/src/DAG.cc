@@ -310,7 +310,7 @@ void DAG :: StatGC() {
 // ----------------------------------------------------------------
 //  MarkandSweep garbage collector
 // ----------------------------------------------------------------
-void DAG :: MarkAndSweep(int pos,int verbose)
+void DAG :: MarkAndSweep(int pos,int verbose, int latency)
 {
   
   int k;
@@ -322,7 +322,7 @@ void DAG :: MarkAndSweep(int pos,int verbose)
   }
 
   // We first compute the maximum horizon that will be GC'd. This is
-  // a purely approximative approach. There is a priori non guarantee
+  // a purely approximative approach. There is a priori no guarantee
   // that everything will be GC'd with this but most things should.
   // For each track, the penalty distribution may have a different
   // length and everything inside this length is a source pointeur for
@@ -332,7 +332,7 @@ void DAG :: MarkAndSweep(int pos,int verbose)
 
   
   for (k = 0; k < NbTracks ; k++) 
-    Horizon = Min(Horizon,Max(0,pos - LBP[k].PenD.MaxLen - k*GCLATENCY));
+    Horizon = Min(Horizon,Max(0,pos - LBP[k].PenD.MaxLen - 2*latency));
 
   for (k = 0; k < NbTracks ; k++)
     LBP[k].ClearMark(Horizon);

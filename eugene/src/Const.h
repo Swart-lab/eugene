@@ -29,7 +29,6 @@
 #define PLUGINS_DIR "plugins"
 #define MODELS_DIR "models"
 #define WEB_DIR "web"
-#define GCLATENCY 10000
 
 #define POSSIBLE_ARGUMENTS "GUREBdrsghm:w:f:n:o:p:x:y:c:u:v:b::l:O:D:t::M:Z::A:"
 

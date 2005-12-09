@@ -54,7 +54,7 @@ class DAG
   void LoadDistLength();
   void ShortestPathAlgoForward (int position, DATA Data);
   void ShortestPathAlgoBackward (int position, DATA Data, int NoContentsUpdate=0);
-  void MarkAndSweep(int,int);
+  void MarkAndSweep(int,int,int);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, int sense);
   //  int ChooseTheBestTrackIndex (int position, double *bestscore, DAG* DagR);
   //  void InsertLastBestUsableBP (int position, int sense=1);
