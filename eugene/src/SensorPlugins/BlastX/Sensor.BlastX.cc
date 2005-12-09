@@ -212,8 +212,15 @@ void SensorBlastX :: Init (DNASeq *X)
 	  }
 	}
 
-
+	// The following piece of code will take into acccount "gaps"
+	// between HSP and penalise UTR/UTR introns/InterGenic
+	// later. Because of protein modularity, this gives some
+	// unexpected behavior and is commented out for the
+	// moment. The penalty enforced is also related to bordering
+	// HSP lengths. It probably (?) would be better using the GAP
+	// length.
 	
+	/*
         // INTERG: to separate InterG from Intron, 4/-4 is used to represent intron phase,
         // 0 for interG phase
         int from,to;
@@ -240,6 +247,7 @@ void SensorBlastX :: Init (DNASeq *X)
               }
           }
         }
+	*/
         
 	if (PAR.getI("Output.graph") && levelidx <3) 
 	  PlotBlastGap(MyHSP->Prev->End,Pphase,MyHSP->Start,MyHSP->Phase,levelidx);
@@ -380,6 +388,11 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
     cdsEnd       = pred->vGene[i]->cdsEnd   + 1;
    
     if (pprocess == 1) {
+
+      // WARNING: this analysis does only take into account the hits
+      // that have not be "shadowed" by other stronger hits in the
+      // Init phase. 
+
       for (int j=0; j<pred->vGene[i]->nbFea; j++) {
 	state = pred->vGene[i]->vFea[j]->state;
 	start = pred->vGene[i]->vFea[j]->start;
@@ -449,12 +462,14 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     while (ThisBlock) {
       from = Max(debut, ThisBlock->Start);
       to   = Min(fin,   ThisBlock->End);
-      if (from < to)
+      if (from < to) {
 	SupportProt = 1;
+	break;
+      }
       ThisBlock = ThisBlock->Next;
     }
     
-    // Si Prot supporte
+    // Si Prot supporte potentiellement
     if (SupportProt)
       vSupProtI.push_back( ProtIndex );
     ProtIndex++;
@@ -469,58 +484,57 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
   char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
   int  codingNuc = 0;
     
-  for(i=0; i<pred->vGene[NumGene-1]->nbFea; i++) {
+  for (i=0; i<pred->vGene[NumGene-1]->nbFea; i++) {
     state = pred->vGene[NumGene-1]->vFea[i]->state;
     start = pred->vGene[NumGene-1]->vFea[i]->start;
     end   = pred->vGene[NumGene-1]->vFea[i]->end;
     
-    if(end > debut  &&  end <= fin+1)
-      {
-	len      = 0;
-	int numF = -1;
-
-	if(state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
-	  numF = pred->vGene[NumGene-1]->vFea[i]->number;
+    if (start > debut  &&  end <= fin+1) {
+      len      = 0;
+      int numF = -1;
+      
+      if (state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
+	numF = pred->vGene[NumGene-1]->vFea[i]->number;
+      
+      if (state <= TermR3) {
+	strcpy(fea, "Exon");
+	codingNuc += end - start + 1;
+      }
+      else if(state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
+      else if(state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
+      
+      if (numF != -1) {
+	if ((int)vSupProtI.size() > 0)
+	  // Longueur totale supportée par les prots
+	  len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
 	
-	if(state <= TermR3) {
-	  strcpy(fea, "Exon");
-	  codingNuc += end - start + 1;
-	}
-	else if(state == UTR5F  ||  state == UTR5R) strcpy(fea, "UTR5");
-	else if(state == UTR3F  ||  state == UTR3R) strcpy(fea, "UTR3");
-	
-      	if(numF != -1) {
-	  if((int)vSupProtI.size() > 0)
-	    // Longueur totale supportée par les prots
-	    len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
+	if (len > 0) {
+	  fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
+		  pred->seqName, (((NumGene-1)*stepid)+1), numF,
+		  fea,start,end,len,strand);
+	  fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 	  
-	  if(len > 0) {
-	    fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-		    pred->seqName, (((NumGene-1)*stepid)+1), numF,
-		    fea,start,end,len,strand);
-	    fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
-	    
-	    for (int k=0;  k<NumProt;  k++)
-	      HitTable[k]->Support = 0;
-
-	    for(j=0; j<(int)vSupProtI.size(); j++) {
-	      // Longueur supportée par la prot
-	      len = LenSup(HitTable, pred, vSupProtI, j, start, end);
-	      HitTable[vSupProtI[j]]->Support = (int)((float)len/(end-start+1)*100);
-	    }
-	    // On copie la hittable pour trier sur le % supporté
-	    for (int k=0; k<NumProt; k++)
-	      TMPHitTable[k] = HitTable[k];
-	    qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
-	   
-	    // On affiche les ppNumber premiers hits supportant
-	    for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
-	      fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
-		      TMPHitTable[j]->Support, TMPHitTable[j]->Level);
-	    fprintf(MINFO, "\n");
+	  for (int k=0;  k<NumProt;  k++)
+	    HitTable[k]->Support = 0;
+	  
+	  for (j=0; j<(int)vSupProtI.size(); j++) {
+	    // Longueur supportée par la prot
+	    len = LenSup(HitTable, pred, vSupProtI, j, start, end);
+	    HitTable[vSupProtI[j]]->Support = (int)((float)len/(end-start+1)*100);
 	  }
+	  // On copie la hittable pour trier sur le % supporté
+	  for (int k=0; k<NumProt; k++)
+	    TMPHitTable[k] = HitTable[k];
+	  qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
+	  
+	  // On affiche les ppNumber premiers hits supportant
+	  for (j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
+	    fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
+		    TMPHitTable[j]->Support, TMPHitTable[j]->Level);
+	  fprintf(MINFO, "\n");
 	}
       }
+    }
   }
 
   /***********************************************************************/
@@ -568,9 +582,9 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 }
 
 // -------------------------------------------------------------------------
-//  Lenght supported by Prot.
-//    If index = -1 -> Lenght supported by ALL Prot.
-//    Else          -> Lenght supported by ONE Prot.
+//  Length supported by Prot.
+//    If index = -1 -> Length supported by ALL Prot.
+//    Else          -> Length supported by ONE Prot.
 // -------------------------------------------------------------------------
 int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
 			   std::vector<int> vSupProtI,
@@ -582,19 +596,19 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
   int from  = 0, to = 0;
   int state = 0;
   int i, j;
-
-  Sup = new unsigned char[end-beg+1]; 
-  for (i=0; i<=end-beg; i++)
-    Sup[i]=0;
   
-  index == -1  ?  i=0 : i=index;
+  Sup = new unsigned char[end-beg+1]; 
+  for (i=0; i<=end-beg; i++) Sup[i]=0;
+  
+  i = (index == -1  ?  0 : index);
+  
   for(; i<(int)vSupProtI.size() || i==index; i++) {
     ThisBlock = HitTable[vSupProtI[i]]->Match;
     while (ThisBlock) {
       from = Max(beg, ThisBlock->Start+1);
       to   = Min(end, ThisBlock->End+1);
        
-      for (j=from; j<=to; j++) {
+      for (j = from; j <= to; j++) {
 	state = pred->GetStateForPos(j);
 	if (!Sup[j-beg]  &&  State2Phase[state] == ThisBlock->Phase) {
 	  Sup[j-beg] = 1;
@@ -603,7 +617,7 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
       }
       ThisBlock = ThisBlock->Next;
     }
-    if(index != -1) break;
+    if (index != -1) break;
   }
   delete [] Sup;
   return supported;
