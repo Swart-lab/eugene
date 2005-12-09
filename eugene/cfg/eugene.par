@@ -1,9 +1,11 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.3
+EuGene.version		3.3a
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
+EuGene.VerboseGC	0
+EuGene.GCLatency	100000
 #
 ##### Lengths #####
 EuGene.InitExDist	init.dist
