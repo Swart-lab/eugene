@@ -76,12 +76,13 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   int   j, k;
   int   Data_Len = TheSeq->SeqLen;
   DATA	Data;
-  int   Forward =   1;//PAR.getI("Sense"); 
+  int   Forward =  1;//PAR.getI("Sense"); 
   int   Dir = (Forward ? 1 : -1);
   int	FirstNuc = (Forward ? 0 : Data_Len);
   int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
-  
-  DAG Dag(FirstNuc-Dir, LastNuc, PAR,TheSeq);
+  int   GCVerbose = PAR.getI("EuGene.VerboseGC");
+  int   GCLatency = PAR.getI("EuGene.GCLatency");
+  DAG   Dag(FirstNuc-Dir, LastNuc, PAR,TheSeq);
   
   Dag.LoadDistLength();
   Dag.WeightThePrior();
@@ -98,7 +99,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     else
       Dag.ShortestPathAlgoBackward(nuc,Data);
 
-    //if (nuc && (nuc % GCLATENCY) == 0) Dag.MarkAndSweep(nuc);
+    if (nuc && (nuc % GCLatency == 0)) Dag.MarkAndSweep(nuc,GCVerbose);
   }
 
   Dag.WeightThePrior();

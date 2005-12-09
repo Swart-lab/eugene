@@ -294,7 +294,7 @@ void DAG :: StatActive() {
   for (int k = 0;k < NbTracks ; k++) 
     BPalloc += LBP[k].NumBPAlloc;
   
-   printf("Number of active BP: %d\n",BPalloc);
+   printf("(%d active BP, ",BPalloc);
 }
 // ----------------------------------------------------------------
 //  Print collected BP stats
@@ -305,18 +305,21 @@ void DAG :: StatGC() {
   for (int k = 0;k < NbTracks ; k++) 
     BPcollect += LBP[k].NumBPCollect;
   
-   printf("Number of collected BP: %d\n",BPcollect);
+   printf("%d collected).\n",BPcollect);
 }
 // ----------------------------------------------------------------
 //  MarkandSweep garbage collector
 // ----------------------------------------------------------------
-void DAG :: MarkAndSweep(int pos){
+void DAG :: MarkAndSweep(int pos,int verbose)
+{
   
   int k;
   int Horizon = pos;
 
-  printf("GC started, ");
-  StatActive();
+  if (verbose) {
+    printf("GC started ");
+    StatActive();
+  }
 
   // We first compute the maximum horizon that will be GC'd. This is
   // a purely approximative approach. There is a priori non guarantee
@@ -340,8 +343,8 @@ void DAG :: MarkAndSweep(int pos){
   for (k = 0; k < NbTracks ; k++) 
     LBP[k].Sweep(Horizon);
 
-  printf("GC finished, ");
-  StatGC();
+  if (verbose) 
+    StatGC();
 }
 
 // ----------------------------------------------------------------
