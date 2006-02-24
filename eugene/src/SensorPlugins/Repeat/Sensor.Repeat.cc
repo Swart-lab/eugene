@@ -43,7 +43,7 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   strcat(tempname,".ig");
   ncfile = FileOpen(NULL,tempname, "r");
   
-  while (fscanf(ncfile,"%d %d\n", &deb, &fin) != EOF)  {
+  while (fscanf(ncfile,"%d %d%*s\n", &deb, &fin) != EOF)  {
     int s = (int)vDeb.size();
     deb   = Max(1,deb)-1;
     fin   = Min(X->SeqLen,fin)-1;
