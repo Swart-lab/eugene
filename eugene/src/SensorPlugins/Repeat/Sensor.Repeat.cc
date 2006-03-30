@@ -33,6 +33,9 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   char tempname[FILENAME_MAX+1];
   FILE* ncfile;
   int deb, fin;
+  char *line;
+  size_t linelen;
+  int read;
 
   type = Type_Content;
 
@@ -42,12 +45,21 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".ig");
   ncfile = FileOpen(NULL,tempname, "r");
-  
-  while (fscanf(ncfile,"%d %d%*s\n", &deb, &fin) != EOF)  {
+  line  = NULL;
+  linelen = 0;
+
+  while (getline(&line, &linelen, ncfile) > 0) {
+
+    read = sscanf(line, "%d %d %*s\n", &deb, &fin);
+
+    free(line);
+    line = NULL; 
+    linelen = 0;
+
     int s = (int)vDeb.size();
     deb   = Max(1,deb)-1;
     fin   = Min(X->SeqLen,fin)-1;
-    if(deb > fin  ||
+    if(deb > fin  || (read <2) ||
        (s != 0  &&  vFin[s-1] >= deb)) {
       fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
       exit(2);
