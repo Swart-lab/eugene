@@ -124,10 +124,8 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".tblastx");
-  ftblastx = FileOpen(NULL,tempname, "r");
-  if (ftblastx == NULL) {
-    fprintf (stderr,"\ncannot open tblastx file %s\n",tempname); exit (2);
-  }
+  ftblastx = FileOpen(NULL,tempname, "r", PAR.getI("EuGene.sloppy"));
+  if (ftblastx) {
   
   while (!feof(ftblastx)) {
     if (fscanf(ftblastx,"%d %d %lf %*s %d %*s %d %d",
@@ -192,7 +190,8 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
       }
     }
   }
-
+  }
+  else   fprintf(stderr,"no file\n");
   delete [] tmpdir;
 }
 

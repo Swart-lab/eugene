@@ -44,30 +44,36 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".ig");
-  ncfile = FileOpen(NULL,tempname, "r");
-  line  = NULL;
-  linelen = 0;
+  ncfile = FileOpen(NULL,tempname, "r",PAR.getI("EuGene.sloppy"));
 
-  while (getline(&line, &linelen, ncfile) > 0) {
-
-    read = sscanf(line, "%d %d %*s\n", &deb, &fin);
-
-    free(line);
-    line = NULL; 
+  if (ncfile) { 
+    line  = NULL;
     linelen = 0;
 
-    int s = (int)vDeb.size();
-    deb   = Max(1,deb)-1;
-    fin   = Min(X->SeqLen,fin)-1;
-    if(deb > fin  || (read <2) ||
-       (s != 0  &&  vFin[s-1] >= deb)) {
-      fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
-      exit(2);
+    while (getline(&line, &linelen, ncfile) > 0) {
+
+      read = sscanf(line, "%d %d %*s\n", &deb, &fin);
+
+      free(line);
+      line = NULL; 
+      linelen = 0;
+
+      int s = (int)vDeb.size();
+      deb   = Max(1,deb)-1;
+      fin   = Min(X->SeqLen,fin)-1;
+      if(deb > fin  || (read <2) ||
+         (s != 0  &&  vFin[s-1] >= deb)) {
+        fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
+        exit(2);
+      }
+      vDeb.push_back( deb );
+      vFin.push_back( fin );
     }
-    vDeb.push_back( deb );
-    vFin.push_back( fin );
-  }
   fprintf(stderr,"done\n");
+  } else
+  {
+  fprintf(stderr,"no file\n");
+  }
 }
 
 // ----------------------
