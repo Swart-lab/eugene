@@ -467,7 +467,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
   	UTRRightTo  = vGene[i]->vFea[vGene[i]->nbFea-1]->end;
   	
   	if ((estopt) && PAR.getI("Output.UTRtrim"))
-  	{
+  	{		
   		// Start by determining UTR support if needed
   		for(int j=0; j<vGene[i]->nbFea; j++) 
   		{
@@ -476,6 +476,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
   			start = vGene[i]->vFea[j]->start;
   			end = vGene[i]->vFea[j]->end;
   			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
+  			else UTRLeftFrom = end+1;
   		}
   	
   		// Same on right
@@ -486,6 +487,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
   			start = vGene[i]->vFea[j]->start;
   			end = vGene[i]->vFea[j]->end;
   			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
+  			else UTRRightTo = start-1;
   		}
   	}
   	
@@ -500,7 +502,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
       start = vGene[i]->vFea[j]->start;
       end   = vGene[i]->vFea[j]->end;
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
-        
+               
       if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
       {
       	start = Max(start,UTRLeftFrom);
@@ -548,6 +550,7 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
   			start = vGene[i]->vFea[j]->start;
   			end = vGene[i]->vFea[j]->end;
   			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
+  			else UTRLeftFrom = end+1;
   		}
   	
   		// Same on right
@@ -558,6 +561,7 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
   			start = vGene[i]->vFea[j]->start;
   			end = vGene[i]->vFea[j]->end;
   			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
+  			else UTRRightTo = start-1;
   		}
   	}
   	
@@ -583,7 +587,7 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 		acc = offset + start - 1;
 		don = offset + end   + 1;
       }
-  
+    	  
       if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
       {
       	start = Max(start,UTRLeftFrom);
@@ -821,14 +825,14 @@ char* Prediction :: State2GFFString (int state)
 // is used.
 // ----------------------------------------------------------------
 bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
-{
+{	
 	if ((etat == UTR5F) || (etat == UTR3R))
 		for (int k = *debut; k <= *fin; k++)
-			if (ESTMatch[k] | Hit) { *debut = k; return true; }
+			if (ESTMatch[k] & Hit) { *debut = k; return true; }
 				
 	if ((etat == UTR3F) || (etat == UTR5R))
 		for (int k = *fin; k >= *debut; k--)
-			if (ESTMatch[k] | Hit) { *fin = k; return true; }
+			if (ESTMatch[k] & Hit) { *fin = k; return true; }
 			
 	return false;	
 }
