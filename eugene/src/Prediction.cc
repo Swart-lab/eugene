@@ -24,6 +24,49 @@
 
 extern Parameters   PAR;
 
+// -----------------------
+//  ESTScan: fills ESTMatch with just Gap and Hit. Used to detect supported UTR
+// -----------------------
+void Prediction :: ESTScan()
+{
+    int i, NumEST;
+    Hits *ThisEST = NULL, *AllEST = NULL;
+    Block *ThisBlock = NULL;
+    char tempname[FILENAME_MAX+1];
+    FILE *fEST;
+    
+    ESTMatch = new unsigned char[X->SeqLen+1];
+    for (i = 0; i <= X->SeqLen; i++) ESTMatch[i] = 0;
+
+    strcpy(tempname, PAR.getC("fstname"));
+    strcat(tempname, ".est");
+    fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+    NumEST = 0;
+    if (fEST)
+    {
+    	AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0);
+        fclose(fEST);
+
+		ThisEST = AllEST; // start from first one.
+		while (ThisEST)
+		{
+			ThisBlock = ThisEST->Match;
+			while (ThisBlock) 
+			{
+				//Mark Hit
+				for (i = ThisBlock->Start; i <= ThisBlock->End; i++) ESTMatch[i] |= Hit;
+				// A Gap ?
+				if (ThisBlock->Prev != NULL) // Mark Gap
+					for (i = ThisBlock->Prev->End; i <= ThisBlock->Start; i++) ESTMatch[i] |= Gap;
+				
+				ThisBlock = ThisBlock->Next;
+			}
+			ThisEST = ThisEST->Next;
+		}
+		delete AllEST;
+     }
+}
+
 /*************************************************************
  **                       Feature Object                    **
  *************************************************************/
@@ -269,6 +312,7 @@ Prediction :: Prediction ()
 {
   MS = NULL;
   X  = NULL;
+  ESTMatch = NULL;
   seqName[0]  = '\000';
   nbGene      = 0;
   optimalPath = 0;
@@ -282,6 +326,7 @@ Prediction :: Prediction (std::vector <int> vPos,
 {
   MS = NULL;
   X  = NULL;
+  ESTMatch = NULL;
   seqName[0]  = '\000';
   nbGene      = 0;
   optimalPath = 0;
@@ -326,6 +371,7 @@ Prediction :: Prediction (std::vector <int> vPos,
 Prediction :: ~Prediction ()
 {
   vGene.clear();
+  if (ESTMatch) delete [] ESTMatch;
 }
 
 // --------------------------
@@ -340,6 +386,10 @@ void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
   char outputFormat[20];
   int  trunclen =      PAR.getI("Output.truncate");
   strcpy(outputFormat, PAR.getC("Output.format"));
+  
+  if (PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy")) && 
+      PAR.getI("Output.UTRtrim")) 
+      ESTScan();
 
   // SeqName
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
@@ -393,6 +443,8 @@ void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
       }
     }
   }
+  if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
+  ESTMatch = NULL;
 }
 
 // ------------------------
@@ -405,9 +457,38 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
   int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
   int state, start, end;
   int incons = 0, cons = 0;
-
+  int  UTRLeftFrom,UTRRightTo;
+  
   /* name source feature start end score strand frame */
   for(int i=0; i<nbGene; i++) {
+  	
+  	// default: every UTR must be printed
+  	UTRLeftFrom = vGene[i]->vFea[0]->start;
+  	UTRRightTo  = vGene[i]->vFea[vGene[i]->nbFea-1]->end;
+  	
+  	if ((estopt) && PAR.getI("Output.UTRtrim"))
+  	{
+  		// Start by determining UTR support if needed
+  		for(int j=0; j<vGene[i]->nbFea; j++) 
+  		{
+  			state = vGene[i]->vFea[j]->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = vGene[i]->vFea[j]->start;
+  			end = vGene[i]->vFea[j]->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
+  		}
+  	
+  		// Same on right
+  		for(int j=vGene[i]->nbFea-1; j>=0; j--) 
+  		{
+  			state = vGene[i]->vFea[j]->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = vGene[i]->vFea[j]->start;
+  			end = vGene[i]->vFea[j]->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
+  		}
+  	}
+  	
     for(int j=0; j<vGene[i]->nbFea; j++) {
       state = vGene[i]->vFea[j]->state;
       // Print introns ?
@@ -416,20 +497,24 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
 	  (state >= IntronU5F) )
 	continue;
       
-      start = offset + vGene[i]->vFea[j]->start;
-      end   = offset + vGene[i]->vFea[j]->end;
-      if (estopt)
-	CheckConsistency(start-1, end, state, &cons, &incons);
-      
-      fprintf(OUT, "%s.%d.%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t",
+      start = vGene[i]->vFea[j]->start;
+      end   = vGene[i]->vFea[j]->end;
+      if (estopt) CheckConsistency(start, end, state, &cons, &incons);
+        
+      if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
+      {
+      	start = Max(start,UTRLeftFrom);
+      	end   = Min(end, UTRRightTo);
+      	fprintf(OUT, "%s.%d.%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t",
 	      seqName, (i*stepid)+1, vGene[i]->vFea[j]->number,
-	      State2GFFString(state), start, end,
+	      State2GFFString(state), start+offset, end+offset,
 	      100.0*(double)cons/(end-start+1), 100.0*(double)incons/(end-start+1),
 	      vGene[i]->vFea[j]->strand);
       if(vGene[i]->vFea[j]->framegff == 9)
 	fprintf(OUT, ".\n");
       else
 	fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->framegff));
+      }
     }
   }
 }
@@ -444,9 +529,38 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
   int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
   int state, forward, start, end, don, acc;
   int incons = 0, cons = 0;
+  int UTRLeftFrom, UTRRightTo;
 
   /* Seq Type S Lend Rend Length Phase Frame Ac Do Pr */
   for(int i=0; i<nbGene; i++) {
+  	
+  	// default: every UTR must be printed
+  	UTRLeftFrom = vGene[i]->vFea[0]->start;
+  	UTRRightTo  = vGene[i]->vFea[vGene[i]->nbFea-1]->end;
+  	
+  	if ((estopt) && PAR.getI("Output.UTRtrim"))
+  	{
+  		// Start by determining UTR support if needed
+  		for(int j=0; j<vGene[i]->nbFea; j++) 
+  		{
+  			state = vGene[i]->vFea[j]->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = vGene[i]->vFea[j]->start;
+  			end = vGene[i]->vFea[j]->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
+  		}
+  	
+  		// Same on right
+  		for(int j=vGene[i]->nbFea-1; j>=0; j--) 
+  		{
+  			state = vGene[i]->vFea[j]->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = vGene[i]->vFea[j]->start;
+  			end = vGene[i]->vFea[j]->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
+  		}
+  	}
+  	
     forward = (vGene[i]->vFea[0]->strand == '+') ? 1 : 0;
     for(int j=0; j<vGene[i]->nbFea; j++) {
       state = vGene[i]->vFea[j]->state;
@@ -457,47 +571,54 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 	  (state >= IntronU5F) )
 	continue;
 
-      start = offset + vGene[i]->vFea[j]->start;
-      end   = offset + vGene[i]->vFea[j]->end;
+      start = vGene[i]->vFea[j]->start;
+      end   = vGene[i]->vFea[j]->end;
+      
+     if (estopt) CheckConsistency(start, end, state, &cons, &incons);
+ 
       if (forward) {
-	don = start - 1;
-	acc = end   + 1;
+		don = offset + start - 1;
+		acc = offset + end   + 1;
       } else {
-	acc = start - 1;
-	don = end   + 1;
+		acc = offset + start - 1;
+		don = offset + end   + 1;
       }
-      if (estopt)
-	CheckConsistency(start-1, end, state, &cons, &incons);
-
-      // araset ?
-      if (a) fprintf(OUT, "%s ",seqName);
-      else   fprintf(OUT, "%s.%d.%d\t",
+  
+      if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
+      {
+      	start = Max(start,UTRLeftFrom);
+      	end   = Min(end, UTRRightTo);     	
+      	// araset ?
+      	if (a) fprintf(OUT, "%s ",seqName);
+      	else   fprintf(OUT, "%s.%d.%d\t",
 		     seqName, (i*stepid)+1, vGene[i]->vFea[j]->number);
 
-      fprintf(OUT, "%s    %c    %7d %7d     %4d  ",
+      	fprintf(OUT, "%s    %c    %7d %7d     %4d  ",
 	      State2EGNString(state),
 	      vGene[i]->vFea[j]->strand,
-	      start, end, end - start +1);
+	      start+offset, end+offset, end - start +1);
 
-      if(state >= UTR5F) {
-	fprintf(OUT,"   NA      NA");
-	fprintf(OUT,"      NA      NA ");
-      }
-      else {
-	if(vGene[i]->vFea[j]->phase == 9)
-	  fprintf(OUT," Unk.");
-	else
-	  fprintf(OUT,"   %+2d",vGene[i]->vFea[j]->phase);
+      	if(state >= UTR5F) {
+			fprintf(OUT,"   NA      NA");
+			fprintf(OUT,"      NA      NA ");
+      	}
+      	else 
+      	{
+			if(vGene[i]->vFea[j]->phase == 9)
+	  			fprintf(OUT," Unk.");
+			else
+	  		fprintf(OUT,"   %+2d",vGene[i]->vFea[j]->phase);
 	
-	if(vGene[i]->vFea[j]->frame == 0)
-	  fprintf(OUT,"      NA");
-	else
-	  fprintf(OUT,"      %+2d",vGene[i]->vFea[j]->frame);
+			if(vGene[i]->vFea[j]->frame == 0)
+	  		fprintf(OUT,"      NA");
+			else
+	  		fprintf(OUT,"      %+2d",vGene[i]->vFea[j]->frame);
 	
-	fprintf(OUT," %7d %7d ", don, acc);
-      }
-      fprintf(OUT,"  %3.0f.%-3.0f\n",100.0*(double)cons/(end-start+1),
+			fprintf(OUT," %7d %7d ", don, acc);
+      	}
+        fprintf(OUT,"  %3.0f.%-3.0f\n",100.0*(double)cons/(end-start+1),
 	      100.0*(double)incons/(end-start+1));
+      } 
     }
   }
 }
@@ -693,7 +814,24 @@ char* Prediction :: State2GFFString (int state)
   if(state == UTR3F || state == UTR3R) return "UTR3";
   if(state >= IntronU5F)               return "Intron";
 }
-
+// ----------------------------------------------------------------
+// If the feature checked is a UTR, then the UTR will be checked for 
+// support (bool returned) and start/end positions may be trimmed to 
+// match with the first experimental (EST) evidence. All EST evidence
+// is used.
+// ----------------------------------------------------------------
+bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
+{
+	if ((etat == UTR5F) || (etat == UTR3R))
+		for (int k = *debut; k <= *fin; k++)
+			if (ESTMatch[k] | Hit) { *debut = k; return true; }
+				
+	if ((etat == UTR3F) || (etat == UTR5R))
+		for (int k = *fin; k >= *debut; k--)
+			if (ESTMatch[k] | Hit) { *fin = k; return true; }
+			
+	return false;	
+}
 // ----------------------------------------------------------------
 // Verif coherence EST: calcul le nombre de nuc. coherents et
 // incoherents avec les match est debut/fin/etat: debut et fin de la
@@ -746,10 +884,8 @@ void Prediction :: CheckConsistency(int debut, int fin, int etat,
     Gap|Margin,    Gap|Margin,
     Gap|Margin,    Gap|Margin
   };
-
-  if (debut == -1) debut = 0;
   
-  for (i=debut; i<fin; i++) {
+  for (i=Max(debut-1,0); i<fin; i++) {
     
     MS->GetInfoSpAt(Type_Content, X, i, &dTMP);
     
