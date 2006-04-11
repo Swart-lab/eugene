@@ -30,6 +30,7 @@ extern "C"{
 }
 #include "SensorIF.h"
 #include "Param.h"
+#include "Hits.h"
 
 class MasterSensor;
 class DNASeq;
@@ -91,13 +92,14 @@ class Prediction
  private:
   MasterSensor *MS;
   DNASeq       *X;
+  unsigned char *ESTMatch;
  
   void  PrintGff        (FILE*, char*);
   void  PrintEgnL       (FILE*, char*, int a=0);
   void  PrintEgnS       (FILE*);
   void  PrintEgnD       (FILE*);
   void  PrintHtml       (FILE*, char*);
- 
+
   // Convert state in string
   char* State2EGNString (int);
   char* State2GFFString (int);
@@ -108,6 +110,10 @@ class Prediction
   // cons/incons: retour des valeurs
   void  CheckConsistency(int debut, int fin, int etat,
 			 int* cons, int* incons);
+			 
+  // Check and Trim UTR according to EST evidence
+  void ESTScan();
+  bool UTRCheckAndTrim(int* debut, int* fin, int etat);
   
   // PrintHtml : -ph print the start of the HTML output
   void  StartHTML       (char*, FILE*);
