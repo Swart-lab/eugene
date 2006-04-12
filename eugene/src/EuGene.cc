@@ -104,6 +104,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
   Dag.WeightThePrior();
   Dag.BuildPrediction(Forward);
+  Dag.pred->Trim(TheSeq);
 
   return Dag.pred;
 }
@@ -223,7 +224,7 @@ int main  (int argc, char * argv [])
 	// Predict
 	// --------------------------------------------------------------------
 	pred = Predict(TheSeq, MS);
-       	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
+	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
 	
 	// --------------------------------------------------------------------
 	// Textual and graphical output
