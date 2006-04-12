@@ -82,7 +82,7 @@ void SensorFrameShift :: PostAnalyse(Prediction *pred, FILE *MINFO)
   
   if (PAR.getI("Output.graph")) {
     for(int i=0; i<pred->nbGene; i++) {
-      for(int j=0; j<pred->vGene[i]->nbFea; j++) {
+      for(int j=0; j<pred->vGene[i]->nbFea(); j++) {
 	state = pred->vGene[i]->vFea[j]->state;
 	if(state <= TermR3)
 	  if(posFs != -1) { // Frameshift plot

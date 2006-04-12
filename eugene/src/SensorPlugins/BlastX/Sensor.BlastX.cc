@@ -440,7 +440,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
             // that have not be "shadowed" by other stronger hits in the
             // Init phase.
 
-            for (int j=0; j<pred->vGene[i]->nbFea; j++)
+            for (int j=0; j<pred->vGene[i]->nbFea(); j++)
             {
                 state = pred->vGene[i]->vFea[j]->state;
                 start = pred->vGene[i]->vFea[j]->start;
@@ -544,7 +544,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
     int  codingNuc = 0;
 
-    for (i=0; i<pred->vGene[NumGene-1]->nbFea; i++)
+    for (i=0; i<pred->vGene[NumGene-1]->nbFea(); i++)
     {
         state = pred->vGene[NumGene-1]->vFea[i]->state;
         start = pred->vGene[NumGene-1]->vFea[i]->start;

@@ -919,7 +919,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
     char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
     Hits **TMPHitTable = new Hits *[NumEST+1]; // need for sorting by % support
 
-    for (i = 0; i < pred->vGene[NumGene-1]->nbFea; i++)
+    for (i = 0; i < pred->vGene[NumGene-1]->nbFea(); i++)
     {
         state = pred->vGene[NumGene-1]->vFea[i]->state;
         start = pred->vGene[NumGene-1]->vFea[i]->start;
