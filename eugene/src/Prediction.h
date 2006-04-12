@@ -132,6 +132,7 @@ class Prediction
   Prediction  (std::vector <int> vPos,
 	       std::vector <signed char> vState);
   ~Prediction ();
+  void  Trim(DNASeq*);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
