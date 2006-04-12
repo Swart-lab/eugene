@@ -104,7 +104,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 
   Dag.WeightThePrior();
   Dag.BuildPrediction(Forward);
-  Dag.pred->Trim(TheSeq);
+  Dag.pred->TrimAndUpdate(TheSeq);
 
   return Dag.pred;
 }

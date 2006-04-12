@@ -64,22 +64,24 @@ class Feature
  *************************************************************/
 class Gene
 {
+	friend class Prediction;
+	
  private:
   int complete;  //+1:init|sngl +2:term|sngl 3:ALL 
   int exNumber;
-  int inNumber,  inLength;
+  int inNumber, inLength;
   int utrLength, mrnaLength, geneLength;
-
+  void Update   ();
+  void clear	();
  public:
   int cdsStart, cdsEnd, trStart, trEnd;
   int exLength;
-  int nbFea;
   std::vector <Feature*> vFea;
  
   Gene  ();
   ~Gene ();
+  inline int nbFea() {return vFea.size();};
   void AddFeature(signed char state, int start, int end);
-  void Update    ();
   void PrintInfo (FILE*, int, char*);
 };
 
@@ -93,7 +95,8 @@ class Prediction
   MasterSensor *MS;
   DNASeq       *X;
   unsigned char *ESTMatch;
- 
+
+  void  clear			(); 
   void  PrintGff        (FILE*, char*);
   void  PrintEgnL       (FILE*, char*, int a=0);
   void  PrintEgnS       (FILE*);
@@ -132,7 +135,7 @@ class Prediction
   Prediction  (std::vector <int> vPos,
 	       std::vector <signed char> vState);
   ~Prediction ();
-  void  Trim(DNASeq*);
+  void  TrimAndUpdate (DNASeq*);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();

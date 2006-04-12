@@ -116,12 +116,7 @@ Feature :: ~Feature ()
 // ------------------------
 Gene :: Gene ()
 {
-  nbFea      = 0;
-  complete   = 0;
-  exNumber   = exLength   = 0;
-  inNumber   = inLength   = 0;
-  utrLength  = mrnaLength = geneLength = 0;
-  cdsStart   = cdsEnd     = trStart    = trEnd = -1;
+  clear();
 }
 
 // ------------------------
@@ -131,7 +126,17 @@ Gene :: ~Gene ()
 {
   vFea.clear();
 }
-
+// ------------------------
+//  Default cleaner.
+// ------------------------
+void Gene :: clear()
+{
+  complete   = 0;
+  exNumber   = exLength   = 0;
+  inNumber   = inLength   = 0;
+  utrLength  = mrnaLength = geneLength = 0;
+  cdsStart   = cdsEnd     = trStart    = trEnd = -1;
+}
 // ------------------------
 //  Add Feature.
 // ------------------------
@@ -151,7 +156,6 @@ void Gene :: AddFeature (signed char state, int start, int end)
     else if (state <= SnglR3) complete += 3;
     else if (state >= TermF1) complete += 2;
   }
-  nbFea++;
 }
 
 // ------------------------
@@ -164,8 +168,10 @@ void Gene :: Update ()
   int stateNext = -1;
   int forward   = (vFea[0]->strand == '+') ? 1 : 0;
   
+  clear();
+  
   // Compute Gene informations
-  for (int i=0; i<nbFea; i++) {
+  for (int i=0; i<nbFea(); i++) {
     state = vFea[i]->state;
     if (state <= TermR3) {
       exNumber++;
@@ -183,8 +189,8 @@ void Gene :: Update ()
       if(i==0) trStart = vFea[i]->start - 1;
     }
   }
-  trEnd = vFea[nbFea-1]->end - 1;
-  if(vFea[nbFea-1]->state < UTR5F) cdsEnd = trEnd;
+  trEnd = vFea[nbFea()-1]->end - 1;
+  if(vFea[nbFea()-1]->state < UTR5F) cdsEnd = trEnd;
 
   mrnaLength = exLength   + utrLength;
   geneLength = mrnaLength + inLength;
@@ -193,7 +199,7 @@ void Gene :: Update ()
   
   // Compute number (feature)
   int nb = (forward) ? 1 : exNumber;
-  for (int i=0; i<nbFea; i++) {
+  for (int i=0; i<nbFea(); i++) {
     state = vFea[i]->state;
     if (state <= TermR3) {
       vFea[i]->number = nb;
@@ -202,9 +208,9 @@ void Gene :: Update ()
   }
 
   // Compute phase (feature)
-  for (int i=0; i<nbFea; i++) {
+  for (int i=0; i<nbFea(); i++) {
     state = vFea[i]->state;
-    if (i+1 < nbFea) stateNext = vFea[i+1]->state;
+    if (i+1 < nbFea()) stateNext = vFea[i+1]->state;
     if (forward)
       ((stateBack == -1) ? phase=-1 : phase = PhaseAdapt(stateBack));
     else
@@ -219,7 +225,7 @@ void Gene :: Update ()
   }
 
   // Compute framegff (feature)
-  for (int i=0; i<nbFea; i++) {
+  for (int i=0; i<nbFea(); i++) {
     // On ne peut calculer la framegff qd :
     //  - on a pas le debut d'un gene forward
     //  - on a pas le gene entier pour un reverse
@@ -269,7 +275,7 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
   fprintf(F,"%s.%d  \tEuGene_misc\tCDS\t%d\t%d\t%d\t%c\t.\t",
 	  seqName, nb, cdsStart+1, cdsEnd+1, exLength, vFea[0]->strand);
   fprintf(F,"%s\t", comp);
-  for (i=0; i<nbFea; i++) {
+  for (i=0; i<nbFea(); i++) {
     if(vFea[i]->state <= TermR3) {
       if (nofirst) fprintf(F,",");
       else         nofirst = true;
@@ -284,7 +290,7 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
 	  geneLength, vFea[0]->strand);
   fprintf(F,"%s\t", comp);
   nofirst = false;
-  for (i=0; i<nbFea; i++) {
+  for (i=0; i<nbFea(); i++) {
     state = vFea[i]->state;
     if(state <= TermR3 || (state >= UTR5F && state <= UTR3R)) {
       char sep = ',';
@@ -310,12 +316,7 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
 // ------------------------
 Prediction :: Prediction ()
 {
-  MS = NULL;
-  X  = NULL;
-  ESTMatch = NULL;
-  seqName[0]  = '\000';
-  nbGene      = 0;
-  optimalPath = 0;
+  clear();
 }
 
 // ------------------------
@@ -324,15 +325,9 @@ Prediction :: Prediction ()
 Prediction :: Prediction (std::vector <int> vPos,
 			  std::vector <signed char> vState)
 {
-  MS = NULL;
-  X  = NULL;
-  ESTMatch = NULL;
-  seqName[0]  = '\000';
-  nbGene      = 0;
-  optimalPath = 0;
+  clear();
   
   int i;
-  int MinCDSLen = PAR.getI("Output.MinCDSLen");
   int start = 1;
   int nbPos = vPos.size()-1;  // == vState.size()-1;
 
@@ -352,17 +347,6 @@ Prediction :: Prediction (std::vector <int> vPos,
     }
     vGene[nbGene-1]->AddFeature(vState[i], start, vPos[i]);
   }
-  
-  // Gene update and deletion of short genes
-  std::vector <Gene*>::iterator geneindex;
-  for (geneindex = vGene.begin(); geneindex != vGene.end(); )
-  {
-    (*geneindex)->Update();
-    if ((*geneindex)->exLength <= MinCDSLen) {
-      nbGene--;
-      geneindex = vGene.erase(geneindex);
-    } else geneindex++;
-  }
 }
 
 // ------------------------
@@ -371,25 +355,116 @@ Prediction :: Prediction (std::vector <int> vPos,
 Prediction :: ~Prediction ()
 {
   vGene.clear();
-  if (ESTMatch) delete [] ESTMatch;
 }
-
+// ------------------------
+//  Initializer
+// ------------------------
+void Prediction :: clear()
+{
+  MS = NULL;
+  X  = NULL;
+  ESTMatch = NULL;
+  seqName[0]  = '\000';
+  nbGene      = 0;
+  optimalPath = 0;
+}
+// --------------------------
+//  TrimAndUpdate: modifies the prediction to Trim UTR according to EST support
+//  Also computes all statistics (length and intron numbers) 
+//  and deletes too short genes
+// --------------------------
+void Prediction :: TrimAndUpdate(DNASeq* x)
+{
+	int  state,start,end;
+	
+	X = x;
+	
+	// If no EST data or No trimming, do  nothing
+	if ((PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy")) && 
+      PAR.getI("Output.UTRtrim")))
+    {
+      
+    // Fill in ESTMatch data
+	ESTScan();
+    
+  	for(int i=0; i<nbGene; i++) 
+  	{
+  		// delete unsupported or trim
+  		std::vector <Feature*>::iterator featindex;
+  		std::vector <Feature*>::reverse_iterator rfeatindex; 	
+  		
+  		for (featindex = vGene[i]->vFea.begin(); featindex != vGene[i]->vFea.end(); )
+		{
+  			state = (*featindex)->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = (*featindex)->start;
+  			end = (*featindex)->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) 
+  			{
+//  				printf("Triming %d-%d (state %d) to S%d\n",(*featindex)->start,(*featindex)->end,
+//  					(*featindex)->state,start);
+  				(*featindex)->start = start;
+  				break;
+  			}
+  			else 
+  			{
+//  				printf("Erasing %d-%d (state %d)\n",(*featindex)->start,(*featindex)->end,(*featindex)->state);
+  				featindex = vGene[i]->vFea.erase(featindex);
+  			}
+  		}
+  		
+  	  	// Same on right
+  		for (rfeatindex = vGene[i]->vFea.rbegin(); rfeatindex != vGene[i]->vFea.rend(); )
+		{
+  			state = (*rfeatindex)->state;
+  			if (state <= InterGen) break; // Not UTR or UTRIntron
+  			start = (*rfeatindex)->start;
+  			end = (*rfeatindex)->end;
+  			if (UTRCheckAndTrim(&start,&end,state)) 
+  			{
+//  				printf("Triming %d-%d (state %d) to E%d\n",(*featindex)->start,(*featindex)->end,
+//  					(*featindex)->state,end);
+  				(*rfeatindex)->end = end;
+  				break;
+  			} 
+  			else 
+  			{
+//  				printf("Erasing %d-%d (state %d)\n",(*rfeatindex)->start,(*rfeatindex)->end,(*rfeatindex)->state);
+  				rfeatindex++;
+  				vGene[i]->vFea.pop_back();
+  			}
+  		}
+  	}
+    }
+  	
+	if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
+	ESTMatch = NULL;
+	
+	
+	// Gene update and deletion of short genes
+	std::vector <Gene*>::iterator geneindex;
+	int MinCDSLen = PAR.getI("Output.MinCDSLen");
+	for (geneindex = vGene.begin(); geneindex != vGene.end(); )
+	{
+    	(*geneindex)->Update();
+    	if ((*geneindex)->exLength <= MinCDSLen) {
+      		nbGene--;
+      		geneindex = vGene.erase(geneindex);
+    	} else geneindex++;
+	}
+}
 // --------------------------
 //  print prediction (master)
 // --------------------------
-void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
+void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
 {
-  X  = x;
+ 
   MS = ms;
   FILE *OUT;
   char nameformat[20];
   char outputFormat[20];
   int  trunclen =      PAR.getI("Output.truncate");
   strcpy(outputFormat, PAR.getC("Output.format"));
-  
-  if (PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy")) && 
-      PAR.getI("Output.UTRtrim")) 
-      ESTScan();
 
   // SeqName
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
@@ -443,10 +518,7 @@ void Prediction :: Print (DNASeq *x, MasterSensor *ms, FILE *OPTIM_OUT)
       }
     }
   }
-  if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
-  ESTMatch = NULL;
 }
-
 // ------------------------
 //  print prediction (GFF)
 // ------------------------
@@ -457,41 +529,11 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
   int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
   int state, start, end;
   int incons = 0, cons = 0;
-  int  UTRLeftFrom,UTRRightTo;
   
   /* name source feature start end score strand frame */
   for(int i=0; i<nbGene; i++) {
   	
-  	// default: every UTR must be printed
-  	UTRLeftFrom = vGene[i]->vFea[0]->start;
-  	UTRRightTo  = vGene[i]->vFea[vGene[i]->nbFea-1]->end;
-  	
-  	if ((estopt) && PAR.getI("Output.UTRtrim"))
-  	{		
-  		// Start by determining UTR support if needed
-  		for(int j=0; j<vGene[i]->nbFea; j++) 
-  		{
-  			state = vGene[i]->vFea[j]->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = vGene[i]->vFea[j]->start;
-  			end = vGene[i]->vFea[j]->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
-  			else UTRLeftFrom = end+1;
-  		}
-  	
-  		// Same on right
-  		for(int j=vGene[i]->nbFea-1; j>=0; j--) 
-  		{
-  			state = vGene[i]->vFea[j]->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = vGene[i]->vFea[j]->start;
-  			end = vGene[i]->vFea[j]->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
-  			else UTRRightTo = start-1;
-  		}
-  	}
-  	
-    for(int j=0; j<vGene[i]->nbFea; j++) {
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
       // Print introns ?
       if( (PAR.getI("Output.intron") == 0) &&
@@ -503,22 +545,17 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
       end   = vGene[i]->vFea[j]->end;
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
                
-      if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
-      {
-      	start = Max(start,UTRLeftFrom);
-      	end   = Min(end, UTRRightTo);
-      	fprintf(OUT, "%s.%d.%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t",
+      fprintf(OUT, "%s.%d.%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t",
 	      seqName, (i*stepid)+1, vGene[i]->vFea[j]->number,
 	      State2GFFString(state), start+offset, end+offset,
 	      100.0*(double)cons/(end-start+1), 100.0*(double)incons/(end-start+1),
 	      vGene[i]->vFea[j]->strand);
       if(vGene[i]->vFea[j]->framegff == 9)
-	fprintf(OUT, ".\n");
+		fprintf(OUT, ".\n");
       else
-	fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->framegff));
+		fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->framegff));
       }
     }
-  }
 }
 
 // ----------------------------
@@ -531,42 +568,12 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
   int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
   int state, forward, start, end, don, acc;
   int incons = 0, cons = 0;
-  int UTRLeftFrom, UTRRightTo;
 
   /* Seq Type S Lend Rend Length Phase Frame Ac Do Pr */
   for(int i=0; i<nbGene; i++) {
   	
-  	// default: every UTR must be printed
-  	UTRLeftFrom = vGene[i]->vFea[0]->start;
-  	UTRRightTo  = vGene[i]->vFea[vGene[i]->nbFea-1]->end;
-  	
-  	if ((estopt) && PAR.getI("Output.UTRtrim"))
-  	{
-  		// Start by determining UTR support if needed
-  		for(int j=0; j<vGene[i]->nbFea; j++) 
-  		{
-  			state = vGene[i]->vFea[j]->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = vGene[i]->vFea[j]->start;
-  			end = vGene[i]->vFea[j]->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) {UTRLeftFrom = start ; break;} // Found first
-  			else UTRLeftFrom = end+1;
-  		}
-  	
-  		// Same on right
-  		for(int j=vGene[i]->nbFea-1; j>=0; j--) 
-  		{
-  			state = vGene[i]->vFea[j]->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = vGene[i]->vFea[j]->start;
-  			end = vGene[i]->vFea[j]->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) {UTRRightTo = end ; break;} // Found first
-  			else UTRRightTo = start-1;
-  		}
-  	}
-  	
     forward = (vGene[i]->vFea[0]->strand == '+') ? 1 : 0;
-    for(int j=0; j<vGene[i]->nbFea; j++) {
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
 
       // Print introns ?
@@ -588,44 +595,40 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 		don = offset + end   + 1;
       }
     	  
-      if ((end >= UTRLeftFrom) && (start <= UTRRightTo))
+      // araset ?
+      if (a) fprintf(OUT, "%s ",seqName);
+      else   fprintf(OUT, "%s.%d.%d\t",
+		    seqName, (i*stepid)+1, vGene[i]->vFea[j]->number);
+
+      fprintf(OUT, "%s    %c    %7d %7d     %4d  ",
+	     State2EGNString(state),
+	     vGene[i]->vFea[j]->strand,
+	     start+offset, end+offset, end - start +1);
+
+      if(state >= UTR5F) {
+		fprintf(OUT,"   NA      NA");
+		fprintf(OUT,"      NA      NA ");
+      }
+      else 
       {
-      	start = Max(start,UTRLeftFrom);
-      	end   = Min(end, UTRRightTo);     	
-      	// araset ?
-      	if (a) fprintf(OUT, "%s ",seqName);
-      	else   fprintf(OUT, "%s.%d.%d\t",
-		     seqName, (i*stepid)+1, vGene[i]->vFea[j]->number);
-
-      	fprintf(OUT, "%s    %c    %7d %7d     %4d  ",
-	      State2EGNString(state),
-	      vGene[i]->vFea[j]->strand,
-	      start+offset, end+offset, end - start +1);
-
-      	if(state >= UTR5F) {
-			fprintf(OUT,"   NA      NA");
-			fprintf(OUT,"      NA      NA ");
-      	}
-      	else 
-      	{
-			if(vGene[i]->vFea[j]->phase == 9)
-	  			fprintf(OUT," Unk.");
-			else
+		if(vGene[i]->vFea[j]->phase == 9)
+	  		fprintf(OUT," Unk.");
+		else
 	  		fprintf(OUT,"   %+2d",vGene[i]->vFea[j]->phase);
 	
-			if(vGene[i]->vFea[j]->frame == 0)
+		if(vGene[i]->vFea[j]->frame == 0)
 	  		fprintf(OUT,"      NA");
-			else
+		else
 	  		fprintf(OUT,"      %+2d",vGene[i]->vFea[j]->frame);
 	
-			fprintf(OUT," %7d %7d ", don, acc);
-      	}
-        fprintf(OUT,"  %3.0f.%-3.0f\n",100.0*(double)cons/(end-start+1),
+		fprintf(OUT," %7d %7d ", don, acc);
+      }
+      fprintf(OUT,"  %3.0f.%-3.0f\n",100.0*(double)cons/(end-start+1),
 	      100.0*(double)incons/(end-start+1));
-      } 
     }
   }
 }
+	
 
 // -----------------------------
 //  print prediction (egn short)
@@ -639,7 +642,7 @@ void Prediction :: PrintEgnS (FILE *OUT)
   for(int i=0; i<nbGene; i++) {
     if (i!=0)
       fprintf(OUT,"\n");
-    for(int j=0; j<vGene[i]->nbFea; j++) {
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
       if (state <= TermR3) {
 	start = offset + vGene[i]->vFea[j]->start;
@@ -740,7 +743,7 @@ void Prediction :: PrintHtml (FILE *OUT, char *seqName)
 
   int lc = 0;
   for(int i=0; i<nbGene; i++) {
-    for(int j=0; j<vGene[i]->nbFea; j++) {
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
       
       // Print introns ?
@@ -828,11 +831,11 @@ bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
 {	
 	if ((etat == UTR5F) || (etat == UTR3R))
 		for (int k = *debut; k <= *fin; k++)
-			if (ESTMatch[k] & Hit) { *debut = k; return true; }
+			if (ESTMatch[k] & Hit) { *debut = k+1; return true; }
 				
 	if ((etat == UTR3F) || (etat == UTR5R))
 		for (int k = *fin; k >= *debut; k--)
-			if (ESTMatch[k] & Hit) { *fin = k; return true; }
+			if (ESTMatch[k] & Hit) { *fin = k+1; return true; }
 			
 	return false;	
 }
@@ -1037,7 +1040,7 @@ void Prediction :: PlotPred ()
   int endBack = 0;
 
   for(int i=0; i<nbGene; i++) {
-    for(int j=0; j<vGene[i]->nbFea; j++) {
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
       start = vGene[i]->vFea[j]->start;
       end   = vGene[i]->vFea[j]->end;
@@ -1061,8 +1064,8 @@ char Prediction :: GetStateForPos(int pos)
   for(int i=0; i<nbGene; i++) {
     if( pos < vGene[i]->vFea[0]->start ) return InterGen;
     else
-      if( pos <= vGene[i]->vFea[vGene[i]->nbFea-1]->end )
-	for(int j=0; j<vGene[i]->nbFea; j++)
+      if( pos <= vGene[i]->vFea[vGene[i]->nbFea()-1]->end )
+	for(int j=0; j<vGene[i]->nbFea(); j++)
 	  if(pos <= vGene[i]->vFea[j]->end)
 	    return vGene[i]->vFea[j]->state;
   }
