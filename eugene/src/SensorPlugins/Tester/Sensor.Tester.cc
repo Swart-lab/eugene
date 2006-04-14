@@ -80,7 +80,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     }
 
     sensor = MS->MakeSensor( SensorName, SensorInstance, X); sensor->Init(X);
-    gene = ReadGFFAnnotation();
+    gene = ReadGFFAnnotation(X);
 
     SensorType = sensor->type;
 
@@ -207,7 +207,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
       IsInitialized = true;
     }
  
-    gene = ReadGFFAnnotation();
+    gene = ReadGFFAnnotation(X);
     sensor = MS->MakeSensor( "Sensor."+SensorName, SensorInstance, X );
     sensor->Init(X);
     
@@ -319,7 +319,7 @@ void SensorTester :: PostAnalyse(Prediction *pred, FILE *MINFO)
 //         is in InterGen and the state after the last exon in the GFF  
 //         is not set Introns are all in the state IntronF1.
 // -----------------
-Prediction* SensorTester :: ReadGFFAnnotation(void)
+Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
 {
   std::string gff_file_name;
   FILE *fpCoord;
@@ -466,6 +466,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(void)
   delete [] feature;
 
   gene = new Prediction(vPos, vState);
+  gene->TrimAndUpdate(x);
 
   vPos.clear();
   vState.clear();
