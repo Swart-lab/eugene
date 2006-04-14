@@ -77,7 +77,7 @@ class SensorTester : public Sensor
   enum SIGNAL_STRAND_NO {START_F=0, START_R=1, STOP_F=0, STOP_R=1, ACC_F=0, ACC_R=1, DON_F=2, DON_R=3};
   unsigned char SensorType;
 
-  Prediction* ReadGFFAnnotation(void);
+  Prediction* ReadGFFAnnotation(DNASeq *);
   char* SigType_TF(int, int, char **);
   char* State(int);
 
