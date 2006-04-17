@@ -116,7 +116,8 @@ Feature :: ~Feature ()
 // ------------------------
 Gene :: Gene ()
 {
-  clear();
+	complete = 0;
+    clear();
 }
 
 // ------------------------
@@ -131,7 +132,6 @@ Gene :: ~Gene ()
 // ------------------------
 void Gene :: clear()
 {
-  complete   = 0;
   exNumber   = exLength   = 0;
   inNumber   = inLength   = 0;
   utrLength  = mrnaLength = geneLength = 0;
@@ -229,8 +229,7 @@ void Gene :: Update ()
     // On ne peut calculer la framegff qd :
     //  - on a pas le debut d'un gene forward
     //  - on a pas le gene entier pour un reverse
-    if ( forward  && complete==2  ||
-	 !forward && complete!=3)    break;
+    if ( forward  && complete==2  || !forward && complete!=3) break;
 
     state = vFea[i]->state;
     if (state > TermR3) continue;
@@ -843,7 +842,7 @@ bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
 // Verif coherence EST: calcul le nombre de nuc. coherents et
 // incoherents avec les match est debut/fin/etat: debut et fin de la
 // seq. dont l'etat est etat cons/incons: retour des valeurs.  Seuls
-// les EST informant ESTmatch (non filtrés) sont pris en compte.
+// les EST informant ESTmatch (non filtrs) sont pris en compte.
 // ----------------------------------------------------------------
 void Prediction :: CheckConsistency(int debut, int fin, int etat, 
 				    int* cons, int* incons)
@@ -921,7 +920,7 @@ void Prediction :: StartHTML (char* html_dir, FILE *OUT) {
 	  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
 	  "<html>\n"
 	  "  <head>\n"
-	  "    <title>EuGène : Prediction</title>\n"
+	  "    <title>EuGne : Prediction</title>\n"
 	  "    <link rel=\"STYLESHEET\" type=\"text/css\" "
 	  "href=\"%s/Style/eugene.css\">\n\n"
 	  "    <script language=\"JavaScript1.2\" "
