@@ -186,9 +186,9 @@ void Gene :: Update ()
     }
     else if (state <= UTR3R) {
       utrLength += vFea[i]->end - vFea[i]->start + 1;
-      if(i==0) trStart = vFea[i]->start - 1;
-    }
+	}
   }
+  trStart = vFea[0]->start - 1;
   trEnd = vFea[nbFea()-1]->end - 1;
   if(vFea[nbFea()-1]->state < UTR5F) cdsEnd = trEnd;
 
