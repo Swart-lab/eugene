@@ -104,17 +104,17 @@ install-data-hook:
 	install -d $(DESTDIR)/$(pkgdatadir)/Procedures
 	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
 	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
-	install -m a-x $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
-	install -m a-x $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
-	install -m a-x $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
-	install -m a-x $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
-	install -m a-x $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
-	install -m a-x $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
-	install -m a-x $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
-	install -m a-x $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
-	install -m a-x $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
-	install -m a-x $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
-	install -m a-x $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
+	install -m 644 $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
+	install -m 644 $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
+	install -m 644 $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
+	install -m 644 $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
+	install -m 644 $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
+	install -m 644 $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
+	install -m 644 $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
+	install -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
+	install -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
+	install -m 644 $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
+	install -m 644 $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
 	install src/SensorPlugins/*/*.so  $(DESTDIR)/$(pkgdatadir)/plugins
 	install $(srcdir)/Procedures/Eval/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
 	install $(srcdir)/Procedures/Get/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Get
