@@ -29,6 +29,7 @@
 
 #include "Const.h"
 #include "System.h"
+#include "Param.h"
 
 /*************************************************************
  **                      OneAltEst
@@ -59,8 +60,10 @@ class OneAltEst
   inline void  UpdateBoundaries() { start = vi_ExonStart[0]; end = vi_ExonEnd[vi_ExonEnd.size()-1]; };
   inline char* GetId()            { return id;  };
   inline int   GetEnd()           { return end; };
+  inline int GetStart()           {return start; };
   inline int   GetAltSplE()       { return altSplicingEvidence; };
   inline void  PutAltSplE(bool b) { altSplicingEvidence = b;    };
+  inline void PutIndex(int i) { index = i;};
 };
 
 /*************************************************************
@@ -74,6 +77,14 @@ class AltEst
   int  minIn, maxIn, maxEx, minEx;
   int  minEstLength, maxEstLength, exonucleasicLength;
   int  totalAltEstNumber;
+
+  double altPenalty;
+  int includedEstFilter;
+  int compatibleEstFilter;
+  int unsplicedEstFilter;
+  int extremeLengthFilter;
+  int nextAdd, nextRemove;
+
   std::vector<OneAltEst> voae_AltEst;
 
   int  ReadAltFile (char[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen);

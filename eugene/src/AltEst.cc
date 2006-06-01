@@ -18,6 +18,9 @@
 // ------------------------------------------------------------------
 
 #include "AltEst.h"
+#include <algorithm>
+
+extern Parameters   PAR;
 
 /*************************************************************
  **                      OneAltEst
@@ -139,41 +142,41 @@ int OneAltEst :: IsFiltered(bool unspliced, bool extremelen, bool verbose,
 {
   // remove if unspliced
   if ((unspliced) && (exonsNumber == 1)) {
-    if (verbose) fprintf(stderr," %s removed (unspliced) ...", id);
+    if (verbose) fprintf(stderr,"\n%s removed (unspliced) ...", id);
     return 1;
   }
   if (extremelen) {
     // remove if est too short or too long (after trimming!)
     if (totalLength < minEstLen) {
-      if (verbose) fprintf(stderr," %s removed (too short) ...", id);
+      if (verbose) fprintf(stderr,"\n%s removed (too short) ...", id);
       return 2;
     }
     if (totalLength > maxEstLen) {
-      if (verbose) fprintf(stderr," %s removed (too long) ...", id);
+      if (verbose) fprintf(stderr,"\n%s removed (too long) ...", id);
       return 2;
     }
     if ((exonsNumber>1) && (vi_ExonEnd[0] - vi_ExonStart[0]-1 > maxEx)) {
-      if (verbose) fprintf(stderr," %s removed (exon too long) ...", id);
+      if (verbose) fprintf(stderr,"\n%s removed (exon too long) ...", id);
       return 2;
     }
 
     // remove if one intron or exon is too short or too long,
     for (int j=1; j<exonsNumber;j++) {
       if ((vi_ExonStart[j] - vi_ExonEnd[j-1] -1) < minIn) {
-	if (verbose) fprintf(stderr," %s removed (intron too short) ...", id);
+	if (verbose) fprintf(stderr,"\n%s removed (intron too short) ...", id);
 	return 2;
       }
       if ((vi_ExonStart[j] - vi_ExonEnd[j-1] -1) > maxIn) {
-	if (verbose) fprintf(stderr," %s removed (intron too long) ...", id);
+	if (verbose) fprintf(stderr,"\n%s removed (intron too long) ...", id);
 	return 2;
       }
       if ((vi_ExonEnd[j] - vi_ExonStart[j] -1) > maxEx) {
-	if (verbose) fprintf(stderr," %s removed (exon too long) ...", id);
+	if (verbose) fprintf(stderr,"\n%s removed (exon too long) ...", id);
 	return 2;
       }
       if((vi_ExonEnd[j] - vi_ExonStart[j] -1 < minEx) && (j<exonsNumber-1)) {
 	// internal exon too short
-	if (verbose) fprintf(stderr," %s removed (int. exon too short) ...", id);
+	if (verbose) fprintf(stderr,"\n%s removed (int. exon too short) ...", id);
 	return 2;
       }
     }
@@ -188,7 +191,7 @@ int OneAltEst :: IsFiltered(bool unspliced, bool extremelen, bool verbose,
 bool OneAltEst :: IsInconsistentWith(OneAltEst *other)
 {
   int i, j = 0, k;
-  //printf("%s IsInconsistentWith %s ? ... ",this->ID,other->ID);
+  //printf("%s IsInconsistentWith %s ? ... ",this->GetId(),other->GetId());
 
   // if this and other are not overlaping they can't be inconsistent
   if (other->start >= this->end) return false;
@@ -249,6 +252,8 @@ void OneAltEst :: Print()
   fprintf(stdout,"\n");
 }
 
+bool StartAtLeft( OneAltEst A,  OneAltEst B) { return (A.GetStart() < B.GetStart()); };
+bool EndAtRight( OneAltEst &A,  OneAltEst &B) { return (A.GetEnd() > B.GetEnd()); };
 /*************************************************************
  **                        AltEst
  *************************************************************/
@@ -257,6 +262,55 @@ void OneAltEst :: Print()
 // ----------------------
 AltEst :: AltEst()
 {
+ int i,nbIncomp,nbNoevidence,nbIncluded,nbUnspliced, nbExtremLen;
+  char tempname[FILENAME_MAX+1];
+  i=nbIncomp=nbNoevidence=nbIncluded=nbUnspliced=nbExtremLen=0;
+
+  altPenalty = PAR.getD("Alt.Penalty");
+  includedEstFilter= PAR.getI("Alt.includedEstFilter");
+  compatibleEstFilter= PAR.getI("Alt.compatibleEstFilter");
+  unsplicedEstFilter= PAR.getI("Alt.unsplicedEstFilter");
+  extremeLengthFilter= PAR.getI("Alt.extremeLengthFilter");
+  maxEstLength= PAR.getI("Alt.maxEstLength");
+  minEstLength= PAR.getI("Alt.minEstLength");
+  maxIn= PAR.getI("Alt.maxIn");
+  minIn= PAR.getI("Alt.minIn");
+  maxEx= PAR.getI("Alt.maxEx");
+  minEx= PAR.getI("Alt.minEx");
+  exonucleasicLength= PAR.getI("Alt.exonucleasicLength");
+  altEstDisplay= PAR.getI("Alt.altEstDisplay");
+  verbose= PAR.getI("Alt.verbose");
+
+  fprintf(stderr, "Reading alt. splicing evidence.....");
+  fflush(stderr);
+  strcpy(tempname, PAR.getC("fstname"));
+  strcat(tempname, ".alt");
+  i=ReadAltFile (tempname,nbUnspliced,nbExtremLen);
+
+  fprintf(stderr, " %d read ...",i);
+  fflush(stderr);
+
+  // sort all Est by their begin coordinates
+  sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
+
+  Compare(nbIncomp, nbNoevidence, nbIncluded);
+  fprintf(stderr,"%d removed (%d incl., %d unsp., %d no alt.spl., %d len.), %d inc. pairs...",
+  nbIncluded+nbNoevidence+nbUnspliced+nbExtremLen,
+  nbIncluded,nbUnspliced,nbNoevidence,nbExtremLen,nbIncomp);
+
+  fprintf(stderr, " %d kept ...",totalAltEstNumber-1);
+  fprintf(stderr, " done\n");
+  fflush(stderr);
+
+  // and set indexes
+  for (i=0; i<totalAltEstNumber; i++) {
+    voae_AltEst[i].PutIndex(i);
+    // So, with the special AltEst "Init", 
+    // indexes are the same than the DAG[] indexes
+    if (altEstDisplay) voae_AltEst[i].Print();
+  }
+
+  nextAdd=nextRemove= (totalAltEstNumber > 1);
 }
 
 // ----------------------
@@ -353,14 +407,14 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
   // NxN comparisons could be tested, but it has been reduced to
   // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
   // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
-  for(i=1; i<totalAltEstNumber; i++) {
+  for(i=0; i<totalAltEstNumber; i++) {
     if (compatibleFilter || includedFilter) {
       // Compare this est with the others to check incompatibility or inclusion
-      for (j=2+k; j<totalAltEstNumber; j++) {
+      for (j=1+k; j<totalAltEstNumber; j++) {
 	char *iID = voae_AltEst[i].GetId();
 	char *jID = voae_AltEst[j].GetId();
 	if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j])) {
-	  if (verbose) fprintf(stderr," incompatibility: %s vs. %s ...", jID, iID);
+	  if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", jID, iID);
 	  voae_AltEst[i].PutAltSplE(true);
 	  voae_AltEst[j].PutAltSplE(true);
 	  nbIncomp++;
@@ -368,7 +422,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
 	else { // no inconsistency
 	  // j strictly included in i
 	  if ((includedFilter) && (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd())) {
-	    if (verbose) fprintf(stderr," %s removed (included in %s) ...", jID, iID);
+	    if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
 	    voae_AltEst.erase(voae_AltEst.begin() + j);
 	    totalAltEstNumber--;
 	    j--;
@@ -383,7 +437,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
   if (compatibleFilter) {
     for (i=1; i<totalAltEstNumber; i++) {
       if  (! voae_AltEst[i].GetAltSplE()) {
-	if (verbose) fprintf(stderr," %s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
+	if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
 	voae_AltEst.erase(voae_AltEst.begin() + i);
 	totalAltEstNumber--;
 	i--;
