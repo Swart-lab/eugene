@@ -445,8 +445,10 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
 	int MinCDSLen = PAR.getI("Output.MinCDSLen");
 	for (geneindex = vGene.begin(); geneindex != vGene.end(); )
 	{
-    	(*geneindex)->Update();
-    	if ((*geneindex)->exLength <= MinCDSLen) {
+		int empty_gene = ((*geneindex)->nbFea() < 1 ) ? 1: 0;
+		if ( ! empty_gene )
+    		(*geneindex)->Update();
+    	if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene ) {
       		nbGene--;
       		geneindex = vGene.erase(geneindex);
     	} else geneindex++;
