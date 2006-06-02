@@ -44,7 +44,7 @@ void Prediction :: ESTScan()
     NumEST = 0;
     if (fEST)
     {
-    	AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0);
+    	AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
         fclose(fEST);
 
 		ThisEST = AllEST; // start from first one.
