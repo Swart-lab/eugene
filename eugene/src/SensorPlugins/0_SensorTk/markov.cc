@@ -905,10 +905,10 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   tampon = '#';
 
   // on saute les commentaires
-  fscanf (fp, "%s", &tampon); 
+  fscanf (fp, "%c", &tampon); 
   while (tampon=='#') {
     if (fgets (Line, MAX_LINE, fp) == NULL) return(1);
-    fscanf (fp, "%s", &tampon); 
+    fscanf (fp, "%c", &tampon); 
   }
   ungetc(tampon,fp);
 
@@ -943,6 +943,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
     if (j>=MAT->nbrevaleurs) {fprintf(stderr,"error in PROTMAT file, blosum/pam format required\n");return(1);}
     MAT->VAL[j+MAT->offset+1] = atoi(STR);
   }
+  // MAT->affichage(2);
   return(0);
-  //  MAT->affichage(2);
+  
 }
