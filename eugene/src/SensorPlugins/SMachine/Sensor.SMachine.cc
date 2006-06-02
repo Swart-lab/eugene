@@ -46,7 +46,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   seqname = PAR.getC("fstname");
   strcpy(tempname,seqname);
   strcat(tempname,".spliceMAD");
-  if (!ProbeFile(tempname)) SpliceMachine();
+  if (!ProbeFile(NULL,tempname)) SpliceMachine();
     
   ReadSMachineSplices(tempname, X->SeqLen);
   fprintf(stderr,"  done\n");
@@ -58,7 +58,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
 
   strcpy(tempname,seqname);
   strcat(tempname,".spliceMSt");
-  if (!ProbeFile(tempname)) SpliceMachine();
+  if (!ProbeFile(NULL,tempname)) SpliceMachine();
 
   ReadSMachineStarts(tempname, X->SeqLen);
   fprintf(stderr,"  done\n");
