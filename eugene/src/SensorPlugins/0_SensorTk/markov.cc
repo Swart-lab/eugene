@@ -901,7 +901,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   int i, j, n;
   char tampon;
   int nmaxAA=50;
-  char* STR= new char[nmaxAA]; // MAX d'AA pour la matrice
+  char* STR= new char[nmaxAA+10]; // MAX d'AA pour la matrice
   tampon = '#';
 
   // on saute les commentaires
@@ -919,10 +919,10 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
     tampon=fgetc(fp);
     if (isspace(tampon)) continue;
     if (n>=nmaxAA) {fprintf(stderr,"error in PROTMAT file, blosum/pam format required (too many AA in first line)\n");return(1);}
-    strcat(STR,&tampon);
+    STR[n+1] = '\0';
+    STR[n] = tampon;
     n++; 
-    STR[n]='\0';
-    //    printf("acides amines=%s\n",STR);
+    //    printf("n= %d acides amines=%s\n",n,STR);
   }
   //  printf("lecture de %d acides amines: %s\n",n,STR);
   
