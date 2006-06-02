@@ -310,7 +310,7 @@ Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
     Block *ThisBlock = NULL;
 
     // ReadFromFile (EstFile  EstNumber  Level  Margin)
-    AllEST = AllEST->ReadFromFile(ESTFile, NumEST, -1, 0);
+    AllEST = AllEST->ReadFromFile(ESTFile, NumEST, -1, 0,X->SeqLen);
 
     fprintf(stderr,"%d sequences read\n",*NumEST);
     fflush(stderr);
