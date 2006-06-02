@@ -143,7 +143,7 @@ void Track :: Mark(int pos)
     if (isinf(It->Additional)) break;
 
     if (It->IsOptimal() &&  
-	(abs(pos-It->StartPos) > PenD.MaxLen)) break;
+	(abs(pos-It->StartPos) > PenD->MaxLen)) break;
 
     It = It -> Next;
   } while (It != Path.Next);
@@ -187,11 +187,11 @@ void Track :: InsertNew(char state, int pos, double cost, BackPoint *Or)
   BackPoint *It = Path.Next;
   
   //  if (cost > NINFINITY) {
-  //  if (cost > Optimal-PenD.MaxDelta) {
-  //  if (cost > Optimal-PenD.GetDelta(pos-OptPos)) {
-  //  if (cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(pos-Path.Next->StartPos)) {
-  if (cost > Optimal-PenD.GetDelta(abs(pos-OptPos)) && 
-      cost > Path.Next->Cost+Path.Next->Additional-PenD.GetDelta(abs(pos-Path.Next->StartPos))) {
+  //  if (cost > Optimal-PenD->MaxDelta) {
+  //  if (cost > Optimal-PenD->GetDelta(pos-OptPos)) {
+  //  if (cost > Path.Next->Cost+Path.Next->Additional-PenD->GetDelta(pos-Path.Next->StartPos)) {
+  if (cost > Optimal-PenD->GetDelta(abs(pos-OptPos)) && 
+      cost > Path.Next->Cost+Path.Next->Additional-PenD->GetDelta(abs(pos-Path.Next->StartPos))) {
     NumBPAlloc++;
     It =  new BackPoint(state,pos,cost);
     if (cost > Optimal) { 
@@ -246,15 +246,15 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
     // (because -1 and Data_Len+1 are used).
 
     if (pen && It->Origin) 
-      LenPen = PenD[Len] - PenD.FinalSlope*Len;
+      LenPen = (*PenD)[Len] - (PenD->FinalSlope)*Len;
     else 
-      LenPen = PenD.MinPen(Len) - PenD.FinalSlope*(Len-1);
+      LenPen = PenD->MinPen(Len) - PenD->FinalSlope*(Len-1);
 
     if ((Add + It->Cost - LenPen) > BestCost) {
       BestCost = Add+It->Cost - LenPen;
       BestBP = It;
     }
-    if (It->IsOptimal() && Len >= PenD.MaxLen) break;
+    if (It->IsOptimal() && Len >= PenD->MaxLen) break;
 
     It = It -> Next;
   } while (It != Path.Next);

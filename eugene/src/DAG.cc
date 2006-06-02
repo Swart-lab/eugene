@@ -332,7 +332,7 @@ void DAG :: MarkAndSweep(int pos,int verbose, int latency)
 
   
   for (k = 0; k < NbTracks ; k++) 
-    Horizon = Min(Horizon,Max(0,pos - LBP[k].PenD.MaxLen - 2*latency));
+    Horizon = Min(Horizon,Max(0,pos - LBP[k].PenD->MaxLen - 2*latency));
 
   for (k = 0; k < NbTracks ; k++)
     LBP[k].ClearMark(Horizon);

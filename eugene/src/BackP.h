@@ -68,14 +68,14 @@ class Track
   unsigned int NumBPAlloc; 
   unsigned int NumBPCollect;
   BackPoint Path;
-  PenaltyDist PenD;
+  PenaltyDist *PenD;
   double Optimal;
   int OptPos;
 
-  inline void LoadPenalty(char* name) { PenD.LoadPenaltyDist(name); };
+  inline void LoadPenalty(char* name) { PenD = new PenaltyDist; PenD->LoadPenaltyDist(name); };
   inline void Update(double cost) {  Path.Next->Additional += cost; Optimal += cost;};
-  inline void PayTheSlope() {Path.Next->Additional -= PenD.FinalSlope;
-                             Optimal  -= PenD.FinalSlope;  };
+  inline void PayTheSlope() {Path.Next->Additional -= PenD->FinalSlope;
+                             Optimal  -= PenD->FinalSlope;  };
   void InsertNew(char state,  int pos, double cost, BackPoint *Or);
   void ForceNew(char state, int pos, double cost, BackPoint *Or);
   BackPoint *BestUsable(int pos, double *cost, int pen = 1);
