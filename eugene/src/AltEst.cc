@@ -242,18 +242,15 @@ bool OneAltEst :: IsInconsistentWith(OneAltEst *other)
 // --------------------------------------
 void OneAltEst :: Print()
 {
-  //fprintf(stdout,"%10s n°%4d %6d -> %6d %de:",
-  //        id, index, start+1, end+1, exonsNumber);
   fprintf(stdout," %s:", id);
   for(int i=0; i<(int)vi_ExonStart.size(); i++) {
     fprintf(stdout,"\t%d - %d", vi_ExonStart[i]+1, vi_ExonEnd[i]+1);
   }
-  //fprintf(stdout,"\t%d", altSplicingEvidence);
   fprintf(stdout,"\n");
 }
 
 bool StartAtLeft( OneAltEst A,  OneAltEst B) { return (A.GetStart() < B.GetStart()); };
-bool EndAtRight( OneAltEst &A,  OneAltEst &B) { return (A.GetEnd() > B.GetEnd()); };
+bool EndAtRight( OneAltEst A,  OneAltEst B) { return (A.GetEnd() > B.GetEnd()); };
 /*************************************************************
  **                        AltEst
  *************************************************************/
@@ -262,7 +259,7 @@ bool EndAtRight( OneAltEst &A,  OneAltEst &B) { return (A.GetEnd() > B.GetEnd())
 // ----------------------
 AltEst :: AltEst()
 {
- int i,nbIncomp,nbNoevidence,nbIncluded,nbUnspliced, nbExtremLen;
+  int i,nbIncomp,nbNoevidence,nbIncluded,nbUnspliced, nbExtremLen;
   char tempname[FILENAME_MAX+1];
   i=nbIncomp=nbNoevidence=nbIncluded=nbUnspliced=nbExtremLen=0;
 
@@ -281,24 +278,27 @@ AltEst :: AltEst()
   altEstDisplay= PAR.getI("Alt.altEstDisplay");
   verbose= PAR.getI("Alt.verbose");
 
-  fprintf(stderr, "Reading alt. splicing evidence.....");
-  fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".alt");
+  if (!ProbeFile(NULL,tempname)) return;
+
+  fprintf(stderr, "Reading alt. spl. evidence...");
+  fflush(stderr);
+
   i=ReadAltFile (tempname,nbUnspliced,nbExtremLen);
 
-  fprintf(stderr, " %d read ...",i);
+  fprintf(stderr, " %d read, ",i);
   fflush(stderr);
 
   // sort all Est by their begin coordinates
   sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
 
   Compare(nbIncomp, nbNoevidence, nbIncluded);
-  fprintf(stderr,"%d removed (%d incl., %d unsp., %d no alt.spl., %d len.), %d inc. pairs...",
+  fprintf(stderr,"%d removed (%d incl., %d unsp., %d no alt.spl., %d len.), %d inc. pairs, ",
   nbIncluded+nbNoevidence+nbUnspliced+nbExtremLen,
   nbIncluded,nbUnspliced,nbNoevidence,nbExtremLen,nbIncomp);
 
-  fprintf(stderr, " %d kept ...",totalAltEstNumber-1);
+  fprintf(stderr, "%d kept ...",totalAltEstNumber);
   fprintf(stderr, " done\n");
   fflush(stderr);
 
@@ -435,7 +435,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
   }
 
   if (compatibleFilter) {
-    for (i=1; i<totalAltEstNumber; i++) {
+    for (i=0; i<totalAltEstNumber; i++) {
       if  (! voae_AltEst[i].GetAltSplE()) {
 	if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
 	voae_AltEst.erase(voae_AltEst.begin() + i);
