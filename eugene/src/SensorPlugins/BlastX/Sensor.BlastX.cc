@@ -105,7 +105,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 
         if (fblast)
         {
-            AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20);
+            AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20,X->SeqLen);
             fprintf(stderr,"%c ",levels[k]);
             fflush(stderr);
             fclose(fblast);
@@ -182,7 +182,6 @@ void SensorBlastX :: Init (DNASeq *X)
 
         while (MyHSP != NULL)
         {
-
             GlobalScore = (float)(MyHSP->Score) / (float)abs(MyHSP->End-MyHSP->Start);
 
             // GAPS -> INTRONS ; the "intron" consideration between 2 HSP
