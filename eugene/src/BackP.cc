@@ -78,16 +78,33 @@ void BackPoint :: Print()
 {
   printf("pos = %d, state = %d\n", StartPos,State);
 }
+
+
+// ----------------------------------------------------------------
+// Class Track
+// STATIC INIT
+// ----------------------------------------------------------------
+unsigned int Track::NumBPAlloc = 0; 
+unsigned int Track::NumBPCollect = 0;
 // ----------------------------------------------------------------
 // Track creator
 // ----------------------------------------------------------------
 Track :: Track()
 {
-  NumBPAlloc = 0;
-  NumBPCollect = 0;
   Optimal = 0.0;
   OptPos =0;
+  PenD = NULL;
 }
+// ----------------------------------------------------------------
+// Track creator: from another Track
+// ----------------------------------------------------------------
+Track :: Track(Track *other)
+{
+  Optimal 		= other->Optimal;
+  OptPos 		= other->OptPos;
+  PenD 		= other->PenD;
+}
+
 // ----------------------------------------------------------------
 // Track destructor
 // ----------------------------------------------------------------
@@ -162,7 +179,6 @@ void Track :: Mark(int pos)
 void Track :: Sweep(int pos) {
 
   BackPoint *It = Path.Next;
-  NumBPCollect = 0;
 
   while ( (It != &Path)){// && (It->StartPos >= pos)) {
     if (!It->IsMarked()) {
@@ -176,8 +192,6 @@ void Track :: Sweep(int pos) {
 
     It = It->Next;
   }
-  NumBPAlloc -= NumBPCollect;
-
 }
 // ----------------------------------------------------------------
 // Insert  a new backpoint
@@ -343,7 +357,7 @@ void Track :: Dump ()
   BackPoint* It = Path.Next;
 
   printf("Number of BP allocated: %d\n",NumBPAlloc);
-  printf("Number of BP garbage collected: %d\n",NumBPAlloc);
+  printf("Number of BP garbage collected: %d\n",NumBPCollect);
   printf("Number of active BP: %d\n\n",NumBPAlloc-NumBPCollect);
 
   do {

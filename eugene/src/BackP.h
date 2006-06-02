@@ -65,8 +65,9 @@ class Track
 {
  public: 
 
-  unsigned int NumBPAlloc; 
-  unsigned int NumBPCollect;
+  static unsigned int NumBPAlloc; 
+  static unsigned int NumBPCollect;
+
   BackPoint Path;
   PenaltyDist *PenD;
   double Optimal;
@@ -87,6 +88,7 @@ class Track
   void Sweep(int);
 
   Track ();
+  Track(Track *other);
   ~Track();
   
 };
