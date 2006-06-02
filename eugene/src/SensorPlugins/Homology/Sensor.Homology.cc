@@ -111,7 +111,7 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     exit (2);
   }
   // chargement classe protmat
-  fprintf(stderr,"Reading protmat file: %s/%s .......",tmpdir,tempname);
+  fprintf(stderr,"Reading protmat file.........");
    fflush(stderr);
   if (fichier2protmat(protmatfile , PROTMAT)) {
     fprintf(stderr,"error when reading protmat file %s\n",tempname);
