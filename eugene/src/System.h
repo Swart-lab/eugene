@@ -32,7 +32,7 @@ int isinf(double x);
 #endif
 
 char * BaseName(char *path);
-int ProbeFile(char *path);
+int ProbeFile(const char *defdir,const char *path);
 
 
 template<class T>

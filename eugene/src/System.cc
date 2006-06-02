@@ -56,12 +56,20 @@ char * BaseName(char *path)
 // ProbeFile: test if a file exists and has non empty size
 // return 1 if Ok.
 // ------------------------------------------------------------------
-int ProbeFile(char *path)
+int ProbeFile(const char *defdir, const char *filename)
 {
   struct stat FileStat;
 
-  if (stat(path,&FileStat) != 0) return 0;
-  return (S_ISREG(FileStat.st_mode) && FileStat.st_size != 0);
+  if ((stat(filename,&FileStat) == 0) && S_ISREG(FileStat.st_mode))
+	return (FileStat.st_size != 0);
+
+  if (defdir) {
+    char buffer[FILENAME_MAX];
+    strcat(strcat(strcpy(buffer, defdir), "/"), filename);
+    if ((stat(buffer,&FileStat) == 0) && S_ISREG(FileStat.st_mode))
+	return (FileStat.st_size != 0);
+  }
+  return 0;
 }
 // ------------------------------------------------------------------
 // Function to open a file by using environment variables.  We first
