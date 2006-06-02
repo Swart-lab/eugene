@@ -901,7 +901,7 @@ int fichier2protmat(FILE *fp, ProtMat* &MAT)
   int i, j, n;
   char tampon;
   int nmaxAA=50;
-  char* STR= new char[nmaxAA+10]; // MAX d'AA pour la matrice
+  char* STR= new char[nmaxAA+1]; // MAX d'AA pour la matrice
   tampon = '#';
 
   // on saute les commentaires
