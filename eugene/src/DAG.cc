@@ -24,6 +24,21 @@
 
 extern Parameters PAR;
 
+//---------STATIC MEMBERS ---------------------------------
+DNASeq *DAG::TheSeq = NULL;
+
+double DAG::ExPrior 		= 0.0;
+double DAG::InPrior 			= 0.0;
+double DAG::IGPrior 		= 0.0;
+double DAG::FivePrior 		= 0.0;
+double DAG::ThreePrior 		= 0.0;
+double DAG::IntronFivePrior 	= 0.0;
+
+double DAG::SplicedStopPen 	= 0.0;
+int       DAG::estuse 			= 0;
+double DAG::NormalizingPath	= 0.0;
+double DAG::PBest[NbTracks];
+BackPoint *DAG::PrevBP[NbTracks];
 // ----------------------------------------------------------------
 // Default constructor.
 // ----------------------------------------------------------------
@@ -33,35 +48,33 @@ DAG :: DAG ()
   EndPosition=0;
   EvidenceName[0]=0;
   pred = NULL;
-  NormalizingPath= 0.0;
-  TheSeq = NULL;
 
   for (int i = 0; i < NbTracks; i++) 
     LBP[i].Path.InitState(i,StartPosition);
 }
 
 // ----------------------------------------------------------------
-// Default constructor.
+// Default constructor. 
+// Cond: Used only once for Main DAG !
 // ----------------------------------------------------------------
 DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
 {
   StartPosition=start;
   EndPosition=end;
-  strcpy(EvidenceName,"OPTIMAL");
+  strcpy(EvidenceName,"Main");
   pred = NULL;
   for (int i = 0; i < NbTracks; i++) LBP[i].Path.InitState(i,StartPosition);
-  NormalizingPath = 0.0;
-  TheSeq = Seq;
 
-  // Objectif -> limiter le nombre d'appel à la map de PAR
-  SplicedStopPen = -PAR.getD("EuGene.SplicedStopPen");
-  ExPrior    = PAR.getD("EuGene.ExonPrior");
-  InPrior    = PAR.getD("EuGene.IntronPrior");
-  IGPrior    = PAR.getD("EuGene.InterPrior"); 
-  FivePrior  = PAR.getD("EuGene.FivePrimePrior");
-  ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
-  IntronFivePrior = InPrior;
-  estuse = PAR.getI("Sensor.Est.use");
+  DAG::TheSeq = Seq;
+
+  DAG::SplicedStopPen = -PAR.getD("EuGene.SplicedStopPen");
+  DAG::ExPrior    = PAR.getD("EuGene.ExonPrior");
+  DAG::InPrior    = PAR.getD("EuGene.IntronPrior");
+  DAG::IGPrior    = PAR.getD("EuGene.InterPrior"); 
+  DAG::FivePrior  = PAR.getD("EuGene.FivePrimePrior");
+  DAG::ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
+  DAG::IntronFivePrior = InPrior;
+  DAG::estuse = PAR.getI("Sensor.Est.use");
 }
 
 // ----------------------------------------------------------------
@@ -70,27 +83,15 @@ DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
 // ----------------------------------------------------------------
 DAG :: DAG (int start, int end, DAG *RefDag,char* name)
 {
-  TheSeq = RefDag->TheSeq;
    StartPosition=start;
    EndPosition=end;
    pred = NULL;
    for (int i = 0; i < NbTracks; i++) LBP[i].Path.InitState(i,StartPosition);
    strcpy(EvidenceName,name);
-   NormalizingPath = RefDag->NormalizingPath;
 
-   //   for (int i = 0; i < NbTracks; i++) {
-   //    LBP[i] = new Track(RefDag->LBP[i]);
-   //  }
-
-   // Objectif -> limiter le nombre d'appel à la map de PAR
-   SplicedStopPen = RefDag->SplicedStopPen;
-   ExPrior    = RefDag->ExPrior   ;
-   InPrior    = RefDag->InPrior   ;
-   IGPrior    = RefDag->IGPrior   ;
-   FivePrior  = RefDag->FivePrior ;
-   ThreePrior = RefDag->ThreePrior;
-
-   estuse =   RefDag->estuse ;
+   for (int i = 0; i < NbTracks; i++) {
+     LBP[i] = new Track(&RefDag->LBP[i]);
+   }
 }
 
 // ----------------------------------------------------------------

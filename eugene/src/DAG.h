@@ -27,21 +27,24 @@
 #include "SensorIF.h"
 #include "Param.h"
 #include "DNASeq.h"
-
+ 
 class DAG
 {
- private: 
-  DNASeq *TheSeq;
+
+   static DNASeq *TheSeq;
+   static double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior;
+   static double SplicedStopPen;
+   static int estuse;
+   static double NormalizingPath;
+   static double PBest[NbTracks];
+   static BackPoint *PrevBP[NbTracks];
+
+private: 
+
   int StartPosition;
   int EndPosition;
-  double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior;
-  double SplicedStopPen;
-  int estuse;
-  double NormalizingPath;
   Track  LBP[NbTracks];
-  double PBest[NbTracks];
-  BackPoint *PrevBP[NbTracks];
-
+  	   
  public:
   char EvidenceName[FILENAME_MAX+1];//   **
   Prediction *pred; //   **
@@ -75,4 +78,9 @@ class DAG
   void StatActive();
   void StatGC();
 };
-// **  a passer en private
+
+class DAGsManager
+{
+	   DAG	mainDAG;
+	   std::vector<DAG*> altDAG;
+};
