@@ -51,7 +51,7 @@ class  Hits
   Hits ();
   Hits (char* name, int length, char strand, int deb, int fin, int ldeb,
 	int lfin, int Ph, int Scr, double prob, int level, int sup);
-  Hits* Hits::ReadFromFile(FILE* HitFile, int *NumSeqs, int level, int margin);
+  Hits* Hits::ReadFromFile(FILE* HitFile, int *NumSeqs, int level, int margin, int maxLen);
   ~Hits ();
 
   char   *Name;

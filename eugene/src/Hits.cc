@@ -122,7 +122,7 @@ Hits :: Hits  (char* name, int length, char strand, int deb, int fin,
 // ---------------------------------------------------------------------
 //  Read a table of Hits from a file
 // ---------------------------------------------------------------------
-Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin) 
+Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int maxPos) 
 {
   char   *HitId, *PHitId;
   int    deb, fin, phase, Pphase, HSPDeb, HSPFin, poids, read;
@@ -154,6 +154,12 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin)
 	HSPDeb  = HSPFin;
 	HSPFin  = tmp;
       }
+
+	if((deb>maxPos) || (fin>maxPos)) {
+	fprintf(stderr,"Hit does not map on sequence. Check %s\n",
+		HitId);
+	exit(1);
+     }
 
       if (abs(fin-deb) > MaxHitLen) {
 	fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",
