@@ -35,6 +35,11 @@ void Prediction :: ESTScan()
     char tempname[FILENAME_MAX+1];
     FILE *fEST;
     
+    ESTMatch = NULL;
+    
+    // If no EST data, do  nothing
+    if (!(PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy")))) return; 
+
     ESTMatch = new unsigned char[X->SeqLen+1];
     for (i = 0; i <= X->SeqLen; i++) ESTMatch[i] = 0;
 
@@ -43,28 +48,28 @@ void Prediction :: ESTScan()
     fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
     NumEST = 0;
     if (fEST)
-    {
+      {
     	AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
         fclose(fEST);
-
-		ThisEST = AllEST; // start from first one.
-		while (ThisEST)
-		{
-			ThisBlock = ThisEST->Match;
-			while (ThisBlock) 
-			{
-				//Mark Hit
-				for (i = ThisBlock->Start; i <= ThisBlock->End; i++) ESTMatch[i] |= Hit;
-				// A Gap ?
-				if (ThisBlock->Prev != NULL) // Mark Gap
-					for (i = ThisBlock->Prev->End; i <= ThisBlock->Start; i++) ESTMatch[i] |= Gap;
-				
-				ThisBlock = ThisBlock->Next;
-			}
-			ThisEST = ThisEST->Next;
-		}
-		delete AllEST;
-     }
+	
+	ThisEST = AllEST; // start from first one.
+	while (ThisEST)
+	  {
+	    ThisBlock = ThisEST->Match;
+	    while (ThisBlock) 
+	      {
+		//Mark Hit
+		for (i = ThisBlock->Start; i <= ThisBlock->End; i++) ESTMatch[i] |= Hit;
+		// A Gap ?
+		if (ThisBlock->Prev != NULL) // Mark Gap
+		  for (i = ThisBlock->Prev->End; i <= ThisBlock->Start; i++) ESTMatch[i] |= Gap;
+		
+		ThisBlock = ThisBlock->Next;
+	      }
+	    ThisEST = ThisEST->Next;
+	  }
+	delete AllEST;
+      }
 }
 
 /*************************************************************
@@ -374,85 +379,82 @@ void Prediction :: clear()
 // --------------------------
 void Prediction :: TrimAndUpdate(DNASeq* x)
 {
-	int  state,start,end;
+  int  state,start,end;
 	
-	X = x;
+  X = x;
 	
-	// If no EST data or No trimming, do  nothing
-	if ((PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy")) && 
-      PAR.getI("Output.UTRtrim")))
-    {
-      
-    // Fill in ESTMatch data
-	ESTScan();
+  if (PAR.getI("Output.UTRtrim")) {
+	 
+    // Fill in ESTMatch data if any
+    ESTScan();
     
-  	for(int i=0; i<nbGene; i++) 
-  	{
-  		// delete unsupported or trim
-  		std::vector <Feature*>::iterator featindex;
-  		std::vector <Feature*>::reverse_iterator rfeatindex; 	
+    for(int i=0; i<nbGene; i++) 
+      {
+	// delete unsupported or trim
+	std::vector <Feature*>::iterator featindex;
+	std::vector <Feature*>::reverse_iterator rfeatindex; 	
   		
-  		for (featindex = vGene[i]->vFea.begin(); featindex != vGene[i]->vFea.end(); )
-		{
-  			state = (*featindex)->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = (*featindex)->start;
-  			end = (*featindex)->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) 
-  			{
-//  				printf("Triming %d-%d (state %d) to S%d\n",(*featindex)->start,(*featindex)->end,
-//  					(*featindex)->state,start);
-  				(*featindex)->start = start;
-  				break;
-  			}
-  			else 
-  			{
-//  				printf("Erasing %d-%d (state %d)\n",(*featindex)->start,(*featindex)->end,(*featindex)->state);
-  				featindex = vGene[i]->vFea.erase(featindex);
-  			}
-  		}
+	for (featindex = vGene[i]->vFea.begin(); featindex != vGene[i]->vFea.end(); )
+	  {
+	    state = (*featindex)->state;
+	    if (state <= InterGen) break; // Not UTR or UTRIntron
+	    start = (*featindex)->start;
+	    end = (*featindex)->end;
+	    if (UTRCheckAndTrim(&start,&end,state)) 
+	      {
+		//  				printf("Triming %d-%d (state %d) to S%d\n",(*featindex)->start,(*featindex)->end,
+		//  					(*featindex)->state,start);
+		(*featindex)->start = start;
+		break;
+	      }
+	    else 
+	      {
+		//  				printf("Erasing %d-%d (state %d)\n",(*featindex)->start,(*featindex)->end,(*featindex)->state);
+		featindex = vGene[i]->vFea.erase(featindex);
+	      }
+	  }
   		
-  	  	// Same on right
-  		for (rfeatindex = vGene[i]->vFea.rbegin(); rfeatindex != vGene[i]->vFea.rend(); )
-		{
-  			state = (*rfeatindex)->state;
-  			if (state <= InterGen) break; // Not UTR or UTRIntron
-  			start = (*rfeatindex)->start;
-  			end = (*rfeatindex)->end;
-  			if (UTRCheckAndTrim(&start,&end,state)) 
-  			{
-//  				printf("Triming %d-%d (state %d) to E%d\n",(*featindex)->start,(*featindex)->end,
-//  					(*featindex)->state,end);
-  				(*rfeatindex)->end = end;
-  				break;
-  			} 
-  			else 
-  			{
-//  				printf("Erasing %d-%d (state %d)\n",(*rfeatindex)->start,(*rfeatindex)->end,(*rfeatindex)->state);
-  				rfeatindex++;
-  				vGene[i]->vFea.pop_back();
-  			}
-  		}
-  	}
-    }
+	// Same on right
+	for (rfeatindex = vGene[i]->vFea.rbegin(); rfeatindex != vGene[i]->vFea.rend(); )
+	  {
+	    state = (*rfeatindex)->state;
+	    if (state <= InterGen) break; // Not UTR or UTRIntron
+	    start = (*rfeatindex)->start;
+	    end = (*rfeatindex)->end;
+	    if (UTRCheckAndTrim(&start,&end,state)) 
+	      {
+		//  				printf("Triming %d-%d (state %d) to E%d\n",(*featindex)->start,(*featindex)->end,
+		//  					(*featindex)->state,end);
+		(*rfeatindex)->end = end;
+		break;
+	      } 
+	    else 
+	      {
+		//  				printf("Erasing %d-%d (state %d)\n",(*rfeatindex)->start,(*rfeatindex)->end,(*rfeatindex)->state);
+		rfeatindex++;
+		vGene[i]->vFea.pop_back();
+	      }
+	  }
+      }
+  }
   	
-	if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
-	ESTMatch = NULL;
+  if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
+  ESTMatch = NULL;
 	
 	
-	// Gene update and deletion of short genes
-	std::vector <Gene*>::iterator geneindex;
-	int MinCDSLen = PAR.getI("Output.MinCDSLen");
-	for (geneindex = vGene.begin(); geneindex != vGene.end(); )
-	{
-		int empty_gene = ((*geneindex)->nbFea() < 1 ) ? 1: 0;
-		if ( ! empty_gene )
-    		(*geneindex)->Update();
-    	if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene ) {
-      		nbGene--;
-      		geneindex = vGene.erase(geneindex);
-    	} else geneindex++;
-	}
+  // Gene update and deletion of short genes
+  std::vector <Gene*>::iterator geneindex;
+  int MinCDSLen = PAR.getI("Output.MinCDSLen");
+  for (geneindex = vGene.begin(); geneindex != vGene.end(); )
+    {
+      int empty_gene = ((*geneindex)->nbFea() < 1 ) ? 1: 0;
+      if ( ! empty_gene )
+	(*geneindex)->Update();
+      if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene ) {
+	nbGene--;
+	geneindex = vGene.erase(geneindex);
+      } else geneindex++;
+    }
 }
 // --------------------------
 //  print prediction (master)
@@ -832,11 +834,11 @@ bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
 {	
 	if ((etat == UTR5F) || (etat == UTR3R))
 		for (int k = *debut; k <= *fin; k++)
-			if (ESTMatch[k] & Hit) { *debut = k+1; return true; }
+		  if (GetESTMatch(k) & Hit) { *debut = k+1; return true; }
 				
 	if ((etat == UTR3F) || (etat == UTR5R))
 		for (int k = *fin; k >= *debut; k--)
-			if (ESTMatch[k] & Hit) { *fin = k+1; return true; }
+		  if (GetESTMatch(k) & Hit) { *fin = k+1; return true; }
 			
 	return false;	
 }

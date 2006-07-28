@@ -96,6 +96,7 @@ class Prediction
   DNASeq       *X;
   unsigned char *ESTMatch;
 
+  inline unsigned char GetESTMatch(int i) {return (ESTMatch ? ESTMatch[i] : 0);};
   void  clear			(); 
   void  PrintGff        (FILE*, char*);
   void  PrintEgnL       (FILE*, char*, int a=0);
