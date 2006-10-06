@@ -75,8 +75,8 @@ class SensorAnnotaStruct : public Sensor
   float exonPAR,      intronPAR,     cdsPAR;
     
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
-  void SensorAnnotaStruct :: PushInCon(int d,   int e,     float *sc,
-				       char st, char p[2], int f);
+  void PushInCon(int d,   int e,     float *sc,
+		 char st, char p[2], int f);
   
  public:
   SensorAnnotaStruct          (int n, DNASeq *X);
