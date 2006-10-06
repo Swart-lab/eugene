@@ -54,7 +54,7 @@ class PenaltyDist
   void   UpdateMinDist();
   void   UpdateMaxDelta ();
 
-  inline double PenaltyDist :: GetDelta(int len) {
+  inline double GetDelta(int len) {
     if (len < (int)Delta.size()) return Delta[len];
     return MaxDelta;
   }
