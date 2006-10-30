@@ -1019,7 +1019,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // - on quitte un Init ou un Intr
     // no spliceable stop: 
     if (!((spliceStopPreTxx(StartStop,FStrand) && k == 1) ||
-	  (spliceStopPrexxA(StartStop,FStrand) && k == 2))) {
+	  (spliceStopPrexxA(StartStop,FStrand) && k == 2) ||
+	  (spliceStopPreTAx(StartStop,FStrand) && k == 2))) {
       PICOMPEN(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3),
 	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
       PICOMPEN(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3),
