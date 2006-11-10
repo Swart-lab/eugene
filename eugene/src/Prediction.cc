@@ -121,7 +121,7 @@ Feature :: ~Feature ()
 // ------------------------
 Gene :: Gene ()
 {
-	complete = 0;
+    complete = 0;
     clear();
 }
 
@@ -130,6 +130,10 @@ Gene :: Gene ()
 // ------------------------
 Gene :: ~Gene ()
 {
+  for (int i=0; i<nbFea(); i++) { 
+    delete  vFea[i];
+    vFea[i] = NULL;
+  }
   vFea.clear();
 }
 // ------------------------
@@ -358,6 +362,10 @@ Prediction :: Prediction (std::vector <int> vPos,
 // ------------------------
 Prediction :: ~Prediction ()
 {
+  for(int i=0; i<nbGene; i++) {
+    delete vGene[i];
+    vGene[i] = NULL;
+  }
   vGene.clear();
 }
 // ------------------------
