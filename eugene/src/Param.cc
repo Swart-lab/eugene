@@ -554,11 +554,11 @@ void Parameters :: setD (const char *key, double n)
 // ------------------------
 Parameters :: ~Parameters ()
 {
-  // Need to be commented, if not segmentation fault
-  // for (iter = m.begin(); iter!=m.end(); ++iter) { 
-  //       delete [] iter->second;
-  //       delete [] iter->first;
-  // }
+// Need to be commented, if not segmentation fault
+//   for (iter = m.begin(); iter!=m.end(); ++iter) { 
+//     delete [] iter->second;
+//     delete [] iter->first;
+//  }
   m.clear();
 }
 
@@ -579,7 +579,7 @@ std::string Parameters::WriteParam (std::vector<std::string> para_name,
   char filename[FILENAME_MAX+1];
   bool find_para;
   char *d = new char[MAX_LINE];
-  std::string s; unsigned int i;
+  std::string s; int i;
 
   strcpy(filename, getC("parameters_file"));
   fp = FileOpen(NULL,filename,"r");
