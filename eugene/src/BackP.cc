@@ -111,7 +111,7 @@ Track :: Track(Track *other)
 Track :: ~Track()
 {
   Zap();
-  delete PenaltyDist;
+  delete PenD;
 }
 // ----------------------------------------------------------------
 // Zap  the path data of a  whole track
