@@ -1,3 +1,4 @@
+
 // ------------------------------------------------------------------
 // Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
@@ -87,7 +88,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   type = Type_Content;
 
 
-  UseM0asIG = (PAR.getI("MarkovIMM.useM0asIG",GetNumber()) != 0);
+  IntergenicModel = (PAR.getI("MarkovIMM.IntergenicModel",GetNumber()));
   
   maxOrder = PAR.getI("MarkovIMM.maxOrder",GetNumber());  
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
@@ -234,8 +235,29 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[DATA::IntronUTRR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
   
   // InterG
-  d->contents[DATA::InterG] += (UseM0asIG ? log(X->GC_AT(pos)) :
-				log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0));
+  switch (IntergenicModel)
+    {
+      // Before 3.4, known as useM0asIG=true: uses a Oth order markov
+      // model with seq. GC%
+    case 0:  
+      d->contents[DATA::InterG] += log(X->GC_AT(pos));
+      break;
+     
+      // new assymetric model (3.4). This breaks the syymetry between
+      // reverse and forward but seems top work better on C. Elegans
+    case 1:
+      d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      break;
+
+      // old symetric model (default before 3.4). Mixes forward and reverse probabilities.
+    case 2:
+      d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
+      break;
+
+    default:
+      fprintf(stderr,"Error: Incorrect value for parameter IntergenicModel\n");
+      exit(1);
+    }
   
   // UTR 5' F/R
   d->contents[DATA::UTR5F] += log((double)(*IMMatrix[6])[indexF]/65535.0);
