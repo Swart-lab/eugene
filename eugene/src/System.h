@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <sstream>
 
 #define myassert(x) assert(x)
 //#define myassert(x)
@@ -58,4 +59,26 @@ void *Safe_realloc(void * Q, size_t Len);
 double cpuTime();
 void GetStrDate (char* d);
 
+/**
+ *	\fn	to_string
+ *	\brief	Convertit n'importe quoi en string
+ *	\date	07 novembre 2006
+ *	\author	Aurelien.Regat-Barrel ?
+ *	Cette fonction a ete copier depuis le site
+ *	http://c.developpez.com/faq/cpp/?page=strings#STRINGS_convertform
+ *	"L'utilisation de ostringstream permet de convertir en une string n'importe
+ *	quel objet pour lequel l'opérateur ostream::operator <<() a été défini."
+**/
+template<typename T>
+std::string to_string( const T & Value )
+{
+    // utiliser un flux de sortie pour créer la chaîne
+    std::ostringstream oss;
+    // écrire la valeur dans le flux
+    oss << Value;
+    // renvoyer une string
+    return oss.str();
+}
+
 #endif
+
