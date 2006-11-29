@@ -75,6 +75,7 @@ DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
   DAG::ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
   DAG::IntronFivePrior = InPrior;
   DAG::estuse = PAR.getI("Sensor.Est.use");
+  DAG::NormalizingPath = 0.0;
 }
 
 // ----------------------------------------------------------------
