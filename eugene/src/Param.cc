@@ -164,6 +164,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["Sensor.Repeat.use"] = "1";
       break;
       
+    case 'a':    /* AltEst activation */
+      m["AltEst.use"] = "1";
+      break;
+      
     case 'c':           /* -c couverture */
       if (! TestIArg(optarg))
         errflag++;
@@ -323,6 +327,7 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  General:\n");
   fprintf(stderr, "    -A paramfile            Selects another parameter file\n");
+  fprintf(stderr, "    -a                      Activates the alternative splicing prediction using EST\n");
   fprintf(stderr, "    -D<parameter>=<value>   Changes the parameter value\n"); 
   fprintf(stderr, "    -s                      Forbids partial gene prediction\n");
   fprintf(stderr, "    -Z                      Select the parameters optimization mode\n");
