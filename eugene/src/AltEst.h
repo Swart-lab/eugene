@@ -30,19 +30,23 @@
 #include "Const.h"
 #include "System.h"
 #include "Param.h"
-
+#include "Prediction.h"
+#include "SensorIF.h"
 /*************************************************************
  **                      OneAltEst
  *************************************************************/
 class OneAltEst
 {
+  friend class AltEst;
+
  private:
   char id[FILENAME_MAX+1];
-  int  start, end, index, exonIndex;
+  int  start, end, index;
   int  exonsNumber, totalLength;
   bool altSplicingEvidence;
   std::vector <int> vi_ExonStart;
   std::vector <int> vi_ExonEnd;
+  void Penalize(int pos, DATA *Data, double altPenalty);
   
  public:
   OneAltEst  ();
@@ -56,6 +60,7 @@ class OneAltEst
 			  int  minIn,     int  maxIn,      int  maxEx,   int minEx,
 			  int  minEstLen, int  maxEstLen);
   bool IsInconsistentWith(OneAltEst*);
+  bool CompatibleWith(Prediction *pred);
   void Print           ();
   inline void  UpdateBoundaries() { start = vi_ExonStart[0]; end = vi_ExonEnd[vi_ExonEnd.size()-1]; };
   inline char* GetId()            { return id;  };
@@ -72,11 +77,9 @@ class OneAltEst
 class AltEst
 {
  private:
-  bool extremeLenFilter, includedFilter, unsplicedFilter;
-  bool compatibleFilter, altEstDisplay,  verbose;
+  bool altEstDisplay,  verbose;
   int  minIn, maxIn, maxEx, minEx;
   int  minEstLength, maxEstLength, exonucleasicLength;
-  int  totalAltEstNumber;
 
   double altPenalty;
   int includedEstFilter;
@@ -85,14 +88,17 @@ class AltEst
   int extremeLengthFilter;
   int nextAdd, nextRemove;
 
-  std::vector<OneAltEst> voae_AltEst;
-
   int  ReadAltFile (char[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen);
   void Compare     (int &nbIncomp, int &nbNoevidence, int &nbIncluded);
 
  public:
+  int  totalAltEstNumber;
+  std::vector<OneAltEst> voae_AltEst;
+
   AltEst  ();
   ~AltEst ();
+  void Penalize(int i, int pos, DATA *Data);
+
 };
 
 #endif

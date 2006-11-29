@@ -31,7 +31,7 @@ extern Parameters   PAR;
 OneAltEst :: OneAltEst()
 {
   id[0] = 0;
-  start = end = index = exonIndex = exonsNumber = 0;
+  start = end = index = exonsNumber = 0;
   totalLength = altSplicingEvidence = 0;
 }
 
@@ -40,7 +40,6 @@ OneAltEst :: OneAltEst(char *ID, int i, int j)
   strcpy(id, ID);
   this->start               = i;
   this->index               = -1;
-  this->exonIndex           = 0;
   this->exonsNumber         = 0;
   this->altSplicingEvidence = 0;
   this->totalLength         = 0;
@@ -62,7 +61,6 @@ void OneAltEst :: Reset ()
   this->start               = -1;
   this->end                 = -1;
   this->index               = -1;
-  this->exonIndex           = 0;
   this->exonsNumber         = 0;
   this->altSplicingEvidence = 0;
   this->totalLength         = 0;
@@ -237,6 +235,98 @@ bool OneAltEst :: IsInconsistentWith(OneAltEst *other)
   return false; // just to avoid a compilation warning
 }
 
+// -----------------------------------------------------------------
+// Check compatibility of a prediction with an AltEst
+// -----------------------------------------------------------------
+bool OneAltEst :: CompatibleWith(Prediction *pred)
+ {
+   int idxf, idxe=0;
+   Gene *g;
+
+   //locate gene
+   g = pred->FindGene(start,end);
+   // check first exon start is in transcribed matured region   
+
+   for (idxf = 0; idxf < g->nbFea(); idxf++)
+     {
+       if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &
+	   (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
+	 if (State2Status[g->vFea[idxf]->state] <= 2) // IG or intron
+	   return false;
+	 else break;
+     }
+   //   if (idxf == g->nbFea()) return false;
+
+   bool firstOk = false; 
+   // test des frontières suivantes
+   while ((idxe < exonsNumber-1) & (idxf < g->nbFea()))
+     {
+       idxf++;
+       if (!firstOk & (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
+	 firstOk = true;
+
+       if (!firstOk & (State2Status[g->vFea[idxf]->state] <= 2)) // IG or intron: broken
+	 return false;
+
+       if (firstOk & (g->vFea[idxf]->end == vi_ExonStart[idxe+1]))
+	 if (State2Status[g->vFea[idxf]->state] <= 2) // IG or intron
+	   {
+	     idxe++; firstOk = false;
+	     continue;
+	   } else return false;
+     }
+
+   // test de la fin
+   for (; idxf < g->nbFea(); idxf++)   
+     {
+       if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &
+	   (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
+	 return (State2Status[g->vFea[idxf]->state] > 2); // not (IG or intron)
+     }
+   return false;
+ }
+
+// --------------------------------------
+//  Penalize according to the EST
+// --------------------------------------
+void OneAltEst :: Penalize(int pos, DATA *Data, double altPenalty)
+{
+  if ((pos < start) | (pos > end)) return;
+
+  int idx, inExon = 1;
+ 
+  for (idx =0; idx < exonsNumber-1; idx++)
+    {
+      if ((vi_ExonStart[idx] <= pos) & 
+	  (vi_ExonEnd[idx] >= pos)) 
+	{ inExon = 1; break; }
+
+      if ((vi_ExonEnd[idx] < pos) & 
+	  (vi_ExonStart[idx+1] > pos)) 
+	{ inExon = 0; break; }
+    }
+  
+  //we don't choose the strand. The splice sites will do this for us
+  if (inExon == 0)
+    {
+      Data->contents[DATA::UTR5F] -= altPenalty;
+      Data->contents[DATA::UTR3F] -= altPenalty;
+      Data->contents[DATA::UTR5R] -= altPenalty;
+      Data->contents[DATA::UTR3R] -= altPenalty;
+      for(int i=0; i<6; i++)
+	Data->contents[i] -= altPenalty;
+    }
+  else
+    {
+      Data->contents[DATA::IntronF] -= altPenalty;
+      Data->contents[DATA::IntronUTRF] -= altPenalty;
+      Data->contents[DATA::IntronR] -= altPenalty;
+      Data->contents[DATA::IntronUTRR] -= altPenalty;
+    }
+  Data->contents[DATA::InterG] -= altPenalty;
+
+}
+
 // --------------------------------------
 //  Print the OneAltEst (nuc coordinates)
 // --------------------------------------
@@ -263,23 +353,24 @@ AltEst :: AltEst()
   char tempname[FILENAME_MAX+1];
   i=nbIncomp=nbNoevidence=nbIncluded=nbUnspliced=nbExtremLen=0;
 
-  altPenalty = PAR.getD("Alt.Penalty");
-  includedEstFilter= PAR.getI("Alt.includedEstFilter");
-  compatibleEstFilter= PAR.getI("Alt.compatibleEstFilter");
-  unsplicedEstFilter= PAR.getI("Alt.unsplicedEstFilter");
-  extremeLengthFilter= PAR.getI("Alt.extremeLengthFilter");
-  maxEstLength= PAR.getI("Alt.maxEstLength");
-  minEstLength= PAR.getI("Alt.minEstLength");
-  maxIn= PAR.getI("Alt.maxIn");
-  minIn= PAR.getI("Alt.minIn");
-  maxEx= PAR.getI("Alt.maxEx");
-  minEx= PAR.getI("Alt.minEx");
-  exonucleasicLength= PAR.getI("Alt.exonucleasicLength");
-  altEstDisplay= PAR.getI("Alt.altEstDisplay");
-  verbose= PAR.getI("Alt.verbose");
+  altPenalty = PAR.getD("AltEst.Penalty");
+  includedEstFilter= PAR.getI("AltEst.includedEstFilter");
+  compatibleEstFilter= PAR.getI("AltEst.compatibleEstFilter");
+  unsplicedEstFilter= PAR.getI("AltEst.unsplicedEstFilter");
+  extremeLengthFilter= PAR.getI("AltEst.extremeLengthFilter");
+  maxEstLength= PAR.getI("AltEst.maxEstLength");
+  minEstLength= PAR.getI("AltEst.minEstLength");
+  maxIn= PAR.getI("AltEst.maxIn");
+  minIn= PAR.getI("AltEst.minIn");
+  maxEx= PAR.getI("AltEst.maxEx");
+  minEx= PAR.getI("AltEst.minEx");
+  exonucleasicLength= PAR.getI("AltEst.exonucleasicLength");
+  altEstDisplay= PAR.getI("AltEst.altEstDisplay");
+  verbose= PAR.getI("AltEst.verbose");
+  totalAltEstNumber = 0;
 
   strcpy(tempname, PAR.getC("fstname"));
-  strcat(tempname, ".alt");
+  strcat(tempname, ".alt.est");
   if (!ProbeFile(NULL,tempname)) return;
 
   fprintf(stderr, "Reading alt. spl. evidence...");
@@ -310,7 +401,7 @@ AltEst :: AltEst()
     if (altEstDisplay) voae_AltEst[i].Print();
   }
 
-  nextAdd=nextRemove= (totalAltEstNumber > 1);
+  nextAdd = nextRemove = (totalAltEstNumber > 1);
 }
 
 // ----------------------
@@ -350,7 +441,7 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
       if (first) first = 0;
       else {
 	oaetmp.ExtremitiesTrim(exonucleasicLength);
-	filtertype = oaetmp.IsFiltered(unsplicedFilter, extremeLenFilter, verbose,
+	filtertype = oaetmp.IsFiltered(unsplicedEstFilter, extremeLengthFilter, verbose,
 				       minIn, maxIn, maxEx, minEx,
 				       minEstLength, maxEstLength);
 	if (filtertype == 0) {
@@ -371,7 +462,7 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
   }
   // last est
   oaetmp.ExtremitiesTrim(exonucleasicLength);
-  filtertype = oaetmp.IsFiltered(unsplicedFilter, extremeLenFilter, verbose,
+  filtertype = oaetmp.IsFiltered(unsplicedEstFilter, extremeLengthFilter, verbose,
 				 minIn, maxIn, maxEx, minEx,
 				 minEstLength, maxEstLength);
   if (filtertype == 0) {
@@ -389,15 +480,15 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
 }
 
 // -----------------------------------------------------------------
-// Filter the AltEst:
+// Filters the AltEst:
 //  Remove Est strictly included in another one,
-//  Set a list of Est clusters, 
+//  TODO: Set a list of Est clusters, 
 //   (a cluster can be seen as a connex component in a graph 
 //   built with est as edges and overlap as vertices ;
 //   it allows to reduce the time complexity by restricting the
 //   pairwise est-est comparisons to est of a same cluster.)
 //  And keep only Est confering an evidence of alternative splicing,
-//  (that is all est that is inconsistent with another one).
+//  (that is every EST that is inconsistent with another one).
 // -----------------------------------------------------------------
 void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
 {
@@ -407,8 +498,9 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
   // NxN comparisons could be tested, but it has been reduced to
   // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
   // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
+  
   for(i=0; i<totalAltEstNumber; i++) {
-    if (compatibleFilter || includedFilter) {
+    if (compatibleEstFilter || includedEstFilter) {
       // Compare this est with the others to check incompatibility or inclusion
       for (j=1+k; j<totalAltEstNumber; j++) {
 	char *iID = voae_AltEst[i].GetId();
@@ -421,7 +513,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
 	}
 	else { // no inconsistency
 	  // j strictly included in i
-	  if ((includedFilter) && (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd())) {
+	  if ((includedEstFilter) && (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd())) {
 	    if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
 	    voae_AltEst.erase(voae_AltEst.begin() + j);
 	    totalAltEstNumber--;
@@ -434,7 +526,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     }
   }
 
-  if (compatibleFilter) {
+  if (compatibleEstFilter) {
     for (i=0; i<totalAltEstNumber; i++) {
       if  (! voae_AltEst[i].GetAltSplE()) {
 	if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
@@ -445,4 +537,11 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
       }
     }
   }
+}
+// -----------------------------------------------------------------
+// Penalize according to EST number i
+// -----------------------------------------------------------------
+void AltEst :: Penalize(int i, int pos, DATA *Data)
+{
+  voae_AltEst[i].Penalize(pos,Data,altPenalty);
 }
