@@ -79,8 +79,3 @@ private:
   void StatGC();
 };
 
-class DAGsManager
-{
-	   DAG	mainDAG;
-	   std::vector<DAG*> altDAG;
-};
