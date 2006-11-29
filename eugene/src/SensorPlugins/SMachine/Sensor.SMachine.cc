@@ -1,3 +1,4 @@
+// VERSION BIDOUILLEE - THOMAS
 // ------------------------------------------------------------------
 // Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
 //
@@ -86,19 +87,39 @@ SensorSMachine :: ~SensorSMachine ()
 // -------------------------------------
 inline double ScaleIt(double w, double B, double P, char Scaled)
 {
-	if (Scaled) {
-		return B*log(w)-P;
-	}
-	else 
-		return B*w-P;
+  switch (Scaled) {
+  case 0:
+    return B*w-P;
+    break;
+
+  case 1:
+  case 2:
+    return B*log(w)-P;
+    break;
+    
+  default:
+    fprintf(stderr,"Error: incorrect value for parameter IsScaled\n");
+    exit(1);
+  }
 }
 
 inline double ScaleItNo(double w, double B,double P, char Scaled)
 {
-	if (Scaled)
-		return log(1.0-pow(w,B)*exp(-P));
-	else
-		return 0.0;
+  switch (Scaled) {
+    
+  case 0:
+  case 2:
+    return 0.0;
+    break;
+    
+  case 1:
+    return log(1.0-pow(w,B)*exp(-P));
+    break;
+    
+  default:
+    fprintf(stderr,"Error: incorrect value for parameter IsScaled\n");
+    exit(1);
+  }
 }
 // ----------------------
 //  Init SMachine.
@@ -109,6 +130,8 @@ void SensorSMachine :: Init (DNASeq *X)
   accP = PAR.getD("SMachine.accP*",GetNumber());
   donB = PAR.getD("SMachine.donB*",GetNumber());
   donP = PAR.getD("SMachine.donP*",GetNumber());
+
+  transSpliceB = PAR.getD("SMachine.tSpliceB*",GetNumber());
 
   startP = PAR.getD("SMachine.startP*",GetNumber());
   startB = PAR.getD("SMachine.startB*",GetNumber());
@@ -223,6 +246,7 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
     
     if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Forward] += ScaleIt(vValAccF[iAccF],accB,accP,isScaled);
+      d->sig[DATA::tStart].weight[Signal::Forward] += ScaleIt(vValAccF[iAccF],transSpliceB,0,0);
       d->sig[DATA::Acc].weight[Signal::ForwardNo] += ScaleItNo(vValAccF[iAccF],accB,accP,isScaled);
       iAccF++;
     }
@@ -235,6 +259,7 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
     if((iAccR<(int)vPosAccR.size()) && (vPosAccR[iAccR] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Reverse] += ScaleIt(vValAccR[iAccR], accB, accP, isScaled);
+      d->sig[DATA::tStart].weight[Signal::Reverse] += ScaleIt(vValAccR[iAccR],transSpliceB,0,0);
       d->sig[DATA::Acc].weight[Signal::ReverseNo] += ScaleItNo(vValAccR[iAccR], accB, accP, isScaled);
       iAccR++;
     }
