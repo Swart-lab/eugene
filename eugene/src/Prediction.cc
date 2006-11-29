@@ -121,7 +121,7 @@ Feature :: ~Feature ()
 // ------------------------
 Gene :: Gene ()
 {
-    complete = 0;
+	complete = 0;
     clear();
 }
 
@@ -130,7 +130,7 @@ Gene :: Gene ()
 // ------------------------
 Gene :: ~Gene ()
 {
-  for (int i=0; i<nbFea(); i++) { 
+  for (int i=0; i<nbFea(); i++) {
     delete  vFea[i];
     vFea[i] = NULL;
   }
@@ -464,6 +464,24 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
       } else geneindex++;
     }
 }
+
+// --------------------------
+//  Delete genes outside of range
+// --------------------------
+void Prediction :: DeleteOutOfRange(int s,int e)
+{
+  std::vector <Gene*>::iterator geneindex;
+
+  for (geneindex = vGene.begin(); geneindex != vGene.end(); )
+    {
+      if (((*geneindex)->trEnd < s) | ((*geneindex)->trStart > e))
+        {
+          nbGene--;
+          geneindex = vGene.erase(geneindex);
+        } else geneindex++;
+    }
+}
+
 // --------------------------
 //  print prediction (master)
 // --------------------------
@@ -505,6 +523,18 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
 	OUT = FileOpen(NULL, strcat(filename,".gff"), "wb");
 	PrintGff(OUT, seqName);
 	fclose(OUT);
+//SEB
+  {
+    std::string filename_gff3(PAR.getC("prefixName"));
+    filename_gff3 += ".gff3";
+    std::ofstream out(filename_gff3.c_str());
+  //	, std::ios_base::binary);
+    //le 1 est a verifier
+    out << Gff3Line::header(X->Name, 1, X->SeqLen);
+    PrintGff3(out, seqName);
+    out.close();
+  }
+//SEB
 	break;
       case 'h':
 	OUT = FileOpen(NULL, strcat(filename, ".html"), "wb");
@@ -567,8 +597,208 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
 		fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->framegff));
       }
     }
+  //ajoute une ligne vide en fin de fichier
+   fprintf(OUT, "\n");
 }
 
+//SEB ------------------------
+//  print prediction (GFF3)
+// ------------------------
+void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
+{
+  int offset = PAR.getI("Output.offset");
+  int stepid = PAR.getI("Output.stepid");
+  int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
+  int state, start, end;
+  int incons = 0, cons = 0;
+  
+  /* name source feature start end score strand frame */
+  for(int i=0; i<nbGene; i++)
+  {
+//  --  --  la ligne du gene  --  --
+    Gff3Line gene_line(seqName);
+    //la ligne decrivant le gene
+    gene_line.setType(SOFA_GENE);
+    gene_line.setStart(vGene[i]->trStart+1);
+    gene_line.setEnd(vGene[i]->trEnd+1);
+    std::string gene_name = to_string(seqName) + '.' + to_string(i*stepid +1);
+   //l'identifiant du gene = type_sofa:nom_eugene
+    std::string gene_id = Sofa::getName(SOFA_GENE)
+                        + ":" + gene_name;
+    gene_line.setAttribute("ID=" + gene_id);
+    gene_line.addAttribute("Name=" + gene_name);
+    gene_line.addAttribute("length=" + to_string(vGene[i]->geneLength));
+    //je pars du principe que la premiere structure me donne le brin du gene
+    if (vGene[i]->nbFea() > 0)
+      gene_line.setStrand(vGene[i]->vFea[0]->strand);
+    gene_line.print(out);
+//  --  --  fin de la ligne du gene  --  --
+
+//  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
+    //En fait je me contente d'ecraser ce que je ne veux plus
+    gene_line.setType(SOFA_MRNA);
+    std::string rna_id = Sofa::getName(SOFA_MRNA) + ":"+ gene_name;
+    gene_line.setAttribute("ID=" + rna_id);
+    gene_line.addAttribute("nb_exon=" + to_string(vGene[i]->exNumber));
+//----- fin de la ligne du mRNA
+
+    Gff3Line *pre_arn_line, *arn_line;
+    std::vector<Gff3Line*> pre_arn_lines, arn_lines;
+    std::string fea_name(gene_name + ".");
+    std::string fea_id;
+    //postulat : ici on a un seul ARNm par gene
+    int taille_mRNA = 0;
+
+    for(int j=0; j<vGene[i]->nbFea(); j++) {
+      state = vGene[i]->vFea[j]->state;
+      // Print introns ?
+      if( (PAR.getI("Output.intron") == 0) &&
+          (state >= IntronF1 && state <= InterGen) ||
+          (state >= IntronU5F) )
+        continue;
+
+      start = vGene[i]->vFea[j]->start;
+      end   = vGene[i]->vFea[j]->end;
+      if (estopt) CheckConsistency(start, end, state, &cons, &incons);
+
+      int type_sofa = getTypeSofa(state);
+      //selon le type on renseigne une ligne existante ou nouvelle
+      // d'arn, de cds ou des 2
+      switch(type_sofa)
+      {
+        //cas d'une region intergenique, ou d'un intron
+        //on ne le signale que dans le pre_arn
+        case SOFA_INTERGEN  :
+        case SOFA_INTRON    :
+        case SO_UTR_INTRON  :
+              pre_arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
+                                           vGene[i]->vFea[j]->strand,
+                                           vGene[i]->vFea[j]->framegff);
+              //les attributs
+              setGff3Attributes(pre_arn_line, state, type_sofa,
+                                 fea_name, j, gene_id);
+            //on l'ajoute au vecteur
+              pre_arn_lines.push_back(pre_arn_line);
+              break;
+        //cas d'un UTR 3' ou 5'
+        //c'est [la fin d']un exon du pre_arn, et un utr de l'arn
+        case SOFA_5_UTR :
+        case SOFA_3_UTR :
+              if((!pre_arn_lines.empty()) &&
+                  (previousExonMustBeUpdated(pre_arn_lines.back(), start+offset)))
+              //fusion des exons
+                pre_arn_lines.back()->setEnd(end+offset);
+              else
+              {
+                pre_arn_line = fillGff3Line(SOFA_EXON, start+offset, end+offset,
+                                           vGene[i]->vFea[j]->strand,
+                                           vGene[i]->vFea[j]->framegff);
+              //attributs
+                setGff3Attributes(pre_arn_line, state, SOFA_EXON,
+                                  fea_name, j, gene_id);
+                pre_arn_lines.push_back(pre_arn_line);
+              }
+              
+              arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
+                                        vGene[i]->vFea[j]->strand,
+                                        vGene[i]->vFea[j]->framegff);
+              //attributs
+              setGff3Attributes(arn_line, state, type_sofa,
+                                fea_name, j, rna_id);
+              arn_lines.push_back(arn_line);
+              //je mets à jour la taille de l'ARNm
+              taille_mRNA += (end-start+1);
+              break;
+        //cas d'un exon
+        //il est peut etre la fin du precedent
+        case SOFA_EXON :
+//               fin = -99999;
+              if((!pre_arn_lines.empty()) &&//c'est le premier
+                (previousExonMustBeUpdated(pre_arn_lines.back(), start+offset)))
+              //fusion des exons
+                pre_arn_lines.back()->setEnd(end+offset);
+              else
+              {
+                pre_arn_line = fillGff3Line(SOFA_EXON, start+offset, end+offset,
+                                              vGene[i]->vFea[j]->strand,
+                                              vGene[i]->vFea[j]->framegff);
+                pre_arn_lines.push_back(pre_arn_line);
+              }
+              //les attributs
+//               je le mets ici pour permettre la MAJ d'ontology term.
+//               Pour bien faire il faudrait une fonction SetOntologyTerm()
+//                 que l'on placerait au niveau de la MAJ
+//                 et le setAttributes resterait dans le else
+              //si je suis sur un single exon, le code de l'ontology doit etre SOFA_EXON
+              if((SnglF1<=state) && (state <=SnglR3))
+              //je passe nbTracks pour etre sur d'etre hors zone
+                setGff3Attributes(pre_arn_lines.back(), NbTracks, type_sofa, fea_name,
+                                  vGene[i]->vFea[j]->number, gene_id);
+              else
+                setGff3Attributes(pre_arn_lines.back(), state, type_sofa, fea_name,
+                                  vGene[i]->vFea[j]->number, gene_id);
+
+              arn_line = fillGff3Line(SOFA_CDS, start+offset, end+offset,
+                                      vGene[i]->vFea[j]->strand,
+                                      vGene[i]->vFea[j]->framegff);
+              //les attributs
+              setGff3Attributes(arn_line, state, SOFA_CDS,
+                                fea_name, vGene[i]->vFea[j]->number, rna_id);
+              arn_lines.push_back(arn_line);
+              //je mets à jour la taille de l'ARNm
+              taille_mRNA += (end-start+1);
+              break;
+        //par defaut je n'ajoute que dans le pre-arn
+        default :
+                pre_arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
+                                            vGene[i]->vFea[j]->strand,
+                                            vGene[i]->vFea[j]->framegff);
+                //les attributs
+                setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name,
+                                  j, gene_id);
+                pre_arn_lines.push_back(pre_arn_line);
+      }//fin switch
+      //si on vient d'ajouter une ligne dans les ARNs
+      //Je lui ajoute le score
+      if((type_sofa==SOFA_5_UTR) ||
+          (type_sofa==SOFA_3_UTR) ||
+          (type_sofa==SOFA_EXON))
+      {
+        double score = 100.0*(double)cons/(end-start+1);
+        char buff[6];   snprintf(buff, 6, "%.1f", score);
+        arn_lines.back()->addAttribute("est_cons=" + std::string(buff));
+        score  = 100.0*(double)incons/(end-start+1);
+        snprintf(buff, 6, "%.1f", score);
+        arn_lines.back()->addAttribute("est_incons=" + to_string(buff));
+      }
+    }//fin des structures du gene
+      //on affiche les lignes, j'en profite pour liberer les pointeurs
+      std::vector<Gff3Line*>::iterator itr;
+      //le pre-arn
+      for(itr = pre_arn_lines.begin();
+          itr != pre_arn_lines.end();
+          ++itr)
+      {
+        (*itr)->print(out);
+        delete (*itr);
+      }
+      //J'ajoute la taille du mRNA à sa ligne
+      gene_line.addAttribute("length=" + to_string(taille_mRNA));
+      //j'affiche la ligne du mRNA juste avant les UTRs et CDS
+      gene_line.print(out);
+      //l'arn
+      for(itr = arn_lines.begin();
+          itr != arn_lines.end();
+          ++itr)
+      {
+        (*itr)->print(out);
+        delete (*itr);
+      }
+      //fin du gene
+      out << Gff3Line::endComplexFeature();
+    }//fin des genes
+}
+//SEB
 // ----------------------------
 //  print prediction (egn long)
 // ----------------------------
@@ -1041,6 +1271,20 @@ void Prediction :: PrintGeneInfo (FILE* F)
   }
 }
 
+// ------------------------------------
+//  Find the index of the first gene overlapping a segment.
+//  -1 if not found. Assumes a sorted prediction.
+// ------------------------------------
+Gene *Prediction :: FindGene (int start, int end)
+{
+  for(int i=0; i<nbGene; i++) {
+    if (vGene[i]->trStart > end) return NULL;
+    if (vGene[i]->trEnd < start) continue;
+    return vGene[i];
+  }
+  return NULL;
+}
+
 // ------------------------
 //  plot a prediction.
 // ------------------------
@@ -1221,3 +1465,43 @@ bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
   return is_state;
 }
 
+
+//SEB--  --  --  --  --  --  --
+//  --  --  delocalisation pour eclaircir le code
+Gff3Line*
+  Prediction::fillGff3Line(int type_sofa, int start, int end,
+                            char strand, int framegff)
+{
+  Gff3Line* line = new Gff3Line(seqName);
+  line->setType(type_sofa);
+  line->setStart(start);
+  line->setEnd(end);
+  line->setStrand(strand);
+  if(framegff != 9)
+    line->setPhase(abs(framegff));
+  return line;
+}
+
+bool
+  Prediction::previousExonMustBeUpdated(Gff3Line* line, int start)
+{
+  if(!line)
+std::cerr << "bad previous !" << std::endl;
+//     return false;
+  if(line->getType()==SOFA_EXON)
+    return((line->getEnd()+1) == start);
+  return false;
+}
+
+void
+  Prediction::setGff3Attributes(Gff3Line* line, int type_egn,
+                                int type_sofa, std::string fea_name,
+                                int j, std::string gene_id)
+{
+  std::string fea_id = Sofa::getName(type_sofa) + ":"
+                      + fea_name + to_string(j);
+  line->setAttribute("ID=" + fea_id);
+  line->addAttribute("Parent="+gene_id);
+  line->addAttribute("Ontology_term="
+                    + Sofa::codeToString(getTypeSofa(type_egn, false)));
+}
