@@ -49,6 +49,7 @@ inline int (isnan)(double r) { return isnan(r); }
 #include "Const.h"
 #include "System.h"
 #include "DAG.h"
+#include "AltEst.h"
 #include "SensorIF.h"
 #include "MSensor.h"
 #include "Param.h"
@@ -68,7 +69,7 @@ Parameters       PAR;
 ParaOptimization OPTIM;
 
 // -------------------------------------------------------------------------
-// Predict genes
+// Compute Optimal Prediction
 // -------------------------------------------------------------------------
 Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
@@ -82,10 +83,14 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
   int   GCVerbose = PAR.getI("EuGene.VerboseGC");
   int   GCLatency = PAR.getI("EuGene.GCLatency");
-  DAG   Dag(FirstNuc-Dir, LastNuc, PAR,TheSeq);
+  DAG   *Dag;
+  Prediction *prediction;
+	
+  // Initialize the central DAG
+  Dag = new DAG(FirstNuc-Dir, LastNuc, PAR,TheSeq);
   
-  Dag.LoadDistLength();
-  Dag.WeightThePrior();
+  Dag->LoadDistLength();
+  Dag->WeightThePrior();
 
   // --------------------------------------------------------------------------
   // Demarrage de la programmation dynamique
@@ -95,18 +100,74 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
     // recuperation des infos
     MSensor->GetInfoAt(TheSeq, nuc, &Data);
     if (Forward) 
-      Dag.ShortestPathAlgoForward(nuc,Data);
+      Dag->ShortestPathAlgoForward(nuc,Data);
     else
-      Dag.ShortestPathAlgoBackward(nuc,Data);
+      Dag->ShortestPathAlgoBackward(nuc,Data);
 
-    if (nuc && (nuc % GCLatency == 0)) Dag.MarkAndSweep(nuc,GCVerbose,GCLatency);
+    if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
   }
 
-  Dag.WeightThePrior();
-  Dag.BuildPrediction(Forward);
-  Dag.pred->TrimAndUpdate(TheSeq);
+  Dag->WeightThePrior();
+  Dag->BuildPrediction(Forward);
 
-  return Dag.pred;
+  Dag->pred->TrimAndUpdate(TheSeq);
+  prediction = Dag->pred;
+
+  delete Dag;
+
+  return prediction;
+}
+
+// -------------------------------------------------------------------------
+// Compute Optimal Prediction
+// -------------------------------------------------------------------------
+Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB, Prediction *optpred, int idx)
+{
+
+  int   j, k;
+  int   Data_Len = TheSeq->SeqLen;
+  DATA	Data;
+  int   Forward =  1;//PAR.getI("Sense"); 
+  int   Dir = (Forward ? 1 : -1);
+  int	FirstNuc = (Forward ? 0 : Data_Len);
+  int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
+  int   GCVerbose = PAR.getI("EuGene.VerboseGC");
+  int   GCLatency = PAR.getI("EuGene.GCLatency");
+  DAG* Dag;
+  Prediction *prediction;
+	
+  if (!AltEstDB-> voae_AltEst[idx].CompatibleWith(optpred))
+    {
+      Dag = new DAG(FirstNuc-Dir, LastNuc, PAR,TheSeq);
+	  
+      Dag->LoadDistLength();
+      Dag->WeightThePrior();
+
+      for (int nuc = FirstNuc; nuc != LastNuc; nuc += Dir) {
+	
+	// recuperation des infos
+	MSensor->GetInfoAt(TheSeq, nuc, &Data);
+	AltEstDB->Penalize(idx,nuc,&Data);
+
+	if (Forward) 
+	  Dag->ShortestPathAlgoForward(nuc,Data);
+	else
+	  Dag->ShortestPathAlgoBackward(nuc,Data);
+	
+	if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+      }
+      
+      Dag->WeightThePrior();
+      Dag->BuildPrediction(Forward);
+
+      Dag->pred->TrimAndUpdate(TheSeq);
+      prediction = Dag->pred;
+
+      delete Dag;
+
+      return prediction;
+    }
+  return NULL;
 }
 
 // -------------------------------------------------------------------------
@@ -221,7 +282,7 @@ int main  (int argc, char * argv [])
 	MS->InitMaster(TheSeq);
 
 	// --------------------------------------------------------------------
-	// Predict
+	// Predict: 1st main prediction
 	// --------------------------------------------------------------------
 	pred = Predict(TheSeq, MS);
 	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
@@ -247,11 +308,32 @@ int main  (int argc, char * argv [])
 	  fprintf(stderr, "done\n");
 	}
 
-	// Free used memory
-	delete TheSeq; 
-	delete MS;
-	delete pred;
+	// --------------------------------------------------------------------
+	// Load Alternative EST data (if any)
+	// --------------------------------------------------------------------
+	if (PAR.getI("AltEst.use")) {
+	  AltEst *AltEstDB = new AltEst();
+	  Prediction *AltPred;
+	  
+	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
+	    {
+	      AltPred = AltPredict(TheSeq,MS,AltEstDB,pred,altidx);
+	      
+	      if (AltPred) {
+		AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
+		fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+		AltPred ->Print(TheSeq, MS);
+		
+		delete AltPred;
+	      }
+	    }
+	}
 	
+	  // Free used memory
+	  delete TheSeq; 
+	  delete MS;
+	  delete pred;
+	  
 	fflush(stderr);
 	fflush(stdout);
       } // fin de traitement de chaque séquence....
