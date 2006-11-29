@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.3c
+EuGene.version		3.4
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -45,7 +45,23 @@ Output.format		l
 Output.Prefix		./
 Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
-#################################################################
+##### Alternative splicing predictor control
+AltEst.use			0
+AltEst.Penalty			1000
+AltEst.includedEstFilter		1
+AltEst.compatibleEstFilter	1
+AltEst.unsplicedEstFilter		1
+AltEst.extremeLengthFilter	1
+AltEst.maxEstLength		10000
+AltEst.minEstLength		100
+AltEst.maxIn				10000
+AltEst.minIn				40
+AltEst.maxEx				10000
+AltEst.minEx				3
+AltEst.exonucleasicLength	10
+AltEst.altEstDisplay		0
+AltEst.verbose			0
+#######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
 #
@@ -79,6 +95,7 @@ SMachine.donP*		0.020202707318
 SMachine.donB*		27.670
 SMachine.startP*	0.052
 SMachine.startB*	0.308
+SMachine.tSpliceB*	0.0
 #
 # NetGene2 parameters #####
 NG2.accP*[0]	0.903
@@ -203,12 +220,12 @@ MarkovConst.Inter*	1.0
 MarkovIMM.matname[0]	Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
-MarkovIMM.useM0asIG[0]	0
+MarkovIMM.IntergenicModel[0]	2
 MarkovIMM.maxOrder[0]	8
 #MarkovIMM.matname[1]	Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
-#MarkovIMM.useM0asIG[1]	0
+#MarkovIMM.IntergenicModel[1]	2
 #MarkovIMM.maxOrder[1]	8
 #
 ##### Markov proteic model parameters #####
