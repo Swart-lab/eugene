@@ -46,7 +46,7 @@ class SensorMarkovIMM : public Sensor
   double minGC;
   double maxGC;
   int maxOrder;
-  bool UseM0asIG;
+  int IntergenicModel;
 
 
  public:
