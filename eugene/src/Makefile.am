@@ -25,7 +25,7 @@ AM_CFLAGS =
 
 bin_PROGRAMS = eugene
 
-eugene_SOURCES = EuGene.cc DAG.cc DAG.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h AltEst.cc AltEst.h
+eugene_SOURCES = EuGene.cc DAG.cc DAG.h Hits.cc Hits.h DNASeq.cc DNASeq.h  System.cc System.h Prediction.cc Prediction.h  BackP.cc BackP.h Sensor.cc Sensor.h Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc PenaltyDist.h SensorIF.h Const.h AltEst.cc AltEst.h Gff3Line.cc Gff3Line.h
 
 eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl
 
