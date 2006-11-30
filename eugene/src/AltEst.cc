@@ -249,7 +249,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
 
    for (idxf = 0; idxf < g->nbFea(); idxf++)
      {
-       if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &
+       if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
 	   (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
 	 if (State2Status[g->vFea[idxf]->state] <= 2) // IG or intron
 	   return false;
@@ -257,29 +257,32 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
      }
    //   if (idxf == g->nbFea()) return false;
 
+   idxf++;
    bool firstOk = false; 
    // test des frontières suivantes
-   while ((idxe < exonsNumber-1) & (idxf < g->nbFea()))
+   while ((idxe < exonsNumber-1) && (idxf < g->nbFea()))
      {
-       idxf++;
-       if (!firstOk & (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
+       if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
 	 firstOk = true;
 
-       if (!firstOk & (State2Status[g->vFea[idxf]->state] <= 2)) // IG or intron: broken
+       if (!firstOk && (State2Status[g->vFea[idxf]->state] <= 2)) // IG or intron: broken
 	 return false;
 
-       if (firstOk & (g->vFea[idxf]->end == vi_ExonStart[idxe+1]))
+       if (firstOk && 
+	   (g->vFea[idxf]->end == 
+	    vi_ExonStart[idxe+1]))
 	 if (State2Status[g->vFea[idxf]->state] <= 2) // IG or intron
 	   {
 	     idxe++; firstOk = false;
 	     continue;
 	   } else return false;
+       idxf++;
      }
 
    // test de la fin
    for (; idxf < g->nbFea(); idxf++)   
      {
-       if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &
+       if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &&
 	   (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
 	 return (State2Status[g->vFea[idxf]->state] > 2); // not (IG or intron)
      }
@@ -297,11 +300,11 @@ void OneAltEst :: Penalize(int pos, DATA *Data, double altPenalty)
  
   for (idx =0; idx < exonsNumber-1; idx++)
     {
-      if ((vi_ExonStart[idx] <= pos) & 
+      if ((vi_ExonStart[idx] <= pos) && 
 	  (vi_ExonEnd[idx] >= pos)) 
 	{ inExon = 1; break; }
 
-      if ((vi_ExonEnd[idx] < pos) & 
+      if ((vi_ExonEnd[idx] < pos) && 
 	  (vi_ExonStart[idx+1] > pos)) 
 	{ inExon = 0; break; }
     }
