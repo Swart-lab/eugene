@@ -88,6 +88,7 @@ class Gene
  
   Gene  ();
   ~Gene ();
+  bool operator== (const Gene& o);
   inline int nbFea() {return vFea.size();};
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
@@ -125,7 +126,7 @@ class Prediction
   // cons/incons: retour des valeurs
   void  CheckConsistency(int debut, int fin, int etat,
 			 int* cons, int* incons);
-			 
+
   // Check and Trim UTR according to EST evidence
   void ESTScan();
   bool UTRCheckAndTrim(int* debut, int* fin, int etat);
@@ -156,6 +157,7 @@ class Prediction
   Prediction  (std::vector <int> vPos,
          std::vector <signed char> vState);
   ~Prediction ();
+  bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds);
   void  TrimAndUpdate (DNASeq*);
   void DeleteOutOfRange(int s,int e);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL);
