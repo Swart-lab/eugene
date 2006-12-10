@@ -119,7 +119,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 }
 
 // -------------------------------------------------------------------------
-// Compute Optimal Prediction
+// Compute alternative Predictions based on EST
 // -------------------------------------------------------------------------
 Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB, Prediction *optpred, int idx)
 {
@@ -313,7 +313,8 @@ int main  (int argc, char * argv [])
 	// --------------------------------------------------------------------
 	if (PAR.getI("AltEst.use")) {
 	  AltEst *AltEstDB = new AltEst();
-	  Prediction *AltPred;
+	  std::vector <Prediction*> vPred;
+	  Prediction* AltPred;
 	  
 	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
 	    {
@@ -321,23 +322,29 @@ int main  (int argc, char * argv [])
 	      
 	      if (AltPred) {
 		AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
-		fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
-		AltPred ->Print(TheSeq, MS);
 		
-		delete AltPred;
+		if (AltPred->IsOriginal(pred,vPred))
+		  {
+		    fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+		    AltPred ->Print(TheSeq, MS);
+		    vPred.push_back(AltPred);
+		  }
+		else delete AltPred;	
 	      }
 	    }
+	  //delete AltPred;	
 	}
+
+
+	// Free used memory
+	delete TheSeq; 
+	delete MS;
+	delete pred;
 	
-	  // Free used memory
-	  delete TheSeq; 
-	  delete MS;
-	  delete pred;
-	  
 	fflush(stderr);
 	fflush(stdout);
       } // fin de traitement de chaque séquence....
-	    
+      
       fprintf(stderr,"-------------------------------------"
 	      "--------------------------------\n");
     
