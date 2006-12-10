@@ -201,7 +201,7 @@ bool Gene :: operator== (const Gene& o)
   // we assume the gene structures staisfy the structural constraints
   // of complete genes. If the final exon is identical, it is a term
   // exon and the 2 CDS are identical.
-  
+  return true;
 }
 
 // ------------------------
