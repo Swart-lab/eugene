@@ -147,8 +147,10 @@ Feature :: ~Feature ()
 // ------------------------
 Gene :: Gene ()
 {
-	complete = 0;
-    clear();
+  complete = 0;
+  isvariant = false;
+  hasvariant = 0;
+  clear();
 }
 
 // ------------------------
@@ -511,6 +513,8 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
   // Gene update and deletion of short genes
   std::vector <Gene*>::iterator geneindex;
   int MinCDSLen = PAR.getI("Output.MinCDSLen");
+  int gIdx = 0;
+
   for (geneindex = vGene.begin(); geneindex != vGene.end(); )
     {
       int empty_gene = ((*geneindex)->nbFea() < 1 ) ? 1: 0;
@@ -519,7 +523,12 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
       if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene ) {
 	nbGene--;
 	geneindex = vGene.erase(geneindex);
-      } else geneindex++;
+      } else 
+	{
+	  (*geneindex)->geneNumber = gIdx;
+	  gIdx++;
+	  geneindex++;
+	}
     }
 }
 
@@ -543,7 +552,7 @@ void Prediction :: DeleteOutOfRange(int s,int e)
 // --------------------------
 //  print prediction (master)
 // --------------------------
-void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
+void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const char append)
 {
  
   MS = ms;
@@ -552,6 +561,20 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
   char outputFormat[20];
   int  trunclen =      PAR.getI("Output.truncate");
   strcpy(outputFormat, PAR.getC("Output.format"));
+
+  char *mode;
+  std::ios_base::openmode ccmode;
+
+  if (append) 
+    {
+      mode = "ab";
+      ccmode = std::ofstream::out |std:: ofstream::app;
+    }
+  else 
+    {
+      mode = "wb";
+      ccmode = std::ofstream::out | std::ofstream::trunc;
+    }
 
   // SeqName
   if (trunclen) sprintf(nameformat,"%%%d.%ds",trunclen,trunclen);
@@ -568,24 +591,24 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
       strcpy(filename,PAR.getC("prefixName"));
       switch (outputFormat[i]) {
       case 'a':
-	OUT = FileOpen(NULL, strcat(filename, ".egn.ara"), "wb");
+	OUT = FileOpen(NULL, strcat(filename, ".egn.ara"), mode);
 	PrintEgnL(OUT, seqName, 1);
 	fclose(OUT);
 	break;
       case 'd':
-	OUT = FileOpen(NULL, strcat(filename, ".egn.debug"), "wb");
+	OUT = FileOpen(NULL, strcat(filename, ".egn.debug"), mode);
 	PrintEgnD(OUT);
 	fclose(OUT);
 	break;
       case 'g':
-	OUT = FileOpen(NULL, strcat(filename,".gff"), "wb");
+	OUT = FileOpen(NULL, strcat(filename,".gff"), mode);
 	PrintGff(OUT, seqName);
 	fclose(OUT);
 //SEB
   {
     std::string filename_gff3(PAR.getC("prefixName"));
     filename_gff3 += ".gff3";
-    std::ofstream out(filename_gff3.c_str());
+    std::ofstream out(filename_gff3.c_str(),ccmode);
   //	, std::ios_base::binary);
     //le 1 est a verifier
     out << Gff3Line::header(X->Name, 1, X->SeqLen);
@@ -595,17 +618,17 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT)
 //SEB
 	break;
       case 'h':
-	OUT = FileOpen(NULL, strcat(filename, ".html"), "wb");
+	OUT = FileOpen(NULL, strcat(filename, ".html"), mode);
 	PrintHtml(OUT, seqName);
 	fclose(OUT);
 	break;
       case 'l':
-	OUT = FileOpen(NULL, strcat(filename, ".egn"), "wb");
+	OUT = FileOpen(NULL, strcat(filename, ".egn"), mode);
 	PrintEgnL(OUT, seqName);
 	fclose(OUT);
 	break;
       case 's':
-	OUT = FileOpen(NULL, strcat(filename, ".egn.short"), "wb");
+	OUT = FileOpen(NULL, strcat(filename, ".egn.short"), mode);
 	PrintEgnS(OUT);
 	fclose(OUT);
 	break;
@@ -644,8 +667,9 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
       end   = vGene[i]->vFea[j]->end;
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
                
-      fprintf(OUT, "%s.%d.%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t",
-	      seqName, (i*stepid)+1, vGene[i]->vFea[j]->number,
+      fprintf(OUT, "%s.%d",seqName, ((vGene[i]->geneNumber)*stepid)+1);
+      if (vGene[i]->isvariant) fprintf(OUT, "%c",'a'+(vGene[i]->hasvariant-1));
+      fprintf(OUT, ".%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t", vGene[i]->vFea[j]->number,
 	      State2GFFString(state), start+offset, end+offset,
 	      100.0*(double)cons/(end-start+1), 100.0*(double)incons/(end-start+1),
 	      vGene[i]->vFea[j]->strand);
@@ -679,7 +703,12 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
     gene_line.setType(SOFA_GENE);
     gene_line.setStart(vGene[i]->trStart+1);
     gene_line.setEnd(vGene[i]->trEnd+1);
-    std::string gene_name = to_string(seqName) + '.' + to_string(i*stepid +1);
+
+    std::string gene_name = 
+      ((vGene[i]->isvariant) ? 
+       to_string(seqName) + '.' + to_string((vGene[i]->geneNumber)*stepid +1)+(char)('a'+(vGene[i]->hasvariant-1)) :
+       to_string(seqName) + '.' + to_string((vGene[i]->geneNumber)*stepid +1));
+
    //l'identifiant du gene = type_sofa:nom_eugene
     std::string gene_id = Sofa::getName(SOFA_GENE)
                         + ":" + gene_name;
@@ -896,8 +925,13 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
     	  
       // araset ?
       if (a) fprintf(OUT, "%s ",seqName);
-      else   fprintf(OUT, "%s.%d.%d\t",
-		    seqName, (i*stepid)+1, vGene[i]->vFea[j]->number);
+      else   
+	{
+	  fprintf(OUT, "%s.%d",seqName, ((vGene[i]->geneNumber)*stepid)+1);
+	  if (vGene[i]->isvariant)
+	    fprintf(OUT, "%c", 'a'+(vGene[i]->hasvariant-1));
+	  fprintf(OUT, ".%d\t", vGene[i]->vFea[j]->number);
+	}
 
       fprintf(OUT, "%s    %c    %7d %7d     %4d  ",
 	     State2EGNString(state),

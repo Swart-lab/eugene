@@ -72,8 +72,8 @@ class Feature
  *************************************************************/
 class Gene
 {
-	friend class Prediction;
-	
+  friend class Prediction;
+  
  private:
   int complete;  //+1:init|sngl +2:term|sngl 3:ALL 
   int exNumber;
@@ -84,14 +84,19 @@ class Gene
  public:
   int cdsStart, cdsEnd, trStart, trEnd;
   int exLength;
+  int geneNumber;
+  bool isvariant; // true = is a splice variant
+  int hasvariant; // has n splice variant (or is number n splice variant if is variant is true)
   std::vector <Feature*> vFea;
- 
+  
   Gene  ();
   ~Gene ();
+
   bool operator== (const Gene& o);
   inline int nbFea() {return vFea.size();};
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
+
 };
 
 
@@ -160,7 +165,7 @@ class Prediction
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds);
   void  TrimAndUpdate (DNASeq*);
   void DeleteOutOfRange(int s,int e);
-  void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL);
+  void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
   char  GetStateForPos(int);
