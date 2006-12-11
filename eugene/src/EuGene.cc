@@ -315,6 +315,7 @@ int main  (int argc, char * argv [])
 	  AltEst *AltEstDB = new AltEst();
 	  std::vector <Prediction*> vPred;
 	  Prediction* AltPred;
+	  Gene *baseGene;
 	  
 	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
 	    {
@@ -326,7 +327,12 @@ int main  (int argc, char * argv [])
 		if (AltPred->IsOriginal(pred,vPred))
 		  {
 		    fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
-		    AltPred ->Print(TheSeq, MS);
+		    baseGene = pred->FindGene(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
+		    baseGene->hasvariant++;
+		    AltPred->vGene[0]->isvariant = true;
+		    AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
+		    AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
+		    AltPred ->Print(TheSeq, MS,NULL,1);
 		    vPred.push_back(AltPred);
 		  }
 		else delete AltPred;	
