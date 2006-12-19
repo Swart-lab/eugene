@@ -24,6 +24,7 @@
 # definition of variables related to I/O
 
 set SEQ Sequences/SYNO_ARATH.fasta
+set SEQALT Sequences/At5g18830.fasta.genomicAJ011613.fasta
 set EUGENE ../src/eugene
 
 set FIC_TEX "Doc.tex"
@@ -38,7 +39,9 @@ set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE -s -po -d
 set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE -s -po -d -b012 -B $SEQ"
 set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) "cp $SEQ.user1 $SEQ.user;"; set Cmd(5) "$EUGENE -po -U $SEQ"
 set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) "cp $SEQ.user2 $SEQ.user;"; set Cmd(6) "$EUGENE -po -U $SEQ"
-set nbflags 6
+set Flag(7) EXECUTION_TRACE7; set Cmd_begin(7) ""; set Cmd(7) "$EUGENE -s -a -po $SEQALT"
+
+set nbflags 7
 #===========================================================================
 
 
@@ -92,6 +95,7 @@ close $f
 # clean directory (beware except image .png)
 exec rm  $FIC_TMP
 exec rm  SYNO_ARATH.misc_info
+exec rm At5g18830.fasta.genomicAJ011613.misc_info
 
 # ask for compilation
 exec pdflatex $FIC_TEX_TMP.tex
