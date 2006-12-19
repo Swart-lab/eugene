@@ -18,7 +18,7 @@
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, J\'erome Gouzy, Annick Moisan,Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
+\author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, J\'erome Gouzy, Annick Moisan, C\'eline Noirot, Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
 
 \def\abstractname{Overview}
 \setcounter{tocdepth}{3}
@@ -447,8 +447,8 @@ sensitive. The definition order is not important.
   All the others print the prediction in files which name are composed by the 
   name of the sequence file (w/o the extension .fasta, .tfa, .fsa or .txt) completed by
   \texttt{.egn.debug (d)}, \texttt{.egn (l)}, \texttt{.egn.short (s)},
-  \texttt{.html (h)}, \texttt{.gff (g)} or \texttt{.egn.ara (a)}.
-  Multiple format can be selected (\texttt{ohg} for example).
+  \texttt{.html (h)}, \texttt{.gff (g)}, \texttt{.gff3 (g)} or \texttt{.egn.ara (a)}.
+  Multiple format can be selected (\texttt{ohg} for example). When GFF is requested, both GFF1 and GFF3 are produced.
   
 \item \texttt{Output.offset}: allows to offset the nucleotide position
   of the prediction.  That is, the prediction for nucleotide at
@@ -503,6 +503,44 @@ distribution region with penalty 0.0 for 3, 2.0 for 4, 3.0 for 5
 (linear interpolation), then 4.0 at 6. As this is the last point
 and the slope is 1, the rest of the distribution will be linear
 with slope 1.
+
+\section{Splice variant prediction}
+
+Since version 3.4, \EuGene\ allows to predict splice variants based purely on
+experimental data (alternative transcripts observed through EST). The feature
+is still experimental and is activated using the \texttt{-a} flag or 
+equivalently by setting the parameter \texttt{AltEst.use} to 1 or TRUE.
+
+In this case, \EuGene\ will look for a file with the same name as the sequence
+file and with a suffix '\texttt{.alt.est}'. This file has the same format as
+the '\texttt{.est}' used by the Est pugin (see later) and contains information
+about genomic region with high quality similarity with EST. The spliced 
+alignment algorithm used ti create this file should be of high quality, 
+with clear exon-intron frontiers associated with splice sites (use for example
+GeneSeqer or faster GenomeThreader).
+
+\EuGene\ will analyze these EST and look for pairs of EST which are inconsistent
+one with the other (there is one nucleotide mapped to an exon by one which is 
+mapped to an intron/gap by the other). Each element of such a pair will be used 
+to try to produce a prediction that follows the EST structure. If the prediction
+is different from the optimal prediction, the genen variant structure will be
+also output.
+
+This feature is controlled by a number of parameters with the '\texttt{AltEst}'
+prefix in the parameter file. The only parameters that you could change are the
+parametrs regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength}, \texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn}, \texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves.
+
+Every alignement is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLength} on the first and last hit to account for possible spurious short matches. If these hits are shorter than this amount, they are removed from the available data.
+
+Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and the associated information found in
+the \texttt{doc/Sequences/} directory, we can test this as follows:
+
+\begin{Verbatim}[fontsize=\scriptsize]
+EXECUTION_TRACE7
+\end{Verbatim}
+
+We can see that two predictions are produced for the same region. In this case, it is just one alternative splice site
+that has been used for the exon number 8 in the gene.
 
 \section{Plugins}
 \label{plug}
