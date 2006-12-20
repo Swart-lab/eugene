@@ -5,21 +5,36 @@
 
 \paragraph{Description}
 
-This plugin injects possible start and splice sites as predicted by the
-SpliceMachine program. For more detail, see the publication Degroeve, S., Saeys, Y., De Baets, B., Rouz\'e, P., Van de Peer, Y. (2004) Predicting splice sites from high-dimensional local context representations Bioinformatics. 
+This plugin injects possible start and splice sites as predicted by
+the SpliceMachine program. For more detail, see the publication
+Degroeve, S., Saeys, Y., De Baets, B., Rouzé, P., Van de Peer, Y.
+(2004) Predicting splice sites from high-dimensional local context
+representations Bioinformatics.
 
-The plugin reads the predictions of the
-program from two files whose names are derived from the sequence name
-by adding the \texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes
-(respectively prediction for the starts and splices sites).
-The sensor is activated by setting the value 1 for the parameter
-\texttt{Sensor.SMachine.use} in the parameter file. The score for start, acceptor
-and donor prediction is rescaled by the parameters {\tt SMachine.startP*} and
-{\tt SMachine.startB*} for starts,  {\tt SMachine.accP*} and
-{\tt SMachine.accB*} for acceptors and {\tt SMachine.donP*} and {\tt SMachine.donB*} for donors (see below).
-The parameter {\tt SMachine.isScaled} indicates that predictions are scaled after fitsigmoid in SpliceMachine. That changes the rescaling fonction used (see below).
-The parameter {\tt SMachine.cmd} contains the command which is launch if the predictions files do not exist.
+There are two possible outputs for this program, the direct raw output
+directly outputs SVM values (positive or negative real numbers with
+arbitrary magnitude) or a rescaled output (fitting to a sigmoid) with
+a positive ouput between 0 and 1 (with a probabilistic
+interpretation). The two different outputs may lead to different
+prediction performances in \EuGene.
 
+The plugin reads the predictions of the program from two files whose
+names are derived from the sequence name by adding the
+\texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes (respectively
+prediction for the starts and splices sites).  The sensor is activated
+by setting the value 1 for the parameter \texttt{Sensor.SMachine.use}
+in the parameter file. The score for start, acceptor and donor
+prediction is rescaled by the parameters {\tt SMachine.startP*} and
+{\tt SMachine.startB*} for starts, {\tt SMachine.accP*} and {\tt
+  SMachine.accB*} for acceptors and {\tt SMachine.donP*} and {\tt
+  SMachine.donB*} for donors (see below).  
+
+The parameter {\tt SMachine.isScaled} indicates how the scores of
+SpliceMachine are integrated in \EuGene\ (the details of the scaling
+used in each case is given below. Note that this is the second rescaling
+if the sigmoid fitting has been used in SpliceMachine).  The parameter
+{\tt SMachine.cmd} contains the command which is launch if the
+predictions files do not exist.
 
 Here is an example of SMachine parameters definition.
 \begin{Verbatim}[fontsize=\small]
@@ -34,8 +49,6 @@ SMachine.startB*        0.308
 Sensor.SMachine.use     1                # Use SMachine sensor
 Sensor.SMachine         10               # Sensor priority
 \end{Verbatim}
-
-
 
 \paragraph{Input files format}
 The files with \texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes are
@@ -68,22 +81,26 @@ No filtering.
 
 \paragraph{Integration of information}
 
-The integrated score for start and donor/acceptor prediction is read (columns 3). 
-The score read $s$ is rescaled using the {\tt SMachine.startP*} (\emph{P}) and 
-{\tt SMachine.startB*} (\emph{B}) parameters for starts,
- {\tt SMachine.accP*} (\emph{P}) and 
-{\tt SMachine.accB*} (\emph{B}) parameters for acceptors and {\tt SMachine.donP*} 
-(\emph{P}) and {\tt SMachine.donB*} (\emph{B}) parameters for donors.
-If predictions are scaled ({\tt SMachine.isScaled} is set to {\tt 1}) then the rescaled score  $s'$ is:
-\[s' = e^{-P}.s^B\]
-All predictions that use a predicted start receive a $\log(s')$
-penalty while those that go through a predicted start while they
-could have used it receive a $\log(1-s')$ penalty.
-If predictions are not scaled ({\tt SMachine.isScaled} is set to {\tt 0}) then the rescaled score  $s'$ is:
-\[s' = 1 - e^{-P}.s^B\]
- All predictions that use a predicted start receive a $\log(s')$
-penalty while those that go through a predicted start while they
-could have used it do not receive a penalty.
+The integrated score for start and donor/acceptor prediction is read
+(columns 3).  The score read $s$ is rescaled using the {\tt
+  SMachine.startP*} (\emph{P}) and {\tt SMachine.startB*} (\emph{B})
+parameters for starts, {\tt SMachine.accP*} (\emph{P}) and {\tt
+  SMachine.accB*} (\emph{B}) parameters for acceptors and {\tt
+  SMachine.donP*} (\emph{P}) and {\tt SMachine.donB*} (\emph{B})
+parameters for donors.
+
+
+If ({\tt SMachine.isScaled} is set to {\tt 0}) then the rescaled score  $s'$ is:
+\[s' = B*s-P\]
+used when the signal is used. If the signal is not used, no penalty occurs.
+
+If ({\tt SMachine.isScaled} is set to {\tt 1}) then the rescaled score  $s'$ is:
+\[s' = B\log(s)-P\]
+when the signal is used, and $\log(1.0-s^B*e^{-P})$ otherwise. 
+
+If  ({\tt SMachine.isScaled} is set to {\tt 2}) then the rescaled score  $s'$ is
+\[s' = B\log(s)-P\]
+when the signal is used, nothing otherwise.
 
 
 \paragraph{Post analyse}

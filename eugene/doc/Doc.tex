@@ -18,7 +18,7 @@
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Philipe Bardou, Marie-Jos\'ee Cros, Sylvain Foissac, J\'erome Gouzy, Annick Moisan, C\'eline Noirot, Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
+\author{Philipe Bardou \and Marie-Jos\'ee Cros \and Sylvain Foissac \and J\'erome Gouzy \and Annick Moisan \and C\'eline Noirot \and Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
 
 \def\abstractname{Overview}
 \setcounter{tocdepth}{3}
@@ -38,7 +38,7 @@
   and graphical outputs.
   
   \EuGene\ uses a graph based model to predict genes that covers both
-  HMM based or more complex Bayesian net based probabilistic
+  HMM based or more complex Bayesian net based or Conditional Markov Field probabilistic
   predictions. The model is fixed but complex (with 43 different
   states) and covers Exon, Intron, UTR, UTR introns\ldots each with a
   possible explicit distribution on length. The prediction itself
@@ -55,7 +55,8 @@
   
   In order to integrate all this information, \EuGene\ does not use
   maximum likelihood estimation for all parameters but parameters
-  optimized by maximum of prediction quality on expertized data sets.
+  optimized by maximum of prediction quality on expertized data sets (minimizing
+  empirical risk on a given dataset).
 
   The software called \texttt{eugene} is written in C++ and is distributed 
   under the artistic license.
@@ -509,7 +510,7 @@ with slope 1.
 Since version 3.4, \EuGene\ allows to predict splice variants based purely on
 experimental data (alternative transcripts observed through EST). The feature
 is still experimental and is activated using the \texttt{-a} flag or 
-equivalently by setting the parameter \texttt{AltEst.use} to 1 or TRUE.
+equivalently by setting the parameter \texttt{AltEst.use} to 1 or TRUE.\index{CmdFlags}{[splice isoform prediction] a}
 
 In this case, \EuGene\ will look for a file with the same name as the sequence
 file and with a suffix '\texttt{.alt.est}'. This file has the same format as
