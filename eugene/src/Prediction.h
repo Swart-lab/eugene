@@ -92,6 +92,7 @@ class Gene
   Gene  ();
   ~Gene ();
 
+  int isDifferent (const Gene& o, int threshold);
   bool operator== (const Gene& o);
   inline int nbFea() {return vFea.size();};
   void AddFeature(signed char state, int start, int end);
@@ -162,7 +163,7 @@ class Prediction
   Prediction  (std::vector <int> vPos,
          std::vector <signed char> vState);
   ~Prediction ();
-  bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds);
+  bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
   void DeleteOutOfRange(int s,int e);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);

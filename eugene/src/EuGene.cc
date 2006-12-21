@@ -312,6 +312,8 @@ int main  (int argc, char * argv [])
 	// Load Alternative EST data (if any)
 	// --------------------------------------------------------------------
 	if (PAR.getI("AltEst.use")) {
+
+	  int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
 	  AltEst *AltEstDB = new AltEst();
 	  std::vector <Prediction*> vPred;
 	  Prediction* AltPred;
@@ -324,7 +326,7 @@ int main  (int argc, char * argv [])
 	      if (AltPred) {
 		AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
 		
-		if (AltPred->IsOriginal(pred,vPred))
+		if (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold))
 		  {
 		    fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
 		    baseGene = pred->FindGene(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());

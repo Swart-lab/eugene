@@ -29,24 +29,28 @@ extern Parameters   PAR;
 //  alternative prediction does not appear either as a gene in the
 //  optimal prediction or as an already predicted alternative gene
 // -----------------------
-bool Prediction :: IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds)
+bool Prediction :: IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil)
 {
   Gene *thisGene = this->vGene[0];
   Gene *otherGene;
+  int mismatch;
 
   // First check in the optimal prediction.
   int idx;
 
-  for (idx = 0; idx < optPred->vGene.size(); idx++)
-    if ((*thisGene) ==  *(optPred->vGene[idx])) 
+  for (idx = 0; idx < optPred->vGene.size(); idx++) {
+    mismatch = thisGene->isDifferent(*(optPred->vGene[idx]), seuil);
+    if ((mismatch >= 0) && (mismatch <= seuil))
       return false;
-
+  }
   // Now alternative predictions. They contain just one gene
   
-  for (idx = 0; idx < altPreds.size(); idx++)
-    if ((*thisGene) ==  *(altPreds[idx]->vGene[0]))
+  for (idx = 0; idx < altPreds.size(); idx++) {
+    mismatch = thisGene->isDifferent(*(altPreds[idx]->vGene[0]), seuil);
+    if  ((mismatch >= 0) && (mismatch <= seuil))
       return false;
-
+  }
+  
   return true;
 }
 
@@ -174,6 +178,45 @@ void Gene :: clear()
   utrLength  = mrnaLength = geneLength = 0;
   cdsStart   = cdsEnd     = trStart    = trEnd = -1;
 }
+
+// ------------------------
+//  comparison: same CDS ?
+// Assumes complete genes with similar stucture (number of exons, positions)
+// returns the cumulated diffence in position or a negative number if different structure.
+// ------------------------
+int Gene :: isDifferent (const Gene& o, int threshold)
+{
+  int idxo = 0;
+  int idxt = 0;
+  int nDiff = 0;
+
+  //first coding exon in each
+  while (State2Status[o.vFea[idxo]->state] != 3) idxo++;
+  while (State2Status[this->vFea[idxt]->state] != 3) idxt++;
+
+  int shift = 0;
+
+  while ((State2Status[o.vFea[idxo+shift]->state] != 2) && //not UTR
+	 (State2Status[this->vFea[idxt]->state] != 2) && // not UTR
+	 (idxo+shift < o.vFea.size()) &&
+	 (idxt+shift < this->nbFea()))
+    {
+      if ((o.vFea[idxo+shift]->state == this->vFea[idxt+shift]->state) &&
+	  (abs(o.vFea[idxo+shift]->start - this->vFea[idxt+shift]->start) <= threshold) &&
+	  (abs(o.vFea[idxo+shift]->end - this->vFea[idxt+shift]->end)  <= threshold))
+	{
+	  nDiff += abs(o.vFea[idxo+shift]->start - this->vFea[idxt+shift]->start);
+	  nDiff += abs(o.vFea[idxo+shift]->end - this->vFea[idxt+shift]->end);
+	  shift++;
+	}
+      else return -1;
+    }
+  // we assume the gene structures satisfy the structural constraints
+  // of complete genes. If the final exon is identical, it is a term
+  // exon and the 2 CDS are identical.
+  return nDiff;
+}
+
 // ------------------------
 //  comparison: same CDS ?
 // Assumes complete genes
