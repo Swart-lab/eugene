@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.4
+EuGene.version		3.4a
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -47,6 +47,7 @@ Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
 ##### Alternative splicing predictor control
 AltEst.use			0
+AltEst.ExonBorderMatchThreshold 0
 AltEst.Penalty			1000
 AltEst.includedEstFilter		1
 AltEst.compatibleEstFilter	1
@@ -113,22 +114,22 @@ NStart.startB*		0.308
 #
 ##### PatConst sensor (uniform penalties) #####
 PatConst.type[0]	donor   # Possible types : start insertion deletion
-PatConst.pat[0]		GT	#  transstart transstop stop acceptor donor
+PatConst.pat[0]		GC	#  transstart transstop stop acceptor donor
 PatConst.newStatePos[0] 1       # Position of the new state in the pattern
-PatConst.patP*[0]	1e-9
+PatConst.patP*[0]	-10
 PatConst.patPNo*[0]	0
 #
-PatConst.type[1]	acceptor
-PatConst.pat[1]		AG
-PatConst.newStatePos[1] 3
-PatConst.patP*[1]	1e-9
-PatConst.patPNo*[1]	0
+#PatConst.type[1]	acceptor
+#PatConst.pat[1]		AG
+#PatConst.newStatePos[1] 3
+#PatConst.patP*[1]	1e-9
+#PatConst.patPNo*[1]	0
 #
-PatConst.type[2]	start
-PatConst.pat[2]		ATG
-PatConst.newStatePos[2] 1
-PatConst.patP*[2]	2.897949
-PatConst.patPNo*[2]	0
+#PatConst.type[2]	start
+#PatConst.pat[2]		ATG
+#PatConst.newStatePos[2] 1
+#PatConst.patP*[2]	2.897949
+#PatConst.patPNo*[2]	0
 #
 ##### Sensor SpliceWAM #####
 SpliceWAM.MarkovianOrder	1
@@ -316,7 +317,7 @@ Sensor.GSplicer.use	0
 Sensor.SMachine.use	0
 Sensor.NG2.use		0
 Sensor.NStart.use	1
-Sensor.PatConst.use	0
+Sensor.PatConst.use	1
 Sensor.PepSignal.use	0
 Sensor.SpliceWAM.use 	0
 Sensor.SPred.use	0
