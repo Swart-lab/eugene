@@ -644,7 +644,7 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const ch
 	fclose(OUT);
 	break;
       case 'g':
-	OUT = FileOpen(NULL, strcat(filename,".gff"), mode);
+	OUT = FileOpen(NULL, strcat(filename,".gff1"), mode);
 	PrintGff(OUT, seqName);
 	fclose(OUT);
 //SEB
