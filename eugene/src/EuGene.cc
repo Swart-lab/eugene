@@ -293,7 +293,8 @@ int main  (int argc, char * argv [])
 	if (graph)
 	  pred->PlotPred();
 
-	pred->Print(TheSeq, MS);
+	if ( ! PAR.getI("AltEst.use") )
+		pred->Print(TheSeq, MS);
 
 	strcpy(miname, prefixName);
 	MISC_INFO = FileOpen(NULL, strcat(miname, ".misc_info"), "wb");
@@ -324,6 +325,12 @@ int main  (int argc, char * argv [])
 	      AltPred = AltPredict(TheSeq,MS,AltEstDB,pred,altidx);
 	      
 	      if (AltPred) {
+            if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+            {
+              delete AltPred;
+              continue;
+          	}
+			//fprintf(stderr,"start=%d, end=%d\n",AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
 		AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
 		
 		if (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold))
@@ -334,12 +341,22 @@ int main  (int argc, char * argv [])
 		    AltPred->vGene[0]->isvariant = true;
 		    AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
 		    AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
-		    AltPred ->Print(TheSeq, MS,NULL,1);
+			//fprintf(stderr,"Alt: %d,hasv=%d,isv=%d Opt gn=%d,hasv=%d,isv=%d\n",AltPred->vGene[0]->geneNumber,AltPred->vGene[0]->hasvariant,AltPred->vGene[0]->isvariant,baseGene->geneNumber,baseGene->hasvariant,AltPred->vGene[0]->isvariant);
+			baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart) 
+													  : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
+			baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)     
+													  : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
+		    //AltPred ->Print(TheSeq, MS,NULL,1);
 		    vPred.push_back(AltPred);
 		  }
 		else delete AltPred;	
 	      }
 	    }
+		pred->Print(TheSeq, MS);
+		for (int idx = 0; idx < vPred.size(); idx++) 
+		{
+			vPred[idx]->Print(TheSeq, MS,NULL,1);    		
+		}
 	  //delete AltPred;	
 	}
 

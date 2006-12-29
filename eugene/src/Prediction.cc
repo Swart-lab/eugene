@@ -154,6 +154,8 @@ Gene :: Gene ()
   complete = 0;
   isvariant = false;
   hasvariant = 0;
+  tuStart = 0;
+  tuEnd = 0;
   clear();
 }
 
@@ -168,6 +170,21 @@ Gene :: ~Gene ()
   }
   vFea.clear();
 }
+
+// 
+// Return the variant code when alternative forms are predicted
+// 
+char Gene :: GetVariantCode ()
+{
+char code_variant = '\0';
+
+	if ( this->hasvariant )
+	{
+		code_variant = ( this->isvariant ) ? (char)('b'+(this->hasvariant-1)) : 'a';
+	}
+	return code_variant;
+}
+
 // ------------------------
 //  Default cleaner.
 // ------------------------
@@ -584,7 +601,7 @@ void Prediction :: DeleteOutOfRange(int s,int e)
 
   for (geneindex = vGene.begin(); geneindex != vGene.end(); )
     {
-      if (((*geneindex)->trEnd < s) | ((*geneindex)->trStart > e))
+      if (((*geneindex)->trEnd < s) | ((*geneindex)->trStart > e)) 
         {
           nbGene--;
           geneindex = vGene.erase(geneindex);
@@ -654,8 +671,11 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const ch
     std::ofstream out(filename_gff3.c_str(),ccmode);
   //	, std::ios_base::binary);
     //le 1 est a verifier
-    out << Gff3Line::header(X->Name, 1, X->SeqLen);
-    PrintGff3(out, seqName);
+	if ( ! append )
+	{
+		out << Gff3Line::header(X->Name, 1, X->SeqLen);
+	}
+    PrintGff3(out,seqName,append);
     out.close();
   }
 //SEB
@@ -711,7 +731,8 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
                
       fprintf(OUT, "%s.%d",seqName, ((vGene[i]->geneNumber)*stepid)+1);
-      if (vGene[i]->isvariant) fprintf(OUT, "%c",'a'+(vGene[i]->hasvariant-1));
+	  if (vGene[i]->hasvariant) 
+	  	fprintf(OUT, "%c",vGene[i]->GetVariantCode());
       fprintf(OUT, ".%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t", vGene[i]->vFea[j]->number,
 	      State2GFFString(state), start+offset, end+offset,
 	      100.0*(double)cons/(end-start+1), 100.0*(double)incons/(end-start+1),
@@ -729,7 +750,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
 //SEB ------------------------
 //  print prediction (GFF3)
 // ------------------------
-void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
+void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 {
   int offset = PAR.getI("Output.offset");
   int stepid = PAR.getI("Output.stepid");
@@ -742,41 +763,63 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
   {
 //  --  --  la ligne du gene  --  --
     Gff3Line gene_line(seqName);
-    //la ligne decrivant le gene
-    gene_line.setType(SOFA_GENE);
-    gene_line.setStart(vGene[i]->trStart+1);
-    gene_line.setEnd(vGene[i]->trEnd+1);
+    std::string gene_name = to_string(seqName)+'.'+to_string((vGene[i]->geneNumber*stepid+1));
+    std::string gene_id = Sofa::getName(SOFA_GENE) + ":" + gene_name;
 
-    std::string gene_name = 
-      ((vGene[i]->isvariant) ? 
-       to_string(seqName) + '.' + to_string((vGene[i]->geneNumber)*stepid +1)+(char)('a'+(vGene[i]->hasvariant-1)) :
-       to_string(seqName) + '.' + to_string((vGene[i]->geneNumber)*stepid +1));
+	if ( append &&  ! vGene[i]->isvariant )
+	{	
+		fprintf(stderr,"Warning: in append mode, only variant can be printed out gene=%d\n",i);
+		// je laisse l'erreur dans .gff1 pour aider au debugage
+		continue;
+	}
 
-   //l'identifiant du gene = type_sofa:nom_eugene
-    std::string gene_id = Sofa::getName(SOFA_GENE)
-                        + ":" + gene_name;
-    gene_line.setAttribute("ID=" + gene_id);
-    gene_line.addAttribute("Name=" + gene_name);
-    gene_line.addAttribute("length=" + to_string(vGene[i]->geneLength));
-    //je pars du principe que la premiere structure me donne le brin du gene
-    if (vGene[i]->nbFea() > 0)
-      gene_line.setStrand(vGene[i]->vFea[0]->strand);
-    gene_line.print(out);
+    if ( ! vGene[i]->isvariant ) // only for the optimal prediction
+    {
+		int tr_min = (vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
+  		int tr_max = (vGene[i]->tuEnd )   ?  vGene[i]->tuEnd   : vGene[i]->trEnd;
+
+    	//la ligne decrivant le gene
+    	gene_line.setType(SOFA_GENE);
+    	gene_line.setStart(tr_min+1+offset); 
+    	gene_line.setEnd(tr_max+1+offset); 
+
+   	//l'identifiant du gene = type_sofa:nom_eugene
+    	
+    	gene_line.setAttribute("ID=" + gene_id);
+    	gene_line.addAttribute("Name=" + gene_name);
+    	gene_line.addAttribute("length=" + to_string(vGene[i]->geneLength));
+    	//je pars du principe que la premiere structure me donne le brin du gene
+    	if (vGene[i]->nbFea() > 0)
+      		gene_line.setStrand(vGene[i]->vFea[0]->strand);
+        gene_line.print(out);
+    }
 //  --  --  fin de la ligne du gene  --  --
 
 //  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
     //En fait je me contente d'ecraser ce que je ne veux plus
+
+    gene_line.setStart(vGene[i]->trStart+1+offset); 
+    gene_line.setEnd(vGene[i]->trEnd+1+offset); 
+    std::string mrna_name = gene_name;
+	if ( vGene[i]->hasvariant )
+	{
+		mrna_name += to_string(vGene[i]->GetVariantCode());
+	}
+    
     gene_line.setType(SOFA_MRNA);
-    std::string rna_id = Sofa::getName(SOFA_MRNA) + ":"+ gene_name;
+    std::string rna_id = Sofa::getName(SOFA_MRNA) + ":"+ mrna_name;
     gene_line.setAttribute("ID=" + rna_id);
+    gene_line.addAttribute("Name=" + mrna_name);
+    gene_line.addAttribute("Parent=" + gene_id);
     gene_line.addAttribute("nb_exon=" + to_string(vGene[i]->exNumber));
+
 //----- fin de la ligne du mRNA
 
     Gff3Line *pre_arn_line, *arn_line;
     std::vector<Gff3Line*> pre_arn_lines, arn_lines;
     std::string fea_name(gene_name + ".");
     std::string fea_id;
-    //postulat : ici on a un seul ARNm par gene
+    //postulat : ici on a un seul ARNm par gene // JER je change de postulat.
     int taille_mRNA = 0;
 
     for(int j=0; j<vGene[i]->nbFea(); j++) {
@@ -789,6 +832,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
 
       start = vGene[i]->vFea[j]->start;
       end   = vGene[i]->vFea[j]->end;
+	  char code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : 0;
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
 
       int type_sofa = getTypeSofa(state);
@@ -805,8 +849,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
                                            vGene[i]->vFea[j]->strand,
                                            vGene[i]->vFea[j]->framegff);
               //les attributs
-              setGff3Attributes(pre_arn_line, state, type_sofa,
-                                 fea_name, j, gene_id);
+              setGff3Attributes(pre_arn_line, state, type_sofa, fea_name, j,code_variant, rna_id);
             //on l'ajoute au vecteur
               pre_arn_lines.push_back(pre_arn_line);
               break;
@@ -825,7 +868,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
                                            vGene[i]->vFea[j]->framegff);
               //attributs
                 setGff3Attributes(pre_arn_line, state, SOFA_EXON,
-                                  fea_name, j, gene_id);
+                                  fea_name, j, code_variant, rna_id);
                 pre_arn_lines.push_back(pre_arn_line);
               }
               
@@ -834,7 +877,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
                                         vGene[i]->vFea[j]->framegff);
               //attributs
               setGff3Attributes(arn_line, state, type_sofa,
-                                fea_name, j, rna_id);
+                                fea_name, j, code_variant, rna_id);
               arn_lines.push_back(arn_line);
               //je mets à jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
@@ -863,17 +906,17 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
               if((SnglF1<=state) && (state <=SnglR3))
               //je passe nbTracks pour etre sur d'etre hors zone
                 setGff3Attributes(pre_arn_lines.back(), NbTracks, type_sofa, fea_name,
-                                  vGene[i]->vFea[j]->number, gene_id);
+                                  vGene[i]->vFea[j]->number, code_variant, rna_id);
               else
                 setGff3Attributes(pre_arn_lines.back(), state, type_sofa, fea_name,
-                                  vGene[i]->vFea[j]->number, gene_id);
+                                  vGene[i]->vFea[j]->number, code_variant, rna_id);
 
               arn_line = fillGff3Line(SOFA_CDS, start+offset, end+offset,
                                       vGene[i]->vFea[j]->strand,
                                       vGene[i]->vFea[j]->framegff);
               //les attributs
               setGff3Attributes(arn_line, state, SOFA_CDS,
-                                fea_name, vGene[i]->vFea[j]->number, rna_id);
+                                fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id);
               arn_lines.push_back(arn_line);
               //je mets à jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
@@ -884,23 +927,25 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName)
                                             vGene[i]->vFea[j]->strand,
                                             vGene[i]->vFea[j]->framegff);
                 //les attributs
-                setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name,
-                                  j, gene_id);
+                setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name, j, code_variant, rna_id);
                 pre_arn_lines.push_back(pre_arn_line);
       }//fin switch
       //si on vient d'ajouter une ligne dans les ARNs
       //Je lui ajoute le score
-      if((type_sofa==SOFA_5_UTR) ||
-          (type_sofa==SOFA_3_UTR) ||
-          (type_sofa==SOFA_EXON))
-      {
-        double score = 100.0*(double)cons/(end-start+1);
-        char buff[6];   snprintf(buff, 6, "%.1f", score);
-        arn_lines.back()->addAttribute("est_cons=" + std::string(buff));
-        score  = 100.0*(double)incons/(end-start+1);
-        snprintf(buff, 6, "%.1f", score);
-        arn_lines.back()->addAttribute("est_incons=" + to_string(buff));
-      }
+	  if ( estopt )
+	  {
+		  if((type_sofa==SOFA_5_UTR) ||
+			  (type_sofa==SOFA_3_UTR) ||
+			  (type_sofa==SOFA_EXON))
+		  {
+			double score = 100.0*(double)cons/(end-start+1);
+			char buff[6];   snprintf(buff, 6, "%.1f", score);
+			arn_lines.back()->addAttribute("est_cons=" + std::string(buff));
+			score  = 100.0*(double)incons/(end-start+1);
+			snprintf(buff, 6, "%.1f", score);
+			arn_lines.back()->addAttribute("est_incons=" + to_string(buff));
+		  }
+	  }
     }//fin des structures du gene
       //on affiche les lignes, j'en profite pour liberer les pointeurs
       std::vector<Gff3Line*>::iterator itr;
@@ -971,8 +1016,8 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
       else   
 	{
 	  fprintf(OUT, "%s.%d",seqName, ((vGene[i]->geneNumber)*stepid)+1);
-	  if (vGene[i]->isvariant)
-	    fprintf(OUT, "%c", 'a'+(vGene[i]->hasvariant-1));
+	  if (vGene[i]->hasvariant) 
+			fprintf(OUT, "%c",vGene[i]->GetVariantCode());
 	  fprintf(OUT, ".%d\t", vGene[i]->vFea[j]->number);
 	}
 
@@ -1631,10 +1676,12 @@ std::cerr << "bad previous !" << std::endl;
 void
   Prediction::setGff3Attributes(Gff3Line* line, int type_egn,
                                 int type_sofa, std::string fea_name,
-                                int j, std::string gene_id)
+                                int j, char code_variant, std::string gene_id)
 {
   std::string fea_id = Sofa::getName(type_sofa) + ":"
                       + fea_name + to_string(j);
+  if (code_variant)
+  	fea_id += to_string(code_variant);
   line->setAttribute("ID=" + fea_id);
   line->addAttribute("Parent="+gene_id);
   line->addAttribute("Ontology_term="

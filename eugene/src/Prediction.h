@@ -83,6 +83,7 @@ class Gene
   void clear	();
  public:
   int cdsStart, cdsEnd, trStart, trEnd;
+  int tuStart, tuEnd; // transcript unit (required for gff3 + alternatives variants)
   int exLength;
   int geneNumber;
   bool isvariant; // true = is a splice variant
@@ -97,6 +98,7 @@ class Gene
   inline int nbFea() {return vFea.size();};
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
+  char GetVariantCode(void);
 
 };
 
@@ -115,7 +117,7 @@ class Prediction
   void  clear			(); 
   void  PrintGff        (FILE*, char*);
 //SEB
-  void  PrintGff3        (std::ofstream&, char*);
+  void  PrintGff3        (std::ofstream&, char*, char);
 //SEB
   void  PrintEgnL       (FILE*, char*, int a=0);
   void  PrintEgnS       (FILE*);
@@ -148,7 +150,7 @@ class Prediction
                             char strand, int framegff);
   void setGff3Attributes(Gff3Line* line, int type_egn,
                           int type_sofa, std::string fea_name,
-                          int j, std::string gene_id);
+                          int j, char code, std::string gene_id);
   bool previousExonMustBeUpdated(Gff3Line* line, int start);
   //SEB
 
