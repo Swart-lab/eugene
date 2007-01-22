@@ -30,7 +30,7 @@ export eugene_cflags =
 endif
 
 if MACOS_OS
-export sensors_ldflags = -bundle -flat_namespace -undefined suppres
+export sensors_ldflags = -bundle -flat_namespace -undefined suppress
 export eugene_cxxflags = 
 export eugene_cflags = 
 endif
