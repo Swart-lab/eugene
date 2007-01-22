@@ -33,8 +33,7 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   char tempname[FILENAME_MAX+1];
   FILE* ncfile;
   int deb, fin;
-  char *line;
-  size_t linelen;
+  char line[MAX_LINE];
   int read;
 
   type = Type_Content;
@@ -47,16 +46,10 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   ncfile = FileOpen(NULL,tempname, "r",PAR.getI("EuGene.sloppy"));
 
   if (ncfile) { 
-    line  = NULL;
-    linelen = 0;
 
-    while (getline(&line, &linelen, ncfile) > 0) {
+    while (fgets(line, MAX_LINE, ncfile)!= NULL) {
 
       read = sscanf(line, "%d %d %*s\n", &deb, &fin);
-
-      free(line);
-      line = NULL; 
-      linelen = 0;
 
       int s = (int)vDeb.size();
       deb   = Max(1,deb)-1;
