@@ -90,31 +90,31 @@ uninstall-local:
 
 # note that $(pkgdatadir) = $(datadir)/$(PACKAGE)
 install-data-hook:
-	install -d $(DESTDIR)/$(pkgdatadir)
-	install -d $(DESTDIR)/$(pkgdatadir)/doc 
-	install -d $(DESTDIR)/$(pkgdatadir)/doc/Sequences 
-	install -d $(DESTDIR)/$(pkgdatadir)/web
-	install -d $(DESTDIR)/$(pkgdatadir)/web/Style
-	install -d $(DESTDIR)/$(pkgdatadir)/web/Javascripts
-	install -d $(DESTDIR)/$(pkgdatadir)/web/Images
-	install -d $(DESTDIR)/$(pkgdatadir)/plugins
-	install -d $(DESTDIR)/$(pkgdatadir)/cfg
-	install -d $(DESTDIR)/$(pkgdatadir)/models
-	install -d $(DESTDIR)/$(pkgdatadir)/models/WAM
-	install -d $(DESTDIR)/$(pkgdatadir)/Procedures
-	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
-	install -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
-	install -m 644 $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
-	install -m 644 $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
-	install -m 644 $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
-	install -m 644 $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
-	install -m 644 $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
-	install -m 644 $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
-	install -m 644 $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
-	install -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
-	install -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
-	install -m 644 $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
-	install -m 644 $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
-	install src/SensorPlugins/*/*.so  $(DESTDIR)/$(pkgdatadir)/plugins
-	install $(srcdir)/Procedures/Eval/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
-	install $(srcdir)/Procedures/Get/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Get
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/doc 
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/doc/Sequences 
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/web
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/web/Style
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/web/Javascripts
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/web/Images
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/plugins
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/cfg
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/models/WAM
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
+	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
+	$(INSTALL) -m 644 $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
+	$(INSTALL) -m 644 $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
+	$(INSTALL) -m 644 $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
+	$(INSTALL) -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
+	$(INSTALL) -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
+	$(INSTALL) -m 644 $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
+	$(INSTALL) -m 644 $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
+	$(INSTALL) src/SensorPlugins/*/*.so  $(DESTDIR)/$(pkgdatadir)/plugins
+	$(INSTALL) $(srcdir)/Procedures/Eval/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
+	$(INSTALL) $(srcdir)/Procedures/Get/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Get
