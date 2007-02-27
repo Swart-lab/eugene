@@ -74,6 +74,8 @@ oCMenu.makeMenu('top0','','<img src="Images/m_home.jpg">','index.html')
 oCMenu.makeMenu('top1','','<img src="Images/m_plugins.jpg">','plugins.html')
   
 oCMenu.makeMenu('top2','','<img src="Images/m_orga.jpg">','organisms.html')
+
+oCMenu.makeMenu('top2b','','<img src="Images/m_references.jpg">','references.html')
     
 oCMenu.makeMenu('top3','','<img src="Images/m_doc.jpg">','http://mulcyber.toulouse.inra.fr/docman/index.php?group_id=10&selected_doc_group_id=9')
 
