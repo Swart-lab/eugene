@@ -202,6 +202,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
       i--;
     }
   }
+
   for(int i=0; i<(int)vCon.size(); i++) {
     if(i == 0) continue;
     if(vCon[i]->start==vCon[i-1]->start && vCon[i]->end  ==vCon[i-1]->end &&
@@ -213,13 +214,19 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 
   // Patch because of non start/stop sites due to non full gene predicted
   // by fgeneshpasa.  If start stop is non canonical -> remove it
-  for(int i=0; i<(int)vSig.size(); i++) {
+  for(int i=(int)vSig.size()-1; i>=0; i--) {
     if (vSig[i]->type == DATA::Start)
       if(vSig[i]->edge) {
-	if (!X->IsEStart(vSig[i]->pos-1, -1)) { vSig.erase(i+vSig.begin()); }
+	if (!X->IsEStart(vSig[i]->pos-1, -1)) { 
+		vSig.erase(i+vSig.begin());
+		fprintf(stderr,"Annotastruct: bad ATG on reverse strand\n");
+	}
       }
       else {
-	if (!X->IsEStart(vSig[i]->pos, 1))    { vSig.erase(i+vSig.begin()); }
+	if (!X->IsEStart(vSig[i]->pos, 1))    { 
+		vSig.erase(i+vSig.begin());
+		fprintf(stderr,"Annotastruct: bad ATG on forward strand\n");
+	}
       }
     if (vSig[i]->type ==  DATA::Stop)
       if(vSig[i]->edge) {
