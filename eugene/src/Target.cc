@@ -32,7 +32,7 @@ Target::Target ( )
 
 }
 
-Target::Target (std::string name, Range * range , std::string sequenceData,  int targetLength, int isFullLength) 
+Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Range * range) 
 {
   name_ = name;
   range_ = new Range (range);
@@ -41,6 +41,25 @@ Target::Target (std::string name, Range * range , std::string sequenceData,  int
   isFullLength_ = isFullLength; 
 }
 
+Target::Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand)
+{
+  cout << "name : "<< name << "sequenceData : "<< sequenceData << "targetLength : "<<targetLength<< "isFullLength : " << isFullLength << "start : "<< start << "end : "<< end << "strand : "<< strand <<endl;
+        name_ = name;
+	range_ = new Range (start,end,strand);
+	sequenceData_ = sequenceData;
+	targetLength_ = targetLength;
+	isFullLength_ = isFullLength;
+	cout << "Constructeur TARGET :  "<<getString()<<endl;
+}
+		
+Target::Target (Target * target) 
+{
+  name_ = target->getName();
+  range_ = new Range (target->range_);
+  sequenceData_ = target->sequenceData_;
+  targetLength_ = target->targetLength_;
+  isFullLength_ = target->isFullLength_;
+}
 // -----------------------
 //  Destructeur
 // -----------------------
@@ -119,13 +138,13 @@ std::string Target::getString ( )
 	std::string my_target = "";
 	if ( name_ != ""  && range_ != NULL)
 	{	
-		 my_target = "target="+name_+" "+range_->getString()+";";
+		 my_target = "Target="+name_+" "+range_->getString()+";";
 	}
 	if ( isFullLength_ != UNKNOWN )
 	{
 		my_target += "is_full_length=" + to_string(isFullLength_) + ";";
 	}
-	if ( targetLength_ != 0 )
+	if ( targetLength_ != -1 && targetLength_ != 0)
 	{
 		my_target += "target_length=" + to_string(targetLength_)+ ";";
 	}

@@ -50,11 +50,13 @@ private:
 
 public:
 
-	enum LengthType { UNKNOWN = -1, NOT_FULL_LENGTH = 0, RIKEN = 1, FULL_LENGTH=2 };
+  enum LengthType { UNKNOWN = -1, NOT_FULL_LENGTH = 0, RIKEN = 1, FULL_LENGTH=2 };
   // Constructors/Destructors
 
    Target ( );
-   Target ( std::string name, Range * range , std::string sequenceData,  int targetLength, int isFullLength);
+   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, Range * range);
+   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
+   Target ( Target * target);
    virtual ~Target ( );
 
 
