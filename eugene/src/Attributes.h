@@ -26,11 +26,11 @@ private:
   std::string id_;
   std::string name_;
   std::string alias_;
-  //GeneFeature *parent_;
+  std::string parent_;
   Target * target_;
   // on an alignment list of the Gap.
   std::vector<Gap> gaps_;
-  //  GeneFeature *derivesFrom_;
+  std::string derivesFrom_;
   std::string note_;
   std::string dbxref_;
   std::string ontologyTerm_;
@@ -46,7 +46,10 @@ public:
   // Constructors/Destructors
   Attributes ( );
   Attributes ( std::string line ); 
+  void Attributes::InitializeDefault ( void);
   virtual ~Attributes ( );
+  void setId ( std::string id );
+  std::string getId ( );
   std::string getString ( );
 
   // Puplic attribute accessor methods
@@ -60,7 +63,7 @@ public:
   //Should be static members , 
   static const int NB_ATTRIBUTES_NAMES_=16;
   std::vector<std::string> attributeNames_; // "ID=","Note=","Target="
-  void InitAttributeNames()
+  void InitializeAttributeNames()
   {
 	attributeNames_.push_back("ID=");
 	attributeNames_.push_back("Name=");

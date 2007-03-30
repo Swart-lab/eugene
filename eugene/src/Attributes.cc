@@ -24,120 +24,110 @@
 // -----------------------
 Attributes::Attributes()
 {
-  id_="";
-  name_="";
-  alias_="";
-  note_="";
-  //parent_=NULL;
-  target_=NULL;
-  database_="";
-  //deriveFrom_=NULL;
-  ontologyTerm_="";
-  length_=-1;
-  nbExon_=-1;
-  //gaps_ = new std::vector();
+  InitializeDefault();
 }
+
 
 Attributes::Attributes ( std::string line ) 
 {
-	if (attributeNames_.empty()) {
-		InitAttributeNames();
-	}	
-	std::vector<std::string> subStrings;
-	//example : ID=match00001;Note=0907A18;Target=sp_P54263_SYN_THETH 6 34;
-	int nbAttribute = StringUtils::SplitString(line ,";",subStrings);
-	if(subStrings.empty()) { 
-		Attributes();
-	}
-	else {
-		std::vector<std::string>::const_iterator iSubStrings; // Construction d'un itérateur pour parcourir les éléments du vecteur
-		string targetString="";
-		int isFullLength=-1;
-		int targetLength=0;
-		string targetSequence="";
-		
-		// Parse attributes 
-		for(iSubStrings=subStrings.begin();iSubStrings!=subStrings.end();iSubStrings++)
-		{
-			int pos=-1;
-			string value="";
-			int i=0;
-			while (i<NB_ATTRIBUTES_NAMES_ && value=="")
-			{
-				if ( (pos=(*iSubStrings).find (attributeNames_[i],0)) != string::npos  ) {
-					value=(*iSubStrings).substr(pos+attributeNames_[i].length(), (*iSubStrings).length());
-					cout << (*iSubStrings)<< "att name " << attributeNames_[i] << "i:" <<i <<endl;
-					// else at end of loop, add 1, wich no reason.
-					i--;
-				}
- 				i++;
-			}
+  if (attributeNames_.empty()) {
+    InitializeAttributeNames();
+  }	
+  InitializeDefault();
+  std::vector<std::string> subStrings;
+  //example : ID=match00001;Note=0907A18;Target=sp_P54263_SYN_THETH 6 34;
+  int nbAttribute = StringUtils::SplitString(line ,";",subStrings);
+  if(subStrings.empty()) { 
+    Attributes();
+  }
+  else {
+    std::vector<std::string>::const_iterator iSubStrings; // Construction d'un itérateur pour parcourir les éléments du vecteur
+    string targetString="";
+    int isFullLength=-1;
+    int targetLength=-1;
+    string targetSequence="";
+    
+    // Parse attributes 
+    for(iSubStrings=subStrings.begin();iSubStrings!=subStrings.end();iSubStrings++)
+    {
+      int pos=-1;
+      string value="";
+      int i=0;
+      while (i<NB_ATTRIBUTES_NAMES_ && value=="") {
+	if ( (pos=(*iSubStrings).find (attributeNames_[i],0)) != string::npos  ) {
+	  value=(*iSubStrings).substr(pos+attributeNames_[i].length(), (*iSubStrings).length());
+	  cout << (*iSubStrings)<< "att name " << attributeNames_[i] << "i:" <<i <<endl;
+	  // else at end of loop, add 1, wich no reason.
+	  i--;
+        }
+        i++;
+      } //end while
+  
+      if ( attributeNames_[i] == "ID=" && value !="") {
+	id_=value;
+      }
+      if ( attributeNames_[i] == "Name=" && value !=""){
+	name_=value;
+      }
+      if ( attributeNames_[i] == "Alias=" && value !=""){
+	alias_=value;
+      }
+      if ( attributeNames_[i] == "Parent=" && value !=""){
+	parent_=value;
+      }
+      if ( attributeNames_[i] == "Target=" && value !="") {
+	targetString=value;
+      }
+      if ( attributeNames_[i] == "Gap=" && value !="") {
+	//gap_=value;
+      }
+      if ( attributeNames_[i] == "Derives_from=" && value !="") {
+	derivesFrom_=value;
+      }
+      if ( attributeNames_[i] == "Note=" && value !=""){
+	note_=value;
+      }
+      if ( attributeNames_[i] == "Dbxref=" && value !=""){
+	dbxref_=value;
+      }
+      if ( attributeNames_[i] == "Ontology_term=" && value !="") {
+	ontologyTerm_=value;
+      }
+      if ( attributeNames_[i] == "database=" && value !="") {
+	database_=value;
+      }
+      if ( attributeNames_[i] == "is_full_length=" && value !="") {
+	isFullLength=atoi(value.c_str());
+      }
+      if ( attributeNames_[i] == "target_length=" && value !="") {
+	targetLength=atoi(value.c_str());
+      }
+      if ( attributeNames_[i] == "target_sequence=" && value !="") {
+	targetSequence=value;
+      }
+      if ( attributeNames_[i] == "nb_exon=" && value !="") {
+	nbExon_= atoi(value.c_str());
+      }
+      if ( attributeNames_[i] == "length=" && value !="") {
+	length_= atoi(value.c_str());
+      }
+    } //end for all substring
 
-			if ( attributeNames_[i] == "ID=" && value !="") {
-				id_=value;
-			}
-			if ( attributeNames_[i] == "Name=" && value !=""){
-				name_=value;
-			}
-			if ( attributeNames_[i] == "Alias=" && value !=""){
-				alias_=value;
-			}
-			if ( attributeNames_[i] == "Parent=" && value !=""){
-				//alias_=value;
-			}
-			if ( attributeNames_[i] == "Target=" && value !="") {
-				targetString=value;
-			}
-			if ( attributeNames_[i] == "Gap=" && value !="") {
-				//gap_=value;
-			}
-			if ( attributeNames_[i] == "Derives_from=" && value !="") {
-				//derives_from_=value;
-			}
-			if ( attributeNames_[i] == "Note=" && value !=""){
-				note_=value;
- 			}
-			if ( attributeNames_[i] == "Dbxref=" && value !=""){
-				dbxref_=value;
-			}
-			if ( attributeNames_[i] == "Ontology_term=" && value !="") {
-				ontologyTerm_=value;
-			}
-			if ( attributeNames_[i] == "database=" && value !="") {
-				database_=value;
-			}
-			if ( attributeNames_[i] == "is_full_length=" && value !="") {
-				isFullLength=atoi(value.c_str());
-			}
-			if ( attributeNames_[i] == "target_length=" && value !="") {
-				targetLength=atoi(value.c_str());
-			}
-			if ( attributeNames_[i] == "target_sequence=" && value !="") {
-				targetSequence=value;
-			}
-			if ( attributeNames_[i] == "nb_exon=" && value !="") {
-				nbExon_= atoi(value.c_str());
-			}
-			if ( attributeNames_[i] == "length=" && value !="") {
-				length_= atoi(value.c_str());
-			}
-		} 
-		
-		// check target attributes:
-		if ( targetString!="") { 
-			//isFullLength targetLength targetSequence
-			std::vector<std::string> targetAtt;
-			int targetNbAtt = StringUtils::SplitString(targetString ," ",targetAtt);
-			cout << "Target "<< targetString << " nb el: " << targetNbAtt <<endl;
-			char strand=' ';
-			if (targetNbAtt == 3 ) {
-				strand=(targetAtt[3].c_str())[0];
-			}
-			//Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
-			target_ = new Target (targetAtt[0],targetSequence,targetLength,isFullLength,atoi(targetAtt[1].c_str()), atoi(targetAtt[2].c_str()), strand);
-		}
-		
-	}
+    // check target attributes:
+    if ( targetString!="") { 
+      //isFullLength targetLength targetSequence
+      std::vector<std::string> targetAtt;
+      int targetNbAtt = StringUtils::SplitString(targetString ," ",targetAtt);
+    //  cout << "Target "<< targetString << " nb el: " << targetNbAtt <<endl;
+      char strand=' ';
+      if (targetNbAtt == 3 ) {
+        strand=(targetAtt[3].c_str())[0];
+      }
+      //Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
+      target_ = new Target (targetAtt[0],targetSequence,targetLength,isFullLength,atoi(targetAtt[1].c_str()), atoi(targetAtt[2].c_str()), strand);
+    }
+	
+  } //end else
 
 }
 
@@ -148,11 +138,43 @@ Attributes::~Attributes ( )
 { 
  gaps_.clear();
 }
+//Initialize
+void Attributes::InitializeDefault ( void)
+{
+  id_="";
+  name_="";
+  alias_="";
+  note_="";
+  parent_="";
+  target_=NULL;
+  database_="";
+  derivesFrom_="";
+  ontologyTerm_="";
+  length_=-1;
+  nbExon_=-1;
+  //gaps_ = new std::vector();
+}
+
+// -----------------------
+//Accessor
+// -----------------------
+
+// Id
+//
+void Attributes::setId ( std::string id ) 
+{
+	id_ = id;
+}
+std::string Attributes::getId ( )
+{
+	return id_;
+}
+
 
 
 //getString
 std::string Attributes::getString ( )
-{
+{	
 	std::string my_attributes ="";
 	if ( id_ != "" ) {
 		my_attributes +=attributeNames_[0]+id_+";";
@@ -163,18 +185,18 @@ std::string Attributes::getString ( )
 	if ( alias_ != "" ) {
 		my_attributes +=attributeNames_[2]+alias_+";";
 	}
-// 	if ( parent_ != NULL ) {
-// 		my_attributes +=attributeNames_[3]+parent_.getString()+";";
-// 	}
+ 	if ( parent_ != ""  ) {
+ 		my_attributes +=attributeNames_[3]+parent_+";";
+ 	}
 	if ( target_ != NULL ) {
 		my_attributes +=target_->getString();
 	}
 	if ( !gaps_.empty() ) {
 		//my_attributes +=gaps_.getString();
 	}
-// 	if ( derivesFrom_ != NULL ) {
-// 		my_attributes +=attributeNames_[6]+derivesFrom_.getId()+";";
-// 	}
+	if ( derivesFrom_ != ""  ) {
+		my_attributes +=attributeNames_[6]+derivesFrom_+";";
+	}
 	if ( note_ != "" ) {
 		my_attributes +=attributeNames_[7]+note_+";";
 	}
@@ -187,11 +209,11 @@ std::string Attributes::getString ( )
 	if ( database_ != "" ) {
 		my_attributes +=attributeNames_[10]+database_+";";
 	}
-	if ( length_ != -1 ) {
-		my_attributes +=attributeNames_[11]+to_string(length_)+";";
-	}
 	if ( nbExon_ != -1 ) {
-		my_attributes +=attributeNames_[12]+to_string(nbExon_)+";";
+	  my_attributes +=attributeNames_[14]+to_string(nbExon_)+";";
+	}
+	if ( length_ != -1 ) {
+		my_attributes +=attributeNames_[15]+to_string(length_)+";";
 	}
 	return my_attributes;
 } 
