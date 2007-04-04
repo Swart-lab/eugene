@@ -18,117 +18,134 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Attributes.h"
-
+#include "GeneFeatureSet.h";
+//Attribut de classe;
+    std::vector<std::string> Attributes::attributeNames_;
+    
 // -----------------------
 //  Default constructeur
 // -----------------------
+
 Attributes::Attributes()
 {
   InitializeDefault();
 }
 
 
+
 Attributes::Attributes ( std::string line ) 
 {
+
   if (attributeNames_.empty()) {
     InitializeAttributeNames();
   }	
-  InitializeDefault();
-  std::vector<std::string> subStrings;
   //example : ID=match00001;Note=0907A18;Target=sp_P54263_SYN_THETH 6 34;
-  int nbAttribute = StringUtils::SplitString(line ,";",subStrings);
-  if(subStrings.empty()) { 
-    Attributes();
-  }
-  else {
-    std::vector<std::string>::const_iterator iSubStrings; // Construction d'un itérateur pour parcourir les éléments du vecteur
-    string targetString="";
+ 
+  InitializeDefault();
+  char * oneAttributeString;
+  char att[MAX_LINE];
+  strcpy(att,line.c_str());
+
+  oneAttributeString = strtok (att,"=;");
+    char targetString[MAX_LINE];
+    strcpy (targetString,"");
     int isFullLength=-1;
     int targetLength=-1;
     string targetSequence="";
-    
     // Parse attributes 
-    for(iSubStrings=subStrings.begin();iSubStrings!=subStrings.end();iSubStrings++)
+    //  
+    while ( oneAttributeString != NULL )
     {
-      int pos=-1;
-      string value="";
+      //Note=0907A18;
+      char value[MAX_LINE]="";
       int i=0;
-      while (i<NB_ATTRIBUTES_NAMES_ && value=="") {
-	if ( (pos=(*iSubStrings).find (attributeNames_[i],0)) != string::npos  ) {
-	  value=(*iSubStrings).substr(pos+attributeNames_[i].length(), (*iSubStrings).length());
-	  cout << (*iSubStrings)<< "att name " << attributeNames_[i] << "i:" <<i <<endl;
+      while (i<NB_ATTRIBUTES_NAMES_ && strcmp (value,"") ==0 && oneAttributeString != NULL)  {
+	
+	if ( strcmp (attributeNames_[i].c_str(),oneAttributeString) ==0  ) 
+	{
+	  oneAttributeString = strtok (NULL,"=;");
+	  strcpy(value,oneAttributeString);
 	  // else at end of loop, add 1, wich no reason.
 	  i--;
         }
-        i++;
+	i++;
       } //end while
-  
-      if ( attributeNames_[i] == "ID=" && value !="") {
-	id_=value;
+      if  ( i >= NB_ATTRIBUTES_NAMES_){
+        break;
       }
-      if ( attributeNames_[i] == "Name=" && value !=""){
-	name_=value;
+      if ( attributeNames_[i] == "ID" && ( strcmp(value,"")!=0 ) ) {
+	id_=to_string(value);
       }
-      if ( attributeNames_[i] == "Alias=" && value !=""){
-	alias_=value;
+      if ( attributeNames_[i] == "Name" && ( strcmp(value,"")!=0 )){
+	name_=to_string(value);
       }
-      if ( attributeNames_[i] == "Parent=" && value !=""){
-	parent_=value;
+      if ( attributeNames_[i] == "Alias" && ( strcmp(value,"")!=0 )){
+	alias_=to_string(value);
       }
-      if ( attributeNames_[i] == "Target=" && value !="") {
-	targetString=value;
+      if ( attributeNames_[i] == "Parent" && ( strcmp(value,"")!=0 )){
+	parent_=to_string(value);
+	
       }
-      if ( attributeNames_[i] == "Gap=" && value !="") {
+      if ( attributeNames_[i] == "Target" && ( strcmp(value,"")!=0 )) {
+	strcpy (targetString,value);
+      }
+      if ( attributeNames_[i] == "Gap" && ( strcmp(value,"")!=0 )) {
 	//gap_=value;
       }
-      if ( attributeNames_[i] == "Derives_from=" && value !="") {
-	derivesFrom_=value;
+      if ( attributeNames_[i] == "Derives_from" && ( strcmp(value,"")!=0 )) {
+	derivesFrom_=to_string(value);
       }
-      if ( attributeNames_[i] == "Note=" && value !=""){
-	note_=value;
+      if ( attributeNames_[i] == "Note" && ( strcmp(value,"")!=0 )){
+	note_=to_string(value);
       }
-      if ( attributeNames_[i] == "Dbxref=" && value !=""){
-	dbxref_=value;
+      if ( attributeNames_[i] == "Dbxref" && ( strcmp(value,"")!=0 )){
+	dbxref_=to_string(value);
       }
-      if ( attributeNames_[i] == "Ontology_term=" && value !="") {
-	ontologyTerm_=value;
+      if ( attributeNames_[i] == "Ontology_term" && ( strcmp(value,"")!=0 )) {
+	ontologyTerm_=to_string(value);
       }
-      if ( attributeNames_[i] == "database=" && value !="") {
-	database_=value;
+      if ( attributeNames_[i] == "database" && ( strcmp(value,"")!=0 )) {
+	database_=to_string(value);
       }
-      if ( attributeNames_[i] == "is_full_length=" && value !="") {
-	isFullLength=atoi(value.c_str());
+      if ( attributeNames_[i] == "is_full_length" && ( strcmp(value,"")!=0 )) {
+	isFullLength=atoi(value);
       }
-      if ( attributeNames_[i] == "target_length=" && value !="") {
-	targetLength=atoi(value.c_str());
+      if ( attributeNames_[i] == "target_length" && ( strcmp(value,"")!=0 )) {
+	targetLength=atoi(value);
       }
-      if ( attributeNames_[i] == "target_sequence=" && value !="") {
-	targetSequence=value;
+      if ( attributeNames_[i] == "target_sequence" && ( strcmp(value,"")!=0 )) {
+	targetSequence=to_string(value);
       }
-      if ( attributeNames_[i] == "nb_exon=" && value !="") {
-	nbExon_= atoi(value.c_str());
+      if ( attributeNames_[i] == "nb_exon" && ( strcmp(value,"")!=0 )) {
+	nbExon_= atoi(value);
       }
-      if ( attributeNames_[i] == "length=" && value !="") {
-	length_= atoi(value.c_str());
+      if ( attributeNames_[i] == "length" && ( strcmp(value,"")!=0 )) {
+	length_= atoi(value);
       }
+      oneAttributeString = strtok (NULL,"=;");
     } //end for all substring
-
+    
     // check target attributes:
-    if ( targetString!="") { 
-      //isFullLength targetLength targetSequence
-      std::vector<std::string> targetAtt;
-      int targetNbAtt = StringUtils::SplitString(targetString ," ",targetAtt);
-    //  cout << "Target "<< targetString << " nb el: " << targetNbAtt <<endl;
-      char strand=' ';
-      if (targetNbAtt == 3 ) {
-        strand=(targetAtt[3].c_str())[0];
+    if ( strcmp(targetString,"")!=0 ) { 
+      char targetName[MAX_LINE];
+      char targetStart[MAX_LINE],targetEnd[MAX_LINE],targetStrand=' ';
+      //name
+      char* targetAtt = strtok (targetString," ");
+      strcpy(targetName,targetAtt);
+      //start
+      targetAtt = strtok (NULL," ");
+      strcpy(targetStart,targetAtt);
+      //end
+      targetAtt = strtok (NULL," ");
+      strcpy(targetEnd,targetAtt);
+      //end
+      targetAtt = strtok (NULL," ");
+      if (targetAtt != NULL)
+      {
+	targetStrand=targetAtt[0];
       }
-      //Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
-      target_ = new Target (targetAtt[0],targetSequence,targetLength,isFullLength,atoi(targetAtt[1].c_str()), atoi(targetAtt[2].c_str()), strand);
+      target_ = new Target (targetName, targetSequence, targetLength, isFullLength, atoi(targetStart), atoi(targetEnd), targetStrand);
     }
-	
-  } //end else
-
 }
 
 // -----------------------
@@ -136,7 +153,7 @@ Attributes::Attributes ( std::string line )
 // -----------------------
 Attributes::~Attributes ( ) 
 { 
- gaps_.clear();
+// gaps_.clear();
 }
 //Initialize
 void Attributes::InitializeDefault ( void)
@@ -170,50 +187,59 @@ std::string Attributes::getId ( )
 	return id_;
 }
 
+std::string Attributes::getParent ( )
+{
+  return parent_;
+}
 
+std::string Attributes::getOntologyTerm ()
+{
+  return ontologyTerm_;
+}
 
 //getString
 std::string Attributes::getString ( )
 {	
 	std::string my_attributes ="";
 	if ( id_ != "" ) {
-		my_attributes +=attributeNames_[0]+id_+";";
+		my_attributes +=attributeNames_[0]+"="+id_+";";
 	}
 	if ( name_ != "" ) {
-		my_attributes +=attributeNames_[1]+name_+";";
+	  my_attributes +=attributeNames_[1]+"="+name_+";";
 	}
 	if ( alias_ != "" ) {
-		my_attributes +=attributeNames_[2]+alias_+";";
+	  my_attributes +=attributeNames_[2]+"="+alias_+";";
 	}
  	if ( parent_ != ""  ) {
- 		my_attributes +=attributeNames_[3]+parent_+";";
+	  my_attributes +=attributeNames_[3]+"="+parent_+";";
  	}
 	if ( target_ != NULL ) {
 		my_attributes +=target_->getString();
 	}
-	if ( !gaps_.empty() ) {
+/*	if ( !gaps_.empty() ) {
 		//my_attributes +=gaps_.getString();
-	}
+	}*/
 	if ( derivesFrom_ != ""  ) {
-		my_attributes +=attributeNames_[6]+derivesFrom_+";";
+	  my_attributes +=attributeNames_[6]+"="+derivesFrom_+";";
 	}
 	if ( note_ != "" ) {
-		my_attributes +=attributeNames_[7]+note_+";";
+	  my_attributes +=attributeNames_[7]+"="+note_+";";
 	}
 	if ( dbxref_ != "" ) {
-		my_attributes +=attributeNames_[8]+dbxref_+";";
+	  my_attributes +=attributeNames_[8]+"="+dbxref_+";";
 	}
 	if ( ontologyTerm_ != "" ) {
-		my_attributes +=attributeNames_[9]+ontologyTerm_+";";
+	  my_attributes +=attributeNames_[9]+"="+ontologyTerm_+";";
 	}
 	if ( database_ != "" ) {
-		my_attributes +=attributeNames_[10]+database_+";";
+	  my_attributes +=attributeNames_[10]+"="+database_+";";
 	}
 	if ( nbExon_ != -1 ) {
-	  my_attributes +=attributeNames_[14]+to_string(nbExon_)+";";
+	  my_attributes +=attributeNames_[14]+"="+to_string(nbExon_)+";";
 	}
 	if ( length_ != -1 ) {
-		my_attributes +=attributeNames_[15]+to_string(length_)+";";
+	  my_attributes +=attributeNames_[15]+"="+to_string(length_)+";";
 	}
 	return my_attributes;
+	
 } 

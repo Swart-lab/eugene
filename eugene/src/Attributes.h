@@ -11,6 +11,8 @@
 //Feature class:
 #include <Target.h>
 #include <Gap.h>
+#include "Const.h"
+    
 /**
   * class Attributes
   */
@@ -29,7 +31,7 @@ private:
   std::string parent_;
   Target * target_;
   // on an alignment list of the Gap.
-  std::vector<Gap> gaps_;
+//  std::vector<Gap> gaps_;
   std::string derivesFrom_;
   std::string note_;
   std::string dbxref_;
@@ -51,7 +53,8 @@ public:
   void setId ( std::string id );
   std::string getId ( );
   std::string getString ( );
-
+  std::string getParent ( );
+  std::string getOntologyTerm ( );
   // Puplic attribute accessor methods
   //  
   friend std::ostream& operator<<(std::ostream& o, Attributes attributes )
@@ -62,25 +65,25 @@ public:
 
   //Should be static members , 
   static const int NB_ATTRIBUTES_NAMES_=16;
-  std::vector<std::string> attributeNames_; // "ID=","Note=","Target="
+  static std::vector<std::string> attributeNames_; // "ID=","Note=","Target="
   void InitializeAttributeNames()
   {
-	attributeNames_.push_back("ID=");
-	attributeNames_.push_back("Name=");
-	attributeNames_.push_back("Alias=");
-	attributeNames_.push_back("Parent=");
-  	attributeNames_.push_back("Target=");
-	attributeNames_.push_back("Gap=");
-	attributeNames_.push_back("Derives_from=");
-	attributeNames_.push_back("Note=");
-	attributeNames_.push_back("Dbxref=");
-	attributeNames_.push_back("Ontology_term=");
-	attributeNames_.push_back("database=");
-	attributeNames_.push_back("is_full_length=");
-	attributeNames_.push_back("target_length=");
-	attributeNames_.push_back("target_sequence=");
-	attributeNames_.push_back("nb_exon=");
-	attributeNames_.push_back("length=");
+	attributeNames_.push_back("ID");
+	attributeNames_.push_back("Name");
+	attributeNames_.push_back("Alias");
+	attributeNames_.push_back("Parent");
+  	attributeNames_.push_back("Target");
+	attributeNames_.push_back("Gap");
+	attributeNames_.push_back("Derives_from");
+	attributeNames_.push_back("Note");
+	attributeNames_.push_back("Dbxref");
+	attributeNames_.push_back("Ontology_term");
+	attributeNames_.push_back("database");
+	attributeNames_.push_back("is_full_length");
+	attributeNames_.push_back("target_length");
+	attributeNames_.push_back("target_sequence");
+	attributeNames_.push_back("nb_exon");
+	attributeNames_.push_back("length");
   }
 
 };
