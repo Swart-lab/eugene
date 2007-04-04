@@ -18,7 +18,7 @@
     *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "GeneFeature.h"
-
+#include "GeneFeatureSet.h"
 // -----------------------
 //  Default constructeur
 // -----------------------
@@ -28,44 +28,105 @@ GeneFeature::GeneFeature()
   seqid_=".";
   source_=".";
   type_=".";
-  range_=NULL;
+  locus_=NULL;
   score_=0.0;
   phase_='.';
   attributes_=NULL;
+  valid_= true ;
 }
 
-GeneFeature::GeneFeature ( string line ) 
+
+//Constructor from a gff3 line
+
+GeneFeature::GeneFeature ( char * line) 
 {
-  line_=line;
-  vector<string> subStrings;
-  
-  //example : ID=match00001;Note=0907A18;Target=sp_P54263_SYN_THETH 6 34;
-  int nbColumn = StringUtils::SplitString(line ,"\t",subStrings);
-  cout << "nb column " << nbColumn << endl;
-  if(subStrings.empty() || nbColumn < 7 || nbColumn > 9) { 
-    cout << "Error : nb column " << nbColumn << endl;
-    GeneFeature();
+  valid_= true ;
+  line_=to_string(line);
+  if ( line[0] != '#' )
+  {  
+    ParseLine(line); 
   }
-  else {
-    //check sofa / so terms
-    if (  ! GeneFeatureSet::soTerms_->existsId(subStrings[2]) && !GeneFeatureSet::soTerms->existsName(subStrings[2]) )  {
-      cout << "WARNING : " << subStrings[2] << " is not SO/SOFA referenced terms"<<endl;
+}
+
+// ---------------------------------------
+//  ParseLine : Parse a gff3 line with a token, check SO/SOFA code and Parent Attribut.
+// ---------------------------------------
+
+void GeneFeature::ParseLine ( char * line ) 
+{
+  char * token = strtok (line,"\t");
+  int i =0;
+  int start, end;
+  char strand;
+  attributes_=NULL;
+  locus_=NULL;
+  while ( token != NULL )
+  {
+    //cout << "Token "<<i<< " valeur: "<<token<<endl;
+    switch (i)
+    {
+      case 0 : 
+      { //sequence id
+	seqid_= to_string (token);
+	break;
+      }
+      case 1 : 
+      { //source
+	source_= to_string (token);
+	break;
+      }
+      case 2 : 
+      { //type : SOFA/SO
+	type_= to_string (token);
+	if (  ( ! GeneFeatureSet::soTerms_->existsId(type_) ) && ( !GeneFeatureSet::soTerms_->existsName(type_) ) )  
+	{
+	  cout << "WARNING : " << type_ << " is not SO/SOFA referenced terms"<<endl;
+	  valid_=false;
+	}
+	break;
+      }
+      case 3 : 
+      {
+	start= atoi (token);
+	break;
+      }
+      case 4 : 
+      {
+	end= atoi (token);
+	break;
+      }
+      case 5 : 
+      {
+	score_= atof (token);
+	break;
+      }
+      case 6 : 
+      {
+	strand= token[0];
+	break;
+      }
+      case 7 : 
+      {
+	phase_= token[0];
+	break;
+      }
+      case 8 : 
+      {
+	//cout << "Attributes : " << token <<endl;
+	attributes_ = new Attributes (to_string (token));
+	id_=attributes_->getId();
+	if ( id_ == "" )
+	{
+	  cout <<"WARNING : Feature has no ID >" << id_ << "<"<<endl;
+	  valid_=false;
+	}
+	break;
+      }
     }
-    // Parse attributes 
-    seqid_  = subStrings[0];
-    source_ = subStrings[1];
-    type_   = subStrings[2];
-    score_  = atof(subStrings[5].c_str());
-    range_  = new Range (atoi(subStrings[3].c_str()), atoi(subStrings[4].c_str()),(subStrings[6].c_str())[0]);
-    phase_  = (subStrings[7].c_str())[0];
-    if ( nbColumn == 8 && subStrings[8] != "") {
-      attributes_ = new Attributes (subStrings[8]);
-      id_=attributes_->getId();
-    }
-    else {
-      attributes_ = NULL;
-    }
-  } 
+    token = strtok (NULL,"\t");
+    i++;
+  }
+  locus_  = new Locus (start, end, strand);
 }
 
 // -----------------------
@@ -73,14 +134,14 @@ GeneFeature::GeneFeature ( string line )
 // -----------------------
 GeneFeature::~GeneFeature ( ) 
 { 
-
+  delete locus_;
 }
 
 // -----------------------
-//Accessor
+// Accessor
 // -----------------------
 
-// Id
+// Sequence Id
 //
 void GeneFeature::setSeqId ( string seqid ) 
 {
@@ -91,21 +152,50 @@ string GeneFeature::getSeqId ( )
   return seqid_;
 }
 
+// Id of feature , copy from attributes
+//
 
+string GeneFeature::getId ( )
+{
+  return id_;
+}
 
-//getString
+// Parent attributes get from attributes class if exists
+//
+string GeneFeature::getParent()
+{
+  string res="";
+  if (attributes_ != NULL )
+  {
+    res= attributes_->getParent();
+  }
+  return res;
+}
+
+// Valid attribut.
+//
+void GeneFeature::setValid (bool valid)
+{
+  valid_= valid;
+}
+bool GeneFeature::getValid ( )
+{
+  return valid_;
+}
+// ---------------------------------------
+//  getString : Build a string gff3 format
+// ---------------------------------------
 string GeneFeature::getString ( )
 {
   string geneFeature =seqid_+"\t"+source_+"\t"+type_+"\t";
-  if ( range_ != NULL )
+  if ( locus_ != NULL )
   {
-    geneFeature += to_string(range_->getStart()) + "\t" + to_string(range_->getEnd()) + "\t" + to_string(score_) + "\t" + to_string(range_->getStrand()) + "\t";
+    geneFeature += to_string(locus_->getStart()) + "\t" + to_string(locus_->getEnd()) + "\t" + to_string(score_) + "\t" + to_string(locus_->getStrand()) + "\t";
   }
   else
   {
     geneFeature += ".\t.\t" + to_string(score_) + "\t.\t";
   }
-  
   geneFeature += to_string(phase_)+"\t";
   if ( attributes_ != NULL )
   {

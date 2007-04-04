@@ -5,12 +5,9 @@
 #include <string>
 #include <iostream>
 
-#include "StringUtils.h"
-
 //Feature class:
-#include <Range.h>
+#include <Locus.h>
 #include <Attributes.h>
-#include <GeneFeatureSet.h>
 using namespace std; 
 
 /**
@@ -25,22 +22,28 @@ class GeneFeature
     string seqid_;
     string source_;
     string type_;
-    Range * range_;
+    Locus * locus_;
     float score_;
     char phase_;
     Attributes * attributes_;
+    bool valid_ ;
     
   public:
   
     string line_;
     // Constructors/Destructors
     GeneFeature ( );
-    GeneFeature ( string line ); 
+    GeneFeature ( char * ); 
+    GeneFeature (string seqId, string source, string type, int start, int end, float score, char strand, char phase, char * attributes);
     virtual ~GeneFeature ( );
+    void setValid ( bool valid);
+    bool getValid ( );
     void setSeqId ( string id );
+    void ParseLine( char * line );
     string getSeqId ( );
     string getString ( );
-    
+    string getId ();
+    string getParent();
     // Public attribute accessor methods
     //  
     friend ostream& operator<<(ostream& o, GeneFeature geneFeature )
