@@ -4,7 +4,9 @@
 
 #include <string>
 #include <map>
-#include "StringUtils.h"
+#include "Const.h"
+#include "System.h"
+#include <iostream>
 using namespace std; 
 
 /**
@@ -29,10 +31,12 @@ class SoTerms
   
     // Constructors/Destructors
     //SoTerms ( );
-    SoTerms( char * filename );
+    SoTerms();
     virtual ~SoTerms ( );
+    void LoadFile( char * filename );
     bool existsId   (string name);
     bool existsName (string name);
+    int size();
     void Print ();
 
 };

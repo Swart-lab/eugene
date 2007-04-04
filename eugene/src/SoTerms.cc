@@ -18,11 +18,22 @@
     *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "SoTerms.h"
-#include "Const.h"
+
 // -----------------------
 //  Default constructeur
 // -----------------------
-SoTerms::SoTerms( char * filename )
+SoTerms::SoTerms(  )
+{
+  
+}
+
+SoTerms::~SoTerms ( )
+{
+  idToName_.clear();
+  nameToId_.clear();
+}
+
+void SoTerms::LoadFile( char * filename )
 {
   FILE *fp;
   if (!(fp = fopen(filename, "r"))) {
@@ -40,47 +51,54 @@ SoTerms::SoTerms( char * filename )
       i = sscanf(line, "id: %s", &value);
       if (i > 0) {
 	char soId[60];
+	char soName[60];
 	strcpy (soId, value );
 	fgets (line, MAX_LINE, fp);
 	i = sscanf(line, "name: %s", &value);
-	idToName_[soId]=value;
-	nameToId_[value]=soId;
+	strcpy (soName, value );
+	idToName_[to_string(soId)]=to_string(soName);
+	nameToId_[to_string(soName)]=to_string(soId);
       }
     }
   }
   fclose(fp);
 }
 
-SoTerms::~SoTerms ( )
-{}
-
 void SoTerms::Print (void)
 {
   map<string,string>::iterator it;
   for ( it=idToName_.begin() ; it != idToName_.end(); it++ )
   {
-    cout << "idToName_ Key : " << (*it).first << " Value : " << (*it).second << endl;
+     cout << "idToName_ Key : " << (*it).first << " Value : " << (*it).second << endl;
+  }
+  for ( it=nameToId_.begin() ; it != nameToId_.end(); it++ )
+  {
+    cout << "nameToId_ Key : " << (*it).first << " Value : " << (*it).second << endl;
   }
 }
 
 bool SoTerms::existsId(string id)
 {
   map<string,string>::iterator it=idToName_.find(id);
+  bool res = true;
   if (it == idToName_.end()) {
-      return false;
+    res=false;
   }
-  else {
-    return true;
-  }
+  return res;
 }
 
-bool SoTerms::existsName( string name)
+bool SoTerms::existsName(string name)
 {
   map<string,string>::iterator it=nameToId_.find(name);
-  if (it == idToName_.end()) {
-    return false;
+  bool res = true;
+  if (it == nameToId_.end()) {
+    res=false;
   }
-  else {
-    return true;
-  }
+  return res;
 }
+
+int SoTerms::size (void)
+{
+  return idToName_.size();
+}
+
