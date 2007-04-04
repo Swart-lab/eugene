@@ -22,7 +22,7 @@
 #define TARGET_H
 
 #include <string>
-#include "Range.h"
+#include "Locus.h"
 
 /**
   * class Target
@@ -39,7 +39,7 @@ private:
   // Private attributes
   //  
   std::string name_;
-  Range * range_;
+  Locus * locus_;
   std::string sequenceData_;
   int targetLength_;
   int isFullLength_; 
@@ -54,7 +54,7 @@ public:
   // Constructors/Destructors
 
    Target ( );
-   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, Range * range);
+   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, Locus * locus);
    Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
    Target ( Target * target);
    virtual ~Target ( );
@@ -65,8 +65,8 @@ public:
   void setName ( std::string name );
   std::string getName ( );
 
-  void setRange ( Range * range );
-  Range* getRange ( );
+  void setLocus ( Locus * range );
+  Locus* getLocus ( );
 
   void setSequenceData ( std::string sequenceData );
   std::string getSequenceData ( );

@@ -25,17 +25,17 @@
 Target::Target ( ) 
 {
   name_ = "";
-  range_ = NULL;
+  locus_ = NULL;
   sequenceData_ = "";
   targetLength_ = 0;
   isFullLength_ = UNKNOWN; 
 
 }
 
-Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Range * range) 
+Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Locus * locus) 
 {
   name_ = name;
-  range_ = new Range (range);
+  locus_ = new Locus (locus);
   sequenceData_ = sequenceData;
   targetLength_ = targetLength;
   isFullLength_ = isFullLength; 
@@ -43,19 +43,18 @@ Target::Target (std::string name , std::string sequenceData,  int targetLength, 
 
 Target::Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand)
 {
-  cout << "name : "<< name << "sequenceData : "<< sequenceData << "targetLength : "<<targetLength<< "isFullLength : " << isFullLength << "start : "<< start << "end : "<< end << "strand : "<< strand <<endl;
         name_ = name;
-	range_ = new Range (start,end,strand);
+	locus_ = new Locus (start,end,strand);
 	sequenceData_ = sequenceData;
 	targetLength_ = targetLength;
 	isFullLength_ = isFullLength;
-	cout << "Constructeur TARGET :  "<<getString()<<endl;
+	//cout << "Constructeur TARGET :  "<<getString()<<endl;
 }
 		
 Target::Target (Target * target) 
 {
   name_ = target->getName();
-  range_ = new Range (target->range_);
+  locus_ = new Locus (target->locus_);
   sequenceData_ = target->sequenceData_;
   targetLength_ = target->targetLength_;
   isFullLength_ = target->isFullLength_;
@@ -66,7 +65,7 @@ Target::Target (Target * target)
 
 Target::~Target ( ) 
 { 
-	delete range_;
+	delete locus_;
 }
 
 
@@ -85,15 +84,15 @@ std::string Target::getName ( )
 	return name_;
 }
 
-// Range
+// Locus
 //
-void Target::setRange ( Range * range ) 
+void Target::setLocus ( Locus * locus ) 
 {
- 	range_ = range;
+ 	locus_ = locus;
 }
-Range * Target::getRange ( )
+Locus * Target::getLocus ( )
 {
-	return range_;
+	return locus_;
 }
 
 // SequenceData_
@@ -136,9 +135,9 @@ int Target::getIsFullLength ( )
 std::string Target::getString ( )
 {
 	std::string my_target = "";
-	if ( name_ != ""  && range_ != NULL)
+	if ( name_ != ""  && locus_ != NULL)
 	{	
-		 my_target = "Target="+name_+" "+range_->getString()+";";
+		 my_target = "Target="+name_+" "+locus_->getString()+";";
 	}
 	if ( isFullLength_ != UNKNOWN )
 	{
