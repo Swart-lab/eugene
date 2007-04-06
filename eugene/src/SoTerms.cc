@@ -33,7 +33,7 @@ SoTerms::~SoTerms ( )
   nameToId_.clear();
 }
 
-void SoTerms::LoadFile( char * filename )
+void SoTerms::loadFile( char * filename )
 {
   FILE *fp;
   if (!(fp = fopen(filename, "r"))) {
@@ -45,11 +45,14 @@ void SoTerms::LoadFile( char * filename )
   int i=1;
   int j=0;
   char  line[MAX_LINE];
-  while(fp  &&  fgets (line, MAX_LINE, fp) != NULL) {
+  while(fp  &&  fgets (line, MAX_LINE, fp) != NULL) 
+  {
     j++;
-    if (line[0] == 'i' && line[1] == 'd') {
+    if (line[0] == 'i' && line[1] == 'd') 
+    {
       i = sscanf(line, "id: %s", &value);
-      if (i > 0) {
+      if (i > 0) 
+      {
 	char soId[60];
 	char soName[60];
 	strcpy (soId, value );
@@ -58,6 +61,36 @@ void SoTerms::LoadFile( char * filename )
 	strcpy (soName, value );
 	idToName_[to_string(soId)]=to_string(soName);
 	nameToId_[to_string(soName)]=to_string(soId);
+	char* resFgets = " ";
+	while (fp  && strncmp (line,"[Term]",6)  != 0 && fgets (line, MAX_LINE, fp)!=NULL)
+	{
+	 
+	  //cout << "sscanf : synonym : "<<line<< "comparaison" <<strncmp (line,"[Term]",6) <<endl;
+	  if (strncmp (line,"synonym",7)  == 0  )
+	  {
+	    
+	    //synonym: "amplicon" RELATED []
+	    //synonym: "PCR product" EXACT []
+	    string tmpStr = to_string(line);
+	    //if (tmpStr.find("EXACT") != string::npos )
+	    //{
+	    int begin=tmpStr.find_first_of('"')+1;
+	    
+	    string synomynString = tmpStr.substr(begin,tmpStr.find_last_of('"')-begin); //entre " "
+	     // tmpStr = synomynString.substr(0,synomynString.find('"')); //delete string after synomyn value
+	    int pos=synomynString.find(" ");
+	      
+	      while ( pos != string::npos  )
+	      { 
+		synomynString.at(pos) = '_';
+		pos=synomynString.find(" ");
+	      }
+	     // cout << "synonym : "<<synomynString << endl;
+	      nameToId_[synomynString]=to_string(soId);
+	  
+	  //  }
+	  }
+	}
       }
     }
   }
@@ -89,8 +122,15 @@ bool SoTerms::existsId(string id)
 
 bool SoTerms::existsName(string name)
 {
+  int pos=name.find(" ");
+  while ( pos != string::npos  )
+  { 
+    name.at(pos) = '_';
+    pos=name.find(" ");
+  }
   map<string,string>::iterator it=nameToId_.find(name);
   bool res = true;
+  
   if (it == nameToId_.end()) {
     res=false;
   }
@@ -102,3 +142,13 @@ int SoTerms::size (void)
   return idToName_.size();
 }
 
+string SoTerms::getIdFromName (string name)
+{
+  int pos=name.find(" ");
+  while ( pos != string::npos  )
+  { 
+    name.at(pos) = '_';
+    pos=name.find(" ");
+  }
+  return nameToId_[name];
+}

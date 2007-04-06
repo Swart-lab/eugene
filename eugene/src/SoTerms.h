@@ -33,11 +33,12 @@ class SoTerms
     //SoTerms ( );
     SoTerms();
     virtual ~SoTerms ( );
-    void LoadFile( char * filename );
+    void loadFile( char * filename );
     bool existsId   (string name);
     bool existsName (string name);
     int size();
     void Print ();
+    string getIdFromName (string name);
 
 };
 #endif // SOTERMS_H
