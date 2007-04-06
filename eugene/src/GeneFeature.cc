@@ -42,7 +42,9 @@ GeneFeature::GeneFeature ( char * line)
 {
   valid_= true ;
   line_=to_string(line);
-  if ( line[0] != '#' )
+  StringUtils::Chomp( line_ );
+  strcpy (line , line_.c_str());
+  if ( line_.at(0) != '#' )
   {  
     ParseLine(line); 
   }
@@ -172,6 +174,17 @@ string GeneFeature::getParent()
   return res;
 }
 
+// Type
+//
+string GeneFeature::getType()
+{
+  return type_;
+}
+
+float GeneFeature::getScore()
+{
+  return score_;
+}
 // Valid attribut.
 //
 void GeneFeature::setValid (bool valid)
@@ -203,3 +216,9 @@ string GeneFeature::getString ( )
   }
   return geneFeature;
 } 
+
+//Locus
+Locus * GeneFeature::getLocus ( )
+{
+  return locus_;
+}

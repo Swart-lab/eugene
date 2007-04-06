@@ -6,8 +6,8 @@
 #include <iostream>
 
 //Feature class:
-#include <Locus.h>
-#include <Attributes.h>
+#include "Locus.h"
+#include "Attributes.h"
 using namespace std; 
 
 /**
@@ -27,6 +27,7 @@ class GeneFeature
     char phase_;
     Attributes * attributes_;
     bool valid_ ;
+    void ParseLine( char * line );
     
   public:
   
@@ -36,14 +37,18 @@ class GeneFeature
     GeneFeature ( char * ); 
     GeneFeature (string seqId, string source, string type, int start, int end, float score, char strand, char phase, char * attributes);
     virtual ~GeneFeature ( );
+    
     void setValid ( bool valid);
     bool getValid ( );
     void setSeqId ( string id );
-    void ParseLine( char * line );
+    
     string getSeqId ( );
     string getString ( );
     string getId ();
     string getParent();
+    string getType();
+    Locus * getLocus();
+    float getScore();
     // Public attribute accessor methods
     //  
     friend ostream& operator<<(ostream& o, GeneFeature geneFeature )
