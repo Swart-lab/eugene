@@ -34,15 +34,28 @@ SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
 
   type = Type_Acc|Type_Don;
 
-  fprintf(stderr, "Reading splice site file (GeneSplicer)........");
+
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".Gsplicer");
-  fprintf(stderr,"forward, reverse ");
+
   fflush(stderr);
-  ReadGSplicer(tempname, X->SeqLen);
-  fprintf(stderr,"done\n");
   
+  inputFormat_ = to_string(PAR.getC("GSplicer.format", GetNumber(),1));
+
+  if ( inputFormat_ == "GFF3" )
+  {
+    fprintf(stderr, "Reading splice site file (GeneSplicer)........forward, reverse ");
+      strcat(tempname,".gff3");
+      ReadGSplicerGff3(tempname, X->SeqLen);
+  }
+  else
+  {
+    fprintf(stderr, "Reading splice site file (GeneSplicer)........forward, reverse ");
+    ReadGSplicer(tempname, X->SeqLen);
+  }
+  fprintf(stderr,"done\n");
+  Print(tempname);
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 }
 
@@ -67,7 +80,7 @@ void SensorGSplicer :: Init (DNASeq *X)
   penAcc  = PAR.getD("GSplicer.penAcc*", GetNumber());
   coefDon = PAR.getD("GSplicer.coefDon*",GetNumber());
   penDon  = PAR.getD("GSplicer.penDon*", GetNumber());
-
+  
   iAccF = iDonF = 0;
   iAccR = iDonR = 0;
   PositionGiveInfo = -1;
@@ -75,55 +88,107 @@ void SensorGSplicer :: Init (DNASeq *X)
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
-// -------------------------------------
-//  Read GeneSplicer file.
-// -------------------------------------
-void SensorGSplicer :: ReadGSplicer(char name[FILENAME_MAX+1], int SeqLen)
+void SensorGSplicer :: Print (char name[FILENAME_MAX+1])
 {
   FILE *fp;
-  char type[10];
-  int i,j,nt1,nt2;
-  double score;
-  
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open splice sites file %s\n",  name);
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
     exit(2);
   }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
+  int i =0; 
+  for (i=0; i< vPosDonF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
+  }
   
-  i=0;
-  while(!feof(fp)){
-    i++;
-    j = fscanf(fp,"%d %d %lf %*s %s\n", &nt1, &nt2, &score, type);
-    
-    if (j < 4) {
-      fprintf(stderr, "\nError in splice sites file! %s, line %d\n", name, i);
-      exit(2);
+  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
+  for (i=0; i< vPosAccF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
+  }
+  
+  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
+  for (i=0; i< vPosDonR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
+  }
+  
+  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
+  for (i=0; i< vPosAccR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
+  }
+fclose(fp);
+}
+
+
+// -------------------------------------
+//  Read GeneSplicer GFF3 file.
+// -------------------------------------
+void SensorGSplicer :: ReadGSplicerGff3(char name[FILENAME_MAX+1], int SeqLen)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
     }
-        
-    // Forward
-    if ( (nt2-nt1) == 1 ) {
-      if(type[0]=='d') {
-	vPosDonF.push_back( nt1-1 );
-	vValDonF.push_back( score );
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+    
+      if (idSo == "SO:0000163") //donor
+      {
+	vPosDonF.push_back( tmpFeature->getLocus()->getStart()-1 );
+	vValDonF.push_back( tmpFeature->getScore() );
+	
       }
-      else {
-	vPosAccF.push_back( nt2 );
-	vValAccF.push_back( score );
+      else 
+      {
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccF.push_back(tmpFeature->getLocus()->getEnd() );
+  	  vValAccF.push_back( tmpFeature->getScore() );
+	}
       }
     }
     // Reverse
-    if ( (nt2-nt1) == -1 ) {
-      if(type[0]=='d') {
-	vPosDonR.push_back( nt1 );
-	vValDonR.push_back( score );
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) {
+      if(idSo == "SO:0000163") {
+	vPosDonR.push_back( tmpFeature->getLocus()->getEnd() );
+	vValDonR.push_back( tmpFeature->getScore() );
       }
       else {
-	vPosAccR.push_back( nt2-1 );
-	vValAccR.push_back( score );
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccR.push_back( tmpFeature->getLocus()->getStart()-1 );
+	  vValAccR.push_back( tmpFeature->getScore() );
+	}
       }
     }
+    it++;
+    i++;
   }
-  fclose(fp);
+
 }
 
 // ------------------------
@@ -212,4 +277,54 @@ double SensorGSplicer :: Norm(double x, double n) {
 // ------------------
 void SensorGSplicer :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
+}
+
+// -------------------------------------
+//  Read GeneSplicer file.
+// -------------------------------------
+void SensorGSplicer :: ReadGSplicer(char name[FILENAME_MAX+1], int SeqLen)
+{
+  FILE *fp;
+  char type[10];
+  int i,j,nt1,nt2;
+  double score;
+ 
+  if (!(fp = fopen(name, "r"))) {
+    fprintf(stderr, "cannot open splice sites file %s\n",  name);
+    exit(2);
+  }
+  
+  i=0;
+  while(!feof(fp)){
+    i++;
+    j = fscanf(fp,"%d %d %lf %*s %s\n", &nt1, &nt2, &score, type);
+    
+    if (j < 4) {
+      fprintf(stderr, "\nError in splice sites file! %s, line %d\n", name, i);
+      exit(2);
+    }
+    // Forward
+    if ( (nt2-nt1) == 1 ) {
+      if(type[0]=='d') {
+	vPosDonF.push_back( nt1-1 );
+	vValDonF.push_back( score );
+      }
+      else {
+	vPosAccF.push_back( nt2 );
+	vValAccF.push_back( score );
+      }
+    }
+    // Reverse
+    if ( (nt2-nt1) == -1 ) {
+      if(type[0]=='d') {
+	vPosDonR.push_back( nt1 );
+	vValDonR.push_back( score );
+      }
+      else {
+	vPosAccR.push_back( nt2-1 );
+	vValAccR.push_back( score );
+      }
+    }
+  }
+  fclose(fp);
 }

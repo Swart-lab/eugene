@@ -30,7 +30,7 @@ class SensorGSplicer : public Sensor
 {
  private:
   int PositionGiveInfo;
-
+  
   std::vector<int>    vPosAccF, vPosAccR, vPosDonF, vPosDonR;
   std::vector<double> vValAccF, vValAccR, vValDonF, vValDonR;
 
@@ -38,8 +38,10 @@ class SensorGSplicer : public Sensor
   double coefAcc, penAcc, coefDon, penDon;
   
   void   ReadGSplicer(char[FILENAME_MAX+1], int);
+  void   ReadGSplicerGff3(char [FILENAME_MAX+1], int );
   double Norm(double, double);
 
+ 
  public:
   SensorGSplicer          (int n, DNASeq *X);
   virtual ~SensorGSplicer ();
@@ -47,6 +49,7 @@ class SensorGSplicer : public Sensor
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *, FILE *);
+  void SensorGSplicer :: Print (char[FILENAME_MAX+1]);
 };
 
 extern "C" SensorGSplicer* builder0( int n, DNASeq *X) { return new SensorGSplicer(n, X);}
