@@ -38,16 +38,37 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
     
   fprintf(stderr, "Reading splice site file (NetGene2)...........");  
   fflush(stderr);
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".splices");
-  ReadNG2F(tempname, X->SeqLen);
-  fprintf(stderr,"forward,");
-  fflush(stderr);
+ 
+  inputFormat_ = to_string(PAR.getC("NG2.format", GetNumber(),1));
 
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".splicesR");
-  ReadNG2R(tempname, X->SeqLen);
-  fprintf(stderr," reverse done\n");
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".splices");
+    strcat(tempname,".gff3");
+    ReadNG2Gff3(tempname, X->SeqLen);
+    fprintf(stderr,"forward, reverse done\n");
+    fflush(stderr);
+    Print(tempname);
+  }
+  else
+  {
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".splices");
+    ReadNG2F(tempname, X->SeqLen);
+    fprintf(stderr,"forward,");
+    fflush(stderr);
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".splicesR");
+    fflush(stderr);
+
+    ReadNG2R(tempname, X->SeqLen);
+    fprintf(stderr," reverse done\n");
+    fflush(stderr);
+    Print(tempname);
+  }
+
+  
   
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
   
@@ -126,7 +147,6 @@ void SensorNG2 :: ReadNG2F(char name[FILENAME_MAX+1], int SeqLen)
   }
   fclose(fp);
 }
-
 // -----------------------------
 //  Read NetGene2 reverse file.
 // -----------------------------
@@ -168,6 +188,75 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
   }
   fclose(fp);
 }
+
+
+// -------------------------------------
+//  Read ReadNG2Gff3 GFF3 file.
+// -------------------------------------
+void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+    
+      if (idSo == "SO:0000163") //donor
+      {
+	vPosDonF.push_back( tmpFeature->getLocus()->getStart()-1 );
+	vValDonF.push_back( tmpFeature->getScore() );
+	
+      }
+      else 
+      {
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccF.push_back(tmpFeature->getLocus()->getEnd() );
+	  vValAccF.push_back( tmpFeature->getScore() );
+	}
+      }
+    }
+    // Reverse
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) {
+      if(idSo == "SO:0000163") {
+	vPosDonR.push_back( tmpFeature->getLocus()->getEnd() );
+	vValDonR.push_back( tmpFeature->getScore() );
+      }
+      else {
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccR.push_back( tmpFeature->getLocus()->getStart()-1);
+	  vValAccR.push_back( tmpFeature->getScore() );
+	}
+      }
+    }
+    it++;
+    i++;
+  }
+}
+
+
+
 
 // ------------------------
 //  GiveInfo signal NG2.   pow(atof(sdon),  donB)*donP
@@ -266,4 +355,41 @@ void SensorNG2 :: Plot(DNASeq *X)
 // ------------------
 void SensorNG2 :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
+}
+
+
+void SensorNG2 :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
+  int i =0; 
+  for (i=0; i< vPosDonF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
+  }
+  
+  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
+  for (i=0; i< vPosAccF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
+  }
+  
+  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
+  for (i=0; i< vPosDonR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
+  }
+  
+  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
+  for (i=0; i< vPosAccR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
+  }
+  fclose(fp);
 }

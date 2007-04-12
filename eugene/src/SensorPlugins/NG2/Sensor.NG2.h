@@ -38,7 +38,8 @@ class SensorNG2 : public Sensor
   
   void ReadNG2F(char[FILENAME_MAX+1], int);
   void ReadNG2R(char[FILENAME_MAX+1], int);
-
+  void ReadNG2Gff3(char[FILENAME_MAX+1], int);
+  void Print(char[FILENAME_MAX+1]);
  public:
   SensorNG2  (int n, DNASeq *X);
   virtual ~SensorNG2      ();
