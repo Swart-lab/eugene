@@ -38,17 +38,38 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
   
   fprintf(stderr, "Reading start file (NetStart).................");
   fflush(stderr);
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".starts");
-  ReadNStartF(tempname, X->SeqLen);
-  fprintf(stderr,"forward,");
-  fflush(stderr);
   
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".startsR");
-  ReadNStartR(tempname, X->SeqLen);
-  fprintf(stderr," reverse done\n");
   
+  
+  
+   
+  inputFormat_ = to_string(PAR.getC("NStart.format", GetNumber(),1));
+
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".starts");
+    strcat(tempname,".gff3");
+    ReadNStartGff3(tempname, X->SeqLen);
+    fprintf(stderr,"forward, reverse done\n");
+    fflush(stderr);
+    Print(tempname);
+  }
+  else
+  {
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".starts");
+    ReadNStartF(tempname, X->SeqLen);
+    fprintf(stderr,"forward,");
+    fflush(stderr);
+  
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".startsR");
+    ReadNStartR(tempname, X->SeqLen);
+    fprintf(stderr," reverse done\n");
+    fflush(stderr);
+    Print(tempname);
+  }
   CheckStart(X,vPosF, vPosR);
 
   // vectors for reverse are put in the increasing order
@@ -139,7 +160,71 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
 }
 
 
+void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+      vPosF.push_back( tmpFeature->getLocus()->getStart() -1);
+      vValF.push_back( tmpFeature->getScore() );
+    }
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) 
+    {
+      vPosR.push_back( tmpFeature->getLocus()->getStart()  );
+      vValR.push_back( tmpFeature->getScore() );
+    }
+    i++;
+    it++;
+  }
+}
 
+
+void SensorNStart :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosF %d\n",  vPosF.size());
+  int i =0; 
+  for (i=0; i< vPosF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosF[i],vValF[i]);
+  }
+  
+  fprintf(fp, "vPosR %d\n",  vPosR.size());
+  for (i=0; i< vPosR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosR[i],vValR[i]);
+  }
+
+  fclose(fp);
+}
 // ------------------------
 //  GiveInfo signal start.
 // ------------------------

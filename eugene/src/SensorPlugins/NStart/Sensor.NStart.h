@@ -38,7 +38,8 @@ class SensorNStart : public Sensor
   
   void ReadNStartF (char *, int);
   void ReadNStartR (char *, int);
-
+  void ReadNStartGff3 (char *, int);
+  void Print(char *);
  public:
   SensorNStart   (int n, DNASeq *X);
   virtual ~SensorNStart   ();
