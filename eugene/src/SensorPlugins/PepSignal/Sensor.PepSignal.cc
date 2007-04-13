@@ -35,19 +35,67 @@ char *seqname;
 char tempname[FILENAME_MAX+1];
 
 	seqname = PAR.getC("fstname");
-
+	strcpy(tempname,seqname);
+	strcat(tempname,".psignal");
 	fprintf(stderr, "Probing PepSignal (starts)....");  
 	fflush(stderr);
 
-	strcpy(tempname,seqname);
-	strcat(tempname,".psignal");
+	inputFormat_ = to_string(PAR.getC("PepSignal.format", GetNumber(),1));
 
-	ReadPepSignalStarts(tempname, X->SeqLen);
+	if ( inputFormat_ == "GFF3" )
+	{
+	  strcat(tempname,".gff3");
+	  ReadPepSignalGff3(tempname, X->SeqLen);
+	}
+	else
+	{
+	   ReadPepSignalStarts(tempname, X->SeqLen);
+	}
+	Print(tempname);
 	fprintf(stderr,"done\n");
-
+	fflush(stderr);
 	CheckStart(X,vPosF, vPosR);
 }
 
+void SensorPepSignal :: ReadPepSignalGff3 (char name[FILENAME_MAX+1], int Len)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+      vPosF.push_back( tmpFeature->getLocus()->getStart() -1);
+      vValF.push_back( tmpFeature->getScore() );
+    }
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) 
+    {
+      vPosR.push_back( tmpFeature->getLocus()->getStart()  );
+      vValR.push_back( tmpFeature->getScore() );
+    }
+    i++;
+    it++;
+  }
+}
 
 // --------------------------
 //  Read start file.
@@ -180,4 +228,30 @@ void SensorPepSignal :: Plot(DNASeq *X)
 // ------------------
 void SensorPepSignal :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
+}
+
+
+void SensorPepSignal :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosF %d\n",  vPosF.size());
+  int i =0; 
+  for (i=0; i< vPosF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosF[i],vValF[i]);
+  }
+  
+  fprintf(fp, "vPosR %d\n",  vPosR.size());
+  for (i=0; i< vPosR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosR[i],vValR[i]);
+  }
+
+  fclose(fp);
 }
