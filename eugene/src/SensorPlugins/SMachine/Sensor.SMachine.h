@@ -50,6 +50,8 @@ class SensorSMachine : public Sensor
 
   void SpliceMachine();
   
+  void ReadMachineGff3(char *, int);
+  void Print(char *);
  public:
   SensorSMachine  (int n, DNASeq *X);
   virtual ~SensorSMachine ();

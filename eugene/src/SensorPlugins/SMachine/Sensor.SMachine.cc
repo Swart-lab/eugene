@@ -46,6 +46,21 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
 
   seqname = PAR.getC("fstname");
   strcpy(tempname,seqname);
+  inputFormat_ = to_string(PAR.getC("SMachine.format", GetNumber(),1));
+
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".spliceM.gff3");
+    ReadMachineGff3(tempname, X->SeqLen);
+    CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
+    fprintf(stderr,"  done\n");
+    fprintf(stderr, "Probing SpliceMachine (starts)................");  
+    fflush(stderr);
+    Print(tempname);
+  }
+  else
+  {
+  
   strcat(tempname,".spliceMAD");
   if (!ProbeFile(NULL,tempname)) SpliceMachine();
     
@@ -62,8 +77,10 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   if (!ProbeFile(NULL,tempname)) SpliceMachine();
 
   ReadSMachineStarts(tempname, X->SeqLen);
+  }
+  
   fprintf(stderr,"  done\n");
-
+  Print(tempname);
   CheckStart(X,vPosF, vPosR);
 
 }
@@ -373,4 +390,126 @@ void SensorSMachine :: SpliceMachine()
   system(s1);
 
   return;
+}
+
+
+
+void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+    
+      if (idSo == "SO:0000163") //donor
+      {
+	vPosDonF.push_back( tmpFeature->getLocus()->getStart()-1 );
+	vValDonF.push_back( tmpFeature->getScore() );
+	
+      }
+      if (idSo == "SO:0000164")  //acceptor
+      {
+	vPosAccF.push_back(tmpFeature->getLocus()->getEnd() );
+	vValAccF.push_back( tmpFeature->getScore() );
+      }
+      if (idSo == "SO:0000318")  //start
+      {
+	vPosF.push_back(tmpFeature->getLocus()->getStart() -1 );
+	vValF.push_back( tmpFeature->getScore() );
+      }
+
+    }
+    // Reverse
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) {
+      if(idSo == "SO:0000163") {
+	vPosDonR.push_back( tmpFeature->getLocus()->getEnd() );
+	vValDonR.push_back( tmpFeature->getScore() );
+      }
+      if (idSo == "SO:0000164")  //acceptor
+      {
+	vPosAccR.push_back( tmpFeature->getLocus()->getStart()-1 );
+	vValAccR.push_back( tmpFeature->getScore() );
+      }
+      if (idSo == "SO:0000318")  //start
+      {
+	vPosR.push_back(tmpFeature->getLocus()->getEnd());
+	vValR.push_back( tmpFeature->getScore() );
+      }
+    }
+    it++;
+    i++;
+  }
+
+}
+
+
+void SensorSMachine :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
+  int i =0; 
+  for (i=0; i< vPosDonF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
+  }
+  
+  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
+  for (i=0; i< vPosAccF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
+  }
+  
+  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
+  for (i=0; i< vPosDonR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
+  }
+  
+  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
+  for (i=0; i< vPosAccR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
+  }
+  
+  fprintf(fp, "vPosF %d\n",  vPosF.size());
+  
+  for (i=0; i< vPosF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosF[i],vValF[i]);
+  }
+  
+  fprintf(fp, "vPosR %d\n",  vPosR.size());
+  for (i=0; i< vPosR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosR[i],vValR[i]);
+  }
+
+  fclose(fp);
 }
