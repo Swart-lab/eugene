@@ -38,7 +38,8 @@ class SensorSPred : public Sensor
   
   void ReadSPredF(char[FILENAME_MAX+1], int);
   void ReadSPredR(char[FILENAME_MAX+1], int);
-  
+  void ReadSPredGff3(char[FILENAME_MAX+1], int);
+  void Print (char[FILENAME_MAX+1]);
  public:
   SensorSPred   (int n, DNASeq *X);
   virtual ~SensorSPred    ();

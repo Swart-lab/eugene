@@ -40,17 +40,31 @@ SensorSPred :: SensorSPred (int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".spliceP");
-  ReadSPredF(tempname, X->SeqLen);
-  fprintf(stderr,"forward,");
-  fflush(stderr);
+  
+  inputFormat_ = to_string(PAR.getC("SPred.format", GetNumber(),1));
 
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".splicePR");
-  ReadSPredR(tempname, X->SeqLen);
-  fprintf(stderr," reverse done\n");
-
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    ReadSPredGff3(tempname, X->SeqLen);
+    fprintf(stderr,"forward, reverse done\n");
+    fflush(stderr);
+    
+  }
+  else
+  {
+    
+    ReadSPredF(tempname, X->SeqLen);
+    fprintf(stderr,"forward,");
+    fflush(stderr);
+  
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".splicePR");
+    ReadSPredR(tempname, X->SeqLen);
+    fprintf(stderr," reverse done\n");
+  }
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
-
+  Print(tempname);
   // vectors for reverse are put in the increasing order
   reverse(vPosAccR.begin(), vPosAccR.end()); 
   reverse(vValAccR.begin(), vValAccR.end());
@@ -305,4 +319,105 @@ void SensorSPred :: Plot(DNASeq *X)
 // ------------------
 void SensorSPred :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
+}
+
+// -------------------------------------
+//  Read ReadNG2Gff3 GFF3 file.
+// -------------------------------------
+void SensorSPred :: ReadSPredGff3(char name[FILENAME_MAX+1], int SeqLen)
+{
+  
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+     // Forward
+    
+    if ( tmpFeature->getLocus()->getStrand() == '+' ) 
+    {
+    
+      if (idSo == "SO:0000163") //donor
+      {
+	vPosDonF.push_back( tmpFeature->getLocus()->getStart()-1 );
+	vValDonF.push_back( tmpFeature->getScore() );
+	
+      }
+      else 
+      {
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccF.push_back( tmpFeature->getLocus()->getEnd() );
+	  vValAccF.push_back( tmpFeature->getScore() );
+	}
+      }
+    }
+    // Reverse
+    if ( tmpFeature->getLocus()->getStrand() == '-' ) {
+      if(idSo == "SO:0000163") {
+	vPosDonR.push_back( tmpFeature->getLocus()->getEnd() );
+	vValDonR.push_back( tmpFeature->getScore() );
+      }
+      else {
+	if (idSo == "SO:0000164")  //acceptor
+	{
+	  vPosAccR.push_back( tmpFeature->getLocus()->getStart()-1);
+	  vValAccR.push_back( tmpFeature->getScore() );
+	}
+      }
+    }
+    it++;
+    i++;
+  }
+}
+
+void SensorSPred :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+  //fprintf(stderr, "Write in file %s\n",  name);
+  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
+  int i =0; 
+  for (i=0; i< vPosDonF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
+  }
+  
+  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
+  for (i=0; i< vPosAccF.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
+  }
+  
+  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
+  for (i=0; i< vPosDonR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
+  }
+  
+  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
+  for (i=0; i< vPosAccR.size();i++ )
+  {
+    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
+  }
+  fclose(fp);
 }
