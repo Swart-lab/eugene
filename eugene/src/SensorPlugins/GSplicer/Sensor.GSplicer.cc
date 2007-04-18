@@ -39,7 +39,6 @@ SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".Gsplicer");
 
-  fflush(stderr);
   
   inputFormat_ = to_string(PAR.getC("GSplicer.format", GetNumber(),1));
 
@@ -54,8 +53,10 @@ SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
     fprintf(stderr, "Reading splice site file (GeneSplicer)........forward, reverse ");
     ReadGSplicer(tempname, X->SeqLen);
   }
+  fflush(stderr);
+ 
   fprintf(stderr,"done\n");
-  Print(tempname);
+  //CN Print(tempname);
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 }
 

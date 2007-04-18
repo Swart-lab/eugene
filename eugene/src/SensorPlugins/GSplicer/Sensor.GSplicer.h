@@ -49,7 +49,7 @@ class SensorGSplicer : public Sensor
   virtual void GiveInfo   (DNASeq *X, int, DATA *);
   virtual void Plot       (DNASeq *X);
   virtual void PostAnalyse(Prediction *, FILE *);
-  void SensorGSplicer :: Print (char[FILENAME_MAX+1]);
+  void Print (char[FILENAME_MAX+1]);
 };
 
 extern "C" SensorGSplicer* builder0( int n, DNASeq *X) { return new SensorGSplicer(n, X);}
