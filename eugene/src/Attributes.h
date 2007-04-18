@@ -46,7 +46,7 @@ public:
   // Constructors/Destructors
   Attributes ( );
   Attributes ( std::string line ); 
-  void Attributes::InitializeDefault ( void);
+  void InitializeDefault ( void);
   virtual ~Attributes ( );
   void setId ( std::string id );
   std::string getId ( );
