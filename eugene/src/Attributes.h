@@ -6,11 +6,9 @@
 #include <vector>
 #include <iostream>
 
-#include "StringUtils.h"
-
 //Feature class:
-#include <Target.h>
-#include <Gap.h>
+#include "Target.h"
+#include "Gap.h"
 #include "Const.h"
     
 /**

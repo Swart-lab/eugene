@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "Attributes.h"
-#include "GeneFeatureSet.h";
+
 //Attribut de classe;
     std::vector<std::string> Attributes::attributeNames_;
     
@@ -39,10 +39,9 @@ Attributes::Attributes ( std::string line )
   if (attributeNames_.empty()) {
     InitializeAttributeNames();
   }	
-  //example : ID=match00001;Note=0907A18;Target=sp_P54263_SYN_THETH 6 34;
- 
+  
   InitializeDefault();
-  char * oneAttributeString;
+  char * oneAttributeString=new char[MAX_LINE];;
   char att[MAX_LINE];
   strcpy(att,line.c_str());
 
@@ -241,5 +240,4 @@ std::string Attributes::getString ( )
 	  my_attributes +=attributeNames_[15]+"="+to_string(length_)+";";
 	}
 	return my_attributes;
-	
 } 
