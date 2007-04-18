@@ -4,7 +4,7 @@
 
 #include <string>
 #include <iostream>
-
+#include "StringUtils.h"
 //Feature class:
 #include "Locus.h"
 #include "Attributes.h"
@@ -23,7 +23,7 @@ class GeneFeature
     string source_;
     string type_;
     Locus * locus_;
-    float score_;
+    double score_;
     char phase_;
     Attributes * attributes_;
     bool valid_ ;
@@ -35,7 +35,7 @@ class GeneFeature
     // Constructors/Destructors
     GeneFeature ( );
     GeneFeature ( char * ); 
-    GeneFeature (string seqId, string source, string type, int start, int end, float score, char strand, char phase, char * attributes);
+    //GeneFeature (string seqId, string source, string type, int start, int end, double score, char strand, char phase, char * attributes);
     virtual ~GeneFeature ( );
     
     void setValid ( bool valid);
@@ -48,7 +48,7 @@ class GeneFeature
     string getParent();
     string getType();
     Locus * getLocus();
-    float getScore();
+    double getScore();
     // Public attribute accessor methods
     //  
     friend ostream& operator<<(ostream& o, GeneFeature geneFeature )

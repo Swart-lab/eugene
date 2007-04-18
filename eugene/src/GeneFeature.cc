@@ -181,7 +181,7 @@ string GeneFeature::getType()
   return type_;
 }
 
-float GeneFeature::getScore()
+double GeneFeature::getScore()
 {
   return score_;
 }
