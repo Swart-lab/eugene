@@ -32,6 +32,8 @@
 #include "Prediction.h"
 #include "Const.h"
 #include "SensorIF.h"
+#include "GeneFeatureSet.h"
+    
 extern "C" {
 #include "GDIF/gdIF.h"
 }
@@ -60,7 +62,8 @@ class Sensor
   void PlotEndReg   (int pos,   int phase,  int color);
   void PlotRepeat   (int start, int end);
   int  GetNumber    (void) { return instanceNumber; }
-
+ //CN
+  std::string inputFormat_;
  public:
   unsigned char type;
   
