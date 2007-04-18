@@ -42,7 +42,11 @@ GeneFeature::GeneFeature ( char * line)
 {
   valid_= true ;
   line_=to_string(line);
-  StringUtils::Chomp( line_ );
+  //chomp : 
+  if (int pos=line_.find("\n") )
+  {
+    line_.at(pos)=' ';
+  }
   strcpy (line , line_.c_str());
   if ( line_.at(0) != '#' )
   {  

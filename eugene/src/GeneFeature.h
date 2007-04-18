@@ -4,7 +4,7 @@
 
 #include <string>
 #include <iostream>
-#include "StringUtils.h"
+
 //Feature class:
 #include "Locus.h"
 #include "Attributes.h"
