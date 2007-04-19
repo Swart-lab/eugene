@@ -39,7 +39,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
 
   type = Type_Acc|Type_Don|Type_Start;
 
-  isScaled = (PAR.getI("SMachine.isScaled",GetNumber()) != 0);
+  isScaled = PAR.getI("SMachine.isScaled",GetNumber()) ;
 
   fprintf(stderr, "Probing SpliceMachine (splice sites)..........");  
   fflush(stderr);
@@ -48,7 +48,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
   strcpy(tempname,seqname);
   inputFormat_ = to_string(PAR.getC("SMachine.format", GetNumber(),1));
 
-  if ( inputFormat_ == "GFF3" )
+  if ( inputFormat_ == "GFF3" ) // load from GFF3 file
   {
     strcat(tempname,".spliceM.gff3");
     ReadMachineGff3(tempname, X->SeqLen);
@@ -56,33 +56,26 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
     fprintf(stderr,"  done\n");
     fprintf(stderr, "Probing SpliceMachine (starts)................");  
     fflush(stderr);
-    Print(tempname);
   }
-  else
+  else // load from native format file
   {
-  
-  strcat(tempname,".spliceMAD");
-  if (!ProbeFile(NULL,tempname)) SpliceMachine();
-    
-  ReadSMachineSplices(tempname, X->SeqLen);
-  fprintf(stderr,"  done\n");
-  
-  CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
+    strcat(tempname,".spliceMAD");
+    if (!ProbeFile(NULL,tempname)) SpliceMachine();
+ 
+    ReadSMachineSplices(tempname, X->SeqLen);
+    fprintf(stderr,"  done\n");
+    CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 
-  fprintf(stderr, "Probing SpliceMachine (starts)................");  
-  fflush(stderr);
+    fprintf(stderr, "Probing SpliceMachine (starts)................");  
+    fflush(stderr);
 
-  strcpy(tempname,seqname);
-  strcat(tempname,".spliceMSt");
-  if (!ProbeFile(NULL,tempname)) SpliceMachine();
-
-  ReadSMachineStarts(tempname, X->SeqLen);
+    strcpy(tempname,seqname);
+    strcat(tempname,".spliceMSt");
+    if (!ProbeFile(NULL,tempname)) SpliceMachine();
+    ReadSMachineStarts(tempname, X->SeqLen);
   }
-  
   fprintf(stderr,"  done\n");
-  Print(tempname);
   CheckStart(X,vPosF, vPosR);
-
 }
 
 // ----------------------
@@ -102,8 +95,9 @@ SensorSMachine :: ~SensorSMachine ()
 // -------------------------------------
 //  Scaling modes for the 2 signal edges
 // -------------------------------------
-inline double ScaleIt(double w, double B, double P, char Scaled)
+inline double ScaleIt(double w, double B, double P, int Scaled)
 {
+  
   switch (Scaled) {
   case 0:
     return B*w-P;
@@ -120,7 +114,7 @@ inline double ScaleIt(double w, double B, double P, char Scaled)
   }
 }
 
-inline double ScaleItNo(double w, double B,double P, char Scaled)
+inline double ScaleItNo(double w, double B,double P, int Scaled)
 {
   switch (Scaled) {
     
@@ -252,7 +246,6 @@ void SensorSMachine :: ReadSMachineStarts(char *name, int Len)
 void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
-
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
   PositionGiveInfo = pos;
 
@@ -260,7 +253,6 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
   if(!vPosAccF.empty()) {
     if (update) 
       iAccF = lower_bound(vPosAccF.begin(), vPosAccF.end(), pos)-vPosAccF.begin();
-    
     if((iAccF<(int)vPosAccF.size()) && (vPosAccF[iAccF] == pos)) {
       d->sig[DATA::Acc].weight[Signal::Forward] += ScaleIt(vValAccF[iAccF],accB,accP,isScaled);
       d->sig[DATA::tStart].weight[Signal::Forward] += ScaleIt(vValAccF[iAccF],transSpliceB,0,0);
@@ -322,7 +314,7 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
   if (!vPosR.empty()) {
     if (update) 
       indexR = lower_bound(vPosR.begin(), vPosR.end(), pos)-vPosR.begin();
-    
+
     if((indexR<(int)vPosR.size()) && (vPosR[indexR] == pos)) {
       d->sig[DATA::Start].weight[Signal::Reverse] += ScaleIt(vValR[indexR], startB,startP,isScaled);
       d->sig[DATA::Start].weight[Signal::ReverseNo] += ScaleItNo(vValR[indexR], startB,startP,isScaled);
@@ -393,6 +385,9 @@ void SensorSMachine :: SpliceMachine()
 }
 
 
+// --------------------------
+//  Read SMachine GFF3 file 
+// --------------------------
 
 void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
 {
@@ -409,24 +404,23 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
   int i=0;
   while ( i<nbElement )
   {
-    //(*it)->second();
     GeneFeature * tmpFeature = (*it).second;
     string idSo=tmpFeature->getType();
+    
+    //Get SO code if feature correspond to the name or the synonym.
     if ( idSo.find("SO:") == string::npos )
     {
       string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
       idSo=tmp;
     }
-     // Forward
     
+     // Forward
     if ( tmpFeature->getLocus()->getStrand() == '+' ) 
     {
-    
       if (idSo == "SO:0000163") //donor
       {
 	vPosDonF.push_back( tmpFeature->getLocus()->getStart()-1 );
 	vValDonF.push_back( tmpFeature->getScore() );
-	
       }
       if (idSo == "SO:0000164")  //acceptor
       {
@@ -440,6 +434,7 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
       }
 
     }
+    
     // Reverse
     if ( tmpFeature->getLocus()->getStrand() == '-' ) {
       if(idSo == "SO:0000163") {
@@ -460,56 +455,4 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
     it++;
     i++;
   }
-
-}
-
-
-void SensorSMachine :: Print (char name[FILENAME_MAX+1])
-{
-  FILE *fp;
-  strcat (name, ".out");
-  if (!(fp = fopen(name, "w"))) {
-    fprintf(stderr, "cannot write in %s\n",  name);
-    exit(2);
-  }
-  //fprintf(stderr, "Write in file %s\n",  name);
-  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
-  int i =0; 
-  for (i=0; i< vPosDonF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
-  }
-  
-  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
-  for (i=0; i< vPosAccF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
-  }
-  
-  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
-  for (i=0; i< vPosDonR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
-  }
-  
-  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
-  for (i=0; i< vPosAccR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
-  }
-  
-  fprintf(fp, "vPosF %d\n",  vPosF.size());
-  
-  for (i=0; i< vPosF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosF[i],vValF[i]);
-  }
-  
-  fprintf(fp, "vPosR %d\n",  vPosR.size());
-  for (i=0; i< vPosR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosR[i],vValR[i]);
-  }
-
-  fclose(fp);
 }

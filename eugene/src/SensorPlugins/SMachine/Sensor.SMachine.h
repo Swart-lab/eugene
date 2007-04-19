@@ -40,7 +40,7 @@ class SensorSMachine : public Sensor
   int iAccF, iAccR, iDonF, iDonR;
   double accB, accP, donB, donP;
   double transSpliceB;
-  char isScaled;
+  int isScaled;
 
   int indexF, indexR;
   double startP, startB;
@@ -51,7 +51,6 @@ class SensorSMachine : public Sensor
   void SpliceMachine();
   
   void ReadMachineGff3(char *, int);
-  void Print(char *);
  public:
   SensorSMachine  (int n, DNASeq *X);
   virtual ~SensorSMachine ();
