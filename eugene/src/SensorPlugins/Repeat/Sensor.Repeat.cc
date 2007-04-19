@@ -43,7 +43,32 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
   
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".ig");
-  ncfile = FileOpen(NULL,tempname, "r",PAR.getI("EuGene.sloppy"));
+  
+  inputFormat_ = to_string(PAR.getC("Repeat.format", GetNumber(),1));
+
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    ReadRepeatGff3(tempname, X->SeqLen);
+  }
+  else
+  {
+    ReadRepeat(tempname,X->SeqLen);
+  }
+}
+
+
+// -----------------------------
+//  Read Repeat region file
+// -----------------------------
+void SensorRepeat :: ReadRepeat (char *name, int SeqLen) 
+{
+  FILE* ncfile;
+  int deb, fin;
+  char line[MAX_LINE];
+  int read;
+
+  ncfile = FileOpen(NULL,name, "r",PAR.getI("EuGene.sloppy"));
 
   if (ncfile) { 
 
@@ -53,20 +78,62 @@ SensorRepeat :: SensorRepeat (int n, DNASeq *X) : Sensor(n)
 
       int s = (int)vDeb.size();
       deb   = Max(1,deb)-1;
-      fin   = Min(X->SeqLen,fin)-1;
+      fin   = Min(SeqLen,fin)-1;
       if(deb > fin  || (read <2) ||
-         (s != 0  &&  vFin[s-1] >= deb)) {
-        fprintf(stderr,"\nError in ig file %s, line %d\n", tempname, s+1);
-        exit(2);
-      }
-      vDeb.push_back( deb );
-      vFin.push_back( fin );
+	 (s != 0  &&  vFin[s-1] >= deb)) {
+	fprintf(stderr,"\nError in ig file %s, line %d\n", name, s+1);
+	exit(2);
+	 }
+	 vDeb.push_back( deb );
+	 vFin.push_back( fin );
     }
-  fprintf(stderr,"done\n");
+    fprintf(stderr,"done\n");
   } else
   {
-  fprintf(stderr,"no file\n");
+    fprintf(stderr,"no file\n");
   }
+}
+
+// -----------------------------
+//  Read Repeat region gff3 file
+// -----------------------------
+void SensorRepeat :: ReadRepeatGff3 (char *name, int SeqLen) 
+{
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * soTerms = new char[FILENAME_MAX+1];
+  strcpy(soTerms , PAR.getC("eugene_dir"));
+  strcat(soTerms , filenameSoTerms );
+  int deb, fin;
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  int nbElement=geneFeatureSet->getNbFeature();
+  //geneFeatureSet->printFeature();
+  int i=0;
+  while ( i<nbElement )
+  {
+    //(*it)->second();
+    GeneFeature * tmpFeature = (*it).second;
+    string idSo=tmpFeature->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+    int s = (int)vDeb.size();
+    deb   = Max(1,tmpFeature->getLocus()->getStart())-1;
+    fin   = Min(SeqLen,tmpFeature->getLocus()->getEnd())-1;
+    if(deb > fin || (s != 0  &&  vFin[s-1] >= deb) || strcmp (idSo.c_str(),"SO:0000657")!=0) 
+    {
+      fprintf(stderr,"\nError in ig file %s, line %d\n", name, s+1);
+      exit(2);
+    }
+    vDeb.push_back( deb );
+    vFin.push_back( fin );
+    it++;
+    i++;
+  }
+  fprintf(stderr,"done\n");
+  
 }
 
 // ----------------------
@@ -99,7 +166,6 @@ void SensorRepeat :: Init (DNASeq *X)
 void SensorRepeat :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
-
   if ( (PositionGiveInfo == -1) || (pos != PositionGiveInfo+1) ) update = true; // update indexes on vectors
   PositionGiveInfo = pos;
 

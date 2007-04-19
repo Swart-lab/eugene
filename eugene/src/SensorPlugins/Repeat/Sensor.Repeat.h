@@ -37,7 +37,8 @@ class SensorRepeat : public Sensor
   double intronPenalty;
   double UTRPenalty;
   double exonPenalty;
-
+  void ReadRepeat (char *name, int SeqLen);
+  void ReadRepeatGff3 (char *name, int SeqLen);
  public:
   SensorRepeat  (int n, DNASeq *X);
   virtual ~SensorRepeat   ();
