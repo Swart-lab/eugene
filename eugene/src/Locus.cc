@@ -34,24 +34,24 @@ Locus::Locus (int start, int end, char strand)
   start_ =start;
   end_   =end;
   strand_=strand;
-  cout << "Constructeur Locus :  " << getString() <<endl;
 }
 
-Locus::Locus (Locus *locus )
+Locus::Locus (const Locus & locus )
 {
-  start_ =locus->getStart();
-  end_   =locus->getEnd();
-  strand_=locus->getStrand();
+  start_ =locus.getStart();
+  end_   =locus.getEnd();
+  strand_=locus.getStrand();
 }
 
 // -----------------------
 //  Destructeur
 // -----------------------
-Locus::~Locus ( ) { }
+Locus::~Locus ( ) 
+{}
 
 
 //getString
-std::string Locus::getString ( )
+std::string Locus::getString ( ) const
 {
 	std::string my_locus = to_string(start_)+" "+to_string(end_);
 	if ( strand_ != ' ' )
@@ -61,11 +61,6 @@ std::string Locus::getString ( )
 	return my_locus;
 }
 
-// surcharge <<
-// ostream& operator<<(ostream &o, const Locus *locus )
-// {
-// 	return o << locus->getString();
-// }
 
 // -----------------------
 //  Start
@@ -74,7 +69,7 @@ void Locus::setStart ( int start )
 {
 	start_=start;
 }
-int Locus::getStart ( )
+int Locus::getStart ( ) const
 {
 	return start_;
 }
@@ -86,7 +81,7 @@ void Locus::setEnd ( int end )
 {
 	end_=end;
 }
-int Locus::getEnd ( )
+int Locus::getEnd ( ) const
 {
 	return end_;
 }
@@ -99,7 +94,7 @@ void Locus::setStrand ( char strand )
 {
 	strand_=strand;
 }
-char Locus::getStrand ( )
+char Locus::getStrand ( ) const
 {
 	return strand_;
 }

@@ -46,7 +46,7 @@ public:
 
   Locus ( );
   Locus (int start, int end, char strand);
-  Locus (Locus *range );
+  Locus (const Locus & locus );
   virtual ~Locus ( );
 
   // Puplic attribute accessor methods
@@ -54,16 +54,16 @@ public:
 
   //start
   void setStart ( int start );
-  int getStart ( );
+  int getStart ( ) const;
 
   void setEnd ( int end );
-  int getEnd ( );
+  int getEnd ( ) const;
 
   void setStrand ( char strand );
-  char getStrand ( );
-  std::string getString ( );
+  char getStrand ( ) const;
+  std::string getString ( ) const;
 
-  friend std::ostream& operator<<(std::ostream& o, Locus range )
+  friend std::ostream& operator<<(std::ostream& o, const Locus & range )
   {
 	return o << range.getString();
   }
