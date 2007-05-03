@@ -33,40 +33,77 @@ GeneFeature::GeneFeature()
   phase_='.';
   attributes_=NULL;
   valid_= true ;
+  length_=0;
+  line_=" ";
 }
 
 
 //Constructor from a gff3 line
-
+// prerequis : no \n at the end of the line.
 GeneFeature::GeneFeature ( char * line) 
 {
+  
   valid_= true ;
   line_=to_string(line);
   //chomp : 
-  if (int pos=line_.find("\n") )
+  size_t pos=line_.find("\n") ;
+  if (pos != string::npos)
   {
-    line_.at(pos)=' ';
+    line_.at(pos)='\0';
+    line[pos]='\0';
   }
-  strcpy (line , line_.c_str());
-  if ( line_.at(0) != '#' )
+  
+  if ( line_[0] != '#' )
   {  
     ParseLine(line); 
   }
 }
 
+//Constructor from a gff3 line
+
+GeneFeature::GeneFeature ( const GeneFeature & gene)
+{
+
+  fprintf (stderr,"%p constructeur par recopy geneFeature %p \n",this,& gene);
+  fflush (stderr);
+  line_=gene.line_;
+  id_=gene.id_;
+  seqid_=gene.seqid_;
+  source_=gene.source_;
+  type_=gene.type_;
+  if (gene.locus_ != NULL)
+  {
+    locus_=new Locus( *gene.locus_ );
+  }
+  score_=gene.score_;
+  phase_=gene.phase_;
+  if (gene.attributes_ != NULL)
+  {
+    attributes_=new Attributes ( *gene.attributes_);
+  }
+  valid_= gene.valid_ ;
+  length_=gene.length_;
+  fprintf (stderr,"%p end constructeur par recopy \n",this);
+  fflush (stderr);
+  
+}
 // ---------------------------------------
 //  ParseLine : Parse a gff3 line with a token, check SO/SOFA code and Parent Attribut.
 // ---------------------------------------
 
 void GeneFeature::ParseLine ( char * line ) 
 {
-  char * token = strtok (line,"\t");
+  
+  char * token=new char [MAX_LINE];
+  char delims[] = "\t";
+  token = strtok (line,delims);
   int i =0;
   int start, end;
   char strand;
   attributes_=NULL;
   locus_=NULL;
-  while ( token != NULL )
+  length_=0;
+  while ( token != NULL && i<9)
   {
     //cout << "Token "<<i<< " valeur: "<<token<<endl;
     switch (i)
@@ -108,18 +145,24 @@ void GeneFeature::ParseLine ( char * line )
       }
       case 6 : 
       {
-	strand= token[0];
+	char * tmp= new char [MAX_LINE];
+	strcpy (tmp, token);
+	strand= tmp[0];
 	break;
       }
       case 7 : 
       {
-	phase_= token[0];
+	char * tmp= new char [MAX_LINE];
+	strcpy (tmp, token);
+	phase_= tmp[0];
 	break;
       }
       case 8 : 
       {
 	//cout << "Attributes : " << token <<endl;
-	attributes_ = new Attributes (to_string (token));
+	char * attributeString = new char[MAX_GFF_LINE];
+	strcpy (attributeString , token );
+	attributes_ = new Attributes (attributeString);
 	id_=attributes_->getId();
 	if ( id_ == "" )
 	{
@@ -128,19 +171,33 @@ void GeneFeature::ParseLine ( char * line )
 	}
 	break;
       }
+      
+
     }
-    token = strtok (NULL,"\t");
+
+    token = strtok (NULL,delims);
     i++;
   }
   locus_  = new Locus (start, end, strand);
+  length_=end-start+1;
+
 }
+
+
 
 // -----------------------
 //  Destructeur
 // -----------------------
 GeneFeature::~GeneFeature ( ) 
 { 
-  delete locus_;
+  if (locus_ != NULL)
+  {
+    delete locus_;
+  }
+  if (attributes_ != NULL)
+  {
+    delete attributes_;
+  }
 }
 
 // -----------------------
@@ -153,7 +210,7 @@ void GeneFeature::setSeqId ( string seqid )
 {
   seqid_ = seqid;
 }
-string GeneFeature::getSeqId ( )
+string GeneFeature::getSeqId ( ) const 
 {
   return seqid_;
 }
@@ -161,14 +218,14 @@ string GeneFeature::getSeqId ( )
 // Id of feature , copy from attributes
 //
 
-string GeneFeature::getId ( )
+string GeneFeature::getId ( ) const 
 {
   return id_;
 }
 
 // Parent attributes get from attributes class if exists
 //
-string GeneFeature::getParent()
+string GeneFeature::getParent() const 
 {
   string res="";
   if (attributes_ != NULL )
@@ -180,12 +237,12 @@ string GeneFeature::getParent()
 
 // Type
 //
-string GeneFeature::getType()
+string GeneFeature::getType() const 
 {
   return type_;
 }
 
-double GeneFeature::getScore()
+double GeneFeature::getScore() const 
 {
   return score_;
 }
@@ -195,14 +252,14 @@ void GeneFeature::setValid (bool valid)
 {
   valid_= valid;
 }
-bool GeneFeature::getValid ( )
+bool GeneFeature::getValid ( ) const 
 {
   return valid_;
 }
 // ---------------------------------------
 //  getString : Build a string gff3 format
 // ---------------------------------------
-string GeneFeature::getString ( )
+string GeneFeature::getString ( ) const 
 {
   string geneFeature =seqid_+"\t"+source_+"\t"+type_+"\t";
   if ( locus_ != NULL )
@@ -222,7 +279,22 @@ string GeneFeature::getString ( )
 } 
 
 //Locus
-Locus * GeneFeature::getLocus ( )
+Locus * GeneFeature::getLocus ( )  const 
 {
   return locus_;
+}
+
+char GeneFeature::getPhase ( ) const 
+{
+  return phase_;
+}
+
+int GeneFeature::getLength ( ) const 
+{
+  return (length_);
+}
+
+Attributes * GeneFeature::getAttributes ( ) const 
+{
+  return (attributes_);
 }
