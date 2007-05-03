@@ -35,7 +35,7 @@ Target::Target ( )
 Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Locus * locus) 
 {
   name_ = name;
-  locus_ = new Locus (locus);
+  locus_ = new Locus (*locus);
   sequenceData_ = sequenceData;
   targetLength_ = targetLength;
   isFullLength_ = isFullLength; 
@@ -54,7 +54,7 @@ Target::Target ( std::string name, std::string sequenceData,  int targetLength, 
 Target::Target (Target * target) 
 {
   name_ = target->getName();
-  locus_ = new Locus (target->locus_);
+  locus_ = new Locus (*target->locus_);
   sequenceData_ = target->sequenceData_;
   targetLength_ = target->targetLength_;
   isFullLength_ = target->isFullLength_;
@@ -65,7 +65,7 @@ Target::Target (Target * target)
 
 Target::~Target ( ) 
 { 
-	delete locus_;
+  delete locus_;
 }
 
 
@@ -132,7 +132,7 @@ int Target::getIsFullLength ( )
 
 
 //getString
-std::string Target::getString ( )
+std::string Target::getString ( )  const 
 {
 	std::string my_target = "";
 	if ( name_ != ""  && locus_ != NULL)

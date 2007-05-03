@@ -76,8 +76,8 @@ public:
 
   void setIsFullLength ( int isFullLength );
   int getIsFullLength ( );
-  std::string getString ( );
-  friend std::ostream& operator<<(std::ostream& o, Target target )
+  std::string getString ( ) const ;
+  friend std::ostream& operator<<(std::ostream& o, const Target & target )
   {
 	return o << target.getString();
   }
