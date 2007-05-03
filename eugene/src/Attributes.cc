@@ -32,10 +32,8 @@ Attributes::Attributes()
 }
 
 
-
 Attributes::Attributes ( std::string line ) 
 {
-
   if (attributeNames_.empty()) {
     InitializeAttributeNames();
   }	
@@ -58,13 +56,14 @@ Attributes::Attributes ( std::string line )
       //Note=0907A18;
       char value[MAX_LINE]="";
       int i=0;
-      while (i<NB_ATTRIBUTES_NAMES_ && strcmp (value,"") ==0 && oneAttributeString != NULL)  {
-	
+      while (i<NB_ATTRIBUTES_NAMES_ && strcmp (value,"") ==0 && oneAttributeString != NULL)  
+      {
+	// cherche dans le tableau attributeNames_ l'indice correspondand a l'attribut en cours.
 	if ( strcmp (attributeNames_[i].c_str(),oneAttributeString) ==0  ) 
 	{
 	  oneAttributeString = strtok (NULL,"=;");
 	  strcpy(value,oneAttributeString);
-	  // else at end of loop, add 1, wich no reason.
+	  // else at end of loop, add 1, with no reason.
 	  i--;
         }
 	i++;
@@ -72,6 +71,7 @@ Attributes::Attributes ( std::string line )
       if  ( i >= NB_ATTRIBUTES_NAMES_){
         break;
       }
+      //en fonction de lindice i on sait sur quel attribut on se situe. 
       if ( attributeNames_[i] == "ID" && ( strcmp(value,"")!=0 ) ) {
 	id_=to_string(value);
       }
@@ -147,12 +147,34 @@ Attributes::Attributes ( std::string line )
     }
 }
 
+Attributes::Attributes ( const Attributes &  attribut ) 
+{
+  id_=attribut.id_;
+  name_=attribut.name_;
+  alias_=attribut.alias_;
+  note_=attribut.note_;
+  parent_=attribut.parent_;
+  if (attribut.target_ != NULL )
+  {
+    target_=new Target( attribut.target_);
+  }
+  database_=attribut.database_;
+  derivesFrom_=attribut.derivesFrom_;
+  ontologyTerm_=attribut.ontologyTerm_;
+  length_=attribut.length_;
+  nbExon_=attribut.nbExon_;
+}
+
+
 // -----------------------
 //  Destructeur
 // -----------------------
 Attributes::~Attributes ( ) 
 { 
-// gaps_.clear();
+  if  ( target_ != NULL )
+  {
+    delete target_;
+  }
 }
 //Initialize
 void Attributes::InitializeDefault ( void)
@@ -169,6 +191,7 @@ void Attributes::InitializeDefault ( void)
   length_=-1;
   nbExon_=-1;
   //gaps_ = new std::vector();
+  
 }
 
 // -----------------------
@@ -181,23 +204,27 @@ void Attributes::setId ( std::string id )
 {
 	id_ = id;
 }
-std::string Attributes::getId ( )
+std::string Attributes::getId ( ) const 
 {
 	return id_;
 }
 
-std::string Attributes::getParent ( )
+std::string Attributes::getParent ( ) const 
 {
   return parent_;
 }
 
-std::string Attributes::getOntologyTerm ()
+std::string Attributes::getOntologyTerm () const 
 {
   return ontologyTerm_;
 }
 
+Target * Attributes::getTarget () const 
+{
+  return target_;
+}
 //getString
-std::string Attributes::getString ( )
+std::string Attributes::getString ( ) const 
 {	
 	std::string my_attributes ="";
 	if ( id_ != "" ) {
@@ -240,4 +267,6 @@ std::string Attributes::getString ( )
 	  my_attributes +=attributeNames_[15]+"="+to_string(length_)+";";
 	}
 	return my_attributes;
+	
 } 
+

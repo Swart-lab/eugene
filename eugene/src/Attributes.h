@@ -23,39 +23,43 @@ class Attributes
 private:
  
   //From gff3 definition
-  std::string id_;
-  std::string name_;
-  std::string alias_;
-  std::string parent_;
-  Target * target_;
+  string    id_;
+  string    name_;
+  string    alias_;
+  string    parent_;
+  Target *  target_;
   // on an alignment list of the Gap.
-//  std::vector<Gap> gaps_;
-  std::string derivesFrom_;
-  std::string note_;
-  std::string dbxref_;
-  std::string ontologyTerm_;
-  std::string database_;  
+//  vector < Gap * > gaps_;
   
+  string derivesFrom_;
+  string note_;
+  string dbxref_;
+  string ontologyTerm_;
+  string database_;  
   //For eugene definition
-  int length_;
-  int nbExon_;
+  int         length_;
+  int         nbExon_;
 
 public:
   
 
   // Constructors/Destructors
-  Attributes ( );
-  Attributes ( std::string line ); 
+  Attributes  ( );
+  Attributes  ( std::string line ); 
+  Attributes  ( const Attributes & attribut ) ;
+  ~Attributes ( );
+  
   void InitializeDefault ( void);
-  virtual ~Attributes ( );
-  void setId ( std::string id );
-  std::string getId ( );
-  std::string getString ( );
-  std::string getParent ( );
-  std::string getOntologyTerm ( );
+  
+  void        setId ( std::string id );
+  std::string getId ( ) const ;
+  std::string getString ( ) const ;
+  std::string getParent ( ) const ;
+  std::string getOntologyTerm ( ) const ;
+  Target *    getTarget ( ) const ;
   // Puplic attribute accessor methods
   //  
-  friend std::ostream& operator<<(std::ostream& o, Attributes attributes )
+  friend std::ostream& operator<<(std::ostream& o, const Attributes & attributes )
   {
 	return o << attributes.getString();
   }
