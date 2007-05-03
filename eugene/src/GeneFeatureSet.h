@@ -22,16 +22,24 @@ class GeneFeatureSet
   
   private:
     map <string, GeneFeature *> features_;
+    vector <GeneFeature *> vRefFeatures_;
+    map <string, int> mPosFeatures_;
+    int lastIndex_;
+    map <string, vector<string> > parentToChildren_;
   public:
     static SoTerms * soTerms_ ;
     // Constructors/Destructors
     GeneFeatureSet ( );
-    GeneFeatureSet ( char* featuresFilename, char* soTermsFilename ); 
+    GeneFeatureSet ( char* featuresFilename, char* soTermsFilename );
+    GeneFeatureSet ( char* soTermsFilename );  
     virtual ~GeneFeatureSet ( );
     bool existsGeneFeature ( string geneFeatureId ) ;
     void printFeature();
-    map<string, GeneFeature *>::iterator getIterator ();
+    vector< GeneFeature *>::iterator getIterator ();
+    map<string, vector<string> >::iterator getIteratorParentToChildren ();
     int getNbFeature ();
+    int getNbParentFeature ();
+    GeneFeature * getGeneFeature (string id );
  
 };
 

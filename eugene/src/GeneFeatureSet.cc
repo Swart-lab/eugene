@@ -31,6 +31,7 @@ SoTerms *  GeneFeatureSet::soTerms_= new SoTerms ();
 //Constructor
 GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename ) 
 {
+  lastIndex_=0;
   // si premier object geneFeatureSet il faut initialiser la variable de classe
   if ( GeneFeatureSet::soTerms_->size() == 0 ) {
     //cout<<"Load SoTerms"<<endl;
@@ -40,7 +41,6 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
   FILE *fp;
   if (!(fp = fopen(featuresFilename, "r"))) {
     fprintf(stderr, "Class GeneFeatureSet : cannot open file %s\n", featuresFilename);
-    exit(2);
   }
   char value[100]="";
   int i=1;
@@ -49,63 +49,116 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
     //cout  << "LINE: "<< line;
     if ( line[0] != '#' )
     {  
-      
       GeneFeature * tempGeneFeature = new GeneFeature (line);
+      // cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
+
       if ( tempGeneFeature->getParent()!="" && ! existsGeneFeature( tempGeneFeature->getParent() ) )
       {
 	tempGeneFeature->setValid(false);
-	cout << "WARNING : parent " << tempGeneFeature->getParent()  << " does not exist "<<endl;
+	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist "<<endl;
       }
+      else
+      {
+	if (tempGeneFeature->getParent()!="")
+	{
+	   parentToChildren_[tempGeneFeature->getParent()].push_back(tempGeneFeature->getId());
+	}
+      }
+     
       if ( tempGeneFeature->getValid() )
       {
-	features_[tempGeneFeature->getId()]=tempGeneFeature;
-	//cout << "KEEP : " << tempGeneFeature->getId()<<  endl;
+	vRefFeatures_.push_back( tempGeneFeature);
+	mPosFeatures_[tempGeneFeature->getId()]=lastIndex_;
+	lastIndex_++;
       }
      
     }
-    
   }
   fclose(fp);
-  //cout<<"End constructor : "<<featuresFilename <<" SO term : "<< soTermsFilename <<endl;
+
+}
+
+//Constructor
+GeneFeatureSet::GeneFeatureSet (char* soTermsFilename ) 
+{
+ 
+  // si premier object geneFeatureSet il faut initialiser la variable de classe
+  if ( GeneFeatureSet::soTerms_->size() == 0 ) {
+    //cout<<"Load SoTerms"<<endl;
+    GeneFeatureSet::soTerms_->loadFile(soTermsFilename);
+  }
+
 }
 
 
-void GeneFeatureSet::printFeature()
+/*void GeneFeatureSet::getIteratorParentToChildren()
 {
   map <string, GeneFeature *>::iterator it;
+  map <string, vector > analyse;
   for ( it=features_.begin() ; it != features_.end(); it++ )
   {
-    cout << "features_ Key : " << (*it).first << " Value : " << *((*it).second);
-    
+    cout << "features_ Key : >" << (*it).first << "< Value : >" << *((*it).second)<<"<";
+    if ( ((*it).second)->getParent() != "" )
+    {
+      analyse[((*it).second)->getParent()]
+    }
   }
  // cout << "features_ Key : " << (*it).first << " Value : " << (*it).second << endl;
 }
-
-
+*/
 // -----------------------
 //  Destructeur
 // -----------------------
 GeneFeatureSet::~GeneFeatureSet ( ) 
 { 
-    features_.clear();
+  cout << "detroy GeneFeatureSet"<<endl;
+  vector < GeneFeature *>::iterator it;
+  for ( it=vRefFeatures_.begin() ; it != vRefFeatures_.end(); it++ )
+  {
+    delete *it ;
+  }
+  vRefFeatures_.clear();
+  mPosFeatures_.clear();
 }
 
 bool GeneFeatureSet::existsGeneFeature ( string geneFeatureId ) 
 {
-  map<string, GeneFeature *>::iterator it=features_.find(geneFeatureId);
+  map<string, int>::iterator it=mPosFeatures_.find(geneFeatureId);
   bool res = true;
-  if (it == features_.end()) {
+  if ( mPosFeatures_.end() == it )
     res=false;
-  }
   return res;
 }
 
-map<string, GeneFeature *>::iterator GeneFeatureSet::getIterator ()
+map<string, vector<string> >::iterator GeneFeatureSet::getIteratorParentToChildren ()
 {
-  return features_.begin() ;
+  return parentToChildren_.begin() ;
+}
+int GeneFeatureSet::getNbParentFeature ()
+{
+  return parentToChildren_.size();
+}
+
+vector< GeneFeature *>::iterator GeneFeatureSet::getIterator ()
+{
+  return vRefFeatures_.begin() ;
 }
 
 int GeneFeatureSet::getNbFeature ()
 {
-  return features_.size();
+  return vRefFeatures_.size();
+}
+
+GeneFeature * GeneFeatureSet::getGeneFeature (string id )
+{
+  return vRefFeatures_[(*mPosFeatures_.find(id)).second];
+}
+
+void GeneFeatureSet::printFeature()
+{
+  int i = 0 ;
+  for ( i=0 ; i < lastIndex_ ; i++ )
+  {
+    cout << *(vRefFeatures_[i]) << endl;
+  }
 }
