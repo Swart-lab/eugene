@@ -69,7 +69,6 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
   }
 
   
-  
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
   
   // vectors for reverse are put in the increasing order
@@ -195,21 +194,21 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
 // -------------------------------------
 void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
 {
-  
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber());
   char * soTerms = new char[FILENAME_MAX+1];
   strcpy(soTerms , PAR.getC("eugene_dir"));
   strcat(soTerms , filenameSoTerms );
   
   GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
-  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
+  
   int i=0;
   while ( i<nbElement )
   {
     //(*it)->second();
-    GeneFeature * tmpFeature = (*it).second;
+    GeneFeature * tmpFeature = *it;
     string idSo=tmpFeature->getType();
     if ( idSo.find("SO:") == string::npos )
     {
@@ -217,7 +216,7 @@ void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
       idSo=tmp;
     }
      // Forward
-    
+   // cout << "ID  SO : "<<idSo<<" strand : "<<tmpFeature->getLocus()->getStrand()<<endl;
     if ( tmpFeature->getLocus()->getStrand() == '+' ) 
     {
     
@@ -231,7 +230,7 @@ void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
       {
 	if (idSo == "SO:0000164")  //acceptor
 	{
-	  vPosAccF.push_back(tmpFeature->getLocus()->getEnd() );
+	  vPosAccF.push_back( tmpFeature->getLocus()->getEnd() );
 	  vValAccF.push_back( tmpFeature->getScore() );
 	}
       }
@@ -371,25 +370,25 @@ void SensorNG2 :: Print (char name[FILENAME_MAX+1])
   int i =0; 
   for (i=0; i< vPosDonF.size();i++ )
   {
-    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
+    fprintf(fp, "vPosDon %d\t%f\n",  vPosDonF[i],vValDonF[i]);
   }
   
   fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
   for (i=0; i< vPosAccF.size();i++ )
   {
-    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
+    fprintf(fp, "vPosAccF %d\t%f\n",  vPosAccF[i],vValAccF[i]);
   }
   
   fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
   for (i=0; i< vPosDonR.size();i++ )
   {
-    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
+    fprintf(fp, "vPosDonR %d\t%f\n",  vPosDonR[i],vValDonR[i]);
   }
   
   fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
   for (i=0; i< vPosAccR.size();i++ )
   {
-    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
+    fprintf(fp, "vPosAccR %d\t%f\n",  vPosAccR[i],vValAccR[i]);
   }
   fclose(fp);
 }

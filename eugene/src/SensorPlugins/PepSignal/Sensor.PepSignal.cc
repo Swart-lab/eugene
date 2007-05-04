@@ -66,14 +66,14 @@ void SensorPepSignal :: ReadPepSignalGff3 (char name[FILENAME_MAX+1], int Len)
   strcat(soTerms , filenameSoTerms );
   
   GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
-  map<string, GeneFeature *>::iterator it = geneFeatureSet->getIterator();
+  vector <GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
   int i=0;
   while ( i<nbElement )
   {
     //(*it)->second();
-    GeneFeature * tmpFeature = (*it).second;
+    GeneFeature * tmpFeature = *it;
     string idSo=tmpFeature->getType();
     if ( idSo.find("SO:") == string::npos )
     {

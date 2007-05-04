@@ -49,7 +49,7 @@ class SensorSMachine : public Sensor
   void ReadSMachineStarts(char *, int);
 
   void SpliceMachine();
-  
+  void Print (char name[FILENAME_MAX+1]);
   void ReadMachineGff3(char *, int);
  public:
   SensorSMachine  (int n, DNASeq *X);
