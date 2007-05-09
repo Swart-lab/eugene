@@ -259,7 +259,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
 
    idxf++;
    bool firstOk = false; 
-   // test des frontières suivantes
+   // test des frontiï¿½res suivantes
    while ((idxe < exonsNumber-1) && (idxf < g->nbFea()))
      {
        if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
@@ -420,6 +420,7 @@ AltEst :: ~AltEst ()
 int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen)
 {
   int  read, deb, fin, poids, brin, EstDeb, EstFin, filtertype, totalread;
+  int  PEstFin;
   char *EstId, *PEstId, *tmp;
   char A[128], B[128];
   FILE *fp;
@@ -429,13 +430,15 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
   A[0]   = B[0] = 0;
   EstId  = A;
   PEstId = B;
+  PEstFin = -1;
 
   fp = FileOpen(NULL, name, "r");
   totalread = 0;
 
   while ((read=fscanf(fp,"%d %d %d %*s %d %s %d %d\n",
 		      &deb, &fin, &poids, &brin, EstId, &EstDeb, &EstFin)) == 7) {
-    if (strcmp(EstId, PEstId) == 0) {
+
+    if ((strcmp(EstId, PEstId) == 0) && (EstDeb > PEstFin)) {
       //voae_AltEst[totalAltEstNumber-1].AddExon(deb-1,fin-1);
       oaetmp.AddExon(deb-1, fin-1);
     }
@@ -462,6 +465,7 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
       PEstId = EstId;
       EstId  = tmp;
     }
+	PEstFin = EstFin;
   }
   // last est
   oaetmp.ExtremitiesTrim(exonucleasicLength);
