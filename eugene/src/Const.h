@@ -34,6 +34,7 @@
 
 const int FASTA_Len = 50;
 const int MAX_LINE  = 300;
+const int MAX_GFF_LINE  = 2048;
 const double NINFINITY   = log(0.0);
 
 // Les Hits EST
