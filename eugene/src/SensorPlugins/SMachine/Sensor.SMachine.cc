@@ -75,7 +75,6 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
     ReadSMachineStarts(tempname, X->SeqLen);
   }
   fprintf(stderr,"  done\n");
-  Print(tempname);
   CheckStart(X,vPosF, vPosR);
 }
 
@@ -458,52 +457,3 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
   }
 }
 
-void SensorSMachine :: Print (char name[FILENAME_MAX+1])
-{
-  FILE *fp;
-  strcat (name, ".out");
-  if (!(fp = fopen(name, "w"))) {
-    fprintf(stderr, "cannot write in %s\n",  name);
-    exit(2);
-  }
-  //fprintf(stderr, "Write in file %s\n",  name);
-  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
-  int i =0; 
-  for (i=0; i< vPosDonF.size();i++ )
-  {
-    fprintf(fp, "vPosDonF %d\t%f\n", vPosDonF[i],vValDonF[i]);
-  }
-  
-  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
-  for (i=0; i< vPosAccF.size();i++ )
-  {
-    fprintf(fp, "vPosAccF %d\t%f\n", vPosAccF[i],vValAccF[i]);
-  }
-  
-  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
-  for (i=0; i< vPosDonR.size();i++ )
-  {
-    fprintf(fp, "vPosDonR %d\t%f\n", vPosDonR[i],vValDonR[i]);
-  }
-  
-  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
-  for (i=0; i< vPosAccR.size();i++ )
-  {
-    fprintf(fp, "vPosAccR %d\t%f\n", vPosAccR[i],vValAccR[i]);
-  }
-  
-  fprintf(fp, "vPosF %d\n",  vPosF.size());
-  
-  for (i=0; i< vPosF.size();i++ )
-  {
-    fprintf(fp, "vPosF %d\t%f\n", vPosF[i],vValF[i]);
-  }
-  
-  fprintf(fp, "vPosR %d\n",  vPosR.size());
-  for (i=0; i< vPosR.size();i++ )
-  {
-    fprintf(fp, "vPosR %d\t%f\n", vPosR[i],vValR[i]);
-  }
-
-  fclose(fp);
-}
