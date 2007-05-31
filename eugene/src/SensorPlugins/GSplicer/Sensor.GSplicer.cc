@@ -89,43 +89,6 @@ void SensorGSplicer :: Init (DNASeq *X)
   if (PAR.getI("Output.graph")) Plot(X);
 }
 
-void SensorGSplicer :: Print (char name[FILENAME_MAX+1])
-{
-  FILE *fp;
-  strcat (name, ".out");
-  if (!(fp = fopen(name, "w"))) {
-    fprintf(stderr, "cannot write in %s\n",  name);
-    exit(2);
-  }
-  //fprintf(stderr, "Write in file %s\n",  name);
-  fprintf(fp, "vPosDon %d\n",  vPosDonF.size());
-  int i =0; 
-  for (i=0; i< vPosDonF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosDonF[i],vValDonF[i]);
-  }
-  
-  fprintf(fp, "vPosAccF %d\n",  vPosAccF.size());
-  for (i=0; i< vPosAccF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosAccF[i],vValAccF[i]);
-  }
-  
-  fprintf(fp, "vPosDonR %d\n",  vPosDonR.size());
-  for (i=0; i< vPosDonR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosDonR[i],vValDonR[i]);
-  }
-  
-  fprintf(fp, "vPosAccR %d\n",  vPosAccR.size());
-  for (i=0; i< vPosAccR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosAccR[i],vValAccR[i]);
-  }
-fclose(fp);
-}
-
-
 // -------------------------------------
 //  Read GeneSplicer GFF3 file.
 // -------------------------------------
