@@ -56,7 +56,6 @@ SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
  
   fprintf(stderr,"done\n");
-  //CN Print(tempname);
   CheckSplices(X,vPosAccF, vPosDonF, vPosAccR, vPosDonR);
 }
 
