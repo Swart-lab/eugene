@@ -53,7 +53,6 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
     ReadNStartGff3(tempname, X->SeqLen);
     fprintf(stderr,"forward, reverse done\n");
     fflush(stderr);
-    Print(tempname);
   }
   else
   {
@@ -68,7 +67,6 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
     ReadNStartR(tempname, X->SeqLen);
     fprintf(stderr," reverse done\n");
     fflush(stderr);
-    Print(tempname);
   }
   CheckStart(X,vPosF, vPosR);
 
@@ -201,30 +199,7 @@ void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
 }
 
 
-void SensorNStart :: Print (char name[FILENAME_MAX+1])
-{
-  FILE *fp;
-  strcat (name, ".out");
-  if (!(fp = fopen(name, "w"))) {
-    fprintf(stderr, "cannot write in %s\n",  name);
-    exit(2);
-  }
-  //fprintf(stderr, "Write in file %s\n",  name);
-  fprintf(fp, "vPosF %d\n",  vPosF.size());
-  int i =0; 
-  for (i=0; i< vPosF.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosF[i],vValF[i]);
-  }
-  
-  fprintf(fp, "vPosR %d\n",  vPosR.size());
-  for (i=0; i< vPosR.size();i++ )
-  {
-    fprintf(fp, "%d\t%f\n",  vPosR[i],vValR[i]);
-  }
 
-  fclose(fp);
-}
 // ------------------------
 //  GiveInfo signal start.
 // ------------------------

@@ -39,7 +39,7 @@ class SensorPepSignal : public Sensor
   
   void ReadPepSignalStarts (char *, int);
   void ReadPepSignalGff3 (char *, int);
-  void Print (char *);
+
  public:
   SensorPepSignal   (int n, DNASeq *X);
   virtual ~SensorPepSignal   ();
