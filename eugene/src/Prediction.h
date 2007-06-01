@@ -138,7 +138,8 @@ class Prediction
   // Check and Trim UTR according to EST evidence
   void ESTScan();
   bool UTRCheckAndTrim(int* debut, int* fin, int etat);
-  
+  void UpdateAndDelete();
+
   // PrintHtml : -ph print the start of the HTML output
   void  StartHTML       (char*, FILE*);
   
@@ -167,7 +168,7 @@ class Prediction
   ~Prediction ();
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
-  void DeleteOutOfRange(int s,int e);
+  void  DeleteOutOfRange(int s,int e);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
