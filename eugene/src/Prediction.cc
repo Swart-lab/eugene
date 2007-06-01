@@ -589,7 +589,6 @@ void Prediction :: UpdateAndDelete()
       int empty_gene = ((*geneindex)->nbFea() < 1);
       if ( ! empty_gene )
 	(*geneindex)->Update();
-	printf("Remove %d complete: %d\n", RemoveFrags, (*geneindex)->complete);
       if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene || (RemoveFrags && ((*geneindex)->complete != 3))) {
 	nbGene--;
 	geneindex = vGene.erase(geneindex);
