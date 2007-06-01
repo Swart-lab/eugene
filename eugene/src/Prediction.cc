@@ -260,7 +260,7 @@ bool Gene :: operator== (const Gene& o)
 	return false;
       shift++;
     }
-  // we assume the gene structures staisfy the structural constraints
+  // we assume the gene structures satisfy the structural constraints
   // of complete genes. If the final exon is identical, it is a term
   // exon and the 2 CDS are identical.
   return true;
@@ -501,9 +501,10 @@ void Prediction :: clear()
   optimalPath = 0;
 }
 // --------------------------
-//  TrimAndUpdate: modifies the prediction to Trim UTR according to EST support
-//  Also computes all statistics (length and intron numbers) 
-//  and deletes too short genes
+//  TrimAndUpdate: 
+// 	- modifies the prediction to Trim UTR according to EST support
+//  	- computes all statistics (length and intron numbers) 
+//  	- deletes short or partial genes if needed
 // --------------------------
 void Prediction :: TrimAndUpdate(DNASeq* x)
 {
@@ -568,19 +569,28 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
   	
   if (ESTMatch) delete [] ESTMatch; // ESTScan() delete
   ESTMatch = NULL;
+
+	UpdateAndDelete();
 	
-	
-  // Gene update and deletion of short genes
+}
+
+// --------------------------
+//  Gene update and deletion of short or fragmentary genes
+// --------------------------
+void Prediction :: UpdateAndDelete()
+{
   std::vector <Gene*>::iterator geneindex;
   int MinCDSLen = PAR.getI("Output.MinCDSLen");
+  int RemoveFrags = PAR.getI("Output.RemoveFrags");
   int gIdx = 0;
 
   for (geneindex = vGene.begin(); geneindex != vGene.end(); )
     {
-      int empty_gene = ((*geneindex)->nbFea() < 1 ) ? 1: 0;
+      int empty_gene = ((*geneindex)->nbFea() < 1);
       if ( ! empty_gene )
 	(*geneindex)->Update();
-      if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene ) {
+	printf("Remove %d complete: %d\n", RemoveFrags, (*geneindex)->complete);
+      if ((*geneindex)->exLength <= MinCDSLen ||  empty_gene || (RemoveFrags && ((*geneindex)->complete != 3))) {
 	nbGene--;
 	geneindex = vGene.erase(geneindex);
       } else 
@@ -591,7 +601,6 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
 	}
     }
 }
-
 // --------------------------
 //  Delete genes outside of range
 // --------------------------
@@ -608,6 +617,7 @@ void Prediction :: DeleteOutOfRange(int s,int e)
         } else geneindex++;
     }
 }
+
 
 // --------------------------
 //  print prediction (master)
@@ -879,7 +889,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
               setGff3Attributes(arn_line, state, type_sofa,
                                 fea_name, j, code_variant, rna_id);
               arn_lines.push_back(arn_line);
-              //je mets à jour la taille de l'ARNm
+              //je mets ï¿½ jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
               break;
         //cas d'un exon
@@ -918,7 +928,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
               setGff3Attributes(arn_line, state, SOFA_CDS,
                                 fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id);
               arn_lines.push_back(arn_line);
-              //je mets à jour la taille de l'ARNm
+              //je mets ï¿½ jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
               break;
         //par defaut je n'ajoute que dans le pre-arn
@@ -957,7 +967,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
         (*itr)->print(out);
         delete (*itr);
       }
-      //J'ajoute la taille du mRNA à sa ligne
+      //J'ajoute la taille du mRNA ï¿½ sa ligne
       gene_line.addAttribute("length=" + to_string(taille_mRNA));
       //j'affiche la ligne du mRNA juste avant les UTRs et CDS
       gene_line.print(out);
