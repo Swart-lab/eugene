@@ -531,8 +531,6 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
 	    end = (*featindex)->end;
 	    if (UTRCheckAndTrim(&start,&end,state)) 
 	      {
-		//  				printf("Triming %d-%d (state %d) to S%d\n",(*featindex)->start,(*featindex)->end,
-		//  					(*featindex)->state,start);
 		(*featindex)->start = start;
 		break;
 	      }
@@ -571,7 +569,7 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
   ESTMatch = NULL;
 
 	UpdateAndDelete();
-	
+
 }
 
 // --------------------------
@@ -1261,11 +1259,11 @@ bool Prediction :: UTRCheckAndTrim(int* debut, int* fin, int etat)
 {	
 	if ((etat == UTR5F) || (etat == UTR3R))
 		for (int k = *debut; k <= *fin; k++)
-		  if (GetESTMatch(k) & Hit) { *debut = k+1; return true; }
+		  if (GetESTMatch(k-1) & Hit) { *debut = k; return true; }
 				
 	if ((etat == UTR3F) || (etat == UTR5R))
 		for (int k = *fin; k >= *debut; k--)
-		  if (GetESTMatch(k) & Hit) { *fin = k+1; return true; }
+		  if (GetESTMatch(k-1) & Hit) { *fin = k; return true; }
 			
 	return false;	
 }
