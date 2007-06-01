@@ -120,8 +120,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
   int carg, errflag = 0;
   char *key, *val = NULL;
   char* indexPos = NULL;
-  
+
   m["fstname"] = "\000"; // no default input
+  m["Output.RemoveFrags"] = "0"; //no fragmentary protein removal
+
   optind = 1;            // reinit this getopt static variable
  
   while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
@@ -142,6 +144,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
 	exit(2);
       }
       break;
+
+	case 'F': /* Remove fragment proteins from output */
+	m["Output.RemoveFrags"] = "1";
+	break;
 
     case 'n':           /* -n normalize across frames */
       if (!TestIArg(optarg))
