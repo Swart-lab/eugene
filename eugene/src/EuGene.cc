@@ -215,7 +215,7 @@ int main  (int argc, char * argv [])
     OPTIM.ParaOptimize(argc, argv);
   else 
     {
-      // Objectif : limiter les appels à la MAP
+      // Objectif : limiter les appels Ã  la MAP
       graph = PAR.getI("Output.graph");
 
       int sequence;
@@ -337,17 +337,21 @@ int main  (int argc, char * argv [])
 		  {
 		    fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
 		    baseGene = pred->FindGene(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
-		    baseGene->hasvariant++;
-		    AltPred->vGene[0]->isvariant = true;
-		    AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
-		    AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
+		    if (baseGene) {
+		    	baseGene->hasvariant++;
+		    	AltPred->vGene[0]->isvariant = true;
+		    	AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
+		    	AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
 			//fprintf(stderr,"Alt: %d,hasv=%d,isv=%d Opt gn=%d,hasv=%d,isv=%d\n",AltPred->vGene[0]->geneNumber,AltPred->vGene[0]->hasvariant,AltPred->vGene[0]->isvariant,baseGene->geneNumber,baseGene->hasvariant,AltPred->vGene[0]->isvariant);
 			baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart) 
 													  : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
 			baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)     
-													  : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
+								  : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
 		    //AltPred ->Print(TheSeq, MS,NULL,1);
 		    vPred.push_back(AltPred);
+			}
+			else fprintf(stderr,"No alternatively spliced gene prediction.\n");
+
 		  }
 		else delete AltPred;	
 	      }
@@ -368,7 +372,7 @@ int main  (int argc, char * argv [])
 	
 	fflush(stderr);
 	fflush(stdout);
-      } // fin de traitement de chaque séquence....
+      } // fin de traitement de chaque sÃ©quence....
       
       fprintf(stderr,"-------------------------------------"
 	      "--------------------------------\n");
