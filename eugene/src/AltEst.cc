@@ -245,8 +245,11 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
 
    //locate gene
    g = pred->FindGene(start,end);
-   // check first exon start is in transcribed matured region   
 
+   // if no such gene then it is incompatible.
+   if (g == NULL) return false;
+
+   // check first exon start is in transcribed matured region   
    for (idxf = 0; idxf < g->nbFea(); idxf++)
      {
        if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
