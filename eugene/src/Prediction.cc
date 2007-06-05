@@ -213,10 +213,11 @@ int Gene :: isDifferent (const Gene& o, int threshold)
 
   int shift = 0;
 
-  while ((State2Status[o.vFea[idxo+shift]->state] != 2) && //not UTR
-	 (State2Status[this->vFea[idxt]->state] != 2) && // not UTR
-	 (idxo+shift < o.vFea.size()) &&
-	 (idxt+shift < this->nbFea()))
+  while ((idxo+shift < o.vFea.size()) &&
+	 (idxt+shift < this->nbFea()) &&
+	 (State2Status[o.vFea[idxo+shift]->state] != 2) && //not UTR
+	 (State2Status[this->vFea[idxt]->state] != 2) // not UTR
+	 )
     {
       if ((o.vFea[idxo+shift]->state == this->vFea[idxt+shift]->state) &&
 	  (abs(o.vFea[idxo+shift]->start - this->vFea[idxt+shift]->start) <= threshold) &&
@@ -1460,7 +1461,7 @@ void Prediction :: PrintGeneInfo (FILE* F)
 
 // ------------------------------------
 //  Find the index of the first gene overlapping a segment.
-//  -1 if not found. Assumes a sorted prediction.
+//  NULL if not found. Assumes a sorted prediction.
 // ------------------------------------
 Gene *Prediction :: FindGene (int start, int end)
 {
