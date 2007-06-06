@@ -94,7 +94,6 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/0_SensorTk/Makefile
 	src/SensorPlugins/0_SensorTk/GetData/Makefile
 	src/SensorPlugins/AnnotaStruct/Makefile
-	src/SensorPlugins/ATGpr/Makefile
 	src/SensorPlugins/BlastX/Makefile
 	src/SensorPlugins/Est/Makefile
 	src/SensorPlugins/EuStop/Makefile
@@ -122,7 +121,6 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/StartWAM/Makefile
 	src/SensorPlugins/Tester/Makefile
 	src/SensorPlugins/Transcript/Makefile
-	src/SensorPlugins/User/Makefile
 	plugins/Makefile
 	doc/Makefile
 ])
