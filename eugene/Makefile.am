@@ -73,17 +73,6 @@ EXTRA_DIST = reconf configure $(srcdir)/config/config.* \
              $(srcdir)/Procedures/Eval/egn_evalpred.pl \
              $(srcdir)/Procedures/Get/egn_*
 
-# the files to distribute are automatically found by Automake: 
-# all source files are automatically included in a distribution
-# the following line avoids to have lex.c and yacc.c 
-# in the gzip'd tar file for distribution
-dist-hook:
-	if [ -f $(distdir)/src/SensorPlugins/User/lex.c ]; then rm $(distdir)/src/SensorPlugins/User/lex.c; fi
-	if [ -f $(distdir)/src/SensorPlugins/User/yacc.c ]; then rm $(distdir)/src/SensorPlugins/User/yacc.c; fi
-
-
-
-
 ############## Install / Uninstall
 uninstall-local:
 	rm -r $(datadir)/$(PACKAGE)
