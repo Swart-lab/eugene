@@ -14,9 +14,7 @@ Reading WAM models...  0 1 2 3 4 ... done.
 Loading Sensor.StartWAM.......done.
 Reading WAM models...  0 1 2 3 4 5 6 7 8 ... done.
 Loading Sensor.Transcript.....done.
-Loading Sensor.User...........done.
-Reading user data............done.
-Optimal path length = 1875.4074.
+Optimal path length = 3250.0655.
 .
     Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
 .
