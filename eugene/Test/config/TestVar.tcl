@@ -37,10 +37,10 @@ if {$action=="Test"} {
 }
 
 ############################################################################
-set AllSensorsList {ATGpr AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
+set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
 		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
 		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
-		    Tester Transcript User}
+		    Tester Transcript}
 
 
 ############################################################################
@@ -60,7 +60,7 @@ set OPTIONS(SeqAra) "-po -g"
 
 ##################### SeqDoc test variables ############################
 set SensorsList(SeqDoc) {MarkovIMM MarkovConst EuStop NStart IfElse Transcript \
-			     FrameShift User}
+			     FrameShift }
 set SEQ(SeqDoc) {SYNO_ARATH.fasta}
 set IMG(SeqDoc) {SYNO_ARATH.000.png}
 set FILE_REF(SeqDoc) Output_SeqDoc
@@ -68,7 +68,7 @@ set OPTIONS(SeqDoc) "-po -g"
 
 ##################### SeqHom test variables ################################
 set SensorsList(SeqHom) {MarkovProt MarkovConst EuStop StartWAM SpliceWAM Homology \
-			     Transcript User GFF}
+			     Transcript GFF}
 set SEQ(SeqHom) {exSeqHom.fasta}
 set IMG(SeqHom) {exSeqHom.000.png}
 set FILE_REF(SeqHom) Output_SeqHom
