@@ -132,9 +132,6 @@ set NewValue1(Output.webdir)            LOCAL
 #################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
-##### ATGpr parameters #####
-set NewValue1(ATGpr.startP*) 0.052
-set NewValue1(ATGpr.startB*) 0.308
 ##### EuStop parameters #####
 set NewValue1(EuStop.stopP*)            4.155
 ##### FrameShift parameters #####
@@ -323,7 +320,6 @@ set NewValue1(Tester.SPSN.Eval)         STOP
 #################################################################
 ##### Sensors desactivation #####
 # SIGNAL SENSORS
-set NewValue1(Sensor.ATGpr.use)	        0
 set NewValue1(Sensor.EuStop.use)	0
 set NewValue1(Sensor.FrameShift.use)	0
 set NewValue1(Sensor.GSplicer.use)	0
@@ -348,7 +344,6 @@ set NewValue1(Sensor.Repeat.use)	0
 set NewValue1(Sensor.AnnotaStruct.use)  0
 set NewValue1(Sensor.IfElse.use)	0
 set NewValue1(Sensor.Riken.use)	        0
-set NewValue1(Sensor.User.use)		0
 # OTHERS SENSORS
 set NewValue1(Sensor.GCPlot.use)	0
 set NewValue1(Sensor.GFF.use)		0
@@ -357,7 +352,6 @@ set NewValue1(Sensor.Tester.use)	0
 #
 ##### Sensor priorities	 #####
 # SIGNAL SENSORS
-set NewValue1(Sensor.ATGpr$space)	1
 set NewValue1(Sensor.EuStop$space)	1
 set NewValue1(Sensor.FrameShift$space)	1
 set NewValue1(Sensor.GSplicer$space)	1
@@ -382,7 +376,6 @@ set NewValue1(Sensor.Repeat$space)	1
 set NewValue1(Sensor.AnnotaStruct$space) 1
 set NewValue1(Sensor.IfElse$space)	1
 set NewValue1(Sensor.Riken$space)	1
-set NewValue1(Sensor.User$space)	10
 # OTHERS SENSORS
 set NewValue1(Sensor.GCPlot$space)	1
 set NewValue1(Sensor.GFF$space)		1
