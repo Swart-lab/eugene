@@ -372,6 +372,10 @@ sensitive. The definition order is not important.
   containing spliced STOPs but setting this to 0.0 can be useful for
   pseudo-gene prediction\ldots
 
+\item \texttt{Output.RemoveFrags}: in the text output, remove any 
+fragmentary gene prediction (missing ATG or STOP or both). The prediction
+process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove fragmentary proteins] F}
+
 \item \texttt{Output.truncate}: in the text output, each gene element
   predicted if prefixed by the FASTA sequence id (or the filename if
   no FASTA id is available). This is truncated to the number of
