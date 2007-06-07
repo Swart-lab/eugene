@@ -21,13 +21,11 @@
 AC_INIT(, , [EuGene Team eugene@ossau.toulouse.inra.fr])
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(eugene, 3.4a)
+AM_INIT_AUTOMAKE(eugene, 3.4b)
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AM_PROG_LEX
-AC_PROG_YACC
 AC_PROG_AWK
 AC_PROG_LN_S 
 AC_PROG_RANLIB
