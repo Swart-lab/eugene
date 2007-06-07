@@ -122,7 +122,6 @@ void Parameters :: ReadArg(int argc, char * argv[])
   char* indexPos = NULL;
 
   m["fstname"] = "\000"; // no default input
-  m["Output.RemoveFrags"] = "0"; //no fragmentary protein removal
 
   optind = 1;            // reinit this getopt static variable
  
