@@ -26,6 +26,7 @@ EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
 #
 ##### Output control ######
+Output.RemoveFrags	0
 Output.UTRtrim		0
 Output.MinCDSLen	60
 Output.truncate		5
