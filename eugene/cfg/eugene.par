@@ -66,10 +66,6 @@ AltEst.verbose			0
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
 #
-##### ATGpr parameters #####
-ATGpr.startP*		0.002
-ATGpr.startB*		0.001
-#
 ##### EuStop parameters #####
 EuStop.stopP*           4.155
 #
@@ -310,7 +306,6 @@ Tester.SPSN.Eval        STOP    # START, STOP, SPLICE
 #
 ##### Sensors activation #####
 # SIGNAL SENSORS
-Sensor.ATGpr.use	0
 Sensor.EuStop.use	1
 Sensor.FrameShift.use	0
 Sensor.GSplicer.use	0
@@ -338,7 +333,6 @@ Sensor.Repeat.use	0
 Sensor.AnnotaStruct.use 0
 Sensor.IfElse.use	1
 Sensor.Riken.use	0
-Sensor.User.use		0
 #
 # OTHERS SENSORS
 Sensor.GCPlot.use	0
@@ -349,7 +343,6 @@ Sensor.Tester.use	0
 ##### Sensor priorities	 #####
 #  the lower the priority, the first loaded sensor
 # SIGNAL SENSORS
-Sensor.ATGpr 		10
 Sensor.EuStop 		10
 Sensor.FrameShift 	10
 Sensor.GSplicer 	10
@@ -376,7 +369,6 @@ Sensor.Repeat 		10
 Sensor.AnnotaStruct     1
 Sensor.IfElse 		10
 Sensor.Riken 		10
-Sensor.User 		30
 #
 # OTHERS SENSORS
 Sensor.GCPlot 		1
