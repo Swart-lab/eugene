@@ -40,9 +40,11 @@ if {$action=="Test"} {
 set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
 		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
 		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
-		    Tester Transcript}
+		    Tester Transcript }
 
-
+############################################################################
+set AllGff3Sensors {AnnotaStruct BlastX Est GFF GSplicer NG2 NStart \
+		    PepSignal Repeat SMachine SPred }
 ############################################################################
 ##################### Units tests variables ################################
 set SEQ(Sensor) {seq14ac002535g4g5}
@@ -60,7 +62,7 @@ set OPTIONS(SeqAra) "-po -g"
 
 ##################### SeqDoc test variables ############################
 set SensorsList(SeqDoc) {MarkovIMM MarkovConst EuStop NStart IfElse Transcript \
-			     FrameShift }
+		     FrameShift }
 set SEQ(SeqDoc) {SYNO_ARATH.fasta}
 set IMG(SeqDoc) {SYNO_ARATH.000.png}
 set FILE_REF(SeqDoc) Output_SeqDoc
@@ -111,9 +113,7 @@ set OPTIONS(Big) "-po"
 
 
 
-############################################################################
-##################### Parameters optimization ##############################
+######################################################################################### Parameters optimization ##############################
 set FILE_REF(Optimization) Output_Optimization
-
 
 
