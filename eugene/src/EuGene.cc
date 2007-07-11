@@ -315,6 +315,7 @@ int main  (int argc, char * argv [])
 	if (PAR.getI("AltEst.use")) {
 
 	  int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+	  int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
 	  AltEst *AltEstDB = new AltEst();
 	  std::vector <Prediction*> vPred;
 	  Prediction* AltPred;
@@ -348,10 +349,13 @@ int main  (int argc, char * argv [])
 			baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)     
 								  : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
 		    //AltPred ->Print(TheSeq, MS,NULL,1);
-		    vPred.push_back(AltPred);
 			}
-			else fprintf(stderr,"No alternatively spliced gene prediction.\n");
-
+			else 
+			{
+				fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
+				AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
+			}
+		    vPred.push_back(AltPred);
 		  }
 		else delete AltPred;	
 	      }

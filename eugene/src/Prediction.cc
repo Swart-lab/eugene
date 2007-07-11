@@ -600,19 +600,43 @@ void Prediction :: UpdateAndDelete()
     }
 }
 // --------------------------
-//  Delete genes outside of range
+//  Delete genes outside of range: 
+//  TS modified. Keeps only one gene with maximum overlap with the region.
 // --------------------------
 void Prediction :: DeleteOutOfRange(int s,int e)
 {
   std::vector <Gene*>::iterator geneindex;
+  int overlap = 0;
+  int left,right;
 
+// 1st compute largest Olap
   for (geneindex = vGene.begin(); geneindex != vGene.end(); )
     {
-      if (((*geneindex)->trEnd < s) | ((*geneindex)->trStart > e)) 
+	left =  Max(s,(*geneindex)->trStart); // left of overlap region (if any)
+	right = Min(e,(*geneindex)->trEnd);   // right of overlap region (if any)
+	if ((right - left) > overlap) overlap = right - left;
+
+	if ((right - left) <= 0) {// delete non overlapping genes
+	  nbGene--;
+          geneindex = vGene.erase(geneindex);
+	} else geneindex++;
+    }
+
+// then keep only one olap'ing gene
+  for (geneindex = vGene.begin(); geneindex != vGene.end(); )
+    {
+      left =  Max(s,(*geneindex)->trStart); // left of overlap region (if any)
+      right = Min(e,(*geneindex)->trEnd);   // right of overlap region (if any)
+      if ((right - left) < overlap) // throw away
         {
           nbGene--;
           geneindex = vGene.erase(geneindex);
-        } else geneindex++;
+        }
+      else 
+	{
+	  overlap++; // will never be found again. Only one gene kept
+	  geneindex++;
+        }
     }
 }
 
@@ -1460,17 +1484,28 @@ void Prediction :: PrintGeneInfo (FILE* F)
 }
 
 // ------------------------------------
-//  Find the index of the first gene overlapping a segment.
+//  Find the index of the 1st gene maximally overlapping a segment.
 //  NULL if not found. Assumes a sorted prediction.
 // ------------------------------------
 Gene *Prediction :: FindGene (int start, int end)
 {
+  int left, right;
+  int overlap = 0;
+  int idx = -1;
+
   for(int i=0; i<nbGene; i++) {
-    if (vGene[i]->trStart > end) return NULL;
-    if (vGene[i]->trEnd < start) continue;
-    return vGene[i];
+    left =  Max(start, vGene[i]->trStart);
+    right = Min(end, vGene[i]->trEnd);
+
+    if (((right - left) <= 0) && overlap != 0) return vGene[idx]; // cannot be -1
+    if ((right - left) > overlap)
+	{
+    	  idx = i;
+    	  overlap = right-end;
+	}
   }
-  return NULL;
+  if (idx == -1) return NULL;
+  else return vGene[idx];
 }
 
 // ------------------------
