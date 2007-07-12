@@ -37,7 +37,6 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
     //cout<<"Load SoTerms"<<endl;
     GeneFeatureSet::soTerms_->loadFile(soTermsFilename);
   }
-
   FILE *fp;
   if (!(fp = fopen(featuresFilename, "r"))) {
     fprintf(stderr, "Class GeneFeatureSet : cannot open file %s\n", featuresFilename);
@@ -45,8 +44,8 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
   char value[100]="";
   int i=1;
   char line[MAX_LINE];
-  while(fp  &&  fgets (line, 1500, fp) != NULL) {
-    //cout  << "LINE: "<< line;
+  while(fp  &&  fgets (line, 1500, fp) != NULL) 
+  {
     if ( line[0] != '#' )
     {  
       GeneFeature * tempGeneFeature = new GeneFeature (line);
@@ -74,7 +73,8 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
      
     }
   }
-  fclose(fp);
+  if (fp )
+  	fclose(fp);
 
 }
 
