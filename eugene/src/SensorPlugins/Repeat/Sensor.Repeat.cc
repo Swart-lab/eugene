@@ -99,7 +99,7 @@ void SensorRepeat :: ReadRepeat (char *name, int SeqLen)
 // -----------------------------
 void SensorRepeat :: ReadRepeatGff3 (char *name, int SeqLen) 
 {
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
   char * soTerms = new char[FILENAME_MAX+1];
   strcpy(soTerms , PAR.getC("eugene_dir"));
   strcat(soTerms , filenameSoTerms );

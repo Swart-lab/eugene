@@ -392,7 +392,7 @@ void SensorSMachine :: SpliceMachine()
 void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
 {
   
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
   char * soTerms = new char[FILENAME_MAX+1];
   strcpy(soTerms , PAR.getC("eugene_dir"));
   strcat(soTerms , filenameSoTerms );

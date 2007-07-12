@@ -62,6 +62,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/config.* \
 	     $(srcdir)/doc/ParaOptimization.fig \
 	     $(srcdir)/src/getopt.h \
 	     $(srcdir)/cfg/eugene.par \
+	     $(srcdir)/cfg/sofa.obo \
 	     $(srcdir)/models/*.dist \
 	     $(srcdir)/models/*.mat \
 	     $(srcdir)/models/*.bin \
@@ -103,6 +104,7 @@ install-data-hook:
 	$(INSTALL) -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
 	$(INSTALL) -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
 	$(INSTALL) -m 644 $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
+	$(INSTALL) -m 644 $(srcdir)/cfg/*.obo $(DESTDIR)/$(pkgdatadir)/cfg
 	$(INSTALL) -m 644 $(srcdir)/cfg/*.par $(DESTDIR)/$(pkgdatadir)/cfg
 	$(INSTALL) src/SensorPlugins/*/*.so  $(DESTDIR)/$(pkgdatadir)/plugins
 	$(INSTALL) $(srcdir)/Procedures/Eval/egn_* $(DESTDIR)/$(pkgdatadir)/Procedures/Eval

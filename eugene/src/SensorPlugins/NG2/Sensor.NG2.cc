@@ -192,7 +192,7 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
 // -------------------------------------
 void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
 {
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber());
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
   char * soTerms = new char[FILENAME_MAX+1];
   strcpy(soTerms , PAR.getC("eugene_dir"));
   strcat(soTerms , filenameSoTerms );

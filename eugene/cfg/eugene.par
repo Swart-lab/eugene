@@ -46,6 +46,9 @@ Output.format		l
 Output.Prefix		./
 Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
+##### Gff3
+#Gff3.SoTerms		cfg/sofa.obo
+#
 ##### Alternative splicing predictor control
 AltEst.use			0
 AltEst.ExonBorderMatchThreshold 0
@@ -63,6 +66,7 @@ AltEst.minEx				3
 AltEst.exonucleasicLength	10
 AltEst.altEstDisplay		0
 AltEst.verbose			0
+#AltEst.format  		GFF3
 #######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
@@ -79,10 +83,12 @@ GSplicer.coefAcc*	1
 GSplicer.penAcc*	0
 GSplicer.coefDon*	1
 GSplicer.penDon* 	0
+#GSplicer.format      GFF3
 #
 ##### PepSignal #####
 PepSignal.startP*	1
 PepSignal.startB*	0
+#PepSignal.format     GFF3
 #
 ##### SpliceMachine parameters #####
 SMachine.cmd		"splicemachine.pl "
@@ -94,6 +100,7 @@ SMachine.donB*		27.670
 SMachine.startP*	0.052
 SMachine.startB*	0.308
 SMachine.tSpliceB*	0.0
+#SMachine.format      GFF3
 #
 # NetGene2 parameters #####
 NG2.accP*[0]	0.903
@@ -104,6 +111,7 @@ NG2.accP*[1]	0.903
 NG2.accB*[1]	5.585
 NG2.donP*[1]	0.980
 NG2.donB*[1]	27.670
+#NG2.format           GFF3
 #
 ##### NetStart parameters #####
 NStart.startP*		0.052
@@ -150,6 +158,7 @@ SPred.accP*[1]	0.987
 SPred.accB*[1]	3.850
 SPred.donP*[1]	0.929
 SPred.donB*[1]	10.800
+#SPred.format GFF3
 #
 ##### Sensor StartWAM #####
 StartWAM.modelfilename	WAM/WAM.ARA.START9
@@ -184,6 +193,7 @@ BlastX.level8*	0.0
 BlastX.level9*	0.0
 BlastX.blastxM*	10	
 BlastX.minIn 50
+#BlastX.format   GFF3
 #
 ##### Est sensor parameters #####
 Est.PostProcess	0     # 0 1 OR 2
@@ -198,11 +208,13 @@ Est.StrongDonor 0.95
 Est.MinDangling 10
 Est.MaxIntron   15000
 Est.MaxInternalIntron   15000
+#Est.format    GFF3
 #
 ##### Homology Sensor parameters #####
 Homology.TblastxP*	0
 Homology.TblastxB* 	0.0595
 Homology.protmatname	BLOSUM80
+#Homology.format              GFF3
 #
 ##### State penalties per position #####
 MarkovConst.minGC[0]	-1
@@ -237,6 +249,7 @@ MarkovProt.order        2
 Repeat.UTRPenalty*	0.0
 Repeat.IntronPenalty*	0.1
 Repeat.ExonPenalty*	1.0
+#Repeat.format        GFF3
 #
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################
@@ -245,7 +258,7 @@ Repeat.ExonPenalty*	1.0
 ##### Sensors AnnotaStruct #####
 AnnotaStruct.FileExtension      gff
 AnnotaStruct.Start*             1
-AnnotaStruct.StartType          p     # p: probability  s: score
+AnnotaStruct.StartType          p      # p: probability  s: score   i: inline score
 AnnotaStruct.Stop*              1
 AnnotaStruct.StopType           p
 AnnotaStruct.Acc*               1
@@ -259,6 +272,7 @@ AnnotaStruct.TrStopType         p
 AnnotaStruct.Exon*              10
 AnnotaStruct.Intron*            10
 AnnotaStruct.CDS*               10
+#AnnotaStruct.format             GFF3
 #
 ##### IfElse #####
 IfElse.SensorIf		NG2
@@ -273,6 +287,7 @@ Riken.Max_riken_est_length		3000
 Riken.Min_riken_length			120 
 Riken.Min_riken_est_length		10
 Riken.RAFLPenalty*			-120.0
+#Riken.format                  		GFF3
 #
 #################################################################
 ################## OTHERS SENSORS PARAMETERS ####################
