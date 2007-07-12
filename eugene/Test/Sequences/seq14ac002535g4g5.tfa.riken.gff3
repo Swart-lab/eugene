@@ -1,0 +1,6 @@
+seq14	Riken	cDNA_match	1400	4718	.	.	.	ID=seq14.1
+seq14	Riken	match_part	1910	4718	.	+	.	ID=seq14.1.1;Parent=seq14.1;is_full_length=1;Ontology_term=SO:0000200
+seq14	Riken	match_part	1400	1500	.	+	.	ID=seq14.1.2;Parent=seq14.1;is_full_length=1;Ontology_term=SO:0000202
+seq14	Riken	cDNA_match	1400	6157	.	.	.	ID=seq14.2
+seq14	Riken	match_part	4771	6157	.	-	.	ID=seq14.2.1;Parent=seq14.2;is_full_length=1;Ontology_term=SO:0000200
+seq14	Riken	match_part	1400	1500	.	+	.	ID=seq14.2.2;Parent=seq14.2;is_full_length=1;Ontology_term=SO:0000202
