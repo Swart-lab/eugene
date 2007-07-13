@@ -48,6 +48,8 @@ Attributes::Attributes ( std::string line )
     strcpy (targetString,"");
     int isFullLength=-1;
     int targetLength=-1;
+    int targetFrameHit=0;
+    int targetScoreHit=-1;
     string targetSequence="";
     // Parse attributes 
     //  
@@ -121,6 +123,12 @@ Attributes::Attributes ( std::string line )
       if ( attributeNames_[i] == "length" && ( strcmp(value,"")!=0 )) {
 	length_= atoi(value);
       }
+      if ( attributeNames_[i] == "frame_hit" && ( strcmp(value,"")!=0 )) {
+	targetFrameHit= atoi(value);
+      }
+      if ( attributeNames_[i] == "score_hit" && ( strcmp(value,"")!=0 )) {
+	targetScoreHit= atoi(value);
+      }
       oneAttributeString = strtok (NULL,"=;");
     } //end for all substring
     
@@ -143,7 +151,7 @@ Attributes::Attributes ( std::string line )
       {
 	targetStrand=targetAtt[0];
       }
-      target_ = new Target (targetName, targetSequence, targetLength, isFullLength, atoi(targetStart), atoi(targetEnd), targetStrand);
+      target_ = new Target (targetName, targetSequence, targetLength, isFullLength, atoi(targetStart), atoi(targetEnd), targetStrand,targetFrameHit,targetScoreHit);
     }
 }
 
@@ -223,6 +231,18 @@ Target * Attributes::getTarget () const
 {
   return target_;
 }
+
+bool Attributes::hasTarget ( ) const 
+{
+  bool res=false;
+  if (target_ != NULL )
+  {
+    if ( target_->hasLocus() )
+        res=true;
+  }
+  return res;
+}
+
 //getString
 std::string Attributes::getString ( ) const 
 {	

@@ -57,6 +57,7 @@ public:
   std::string getParent ( ) const ;
   std::string getOntologyTerm ( ) const ;
   Target *    getTarget ( ) const ;
+  bool        hasTarget ( ) const ;
   // Puplic attribute accessor methods
   //  
   friend std::ostream& operator<<(std::ostream& o, const Attributes & attributes )
@@ -66,7 +67,7 @@ public:
 	
 
   //Should be static members , 
-  static const int NB_ATTRIBUTES_NAMES_=16;
+  static const int NB_ATTRIBUTES_NAMES_=18;
   static std::vector<std::string> attributeNames_; // "ID=","Note=","Target="
   void InitializeAttributeNames()
   {
@@ -74,7 +75,7 @@ public:
 	attributeNames_.push_back("Name");
 	attributeNames_.push_back("Alias");
 	attributeNames_.push_back("Parent");
-  	attributeNames_.push_back("Target");
+	attributeNames_.push_back("Target");
 	attributeNames_.push_back("Gap");
 	attributeNames_.push_back("Derives_from");
 	attributeNames_.push_back("Note");
@@ -86,6 +87,8 @@ public:
 	attributeNames_.push_back("target_sequence");
 	attributeNames_.push_back("nb_exon");
 	attributeNames_.push_back("length");
+	attributeNames_.push_back("frame_hit");
+	attributeNames_.push_back("score_hit");
   }
 
 };
