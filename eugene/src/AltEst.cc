@@ -19,7 +19,7 @@
 
 #include "AltEst.h"
 #include <algorithm>
-
+#include "./Hits.h"
 extern Parameters   PAR;
 
 /*************************************************************
@@ -250,20 +250,24 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
    if (g == NULL) return false;
 
    // check first exon start is in transcribed matured region   
-   for (idxf = 0; idxf < g->nbFea(); idxf++)
+   int  nbFeature = 0;
+   nbFeature=g->nbFea();
+
+   for (idxf = 0; idxf < nbFeature; idxf++)
      {
        if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
 	   (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
+	{
 	 if (State2Status[g->vFea[idxf]->state] < 2) // IG or intron
 	   return false;
 	 else break;
+	}
      }
    //   if (idxf == g->nbFea()) return false;
-
    idxf++;
    bool firstOk = false; 
    // test des fronti�res suivantes
-   while ((idxe < exonsNumber-1) && (idxf < g->nbFea()))
+   while ((idxe < exonsNumber-1) && (idxf < nbFeature))
      {
        if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
 	 firstOk = true;
@@ -283,7 +287,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
      }
 
    // test de la fin
-   for (; idxf < g->nbFea(); idxf++)   
+   for (; idxf < nbFeature; idxf++)   
      {
        if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &&
 	   (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
@@ -353,7 +357,7 @@ bool EndAtRight( OneAltEst A,  OneAltEst B) { return (A.GetEnd() > B.GetEnd()); 
 // ----------------------
 //  Default constructor.
 // ----------------------
-AltEst :: AltEst()
+AltEst :: AltEst(DNASeq *X)
 {
   int i,nbIncomp,nbNoevidence,nbIncluded,nbUnspliced, nbExtremLen;
   char tempname[FILENAME_MAX+1];
@@ -381,9 +385,34 @@ AltEst :: AltEst()
 
   fprintf(stderr, "Reading alt. spl. evidence...");
   fflush(stderr);
-
-  i=ReadAltFile (tempname,nbUnspliced,nbExtremLen);
-
+  //BEGIN NEW CN
+  std::string inputFormat = to_string(PAR.getC("AltEst.format",0,1));
+  int NumEST=0;
+  Hits * AllEST=NULL;
+  if ( inputFormat == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,1);
+    char * soTerms = new char[FILENAME_MAX+1];
+    strcpy(soTerms , PAR.getC("eugene_dir"));
+    strcat(soTerms , filenameSoTerms );
+    
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    AllEST = AllEST->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumEST, -1, 0, X);
+  }
+  else
+  {
+    FILE* fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+    if (fEST)
+    {   //ReadFromFile (EstFile  EstNumber  Level  Margin)
+      AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
+      fclose(fEST);
+    }
+  }
+  i=convertHitsToAltEst(AllEST,nbUnspliced,nbExtremLen,NumEST);
+  //END NEW CN
+  //i=ReadAltFile (tempname,nbUnspliced,nbExtremLen);
+  
   fprintf(stderr, " %d read, ",i);
   fflush(stderr);
 
@@ -408,6 +437,7 @@ AltEst :: AltEst()
   }
 
   nextAdd = nextRemove = (totalAltEstNumber > 1);
+
 }
 
 // ----------------------
@@ -417,6 +447,52 @@ AltEst :: ~AltEst ()
 {
 }
 
+// ----------------------
+//  Read from Hits class
+// ----------------------
+int AltEst :: convertHitsToAltEst (Hits * AllEST, int &nbUnspliced, int &nbExtremLen, int &NumEST)
+{
+  int  read, deb, fin, poids, brin, EstDeb, EstFin, filtertype, totalread;
+  OneAltEst oaetmp;
+  bool first = 1;
+  totalread = 0;
+  int i;
+  Hits *ThisEST = NULL;
+  Block *ThisBlock = NULL;
+  for (i = 0, ThisEST = AllEST; i < NumEST; i++, ThisEST = ThisEST->Next)
+  {      
+    
+    ThisBlock = ThisEST->Match;
+    while (ThisBlock)
+    {
+      if (ThisBlock == ThisEST->Match) //si premier
+      {
+	oaetmp = OneAltEst(ThisEST->getName(), ThisBlock->Start, ThisBlock->End);
+      }
+      else
+      {
+        oaetmp.AddExon(ThisBlock->Start, ThisBlock->End);
+      }
+      ThisBlock = ThisBlock->Next;
+    }
+    oaetmp.ExtremitiesTrim(exonucleasicLength);
+    filtertype = oaetmp.IsFiltered(unsplicedEstFilter, extremeLengthFilter, verbose,
+				   minIn, maxIn, maxEx, minEx,
+       minEstLength, maxEstLength);
+    if (filtertype == 0) {
+      voae_AltEst.push_back(oaetmp);
+      totalAltEstNumber++;
+    }
+    else {
+      if (filtertype == 1) nbUnspliced++;
+      if (filtertype == 2) nbExtremLen++;
+    }
+    oaetmp.Reset();
+    totalread++;
+  }
+  
+  return totalread;
+}
 // ----------------------
 //  Read .alt file.
 // ----------------------

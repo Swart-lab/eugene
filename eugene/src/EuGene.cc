@@ -123,7 +123,6 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 // -------------------------------------------------------------------------
 Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB, Prediction *optpred, int idx)
 {
-
   int   j, k;
   int   Data_Len = TheSeq->SeqLen;
   DATA	Data;
@@ -135,9 +134,9 @@ Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB,
   int   GCLatency = PAR.getI("EuGene.GCLatency");
   DAG* Dag;
   Prediction *prediction;
-	
   if (!AltEstDB-> voae_AltEst[idx].CompatibleWith(optpred))
     {
+
       Dag = new DAG(FirstNuc-Dir, LastNuc, PAR,TheSeq);
 	  
       Dag->LoadDistLength();
@@ -156,7 +155,6 @@ Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB,
 	
 	if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
       }
-      
       Dag->WeightThePrior();
       Dag->BuildPrediction(Forward);
 
@@ -164,10 +162,10 @@ Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB,
       prediction = Dag->pred;
 
       delete Dag;
-
       return prediction;
     }
   return NULL;
+
 }
 
 // -------------------------------------------------------------------------
@@ -316,15 +314,15 @@ int main  (int argc, char * argv [])
 
 	  int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
 	  int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
-	  AltEst *AltEstDB = new AltEst();
+	  AltEst *AltEstDB = new AltEst(TheSeq);
+
 	  std::vector <Prediction*> vPred;
 	  Prediction* AltPred;
 	  Gene *baseGene;
-	  
 	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
 	    {
 	      AltPred = AltPredict(TheSeq,MS,AltEstDB,pred,altidx);
-	      
+
 	      if (AltPred) {
             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
             {
@@ -333,7 +331,6 @@ int main  (int argc, char * argv [])
           	}
 			//fprintf(stderr,"start=%d, end=%d\n",AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
 		AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd());
-		
 		if (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold))
 		  {
 		    fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
@@ -368,7 +365,6 @@ int main  (int argc, char * argv [])
 	  //delete AltPred;	
 	}
 
-
 	// Free used memory
 	delete TheSeq; 
 	delete MS;
@@ -378,8 +374,7 @@ int main  (int argc, char * argv [])
 	fflush(stdout);
       } // fin de traitement de chaque séquence....
       
-      fprintf(stderr,"-------------------------------------"
-	      "--------------------------------\n");
+      fprintf(stderr,"-------------------------------------"	      "--------------------------------\n");
     
       return  0;
     }

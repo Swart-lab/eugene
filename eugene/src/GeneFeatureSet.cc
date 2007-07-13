@@ -41,6 +41,8 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
   if (!(fp = fopen(featuresFilename, "r"))) {
     fprintf(stderr, "Class GeneFeatureSet : cannot open file %s\n", featuresFilename);
   }
+  else
+  {
   char value[100]="";
   int i=1;
   char line[MAX_LINE];
@@ -73,8 +75,8 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
      
     }
   }
-  if (fp )
-  	fclose(fp);
+  fclose(fp);
+  }
 
 }
 
@@ -134,6 +136,7 @@ map<string, vector<string> >::iterator GeneFeatureSet::getIteratorParentToChildr
 {
   return parentToChildren_.begin() ;
 }
+
 int GeneFeatureSet::getNbParentFeature ()
 {
   return parentToChildren_.size();
