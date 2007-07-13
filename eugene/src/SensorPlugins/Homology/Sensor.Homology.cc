@@ -125,53 +125,27 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".tblastx");
-  ftblastx = FileOpen(NULL,tempname, "r", PAR.getI("EuGene.sloppy"));
-  if (ftblastx) {
   
-  while (!feof(ftblastx)) {
-    if (fscanf(ftblastx,"%d %d %lf %*s %d %*s %d %d",
-	       &deb, &fin, &bits, &phase, &ProtDeb, &ProtFin) != 6) {
-      if (feof(ftblastx)) break;
-      fprintf(stderr,"error(1) in tblastxfile format %s\n",tempname);
-      exit(2);
-    }
-    if (abs(fin-deb) > MaxHitLen) {
-      fprintf(stderr,"Similarity of extreme length rejected. Check tblastx file %s\n",tempname);
-      fscanf(ftblastx,"%*s");
-      continue;
-    }
-    sens= ( (phase < 0) ? -1 : 1 );
-    phase = ph06(phase);
-    
-    j=deb;
-    deb= Min (deb,fin);
-    fin= Max (j,fin);
-    
-    // lecture de la suite (sequence hit subject)
-    tampon=fgetc(ftblastx);
-    // en cas de plsrs separateurs avant la derniere colonne
-    while (isspace(tampon)) tampon=fgetc(ftblastx);
-    for (i = deb-1; i < fin; i++)  {
-      if ( (feof(ftblastx)) ||
-	   ( (isspace(tampon)) && (i != (fin)) ) ) {
-	fprintf(stderr,"error(2) in tblastx format, file %s\n",tempname);
-	exit(2);
-      }
-      if ( (i-deb+1)%3 == 0 ) {
-	if (i >deb-1) tampon=fgetc(ftblastx);
-	paire[1]=tampon;
-	paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
-	score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
-	//printf("i:%d query-subject:  %c-%c score: %d\n",
-	//i,paire[0],paire[1],score);
-      }
-      TblastxNumber[phase][i] ++;
-      
-      TblastxScore[phase][i]  += score;
-    }
+  inputFormat_ = to_string(PAR.getC("Homology.format", GetNumber(),1));
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+    char * soTerms = new char[FILENAME_MAX+1];
+    strcpy(soTerms , PAR.getC("eugene_dir"));
+    strcat(soTerms , filenameSoTerms );
+
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    ReadHomologyGff3(*geneFeatureSet, X, MaxHitLen, PROTMAT);
   }
-  fclose(ftblastx);
-  fprintf(stderr,"done\n");
+  else
+  {
+    ReadHomology(tempname, X, MaxHitLen, PROTMAT);
+  }
+  fprintf(stderr, "done\n");
+  fflush(stderr);
+
+
 
   // weighting by the ratio of hits number.
   for (j=0; j<6 ;j++) {
@@ -191,8 +165,7 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
       }
     }
   }
-  }
-  else   fprintf(stderr,"no file\n");
+  
   delete [] tmpdir;
 }
 
@@ -208,6 +181,167 @@ SensorHomology :: ~SensorHomology ()
   delete [] TblastxNumber;
   delete [] TblastxScore;
 }
+
+
+
+void SensorHomology:: ReadHomology (char name[FILENAME_MAX+1],DNASeq *X,  const int MaxHitLen,ProtMat* PROTMAT )
+{
+  int i, j;
+  
+  int Len = X->SeqLen; 
+  FILE *ftblastx;
+  FILE *protmatfile;
+  int deb,fin,phase,ProtDeb,ProtFin,sens;
+  int score = 0;
+  double bits;
+
+  char tampon;
+  char* paire= new char[3];
+  paire[0]=paire[1]= '0';
+  paire[2]='\0';
+  char tempname[FILENAME_MAX+1];
+  int nmax;
+  int contigbeg;
+  char *tmpdir = new char[FILENAME_MAX+1];
+
+  ftblastx = FileOpen(NULL,name, "r", PAR.getI("EuGene.sloppy"));
+  if (ftblastx) {
+  
+    while (!feof(ftblastx)) {
+      if (fscanf(ftblastx,"%d %d %lf %*s %d %*s %d %d",
+	  &deb, &fin, &bits, &phase, &ProtDeb, &ProtFin) != 6) {
+	    if (feof(ftblastx)) break;
+	    fprintf(stderr,"error(1) in tblastxfile format %s\n",name);
+	    exit(2);
+	  }
+	  if (abs(fin-deb) > MaxHitLen) {
+	    fprintf(stderr,"Similarity of extreme length rejected. Check tblastx file %s\n",name);
+	    fscanf(ftblastx,"%*s");
+	    continue;
+	  }
+	  sens= ( (phase < 0) ? -1 : 1 );
+	  phase = ph06(phase);
+    
+	  j=deb;
+	  deb= Min (deb,fin);
+	  fin= Max (j,fin);
+    
+          // lecture de la suite (sequence hit subject)
+	  tampon=fgetc(ftblastx);
+	  
+          // en cas de plsrs separateurs avant la derniere colonne
+	  while (isspace(tampon)) tampon=fgetc(ftblastx);
+	  for (i = deb-1; i < fin; i++)  {
+	    if ( (feof(ftblastx)) ||
+			 ( (isspace(tampon)) && (i != (fin)) ) ) {
+	      fprintf(stderr,"error(2) in tblastx format, file %s\n",name);
+	      exit(2);
+			 }
+			 if ( (i-deb+1)%3 == 0 ) {
+			   if (i >deb-1) tampon=fgetc(ftblastx);
+			   paire[1]=tampon;
+			   paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
+			   score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
+	                   //printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
+			 }
+			 TblastxNumber[phase][i] ++;
+      
+			 TblastxScore[phase][i]  += score;
+	  }
+    }
+    fclose(ftblastx);
+    }
+    
+}
+
+void SensorHomology ::ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *X,  const int MaxHitLen, ProtMat* PROTMAT)
+{
+
+  int Len = X->SeqLen; 
+  int deb,fin,phase,ProtDeb,ProtFin,sens;
+  int score = 0;
+  double bits= 0;
+  string feature;
+  char tampon,strand;
+  char* paire= new char[3];
+  paire[0]=paire[1]= '0';
+  paire[2]='\0';
+
+  vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
+  int nbGeneFeature=geneFeatureSet.getNbFeature();
+  int i=0;
+
+  for ( i=0 ; i < nbGeneFeature ; i++, it++ )
+  {
+	  feature  = (*it)->getType();
+	  deb      = (*it)->getLocus()->getStart();
+	  fin      = (*it)->getLocus()->getEnd();
+	  strand   = (*it)->getLocus()->getStrand();
+	  if ( ! (*it)->hasTarget() )
+	  {
+	    fprintf( stderr, "Warn : skipped : %s \n", ((*it)->getId()).c_str() );
+	    fflush(stderr);
+	    continue;
+	  }
+	  
+	  bits     = (*it)->getAttributes()->getTarget()->getScoreHit();
+	  phase    = (*it)->getAttributes()->getTarget()->getFrameHit();
+	  if (phase == 0) //not specified
+	  { 
+	     phase  = X->Pos2Frame(deb,strand); 
+	  }
+          else 
+	  {
+	    int computedFrame=X->Pos2Frame(deb,strand);
+	    if (phase != computedFrame) //check frame computrd and read are the same.
+	    {
+	      fprintf( stderr, "Warn skipped : %s,  computed frame (%d) and input frame (%d) are different \n",(*it)->getId().c_str(), computedFrame, phase);
+	      fflush(stderr);
+	      continue;
+	    }
+	  }
+	  
+	 
+	  ProtDeb=(*it)->getAttributes()->getTarget()->getLocus()->getStart();
+	  ProtFin=(*it)->getAttributes()->getTarget()->getLocus()->getEnd();
+    
+	  if (abs(fin-deb) > MaxHitLen) {
+	    fprintf(stderr,"Similarity of extreme length rejected. Check tblastx file \n");
+	    fflush(stderr);
+	    continue;
+	  }
+	  sens   = ( (strand == '-') ? -1 : 1 );
+          //converti la frame blast en piste eugene
+	  phase  = ph06(phase);
+
+	  if ( (*it)->getAttributes()->getTarget()->getSequenceData() == "")
+	  {
+	    fprintf( stderr, "Warn hasn't target sequence, skipped : %s \n", ((*it)->getString()).c_str() );
+	    fflush(stderr);
+	    continue;
+	  }
+	  
+	  char subjectHit [MAX_GFF_LINE] ;
+	  strcpy (subjectHit, ((*it)->getAttributes()->getTarget()->getSequenceData()).c_str() );
+	  int j=0;
+	   
+	  tampon=' ';
+	  for (int l = deb-1; l < fin; l++)  {
+		 if ( (l-deb+1)%3 == 0 ) {
+		   if (l >deb-1) 
+		       tampon=subjectHit[j];
+			   
+		   paire[1]=tampon;
+		   paire[0]= ( (sens>0) ? X->AA(l,0) : X->AA(deb+fin-l-1,1) );
+		   score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
+		   j++;
+		 }
+		 TblastxNumber[phase][l] ++;
+		 TblastxScore[phase][l]  += score;
+	  }
+    }
+}
+
 // ----------------------
 //  Init Homol.
 // ----------------------

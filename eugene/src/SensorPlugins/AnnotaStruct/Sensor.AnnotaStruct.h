@@ -31,7 +31,7 @@ class Signals
   int   pos;
   int   type;
   int   edge;
-  char* score;
+  char  score[20];
     
   Signals  ();
   Signals  (int, int, int, char[20]);
@@ -51,10 +51,10 @@ class Contents
   int    start;
   int    end;
   int    type;
-  float* score;
+  float score;
     
   Contents  ();
-  Contents  (int, int, int, float*);
+  Contents  (int, int, int, float);
   ~Contents ();
   void PrintC ();
 };
@@ -73,9 +73,10 @@ class SensorAnnotaStruct : public Sensor
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
   float exonPAR,      intronPAR,     cdsPAR;
-    
+  char  exonTypePAR[20], intronTypePAR[20],   cdsTypePAR[20];
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
-  void PushInCon(int d,   int e,     float *sc,
+  void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int seqlen);
+  void PushInCon(int d,   int e,     float sc,
 		 char st, char p[2], int f);
   
  public:

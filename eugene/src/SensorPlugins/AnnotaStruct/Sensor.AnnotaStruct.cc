@@ -19,7 +19,8 @@
 
 #include "Sensor.AnnotaStruct.h"
 #include <functional>
-
+#include <stdio.h>
+#include <stdlib.h>
 bool BySigPos(const Signals *A, const Signals *B)
 { return (A->pos < B->pos); };
 
@@ -44,7 +45,7 @@ Signals :: Signals ()
   pos   = -1;
   type  = -1;
   edge  = -1;
-  score = NULL;
+  strcpy (score , "" );
 }
 
 // -------------------------
@@ -55,7 +56,7 @@ Signals :: Signals (int p, int t, int e, char s[20])
   pos   = p;
   type  = t;
   edge  = e;
-  score = s;
+  strcpy (score , s );
 }
 
 // -------------------------
@@ -97,13 +98,13 @@ Contents :: Contents ()
   start = -1;
   end   = -1;
   type  = -1;
-  score = NULL;
+  score = 0.0 ;
 }
 
 // -------------------------
 //  Default constructor.
 // -------------------------
-Contents :: Contents (int sta, int e, int t, float *s)
+Contents :: Contents (int sta, int e, int t, float s)
 {
   start = sta;
   end   = e;
@@ -140,7 +141,7 @@ void Contents :: PrintC ()
   case DATA::IntronUTRF : strcpy(t, "IntronUTRF"); break;
   case DATA::IntronUTRR : strcpy(t, "IntronUTRR"); break;
   }
-  fprintf(stderr, "%d\t%d\t%s %f\n", start, end, t, *score);
+  fprintf(stderr, "%d\t%d\t%s %f\n", start, end, t, score);
 }
 
 
@@ -161,6 +162,10 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   type = Type_Any;
 
   fileExt   = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
+  
+  strcpy(exonTypePAR,     PAR.getC("AnnotaStruct.Exon*",      GetNumber()));
+  strcpy(intronTypePAR,   PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
+  strcpy(cdsTypePAR,      PAR.getC("AnnotaStruct.CDS*",       GetNumber()));
   exonPAR   = PAR.getD("AnnotaStruct.Exon*",         GetNumber());
   intronPAR = PAR.getD("AnnotaStruct.Intron*",       GetNumber());
   cdsPAR    = PAR.getD("AnnotaStruct.CDS*",          GetNumber());
@@ -176,15 +181,35 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   strcat(tStartPAR, PAR.getC("AnnotaStruct.TrStart*",    GetNumber()));
   strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
   strcat(tStopPAR,  PAR.getC("AnnotaStruct.TrStop*",     GetNumber()));
-    
+  
+  //fprintf(stderr, "Parameters : exonPAR %d  intronPAR %d cdsPAR %d startPAR %s stopPAR %s accPAR %s donPAR %s tStartPAR %s ",exonPAR, intronPAR ,cdsPAR, startPAR, stopPAR, accPAR, donPAR, tStartPAR );
+  fflush(stderr);
+  inputFormat_ = to_string(PAR.getC("AnnotaStruct.format", GetNumber(),1));
+  
   fprintf(stderr, "Reading %s file....", fileExt);
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".");
   strcat(tempname, fileExt);
-  ReadAnnotaStruct(tempname, X->SeqLen);
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+    char * soTerms = new char[FILENAME_MAX+1];
+    strcpy(soTerms , PAR.getC("eugene_dir"));
+    strcat(soTerms , filenameSoTerms );
+
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+     geneFeatureSet->printFeature();
+    ReadAnnotaStructGff3(*geneFeatureSet, X->SeqLen);
+  }
+  else
+  {
+    ReadAnnotaStruct(tempname, X->SeqLen);
+  }
   fprintf(stderr, "done\n");
   fflush(stderr);
+  
   
   // Sort vSig by pos
   sort(vSig.begin(), vSig.end(), BySigPos);
@@ -192,7 +217,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   // Sort vCon by end and by start
   sort(vCon.begin(), vCon.end(), ByConEnd);
   stable_sort(vCon.begin(), vCon.end(), ByConStart);
-
+  
   // Delete redundancy
   for(int i=0; i<(int)vSig.size(); i++) {
     if(i == 0) continue;
@@ -270,9 +295,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   vPosStoF.clear(); vPosStoR.clear();
   vPosAccF.clear(); vPosDonF.clear(); vPosAccR.clear(); vPosDonR.clear();
   
-  //for(int i=0; i<(int)vCon.size(); i++) {
-  //vCon[i]->PrintC();
-  //}
+
 }
 
 // ----------------------
@@ -351,6 +374,7 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 	}
       }
       else {
+	
 	/* Score ? */
 	if (strcmp(scoreC, ".")) {
 	  if (scoreC[0] == 'p' || scoreC[0] == 's') scF = atof(scoreC+1);
@@ -403,86 +427,87 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 	else if(!strcmp(feature, "del"))
 	  vSig.push_back(new Signals(startS,   DATA::Del,    edge, scoreC));
 	else if(!strcmp(feature, "exon"))
-	  PushInCon(startC, endC, &scF, strand, phase, frame);
+	  PushInCon(startC, endC, scF, strand, phase, frame);
 	else if(!strcmp(feature, "intron"))
-	  vCon.push_back(new Contents(startC, endC, DATA::IntronF+edge,&scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::IntronF+edge,scF));
 	else if(!strcmp(feature, "utr5"))
-	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  &scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  scF));
 	else if(!strcmp(feature, "utr3"))
-	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  &scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  scF));
 	else if(!strcmp(feature, "utr")) {
-	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  &scF));
-	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  &scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  scF));
+	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  scF));
 	}
 	else if(!strcmp(feature, "intronutr"))
-	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,&scF));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,scF));
 	
 	// High level (contents OR/AND signals)
-	else if(!strcmp(feature, "E.Init")) {
+	else if(!strcmp(feature, "E.Init")) 
+	{
 	  vSig.push_back(new Signals(startS-1, DATA::Start, edge, startPAR));
 	  vSig.push_back(new Signals(endS,     DATA::Don,   edge, donPAR));
-	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
+	  PushInCon(startC, endC, cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Intr")) {
 	  vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, accPAR));
 	  vSig.push_back(new Signals(endS,     DATA::Don,   edge, donPAR));
-	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
+	  PushInCon(startC, endC, cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Term")) {
 	  vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, accPAR));
 	  vSig.push_back(new Signals(endS,     DATA::Stop,  edge, stopPAR));
-       	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
+       	  PushInCon(startC, endC, cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "E.Sngl")) {
 	  vSig.push_back(new Signals(startS-1, DATA::Start, edge, startPAR));
 	  vSig.push_back(new Signals(endS,     DATA::Stop,  edge, stopPAR));
-	  PushInCon(startC, endC, &cdsPAR, strand, phase, frame);
+	  PushInCon(startC, endC, cdsPAR, strand, phase, frame);
 	}
 	else if(!strcmp(feature, "UTR5")) {
 	  vSig.push_back(new Signals (startS-1,DATA::tStart,edge, tStartPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR3")) {
 	  vSig.push_back(new Signals (endS,    DATA::tStop, edge, tStopPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, cdsPAR));
 	}
 	else if(!strcmp(feature, "UTR")) {
 	  vSig.push_back(new Signals(startS-1, DATA::tStart, edge,tStartPAR));
 	  vSig.push_back(new Signals(endS,     DATA::tStop,  edge,tStopPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &cdsPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, cdsPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, cdsPAR));
 	}
 	else if(!strcmp(feature, "Intron")) {
-	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&intronPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,intronPAR));
 	}
 	
 	else if(!strcmp(feature, "E.Any")) {
-	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
+	  PushInCon(startC, endC, exonPAR, strand, phase, frame);
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, exonPAR));
 	}
 	else if(!strcmp(feature, "Intron.Any")) {
 	  vSig.push_back(new Signals (startS-1, DATA::Don, edge, donPAR));
 	  vSig.push_back(new Signals (endS,     DATA::Acc, edge, accPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,&intronPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,&intronPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,intronPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,intronPAR));
 	}
 	else if(!strcmp(feature, "E.First")) {
-	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  PushInCon(startC, endC, exonPAR, strand, phase, frame);
 	  vSig.push_back(new Signals (startS-1,DATA::tStart, edge, tStartPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, exonPAR));
 	}
 	else if(!strcmp(feature, "E.Last")) {
-	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  PushInCon(startC, endC, exonPAR, strand, phase, frame);
 	  vSig.push_back(new Signals (endS,  DATA::tStop, edge, tStopPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, exonPAR));
 	}
 	else if(!strcmp(feature, "E.Extreme")) {
-	  PushInCon(startC, endC, &exonPAR, strand, phase, frame);
+	  PushInCon(startC, endC, exonPAR, strand, phase, frame);
 	  vSig.push_back(new Signals(startS-1, DATA::tStart, edge,tStartPAR));
 	  vSig.push_back(new Signals(endS,     DATA::tStop,  edge,tStopPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, &exonPAR));
-	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, &exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, exonPAR));
+	  vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, exonPAR));
 	}
 	else
 	  fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
@@ -493,16 +518,250 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
   if (fp) fclose(fp);
 }
 
+//gff3
+void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int len)
+{
+
+  
+  int   startC, endC, edge;   // C -> content
+  int   startS, endS;         // S -> signal       need for reverse
+  char  strand;
+  char  phase[2];
+  float scF;
+  char  feature[50];
+  string  onthology_term;
+  string idSo;
+
+  char  scoreC[20];
+  int   frame = -1;
+ 
+  int j=0;
+  vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
+  int nbGeneFeature=geneFeatureSet.getNbFeature();
+  int i=0;
+  for ( i=0 ; i < nbGeneFeature ; i++, it++ )
+  {
+
+    j++;
+    strcpy (feature, (*it)->getType().c_str());
+    startC = (*it)->getLocus()->getStart();
+    endC = (*it)->getLocus()->getEnd();
+    
+    /* Score ? */
+    scF = (*it)->getScore();
+    strcpy ( scoreC, to_string(scF).c_str() );
+    
+    strand = (*it)->getLocus()->getStrand();
+    strcpy (phase, to_string((*it)->getPhase()).c_str() );
+    
+    onthology_term = (*it)->getAttributes()->getOntologyTerm();
+    //recup code SO
+    idSo=(*it)->getType();
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+    /* Phase ? */
+    if (strcmp(phase, "."))
+    {
+      if (strand == '+') { frame = (startC - 1) % 3; }
+      else               { frame = (len - endC) % 3; }
+      frame = (frame + atoi(phase)) % 3;
+    }
+
+    /* Strand ? */
+    if      (strand == '+') 
+    {
+      edge = 0;
+      startS = startC;
+      endS   = endC;
+    }
+    else if (strand == '-') 
+    {
+      edge = 1;
+      startS = endC+1;
+      endS   = startC-1;
+    }
+    else 
+    {
+      fprintf(stderr, "WARNING: feature %s line %d strand unknown"
+	  " => ignored.\n", feature, j);
+      continue;
+    }
+    startC--;
+    endC--;
+
+    float scCds=0.0;
+    (cdsTypePAR[0] == 'i') ? scCds = scF : scCds = cdsPAR;
+    
+    float scIntron=0.0;
+    (intronTypePAR[0] == 'i') ? scIntron = scF : scIntron = intronPAR;
+    
+    float scExon=0.0;
+    (exonTypePAR[0] == 'i') ? scExon = scF : scExon = exonPAR;
+    
+    // Low level signals
+    if      ( idSo =="SO:0000315" ) //trStart : transcription_start_site 
+      vSig.push_back(new Signals(startS-1, DATA::tStart, edge, scoreC));
+    else if ( idSo =="SO:0000616" ) //trStop : transcription_end_site
+      vSig.push_back(new Signals(startS,   DATA::tStop,  edge, scoreC));
+    else if ( idSo =="SO:0000318" ) //start : start_codon
+      vSig.push_back(new Signals(startS-1, DATA::Start,  edge, scoreC));
+    else if ( idSo =="SO:0000319" ) //stop : stop_codon
+      vSig.push_back(new Signals(startS,   DATA::Stop,   edge, scoreC));
+    else if ( idSo == "SO:0000164") //acc : three_prime_splice_site
+      vSig.push_back(new Signals(startS,   DATA::Acc,    edge, scoreC));
+    else if ( idSo == "SO:0000163") //don : five_prime_splice_site
+      vSig.push_back(new Signals(startS-1, DATA::Don,    edge, scoreC));
+    else if ( idSo == "SO:0000366") //ins : insertion_site
+      vSig.push_back(new Signals(startS,   DATA::Ins,    edge, scoreC));
+    else if ( idSo == "SO:0000687") //del : deletion_junction
+      vSig.push_back(new Signals(startS,   DATA::Del,    edge, scoreC));
+    
+    // High level (contents OR/AND signals)
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000196") 
+      //CDS && five_prime_coding_exon_region == E.Init
+    {
+      char strSc[20];
+      //copy the good score depend on the first caracter of signalPAR 
+      (startPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, startPAR);
+      vSig.push_back(new Signals(startS-1, DATA::Start, edge, strSc));
+      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
+      vSig.push_back(new Signals(endS,     DATA::Don,   edge, strSc));
+      PushInCon(startC, endC, scCds , strand, phase, frame);
+    }
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000004") 
+      //CDS && interior_coding_exon == E.Intr
+    {
+      char strSc[20];
+      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
+      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, strSc));
+      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
+      vSig.push_back(new Signals(endS,     DATA::Don,   edge, strSc));
+      
+      PushInCon(startC, endC, scCds, strand, phase, frame);
+    }
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000197") //CDS && three_prime_coding_exon_region == E.Term
+    {
+      char strSc[20];
+      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
+      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, strSc));
+      (stopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, stopPAR);
+      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, strSc));
+      PushInCon(startC, endC, scCds, strand, phase, frame);
+    }
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0005845") //CDS && single_exon == "E.Sngl"
+    {
+      char strSc[20];
+      (startPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, startPAR);
+      vSig.push_back(new Signals(startS-1, DATA::Start, edge, strSc));
+      (stopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, stopPAR);
+      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, strSc));
+      PushInCon(startC, endC, scCds, strand, phase, frame);
+    }
+    else if ( idSo == "SO:0000316") //CDS
+    {
+      PushInCon(startC, endC, scCds, strand, phase, frame);
+    }
+    else if ( idSo == "SO:0000204" ) //five_prime_UTR
+    {
+      char strSc[20];
+      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
+      vSig.push_back(new Signals (startS-1,DATA::tStart,edge, strSc));
+
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scCds));
+    }
+    else if ( idSo == "SO:0000205" ) //three_prime_UTR
+    {
+      char strSc[20];
+      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
+      vSig.push_back(new Signals (endS,    DATA::tStop, edge, strSc));
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scCds));
+    }
+    else if ( idSo == "SO:0000203" ) //UTR
+    {
+      char strSc[20];
+      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
+      vSig.push_back(new Signals(startS-1, DATA::tStart, edge, strSc));
+      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
+      vSig.push_back(new Signals(endS,     DATA::tStop,  edge, strSc));
+
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scCds));
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scCds));
+    }
+    else if ( idSo == "SO:0000188" && onthology_term == "SO:0000191") //intron not UTR !
+    {
+      vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,scIntron));
+    }
+    
+    else if ( idSo == "SO:0000147" ) //E.Any 
+    {
+      PushInCon(startC, endC, scExon, strand, phase, frame);
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scExon));
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scExon));
+    }
+    else if ( idSo == "SO:0000188" ) // "Intron.Any"
+    {
+      char strSc[20];
+      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
+      vSig.push_back(new Signals (startS-1, DATA::Don, edge, strSc));
+      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
+      vSig.push_back(new Signals (endS,     DATA::Acc, edge, strSc));
+      vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,scIntron));
+      vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,scIntron));
+    }
+    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000200") //"E.First"
+    {
+      PushInCon(startC, endC, scExon, strand, phase, frame);
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scExon));
+      
+      char strSc[20];
+      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
+      vSig.push_back(new Signals (startS-1,DATA::tStart, edge, strSc));
+    }
+    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000202") // "E.Last"
+    {
+      PushInCon(startC, endC, scExon, strand, phase, frame);
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scExon));
+      
+      char strSc[20];
+      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
+      vSig.push_back(new Signals (endS,  DATA::tStop, edge, strSc));
+
+    }
+    else if (idSo == "SO:0000147" && onthology_term.find("SO:0000202")!= string::npos && onthology_term.find("SO:0000200")!= string::npos) 
+    {
+      PushInCon(startC, endC, scExon, strand, phase, frame);
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scExon));
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scExon));
+      
+      char strSc[20];
+      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
+      vSig.push_back(new Signals(startS-1, DATA::tStart, edge,strSc));
+      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
+      vSig.push_back(new Signals(endS,     DATA::tStop,  edge,strSc));
+    }
+    else
+      fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
+	      feature, j);
+    
+    //fprintf(stderr, "END : feature %s line %d idSO : %s, Ontomlogy_term: %s.\n",
+	   // feature,j, idSo.c_str(), onthology_term.c_str() );
+    
+  }
+   
+}
 // ----------------
 //  push_back con.
 // ----------------
-void SensorAnnotaStruct :: PushInCon(int d, int e, float *sc,
+void SensorAnnotaStruct :: PushInCon(int d, int e, float sc,
 				     char st, char p[2], int f)
 {
   int k;
   if (st == '-') k = 3;
   else           k = 0;
-  if (!strcmp(p, ".")) {
+  if (! strcmp(p, ".") ) {
     vCon.push_back(new Contents(d, e, DATA::ExonF1+k, sc));
     vCon.push_back(new Contents(d, e, DATA::ExonF2+k, sc));
     vCon.push_back(new Contents(d, e, DATA::ExonF3+k, sc));
@@ -561,7 +820,7 @@ void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
     iConTMP = iCon;
     while((iConTMP < (int)vCon.size())   &&
 	  (pos >= vCon[iConTMP]->start)  &&  (pos <= vCon[iConTMP]->end)) {
-      d->contents[vCon[iConTMP]->type] += (*vCon[iConTMP]->score);
+      d->contents[vCon[iConTMP]->type] += vCon[iConTMP]->score;
       iConTMP++;
     }
     while(iCon < (int)vCon.size()  &&  pos > vCon[iCon]->end) iCon++;

@@ -60,9 +60,11 @@ class SensorRiken : public Sensor
   int MIN_RIKEN_LENGTH;     // default  = 120; // 2* riken overlap (60)
   int MIN_RIKEN_EST_LENGTH; // default  = 10;
   double RAFLPenalty;       // default  = -120;
-
+  int checkRAFL ( RAFLgene & tmp, int beg5, int end5, int beg3, int end3, int len);
  public:
   SensorRiken   (int n, DNASeq *X);
+  void readRiken (char name[FILENAME_MAX+1],DNASeq *X, std::vector <RAFLgene> & RAFLtmp);
+  void readRikenGff3 (GeneFeatureSet & geneFeatureSet ,DNASeq *X, std::vector <RAFLgene> & RAFLtmp);
   virtual ~SensorRiken    ();
   virtual void Init       (DNASeq *);
   virtual void GiveInfo   (DNASeq *, int, DATA *);

@@ -34,7 +34,8 @@ class SensorHomology : public Sensor
   float **TblastxScore;
   double TblastxP;
   double TblastxB;
-
+  void ReadHomology (char name[FILENAME_MAX+1],DNASeq *X,  const int MaxHitLen,ProtMat* PROTMAT);
+  void ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *X,  const int MaxHitLen,ProtMat* PROTMAT);
  public:
   SensorHomology (int n, DNASeq *X);
   virtual ~SensorHomology ();
@@ -47,7 +48,8 @@ class SensorHomology : public Sensor
   virtual void Plot  (DNASeq *);
   virtual void PlotAt(int pos);
   virtual void PostAnalyse(Prediction *, FILE *);
-
+  
+  
 };
 
 extern "C" SensorHomology * builder0( int n, DNASeq *X) {  return new SensorHomology(n, X);}

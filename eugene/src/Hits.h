@@ -21,7 +21,8 @@
 #define  HITS_H_INCLUDED
 
 #include <stdio.h>
-
+#include "GeneFeatureSet.h"
+#include "DNASeq.h"
 class Block
 {
  private:
@@ -46,13 +47,15 @@ class Block
 class  Hits
 {
  private:
-
+  
  public:
   Hits ();
   Hits (char* name, int length, char strand, int deb, int fin, int ldeb,
 	int lfin, int Ph, int Scr, double prob, int level, int sup);
-  Hits* ReadFromFile(FILE* HitFile, int *NumSeqs, int level, int margin, int maxLen);
+  Hits* ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int maxPos);
+  Hits* ReadFromGeneFeatureSetIt(GeneFeatureSet& HitSet , int *NumHits, int level, int margin, DNASeq *X);
   ~Hits ();
+
 
   char   *Name;
   char   Strand;
@@ -67,5 +70,8 @@ class  Hits
 
   Block *Match;
   Hits  *Next;
+  
+  char * getName ();
+  
 };
 #endif

@@ -48,6 +48,7 @@ Block :: Block ()
 // ---------------------------------------------------------------------
 Block ::  Block(int start, int end,int lstart,int lend,int Ph,int Scr)
 {
+  //fprintf (stderr, "New block : %d %d %d %d %d %d %c \n",start,end,lstart,lend,Ph,Scr);
   Start  = start;
   End    = end;
   LStart = lstart;
@@ -63,6 +64,7 @@ Block ::  Block(int start, int end,int lstart,int lend,int Ph,int Scr)
 // ---------------------------------------------------------------------
 void Block ::  AddBlockAfter(int start,int end,int lstart,int lend,int Ph,int Scr, char *HSP)
 {
+  
   Block *ABlock = new Block(start,end,lstart,lend,Ph,Scr);
   this->Next    = ABlock;
   ABlock->Prev  = this;
@@ -145,7 +147,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
   while ((read=fscanf(HitFile,"%d %d %d %lf %d %s %d %d %as\n", &deb, &fin, 
 		      &poids, &evalue, &phase, HitId, &HSPDeb, &HSPFin,HSP)) >= 8)
     {
-      // if (HSP) fprintf(stderr,HSP);
+      if (HSP) fprintf(stderr,HSP);
       if (phase < 0  &&  deb > fin) {
 	int tmp = deb;
 	deb     = fin;
@@ -166,7 +168,6 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 		HitId);
 	continue;
       }
-
       if ((strcmp(HitId,PHitId) == 0)      && (phase*Pphase >= 0) &&
 	  (deb + margin > ThisBlock->End)  &&
 	  (phase >= 0  &&  (HSPDeb + margin > ThisBlock->LEnd)    ||
@@ -181,30 +182,175 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 	  ThisBlock->AddBlockAfter(deb-1,fin-1,HSPDeb,HSPFin,phase,poids);
 	  ThisBlock = ThisBlock->Next;
 	}
-      else {
+      else 
+      {
 	(*NumHits)++;
-	OneHit = new Hits(HitId, poids, (phase>0 ? 1 : -1), deb-1, fin-1,
+	OneHit = new Hits(HitId, poids, (phase>0 ? '+' : '-'), deb-1, fin-1,
 			  HSPDeb, HSPFin, phase, poids, evalue, level, 0);
 	ThisBlock = OneHit->Match;
 	PHitId    = HitId;
 	Pevalue   = evalue;
 	Pphase = phase;
 
-	if (AllHit == NULL) {
+	if (AllHit == NULL) 
+	{
 	  AllHit = OneHit;
 	  ThisHit = OneHit;
 	}
-	else {
+	else 
+	{
 	  ThisHit->Next = OneHit;
 	  ThisHit       = OneHit;
 	}
       }
+      
     }
   if (read != EOF) 
     fprintf(stderr,"\nIncorrect similarity file after seq. %s\n",HitId);
 
   return AllHit;
 }
+
+// ---------------------------------------------------------------------
+//  Read a table of Hits from a file
+// ---------------------------------------------------------------------
+Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int level, int margin, DNASeq *X ) 
+{
+  int maxPos = X->SeqLen; 
+  char   *HitId, *PHitId;
+  int    deb, fin, phase, Pphase, HSPDeb, HSPFin, poids, read;
+  double evalue, Pevalue;
+  char   A[512], B[512], strand, Pstrand;
+  char *HSP = NULL;
+  Block *ThisBlock = NULL;
+  Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
+  const int MaxHitLen = 15000;
+  string feature_type=" ";
+  Pevalue = -1.0;
+  Pphase = 0;
+  A[0]    = B[0] = 0;
+  HitId   = A;
+  PHitId  = B;
+  //HitSet.printFeature();
+  if (ThisHit != NULL)
+    for (int i=0; i<*NumHits-1; i++) ThisHit = ThisHit->Next;
+  
+  vector<GeneFeature *>::iterator it = HitSet.getIterator();
+  int nbGeneFeature=HitSet.getNbFeature();
+  
+  int i=0;
+  for ( i=0 ; i < nbGeneFeature ; i++, it++ )
+  {
+    if ( ! (*it)->hasTarget() )
+    {     
+      continue;
+    }
+    deb    = (*it)->getLocus()->getStart();
+    fin    = (*it)->getLocus()->getEnd();
+    poids  = (*it)->getAttributes()->getTarget()->getScoreHit();
+    evalue = (*it)->getScore();
+    strand = (*it)->getLocus()->getStrand();
+    feature_type=(*it)->getType();
+    string idSo=(*it)->getType();
+    if ( poids <= 0)
+    {
+      poids=(*it)->getLength();
+    }
+    //Get SO code if feature correspond to the name or the synonym.
+    if ( idSo.find("SO:") == string::npos )
+    {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+    }
+    
+    if ( idSo == "SO:0000668" ) //EST_match
+    {
+      phase  = (strand == '+' ? 0 : 1);
+    }
+    else //BlastX
+    {
+      phase  = (*it)->getAttributes()->getTarget()->getFrameHit();
+      if (phase == 0) //not specified
+      { 
+	phase  = X->Pos2Frame(deb,strand); 
+      }
+      else 
+      {
+	int computedFrame=X->Pos2Frame(deb,strand);
+	if (phase != computedFrame) //check frame computrd and read are the same.
+	{
+	  fprintf( stderr, "Warn : skipped : computed frame (%d) and input frame (%d) are different \n",computedFrame, phase);
+	  fflush(stderr);
+	  continue;
+	}
+      }
+    }
+    strcpy (HitId, (*it)->getAttributes()->getTarget()->getName().c_str());
+    HSPDeb = (*it)->getAttributes()->getTarget()->getLocus()->getStart();
+    HSPFin = (*it)->getAttributes()->getTarget()->getLocus()->getEnd();
+
+    // if (HSP) fprintf(stderr,HSP);
+    if (phase < 0  &&  strand == '-' ) {
+      int tmp     = HSPDeb;
+      HSPDeb  = HSPFin;
+      HSPFin  = tmp;
+    }
+
+    if((deb>maxPos) || (fin>maxPos)) {
+      fprintf(stderr,"Hit does not map on sequence. Check %s\n",
+	      HitId);
+      exit(1);
+    }
+
+    if (abs(fin-deb) > MaxHitLen) {
+      fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",HitId);
+      continue;
+    }
+    if (  
+	  ( strcmp( HitId, PHitId ) == 0 )   && 
+	  ( phase*Pphase >= 0 )              &&
+	  ( deb + margin > ThisBlock->End )  && 
+	  (
+	   ( phase >= 0 &&  ( HSPFin + margin > ThisBlock->LEnd ) )
+	     ||
+	   ( phase < 0  &&  ( HSPDeb - margin < ThisBlock->LEnd ) )
+	  ) 
+       )
+	// si HitId et PHitId sont égaux, alors il y a un Hit en cours
+	// de meme nom on verifie que c'est bien compatible en terme
+	// de position (sur l'est et le genomique) et en e-value, en 
+	// prenant en compte le brin !
+    {
+      ThisHit->NGaps++;
+      ThisHit->End = fin-1;
+      ThisBlock->AddBlockAfter(deb-1,fin-1,HSPDeb,HSPFin,phase,poids);
+      ThisBlock = ThisBlock->Next;
+    }
+    else 
+    {
+      (*NumHits)++;
+      OneHit = new Hits(HitId, poids, strand, deb-1, fin-1,
+			HSPDeb, HSPFin, phase, poids, evalue, level, 0);
+      ThisBlock = OneHit->Match;
+      PHitId    = HitId;
+      Pevalue   = evalue;
+      Pphase = phase;
+
+      if (AllHit == NULL) 
+      {
+	AllHit   = OneHit;
+	ThisHit  = OneHit;
+      }
+      else 
+      {
+	ThisHit->Next = OneHit;
+	ThisHit       = OneHit;
+      }
+    }
+  }
+  return AllHit;
+}
+
 
 // ---------------------------------------------------------------------
 //  Destroy this alignement
@@ -214,4 +360,8 @@ Hits :: ~ Hits  ()
   delete Match;
   delete [] Name;
   delete Next;
+}
+char * Hits::getName () 
+{
+  return Name;
 }
