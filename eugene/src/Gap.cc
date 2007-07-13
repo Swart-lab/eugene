@@ -42,7 +42,7 @@ Gap::~Gap ( ) { }
 
 
 //getString
-std::string Gap::getString ( )
+std::string Gap::getString ( ) const 
 {
 	std::string my_gap = "";
 	

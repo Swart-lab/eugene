@@ -46,16 +46,16 @@ public:
   // Constructors/Destructors
 
    Gap ( );
-   Gap (char type,int length);
+   Gap (char type , int length );
    virtual ~Gap ( );
 
 
   // Public attribute accessor methods
-  std::string getString ( );
+  std::string getString ( ) const ;
 
-  friend std::ostream& operator<<(std::ostream& o, Gap* gap )
+  friend std::ostream& operator<<(std::ostream& o, const Gap & gap )
   {
-	return o << gap->getString();
+	return o << gap.getString();
   }
 
 };
