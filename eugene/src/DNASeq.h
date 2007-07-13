@@ -91,7 +91,7 @@ class  DNASeq
   unsigned short Nuc2Code(char Ch);
 
   void Transfer(int Pos, int Len, char *To, int mode);
-  
+  int Pos2Frame(int pos, char strand);
   unsigned short Unambit (int pos);
 
   char operator [] (int i);

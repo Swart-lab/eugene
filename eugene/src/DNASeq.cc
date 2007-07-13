@@ -684,3 +684,23 @@ unsigned char DNASeq :: Degeneracy(int i, int mode)
 	  Code2NumOne[(*this)(i,mode)]);
   
 }
+
+//Return frame blast
+int DNASeq :: Pos2Frame(int pos, char strand)
+{
+  int frame=0;
+  if (strand == '+') 
+  { 
+      frame = (pos )% 3; 
+      if ( frame == 0 )
+	frame = 3 ;
+  }
+  else               
+  { 
+      frame = (SeqLen - pos -1 ) % 3;
+      if ( frame == 0 )
+	frame = 3 ;
+      frame = frame * ( -1 ) ;
+  }
+  return frame;
+}
