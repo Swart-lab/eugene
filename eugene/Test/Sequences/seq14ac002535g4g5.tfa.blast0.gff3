@@ -1,0 +1,34 @@
+seq14	blastx0	match	2361	4506	.	+	.	ID=blastx0:seq14.1;Dbxref=blastx0:sp_O84903_GALE_LACCA
+seq14	blastx0	match	2361	2483	2e-07	+	.	ID=blastx0:seq14.1.1;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 1 41 +;Gap=M41;frame_hit=+3;score_hit=114;Parent=blastx0:seq14.1
+seq14	blastx0	match	2792	2857	2e-07	+	.	ID=blastx0:seq14.1.2;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 111 132 +;Gap=M22;frame_hit=+2;score_hit=47;Parent=blastx0:seq14.1
+seq14	blastx0	match	4432	4506	2e-07	+	.	ID=blastx0:seq14.1.3;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 280 304 +;Gap=M25;frame_hit=+1;score_hit=50;Parent=blastx0:seq14.1
+seq14	blastx0	match	6616	6825	.	-	.	ID=blastx0:seq14.2;Dbxref=blastx0:sp_P28321_YKJ4_YEAST
+seq14	blastx0	match	6616	6825	1e-09	-	.	ID=blastx0:seq14.2.1;Dbxref=blastx0:sp_P28321_YKJ4_YEAST;Target=sp_P28321_YKJ4_YEAST 242 311 +;Gap=M70;frame_hit=-2;score_hit=140;Parent=blastx0:seq14.2
+seq14	blastx0	match	4940	5499	.	-	.	ID=blastx0:seq14.3;Dbxref=blastx0:sp_P43330_SMD2_HUMAN
+seq14	blastx0	match	4940	5050	1e-42	-	.	ID=blastx0:seq14.3.1;Dbxref=blastx0:sp_P43330_SMD2_HUMAN;Target=sp_P43330_SMD2_HUMAN 77 113 +;Gap=M37;frame_hit=-1;score_hit=167;Parent=blastx0:seq14.3
+seq14	blastx0	match	5130	5240	1e-42	-	.	ID=blastx0:seq14.3.2;Dbxref=blastx0:sp_P43330_SMD2_HUMAN;Target=sp_P43330_SMD2_HUMAN 41 77 +;Gap=M37;frame_hit=-3;score_hit=190;Parent=blastx0:seq14.3
+seq14	blastx0	match	5425	5499	1e-42	-	.	ID=blastx0:seq14.3.3;Dbxref=blastx0:sp_P43330_SMD2_HUMAN;Target=sp_P43330_SMD2_HUMAN 18 42 +;Gap=M25;frame_hit=-2;score_hit=108;Parent=blastx0:seq14.3
+seq14	blastx0	match	2358	4545	.	+	.	ID=blastx0:seq14.4;Dbxref=blastx0:sp_P44914_RFFG_HAEIN
+seq14	blastx0	match	2358	2447	4e-07	+	.	ID=blastx0:seq14.4.1;Dbxref=blastx0:sp_P44914_RFFG_HAEIN;Target=sp_P44914_RFFG_HAEIN 1 30 +;Gap=M30;frame_hit=+3;score_hit=60;Parent=blastx0:seq14.4
+seq14	blastx0	match	2774	2830	4e-07	+	.	ID=blastx0:seq14.4.2;Dbxref=blastx0:sp_P44914_RFFG_HAEIN;Target=sp_P44914_RFFG_HAEIN 122 140 +;Gap=M19;frame_hit=+2;score_hit=48;Parent=blastx0:seq14.4
+seq14	blastx0	match	3562	3687	4e-07	+	.	ID=blastx0:seq14.4.3;Dbxref=blastx0:sp_P44914_RFFG_HAEIN;Target=sp_P44914_RFFG_HAEIN 201 242 +;Gap=M42;frame_hit=+1;score_hit=80;Parent=blastx0:seq14.4
+seq14	blastx0	match	4468	4545	4e-07	+	.	ID=blastx0:seq14.4.4;Dbxref=blastx0:sp_P44914_RFFG_HAEIN;Target=sp_P44914_RFFG_HAEIN 304 329 +;Gap=M26;frame_hit=+1;score_hit=58;Parent=blastx0:seq14.4
+seq14	blastx0	match	2370	4542	.	+	.	ID=blastx0:seq14.5;Dbxref=blastx0:sp_P55295_RFBB_XANCA
+seq14	blastx0	match	2370	2453	3e-08	+	.	ID=blastx0:seq14.5.1;Dbxref=blastx0:sp_P55295_RFBB_XANCA;Target=sp_P55295_RFBB_XANCA 5 32 +;Gap=M28;frame_hit=+3;score_hit=61;Parent=blastx0:seq14.5
+seq14	blastx0	match	3562	3654	3e-08	+	.	ID=blastx0:seq14.5.2;Dbxref=blastx0:sp_P55295_RFBB_XANCA;Target=sp_P55295_RFBB_XANCA 199 229 +;Gap=M31;frame_hit=+1;score_hit=93;Parent=blastx0:seq14.5
+seq14	blastx0	match	4468	4542	3e-08	+	.	ID=blastx0:seq14.5.3;Dbxref=blastx0:sp_P55295_RFBB_XANCA;Target=sp_P55295_RFBB_XANCA 300 324 +;Gap=M25;frame_hit=+1;score_hit=64;Parent=blastx0:seq14.5
+seq14	blastx0	match	2364	4545	.	+	.	ID=blastx0:seq14.6;Dbxref=blastx0:sp_Q04973_VIPB_SALTI
+seq14	blastx0	match	2364	2483	9e-07	+	.	ID=blastx0:seq14.6.1;Dbxref=blastx0:sp_Q04973_VIPB_SALTI;Target=sp_Q04973_VIPB_SALTI 17 56 +;Gap=M40;frame_hit=+3;score_hit=89;Parent=blastx0:seq14.6
+seq14	blastx0	match	3574	3660	9e-07	+	.	ID=blastx0:seq14.6.2;Dbxref=blastx0:sp_Q04973_VIPB_SALTI;Target=sp_Q04973_VIPB_SALTI 214 242 +;Gap=M29;frame_hit=+1;score_hit=58;Parent=blastx0:seq14.6
+seq14	blastx0	match	4441	4545	9e-07	+	.	ID=blastx0:seq14.6.3;Dbxref=blastx0:sp_Q04973_VIPB_SALTI;Target=sp_Q04973_VIPB_SALTI 301 335 +;Gap=M35;frame_hit=+1;score_hit=59;Parent=blastx0:seq14.6
+seq14	blastx0	match	4940	5237	.	-	.	ID=blastx0:seq14.7;Dbxref=blastx0:sp_Q06217_SMD2_YEAST
+seq14	blastx0	match	4940	5029	3e-20	-	.	ID=blastx0:seq14.7.1;Dbxref=blastx0:sp_Q06217_SMD2_YEAST;Target=sp_Q06217_SMD2_YEAST 79 108 +;Gap=M30;frame_hit=-1;score_hit=103;Parent=blastx0:seq14.7
+seq14	blastx0	match	5133	5237	3e-20	-	.	ID=blastx0:seq14.7.2;Dbxref=blastx0:sp_Q06217_SMD2_YEAST;Target=sp_Q06217_SMD2_YEAST 44 78 +;Gap=M35;frame_hit=-3;score_hit=149;Parent=blastx0:seq14.7
+seq14	blastx0	match	4940	5493	.	-	.	ID=blastx0:seq14.8;Dbxref=blastx0:sp_Q18786_SMD2_CAEEL
+seq14	blastx0	match	4940	5050	6e-38	-	.	ID=blastx0:seq14.8.1;Dbxref=blastx0:sp_Q18786_SMD2_CAEEL;Target=sp_Q18786_SMD2_CAEEL 77 113 +;Gap=M37;frame_hit=-1;score_hit=154;Parent=blastx0:seq14.8
+seq14	blastx0	match	5130	5240	6e-38	-	.	ID=blastx0:seq14.8.2;Dbxref=blastx0:sp_Q18786_SMD2_CAEEL;Target=sp_Q18786_SMD2_CAEEL 41 77 +;Gap=M37;frame_hit=-3;score_hit=190;Parent=blastx0:seq14.8
+seq14	blastx0	match	5425	5493	6e-38	-	.	ID=blastx0:seq14.8.3;Dbxref=blastx0:sp_Q18786_SMD2_CAEEL;Target=sp_Q18786_SMD2_CAEEL 20 42 +;Gap=M23;frame_hit=-2;score_hit=86;Parent=blastx0:seq14.8
+seq14	blastx0	match	2367	4542	.	+	.	ID=blastx0:seq14.9;Dbxref=blastx0:sp_Q57664_GALE_METJA
+seq14	blastx0	match	2367	2543	7e-12	+	.	ID=blastx0:seq14.9.1;Dbxref=blastx0:sp_Q57664_GALE_METJA;Target=sp_Q57664_GALE_METJA 2 60 +;Gap=M59;frame_hit=+3;score_hit=126;Parent=blastx0:seq14.9
+seq14	blastx0	match	3562	3657	7e-12	+	.	ID=blastx0:seq14.9.2;Dbxref=blastx0:sp_Q57664_GALE_METJA;Target=sp_Q57664_GALE_METJA 184 215 +;Gap=M32;frame_hit=+1;score_hit=63;Parent=blastx0:seq14.9
+seq14	blastx0	match	4477	4542	7e-12	+	.	ID=blastx0:seq14.9.3;Dbxref=blastx0:sp_Q57664_GALE_METJA;Target=sp_Q57664_GALE_METJA 275 296 +;Gap=M22;frame_hit=+1;score_hit=55;Parent=blastx0:seq14.9
