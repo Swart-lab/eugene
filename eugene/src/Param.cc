@@ -466,7 +466,8 @@ char* Parameters :: getC(char *key, int index, int sloppy)
     delete [] altkey;
     return key;
   }
-  else {
+  else 
+  {
     if (sloppy) { return 0; }
     else {
       fprintf(stderr,"\nError: Undefined key %s\n",altkey);
@@ -481,14 +482,15 @@ char* Parameters :: getC(char *key, int index, int sloppy)
 double Parameters :: getD(char *key, int index, int sloppy)
 {
   char *res = getC(key,index,sloppy);
-
-  if (res) {
+  double dou = 0.0;
+  if (res) 
+  {
     if(!strcmp(res, "NINFINITY"))
-      return NINFINITY;
+      dou = NINFINITY;
     else
-      return atof(res);
+      dou = atof(res);
   }
-  return 0.0;
+  return dou;
 }
 
 // ------------------------
