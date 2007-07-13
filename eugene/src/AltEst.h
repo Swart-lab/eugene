@@ -95,10 +95,10 @@ class AltEst
   int  totalAltEstNumber;
   std::vector<OneAltEst> voae_AltEst;
 
-  AltEst  ();
+  AltEst  (DNASeq *X);
   ~AltEst ();
   void Penalize(int i, int pos, DATA *Data);
-
+  int convertHitsToAltEst (Hits * AllEST, int &nbUnspliced, int &nbExtremLen, int & NumEST);
 };
 
 #endif
