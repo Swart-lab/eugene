@@ -42,6 +42,16 @@ GeneFeature::GeneFeature()
 // prerequis : no \n at the end of the line.
 GeneFeature::GeneFeature ( char * line) 
 {
+  id_=".";
+  seqid_=".";
+  source_=".";
+  type_=".";
+  locus_=NULL;
+  score_=0.0;
+  phase_='.';
+  attributes_=NULL;
+  valid_= true ;
+  length_=0;
   
   valid_= true ;
   line_=to_string(line);
@@ -64,8 +74,8 @@ GeneFeature::GeneFeature ( char * line)
 GeneFeature::GeneFeature ( const GeneFeature & gene)
 {
 
-  fprintf (stderr,"%p constructeur par recopy geneFeature %p \n",this,& gene);
-  fflush (stderr);
+/*  fprintf (stderr,"%p constructeur par recopy geneFeature %p \n",this,& gene);
+  fflush (stderr);*/
   line_=gene.line_;
   id_=gene.id_;
   seqid_=gene.seqid_;
@@ -261,7 +271,7 @@ bool GeneFeature::getValid ( ) const
 // ---------------------------------------
 string GeneFeature::getString ( ) const 
 {
-  string geneFeature =seqid_+"\t"+source_+"\t"+type_+"\t";
+  string geneFeature = seqid_+"\t"+source_+"\t"+type_+"\t";
   if ( locus_ != NULL )
   {
     geneFeature += to_string(locus_->getStart()) + "\t" + to_string(locus_->getEnd()) + "\t" + to_string(score_) + "\t" + to_string(locus_->getStrand()) + "\t";
@@ -297,4 +307,17 @@ int GeneFeature::getLength ( ) const
 Attributes * GeneFeature::getAttributes ( ) const 
 {
   return (attributes_);
+}
+
+bool    GeneFeature::hasTarget ( )  const 
+{
+    bool res=false;
+    if (attributes_ != NULL)
+    {
+      if ( attributes_->hasTarget() )
+      {
+	res=true;
+      }
+    }
+    return res;
 }

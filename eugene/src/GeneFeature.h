@@ -54,6 +54,7 @@ class GeneFeature
     Locus * getLocus ( )  const ;
     double  getScore ( )  const ;
     int     getLength ( ) const ;
+    bool    hasTarget ( )  const ;
     Attributes * getAttributes () const ;
     
     friend ostream& operator<<(ostream& o, const GeneFeature & geneFeature )
