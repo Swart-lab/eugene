@@ -90,6 +90,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 
     fprintf(stderr,"Reading BlastX data, level...");
     fflush(stderr);
+    inputFormat_ = to_string(PAR.getC("BlastX.format", GetNumber(),1));
 
     for (k = 0; k < (int)strlen(levels); k++)
     {
@@ -100,24 +101,49 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
         i = strlen(tempname);
         tempname[i]   = levels[k];
         tempname[i+1] = 0;
-        // check the corresponding .blastN file (N=level given in arg)
-        fblast = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+	
+	
+	
+	if ( inputFormat_ == "GFF3" )
+	{
+	  strcat(tempname,".gff3");
+	  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+	  char * soTerms = new char[FILENAME_MAX+1];
+	  strcpy(soTerms , PAR.getC("eugene_dir"));
+	  strcat(soTerms , filenameSoTerms );
 
-        if (fblast)
-        {
-            AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20,X->SeqLen);
-            fprintf(stderr,"%c ",levels[k]);
-            fflush(stderr);
-            fclose(fblast);
-        }
+	  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+          //geneFeatureSet->printFeature();
+	  fprintf(stderr,"%c ",levels[k]);
+	  fflush(stderr);
+	  
+	  AllProt = AllProt->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumProt, (levels[k] - '0'), 20, X);
+	  
+	}
+	else
+	{
+	  // check the corresponding .blastN file (N=level given in arg)
+	  fblast = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+  
+	  if (fblast)
+	  {
+	      AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20, X->SeqLen);
+	      fprintf(stderr,"%c ",levels[k]);
+	      fflush(stderr);
+	      fclose(fblast);
+	  }
+	}
+	
     }
     fprintf(stderr,"done\n");
-
-
+    fflush(stderr);
     Hits *ThisProt = AllProt;
     HitTable = new Hits *[NumProt+1];
     for (i = 0;  i < NumProt;  i++, ThisProt = ThisProt->Next)
+    {
         HitTable[i] = ThisProt;
+    }
+    //Print (tempname);
 
     //for (i=0;  i<NumProt;  i++)
     //printf("Name:%s\tLevel:%d\n", HitTable[i]->Name,HitTable[i]->Level);
@@ -706,4 +732,21 @@ int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
     }
     delete [] Sup;
     return supported;
+}
+
+
+void SensorBlastX :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+ for (int i=0;  i<NumProt;  i++)
+  fprintf(fp, "Name:%s\tLevel:%d\n", HitTable[i]->Name,HitTable[i]->Level);
+  
+
+
+  fclose(fp);
 }

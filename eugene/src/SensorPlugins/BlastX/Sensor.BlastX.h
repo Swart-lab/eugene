@@ -57,7 +57,7 @@ class SensorBlastX : public Sensor
   int  LenSup      (Hits **HitTable, Prediction *pred,
 		    std::vector<int> vSupProtI,
 		    int index, int beg, int end);
-  
+  void Print (char name[FILENAME_MAX+1]);
  public:
   SensorBlastX            (int n, DNASeq *X);
   virtual ~SensorBlastX   ();

@@ -120,25 +120,47 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 
     strcpy(tempname, PAR.getC("fstname"));
     strcat(tempname, ".est");
-    fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
     NumEST = 0;
-    if (fEST)
+    Hits * AllEST=NULL;
+      
+    inputFormat_ = to_string(PAR.getC("Est.format", GetNumber(),1));
+
+    if ( inputFormat_ == "GFF3" )
     {
-        HitTable = ESTAnalyzer(fEST, ESTMatch, estM, &NumEST, X);
-        fclose(fEST);
+      strcat(tempname,".gff3");
+      char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),1);
+      char * soTerms = new char[FILENAME_MAX+1];
+      strcpy(soTerms , PAR.getC("eugene_dir"));
+      strcat(soTerms , filenameSoTerms );
+
+      GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+      geneFeatureSet->printFeature();
+      AllEST = AllEST->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumEST, -1, 0, X);
+      HitTable = ESTAnalyzer(AllEST, ESTMatch, estM, &NumEST, X);
     }
     else
     {
-        fprintf(stderr,"\n");
-        fflush(stderr);
+      fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+      if (fEST)
+      {   //ReadFromFile (EstFile  EstNumber  Level  Margin)
+	  AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
+	  HitTable = ESTAnalyzer(AllEST, ESTMatch, estM, &NumEST, X);
+	  fclose(fEST);
+      }
+      else
+      {
+	  fprintf(stderr,"Error while openning %s\n",tempname);
+	  fflush(stderr);
+      }
     }
-
+    
     for (i = 0; i<= X->SeqLen; i++)
         if(ESTMatch[i] != 0)
         {
             vPos.push_back      ( i );
             vESTMatch.push_back ( ESTMatch[i] );
         }
+    //Print(tempname);
     delete [] ESTMatch;
 }
 
@@ -301,28 +323,24 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 // -----------------------
 //  ESTAnalyzer.
 // -----------------------
-Hits** SensorEst :: ESTAnalyzer(FILE *ESTFile, unsigned char *ESTMatch,
+Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                                 int EstM, int *NumEST, DNASeq *X)
 {
     int i,j,k;
     int Rejected = 0;
-    Hits *ThisEST = NULL, *AllEST = NULL;
+    Hits *ThisEST = NULL;
     Block *ThisBlock = NULL;
-
-    // ReadFromFile (EstFile  EstNumber  Level  Margin)
-    AllEST = AllEST->ReadFromFile(ESTFile, NumEST, -1, 0,X->SeqLen);
-
+    
+    
     fprintf(stderr,"%d sequences read\n",*NumEST);
     fflush(stderr);
 
     // on trie les hits sur le nombre de gaps et la
     // longueur. L'idee est d'eliminer les epissages partiels et de
     // favoriser la longueur de toute facon.
-
     Hits **HitTable = new Hits *[*NumEST+1];
     for (i = 0, ThisEST = AllEST; i < *NumEST; i++, ThisEST = ThisEST->Next)
-        HitTable[i] = ThisEST;
-
+    {        HitTable[i] = ThisEST;    }
     // pour memoriser le premier (a liberer)
     HitTable[*NumEST] = AllEST;
 
@@ -1094,4 +1112,29 @@ int SensorEst :: LenSup(Hits **HitTable, std::vector<int> vSupEstI,
     }
     delete [] Sup;
     return supported;
+}
+
+
+void SensorEst :: Print (char name[FILENAME_MAX+1])
+{
+  FILE *fp;
+  strcat (name, ".out");
+  if (!(fp = fopen(name, "w"))) {
+    fprintf(stderr, "cannot write in %s\n",  name);
+    exit(2);
+  }
+
+  fprintf(fp, "vPos %d\n",  vPos.size());
+  for (int i=0; i< vPos.size();i++ )
+  {
+    fprintf(fp, "vPos %d\t%d\n",i,  vPos[i]);
+  }
+  
+  fprintf(fp, "vESTMatch %d\n",  vESTMatch.size());
+  for (int i=0; i< vESTMatch.size();i++ )
+  {
+    fprintf(fp, "vESTMatch %d\t\n", vESTMatch[i]);
+  }
+
+  fclose(fp);
 }
