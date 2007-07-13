@@ -29,25 +29,30 @@ Target::Target ( )
   sequenceData_ = "";
   targetLength_ = 0;
   isFullLength_ = UNKNOWN; 
-
+  frameHit_=0;
+  scoreHit_=-1;
 }
 
-Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Locus * locus) 
+Target::Target (std::string name , std::string sequenceData,  int targetLength, int isFullLength, Locus * locus, int frameHit, int scoreHit) 
 {
   name_ = name;
   locus_ = new Locus (*locus);
   sequenceData_ = sequenceData;
   targetLength_ = targetLength;
   isFullLength_ = isFullLength; 
+  frameHit_     = frameHit;
+  scoreHit_     = scoreHit;
 }
 
-Target::Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand)
+Target::Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand, int frameHit, int scoreHit)
 {
         name_ = name;
 	locus_ = new Locus (start,end,strand);
 	sequenceData_ = sequenceData;
 	targetLength_ = targetLength;
 	isFullLength_ = isFullLength;
+	frameHit_     = frameHit;
+	scoreHit_     = scoreHit;
 	//cout << "Constructeur TARGET :  "<<getString()<<endl;
 }
 		
@@ -58,6 +63,8 @@ Target::Target (Target * target)
   sequenceData_ = target->sequenceData_;
   targetLength_ = target->targetLength_;
   isFullLength_ = target->isFullLength_;
+  frameHit_     = target->frameHit_;
+  scoreHit_     = target->scoreHit_;
 }
 // -----------------------
 //  Destructeur
@@ -68,6 +75,15 @@ Target::~Target ( )
   delete locus_;
 }
 
+bool Target::hasLocus ( ) const 
+{
+  bool res = false ;
+  if (locus_ != NULL )
+  {
+    res = true;
+  }
+  return res;
+}
 
 // -----------------------
 //Accessor
@@ -130,6 +146,16 @@ int Target::getIsFullLength ( )
 	return isFullLength_;
 }
 
+int Target::getFrameHit ( )
+{
+  return frameHit_;
+}
+
+int Target::getScoreHit ( )
+{
+  return scoreHit_;
+}
+
 
 //getString
 std::string Target::getString ( )  const 
@@ -150,6 +176,14 @@ std::string Target::getString ( )  const
 	if ( sequenceData_ != ""  )
 	{
 		my_target += "target_sequence=" + sequenceData_+ ";";
+	}
+	if ( frameHit_ != 0 )
+	{
+	  my_target += "frame_hit=" + to_string(frameHit_)+ ";";
+	}
+	if ( scoreHit_ > -1 )
+	{
+	  my_target += "score_hit=" + to_string(scoreHit_)+ ";";
 	}
 	return my_target;
 }

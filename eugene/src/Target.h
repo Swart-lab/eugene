@@ -46,7 +46,8 @@ private:
   // 0 -> Est or fragment protein
   // 1 -> Riken (have the 5' and 3' Est)
   // 2 -> cDNA or Protein full length
-
+  int frameHit_;
+  int scoreHit_;
 
 public:
 
@@ -54,8 +55,8 @@ public:
   // Constructors/Destructors
 
    Target ( );
-   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, Locus * locus);
-   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand);
+   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, Locus * locus,int frameHit,int scoreHit);
+   Target ( std::string name, std::string sequenceData,  int targetLength, int isFullLength, int start, int end, char strand, int frameHit, int scoreHit);
    Target ( Target * target);
    virtual ~Target ( );
 
@@ -76,6 +77,9 @@ public:
 
   void setIsFullLength ( int isFullLength );
   int getIsFullLength ( );
+  int getFrameHit ( );
+  int getScoreHit ( );
+  bool hasLocus ( ) const;
   std::string getString ( ) const ;
   friend std::ostream& operator<<(std::ostream& o, const Target & target )
   {
