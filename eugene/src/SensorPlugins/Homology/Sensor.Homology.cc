@@ -73,16 +73,8 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
 
   int i, j;
   int Len = X->SeqLen; 
-  FILE *ftblastx;
   FILE *protmatfile;
-  int deb,fin,phase,ProtDeb,ProtFin,sens;
-  int score = 0;
-  double bits;
   const int MaxHitLen  = 15000;
-  char tampon;
-  char* paire= new char[3];
-  paire[0]=paire[1]= '0';
-  paire[2]='\0';
   ProtMat* PROTMAT;
   char tempname[FILENAME_MAX+1];
   int nmax;
@@ -134,9 +126,9 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     char * soTerms = new char[FILENAME_MAX+1];
     strcpy(soTerms , PAR.getC("eugene_dir"));
     strcat(soTerms , filenameSoTerms );
-
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
     ReadHomologyGff3(*geneFeatureSet, X, MaxHitLen, PROTMAT);
+	delete geneFeatureSet;
   }
   else
   {
@@ -165,7 +157,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
       }
     }
   }
-  
   delete [] tmpdir;
 }
 
@@ -242,7 +233,6 @@ void SensorHomology:: ReadHomology (char name[FILENAME_MAX+1],DNASeq *X,  const 
 			   paire[1]=tampon;
 			   paire[0]= ( (sens>0) ? X->AA(i,0) : X->AA(deb+fin-i-1,1) );
 			   score= PROTMAT->VAL[PROTMAT->mot2indice(paire)];
-	                   //printf("i:%d query-subject:  %c-%c score: %d\n",i,paire[0],paire[1],score);
 			 }
 			 TblastxNumber[phase][i] ++;
       
@@ -316,7 +306,7 @@ void SensorHomology ::ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *
 
 	  if ( (*it)->getAttributes()->getTarget()->getSequenceData() == "")
 	  {
-	    fprintf( stderr, "Warn hasn't target sequence, skipped : %s \n", ((*it)->getString()).c_str() );
+	    fprintf( stderr, "Warn Feature hasn't target sequence, skipped : %s \n", ((*it)->getString()).c_str() );
 	    fflush(stderr);
 	    continue;
 	  }
@@ -325,7 +315,7 @@ void SensorHomology ::ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *
 	  strcpy (subjectHit, ((*it)->getAttributes()->getTarget()->getSequenceData()).c_str() );
 	  int j=0;
 	   
-	  tampon=' ';
+	  tampon=subjectHit[j];
 	  for (int l = deb-1; l < fin; l++)  {
 		 if ( (l-deb+1)%3 == 0 ) {
 		   if (l >deb-1) 
