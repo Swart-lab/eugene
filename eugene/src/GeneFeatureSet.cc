@@ -31,10 +31,10 @@ SoTerms *  GeneFeatureSet::soTerms_= new SoTerms ();
 //Constructor
 GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename ) 
 {
+  fflush(stderr);
   lastIndex_=0;
   // si premier object geneFeatureSet il faut initialiser la variable de classe
   if ( GeneFeatureSet::soTerms_->size() == 0 ) {
-    //cout<<"Load SoTerms"<<endl;
     GeneFeatureSet::soTerms_->loadFile(soTermsFilename);
   }
   FILE *fp;
@@ -43,15 +43,14 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
   }
   else
   {
-  char value[100]="";
   int i=1;
-  char line[MAX_LINE];
+  char line[MAX_GFF_LINE];
   while(fp  &&  fgets (line, 1500, fp) != NULL) 
   {
     if ( line[0] != '#' )
     {  
       GeneFeature * tempGeneFeature = new GeneFeature (line);
-      // cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
+       //cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
 
       if ( tempGeneFeature->getParent()!="" && ! existsGeneFeature( tempGeneFeature->getParent() ) )
       {
@@ -113,7 +112,6 @@ GeneFeatureSet::GeneFeatureSet (char* soTermsFilename )
 // -----------------------
 GeneFeatureSet::~GeneFeatureSet ( ) 
 { 
-  cout << "detroy GeneFeatureSet"<<endl;
   vector < GeneFeature *>::iterator it;
   for ( it=vRefFeatures_.begin() ; it != vRefFeatures_.end(); it++ )
   {
