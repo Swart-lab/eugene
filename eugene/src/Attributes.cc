@@ -39,12 +39,13 @@ Attributes::Attributes ( std::string line )
   }	
   
   InitializeDefault();
-  char * oneAttributeString=new char[MAX_LINE];;
-  char att[MAX_LINE];
+
+  char * oneAttributeString=new char[line.length()+1];;
+  char att[MAX_GFF_LINE];
   strcpy(att,line.c_str());
 
   oneAttributeString = strtok (att,"=;");
-    char targetString[MAX_LINE];
+    char targetString[MAX_GFF_LINE];
     strcpy (targetString,"");
     int isFullLength=-1;
     int targetLength=-1;
@@ -56,7 +57,7 @@ Attributes::Attributes ( std::string line )
     while ( oneAttributeString != NULL )
     {
       //Note=0907A18;
-      char value[MAX_LINE]="";
+      char value[MAX_GFF_LINE]="";
       int i=0;
       while (i<NB_ATTRIBUTES_NAMES_ && strcmp (value,"") ==0 && oneAttributeString != NULL)  
       {
@@ -153,6 +154,7 @@ Attributes::Attributes ( std::string line )
       }
       target_ = new Target (targetName, targetSequence, targetLength, isFullLength, atoi(targetStart), atoi(targetEnd), targetStrand,targetFrameHit,targetScoreHit);
     }
+    delete [] oneAttributeString;
 }
 
 Attributes::Attributes ( const Attributes &  attribut ) 
