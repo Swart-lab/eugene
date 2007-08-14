@@ -44,7 +44,6 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
   
    
   inputFormat_ = to_string(PAR.getC("NStart.format", GetNumber(),1));
-
   if ( inputFormat_ == "GFF3" )
   {
     strcpy(tempname,PAR.getC("fstname"));
@@ -182,7 +181,13 @@ void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
       idSo=tmp;
     }
      // Forward
-    
+    if ( idSo != "SO:0000318")
+    {
+	fprintf(stderr,"WARNING: NetStart plugin doesn't accept feature %s !\n",tmpFeature->getType().c_str());
+ 	i++;
+    	it++;
+	continue;
+    }
     if ( tmpFeature->getLocus()->getStrand() == '+' ) 
     {
       vPosF.push_back( tmpFeature->getLocus()->getStart() -1);
@@ -196,6 +201,8 @@ void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
     i++;
     it++;
   }
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 
