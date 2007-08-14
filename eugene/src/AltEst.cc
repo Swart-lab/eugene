@@ -398,7 +398,9 @@ AltEst :: AltEst(DNASeq *X)
     strcat(soTerms , filenameSoTerms );
     
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
-    AllEST = AllEST->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumEST, -1, 0, X);
+    AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
+    delete [] soTerms;
+    delete geneFeatureSet;
   }
   else
   {
