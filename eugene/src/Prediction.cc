@@ -488,6 +488,8 @@ Prediction :: ~Prediction ()
     vGene[i] = NULL;
   }
   vGene.clear();
+  delete [] ESTMatch;
+
 }
 // ------------------------
 //  Initializer
@@ -1239,8 +1241,8 @@ void Prediction :: PrintHtml (FILE *OUT, char *seqName)
       fprintf(OUT, "</font></td>\n</tr>\n");
     }
   }
-  
   EndHTML(OUT);
+  delete [] html_dir;
 }
 
 // -----------------------------------------

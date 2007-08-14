@@ -166,7 +166,10 @@ int MasterSensor :: LoadSensor (std::string name)
     LoadedSensorsList.push_back( name );
     dll_index = LoadedSensorsList.size() - 1; 
     complete_name = PluginsDir + name + ".so";
-    dllList.push_back( new SensorLoader ( complete_name.c_str() ) );
+    char * nom = new char [complete_name.length()+1];
+    strcpy (nom, complete_name.c_str() );
+    dllList.push_back( new SensorLoader ( nom ) ); 
+    delete [] nom;
     if(!dllList[dll_index]->LastError()) {
       fprintf(stderr,"Loading %.21s", name.c_str());
       for(int k=name.size(); k < 22; k++) fprintf(stderr,".");
