@@ -34,7 +34,6 @@ GeneFeature::GeneFeature()
   attributes_=NULL;
   valid_= true ;
   length_=0;
-  line_=" ";
 }
 
 
@@ -54,16 +53,15 @@ GeneFeature::GeneFeature ( char * line)
   length_=0;
   
   valid_= true ;
-  line_=to_string(line);
+  string line_str =to_string(line);
   //chomp : 
-  size_t pos=line_.find("\n") ;
+  size_t pos=line_str.find("\n") ;
   if (pos != string::npos)
   {
-    line_.at(pos)='\0';
     line[pos]='\0';
   }
   
-  if ( line_[0] != '#' )
+  if ( line[0] != '#' )
   {  
     ParseLine(line); 
   }
@@ -73,10 +71,6 @@ GeneFeature::GeneFeature ( char * line)
 
 GeneFeature::GeneFeature ( const GeneFeature & gene)
 {
-
-/*  fprintf (stderr,"%p constructeur par recopy geneFeature %p \n",this,& gene);
-  fflush (stderr);*/
-  line_=gene.line_;
   id_=gene.id_;
   seqid_=gene.seqid_;
   source_=gene.source_;
@@ -93,9 +87,9 @@ GeneFeature::GeneFeature ( const GeneFeature & gene)
   }
   valid_= gene.valid_ ;
   length_=gene.length_;
-  fprintf (stderr,"%p end constructeur par recopy \n",this);
-  fflush (stderr);
-  
+//   fprintf (stderr,"%p end constructeur par recopy \n",this);
+//   fflush (stderr);
+
 }
 // ---------------------------------------
 //  ParseLine : Parse a gff3 line with a token, check SO/SOFA code and Parent Attribut.
@@ -104,7 +98,8 @@ GeneFeature::GeneFeature ( const GeneFeature & gene)
 void GeneFeature::ParseLine ( char * line ) 
 {
   
-  char * token=new char [MAX_LINE];
+  int size = strlen(line);
+  char * token=new char [size+1];
   char delims[] = "\t";
   token = strtok (line,delims);
   int i =0;
@@ -158,6 +153,7 @@ void GeneFeature::ParseLine ( char * line )
 	char * tmp= new char [MAX_LINE];
 	strcpy (tmp, token);
 	strand= tmp[0];
+	delete [] tmp;
 	break;
       }
       case 7 : 
@@ -165,6 +161,7 @@ void GeneFeature::ParseLine ( char * line )
 	char * tmp= new char [MAX_LINE];
 	strcpy (tmp, token);
 	phase_= tmp[0];
+	delete [] tmp;
 	break;
       }
       case 8 : 
@@ -179,17 +176,17 @@ void GeneFeature::ParseLine ( char * line )
 	  cout <<"WARNING : Feature has no ID >" << id_ << "<"<<endl;
 	  valid_=false;
 	}
+	delete [] attributeString;
 	break;
       }
-      
-
     }
 
     token = strtok (NULL,delims);
     i++;
   }
   locus_  = new Locus (start, end, strand);
-  length_=end-start+1;
+  length_ = end-start+1;
+  delete [] token;
 
 }
 

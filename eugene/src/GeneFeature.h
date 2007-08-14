@@ -33,7 +33,6 @@ class GeneFeature
     
   public:
   
-    string line_;
     // Constructors/Destructors
     GeneFeature ( );
     GeneFeature ( char * ); 
