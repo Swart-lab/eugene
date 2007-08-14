@@ -47,6 +47,7 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
     strcat(tempname,".splices");
     strcat(tempname,".gff3");
     ReadNG2Gff3(tempname, X->SeqLen);
+	
     fprintf(stderr,"forward, reverse done\n");
     fflush(stderr);
   }
@@ -250,6 +251,8 @@ void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
     it++;
     i++;
   }
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 

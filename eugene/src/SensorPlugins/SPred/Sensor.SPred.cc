@@ -383,6 +383,8 @@ void SensorSPred :: ReadSPredGff3(char name[FILENAME_MAX+1], int SeqLen)
     it++;
     i++;
   }
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 

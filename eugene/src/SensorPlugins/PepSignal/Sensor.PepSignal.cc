@@ -94,6 +94,8 @@ void SensorPepSignal :: ReadPepSignalGff3 (char name[FILENAME_MAX+1], int Len)
     i++;
     it++;
   }
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 // --------------------------

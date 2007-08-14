@@ -56,6 +56,7 @@ SensorSMachine :: SensorSMachine (int n, DNASeq *X) : Sensor(n)
     fprintf(stderr,"  done\n");
     fprintf(stderr, "Probing SpliceMachine (starts)................");  
     fflush(stderr);
+	
   }
   else // load from native format file
   {
@@ -396,8 +397,8 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
   char * soTerms = new char[FILENAME_MAX+1];
   strcpy(soTerms , PAR.getC("eugene_dir"));
   strcat(soTerms , filenameSoTerms );
-  
   GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  delete [] soTerms;
   //geneFeatureSet->printFeature(); 
   vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
@@ -455,5 +456,7 @@ void SensorSMachine :: ReadMachineGff3(char name[FILENAME_MAX+1], int SeqLen)
     it++;
     i++;
   }
+  delete geneFeatureSet;
+
 }
 

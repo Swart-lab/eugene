@@ -87,6 +87,8 @@ SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)
 
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
     readRikenGff3 (*geneFeatureSet, X, RAFLtmp);
+    delete geneFeatureSet;
+    delete [] soTerms;
   }
   else
   {

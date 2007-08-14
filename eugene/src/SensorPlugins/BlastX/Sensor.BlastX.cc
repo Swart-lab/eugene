@@ -102,8 +102,6 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
         tempname[i]   = levels[k];
         tempname[i+1] = 0;
 	
-	
-	
 	if ( inputFormat_ == "GFF3" )
 	{
 	  strcat(tempname,".gff3");
@@ -117,8 +115,9 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 	  fprintf(stderr,"%c ",levels[k]);
 	  fflush(stderr);
 	  
-	  AllProt = AllProt->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumProt, (levels[k] - '0'), 20, X);
-	  
+	  AllProt = AllProt->ReadFromGeneFeatureSet(*geneFeatureSet, &NumProt, (levels[k] - '0'), 20, X);
+	  delete [] soTerms;
+	  delete geneFeatureSet;
 	}
 	else
 	{
@@ -160,6 +159,9 @@ SensorBlastX :: ~SensorBlastX ()
     if(HitTable != NULL)
         delete [] HitTable;
     HitTable = NULL;
+    delete [] ProtMatch;
+    delete [] ProtMatchLevel;
+    delete [] ProtMatchPhase;
 }
 
 // ----------------------
@@ -351,7 +353,7 @@ void SensorBlastX :: Init (DNASeq *X)
     delete [] ProtMatch;
     delete [] ProtMatchLevel;
     delete [] ProtMatchPhase;
-
+    
     index = 0;
 }
 

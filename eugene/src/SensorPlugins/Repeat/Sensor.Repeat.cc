@@ -133,7 +133,8 @@ void SensorRepeat :: ReadRepeatGff3 (char *name, int SeqLen)
     i++;
   }
   fprintf(stderr,"done\n");
-  
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 // ----------------------
