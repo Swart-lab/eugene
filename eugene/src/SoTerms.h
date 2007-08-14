@@ -32,7 +32,7 @@ class SoTerms
     // Constructors/Destructors
     //SoTerms ( );
     SoTerms();
-    virtual ~SoTerms ( );
+    ~SoTerms ( );
     void loadFile( char * filename );
     bool existsId   (string name);
     bool existsName (string name);
