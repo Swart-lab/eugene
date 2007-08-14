@@ -134,8 +134,9 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
       strcat(soTerms , filenameSoTerms );
 
       GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
-      geneFeatureSet->printFeature();
-      AllEST = AllEST->ReadFromGeneFeatureSetIt(*geneFeatureSet, &NumEST, -1, 0, X);
+      AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
+      delete [] soTerms;
+      delete geneFeatureSet;
       HitTable = ESTAnalyzer(AllEST, ESTMatch, estM, &NumEST, X);
     }
     else

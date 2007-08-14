@@ -47,6 +47,7 @@ SensorGSplicer :: SensorGSplicer (int n, DNASeq *X) : Sensor(n)
     fprintf(stderr, "Reading splice site file (GeneSplicer)........forward, reverse ");
       strcat(tempname,".gff3");
       ReadGSplicerGff3(tempname, X->SeqLen);
+	
   }
   else
   {
@@ -100,6 +101,7 @@ void SensorGSplicer :: ReadGSplicerGff3(char name[FILENAME_MAX+1], int SeqLen)
   strcat(soTerms , filenameSoTerms );
   
   GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+
   vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
@@ -151,7 +153,8 @@ void SensorGSplicer :: ReadGSplicerGff3(char name[FILENAME_MAX+1], int SeqLen)
     it++;
     i++;
   }
-
+  delete geneFeatureSet;
+  delete [] soTerms;
 }
 
 // ------------------------
