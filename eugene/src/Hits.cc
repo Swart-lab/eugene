@@ -181,6 +181,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 	  ThisHit->End = fin-1;
 	  ThisBlock->AddBlockAfter(deb-1,fin-1,HSPDeb,HSPFin,phase,poids);
 	  ThisBlock = ThisBlock->Next;
+	
 	}
       else 
       {
@@ -188,7 +189,9 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 	OneHit = new Hits(HitId, poids, (phase>0 ? '+' : '-'), deb-1, fin-1,
 			  HSPDeb, HSPFin, phase, poids, evalue, level, 0);
 	ThisBlock = OneHit->Match;
-	PHitId    = HitId;
+	//CN Correct bug, assignment wasn't on data but on adress : PHitId = HitId
+	strcpy (PHitId , HitId );
+	
 	Pevalue   = evalue;
 	Pphase = phase;
 
@@ -203,10 +206,10 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 	  ThisHit       = OneHit;
 	}
       }
-      
     }
   if (read != EOF) 
     fprintf(stderr,"\nIncorrect similarity file after seq. %s\n",HitId);
+
 
   return AllHit;
 }
@@ -214,7 +217,7 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 // ---------------------------------------------------------------------
 //  Read a table of Hits from a file
 // ---------------------------------------------------------------------
-Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int level, int margin, DNASeq *X ) 
+Hits* Hits::ReadFromGeneFeatureSet(GeneFeatureSet & HitSet , int *NumHits, int level, int margin, DNASeq *X ) 
 {
   int maxPos = X->SeqLen; 
   char   *HitId, *PHitId;
@@ -237,7 +240,7 @@ Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int
   
   vector<GeneFeature *>::iterator it = HitSet.getIterator();
   int nbGeneFeature=HitSet.getNbFeature();
-  
+
   int i=0;
   for ( i=0 ; i < nbGeneFeature ; i++, it++ )
   {
@@ -262,7 +265,10 @@ Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int
       string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
       idSo=tmp;
     }
-    
+    strcpy (HitId, (*it)->getAttributes()->getTarget()->getName().c_str());
+    HSPDeb = (*it)->getAttributes()->getTarget()->getLocus()->getStart();
+    HSPFin = (*it)->getAttributes()->getTarget()->getLocus()->getEnd();
+
     if ( idSo == "SO:0000668" ) //EST_match
     {
       phase  = (strand == '+' ? 0 : 1);
@@ -274,18 +280,19 @@ Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int
       { 
 	phase  = X->Pos2Frame(deb,strand); 
       }
+      
       else 
       {
 	int computedFrame=X->Pos2Frame(deb,strand);
 	if (phase != computedFrame) //check frame computrd and read are the same.
 	{
-	  fprintf( stderr, "Warn : skipped : computed frame (%d) and input frame (%d) are different \n",computedFrame, phase);
+	  fprintf( stderr, "Computed frame (%d) and input frame (%d) are different. Check : %s %d %d %c %d %d\n",computedFrame, phase, HitId, deb, fin ,strand, HSPDeb, HSPFin);
 	  fflush(stderr);
 	  continue;
 	}
       }
     }
-    strcpy (HitId, (*it)->getAttributes()->getTarget()->getName().c_str());
+    
     HSPDeb = (*it)->getAttributes()->getTarget()->getLocus()->getStart();
     HSPFin = (*it)->getAttributes()->getTarget()->getLocus()->getEnd();
 
@@ -306,16 +313,11 @@ Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int
       fprintf(stderr,"Similarity of extreme length rejected. Check %s\n",HitId);
       continue;
     }
-    if (  
-	  ( strcmp( HitId, PHitId ) == 0 )   && 
-	  ( phase*Pphase >= 0 )              &&
-	  ( deb + margin > ThisBlock->End )  && 
-	  (
-	   ( phase >= 0 &&  ( HSPFin + margin > ThisBlock->LEnd ) )
-	     ||
-	   ( phase < 0  &&  ( HSPDeb - margin < ThisBlock->LEnd ) )
-	  ) 
-       )
+
+      if ((strcmp(HitId,PHitId) == 0)      && (phase*Pphase >= 0) &&
+	  (deb + margin > ThisBlock->End)  &&
+	  (phase >= 0  &&  (HSPDeb + margin > ThisBlock->LEnd)    ||
+	   phase < 0   &&  (HSPDeb - margin < ThisBlock->LEnd)))
 	// si HitId et PHitId sont égaux, alors il y a un Hit en cours
 	// de meme nom on verifie que c'est bien compatible en terme
 	// de position (sur l'est et le genomique) et en e-value, en 
@@ -332,7 +334,7 @@ Hits* Hits::ReadFromGeneFeatureSetIt(GeneFeatureSet & HitSet , int *NumHits, int
       OneHit = new Hits(HitId, poids, strand, deb-1, fin-1,
 			HSPDeb, HSPFin, phase, poids, evalue, level, 0);
       ThisBlock = OneHit->Match;
-      PHitId    = HitId;
+      strcpy (PHitId, HitId);
       Pevalue   = evalue;
       Pphase = phase;
 

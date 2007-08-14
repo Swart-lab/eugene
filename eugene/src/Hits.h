@@ -53,7 +53,7 @@ class  Hits
   Hits (char* name, int length, char strand, int deb, int fin, int ldeb,
 	int lfin, int Ph, int Scr, double prob, int level, int sup);
   Hits* ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int maxPos);
-  Hits* ReadFromGeneFeatureSetIt(GeneFeatureSet& HitSet , int *NumHits, int level, int margin, DNASeq *X);
+  Hits* ReadFromGeneFeatureSet(GeneFeatureSet& HitSet , int *NumHits, int level, int margin, DNASeq *X);
   ~Hits ();
 
 
