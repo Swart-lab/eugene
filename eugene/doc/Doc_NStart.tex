@@ -5,10 +5,7 @@
 \paragraph{Description}
 
 This plugin injects possible translation starts as predicted by the
-NetStart program. The plugin reads the prediction of the
-program from two files whose names are derived from the sequence name
-by adding the \texttt{.starts} and \texttt{.startsR} suffixes
-(respectively prediction for the forward and reverse strand).
+NetStart program. 
 
 The sensor is activated by setting the value \texttt{1} for the parameter
 \texttt{Sensor.NStart.use} in the parameter file. The score for acceptor
@@ -23,7 +20,11 @@ Sensor.NStart.use  1       # Use NStart sensor
 Sensor.NStart      1       # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
+The plugin reads the prediction of the
+program from two files whose names are derived from the sequence name
+by adding the \texttt{.starts} and \texttt{.startsR} suffixes
+(respectively prediction for the forward and reverse strand).
 
 The files with \texttt{.starts} and \texttt{.startsR} suffix are
 obtained by running NetStart which can be obtained at
@@ -49,6 +50,25 @@ Here is an extract from \texttt{SYNO\_ARATH.fasta.starts}:
 
 To run NetStart, the following parameters are used (for \emph{Arabidopsis
 thaliana}): \texttt{netstart -at <Fasta sequence>}.
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{NStart.format} in the parameter file.
+Then, the plugin reads the predictions of the program from one file which
+name is derived from the sequence name by adding the \texttt{.nstart.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000318 or start\_codon
+\end{itemize}
+If feature isn't these, line would be rejected. The expected coordinates must correspond to the first nucleotide of the start codon.
+
+Here an extract of : seq14ac002535g4g5.tfa.starts.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	NStart	SO:0000318	64	64	0.299	+	.	ID=SO:0000318:seq14.0;
+seq14	NStart	SO:0000318	74	74	0.249	+	.	ID=SO:0000318:seq14.1;
+\end{Verbatim}
+
 
 \paragraph{Filtering input information}
 

@@ -43,7 +43,7 @@ generic similarity-based gene finder using multiple homologous
 sequences'' (Foissac \emph{et. al}, \emph{Nucleic Acids Res.}, 2003,
 31(13):3742-5).
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The files \texttt{.tblastx} describe a collection of similarities
 sorted by subject sequence and by position on the query sequence.
@@ -99,6 +99,35 @@ Here is an example of the format:
 1738 1821 108 1e-153 +1 ATHA10A_1493_1576 1493 1576 FDMLLAAKEFGVTECVNPKDHDKPIQQV
 830 877 86 1e-153 +2 ATHA10A_808_855 808 855 GQTPLFPRIFGHEAGG
 590 625 44 1e-20 +2 ATHA10A_562_597 562 597 LQLLWHGKPESH
+\end{Verbatim}
+
+\paragraph{Gff3 input file format}
+
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Homology.format} in the parameter file.
+The plugin reads the file which name is derived from the sequence name by adding the \texttt{.tblastx.gff3}
+
+\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<est name> <$bp^S$> <$ep^S$> <target strand>;frame\_hit=<$p^S$>;score\_hit=<$s^S$>}
+
+Gff3 attributes specifications :
+Required attributes : 
+	\begin{itemize}
+	\item ID
+	\item Target
+	\item target\_sequence : amino acid sequence.
+	\end{itemize}
+Optional attributes : 
+	\begin{itemize}
+	\item frame\_hit represent the blast frame. It's not necessary, 
+	but if it's specified, eugene re-compute it, and check if it the same, else reject match.
+	\item score\_hit :  normalized score.
+	\end{itemize}
+
+
+Here an extract of : seq14ac002535g4g5.tfa.blast0.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	tblastx	match	129	236	2e-25	+	.	ID=tblastx:seq14.1;Dbxref=tblastx:ATKIN2_100_207;Target=ATKIN2_100_207 100 207 +;frame_hit=+3;score_hit=118;target_sequence=KNVRDQQECLPSRSGRWQS*GTLSLLEQSTDRLFKL;
+seq14	tblastx	match	86	130	3e-63	-	.	ID=tblastx:seq14.2;Dbxref=tblastx:ATKIN2_102_58;Target=ATKIN2_102_58 102 58 +;frame_hit=-2;score_hit=74;target_sequence=FQIFFSCKIVFDVCF;
 \end{Verbatim}
 
 \paragraph{Filtering input information}

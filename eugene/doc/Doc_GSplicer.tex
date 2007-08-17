@@ -5,10 +5,7 @@
 \paragraph{Description}
 
 The GSplicer sensor injects possible splice sites as predicted by the
-GeneSplicer program. The plugin reads the prediction of the
-program from one file whose name is derived from the sequence name by
-adding the \texttt{.Gsplicer} suffix. This file describes the predicted
-splice sites for the forward and reverse strand.  The sensor is
+GeneSplicer program. The sensor is
 activated by the value 1 for the parameter
 \texttt{Sensor.GSplicer.use} in the parameter file.  Here is an
 example of GSplicer parameters definition :
@@ -21,7 +18,11 @@ Sensor.GSplicer.use  1        # Use GSplicer sensor
 Sensor.GSplicer      1           # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
+The plugin reads the prediction of the
+program from one file whose name is derived from the sequence name by
+adding the \texttt{.Gsplicer} suffix. This file describes the predicted
+splice sites for the forward and reverse strand.
 
 The files \texttt{.Gsplicer} describe the predicted splice sites
 sorted by position on the sequence (as given by GeneSplicer).
@@ -63,6 +64,25 @@ where options are:
 \item $-e$ $n$ : The maximum acceptor score within $n$ bp is chosen
 \item $-i$ $n$ : The maximum donor score within $n$ bp is chosen
 \end{itemize}
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Gsplicer.format} in the parameter file.
+The plugin reads the predictions of the program from one file which
+name is derived from the sequence name by adding the \texttt{.Gsplicer.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000164 or splice\_acceptor\_site ...
+\item  SO:0000163 or splice\_donor\_site ...
+\end{itemize}
+If feature isn't those, line would be rejected. The expected coordinates must correspond to the AG/GT nucleotides.
+Here an extract of : seq14ac002535g4g5.tfa.Gsplicer.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	GSplicer	SO:0000164	210	211	9.013469	-	.	ID=SO:0000164:seq14.1
+seq14	GSplicer	SO:0000163	244	245	3.350242	-	.	ID=SO:0000163:seq14.1
+seq14	GSplicer	SO:0000163	307	308	4.115466	-	.	ID=SO:0000163:seq14.2
+\end{Verbatim}
 
 \paragraph{Filtering input information}
 

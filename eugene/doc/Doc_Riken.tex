@@ -39,7 +39,7 @@ Sensor.Riken.use                1     # Use Riken sensor
 Sensor.Riken                    7        # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 A file with extension \texttt{.riken} is read.  Each line must contain
 the positions of the extremities of the match of the 5' EST then the
@@ -55,6 +55,37 @@ Here is an exert of a typical \texttt{.riken} file:
 387624  388227  AU236666        387383  387834  AU227623        1514C21
 148345  148909  AV822910        147090  147960  AV783778        0513A17
 \end{Verbatim}
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Riken.format} in the parameter file.
+The plugin reads the file which name is derived from the sequence name by adding the \texttt{.riken.gff3}
+The parent link is very important, one parent must have 2 children ( 5' and 3'). The parent feature must be define before children.
+
+Gff3 attributes specifications :
+Required attributes : 
+	\begin{itemize}
+	\item ID
+	\item Target
+	\item Parent for children feature
+	\item Ontology\_term : define 5' or 3' region for match\_part feature (children).
+	\end{itemize}
+Optional attributes : 
+	is\_full\_length specify the type of data (eg : alignment with full length proteins )
+	\begin{itemize}
+	\item -1 not defined
+	\item 0  not full length match EST or fragment proteins 
+	\item 1  like riken type : we know the 5' and 3'
+	\item 2  match against full length proteins or cDNA
+	\end{itemize}
+
+Here an extract of : seq14ac002535g4g5.tfa.riken.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	Riken	cDNA_match	1400	4718	.	.	.	ID=seq14.1
+seq14	Riken	match_part	1910	4718	.	+	.	ID=seq14.1.1;Parent=seq14.1;is_full_length=1;Ontology_term=SO:0000200
+seq14	Riken	match_part	1400	1500	.	+	.	ID=seq14.1.2;Parent=seq14.1;is_full_length=1;Ontology_term=SO:0000202
+\end{Verbatim}
+
 
 \paragraph{Filtering input information}
 

@@ -50,7 +50,7 @@ Sensor.BlastX.use  1     # Use BlastX sensor
 Sensor.BlastX      1        # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The files \texttt{.blast}$<$i$>$ describe a collection of similarities
 sorted by protein and by position on the sequence. One similarity S is
@@ -99,6 +99,35 @@ and the final \texttt{.blast}$<i>$ files are obtained with:
 
 For more explanation, see the README file in the directory
 \texttt{eugene/src/SensorPlugins/BlastX/GetData}.
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{BlastX.format} in the parameter file.
+The plugin reads a collection of similarities from files named with
+the sequence name and an extension .blast$<$i$>$.gff3 (\texttt{.blast0.gff3,...,.blast9.gff3}).
+
+\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<protein name> <$bp^S$> <$ep^S$>;frame\_hit=<$p^S$>;score\_hit=<$s^S$>}
+
+Gff3 attributes specifications :
+Required attributes : 
+	\begin{itemize}
+	\item ID
+	\item Target
+	\end{itemize}
+Optional attributes : 
+	\begin{itemize}
+	\item frame\_hit represent the blast frame. It's not necessary, 
+	but if it's specified, eugene re-compute it, and check if it the same, else reject match.
+	\item score\_hit :  normalized score.
+	\end{itemize}
+
+Here an extract of : seq14ac002535g4g5.tfa.blast0.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	blastx0	match	2361	4506	.	+	.	ID=blastx0:seq14.1;Dbxref=blastx0:sp_O84903_GALE_LACCA 
+seq14	blastx0	match_part	2361	2483	2e-07	+	.	ID=blastx0:seq14.1.1;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 1 41 +;frame_hit=+3;score_hit=114;Parent=blastx0:seq14.1 
+seq14	blastx0	match_part	2792	2857	2e-07	+	.	ID=blastx0:seq14.1.2;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 111 132 +;frame_hit=+2;score_hit=47;Parent=blastx0:seq14.1 
+seq14	blastx0	match_part	4432	4506	2e-07	+	.	ID=blastx0:seq14.1.3;Dbxref=blastx0:sp_O84903_GALE_LACCA;Target=sp_O84903_GALE_LACCA 280 304 +;frame_hit=+1;score_hit=50;Parent=blastx0:seq14.1
+\end{Verbatim}
 
 \paragraph{Filtering input information}
 

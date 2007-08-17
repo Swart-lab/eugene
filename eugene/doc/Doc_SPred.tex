@@ -5,10 +5,7 @@
 \paragraph{Description}
 
 This plugin injects possible splice sites as predicted by the
-SplicePredictor program. The plugin reads the prediction of
-the program from two files whose names are derived from the sequence
-name by adding the \texttt{.spliceP} and \texttt{.splicePR} suffixes
-(respectively prediction for the forward and reverse strand).
+SplicePredictor program. 
 
 The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.SPred.use} in the parameter file. The score for acceptor
@@ -26,7 +23,11 @@ Sensor.SPred.use   1
 Sensor.SPred       1      # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
+The plugin reads the prediction of
+the program from two files whose names are derived from the sequence
+name by adding the \texttt{.spliceP} and \texttt{.splicePR} suffixes
+(respectively prediction for the forward and reverse strand).
 
 The files with \texttt{.spliceP} and \texttt{.splicePR} suffix are
 obtained by running SplicePredictor which can be obtained at
@@ -52,6 +53,24 @@ A     <- 760 tactattgtagctAGcc   0.002 0.000 0.000  3 (1 1 1) ADIIIII-I-AEDIIAE
 A     <- 764 attgtagctagccAGgg   0.025 0.000 0.023  4 (1 1 2) DIIIIII-A-EDIIAEE
 D ->     792           aagGTggag 0.057 0.001 0.000  3 (1 1 1) IIIIIIA-E-DIIAEEE
 [...]
+\end{Verbatim}
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{SPred.format} in the parameter file.
+The plugin reads the predictions of the program from one file which
+name is derived from the sequence name by adding the \texttt{.spliceP.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000164 or splice\_acceptor\_site ...
+\item  SO:0000163 or splice\_donor\_site ...
+\end{itemize}
+If feature isn't these, line would be rejected. The expected coordinates must correspond to the AG/GT nucleotides.
+Here an extract of : seq14ac002535g4g5.tfa.spliceP.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14   SPred   SO:0000164      922     923     0.002   +       .       ID=SO:0000164:seq14.16;
+seq14   SPred   SO:0000163      1098    1099    0.137   +       .       ID=SO:0000163:seq14.8;
 \end{Verbatim}
 
 \paragraph{Filtering input information}

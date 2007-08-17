@@ -9,10 +9,10 @@ This sensor is intended to take into account information from aligned
 transcribed sequences, both complete cDNA and EST. The existence of a
 hit (resp. gap) in the spliced alignment will influence intergenic,
 exonic and intronic state costs by penalizing states that are
-incompatible with the alignment. The spliced alginments must be
+incompatible with the alignment. The spliced alignments must be
 performed beforehand using a spliced aligner such as \texttt{sim4} or
 \texttt{spidey}. The output of these aligners must be converted in the
-adequate format (see below).
+adequate format (see below). 
 
 The sensor is activated by either:
 \begin{itemize}
@@ -80,7 +80,7 @@ Sensor.Est       20       # Sensor priority: the highest one
 \end{Verbatim}
 
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The input is obtained in a \texttt{.est} file with 8 fields of information
 per ligne:
@@ -138,6 +138,45 @@ A patch file \texttt{sim4.patch} is available in the plugin source
 directory as well as an awk script that put a FASTA sequence bank in a
 pure sim4 format (no upper case, no degenerated code). This seems
 useless on recent sim4 versions.
+
+\paragraph{Gff3 input file format}
+
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Est.format} in the parameter file.
+The plugin reads the file which name is derived from the sequence name by adding the \texttt{.est.gff3}
+
+\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<est name> <$bp^S$> <$ep^S$> <est strand>;score\_hit=<$s^S$>}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000668 or EST\_match
+\end{itemize}
+
+
+Gff3 attributes specifications :
+Required attributes : 
+	\begin{itemize}
+	\item ID
+	\item Target
+	\end{itemize}
+Optional attributes : 
+	\begin{itemize}
+	\item frame\_hit represent the blast frame. It's not necessary, 
+	but if it's specified, eugene re-compute it, and check if it the same, else reject match.
+	\item score\_hit :  normalized score.
+	\end{itemize}
+
+
+Here an extract of : seq14ac002535g4g5.tfa.blast0.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	gth	EST_match	3261	4698	.	-	.	ID=EST_match:seq14.1;
+seq14	gth	EST_match	3261	3332	0	-	.	ID=EST_match:seq14.1.1;Target=AV537418 1 72 +;score_hit=636;Parent=EST_match:seq14.1;
+seq14	gth	EST_match	3411	3494	0	-	.	ID=EST_match:seq14.1.2;Target=AV537418 73 156 +;score_hit=636;Parent=EST_match:seq14.1;
+seq14	gth	EST_match	3583	3657	0	-	.	ID=EST_match:seq14.1.3;Target=AV537418 157 231 +;score_hit=636;Parent=EST_match:seq14.1;
+seq14	gth	EST_match	4209	4301	0	-	.	ID=EST_match:seq14.1.4;Target=AV537418 232 324 +;score_hit=636;Parent=EST_match:seq14.1;
+seq14	gth	EST_match	4387	4698	0	-	.	ID=EST_match:seq14.1.5;Target=AV537418 325 636 +;score_hit=636;Parent=EST_match:seq14.1;
+\end{Verbatim}
+
 
 \paragraph{Filtering input information}
 

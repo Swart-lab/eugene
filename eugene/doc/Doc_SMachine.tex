@@ -18,11 +18,7 @@ a positive ouput between 0 and 1 (with a probabilistic
 interpretation). The two different outputs may lead to different
 prediction performances in \EuGene.
 
-The plugin reads the predictions of the program from two files whose
-names are derived from the sequence name by adding the
-\texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes (respectively
-prediction for the starts and splices sites).  The sensor is activated
-by setting the value 1 for the parameter \texttt{Sensor.SMachine.use}
+The sensor is activated by setting the value 1 for the parameter \texttt{Sensor.SMachine.use}
 in the parameter file. The score for start, acceptor and donor
 prediction is rescaled by the parameters {\tt SMachine.startP*} and
 {\tt SMachine.startB*} for starts, {\tt SMachine.accP*} and {\tt
@@ -50,7 +46,12 @@ Sensor.SMachine.use     1                # Use SMachine sensor
 Sensor.SMachine         10               # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
+The plugin reads the predictions of the program from two files whose
+names are derived from the sequence name by adding the
+\texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes (respectively
+prediction for the starts and splices sites)
+
 The files with \texttt{.spliceMSt} and \texttt{.spliceMAD} suffixes are
 obtained by running SpliceMachine which can be obtained at \\
 \texttt{http://bioinformatics.psb.ugent.be/webtools/splicemachine/}
@@ -72,6 +73,28 @@ Here is an extract from a \texttt{.spliceMAD} file:
 628 acceptor 0.066414
 1309 donor 0.000039
 [...]
+\end{Verbatim}
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{SMachine.format} in the parameter file.
+The plugin reads the predictions of the program from one file which
+name is derived from the sequence name by adding the \texttt{.spliceM.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000318 or start\_codon, the expected coordinates must correspond to the first nucleotide of the start codon.
+\item  SO:0000164 or splice\_acceptor\_site, the expected coordinates must correspond to the AG/GT nucleotides.
+\item  SO:0000163 or splice\_donor\_site, the expected coordinates must correspond to the AG/GT nucleotides.
+\end{itemize}
+If feature isn't these, line would be rejected. 
+
+Here an extract of : seq14ac002535g4g5.tfa.spliceM.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	SMachine	start_codon	175	175	0.024083	-	.	ID=start_codon:seq14.1;
+seq14	SMachine	start_codon	188	188	0.000151	+	.	ID=start_codon:seq14.2;
+seq14	SMachine	acceptor_splice_site	210	211	0.066414	-	.	ID=acceptor_splice_site:seq14.1;
+seq14	SMachine	donor_splice_site	244	245	0.001345	-	.	ID=donor_splice_site:seq14.1;
 \end{Verbatim}
 
 

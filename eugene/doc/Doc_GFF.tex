@@ -24,7 +24,7 @@ Sensor.GFF.use  1      # Use GFF sensor
 Sensor.GFF      1         # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The file \texttt{.gff} describes an annotation for a sequence. The format of
 a line is : \texttt{<seqname> <source> <feature> <start> <end> <score>
@@ -48,6 +48,36 @@ seqName  EuGene  Utr3    2608    2626    0       +       .
 \end{Verbatim}
 Note: only exons are plotted, this file is parsing by the frame field
 (no `.' in the frame field).
+
+\paragraph{Gff3 input files format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{GFF.format} in the parameter file.
+The plugin reads the predictions from a file which
+name is derived from the sequence name by adding the \texttt{.gff.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000316 or CDS
+\item  SO:0000204 or five\_prime\_UTR
+\item  SO:0000205 or three\_prime\_UTR
+\end{itemize}
+If feature isn't those, line won't be take into account.
+If you define parent link between feature , parent feature must be define before children.
+Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq25   EuGene  five_prime_UTR  1       2787    0       +       .       ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
+seq25   EuGene  CDS     2788    2836    0       +       0       ID=CDS:seq25.1;Ontology_term=SO:0000196
+seq25   EuGene  CDS     8356    8471    0       +       2       ID=CDS:seq25.2;Ontology_term=SO:0000004
+seq25   EuGene  CDS     8576    8667    0       +       1       ID=CDS:seq25.3;Ontology_term=SO:0000004
+seq25   EuGene  CDS     9006    9061    0       +       0       ID=CDS:seq25.4;Ontology_term=SO:0000004
+seq25   EuGene  CDS     9567    9655    0       +       1       ID=CDS:seq25.5;Ontology_term=SO:0000004
+seq25   EuGene  CDS     10520   10535   0       +       1       ID=CDS:seq25.6;Ontology_term=SO:0000004
+seq25   EuGene  CDS     10896   11134   0       +       1       ID=CDS:seq25.7;Ontology_term=SO:0000004
+seq25   EuGene  CDS     11544   12005   0       +       2       ID=CDS:seq25.8;Ontology_term=SO:0000004
+seq25   EuGene  CDS     12088   12900   0       +       0       ID=CDS:seq25.9;Ontology_term=SO:0000197
+seq25   EuGene  three_prime_UTR 12901   14900   0       +       .       ID=three_prime_UTR:seq25.10;Ontology_term=SO:0000205
+\end{Verbatim}
+
 
 \paragraph{Filtering input information}
 

@@ -5,10 +5,7 @@
 \paragraph{Description}
 
 This plugin injects possible splice sites as predicted by the
-NetGene2 program. The plugin reads the prediction of the
-program from two files whose names are derived from the sequence name
-by adding the \texttt{.splices} and \texttt{.splicesR} suffixes
-(respectively prediction for the forward and reverse strand).
+NetGene2 program. 
 
 The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.NG2.use} in the parameter file. The score for acceptor
@@ -26,7 +23,11 @@ Sensor.NG2.use   1
 Sensor.NG2       1      # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
+The plugin reads the prediction of the
+program from two files whose names are derived from the sequence name
+by adding the \texttt{.splices} and \texttt{.splicesR} suffixes
+(respectively prediction for the forward and reverse strand).
 
 The files with \texttt{.splices} and \texttt{.splicesR} suffixes are
 obtained by running NetGene2 which can be obtained at
@@ -56,6 +57,25 @@ Here is an extract from \texttt{SYNO\_ARATH.fasta.splices}:
 
 To run Netgene2, the following parameters are used (for \emph{Arabidopsis
 thaliana}): \texttt{netgene2 -a -e -p -r -s at <Fasta sequence>}.
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{NG2.format} in the parameter file.
+The plugin reads the predictions of the program from one file which
+name is derived from the sequence name by adding the \texttt{.splices.gff3}.
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000164 or splice\_acceptor\_site ...
+\item  SO:0000163 or splice\_donor\_site ...
+\end{itemize}
+If feature isn't those, line would be rejected. The expected coordinates must correspond to the AG/GT nucleotides.
+Here an extract of : seq14ac002535g4g5.tfa.splices.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	NG2	SO:0000163	18	19	0.586	+	.	ID=SO:0000163:seq14.1;
+seq14	NG2	SO:0000163	27	28	0.614	+	.	ID=SO:0000163:seq14.2;
+seq14	NG2	SO:0000164	57	58	0.017	+	.	ID=SO:0000164:seq14.1;
+\end{Verbatim}
 
 \paragraph{Filtering input information}
 

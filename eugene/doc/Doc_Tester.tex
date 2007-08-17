@@ -54,7 +54,7 @@ Sensor.Tester.use       1         # use Tester sensor
 Sensor.Tester           1         # sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The file \texttt{.gff} describes the truth coordinates of only one complete gene in GFF format. The format of a
 line is :\texttt{<seqname> <source> <feature> <start> <end> <score> <strand> <frame>}. Seqname, source, score and frame fields are ignored.
@@ -68,6 +68,53 @@ seqName EuGene  E.Term  2444    2481    0       +       1
 seqName EuGene  UTR3    2482    2632    0       +       .
 \end{Verbatim}
 Note : Feature field must be UTR5, UTR3, E.Init, E.Intr, E.Term or E.Sngl (UTR states are optional).
+
+\paragraph{Gff3 input files format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Tester.format} in the parameter file.
+The plugin reads the predictions from a file 
+named from the sequence name by adding the \texttt{.gff.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000316 or CDS
+\item  SO:0000204 or five\_prime\_UTR
+\item  SO:0000205 or three\_prime\_UTR
+\end{itemize}
+If feature isn't those, line won't be take into account.
+You must defined the ontology\_term on CDS feature inorder to identify, E.Init, E.Intr, E.Term, E.Sngl.
+Here is the coresspondance between Eugene feature and Sofa feature :
+\begin{itemize}
+\item  UTR5 :  SO:0000204 (five\_prime\_UTR) ; Ontology term : not necessary
+\item  UTR3 :  SO:0000205 (three\_prime\_UTR); Ontology term : not necessary
+\item  E.Init : SO:0000316 (CDS)	     ; Ontology term : SO:0000196 	(five\_prime\_coding\_exon\_region)
+\item  E.Intr : SO:0000316 (CDS)	     ; Ontology term : SO:0000004	(interior\_coding\_exon)
+\item  E.Term : SO:0000316 (CDS)	     ; Ontology term : SO:0000197	(three\_prime\_coding\_exon\_region)
+\item  E.Sngl : SO:0000316 (CDS)	     ; Ontology term : SO:0005845	(single\_exon)
+\end{itemize}
+
+Gff3 attributes specifications :
+Required attributes : 
+	\begin{itemize}
+	\item ID
+	\item Ontology\_term (Required for CDS feature)
+	\end{itemize}
+
+Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq25   EuGene  five_prime_UTR  1       2787    0       +       .       ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
+seq25   EuGene  CDS     2788    2836    0       +       0       ID=CDS:seq25.1;Ontology_term=SO:0000196
+seq25   EuGene  CDS     8356    8471    0       +       2       ID=CDS:seq25.2;Ontology_term=SO:0000004
+seq25   EuGene  CDS     8576    8667    0       +       1       ID=CDS:seq25.3;Ontology_term=SO:0000004
+seq25   EuGene  CDS     9006    9061    0       +       0       ID=CDS:seq25.4;Ontology_term=SO:0000004
+seq25   EuGene  CDS     9567    9655    0       +       1       ID=CDS:seq25.5;Ontology_term=SO:0000004
+seq25   EuGene  CDS     10520   10535   0       +       1       ID=CDS:seq25.6;Ontology_term=SO:0000004
+seq25   EuGene  CDS     10896   11134   0       +       1       ID=CDS:seq25.7;Ontology_term=SO:0000004
+seq25   EuGene  CDS     11544   12005   0       +       2       ID=CDS:seq25.8;Ontology_term=SO:0000004
+seq25   EuGene  CDS     12088   12900   0       +       0       ID=CDS:seq25.9;Ontology_term=SO:0000197
+seq25   EuGene  three_prime_UTR 12901   14900   0       +       .       ID=three_prime_UTR:seq25.10;Ontology_term=SO:0000205
+\end{Verbatim}
+
 
 \paragraph{Output files format}
 

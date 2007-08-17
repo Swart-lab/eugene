@@ -27,7 +27,7 @@ Sensor.Repeat.use       1    # Use Repeat sensor
 Sensor.Repeat           1       # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The file with a \texttt{.ig} suffix is needed. Each line of the file
 contains the beginning and the end of a region detected as a
@@ -43,6 +43,21 @@ Here is an extract from a typical \texttt{.ig} file:
 22929   23017
 29433   29703
 [...]
+\end{Verbatim}
+
+\paragraph{Gff3 input file format}
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{Repeat.format} in the parameter file.
+The plugin reads the file which name is derived from the sequence name by adding the \texttt{.ig.gff3}
+
+Accepted features (third column) :
+\begin{itemize}
+\item  SO:0000657 or repeat\_region
+\end{itemize}
+If feature isn't this, line would be rejected.
+Here an extract of : seq14ac002535g4g5.tfa.ig.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq14	RepeatMasker	repeat_region	1	100	.	.	.	ID=repeat_region:seq14.1;
 \end{Verbatim}
 
 \paragraph{Filtering input information}

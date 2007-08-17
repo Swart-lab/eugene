@@ -232,43 +232,6 @@ to the plugin using the \texttt{-B} flag.
 EXECUTION_TRACE4
 \end{Verbatim}
 
-\section{Injecting further information}
-
-Additional user information on the intronic, exonic, intergenic aspect
-of the sequence or on specific signals can be injected using a
-specific simple langage (see the the \texttt{User} plugin,
-section \ref{pluguser}). This plugin is activated using the
-\texttt{-U} flag. The plugin will read the file with extension
-\texttt{.user}. For example, imagine I know that the 5'UTR of the gene
-extends from position 2 to 28. I can inject this information in
-\EuGene\ as follows (the \texttt{10.0} gives a strong influence to
-this information, see the plugin description):
-
-\begin{Verbatim}[fontsize=\scriptsize]
-utr5 f [2..28] 10.0
-\end{Verbatim} 
-
-If I use \EuGene\ with the \texttt{-U} flag (and even without
-\texttt{-s}), we get the following prediction:
-
-\begin{Verbatim}[fontsize=\scriptsize]
-EXECUTION_TRACE5
-\end{Verbatim} 
-
-This type of plugin allows to explore alternative predictions. Eg. one
-may wonder what is the optimal prediction if the splice site at
-position \texttt{2966} is not used. It suffices to forbid this splice
-site using the following user file:
-
-\begin{Verbatim}[fontsize=\scriptsize]
-acceptor f 2966 0.0
-\end{Verbatim}
-and to ask for a new prediction.
-
-\begin{Verbatim}[fontsize=\scriptsize]
-EXECUTION_TRACE6
-\end{Verbatim}
-
 Other plugins are described in the reference section of this document.
 
 \newpage
@@ -466,6 +429,10 @@ process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove
   stderr/stdout output (eg. PNG images, HTML and GFF files...) should go.
   Default is the current directory.
   \index{CmdFlags}{[eugene output directory] O}
+
+\item \texttt{Gff3.SoTerm}: indicates the path where sofa (Sequence Ontology Feature Terms) terms are store.
+  The path is relative to EUGENEDIR.
+
 \end{itemize}
 
 {\bf Specification of explicit penalty distributions on length}
@@ -520,7 +487,7 @@ In this case, \EuGene\ will look for a file with the same name as the sequence
 file and with a suffix '\texttt{.alt.est}'. This file has the same format as
 the '\texttt{.est}' used by the Est pugin (see later) and contains information
 about genomic region with high quality similarity with EST. The spliced 
-alignment algorithm used ti create this file should be of high quality, 
+alignment algorithm used to create this file should be of high quality, 
 with clear exon-intron frontiers associated with splice sites (use for example
 GeneSeqer or faster GenomeThreader).
 
@@ -528,7 +495,7 @@ GeneSeqer or faster GenomeThreader).
 one with the other (there is one nucleotide mapped to an exon by one which is 
 mapped to an intron/gap by the other). Each element of such a pair will be used 
 to try to produce a prediction that follows the EST structure. If the prediction
-is different from the optimal prediction, the genen variant structure will be
+is different from the optimal prediction, the gene variant structure will be
 also output.
 
 This feature is controlled by a number of parameters with the '\texttt{AltEst}'
@@ -541,7 +508,7 @@ Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and the associ
 the \texttt{doc/Sequences/} directory, we can test this as follows:
 
 \begin{Verbatim}[fontsize=\scriptsize]
-EXECUTION_TRACE7
+EXECUTION_TRACE5
 \end{Verbatim}
 
 We can see that two predictions are produced for the same region. In this case, it is just one alternative splice site
@@ -628,7 +595,6 @@ Sensor.IfElse           1
 Sensor.EuStop           1       
 Sensor.NStart           1       
 Sensor.MarkovIMM        1 
-Sensor.User             20
 Sensor.Est              30         
 \end{Verbatim}
 
@@ -665,10 +631,54 @@ As the example show, it is equivalent to define the parameter
 \texttt{MarkovIMM.matname[0]} (or any parameter followed by
 \texttt{[0]} and the parameter \texttt{MarkovIMM.matname}.
 
+\subsection{\texttt{GFF3 input documentation}} 
+
+Since version 3.4b, Eugene is compliant Gff3
+
+\paragraph{GFF3 format}
+See http://www.sequenceontology.org/gff3.shtml for details.
+The format of a line is : <seqid> <source> <type> <start> <end> <score> <strand> <phase> <attributes> 
+
+The attributes column is composed of tags, some tag have predefined meanings according to Gff3 specification: 
+\texttt{ID,  Target, Ontology\_term}. 
+For eugene, we define more specifics attributes : 
+\texttt{is\_full\_length, target\_length, target\_sequence, database, frame\_hit, frame\_hit, score\_hit}.
+
+A new parameter is needed in eugene.par : 
+\texttt{Gff3.SoTerms		cfg/sofa.obo}
+It's specified relatively to EUGENEDIR the file which contain all SOFA code. Currently we use the version 1.2 of 25:07:2007. Indeed to create valid gff3 file you have to use SOFA term or code. 
+
+The third column (type) of gff3 format must contain a term of SOFA, program accept the id, name and synonyms. 
+
+Example of SOFA definition term :
+\begin{Verbatim}
+[Term]
+id: SO:0000164
+name: three_prime_splice_site
+def: "The junction between the 3 prime end of an intron and 
+the following exon." [http://www.ucl.ac.uk/~ucbhjow/b241/glossary.html]
+subset: SOFA
+synonym: "3' splice site" RELATED []
+synonym: "acceptor" RELATED []
+synonym: "acceptor splice site" EXACT []
+synonym: "splice acceptor site" EXACT []
+is_a: SO:0000162 ! splice_site
+\end{Verbatim}
+The accepted type in the third columns are :
+\begin{itemize}
+\item\texttt{ SO:0000164}
+\item\texttt{ three\_prime\_splice\_site}
+\item\texttt{ acceptor }
+\item\texttt{ acceptor splice site or  acceptor\_splice\_site}
+\item\texttt{ splice acceptor site or  splice\_acceptor\_site}
+\end{itemize}
+Each plugin have they own extension, in gff3 mode you just have to add '.gff3' after the native file name.
+Example if plugin \texttt{SPred} is active with gff3 input format , it will expect 
+a file named \texttt{file.SPred.gff3} ( instead of \texttt{file.SPred} in native mode)
+
 We now descrive each plugin, its behavior and parameters.
 
 \subsection{\texttt{Signal plugins}}
-\input{Doc_ATGpr.tex}
 \input{Doc_EuStop.tex}
 \input{Doc_FrameShift.tex}
 \input{Doc_GSplicer.tex}
@@ -695,7 +705,6 @@ We now descrive each plugin, its behavior and parameters.
 \input{Doc_AnnotaStruct.tex}
 \input{Doc_IfElse.tex}
 \input{Doc_Riken.tex}
-\input{Doc_User.tex}
 
 \subsection{\texttt{Others plugins}}
 \input{Doc_GCPlot.tex}
@@ -833,6 +842,8 @@ LineSearch.Para.Cluster[2]      1
 \section{Command line flags}
  
 \begin{itemize}
+
+\item \texttt{a}: activates the alternative splicing prediction.
 
 \item \texttt{b}: activates the plugin \texttt{Sensor.BlastX}.
 
