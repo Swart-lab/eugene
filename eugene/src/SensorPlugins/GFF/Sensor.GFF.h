@@ -55,6 +55,7 @@ class SensorGFF : public Sensor
   static bool IsInitialized;
 
   void ReadGFF(char[FILENAME_MAX+1], int seqlen);
+  void ReadGFF3(GeneFeatureSet & geneFeatureSet , DNASeq *X );
 
  public:
   SensorGFF               (int n, DNASeq *X);

@@ -115,9 +115,28 @@ void SensorGFF :: Init (DNASeq *X)
 
   fprintf(stderr, "Reading GFF file.............");
   fflush(stderr);
+
+  inputFormat_ = to_string(PAR.getC("GFF.format", GetNumber(),1));
   strcpy(tempname,PAR.getC("fstname"));
   strcat(tempname,".gff");
-  ReadGFF(tempname, X->SeqLen);
+
+   if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,0);
+    char * soTerms = new char[FILENAME_MAX+1];
+    strcpy(soTerms , PAR.getC("eugene_dir"));
+    strcat(soTerms , filenameSoTerms );
+
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    ReadGFF3(*geneFeatureSet, X);
+    delete [] soTerms;
+    delete geneFeatureSet;
+  }
+  else
+  {
+    ReadGFF(tempname, X->SeqLen);
+  }
   fprintf(stderr, "done\n");
   fflush(stderr);
 
@@ -172,6 +191,7 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1], int seqlen)
       i = sscanf(line,"%s %*s %s %d %d %*s %c %c %d %d %d %d %d %f",
 		 seqname, feature, &start, &end, &strand, phase,
 		 &a, &t, &c, &g, &n, &gc);
+	
       if (i < 6) {
 	if (i==-1) {
 	  if(j==1)
@@ -188,17 +208,74 @@ void SensorGFF :: ReadGFF (char name[FILENAME_MAX+1], int seqlen)
 	  int f = -1;
 	  if (strand == '+')      { f = (start  - 1)   % 3; }
 	  else if (strand == '-') { f = (seqlen - end) % 3; }
-	  char t[2];
-	  if (f != -1) { sprintf(t, "%d", ((f + atoi(phase)) % 3)); }
-	  frame = t[0];
+	  char v[2];
+	  if (f != -1) { sprintf(v, "%d" , ((f + atoi(phase)) % 3)); }
+	  frame = v[0];
 	}
 	gffList.push_back(new GFFObject(seqname, feature, start, end,
 					strand,  frame,
 					a, t, c, g, n, gc));
+
       }
     }
   }
   fclose(fp);
+}
+
+// --------------------------
+//  Read gff3 file.
+// --------------------------
+
+void SensorGFF :: ReadGFF3 (GeneFeatureSet & geneFeatureSet , DNASeq *X )
+{
+
+  char  *seqname = (char *)malloc(FILENAME_MAX*sizeof(char));
+  char  *feature = (char *)malloc(FILENAME_MAX*sizeof(char));
+  int   start, end;
+  char  strand, frame, phase[2];
+  int   a  = -1, t = -1, c = -1, g = -1, n = -1;
+  float gc = -1.0;
+  string idSo;
+  int seqlen=X->SeqLen;
+
+  vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
+  int nbGeneFeature=geneFeatureSet.getNbFeature();
+  for ( int j=0 ; j < nbGeneFeature ; j++, it++ )
+  {
+     strcpy ( seqname, (*it)->getSeqId().c_str() );
+     strcpy (feature, (*it)->getType().c_str());
+     start = (*it)->getLocus()->getStart();
+     end = (*it)->getLocus()->getEnd();
+     strand = (*it)->getLocus()->getStrand();
+     // En natif lecture de : a, t, c, g, n, gc ???
+     
+     idSo=(*it)->getType();
+     if ( idSo.find("SO:") == string::npos )
+     {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+     }
+     if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" )
+     {
+	continue;
+     }
+
+     phase[0] = (*it)->getPhase() ;
+     frame = '.';
+     if (phase[0]  != '.') //selection des CDS == exon
+     {
+	 int f = -1;
+	  if (strand == '+')      { f = (start  - 1)   % 3; }
+	  else if (strand == '-') { f = (seqlen - end) % 3; }
+	  char v[2];
+	  if (f != -1) { sprintf(v, "%d", ((f + atoi(phase)) % 3)); }
+	  frame = v[0];
+     	  
+     }
+     gffList.push_back(new GFFObject(seqname, feature, start, end,
+					strand,  frame,
+					a, t, c, g, n, gc));
+  }
 }
 
 // ------------------------
