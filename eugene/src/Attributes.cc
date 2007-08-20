@@ -71,9 +71,12 @@ Attributes::Attributes ( std::string line )
         }
 	i++;
       } //end while
+	
       if  ( i >= NB_ATTRIBUTES_NAMES_){
-        break;
+	oneAttributeString = strtok (NULL,"=;");
+        continue;
       }
+
       //en fonction de lindice i on sait sur quel attribut on se situe. 
       if ( attributeNames_[i] == "ID" && ( strcmp(value,"")!=0 ) ) {
 	id_=to_string(value);
