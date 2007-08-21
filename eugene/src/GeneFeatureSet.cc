@@ -50,12 +50,12 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
     if ( line[0] != '#' )
     {  
       GeneFeature * tempGeneFeature = new GeneFeature (line);
-       //cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
+     //  cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
 
       if ( tempGeneFeature->getParent()!="" && ! existsGeneFeature( tempGeneFeature->getParent() ) )
       {
 	tempGeneFeature->setValid(false);
-	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist "<<endl;
+	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist or declared later, feature don't take into account"<<endl;
       }
       else
       {
@@ -71,7 +71,6 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
 	mPosFeatures_[tempGeneFeature->getId()]=lastIndex_;
 	lastIndex_++;
       }
-     
     }
   }
   fclose(fp);
@@ -91,22 +90,6 @@ GeneFeatureSet::GeneFeatureSet (char* soTermsFilename )
 
 }
 
-
-/*void GeneFeatureSet::getIteratorParentToChildren()
-{
-  map <string, GeneFeature *>::iterator it;
-  map <string, vector > analyse;
-  for ( it=features_.begin() ; it != features_.end(); it++ )
-  {
-    cout << "features_ Key : >" << (*it).first << "< Value : >" << *((*it).second)<<"<";
-    if ( ((*it).second)->getParent() != "" )
-    {
-      analyse[((*it).second)->getParent()]
-    }
-  }
- // cout << "features_ Key : " << (*it).first << " Value : " << (*it).second << endl;
-}
-*/
 // -----------------------
 //  Destructeur
 // -----------------------
@@ -163,3 +146,4 @@ void GeneFeatureSet::printFeature()
     cout << *(vRefFeatures_[i]) << endl;
   }
 }
+

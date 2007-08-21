@@ -40,7 +40,6 @@ class GeneFeatureSet
     int getNbFeature ();
     int getNbParentFeature ();
     GeneFeature * getGeneFeature (string id );
- 
 };
 
 #endif // GENEFEATURESET_H
