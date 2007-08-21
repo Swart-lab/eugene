@@ -7,7 +7,8 @@
 The sensor allows to seamlessly modify \EuGene\ underlying graph
 weighting using a small langage that can directly modify the weights
 of signals and contents edges in the graph. The plugin offers both
-high-level entries and low-level entries in GFF format. 
+high-level entries and low-level entries in either a sloppy GFF-like
+format or a strict GFF3-compliant format.
 
 The high-level entries allow to take into account information on:
 \begin{itemize}
@@ -63,7 +64,7 @@ Sensor.AnnotaStruct.use       1         # Use AnnotaStruct sensor
 Sensor.AnnotaStruct           1         # Sensor priority
 \end{Verbatim}
 
-\paragraph{Native input files format}
+\paragraph{Native GGF-like input files format}
 
 The plugin reads a GFF format file. Each line in this file forms an
 elementary information which is directly interpreted by the plugin
@@ -202,14 +203,16 @@ ATSYNO FGENESH E.Term 45 75 0 + 3
 
 \paragraph{Gff3 input files format}
 
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{AnnotaStruct.format} in the parameter file.
-The plugin reads a collection of similarities from files named with
-the sequence name and an extension \texttt{AnnotaStruct.FileExtension} plus \texttt{.gff3}
-In gff3 mode you can't describe feature level as in natif mode.
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{AnnotaStruct.format} in the parameter file.
+The plugin reads its informations from a file named with the sequence
+name and an extension \texttt{AnnotaStruct.FileExtension} followed by
+\texttt{.gff3} In gff3 mode, you can't describe feature level as in
+natif mode.
 
-If you want to read score or probability from file you have to set parameters score to "i".
-Content data will be interpreted as score.
+If you want to read scores or probabilities from file you have to set
+parameters score to "i" in the parameter file.  Content data will
+always be interpreted as score.
 \begin{Verbatim}[fontsize=\small]
 AnnotaStruct.Exon*            i
 AnnotaStruct.Intron*          i
@@ -228,9 +231,16 @@ AnnotaStruct.TrStopType       p
 AnnotaStruct.TrStop*          i
 \end{Verbatim}
 
-Here is the correspondance beetween AnnotaStruct feature and gff3 features (note that low level content can't be describe directly, but by setting signal at zero, and using transcribe sequence feature you can simulate it)
+Here is the correspondance beetween GFF native AnnotaStruct features
+and gff3 features. A direct translation between the two formats is not
+always possible (for example, low-level content information cannot be
+given directly in GFF3, but indirectly can be achieved by setting
+signal at zero, and using the transcribed sequence feature).
 
-low-level data :
+Each GFF feature is usually translated in a GFF3 feature and may
+require an additional ontology term given below.
+
+Low-level information:
 \begin{itemize}
 \item \texttt{trStart}: 	SO:0000315 (transcription\_start\_site)
 \item \texttt{trStop}: 	SO:0000616 (transcription\_end\_site)
@@ -242,9 +252,9 @@ low-level data :
 \item \texttt{del}: 	SO:0000687 (deletion\_junction)
 \end{itemize}
 
-high-level data :
+High-level information:
 
-translate information
+Translated regions information
 \begin{itemize}
 \item \texttt{E.Init}: SO:0000316 (CDS) Ontology term :	SO:0000196 (five\_prime\_coding\_exon\_region)
 \item \texttt{E.Intr}: SO:0000316 (CDS) Ontology term :	SO:0000004 (interior\_coding\_exon)
@@ -256,7 +266,7 @@ translate information
 \item \texttt{Intron}: SO:0000188 (intron) Ontology term : SO:0000191	(interior\_intron)
 \end{itemize}
 
-transcribed information
+Transcribed region information
 \begin{itemize}
 \item \texttt{E.Any}: 		SO:0000147 (exon)
 \item \texttt{E.First}: 	SO:0000147 (exon)	Ontology term :	SO:0000200 (five\_prime\_coding\_exon)

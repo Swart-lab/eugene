@@ -50,20 +50,22 @@ Note: only exons are plotted, this file is parsing by the frame field
 (no `.' in the frame field).
 
 \paragraph{Gff3 input files format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{GFF.format} in the parameter file.
-The plugin reads the predictions from a file which
-name is derived from the sequence name by adding the \texttt{.gff.gff3}
 
-Accepted features (third column) :
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{GFF.format} in the parameter file.  The
+plugin reads the predictions from a file which name is derived from
+the sequence name by adding the \texttt{.gff.gff3}
+
+Accepted features (third column of GFF3 lines):\\
 \begin{itemize}
 \item  SO:0000316 or CDS
 \item  SO:0000204 or five\_prime\_UTR
 \item  SO:0000205 or three\_prime\_UTR
 \end{itemize}
-If feature isn't those, line won't be take into account.
-If you define parent link between feature , parent feature must be define before children.
-Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
+
+If the feature isn't one of those, the line won't be take into
+account.  If you define parent link between feature , parent feature
+must be define before children.  Here an extract of \texttt{seq14ac002535g4g5.tfa.gff.gff3}.
 \begin{Verbatim}[fontsize=\tiny]
 seq25   EuGene  five_prime_UTR  1       2787    0       +       .       ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
 seq25   EuGene  CDS     2788    2836    0       +       0       ID=CDS:seq25.1;Ontology_term=SO:0000196

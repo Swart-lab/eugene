@@ -101,23 +101,30 @@ For more explanation, see the README file in the directory
 \texttt{eugene/src/SensorPlugins/BlastX/GetData}.
 
 \paragraph{Gff3 input file format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{BlastX.format} in the parameter file.
-The plugin reads a collection of similarities from files named with
-the sequence name and an extension .blast$<$i$>$.gff3 (\texttt{.blast0.gff3,...,.blast9.gff3}).
+
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{BlastX.format} in the parameter file.  The
+plugin reads a collection of similarities from files named with the
+sequence name and an extension .blast$<$i$>$.gff3
+(\texttt{.blast0.gff3,...,.blast9.gff3}).
+
+Each similarity is described by a GFF3 line as follows
 
 \texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<protein name> <$bp^S$> <$ep^S$>;frame\_hit=<$p^S$>;score\_hit=<$s^S$>}
 
-Gff3 attributes specifications :
-Required attributes : 
+Gff3 attributes specifications:\\
+Required attributes:\\
 	\begin{itemize}
 	\item ID
 	\item Target
 	\end{itemize}
-Optional attributes : 
+
+Optional attributes:\\
 	\begin{itemize}
-	\item frame\_hit represent the blast frame. It's not necessary, 
-	but if it's specified, eugene re-compute it, and check if it the same, else reject match.
+	\item frame\_hit represent the blast frame. This information
+          can be omitted, but if it's specified, eugene will check it
+          is consistent with the similarity positions and reject the
+          information otherwise.
 	\item score\_hit :  normalized score.
 	\end{itemize}
 

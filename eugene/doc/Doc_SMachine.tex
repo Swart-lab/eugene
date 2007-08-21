@@ -76,20 +76,21 @@ Here is an extract from a \texttt{.spliceMAD} file:
 \end{Verbatim}
 
 \paragraph{Gff3 input file format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{SMachine.format} in the parameter file.
-The plugin reads the predictions of the program from one file which
-name is derived from the sequence name by adding the \texttt{.spliceM.gff3}
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{SMachine.format} in the parameter file.  The
+plugin reads the predictions of the program from one file which name
+is derived from the sequence name by adding the \texttt{.spliceM.gff3} extension.
 
-Accepted features (third column) :
+Accepted features (third column):\\
 \begin{itemize}
 \item  SO:0000318 or start\_codon, the expected coordinates must correspond to the first nucleotide of the start codon.
 \item  SO:0000164 or splice\_acceptor\_site, the expected coordinates must correspond to the AG/GT nucleotides.
 \item  SO:0000163 or splice\_donor\_site, the expected coordinates must correspond to the AG/GT nucleotides.
 \end{itemize}
-If feature isn't these, line would be rejected. 
 
-Here an extract of : seq14ac002535g4g5.tfa.spliceM.gff3
+If the feature used isn't one of those, the line will be rejected. The
+expected coordinates must match the AG/GT nucleotides (splices) or ATG (start).
+Here an extract of \texttt{seq14ac002535g4g5.tfa.spliceM.gff3}.
 \begin{Verbatim}[fontsize=\tiny]
 seq14	SMachine	start_codon	175	175	0.024083	-	.	ID=start_codon:seq14.1;
 seq14	SMachine	start_codon	188	188	0.000151	+	.	ID=start_codon:seq14.2;

@@ -141,28 +141,31 @@ useless on recent sim4 versions.
 
 \paragraph{Gff3 input file format}
 
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{Est.format} in the parameter file.
-The plugin reads the file which name is derived from the sequence name by adding the \texttt{.est.gff3}
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{Est.format} in the parameter file.  The
+plugin reads its information from the file whose name is derived from
+the sequence name by adding the extension \texttt{.est.gff3}. Each
+line is as follows:
+
 
 \texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<est name> <$bp^S$> <$ep^S$> <est strand>;score\_hit=<$s^S$>}
 
-Accepted features (third column) :
+Accepted features (third column):\\
 \begin{itemize}
 \item  SO:0000668 or EST\_match
 \end{itemize}
 
 
-Gff3 attributes specifications :
-Required attributes : 
+Gff3 attributes specifications:\\
+Required attributes:\\ 
 	\begin{itemize}
 	\item ID
 	\item Target
 	\end{itemize}
-Optional attributes : 
+
+Optional attributes:\\
 	\begin{itemize}
-	\item frame\_hit represent the blast frame. It's not necessary, 
-	but if it's specified, eugene re-compute it, and check if it the same, else reject match.
+%	\item frame\_hit represent the blast frame. It can be omitted but if specified, its consistency with the hit coordinates will be cheked and the hit will be rejected if the frame is not consistent.
 	\item score\_hit :  normalized score.
 	\end{itemize}
 

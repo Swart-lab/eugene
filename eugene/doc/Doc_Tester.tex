@@ -70,20 +70,24 @@ seqName EuGene  UTR3    2482    2632    0       +       .
 Note : Feature field must be UTR5, UTR3, E.Init, E.Intr, E.Term or E.Sngl (UTR states are optional).
 
 \paragraph{Gff3 input files format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{Tester.format} in the parameter file.
-The plugin reads the predictions from a file 
-named from the sequence name by adding the \texttt{.gff.gff3}
 
-Accepted features (third column) :
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{Tester.format} in the parameter file.  The
+plugin reads the predictions from a file named from the sequence name
+by adding the \texttt{.gff.gff3} extension.
+
+Accepted features (third column):\\
 \begin{itemize}
 \item  SO:0000316 or CDS
 \item  SO:0000204 or five\_prime\_UTR
 \item  SO:0000205 or three\_prime\_UTR
 \end{itemize}
-If feature isn't those, line won't be take into account.
-You must defined the ontology\_term on CDS feature inorder to identify, E.Init, E.Intr, E.Term, E.Sngl.
-Here is the coresspondance between Eugene feature and Sofa feature :
+If the feature used isn't one of those, the line will be rejected.
+You must define the ontology\_term for CDS features in order to
+identify the different types of exons (E.Init, E.Intr, E.Term,
+E.Sngl).  Here is the matching between Eugene native feature name and
+Sofa feature:
+
 \begin{itemize}
 \item  UTR5 :  SO:0000204 (five\_prime\_UTR) ; Ontology term : not necessary
 \item  UTR3 :  SO:0000205 (three\_prime\_UTR); Ontology term : not necessary
@@ -93,14 +97,14 @@ Here is the coresspondance between Eugene feature and Sofa feature :
 \item  E.Sngl : SO:0000316 (CDS)	     ; Ontology term : SO:0005845	(single\_exon)
 \end{itemize}
 
-Gff3 attributes specifications :
-Required attributes : 
+Gff3 attributes specifications:\\
+Required attributes:\\ 
 	\begin{itemize}
 	\item ID
 	\item Ontology\_term (Required for CDS feature)
 	\end{itemize}
 
-Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
+Here an extract of \texttt{seq14ac002535g4g5.tfa.gff.gff3}:
 \begin{Verbatim}[fontsize=\tiny]
 seq25   EuGene  five_prime_UTR  1       2787    0       +       .       ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
 seq25   EuGene  CDS     2788    2836    0       +       0       ID=CDS:seq25.1;Ontology_term=SO:0000196

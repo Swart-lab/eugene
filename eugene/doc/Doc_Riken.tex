@@ -57,20 +57,23 @@ Here is an exert of a typical \texttt{.riken} file:
 \end{Verbatim}
 
 \paragraph{Gff3 input file format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{Riken.format} in the parameter file.
-The plugin reads the file which name is derived from the sequence name by adding the \texttt{.riken.gff3}
-The parent link is very important, one parent must have 2 children ( 5' and 3'). The parent feature must be define before children.
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{Riken.format} in the parameter file.  The
+plugin reads the file which name is derived from the sequence name by
+adding the \texttt{.riken.gff3} extension. The parent link is very
+important, one parent must have two children ( 5' and 3'). The parent
+feature must be defined before the children.
 
-Gff3 attributes specifications :
-Required attributes : 
+Gff3 attributes specifications:\\
+Required attributes:\\ 
 	\begin{itemize}
 	\item ID
 	\item Target
 	\item Parent for children feature
 	\item Ontology\_term : define 5' or 3' region for match\_part feature (children).
 	\end{itemize}
-Optional attributes : 
+
+Optional attributes:\\ 
 	is\_full\_length specify the type of data (eg : alignment with full length proteins )
 	\begin{itemize}
 	\item -1 not defined

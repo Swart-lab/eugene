@@ -66,18 +66,21 @@ where options are:
 \end{itemize}
 
 \paragraph{Gff3 input file format}
-The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
-\texttt{Gsplicer.format} in the parameter file.
-The plugin reads the predictions of the program from one file which
-name is derived from the sequence name by adding the \texttt{.Gsplicer.gff3}
 
-Accepted features (third column) :
+The gff3 input mode is activated by setting the value \texttt{GFF3}
+for the parameter \texttt{Gsplicer.format} in the parameter file.  The
+plugin reads the predictions of the program from one file which name
+is derived from the sequence name by adding the
+\texttt{.Gsplicer.gff3} extension.
+
+Accepted features (third column):\\
 \begin{itemize}
-\item  SO:0000164 or splice\_acceptor\_site ...
-\item  SO:0000163 or splice\_donor\_site ...
+\item  SO:0000164 or splice\_acceptor\_site 
+\item  SO:0000163 or splice\_donor\_site 
 \end{itemize}
-If feature isn't those, line would be rejected. The expected coordinates must correspond to the AG/GT nucleotides.
-Here an extract of : seq14ac002535g4g5.tfa.Gsplicer.gff3
+If the feature used isn't one of those, the line will be rejected. The
+expected coordinates must correspond to the AG/GT nucleotides (this is
+checked).  Here an extract of \texttt{seq14ac002535g4g5.tfa.Gsplicer.gff3}
 \begin{Verbatim}[fontsize=\tiny]
 seq14	GSplicer	SO:0000164	210	211	9.013469	-	.	ID=SO:0000164:seq14.1
 seq14	GSplicer	SO:0000163	244	245	3.350242	-	.	ID=SO:0000163:seq14.1
