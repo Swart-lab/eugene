@@ -47,7 +47,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
   Todo = PAR.getC("Tester.Make");
 
   type = Type_None;
-        
+  inputFormat_ = to_string(PAR.getC("Tester.format", GetNumber(),1));
+
   if (Todo == "SPSN") {
     DATA Data;
     double dF, dR, dFdon, dRdon;
@@ -80,8 +81,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     }
 
     sensor = MS->MakeSensor( SensorName, SensorInstance, X); sensor->Init(X);
-    gene = ReadGFFAnnotation(X);
-
+    //gene = ReadGFFAnnotation(X);
+    ReadAnnotation(X);
     SensorType = sensor->type;
 
     NbNonCanonicalDetected = 0;
@@ -206,11 +207,10 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
       }
       IsInitialized = true;
     }
- 
-    gene = ReadGFFAnnotation(X);
+    ReadAnnotation(X);
     sensor = MS->MakeSensor( "Sensor."+SensorName, SensorInstance, X );
     sensor->Init(X);
-    
+
     // Sequence name without extension
     strcpy(seqName, BaseName(PAR.getC("fstname")));
     if (char * suffix = rindex(seqName,'.')) *suffix = 0;
@@ -285,7 +285,7 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
 		tf, truthState);
       }
     }
-    // delete [] predSigType;  DOES NOT WORK, WHY ??????
+    delete [] predSigType;  //DOES NOT WORK, WHY ??????
   } 
 }
 
@@ -305,6 +305,35 @@ void SensorTester :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }
 
+
+void SensorTester ::ReadAnnotation ( DNASeq *X)
+{
+    std::cerr <<"Reading coordinates file......................"; fflush(stderr);
+    char tempname[FILENAME_MAX+1];
+
+    strcpy(tempname,PAR.getC("fstname"));
+    strcat(tempname,".gff");
+
+    if ( inputFormat_ == "GFF3" )
+    {
+	strcat(tempname,".gff3");
+	char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,0);
+	char * soTerms = new char[FILENAME_MAX+1];
+	strcpy(soTerms , PAR.getC("eugene_dir"));
+	strcat(soTerms , filenameSoTerms );
+	
+	GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+	ReadGFF3Annotation(*geneFeatureSet, X);
+	delete [] soTerms;
+	delete geneFeatureSet;
+    }
+    else
+    {
+	ReadGFFAnnotation(tempname , X);
+    }
+}
+
+
 // -----------------
 //  Read coord file
 //  Lecture du fichier .gff (format gff) pour charger un objet
@@ -319,9 +348,9 @@ void SensorTester :: PostAnalyse(Prediction *pred, FILE *MINFO)
 //         is in InterGen and the state after the last exon in the GFF  
 //         is not set Introns are all in the state IntronF1.
 // -----------------
-Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
+void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
 {
-  std::string gff_file_name;
+  
   FILE *fpCoord;
   char line[MAX_LINE];
   int  i;
@@ -332,11 +361,9 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
   std::vector <int>         vPos;
   std::vector <signed char> vState;
 
-  std::cerr <<"Reading coordinates file......................"; fflush(stderr);
-
-  gff_file_name = (std::string)PAR.getC("fstname") + ".gff";
-  if (!(fpCoord = fopen(gff_file_name.c_str(), "r"))) 
-    {std::cerr<<"Cannot open gff file " << gff_file_name <<"\n"; exit(2);}
+  
+  if (!(fpCoord = fopen(name, "r"))) 
+    {std::cerr<<"Cannot open gff file " << name <<"\n"; exit(2);}
 
   int j=0;
   while(fgets (line, MAX_LINE, fpCoord) != NULL) {
@@ -348,7 +375,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
 	if (i==-1) {
 	  if(j==1) std::cerr<<"WARNING: empty gff file !...";
 	} else 
-	  {std::cerr<<"\nError in gff file "<<gff_file_name<<" line "<<j<<".\n";exit(2);}
+	  {std::cerr<<"\nError in gff file "<<name<<" line "<<j<<".\n";exit(2);}
       } else if (strcmp(feature,"Intron") != 0) {
 	if (j==1) {
 	  vPos.push_back  ( start-1  );
@@ -377,7 +404,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
 	      vState.push_back( InitR1 );
 	    }
 	  else {
-	    std::cerr <<"\n Error in gff file "<<gff_file_name
+	    std::cerr <<"\n Error in gff file "<<name
 		      <<" line "<<j<<".\n"
 		      <<" WARNING :\n"
 		      <<"   - Complete genes only in gff file.\n"
@@ -439,7 +466,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
 	    }
 	  }
 	  else {
-	    std::cerr <<"\n Error in gff file "<<gff_file_name
+	    std::cerr <<"\n Error in gff file "<<name
 		      <<" line "<<j<<".\n"
 		      <<" "<<feature<<" : unknown feature (UTR5, UTR3, E.Init,"
 		      <<" E.Intr, E.Term or E.Sngl).\n";
@@ -456,7 +483,7 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
       (strcmp(feature, "E.Init") == 0  &&  strand == '+')  ||
       (strcmp(feature, "E.Term") == 0  &&  strand == '-'))
     {
-      std::cerr <<"\n Error in gff file "<<gff_file_name<<" line "<<j<<".\n";
+      std::cerr <<"\n Error in gff file "<< name <<" line "<<j<<".\n";
       std::cerr <<" WARNING : complete genes only in gff file.\n";
       exit(2);
     }
@@ -470,8 +497,165 @@ Prediction* SensorTester :: ReadGFFAnnotation(DNASeq *x)
 
   vPos.clear();
   vState.clear();
+}
 
-  return gene;
+void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq *x)
+{
+  std::string gff_file_name;
+  FILE *fpCoord;
+  char line[MAX_LINE];
+  int  i;
+  char *feature = new char[FILENAME_MAX];
+  int  start,  end;
+  char strand, frame;
+  string idSo, ontology_term;
+  std::vector <int>         vPos;
+  std::vector <signed char> vState;
+
+ 
+  vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
+  int nbGeneFeature=geneFeatureSet.getNbFeature();
+  
+  for ( int j=0 ; j < nbGeneFeature ; j++, it++ )
+  {
+     strcpy (feature, (*it)->getType().c_str());
+     start = (*it)->getLocus()->getStart();
+     end = (*it)->getLocus()->getEnd();
+     strand = (*it)->getLocus()->getStrand();
+     frame = (*it)->getPhase();
+     idSo=(*it)->getType();
+     ontology_term=(*it)->getAttributes()->getOntologyTerm();
+     if ( idSo.find("SO:") == string::npos )
+     {
+      string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+      idSo=tmp;
+     }
+     if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" )
+     {
+	continue;
+     }
+     if (j==0) {
+	  vPos.push_back  ( start-1  );
+	  vState.push_back( InterGen );
+	  if (idSo=="SO:0000204" || idSo=="SO:0000205") { //if UTR
+	    if (Todo=="TEST") {
+	      vPos.push_back  ( end   );
+	      vState.push_back( UTR5F );
+	    }
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0000196") { //E.Init
+	    vPos.push_back  ( end    );
+	    vState.push_back( InitF1 );
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0000197") { //E.Term
+	    vPos.push_back  ( end    );
+	    vState.push_back( InitR1 );
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0005845")  { //E.Sngl
+	    if (strand == '+') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitF1 );
+	    }
+	    else {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
+          }
+	  else {
+	    std::cerr <<"\n Error in gff file : SOFA : "<< idSo<< "; ontology_term : "<<ontology_term
+		      <<" feature "<<j<<".\n"
+		      <<" WARNING :\n"
+		      <<"   - Complete genes only in gff file.\n"
+		      <<"   - Feature must be SO:0000204, SO:0000205 or SO:0000316 with ontology term :"
+		      <<" SO:0000196, SO:0000197, SO:0005845.\n";
+	    exit(2);
+	  }
+	}
+	else {
+	  if (idSo=="SO:0000204" || idSo=="SO:0000205") { //if UTR
+	    if (Todo=="TEST") {
+	      vPos.push_back  ( end   );
+	      vState.push_back( UTR5F );
+	    }
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0000196") { //E.Init
+	    if (strand == '+') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitF1 );
+	    }
+	    else {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronR1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitR1   );
+	    }
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0000197")  { //E.Term
+	    if (strand == '-') {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
+	    else {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronF1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitF1   );
+	   	}
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0005845") { //E.Sngl
+	    if (strand == '+') {
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitF1   );
+	    }
+	    else {
+	      vPos.push_back  ( end    );
+	      vState.push_back( InitR1 );
+	    }
+	  }
+	  else if (idSo=="SO:0000316" && ontology_term=="SO:0000004")  { //E.Intr
+	    if (strand == '+') {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronF1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( IntrF1   );
+	    }
+	    else {
+	      vPos.push_back  ( start-1  );
+	      vState.push_back( IntronR1 );
+	      vPos.push_back  ( end      );
+	      vState.push_back( InitR1   );
+	    }
+	  }
+	  else {
+	    std::cerr <<"\n Error in gff file "
+		      <<" line "<<j<<".\n"
+		      <<" "<<feature<<"("<< idSo<<")"<< ": unknown gff3 feature (SO:0000204, SO:0000205 or SO:0000316 with ontology term :"
+		      <<" SO:0000196, SO:0000197, SO:0005845.\n";
+	    exit(2);
+	  }
+	
+    }
+
+  // Complete gene ?
+  // in Gff3 : Must be sorted by coordinates !
+  if ( (idSo=="SO:0000316" && ontology_term=="SO:0000004") ||
+      ((idSo=="SO:0000316" && ontology_term=="SO:0000196") &&  strand == '+')  ||
+      ((idSo=="SO:0000316" && ontology_term=="SO:0000197") &&  strand == '-'))
+    {
+      std::cerr <<"\n Error in gff file , line "<<j<<".\n";
+      std::cerr <<" WARNING : complete genes only in gff file.\n";
+      exit(2);
+    }
+ }
+  std::cerr <<"done\n";
+
+  delete [] feature;
+
+  gene = new Prediction(vPos, vState);
+  gene->TrimAndUpdate(x);
+
+  vPos.clear();
+  vState.clear();
 }
 
 

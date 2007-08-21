@@ -83,7 +83,7 @@ void Signals :: PrintS ()
   case DATA::Del    : strcpy(t, "Del   "); break;
   }
   if (edge) s = '-';
-  fprintf(stderr, "%d\t%s %c %s\n", pos, t, s, score);
+  fprintf(stdout, "%d\t%s %c %s\n", pos, t, s, score);
 }
 
 
@@ -141,7 +141,7 @@ void Contents :: PrintC ()
   case DATA::IntronUTRF : strcpy(t, "IntronUTRF"); break;
   case DATA::IntronUTRR : strcpy(t, "IntronUTRR"); break;
   }
-  fprintf(stderr, "%d\t%d\t%s %f\n", start, end, t, score);
+  fprintf(stdout, "%d\t%d\t%s %f\n", start, end, t, score);
 }
 
 
@@ -157,33 +157,118 @@ extern Parameters PAR;
 SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
-  
+  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
+  char exonRead[20], intronRead[20], cdsRead[20];
   // all types are possible.
   type = Type_Any;
 
   fileExt   = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
   
-  strcpy(exonTypePAR,     PAR.getC("AnnotaStruct.Exon*",      GetNumber()));
-  strcpy(intronTypePAR,   PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
-  strcpy(cdsTypePAR,      PAR.getC("AnnotaStruct.CDS*",       GetNumber()));
-  exonPAR   = PAR.getD("AnnotaStruct.Exon*",         GetNumber());
-  intronPAR = PAR.getD("AnnotaStruct.Intron*",       GetNumber());
-  cdsPAR    = PAR.getD("AnnotaStruct.CDS*",          GetNumber());
+  strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
+  strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
+  strcpy(cdsRead,PAR.getC("AnnotaStruct.Exon*",         GetNumber()));
+
+  if (exonRead[0] != 'i')
+  {
+  	exonPAR   = atof(exonRead);
+	exonInline=0;
+  }
+  else
+  {
+	exonPAR   = 0;
+	exonInline= 1;
+  }
+  if (intronRead[0] != 'i')
+  {
+  	intronPAR = atof(intronRead);
+	intronInline = 0;
+  }	
+  else
+  {
+	intronPAR = 0;
+  	intronInline = 1;
+  }
+  if (cdsRead[0] != 'i')
+  {
+	cdsPAR = atof(cdsRead);
+     	cdsInline = 0;
+  }
+  else
+  {
+	cdsPAR   = 0;
+	cdsInline = 1;
+  }
+
+  strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
+  strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
+  strcpy(accRead,PAR.getC("AnnotaStruct.Acc*",         GetNumber()));
+  strcpy(donRead,PAR.getC("AnnotaStruct.Don*",         GetNumber()));
+  strcpy(tStartRead,PAR.getC("AnnotaStruct.TrStart*",  GetNumber()));
+  strcpy(tStopRead,PAR.getC("AnnotaStruct.TrStop*",    GetNumber()));
+
   strcpy(startPAR,  PAR.getC("AnnotaStruct.StartType",   GetNumber()));
-  strcat(startPAR,  PAR.getC("AnnotaStruct.Start*",      GetNumber()));
   strcpy(stopPAR,   PAR.getC("AnnotaStruct.StopType",    GetNumber()));
-  strcat(stopPAR,   PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
   strcpy(accPAR,    PAR.getC("AnnotaStruct.AccType",     GetNumber()));
-  strcat(accPAR,    PAR.getC("AnnotaStruct.Acc*",        GetNumber()));
   strcpy(donPAR,    PAR.getC("AnnotaStruct.DonType",     GetNumber()));
-  strcat(donPAR,    PAR.getC("AnnotaStruct.Don*",        GetNumber()));
   strcpy(tStartPAR, PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
-  strcat(tStartPAR, PAR.getC("AnnotaStruct.TrStart*",    GetNumber()));
   strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
-  strcat(tStopPAR,  PAR.getC("AnnotaStruct.TrStop*",     GetNumber()));
+  if (startRead[0] != 'i')
+  {
+ 	strcat(startPAR,  startRead);
+ 	startInline=0;
+  }
+  else
+  {
+	startInline= 1;
+  }
+  if (stopRead[0] != 'i')
+  {
+  	strcat(stopPAR,  stopRead);
+	stopInline = 0;
+  }	
+  else
+  {
+  	stopInline = 1;
+  }
+  if (accRead[0] != 'i')
+  {
+	strcat(accPAR, accRead);
+     	accInline = 0;
+  }
+  else
+  {
+	accInline = 1;
+  }
+  if (donRead[0] != 'i')
+  {
+ 	strcat(donPAR, donRead);
+ 	donInline=0;
+  }
+  else
+  {
+	donInline= 1;
+  }
+  if (tStartRead[0] != 'i')
+  {
+  	strcat(tStartPAR, tStartRead);
+	tStartInline = 0;
+  }	
+  else
+  {
+  	tStartInline = 1;
+  }
+  if (tStopRead[0] != 'i')
+  {
+	strcat(tStopPAR,  tStopRead);
+     	tStopInline = 0;
+  }
+  else
+  {
+	tStopInline = 1;
+  }
   
-  //fprintf(stderr, "Parameters : exonPAR %d  intronPAR %d cdsPAR %d startPAR %s stopPAR %s accPAR %s donPAR %s tStartPAR %s ",exonPAR, intronPAR ,cdsPAR, startPAR, stopPAR, accPAR, donPAR, tStartPAR );
-  fflush(stderr);
+  //fprintf(stderr, "Parameters : exonPAR %f  intronPAR %f cdsPAR %f startPAR %s stopPAR %s accPAR %s donPAR %s tStartPAR %s  tStopPAR %s\n",exonPAR, intronPAR ,cdsPAR, startPAR, stopPAR, accPAR, donPAR, tStartPAR,tStopPAR );
+  //fflush(stderr);
   inputFormat_ = to_string(PAR.getC("AnnotaStruct.format", GetNumber(),1));
   
   fprintf(stderr, "Reading %s file....", fileExt);
@@ -194,14 +279,15 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   if ( inputFormat_ == "GFF3" )
   {
     strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
+    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,0);
     char * soTerms = new char[FILENAME_MAX+1];
     strcpy(soTerms , PAR.getC("eugene_dir"));
     strcat(soTerms , filenameSoTerms );
 
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
-     geneFeatureSet->printFeature();
     ReadAnnotaStructGff3(*geneFeatureSet, X->SeqLen);
+    delete [] soTerms;
+    delete geneFeatureSet;
   }
   else
   {
@@ -313,21 +399,112 @@ SensorAnnotaStruct :: ~SensorAnnotaStruct ()
 // ----------------------
 void SensorAnnotaStruct :: Init (DNASeq *X)
 {
-  exonPAR   = PAR.getD("AnnotaStruct.Exon*",         GetNumber());
-  intronPAR = PAR.getD("AnnotaStruct.Intron*",       GetNumber());
-  cdsPAR    = PAR.getD("AnnotaStruct.CDS*",          GetNumber());
+  char exonRead[20], intronRead[20], cdsRead[20];
+  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
+ 
+ strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
+  strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
+  strcpy(cdsRead,PAR.getC("AnnotaStruct.Exon*",         GetNumber()));
+
+  if (exonRead[0] != 'i')
+  {
+  	exonPAR   = atof(exonRead);
+	exonInline=0;
+  }
+  else
+  {
+	exonPAR   = 0;
+	exonInline= 1;
+  }
+  if (intronRead[0] != 'i')
+  {
+  	intronPAR = atof(intronRead);
+	intronInline = 0;
+  }	
+  else
+  {
+	intronPAR = 0;
+  	intronInline = 1;
+  }
+  if (cdsRead[0] != 'i')
+  {
+	cdsPAR = atof(cdsRead);
+     	cdsInline = 0;
+  }
+  else
+  {
+	cdsPAR   = 0;
+	cdsInline = 1;
+  }
+
+  strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
+  strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
+  strcpy(accRead,PAR.getC("AnnotaStruct.Acc*",         GetNumber()));
+  strcpy(donRead,PAR.getC("AnnotaStruct.Don*",         GetNumber()));
+  strcpy(tStartRead,PAR.getC("AnnotaStruct.TrStart*",  GetNumber()));
+  strcpy(tStopRead,PAR.getC("AnnotaStruct.TrStop*",    GetNumber()));
+
   strcpy(startPAR,  PAR.getC("AnnotaStruct.StartType",   GetNumber()));
-  strcat(startPAR,  PAR.getC("AnnotaStruct.Start*",      GetNumber()));
   strcpy(stopPAR,   PAR.getC("AnnotaStruct.StopType",    GetNumber()));
-  strcat(stopPAR,   PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
   strcpy(accPAR,    PAR.getC("AnnotaStruct.AccType",     GetNumber()));
-  strcat(accPAR,    PAR.getC("AnnotaStruct.Acc*",        GetNumber()));
   strcpy(donPAR,    PAR.getC("AnnotaStruct.DonType",     GetNumber()));
-  strcat(donPAR,    PAR.getC("AnnotaStruct.Don*",        GetNumber()));
   strcpy(tStartPAR, PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
-  strcat(tStartPAR, PAR.getC("AnnotaStruct.TrStart*",    GetNumber()));
   strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
-  strcat(tStopPAR,  PAR.getC("AnnotaStruct.TrStop*",     GetNumber()));
+  if (startRead[0] != 'i')
+  {
+ 	strcat(startPAR,  startRead);
+ 	startInline=0;
+  }
+  else
+  {
+	startInline= 1;
+  }
+  if (stopRead[0] != 'i')
+  {
+  	strcat(stopPAR,  stopRead);
+	stopInline = 0;
+  }	
+  else
+  {
+  	stopInline = 1;
+  }
+  if (accRead[0] != 'i')
+  {
+	strcat(accPAR, accRead);
+     	accInline = 0;
+  }
+  else
+  {
+	accInline = 1;
+  }
+  if (donRead[0] != 'i')
+  {
+ 	strcat(donPAR, donRead);
+ 	donInline=0;
+  }
+  else
+  {
+	donInline= 1;
+  }
+  if (tStartRead[0] != 'i')
+  {
+  	strcat(tStartPAR, tStartRead);
+	tStartInline = 0;
+  }	
+  else
+  {
+  	tStartInline = 1;
+  }
+  if (tStopRead[0] != 'i')
+  {
+	strcat(tStopPAR,  tStopRead);
+     	tStopInline = 0;
+  }
+  else
+  {
+	tStopInline = 1;
+  }
+  
 
   PosSigGiveInfo = -1;
   PosConGiveInfo = -1;
@@ -521,8 +698,6 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 //gff3
 void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int len)
 {
-
-  
   int   startC, endC, edge;   // C -> content
   int   startS, endS;         // S -> signal       need for reverse
   char  strand;
@@ -541,19 +716,19 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
   int i=0;
   for ( i=0 ; i < nbGeneFeature ; i++, it++ )
   {
-
     j++;
+    strcpy (scoreC, "s");
     strcpy (feature, (*it)->getType().c_str());
     startC = (*it)->getLocus()->getStart();
     endC = (*it)->getLocus()->getEnd();
     
     /* Score ? */
     scF = (*it)->getScore();
-    strcpy ( scoreC, to_string(scF).c_str() );
+    //score by default for ins/del;
+    strcat ( scoreC, to_string(scF).c_str() ); 
     
     strand = (*it)->getLocus()->getStrand();
     strcpy (phase, to_string((*it)->getPhase()).c_str() );
-    
     onthology_term = (*it)->getAttributes()->getOntologyTerm();
     //recup code SO
     idSo=(*it)->getType();
@@ -571,7 +746,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     }
 
     /* Strand ? */
-    if      (strand == '+') 
+    if (strand == '+') 
     {
       edge = 0;
       startS = startC;
@@ -592,72 +767,85 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     startC--;
     endC--;
 
+    //Recupere le score inline (scF) ou dans le fichier (cdsPAR)
     float scCds=0.0;
-    (cdsTypePAR[0] == 'i') ? scCds = scF : scCds = cdsPAR;
+    (cdsInline == 1) ? scCds = scF : scCds = cdsPAR;
     
     float scIntron=0.0;
-    (intronTypePAR[0] == 'i') ? scIntron = scF : scIntron = intronPAR;
+    (intronInline == 1) ? scIntron = scF : scIntron = intronPAR;
     
     float scExon=0.0;
-    (exonTypePAR[0] == 'i') ? scExon = scF : scExon = exonPAR;
+    (exonInline == 1) ? scExon = scF : scExon = exonPAR;
     
-    // Low level signals
+    // Low level signals : use inline values
     if      ( idSo =="SO:0000315" ) //trStart : transcription_start_site 
-      vSig.push_back(new Signals(startS-1, DATA::tStart, edge, scoreC));
+    {
+	GetScore (DATA::tStart,scF, scoreC);
+	vSig.push_back(new Signals(startS-1, DATA::tStart, edge, scoreC));
+    }
     else if ( idSo =="SO:0000616" ) //trStop : transcription_end_site
-      vSig.push_back(new Signals(startS,   DATA::tStop,  edge, scoreC));
+    {	
+	GetScore (DATA::tStop,scF, scoreC);
+       	vSig.push_back(new Signals(startS,   DATA::tStop,  edge, scoreC));
+    }
     else if ( idSo =="SO:0000318" ) //start : start_codon
-      vSig.push_back(new Signals(startS-1, DATA::Start,  edge, scoreC));
+    {
+	GetScore (DATA::Start,scF, scoreC);
+        vSig.push_back(new Signals(startS-1, DATA::Start,  edge, scoreC));
+    }
     else if ( idSo =="SO:0000319" ) //stop : stop_codon
-      vSig.push_back(new Signals(startS,   DATA::Stop,   edge, scoreC));
+    {
+	GetScore (DATA::Stop,scF, scoreC);
+        vSig.push_back(new Signals(startS,   DATA::Stop,   edge, scoreC));
+    }
     else if ( idSo == "SO:0000164") //acc : three_prime_splice_site
-      vSig.push_back(new Signals(startS,   DATA::Acc,    edge, scoreC));
+    {
+	GetScore (DATA::Acc,scF, scoreC);
+        vSig.push_back(new Signals(startS,   DATA::Acc,    edge, scoreC));
+    }
     else if ( idSo == "SO:0000163") //don : five_prime_splice_site
-      vSig.push_back(new Signals(startS-1, DATA::Don,    edge, scoreC));
+    {
+	GetScore (DATA::Don,scF, scoreC);
+        vSig.push_back(new Signals(startS-1, DATA::Don,    edge, scoreC));
+    }
     else if ( idSo == "SO:0000366") //ins : insertion_site
       vSig.push_back(new Signals(startS,   DATA::Ins,    edge, scoreC));
     else if ( idSo == "SO:0000687") //del : deletion_junction
       vSig.push_back(new Signals(startS,   DATA::Del,    edge, scoreC));
-    
+
     // High level (contents OR/AND signals)
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000196") 
       //CDS && five_prime_coding_exon_region == E.Init
     {
-      char strSc[20];
-      //copy the good score depend on the first caracter of signalPAR 
-      (startPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, startPAR);
-      vSig.push_back(new Signals(startS-1, DATA::Start, edge, strSc));
-      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
-      vSig.push_back(new Signals(endS,     DATA::Don,   edge, strSc));
+      GetScore (DATA::Start,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::Start, edge, scoreC));
+      GetScore (DATA::Don,scF,scoreC );
+      vSig.push_back(new Signals(endS,     DATA::Don,   edge, scoreC));
       PushInCon(startC, endC, scCds , strand, phase, frame);
     }
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000004") 
       //CDS && interior_coding_exon == E.Intr
     {
-      char strSc[20];
-      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
-      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, strSc));
-      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
-      vSig.push_back(new Signals(endS,     DATA::Don,   edge, strSc));
-      
+      GetScore (DATA::Acc,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, scoreC));
+      GetScore (DATA::Don,scF, scoreC);
+      vSig.push_back(new Signals(endS,     DATA::Don,   edge, scoreC));
       PushInCon(startC, endC, scCds, strand, phase, frame);
     }
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000197") //CDS && three_prime_coding_exon_region == E.Term
     {
-      char strSc[20];
-      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
-      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, strSc));
-      (stopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, stopPAR);
-      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, strSc));
+      GetScore (DATA::Acc,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, scoreC));
+      GetScore (DATA::Stop,scF, scoreC);
+      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, scoreC));
       PushInCon(startC, endC, scCds, strand, phase, frame);
     }
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0005845") //CDS && single_exon == "E.Sngl"
     {
-      char strSc[20];
-      (startPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, startPAR);
-      vSig.push_back(new Signals(startS-1, DATA::Start, edge, strSc));
-      (stopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, stopPAR);
-      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, strSc));
+      GetScore (DATA::Start,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::Start, edge, scoreC));
+      GetScore (DATA::Stop,scF, scoreC);
+      vSig.push_back(new Signals(endS,     DATA::Stop,  edge, scoreC));
       PushInCon(startC, endC, scCds, strand, phase, frame);
     }
     else if ( idSo == "SO:0000316") //CDS
@@ -666,26 +854,24 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     }
     else if ( idSo == "SO:0000204" ) //five_prime_UTR
     {
-      char strSc[20];
-      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
-      vSig.push_back(new Signals (startS-1,DATA::tStart,edge, strSc));
+      GetScore (DATA::tStart,scF,scoreC);
+      vSig.push_back(new Signals (startS-1,DATA::tStart,edge, scoreC));
 
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scCds));
     }
     else if ( idSo == "SO:0000205" ) //three_prime_UTR
     {
-      char strSc[20];
-      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
-      vSig.push_back(new Signals (endS,    DATA::tStop, edge, strSc));
+      GetScore (DATA::tStop,scF, scoreC);
+      vSig.push_back(new Signals (endS,    DATA::tStop, edge, scoreC));
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scCds));
     }
     else if ( idSo == "SO:0000203" ) //UTR
     {
-      char strSc[20];
-      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
-      vSig.push_back(new Signals(startS-1, DATA::tStart, edge, strSc));
-      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
-      vSig.push_back(new Signals(endS,     DATA::tStop,  edge, strSc));
+      
+      GetScore (DATA::tStart,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::tStart, edge, scoreC));
+      GetScore (DATA::tStop,scF, scoreC);
+      vSig.push_back(new Signals(endS,     DATA::tStop,  edge, scoreC));
 
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scCds));
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scCds));
@@ -703,11 +889,10 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     }
     else if ( idSo == "SO:0000188" ) // "Intron.Any"
     {
-      char strSc[20];
-      (donPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, donPAR);
-      vSig.push_back(new Signals (startS-1, DATA::Don, edge, strSc));
-      (accPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, accPAR);
-      vSig.push_back(new Signals (endS,     DATA::Acc, edge, strSc));
+      GetScore (DATA::Don,scF, scoreC);
+      vSig.push_back(new Signals (startS-1, DATA::Don, edge, scoreC));
+      GetScore (DATA::Acc,scF, scoreC);
+      vSig.push_back(new Signals (endS,     DATA::Acc, edge, scoreC));
       vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge,scIntron));
       vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge,scIntron));
     }
@@ -715,20 +900,15 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     {
       PushInCon(startC, endC, scExon, strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scExon));
-      
-      char strSc[20];
-      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
-      vSig.push_back(new Signals (startS-1,DATA::tStart, edge, strSc));
+      GetScore (DATA::tStart,scF, scoreC);
+      vSig.push_back(new Signals (startS-1,DATA::tStart, edge, scoreC));
     }
     else if ( idSo == "SO:0000147" && onthology_term == "SO:0000202") // "E.Last"
     {
       PushInCon(startC, endC, scExon, strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scExon));
-      
-      char strSc[20];
-      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
-      vSig.push_back(new Signals (endS,  DATA::tStop, edge, strSc));
-
+      GetScore (DATA::tStop,scF, scoreC);
+      vSig.push_back(new Signals (endS,  DATA::tStop, edge, scoreC));
     }
     else if (idSo == "SO:0000147" && onthology_term.find("SO:0000202")!= string::npos && onthology_term.find("SO:0000200")!= string::npos) 
     {
@@ -736,11 +916,10 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, scExon));
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, scExon));
       
-      char strSc[20];
-      (tStartPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStartPAR);
-      vSig.push_back(new Signals(startS-1, DATA::tStart, edge,strSc));
-      (tStopPAR[0] == 'i') ? strcpy (strSc, scoreC) : strcpy (strSc, tStopPAR);
-      vSig.push_back(new Signals(endS,     DATA::tStop,  edge,strSc));
+      GetScore (DATA::tStart,scF, scoreC);
+      vSig.push_back(new Signals(startS-1, DATA::tStart, edge,scoreC));
+      GetScore (DATA::tStop,scF, scoreC);
+      vSig.push_back(new Signals(endS,     DATA::tStop,  edge,scoreC));
     }
     else
       fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
@@ -751,6 +930,68 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     
   }
    
+}
+
+void SensorAnnotaStruct :: GetScore ( int type , float scF, char scoreC[20])
+{
+	if (type == DATA::tStart)
+	{ 	//contient le type : p /s, si pas inline contiens le score du PAR
+	    	strcpy (scoreC ,tStartPAR ); 
+		if (tStartInline ==1)
+		{
+	 		strcat (scoreC , to_string(scF).c_str()); // ajout du score lu
+		}
+	}
+	else if (type == DATA::tStop)
+	{ 	
+	    strcpy (scoreC ,tStopPAR ); 
+		if (tStopInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); // ajout du score lu
+		}	
+
+	}
+	else if (type == DATA::Start)
+	{ 	
+		strcpy (scoreC ,startPAR );
+		if (startInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); 
+		}	
+	}
+	else if (type == DATA::Stop)
+	{ 	
+		strcpy (scoreC ,stopPAR );
+		if (stopInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); 
+		}	
+	}
+	else if (type == DATA::Acc)
+	{ 	
+		strcpy (scoreC ,accPAR );
+		if (accInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); 
+		}	
+	}
+	else if (type == DATA::Don)
+	{ 	
+		strcpy (scoreC ,donPAR );
+		if (donInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); 
+		}	
+	}
+	else if (type == DATA::Don)
+	{ 	
+		strcpy (scoreC ,donPAR );
+		if (donInline ==1)
+		{
+			strcat (scoreC , to_string(scF).c_str()); 
+		}	
+	}
+
 }
 // ----------------
 //  push_back con.

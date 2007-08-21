@@ -73,12 +73,14 @@ class SensorAnnotaStruct : public Sensor
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
   float exonPAR,      intronPAR,     cdsPAR;
-  char  exonTypePAR[20], intronTypePAR[20],   cdsTypePAR[20];
+  int  exonInline,      intronInline,     cdsInline;
+  int  startInline,      stopInline,     accInline;
+  int  donInline,      tStartInline,     tStopInline;
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
   void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int seqlen);
   void PushInCon(int d,   int e,     float sc,
 		 char st, char p[2], int f);
-  
+  void GetScore ( int type , float scF, char scoreC[20]);
  public:
   SensorAnnotaStruct          (int n, DNASeq *X);
   virtual ~SensorAnnotaStruct ();

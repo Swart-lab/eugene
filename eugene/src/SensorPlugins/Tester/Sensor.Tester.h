@@ -77,14 +77,16 @@ class SensorTester : public Sensor
   enum SIGNAL_STRAND_NO {START_F=0, START_R=1, STOP_F=0, STOP_R=1, ACC_F=0, ACC_R=1, DON_F=2, DON_R=3};
   unsigned char SensorType;
 
-  Prediction* ReadGFFAnnotation(DNASeq *);
+  void ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x);
+  void ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq *X);
+  void ReadAnnotation(DNASeq *);
   char* SigType_TF(int, int, char **);
   char* State(int);
 
   void AnalyzeSPSN(void);
   void UpdateTP_FP_TN_FN(int no_threshold, bool is_don, bool is_annotated, bool is_detected);
   void UpdateThreshold(double t);
-
+  void print(void);
  public:
   SensorTester (int n, DNASeq *X);
   virtual ~SensorTester   (void);
