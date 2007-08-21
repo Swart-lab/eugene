@@ -63,7 +63,7 @@ Sensor.AnnotaStruct.use       1         # Use AnnotaStruct sensor
 Sensor.AnnotaStruct           1         # Sensor priority
 \end{Verbatim}
 
-\paragraph{Input files format}
+\paragraph{Native input files format}
 
 The plugin reads a GFF format file. Each line in this file forms an
 elementary information which is directly interpreted by the plugin
@@ -190,6 +190,7 @@ are recognized:
   parameter values. The UTR5, UTR3 and coding exon contents edges are
   reweighted according to the \texttt{AnnotaStruct.Exon*} parameter
   value.
+\item \texttt{Intron.Any}: ?
 \end{itemize}
 
 
@@ -199,6 +200,85 @@ ATSYNO FGENESH E.Init  3 33 0 + 3
 ATSYNO FGENESH E.Term 45 75 0 + 3
 \end{Verbatim}
 
+\paragraph{Gff3 input files format}
+
+The gff3 input mode is activated by setting the value \texttt{GFF3} for the parameter
+\texttt{AnnotaStruct.format} in the parameter file.
+The plugin reads a collection of similarities from files named with
+the sequence name and an extension \texttt{AnnotaStruct.FileExtension} plus \texttt{.gff3}
+In gff3 mode you can't describe feature level as in natif mode.
+
+If you want to read score or probability from file you have to set parameters score to "i".
+Content data will be interpreted as score.
+\begin{Verbatim}[fontsize=\small]
+AnnotaStruct.Exon*            i
+AnnotaStruct.Intron*          i
+AnnotaStruct.CDS*             i
+AnnotaStruct.StartType        p 
+AnnotaStruct.Start*           i
+AnnotaStruct.StopType         p 
+AnnotaStruct.Stop*            i
+AnnotaStruct.AccType          p 
+AnnotaStruct.Acc*             i
+AnnotaStruct.DonType          p 
+AnnotaStruct.Don*             i
+AnnotaStruct.TrStartType      p 
+AnnotaStruct.TrStart*         i
+AnnotaStruct.TrStopType       p 
+AnnotaStruct.TrStop*          i
+\end{Verbatim}
+
+Here is the correspondance beetween AnnotaStruct feature and gff3 features (note that low level content can't be describe directly, but by setting signal at zero, and using transcribe sequence feature you can simulate it)
+
+low-level data :
+\begin{itemize}
+\item \texttt{trStart}: 	SO:0000315 (transcription\_start\_site)
+\item \texttt{trStop}: 	SO:0000616 (transcription\_end\_site)
+\item \texttt{start}: 	SO:0000318 (start\_codon).
+\item \texttt{stop}: 	SO:0000319 (stop\_codon)
+\item \texttt{acc}: 	SO:0000164 (acceptor)
+\item \texttt{don}: 	SO:0000163 (donor)
+\item \texttt{ins}: 	SO:0000366 (insertion\_site)
+\item \texttt{del}: 	SO:0000687 (deletion\_junction)
+\end{itemize}
+
+high-level data :
+
+translate information
+\begin{itemize}
+\item \texttt{E.Init}: SO:0000316 (CDS) Ontology term :	SO:0000196 (five\_prime\_coding\_exon\_region)
+\item \texttt{E.Intr}: SO:0000316 (CDS) Ontology term :	SO:0000004 (interior\_coding\_exon)
+\item \texttt{E.Term}: SO:0000316 (CDS) Ontology term :	SO:0000197 (three\_prime\_coding\_exon\_region)
+\item \texttt{E.Sngl}: SO:0000316 (CDS) Ontology term :	SO:0005845 (single\_exon)
+\item \texttt{UTR5}:   SO:0000204 (five\_prime\_UTR)
+\item \texttt{UTR3}:   SO:0000205 (three\_prime\_UTR)
+\item \texttt{UTR}:    SO:0000203 (UTR)
+\item \texttt{Intron}: SO:0000188 (intron) Ontology term : SO:0000191	(interior\_intron)
+\end{itemize}
+
+transcribed information
+\begin{itemize}
+\item \texttt{E.Any}: 		SO:0000147 (exon)
+\item \texttt{E.First}: 	SO:0000147 (exon)	Ontology term :	SO:0000200 (five\_prime\_coding\_exon)
+\item \texttt{E.Last}: 		SO:0000147 (exon)	Ontology term :	SO:0000202 (three\_prime\_coding\_exon)
+\item \texttt{E.Extreme}: 	SO:0000147 (exon)	Ontology term :	SO:0000200,SO:0000202
+\item \texttt{Intron.Any}: 	SO:0000188 (intron)
+\end{itemize}
+
+Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
+\begin{Verbatim}[fontsize=\tiny]
+seq25	EuGene	five_prime_UTR	1	2787	0	+	.	ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
+seq25	EuGene	CDS	2788	2836	0	+	0	ID=CDS:seq25.1;Ontology_term=SO:0000196
+seq25	EuGene	CDS	8356	8471	0	+	2	ID=CDS:seq25.2;Ontology_term=SO:0000004
+seq25	EuGene	CDS	8576	8667	0	+	1	ID=CDS:seq25.3;Ontology_term=SO:0000004
+seq25	EuGene	CDS	9006	9061	0	+	0	ID=CDS:seq25.4;Ontology_term=SO:0000004
+seq25	EuGene	CDS	9567	9655	0	+	1	ID=CDS:seq25.5;Ontology_term=SO:0000004
+seq25	EuGene	CDS	10520	10535	0	+	1	ID=CDS:seq25.6;Ontology_term=SO:0000004
+seq25	EuGene	CDS	10896	11134	0	+	1	ID=CDS:seq25.7;Ontology_term=SO:0000004
+seq25	EuGene	CDS	11544	12005	0	+	2	ID=CDS:seq25.8;Ontology_term=SO:0000004
+seq25	EuGene	CDS	12088	12900	0	+	0	ID=CDS:seq25.9;Ontology_term=SO:0000197
+seq25	EuGene	three_prime_UTR	12901	14900	0	+	.	ID=three_prime_UTR:seq25.10;Ontology_term=SO:0000205
+\end{Verbatim}
 
 \paragraph{Filtering input information}
 
