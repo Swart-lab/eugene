@@ -25,6 +25,8 @@ EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
 #
+##### Gff3
+Gff3.SoTerms		cfg/sofa.obo
 ##### Output control ######
 Output.RemoveFrags	0
 Output.UTRtrim		0
@@ -45,9 +47,6 @@ Output.intron		0
 Output.format		l
 Output.Prefix		./
 Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
-#
-##### Gff3
-#Gff3.SoTerms		cfg/sofa.obo
 #
 ##### Alternative splicing predictor control
 AltEst.use			0
