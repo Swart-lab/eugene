@@ -121,7 +121,7 @@ void SensorStartWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
       ScaleWAMScore (WAModel->ScoreTheMotif(MotifExtnd));
   }
 
-  delete MotifExtnd;
+  delete [] MotifExtnd;
 }
 // ----------------------------
 //  Normalize Score for Plot
