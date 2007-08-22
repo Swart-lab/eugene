@@ -69,8 +69,8 @@ SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
 // ----------------------
 SensorSpliceWAM :: ~SensorSpliceWAM ()
 {
-  delete DonWAModel;
-  delete AccWAModel;
+  delete [] DonWAModel;
+  delete [] AccWAModel;
 }
 
 // ---------------------
@@ -152,7 +152,7 @@ void SensorSpliceWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
     }
     d->sig[DATA::Don].weight[Signal::Reverse] += (DonScaleCoef * DonWAModel->ScoreTheMotif(DonSite)) + DonScalePenalty;
   }
-  delete DonSite; delete AccSite;
+  delete [] DonSite; delete [] AccSite;
 }
 
 // ----------------------------
