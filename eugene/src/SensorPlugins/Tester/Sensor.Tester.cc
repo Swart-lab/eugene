@@ -479,9 +479,9 @@ void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
   fclose(fpCoord);
 
   // Complete gene ?
-  if (strcmp(feature, "E.Intr")  == 0  ||
+  if ((strcmp(feature, "E.Intr")  == 0  ||
       (strcmp(feature, "E.Init") == 0  &&  strand == '+')  ||
-      (strcmp(feature, "E.Term") == 0  &&  strand == '-'))
+      (strcmp(feature, "E.Term") == 0  &&  strand == '-') ) && !(strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0))
     {
       std::cerr <<"\n Error in gff file "<< name <<" line "<<j<<".\n";
       std::cerr <<" WARNING : complete genes only in gff file.\n";
@@ -518,6 +518,7 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
   
   for ( int j=0 ; j < nbGeneFeature ; j++, it++ )
   {
+     cout << (*it)->getString() <<endl;	
      strcpy (feature, (*it)->getType().c_str());
      start = (*it)->getLocus()->getStart();
      end = (*it)->getLocus()->getEnd();
@@ -627,7 +628,7 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
 	    }
 	  }
 	  else {
-	    std::cerr <<"\n Error in gff file "
+	    std::cerr <<"\n Error in gff3 file "
 		      <<" line "<<j<<".\n"
 		      <<" "<<feature<<"("<< idSo<<")"<< ": unknown gff3 feature (SO:0000204, SO:0000205 or SO:0000316 with ontology term :"
 		      <<" SO:0000196, SO:0000197, SO:0005845.\n";
@@ -635,18 +636,18 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
 	  }
 	
     }
-
+ }
   // Complete gene ?
   // in Gff3 : Must be sorted by coordinates !
-  if ( (idSo=="SO:0000316" && ontology_term=="SO:0000004") ||
+  if (( (idSo=="SO:0000316" && ontology_term=="SO:0000004") ||
       ((idSo=="SO:0000316" && ontology_term=="SO:0000196") &&  strand == '+')  ||
-      ((idSo=="SO:0000316" && ontology_term=="SO:0000197") &&  strand == '-'))
+      ((idSo=="SO:0000316" && ontology_term=="SO:0000197") &&  strand == '-')) && !(idSo=="SO:0000204"||idSo=="SO:0000205"))
     {
-      std::cerr <<"\n Error in gff file , line "<<j<<".\n";
+      std::cerr <<"\n Error in gff file\n";
       std::cerr <<" WARNING : complete genes only in gff file.\n";
       exit(2);
     }
- }
+ 
   std::cerr <<"done\n";
 
   delete [] feature;
