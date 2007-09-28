@@ -327,7 +327,7 @@ Sensor.GSplicer.use	0
 Sensor.SMachine.use	0
 Sensor.NG2.use		0
 Sensor.NStart.use	1
-Sensor.PatConst.use	1
+Sensor.PatConst.use	0
 Sensor.PepSignal.use	0
 Sensor.SpliceWAM.use 	0
 Sensor.SPred.use	0
