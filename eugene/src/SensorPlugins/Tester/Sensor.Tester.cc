@@ -337,8 +337,8 @@ void SensorTester ::ReadAnnotation ( DNASeq *X)
 // -----------------
 //  Read coord file
 //  Lecture du fichier .gff (format gff) pour charger un objet
-//  prediction "simplifié" (on distingue 6 états : IG, UTR, ExonF,
-//  ExonR, IntronF et IntronR) -> but quel état réel à telle pos ?
+//  prediction "simplifiï¿½" (on distingue 6 ï¿½tats : IG, UTR, ExonF,
+//  ExonR, IntronF et IntronR) -> but quel ï¿½tat rï¿½el ï¿½ telle pos ?
 //  Mots clefs pour le .gff : Features UTR5, UTR3, E.Init, E.Intr,
 //  E.Term, E.Sngl
 // -----------------
@@ -492,7 +492,7 @@ void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
 
   delete [] feature;
 
-  gene = new Prediction(vPos, vState);
+  gene = new Prediction(0,x->SeqLen,vPos, vState);
   gene->TrimAndUpdate(x);
 
   vPos.clear();
@@ -652,7 +652,7 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
 
   delete [] feature;
 
-  gene = new Prediction(vPos, vState);
+  gene = new Prediction(0, x->SeqLen,vPos, vState);
   gene->TrimAndUpdate(x);
 
   vPos.clear();
