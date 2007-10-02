@@ -163,7 +163,7 @@ class Prediction
   double optimalPath;
 
   Prediction  ();
-  Prediction  (std::vector <int> vPos,
+  Prediction  (int From, int To, std::vector <int> vPos,
          std::vector <signed char> vState);
   ~Prediction ();
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);

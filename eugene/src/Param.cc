@@ -197,6 +197,30 @@ void Parameters :: ReadArg(int argc, char * argv[])
       else m["Output.gto"] = optarg;
       break;
       
+    case 'U':
+      if (! TestIArg(optarg)) 
+	errflag++;
+      else {
+        int tmp;
+        key = new char[FILENAME_MAX+1];
+        sscanf(optarg, "%d", &tmp);
+	sprintf(key,"%d",Max(0,tmp-1));
+	m["EuGene.from"] = key;
+	}
+      break;
+
+    case 'V':
+      if (! TestIArg(optarg)) 
+	errflag++;
+      else {
+        int tmp;
+        key = new char[FILENAME_MAX+1];
+        sscanf(optarg, "%d", &tmp);
+	sprintf(key,"%d",Max(0,tmp-1));
+        m["EuGene.to"] = key;
+	}
+      break;
+
     case 'x':           /* -x resx */
       if (! TestIArg(optarg))
         errflag++;
@@ -272,10 +296,6 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["BlastX.PostProcess"] = "2";
       break;
 
-    case 'U':
-      m["Sensor.User.use"] = "1";
-      break;
-
     case 'G':           /* -G use sensor GFF */
       m["Sensor.GFF.use"] = "1";
       break;
@@ -335,6 +355,8 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -a                      Activates the alternative splicing prediction using EST\n");
   fprintf(stderr, "    -D<parameter>=<value>   Changes the parameter value\n"); 
   fprintf(stderr, "    -s                      Forbids partial gene prediction\n");
+  fprintf(stderr, "    -U                      Predict only from this nucleotide position\n");
+  fprintf(stderr, "    -V                      Predict only up to this nucleotide position\n");
   fprintf(stderr, "    -Z                      Select the parameters optimization mode\n");
   fprintf(stderr, "    -h                      Print this help\n\n");
 
@@ -363,8 +385,7 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -M AA  Markov matrix    Activates the MarkovProt plugin\n");
   fprintf(stderr, "    -r                      Activates the Repeat plugin\n");
   fprintf(stderr, "    -R                      Activates the Riken (FL cDNA) plugin\n");
-  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n");
-  fprintf(stderr, "    -U                      Activates the User plugin (obsolete)\n\n");
+  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n\n");
 	
   exit(1);
 }
@@ -560,6 +581,13 @@ void Parameters :: setD (const char *key, double n)
   m[key] = buffer;
 }
 
+void Parameters :: setI (const char *key, int n)
+{
+  char *buffer = new char[FILENAME_MAX+1];
+  sprintf (buffer, "%d",n);
+  delete [] m[key];
+  m[key] = buffer;
+}
 
 // ------------------------
 //  Default destructor.

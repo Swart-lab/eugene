@@ -30,7 +30,7 @@
 #define MODELS_DIR "models"
 #define WEB_DIR "web"
 
-#define POSSIBLE_ARGUMENTS "FGUREBadrsghm:w:f:n:o:p:x:y:c:u:v:b::l:O:D:t::M:Z::A:"
+#define POSSIBLE_ARGUMENTS "FGREBadrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:"
 
 const int FASTA_Len = 50;
 const int MAX_LINE  = 300;

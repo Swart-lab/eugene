@@ -451,13 +451,13 @@ Prediction :: Prediction ()
 // ------------------------
 //  Default constructor.
 // ------------------------
-Prediction :: Prediction (std::vector <int> vPos,
+Prediction :: Prediction (int From, int To, std::vector <int> vPos,
 			  std::vector <signed char> vState)
 {
   clear();
   
   int i;
-  int start = 1;
+  int start = 1+From;
   int nbPos = vPos.size()-1;  // == vState.size()-1;
 
   for(i=0; i<(int)vPos.size(); i++) {

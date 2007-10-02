@@ -281,7 +281,7 @@ BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 // ----------------------------------------------------------------
 // BackTrace and build a prediction object
 // ----------------------------------------------------------------
-Prediction* Track :: BackTrace (int Forward)
+Prediction* Track :: BackTrace (int From, int To, int Forward)
 {
   std::vector <int>         vPos;
   std::vector <signed char> vState;
@@ -311,7 +311,7 @@ Prediction* Track :: BackTrace (int Forward)
   pos  = It->StartPos;
   etat = It->State;
   It   = It->Origin;
-  if (pos >= 0) {
+  if (pos >= From) {
     vPos.push_back  ( pos  );
     vState.push_back( etat );
   }
@@ -329,7 +329,7 @@ Prediction* Track :: BackTrace (int Forward)
 
     //    printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
 
-    if (pos >= 0) {
+    if (pos >= From) {
       vPos.push_back  ( pos  );
       vState.push_back( etat );
     }
@@ -344,7 +344,7 @@ Prediction* Track :: BackTrace (int Forward)
     reverse(vPos.begin(),   vPos.end());
   }
   
-  pred = new Prediction(vPos, vState);
+  pred = new Prediction(From, To, vPos, vState);
   vPos.clear();
   vState.clear();
 

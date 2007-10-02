@@ -63,7 +63,7 @@ private:
   //  void InsertLastBestUsableBP (int position, int sense=1);
   //  void SubstractContents (DATA *data);
   //  double ConnectDag (DAG *RightDag, int position, DATA * data, int datalength);
-  double BuildPrediction (int Forward = 1);
+  double BuildPrediction (int From, int To, int Forward = 1);
   //  void CleanPrediction (DAG* dag, DAG* dagrev);
 
  private:

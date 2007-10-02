@@ -71,7 +71,7 @@ ParaOptimization OPTIM;
 // -------------------------------------------------------------------------
 // Compute Optimal Prediction
 // -------------------------------------------------------------------------
-Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
+Prediction* Predict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor)
 {
 
   int   j, k;
@@ -79,15 +79,19 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   DATA	Data;
   int   Forward =  1;//PAR.getI("Sense"); 
   int   Dir = (Forward ? 1 : -1);
-  int	FirstNuc = (Forward ? 0 : Data_Len);
-  int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
+
   int   GCVerbose = PAR.getI("EuGene.VerboseGC");
   int   GCLatency = PAR.getI("EuGene.GCLatency");
   DAG   *Dag;
   Prediction *prediction;
 	
+  // DynaProg end at the lastpos + 1 to account for final signals.
+  int	FirstNuc = (Forward ? From : To+1);
+  int   LastNuc  = (Forward ? To+1 : From);
+
   // Initialize the central DAG
-  Dag = new DAG(FirstNuc-Dir, LastNuc, PAR,TheSeq);
+  // one more position here for prediction of partial elements at extremities.
+  Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
   
   Dag->LoadDistLength();
   Dag->WeightThePrior();
@@ -95,8 +99,8 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   // --------------------------------------------------------------------------
   // Demarrage de la programmation dynamique
   // --------------------------------------------------------------------------
-  for (int nuc = FirstNuc; nuc != LastNuc; nuc += Dir) {
-    
+  for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir) {
+
     // recuperation des infos
     MSensor->GetInfoAt(TheSeq, nuc, &Data);
     if (Forward) 
@@ -108,7 +112,7 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   }
 
   Dag->WeightThePrior();
-  Dag->BuildPrediction(Forward);
+  Dag->BuildPrediction(From,To,Forward);
 
   Dag->pred->TrimAndUpdate(TheSeq);
   prediction = Dag->pred;
@@ -118,31 +122,40 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
   return prediction;
 }
 
+// Same with whole sequence by default
+Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
+{
+	return Predict(TheSeq,0,TheSeq->SeqLen-1,MSensor);
+}
 // -------------------------------------------------------------------------
 // Compute alternative Predictions based on EST
 // -------------------------------------------------------------------------
-Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB, Prediction *optpred, int idx)
+Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor, 
+		AltEst *AltEstDB, Prediction *optpred, int idx)
 {
   int   j, k;
   int   Data_Len = TheSeq->SeqLen;
   DATA	Data;
   int   Forward =  1;//PAR.getI("Sense"); 
   int   Dir = (Forward ? 1 : -1);
-  int	FirstNuc = (Forward ? 0 : Data_Len);
-  int   LastNuc  = (Forward ? Data_Len : 0)+Dir;
   int   GCVerbose = PAR.getI("EuGene.VerboseGC");
   int   GCLatency = PAR.getI("EuGene.GCLatency");
   DAG* Dag;
   Prediction *prediction;
+
+   // DynaProg end at the lastpos + 1 to account for final signals.
+  int	FirstNuc = (Forward ? From : To+1);
+  int   LastNuc  = (Forward ? To+1 : From);
+
   if (!AltEstDB-> voae_AltEst[idx].CompatibleWith(optpred))
     {
 
-      Dag = new DAG(FirstNuc-Dir, LastNuc, PAR,TheSeq);
+      Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
 	  
       Dag->LoadDistLength();
       Dag->WeightThePrior();
 
-      for (int nuc = FirstNuc; nuc != LastNuc; nuc += Dir) {
+      for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir) {
 	
 	// recuperation des infos
 	MSensor->GetInfoAt(TheSeq, nuc, &Data);
@@ -156,7 +169,7 @@ Prediction* AltPredict (DNASeq* TheSeq, MasterSensor* MSensor, AltEst *AltEstDB,
 	if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
       }
       Dag->WeightThePrior();
-      Dag->BuildPrediction(Forward);
+      Dag->BuildPrediction(From, To, Forward);
 
       Dag->pred->TrimAndUpdate(TheSeq);
       prediction = Dag->pred;
@@ -228,6 +241,17 @@ int main  (int argc, char * argv [])
 	Data_Len = TheSeq->SeqLen;
     
 	// --------------------------------------------------------------------
+	// Calcul des positions de prédiction
+	// --------------------------------------------------------------------
+ 	int fromPos = PAR.getI("EuGene.from",0,true);
+  	int toPos   = PAR.getI("EuGene.to",0,true);
+
+  	if (toPos) 
+		toPos = Min(Data_Len-1,toPos);
+	else 
+		toPos = Data_Len-1;
+
+	// --------------------------------------------------------------------
 	// Prefix output file name
 	// --------------------------------------------------------------------
 	strcpy(prefixName, PAR.getC("Output.Prefix"));
@@ -282,7 +306,7 @@ int main  (int argc, char * argv [])
 	// --------------------------------------------------------------------
 	// Predict: 1st main prediction
 	// --------------------------------------------------------------------
-	pred = Predict(TheSeq, MS);
+	pred = Predict(TheSeq, fromPos, toPos, MS);
 	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
 	
 	// --------------------------------------------------------------------
@@ -321,7 +345,7 @@ int main  (int argc, char * argv [])
 	  Gene *baseGene;
 	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
 	    {
-	      AltPred = AltPredict(TheSeq,MS,AltEstDB,pred,altidx);
+	      AltPred = AltPredict(TheSeq,fromPos,toPos,MS,AltEstDB,pred,altidx);
 
 	      if (AltPred) {
             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))

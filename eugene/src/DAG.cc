@@ -28,14 +28,14 @@ extern Parameters PAR;
 DNASeq *DAG::TheSeq = NULL;
 
 double DAG::ExPrior 		= 0.0;
-double DAG::InPrior 			= 0.0;
+double DAG::InPrior 		= 0.0;
 double DAG::IGPrior 		= 0.0;
 double DAG::FivePrior 		= 0.0;
 double DAG::ThreePrior 		= 0.0;
 double DAG::IntronFivePrior 	= 0.0;
 
 double DAG::SplicedStopPen 	= 0.0;
-int       DAG::estuse 			= 0;
+int       DAG::estuse 		= 0;
 double DAG::NormalizingPath	= 0.0;
 double DAG::PBest[NbTracks];
 BackPoint *DAG::PrevBP[NbTracks];
@@ -245,12 +245,12 @@ void DAG :: LoadDistLength()
 // ----------------------------------------------------------------
 //  Build the prediction by backtracing.
 // ----------------------------------------------------------------
-double DAG :: BuildPrediction (int Forward)
+double DAG :: BuildPrediction (int From, int To, int Forward)
 {
   double maxi,BestU,PBest[NbTracks];
   BackPoint *PrevBP[NbTracks];
-  
-  int j,k = (Forward ? TheSeq->SeqLen+1 :-1);
+
+  int j,k = (Forward ? To+2 :From-1); // SeqLen+1 and -1 typically
 
   // Insert best possible backpoint at the start of the algo (the
   // insert is not automatically possible, cf cost dist. 
@@ -273,7 +273,7 @@ double DAG :: BuildPrediction (int Forward)
     }
   }
 
-  pred = LBP[j].BackTrace(Forward);
+  pred = LBP[j].BackTrace(From,To,Forward);
   pred->optimalPath = maxi+NormalizingPath;
   return maxi+NormalizingPath;
 }
@@ -687,7 +687,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
     PICOMP((PhaseF == k),Start,FStrand,UTR5F);
-    // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+    // Il y a une insertion (frameshift). Saut de position de nuclï¿½otide ignorï¿½.
     PICOMP(true,Ins,FStrand,InitF1+(k+1)%3);
     // Il y a une deletion (frameshift)
     PICOMP(true,Del,FStrand,InitF1+(k+2)%3);
@@ -741,7 +741,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
     PICOMP((PhaseF == k),Start,FStrand,UTR5F);
-    // Il y a une insertion (frameshift). Saut de positionléotide ignore.
+    // Il y a une insertion (frameshift). Saut de positionlï¿½otide ignore.
     PICOMP(true,Ins,FStrand,SnglF1+(k+1)%3);
     // Il y a une deletion (frameshift)
     PICOMP(true,Del,FStrand,SnglF1+(k+2)%3);
@@ -794,7 +794,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
 	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift). Saut de position de nucléotide ignoré.
+    // Il y a une insertion (frameshift). Saut de position de nuclï¿½otide ignorï¿½.
     PICOMP(true,Ins,FStrand,IntrF1+(k+1)%3);
     // Il y a une deletion (frameshift)
     PICOMP(true,Del,FStrand,IntrF1+(k+2)%3);
@@ -858,7 +858,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
 	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift). Saut de positionléotide ignore.
+    // Il y a une insertion (frameshift). Saut de positionlï¿½otide ignore.
     PICOMP(true,Ins,FStrand,TermF1+(k+1)%3);
     // Il y a une deletion (frameshift)
     PICOMP(true,Del,FStrand,TermF1+(k+2)%3);

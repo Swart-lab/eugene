@@ -80,6 +80,7 @@ class Parameters
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
   void   setD (const char *key, double n);
+  void   setI (const char *key, int n);
   std::string WriteParam (std::vector<std::string> para_name, 
 			  std::vector<double> para_val);
 
