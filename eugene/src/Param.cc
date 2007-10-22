@@ -21,12 +21,20 @@
 
 
 // -----------------------------------------------
-//  Gestion des arguments (integer)
+//  Gestion des arguments (positive integer)
 // -----------------------------------------------
 int TestIArg(char *arg)
 {
   int tmp;
   return (sscanf(arg, "%d", &tmp) == 1) && (tmp >= 0);
+}
+// -----------------------------------------------
+//  Gestion des arguments (arbitrary integer)
+// -----------------------------------------------
+int TestIAnyArg(char *arg)
+{
+  int tmp;
+  return (sscanf(arg, "%d", &tmp) == 1);
 }
 
 // -----------------------------------------------
@@ -268,7 +276,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
 
     case 'o':           /* -o offset */
-      if (! TestIArg(optarg))
+      if (! TestIAnyArg(optarg))
 	errflag++;
       else m["Output.offset"] = optarg;
       break;
