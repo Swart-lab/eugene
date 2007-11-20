@@ -112,7 +112,7 @@ char* Chaine :: code2mot(int code, int lgr) const
   clef= new int[lgr];
   reste= code;
   for (i=lgr-1; i>0; i--) {
-    clef[i]=(int)pow(taille,i);
+    clef[i]=(int)pow((double)taille,(double)i);
     tampon[lgr-i-1]=lettre[(int)reste/clef[i]];
     reste = reste % clef[i];
   }
