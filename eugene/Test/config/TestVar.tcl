@@ -51,7 +51,7 @@ set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqRest}
+set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest }
 
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
@@ -104,6 +104,9 @@ foreach f $seq {
 }
 set FILE_REF(Araset) Output_Araset
 set OPTIONS(Araset) "-po"
+set FILE_REF(ArasetSpSn) Output_Araset_SpSn 
+set FILE_COORD(ArasetSpSn) "/Annotation/Arabidopsis/araset/Truth/araset.coord"
+set PRG_EVAL_PRED $EUGENE_DIR/Procedures/Eval/egn_evalpred.pl
 
 ##################### Big test variables ################################
 set SensorsList(Big) {MarkovIMM  Transcript MarkovConst EuStop NStart  GSplicer Est BlastX}
@@ -111,6 +114,12 @@ set SEQ(Big) $SEQ_DIR/chr1_2002.tfa_22540000-23040000.tfa
 set FILE_REF(Big) Output_Big
 set OPTIONS(Big) "-po"
 
+##################### SeqAlt test variables #################################
+set SensorsList(SeqAlt) {MarkovIMM MarkovConst EuStop NStart IfElse Est NG2 SPred}
+set SEQ(SeqAlt) {At5g18830.fasta.genomicAJ011613.fasta}
+set IMG(SeqAlt) {At5g18830.fasta.genomicAJ011613.000.png}
+set FILE_REF(SeqAlt) Output_SeqAlt
+set OPTIONS(SeqAlt) "-po -g -a"
 
 
 ######################################################################################### Parameters optimization ##############################
