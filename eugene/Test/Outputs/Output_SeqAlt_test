@@ -1,0 +1,56 @@
+Loading sequence...gi\|5931636\|emb\|AJ011613.1\|ATH011613, 4920 bases read, GC Proportion = 40.0%.
+Loading Sensor.EuStop.........done.
+Loading Sensor.IfElse.........done.
+Loading Sensor.NG2............done.
+Reading splice site file \(NetGene2\)...........forward, reverse done.
+Loading Sensor.SPred..........done.
+Reading splice site file \(Splice Predictor\)...forward, reverse done.
+Loading Sensor.MarkovConst....done.
+Loading Sensor.MarkovIMM......done.
+Reading IMM... 1 2 3 4 5 6 7 ...done.
+Reading splice site file \(NetGene2\)...........forward, reverse done.
+Loading Sensor.NStart.........done.
+Reading start file \(NetStart\).................forward, reverse done.
+Reading splice site file \(Splice Predictor\)...forward, reverse done.
+Loading Sensor.Est............done.
+Reading cDNA hits............11 sequences read.
+   \[gb:T04465\]: inconsistent hit \[3522-3674\].
+A total of 1/11 sequences rejected.
+Optimal path length = 6562.0751.
+Dumping images \("./At5g18830.fasta.genomicAJ011613.---.png"\)...done.
+Reading alt. spl. evidence... 11 read, 9 removed \(0 incl., 9 unsp., 0 no alt.spl., 0 len.\), 1 inc. pairs, 2 kept ... done.
+Optimal path length = 6591.5314.
+.
+    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
+.
+gi\|59.1a.0	Utr5    \+          1     118      118     NA      NA      NA      NA    81.0  .
+gi\|59.1a.1	Init    \+        119     669      551     \+1      \+2     118     670   100.0  .
+gi\|59.1a.2	Intr    \+       1066    1238      173     \+3      \+2    1065    1239     0.0  .
+gi\|59.1a.3	Intr    \+       1390    1616      227     \+2      \+3    1389    1617     0.0  .
+gi\|59.1a.4	Intr    \+       1690    1764       75     \+1      \+1    1689    1765     0.0  .
+gi\|59.1a.5	Intr    \+       1867    1974      108     \+1      \+1    1866    1975     0.0  .
+gi\|59.1a.6	Intr    \+       2291    2408      118     \+1      \+2    2290    2409     0.0  .
+gi\|59.1a.7	Intr    \+       2525    2660      136     \+2      \+1    2524    2661     0.0  .
+gi\|59.1a.8	Intr    \+       2886    3039      154     \+3      \+1    2885    3040     0.0  .
+gi\|59.1a.9	Intr    \+       3114    3596      483     \+1      \+3    3113    3597    15.0  .
+gi\|59.1a.10	Term    \+       3928    4230      303     \+1      \+1    3927    4231   100.0  .
+gi\|59.1a.0	Utr3    \+       4231    4920      690     NA      NA      NA      NA    66.0  .
+.
+gi\|59.1b.0	Utr5    \+          1     118      118     NA      NA      NA      NA    81.0  .
+gi\|59.1b.1	Init    \+        119     669      551     \+1      \+2     118     670   100.0  .
+gi\|59.1b.2	Intr    \+       1066    1238      173     \+3      \+2    1065    1239     0.0  .
+gi\|59.1b.3	Intr    \+       1390    1616      227     \+2      \+3    1389    1617     0.0  .
+gi\|59.1b.4	Intr    \+       1690    1764       75     \+1      \+1    1689    1765     0.0  .
+gi\|59.1b.5	Intr    \+       1867    1974      108     \+1      \+1    1866    1975     0.0  .
+gi\|59.1b.6	Intr    \+       2291    2408      118     \+1      \+2    2290    2409     0.0  .
+gi\|59.1b.7	Intr    \+       2525    2660      136     \+2      \+1    2524    2661     0.0  .
+gi\|59.1b.8	Intr    \+       2886    3039      154     \+3      \+1    2885    3040     0.0  .
+gi\|59.1b.9	Intr    \+       3114    3674      561     \+1      \+3    3113    3675    13.14 .
+gi\|59.1b.10	Term    \+       3928    4230      303     \+1      \+1    3927    4231   100.0  .
+gi\|59.1b.0	Utr3    \+       4231    4920      690     NA      NA      NA      NA    66.0  .
+.
+.
+    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr.
+.
+---------------------------------------------------------------------.
+
