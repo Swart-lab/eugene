@@ -31,11 +31,24 @@ foreach TEST $ArabidopsisTestList {
     ModifyParaValue $EUGENE_TEST_PAR  NewValueBase
     
     # Run EuGene
-    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) $SEQ($TEST) > tmp%stdout}
-    
+    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) $SEQ($TEST) 2> tmp%stderr > tmp%stdout }
+    catch {exec rm tmp%stderr}
+    if {$TEST == "Araset"} {
+		
+		set TEST2 "ArasetSpSn"
+		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout >& $TRACE_DIR/$FILE_REF($TEST2)
+		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST2)
+		set test_spsn [diff $OUTPUT_DIR/$FILE_REF($TEST2) $TRACE_DIR/$FILE_REF($TEST2)]
+		if {$test_spsn != 1} {
+			fail "${TEST} (spsn)"
+	   	} else {
+			catch { exec rm $TRACE_DIR/$FILE_REF($TEST2)}
+		}
+		
+    }
     # Checking the output
     set test [diff $OUTPUT_DIR/$FILE_REF($TEST) tmp%stdout]
-    if {$test == 1} {
+    if {$test == 1 } {
 	pass $TEST
     } else {
 	fail $TEST

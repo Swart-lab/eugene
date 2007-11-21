@@ -50,13 +50,15 @@ foreach TEST $FunctionalTestList {
 	    -re $reference {set test_std 1}
 	    -re timeout {fail "$TEST (timeout)"}
 	}
-
 	# Checking the graphical output
 	set test_png [diff $OUTPUT_DIR/$FILE_REF($TEST).png $IMG($TEST)]
 
-	# No regression if the 2 tests are passed
+	
+
+	# No regression if the 2 tests are passed #
 	if {$test_std==1 && $test_png==1} {
-	    pass "${TEST}"
+	   
+ 	    pass "${TEST}"
 	    exec rm $IMG($TEST)
 	} else {
 	    if {$test_std != 1} {
@@ -64,12 +66,14 @@ foreach TEST $FunctionalTestList {
 		eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		    $OPTIONS($TEST) -l $l \
 		    $SEQ_DIR/$seq >& $TRACE_DIR/$FILE_REF($TEST)
+		#eval exec cat tmp%stderr tmp%stdout > $TRACE_DIR/$FILE_REF($TEST)
+		catch {exec rm $TRACE_DIR/$FILE_REF($TEST))}
 		# Remove the first lines related to version number
 		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
 	    }
 	    if {$test_png != 1} {
 		fail "${TEST} (graph)"
-		exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).png
+		catch {exec mv $IMG($TEST) $TRACE_DIR/$FILE_REF($TEST).png}
 	    }
 	    catch {exec rm $IMG($TEST)}
 	}
