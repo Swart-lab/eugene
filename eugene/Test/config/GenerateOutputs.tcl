@@ -248,6 +248,20 @@ foreach TEST $ArabidopsisTestList {
 	}
     }
     
+    if {$TEST == "Araset"} {
+		set TEST2 "ArasetSpSn"
+		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout >& tmp%stdout2
+		RemoveFirstLines tmp%stdout2
+		if {[catch {exec diff $OUTPUT_DIR/$FILE_REF($TEST2) tmp%stdout2}]} {
+			AskReplace $OUTPUT_DIR/$FILE_REF($TEST2)
+			if {[gets stdin] == "Y"} {
+	    			exec cp tmp%stdout2 $OUTPUT_DIR/$FILE_REF($TEST2)
+			} else {
+	    			exec cp tmp%stdout2 $OUTPUT_DIR/$FILE_REF($TEST2).new
+			}
+		exec rm tmp%stdout2
+	    }
+    }
     # remove temporary file	
     exec rm tmp%stdout
     set seq [eval exec ls .]
