@@ -37,7 +37,7 @@ OneAltEst :: OneAltEst()
 
 OneAltEst :: OneAltEst(char *ID, int i, int j)
 {
-  strcpy(id, ID);
+  strcpy(id, ID); 
   this->start               = i;
   this->index               = -1;
   this->exonsNumber         = 0;
