@@ -33,43 +33,29 @@ foreach TEST $FunctionalTestList {
 	    {set NewValue${TEST}(Sensor.${sensor}.use) 1}
 	ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
 
-	# Open reference file
-	set f [open $OUTPUT_DIR/$FILE_REF($TEST)_test {RDONLY}]
-	set reference [read -nonewline $f]
-	close $f
-
 	# Get the sequence length
 	set l [GetSeqLength $SEQ_DIR/$seq]
 
-	# Run EuGene
-	eval spawn $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$seq
+   	# Run EuGene
+    	catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) >& $TRACE_DIR/$FILE_REF($TEST) }
 
-	# Checking the output
-	match_max 10000
-	expect {
-	    -re $reference {set test_std 1}
-	    -re timeout {fail "$TEST (timeout)"}
-	}
+	# Remove the first lines related to version number
+	RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
+
+	# Checking eugene output
+	set test_std [diff $OUTPUT_DIR/$FILE_REF($TEST) $TRACE_DIR/$FILE_REF($TEST)]
+
 	# Checking the graphical output
 	set test_png [diff $OUTPUT_DIR/$FILE_REF($TEST).png $IMG($TEST)]
 
-	
-
 	# No regression if the 2 tests are passed #
 	if {$test_std==1 && $test_png==1} {
-	   
  	    pass "${TEST}"
 	    exec rm $IMG($TEST)
+	    catch {exec rm $TRACE_DIR/$FILE_REF($TEST))}
 	} else {
 	    if {$test_std != 1} {
 		fail "${TEST} (text)"
-		eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
-		    $OPTIONS($TEST) -l $l \
-		    $SEQ_DIR/$seq >& $TRACE_DIR/$FILE_REF($TEST)
-		#eval exec cat tmp%stderr tmp%stdout > $TRACE_DIR/$FILE_REF($TEST)
-		catch {exec rm $TRACE_DIR/$FILE_REF($TEST))}
-		# Remove the first lines related to version number
-		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
 	    }
 	    if {$test_png != 1} {
 		fail "${TEST} (graph)"

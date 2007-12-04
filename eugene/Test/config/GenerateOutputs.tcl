@@ -148,7 +148,7 @@ foreach TEST $FunctionalTestList {
     # Save output of software and treat them
     eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
 	$OPTIONS($TEST) \
-	-l $l $SEQ_DIR/$SEQ($TEST) 2> tmp%stderr > tmp%stdout
+	-l $l $SEQ_DIR/$SEQ($TEST) >& tmp%FunctionalTest
 
     # 1/ image file
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.png]} {
@@ -164,37 +164,10 @@ foreach TEST $FunctionalTestList {
     # Remove temporary file
     exec rm $IMG($TEST)
 
-    # 2/ reference file in test format
-    PrepareReference tmp%stdout tmp%stderr tmp%FunctionalTest
+    # 2/ Remove the first lines related to version number
+    RemoveFirstLines tmp%FunctionalTest
 
-    if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}_test]} {
-	exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test
-    } elseif {[catch {exec diff tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test}]} {
-	AskReplace OUTPUT_DIR/Output_${TEST}_test
-	if {[gets stdin] == "Y"} {
-	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test
-	} else {
-	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}_test.new
-	}
-    }
-    # Remove temporary file
-    exec rm tmp%FunctionalTest
-
-    # 3/ reference file in spawn format (no buffered pipes)
-    #Open files
-    set out [open tmp%stdout {RDONLY}]
-    set err [open tmp%stderr {RDONLY}]
-    set std [open "tmp%FunctionalTest" w+]
-    # Copy stderr and stdout in the reference file
-    set f [read -nonewline $err]
-    puts $std $f
-    set f [read -nonewline $out]
-    puts $std $f
-    # Close files
-    close $out
-    close $err
-    close $std
-
+    # 3/ reference file in sp
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}]} {
 	exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
     } elseif {[catch {exec diff $OUTPUT_DIR/Output_${TEST} tmp%FunctionalTest}]} {
@@ -205,8 +178,8 @@ foreach TEST $FunctionalTestList {
 	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}.new
 	}
     }
-    # Remove temporary files
-    exec rm tmp%stderr tmp%stdout tmp%FunctionalTest
+    # Remove temporary files tmp%stderr tmp%stdout 
+    exec rm tmp%FunctionalTest
 
     # Restore initial parameters values
     InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
