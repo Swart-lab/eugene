@@ -37,10 +37,10 @@ foreach TEST $FunctionalTestList {
 	set l [GetSeqLength $SEQ_DIR/$seq]
 
    	# Run EuGene
-    	catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) >& $TRACE_DIR/$FILE_REF($TEST) }
+    	catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) > $TRACE_DIR/$FILE_REF($TEST) }
 
 	# Remove the first lines related to version number
-	RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
+	#RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
 
 	# Checking eugene output
 	set test_std [diff $OUTPUT_DIR/$FILE_REF($TEST) $TRACE_DIR/$FILE_REF($TEST)]

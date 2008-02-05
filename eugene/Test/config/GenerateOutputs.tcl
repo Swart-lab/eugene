@@ -68,22 +68,26 @@ InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 ########################################################################
 foreach sensor $AllSensorsList {
     # Get stderr and stdout
+	puts "$sensor"
     if {$sensor != "Est" && $sensor != "Tester"} {
-	eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 	    -A $EUGENE_TEST_PAR \
 	    -D Sensor.${sensor}.use=1 \
-	    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
+	    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr }
     } else {
 	if {$sensor == "Est"} {
-	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-A $EUGENE_TEST_PAR \
 		-D Sensor.${sensor}.use=1 -D Sensor.NG2.use=1 \
-		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
+		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr }
 	} else {
-	    eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
+	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-A $EUGENE_TEST_PAR \
-		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta  \
-		>& tmp%stderr
+		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
+		catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
+     	    	catch {exec mv  tmp%std tmp%stderr} 
+     	    	catch {exec rm  tmp%stdout} 	
+ 		
 	}
     }
     
@@ -137,18 +141,17 @@ foreach sensor $AllSensorsList {
 ########################      FUNCTIONAL TESTS      ####################
 ########################################################################
 foreach TEST $FunctionalTestList {
+
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
 	{set NewValue${TEST}(Sensor.${sensor}.use) 1}
     ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
-
+puts "$TEST"
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
 
     # Save output of software and treat them
-    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
-	$OPTIONS($TEST) \
-	-l $l $SEQ_DIR/$SEQ($TEST) >& tmp%FunctionalTest
+    catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) > tmp%FunctionalTest}
 
     # 1/ image file
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.png]} {
@@ -165,7 +168,7 @@ foreach TEST $FunctionalTestList {
     exec rm $IMG($TEST)
 
     # 2/ Remove the first lines related to version number
-    RemoveFirstLines tmp%FunctionalTest
+    #RemoveFirstLines tmp%FunctionalTest
 
     # 3/ reference file in sp
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}]} {
@@ -223,7 +226,7 @@ foreach TEST $ArabidopsisTestList {
     
     if {$TEST == "Araset"} {
 		set TEST2 "ArasetSpSn"
-		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout >& tmp%stdout2
+		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout > tmp%stdout2
 		RemoveFirstLines tmp%stdout2
 		if {[catch {exec diff $OUTPUT_DIR/$FILE_REF($TEST2) tmp%stdout2}]} {
 			AskReplace $OUTPUT_DIR/$FILE_REF($TEST2)

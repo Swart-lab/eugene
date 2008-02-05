@@ -20,7 +20,7 @@ foreach TEST $AllGff3Sensors {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		$OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
 		-D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta  \
-		>& tmp%stderr
+		2> tmp%stderr
 }
 }
 

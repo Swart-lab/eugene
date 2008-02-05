@@ -36,7 +36,7 @@ foreach TEST $ArabidopsisTestList {
     if {$TEST == "Araset"} {
 		
 		set TEST2 "ArasetSpSn"
-		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout >& $TRACE_DIR/$FILE_REF($TEST2)
+		eval exec $PRG_EVAL_PRED $FILE_COORD($TEST2) tmp%stdout > $TRACE_DIR/$FILE_REF($TEST2)
 		RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST2)
 		set test_spsn [diff $OUTPUT_DIR/$FILE_REF($TEST2) $TRACE_DIR/$FILE_REF($TEST2)]
 		if {$test_spsn != 1} {
