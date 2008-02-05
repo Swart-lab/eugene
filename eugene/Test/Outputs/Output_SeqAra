@@ -1,28 +1,3 @@
-Loading sequence...SEQ25AB005234G10G11, 14900 bases read, GC Proportion = 36.4%
-Loading Sensor.BlastX.........done
-Reading BlastX data, level...0 done
-Loading Sensor.EuStop.........done
-Loading Sensor.GSplicer.......done
-Reading splice site file (GeneSplicer)........forward, reverse done
-Loading Sensor.IfElse.........done
-Loading Sensor.NG2............done
-Reading splice site file (NetGene2)...........forward, reverse done
-Loading Sensor.SPred..........done
-Reading splice site file (Splice Predictor)...forward, reverse done
-Loading Sensor.MarkovConst....done
-Loading Sensor.MarkovIMM......done
-Reading IMM... 1 2 3 4 5 6 7 ...done
-Loading Sensor.NStart.........done
-Reading start file (NetStart).................forward, reverse done
-Loading Sensor.Est............done
-Reading cDNA hits............13 sequences read
-   [AV547209]: no matching splice site
-A total of 1/13 sequences rejected
-Optimal path length = 20481.7603
-
-    Seq         Type    S       Lend    Rend   Length  Phase   Frame      Ac      Do      Pr
-
-Dumping images ("./seq25ab005234g10g11.---.png")...done
 SEQ25.1.0	Utr5    +          1     387      387     NA      NA      NA      NA    33.0  
 SEQ25.1.0	Utr5    +        470     545       76     NA      NA      NA      NA   100.0  
 SEQ25.1.0	Utr5    +        665     750       86     NA      NA      NA      NA   100.0  
@@ -41,4 +16,3 @@ SEQ25.1.10	Intr    +      11544   12005      462     +1      +3   11543   12006 
 SEQ25.1.11	Term    +      12088   12900      813     +1      +1   12087   12901    20.0  
 SEQ25.1.0	Utr3    +      12901   14800     1900     NA      NA      NA      NA    11.0  
 
----------------------------------------------------------------------
