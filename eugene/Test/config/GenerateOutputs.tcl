@@ -68,7 +68,6 @@ InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 ########################################################################
 foreach sensor $AllSensorsList {
     # Get stderr and stdout
-	puts "$sensor"
     if {$sensor != "Est" && $sensor != "Tester"} {
 	catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 	    -A $EUGENE_TEST_PAR \
@@ -146,7 +145,7 @@ foreach TEST $FunctionalTestList {
     foreach sensor $SensorsList($TEST) \
 	{set NewValue${TEST}(Sensor.${sensor}.use) 1}
     ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
-puts "$TEST"
+
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
 
