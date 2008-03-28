@@ -29,13 +29,13 @@ class GeneFeature
     Attributes * attributes_;
     bool      valid_ ;
     
-    void      ParseLine( char * line );
+    void      ParseLine( char * line, int );
     
   public:
   
     // Constructors/Destructors
     GeneFeature ( );
-    GeneFeature ( char * ); 
+    GeneFeature ( char * , int); 
     GeneFeature ( const GeneFeature & gene) ;
     //GeneFeature (string seqId, string source, string type, int start, int end, double score, char strand, char phase, char * attributes);
     virtual ~GeneFeature ( );
