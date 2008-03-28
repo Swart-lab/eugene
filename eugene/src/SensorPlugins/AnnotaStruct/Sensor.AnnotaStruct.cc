@@ -166,7 +166,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   
   strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
-  strcpy(cdsRead,PAR.getC("AnnotaStruct.Exon*",         GetNumber()));
+  strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
 
   if (exonRead[0] != 'i')
   {
@@ -404,7 +404,7 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
  
  strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
-  strcpy(cdsRead,PAR.getC("AnnotaStruct.Exon*",         GetNumber()));
+  strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
 
   if (exonRead[0] != 'i')
   {
