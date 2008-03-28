@@ -43,19 +43,20 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
   }
   else
   {
-  int i=1;
+  int i=0;
   char line[MAX_GFF_LINE];
   while(fp  &&  fgets (line, 1500, fp) != NULL) 
   {
+    i++;
     if ( line[0] != '#' )
     {  
-      GeneFeature * tempGeneFeature = new GeneFeature (line);
-     //  cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
+      GeneFeature * tempGeneFeature = new GeneFeature (line,i);
+      //cout << "Test >"<< tempGeneFeature->getId() << "< with parent >" << tempGeneFeature->getParent()<<"<" <<endl;
 
       if ( tempGeneFeature->getParent()!="" && ! existsGeneFeature( tempGeneFeature->getParent() ) )
       {
 	tempGeneFeature->setValid(false);
-	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist or declared later, feature don't take into account"<<endl;
+	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist or is declared later, feature ignored on line "<< i << endl;
       }
       else
       {
