@@ -26,6 +26,7 @@
 set SEQ Sequences/SYNO_ARATH.fasta
 set SEQALT Sequences/At5g18830.fasta.genomicAJ011613.fasta
 set EUGENE ../src/eugene
+set env(EUGENEDIR) [pwd]/..
 
 set FIC_TEX "Doc.tex"
 set FIC_TEX_TMP "EuGeneDoc"
