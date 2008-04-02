@@ -51,7 +51,7 @@ class ParaOptimization {
   bool                         IsTest;         // if true then test mode: 
                                       // do not read sequences and related info
                                       // evaluate para with the method NormalLaw
-
+  double	Regularizer;
   void Init(int argc, char* argv[]);
   double NormalLaw(double x);
 };

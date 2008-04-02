@@ -59,6 +59,7 @@ void ParaOptimization::ParaOptimize (int argc, char * argv [])
   std::string filename;
   OptiAlgorithm* algo;
   bool is_chaining = false;
+  Regularizer = 0.0;
 
   // Initialisation
   Init(argc, argv);
@@ -106,6 +107,9 @@ void ParaOptimization::Init(int argc, char * argv [])
 	std::cerr <<"ERROR: Bad optimization algorithm "<<algo_name<<" in the parameter file"<<std::endl;
 	exit(100);
       }
+      
+  // Get the Margin Penalty Factor
+  Regularizer = PAR.getD("ParaOptimization.Regularizer");
 
   if (!IsTest) {
     int sequence;
@@ -157,6 +161,13 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       for (i=0; i<Algorithms[AlgoIndex]->ParaName.size(); i++) 
 	PAR.setD(Algorithms[AlgoIndex]->ParaName[i].c_str(), Algorithms[AlgoIndex]->Para[i]);
 
+
+      // To later Penalize parameter magnitude. 
+      // Brute code: all optimized parameters are pooled  a la L1
+      double mag_penalty = 0.0;
+      for (i=0; i<Algorithms[AlgoIndex]->ParaName.size(); i++) 
+	mag_penalty +=  fabs(Algorithms[AlgoIndex]->Para[i]);	
+	
       // update sensors
       for (i=0; i<Sequences.size(); i++) {
 	PAR.set("fstname", SeqNames[i].c_str());
@@ -202,7 +213,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
       delete [] buffer;
       cmde = "rm " + fic_pred + " " + fic_eval; system(cmde.c_str());
 
-      if (!is_detail_required)  fitness = pow(spg*sng*spe*sne,0.25);
+      if (!is_detail_required)  fitness = pow(spg*sng*spe*sne,0.25)-(mag_penalty*Regularizer);
       else fitness = 0;
     } else {
       fitness = 1;
