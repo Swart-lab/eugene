@@ -25,7 +25,7 @@ class GeneFeatureSet
     vector <GeneFeature *> vRefFeatures_;
     map <string, int> mPosFeatures_;
     int lastIndex_;
-    map <string, vector<string> > parentToChildren_;
+    map <string, vector<GeneFeature *> > parentToChildren_;
   public:
     static SoTerms * soTerms_ ;
     // Constructors/Destructors
@@ -36,7 +36,8 @@ class GeneFeatureSet
     bool existsGeneFeature ( string geneFeatureId ) ;
     void printFeature();
     vector< GeneFeature *>::iterator getIterator ();
-    map<string, vector<string> >::iterator getIteratorParentToChildren ();
+    map<string, vector<GeneFeature *> >::iterator getIteratorParentToChildren ();
+    vector< GeneFeature *>& getChildren(string id);
     int getNbFeature ();
     int getNbParentFeature ();
     GeneFeature * getGeneFeature (string id );

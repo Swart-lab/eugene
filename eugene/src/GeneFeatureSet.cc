@@ -58,25 +58,19 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
 	tempGeneFeature->setValid(false);
 	cout << "WARNING : parent >" << tempGeneFeature->getParent()  << "< does not exist or is declared later, feature ignored on line "<< i << endl;
       }
-      else
-      {
-	if (tempGeneFeature->getParent()!="")
-	{
-	   parentToChildren_[tempGeneFeature->getParent()].push_back(tempGeneFeature->getId());
-	}
-      }
      
-      if ( tempGeneFeature->getValid() )
-      {
-	vRefFeatures_.push_back( tempGeneFeature);
-	mPosFeatures_[tempGeneFeature->getId()]=lastIndex_;
-	lastIndex_++;
-      }
-    }
-  }
-  fclose(fp);
-  }
-
+	if ( tempGeneFeature->getValid() )
+	{
+		parentToChildren_[tempGeneFeature->getParent()].push_back(tempGeneFeature);
+		vRefFeatures_.push_back( tempGeneFeature);
+		mPosFeatures_[tempGeneFeature->getId()]=lastIndex_;
+		lastIndex_++;
+	}
+	else delete tempGeneFeature;
+     }
+   }
+   fclose(fp);
+ }
 }
 
 //Constructor
@@ -114,7 +108,7 @@ bool GeneFeatureSet::existsGeneFeature ( string geneFeatureId )
   return res;
 }
 
-map<string, vector<string> >::iterator GeneFeatureSet::getIteratorParentToChildren ()
+map<string, vector<GeneFeature *> >::iterator GeneFeatureSet::getIteratorParentToChildren ()
 {
   return parentToChildren_.begin() ;
 }
@@ -127,6 +121,11 @@ int GeneFeatureSet::getNbParentFeature ()
 vector< GeneFeature *>::iterator GeneFeatureSet::getIterator ()
 {
   return vRefFeatures_.begin() ;
+}
+
+vector< GeneFeature *>& GeneFeatureSet::getChildren(string id)
+{
+   return (parentToChildren_[id]);
 }
 
 int GeneFeatureSet::getNbFeature ()
