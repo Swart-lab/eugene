@@ -217,6 +217,12 @@ void Attributes::setId ( std::string id )
 {
 	id_ = id;
 }
+
+void Attributes::setOntologyTerm ( std::string term )
+{
+	ontologyTerm_ = term;
+}
+
 std::string Attributes::getId ( ) const 
 {
 	return id_;

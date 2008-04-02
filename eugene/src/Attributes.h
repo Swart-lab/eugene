@@ -52,6 +52,7 @@ public:
   void InitializeDefault ( void);
   
   void        setId ( std::string id );
+  void	      setOntologyTerm ( std::string term );
   std::string getId ( ) const ;
   std::string getString ( ) const ;
   std::string getParent ( ) const ;
