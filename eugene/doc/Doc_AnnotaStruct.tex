@@ -45,21 +45,22 @@ The sensor is activated by using the value 1 for the parameter
 Here is an example of AnnotaStruct parameters definition :
 \begin{Verbatim}[fontsize=\small]
 AnnotaStruct.FileExtension    gff
-AnnotaStruct.Exon*            10
-AnnotaStruct.Intron*          10
-AnnotaStruct.CDS*             10
+AnnotaStruct.TranscriptFeature  mRNA
+AnnotaStruct.Exon*            1
+AnnotaStruct.Intron*          2
+AnnotaStruct.CDS*             3
 AnnotaStruct.StartType        p 
-AnnotaStruct.Start*           1
+AnnotaStruct.Start*           0.1
 AnnotaStruct.StopType         p 
-AnnotaStruct.Stop*            1
+AnnotaStruct.Stop*            0.1
 AnnotaStruct.AccType          p 
-AnnotaStruct.Acc*             1
+AnnotaStruct.Acc*             0.1
 AnnotaStruct.DonType          p 
-AnnotaStruct.Don*             1
+AnnotaStruct.Don*             0.1
 AnnotaStruct.TrStartType      p 
-AnnotaStruct.TrStart*         1
+AnnotaStruct.TrStart*         0.1
 AnnotaStruct.TrStopType       p 
-AnnotaStruct.TrStop*          1
+AnnotaStruct.TrStop*          0.1
 Sensor.AnnotaStruct.use       1         # Use AnnotaStruct sensor
 Sensor.AnnotaStruct           1         # Sensor priority
 \end{Verbatim}
@@ -234,10 +235,10 @@ AnnotaStruct.TrStop*          i
 Here is the correspondance beetween GFF native AnnotaStruct features
 and gff3 features. A direct translation between the two formats is not
 always possible (for example, low-level content information cannot be
-given directly in GFF3, but indirectly can be achieved by setting
+given directly in GFF3, but  can be indirectly achieved by setting
 signal at zero, and using the transcribed sequence feature).
 
-Each GFF feature is usually translated in a GFF3 feature and may
+Each GFF feature is translated in a GFF3 feature and may
 require an additional ontology term given below.
 
 Low-level information:
@@ -289,6 +290,9 @@ seq25	EuGene	CDS	11544	12005	0	+	2	ID=CDS:seq25.8;Ontology_term=SO:0000004
 seq25	EuGene	CDS	12088	12900	0	+	0	ID=CDS:seq25.9;Ontology_term=SO:0000197
 seq25	EuGene	three_prime_UTR	12901	14900	0	+	.	ID=three_prime_UTR:seq25.10;Ontology_term=SO:0000205
 \end{Verbatim}
+
+For complete gene, ontology terms for CDS can be added on the fly by the plugin if the GFF3 includes Parent information to a transcript level feature. This feature is typically called "mRNA" or "transcript" in gene finders GFF3 output.
+If the \texttt{AnnotaStruct.TranscriptFeature} parameter is set accordingly, then the plugin will identify first, internal, terminal and single exon assuming the CDS features are in increasing position order.
 
 \paragraph{Filtering input information}
 
