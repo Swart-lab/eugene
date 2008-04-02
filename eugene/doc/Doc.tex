@@ -767,7 +767,9 @@ parameter file are:
   Search algorithm complementary information on the parameters to
   optimize (initial value, step of discretization, ...),
 \item a file with the coordinates of genes for the sequences set.
-\end{itemize}
+\item it is possible to include a regulizing term in the criteria
+optimized using the \texttt{ParaOptimization.Regularizer} parameter.
+The sum of all the absolute values of the parameters multiplied by this parameter is subtracted from the original fitness to define the final fiteness optimized.\end{itemize}
 
 Here is a simplified example of optimization parameters definition in the parameter file. 
 {\scriptsize \begin{verbatim}
@@ -775,6 +777,7 @@ Here is a simplified example of optimization parameters definition in the parame
 ################### PARAMETERS OPTIMIZATION #####################
 #################################################################
 ParaOptimization.Use           1
+ParaOptimization.Regularizer   0.0
 ParaOptimization.TrueCoordFile Araset.coord
 ParaOptimization.Algorithm     GENETIC+LINESEARCH
 ParaOptimization.Test          FALSE
