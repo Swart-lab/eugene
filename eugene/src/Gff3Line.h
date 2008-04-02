@@ -3,7 +3,7 @@
  *  \date   10 novembre 2006
  *  Ce fichier contient tout ce qu'il faut pour gerer les lignes du gff3
  *  On trouve les enumerations des codes SOFA et SO,
- *  la classe Sofa, qui sert a gérer les codes
+ *  la classe Sofa, qui sert a gï¿½rer les codes
  *  la classe Gff3Line et sa classe interne Attributes
  */
 
@@ -20,7 +20,7 @@
 #include "Prediction_cte.h"  //acces aux constantes
 #include "System.h"  //to_string()
 
-//sofa->j'ai pas trouvé de raison de mettre des entiers plutot que des chaines
+//sofa->j'ai pas trouvï¿½ de raison de mettre des entiers plutot que des chaines
 //sauf l'enum
 /** \enum
  *  la liste des codes SOFA
@@ -58,7 +58,7 @@ enum
  *  \brief  Cette classe doit permettre de traiter les codes Sofa
  *  Pour le moment, sont regroupees ici les fonctions qui permettent de gerer
  *  les codes sofa. Du coup elles sont statiques !
- *  \todo    Faire ça proprement !!!
+ *  \todo    Faire Ã§a proprement !!!
  */
 class Sofa
 {

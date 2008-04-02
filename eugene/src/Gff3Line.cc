@@ -1,13 +1,13 @@
 /**  \file    Gff3Line.cpp
- *  \author  Sébastien Letort
+ *  \author  Sï¿½bastien Letort
  *  \date    10 novembre 2006
  */
 
 #include "Gff3Line.h"
 
-///la source par defaut, est-ce bien ca place ?
+///The default source name
 static const std::string EUGENE = "EuGene";
-///un entier/reel indefini
+///an integer considered as undefined
 static const int INDEFINI = -9999;
 
 //------------------------
@@ -94,12 +94,12 @@ int getTypeSofa(int state_egn, bool sofa)
 /** je passe les elements un a un en affectant un vecteur de string
   *  si sofa_name est vrai (default), ce sont les noms SOFA qui sortiront, le
   *  code sinon.
-  *  \todo  Les elements qui doivent être renseignes ne devrait pas sortir "."
+  *  \todo  Les elements qui doivent ï¿½tre renseignes ne devrait pas sortir "."
   */
 void
   Gff3Line::print(std::ofstream& out, bool sofa_name) const
 {
-    //le vecteur qui est utilisé pour l'impression
+    //le vecteur qui est utilisï¿½ pour l'impression
   std::vector<std::string> tab(NB_ELEMENTS_GFF3);
   tab[SEQ_ID] = (seq_id_.empty()) ? "." : seq_id_;
   tab[SOURCE] = (source_.empty()) ? "." : source_;
