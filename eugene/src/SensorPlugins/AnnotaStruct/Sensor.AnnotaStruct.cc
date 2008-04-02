@@ -163,7 +163,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   type = Type_Any;
 
   fileExt   = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
-  
+  transFeatName = to_string(PAR.getC("AnnotaStruct.TranscriptFeature", GetNumber()));
   strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
   strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
@@ -285,7 +285,7 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
     strcat(soTerms , filenameSoTerms );
 
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
-    ReadAnnotaStructGff3(*geneFeatureSet, X->SeqLen);
+    ReadAnnotaStructGff3(*geneFeatureSet,  X->SeqLen);
     delete [] soTerms;
     delete geneFeatureSet;
   }
@@ -402,7 +402,7 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   char exonRead[20], intronRead[20], cdsRead[20];
   char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
  
- strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
+  strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
   strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
 
@@ -695,6 +695,96 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
   if (fp) fclose(fp);
 }
 
+//----------------------------------------------------------------------------------------------------------
+// FillOntologyTerms : assigns SOTerms to GeneFeatures based on parent information to a transcript feature
+//----------------------------------------------------------------------------------------------------------
+void SensorAnnotaStruct ::FillOntologyTerm(GeneFeatureSet & geneFeatureSet)
+{
+   vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
+   int nbGeneFeature=geneFeatureSet.getNbFeature();
+   int i=0;
+   
+   for ( i=0 ; i < nbGeneFeature ; i++, it++ )
+   {
+      // cout << "<" << (*it)->getType() << "> =? <" << transFeatName << ">\n";
+      // Do we have a transcript feature ?
+      if ((*it)->getType() == transFeatName)
+      {
+	 // cout << "YES\n";
+         // Then scan the CDS and mark them with the correct SOTerm
+	 // get the children of the "transcript" feature
+         vector <GeneFeature *>& childrenArray = geneFeatureSet.getChildren((*it)->getId());
+	 int c = childrenArray.size();
+	 // cout << "size children: " << c << "\n";
+
+	if (c == 0) continue; // No children... Ignore this.
+
+         if (c == 1) // Sngl exon gene
+	 {
+	    // CDS with no SOTerm
+	    if ((childrenArray[0]->getType() == "CDS") && 
+	        (childrenArray[0]->getAttributes()->getOntologyTerm() == ""))
+	    {
+		childrenArray[0]->getAttributes()->setOntologyTerm("SO:0005845");
+		// cout << "Setting SO:0005845 - Sngl to " << *(childrenArray[0]) << "\n";
+	    }
+            continue;
+	 }
+
+	 // Get the strandness
+	 char strand = (*it)->getLocus()->getStrand();
+	 int first,last,incr,lastCDSIdx = -1;
+	 bool firstMet = false;
+
+	 if (strand == '+')
+	 {
+	    first = 0;
+	    last = c-1;
+	    incr = 1;
+	 } 
+ 	 else
+         {
+	    first = c-1;
+	    last = 0;
+	    incr = -1;
+	 }
+
+	 for (int j = first; j <= last; j += incr)
+	 {
+	    // cout << "Children " << j << " Type " << childrenArray[j]->getType() << " Ontol " << childrenArray[j]->getAttributes()->getOntologyTerm() << "\n";
+
+
+	    // CDS with no SOTerm
+	    if ((childrenArray[j]->getType() == "CDS") && 
+	        (childrenArray[j]->getAttributes()->getOntologyTerm() == ""))
+	    {
+		if (!firstMet) // First CDS
+		{
+		    firstMet = true;
+		    childrenArray[j]->getAttributes()->setOntologyTerm("SO:0000196");
+		    // cout << "Setting SO:0000196 - First to " << *(childrenArray[j]) << "\n";
+		    // TODO Check ATG !
+		}
+		else
+		{
+		    lastCDSIdx = j; // Internal Exon or may be LastExon
+		    childrenArray[j]->getAttributes()->setOntologyTerm("SO:0000004");
+		    // cout << "Setting SO:0000004 - Internal to " << *(childrenArray[j]) << "\n";
+		    //  TODO Check Splices
+		}
+	    }
+	 }
+	 if (lastCDSIdx >= 0)
+	 {
+	    childrenArray[lastCDSIdx]->getAttributes()->setOntologyTerm("SO:0000197");
+	    // cout << "Setting SO:0000197 - Last to " << *(childrenArray[lastCDSIdx]) << "\n";
+	    // TODO Check Stop 
+	 }
+      }
+   }
+}
+
+
 //gff3
 void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int len)
 {
@@ -709,7 +799,9 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
 
   char  scoreC[20];
   int   frame = -1;
- 
+  
+  FillOntologyTerm(geneFeatureSet);
+
   int j=0;
   vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
   int nbGeneFeature=geneFeatureSet.getNbFeature();
@@ -921,7 +1013,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       GetScore (DATA::tStop,scF, scoreC);
       vSig.push_back(new Signals(endS,     DATA::tStop,  edge,scoreC));
     }
-    else
+    else if ((*it)->getType() != transFeatName)
       fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
 	      feature, j);
     

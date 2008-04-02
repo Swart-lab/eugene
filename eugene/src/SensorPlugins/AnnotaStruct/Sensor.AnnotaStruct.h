@@ -70,6 +70,7 @@ class SensorAnnotaStruct : public Sensor
   int   PosSigGiveInfo, PosConGiveInfo;
   int   iSig, iCon;
   char  *fileExt;
+  string  transFeatName;
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
   float exonPAR,      intronPAR,     cdsPAR;
@@ -77,7 +78,8 @@ class SensorAnnotaStruct : public Sensor
   int  startInline,      stopInline,     accInline;
   int  donInline,      tStartInline,     tStopInline;
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
-  void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet , int seqlen);
+  void FillOntologyTerm(GeneFeatureSet & geneFeatureSet);
+  void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet, int len);
   void PushInCon(int d,   int e,     float sc,
 		 char st, char p[2], int f);
   void GetScore ( int type , float scF, char scoreC[20]);
