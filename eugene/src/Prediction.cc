@@ -981,6 +981,12 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 		  }
 	  }
     }//fin des structures du gene
+
+      //J'ajoute la taille du mRNA � sa ligne
+      gene_line.addAttribute("length=" + to_string(taille_mRNA));
+      //j'affiche la ligne du mRNA juste avant les UTRs et CDS
+      gene_line.print(out);
+
       //on affiche les lignes, j'en profite pour liberer les pointeurs
       std::vector<Gff3Line*>::iterator itr;
       //le pre-arn
@@ -991,10 +997,6 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
         (*itr)->print(out);
         delete (*itr);
       }
-      //J'ajoute la taille du mRNA � sa ligne
-      gene_line.addAttribute("length=" + to_string(taille_mRNA));
-      //j'affiche la ligne du mRNA juste avant les UTRs et CDS
-      gene_line.print(out);
       //l'arn
       for(itr = arn_lines.begin();
           itr != arn_lines.end();
