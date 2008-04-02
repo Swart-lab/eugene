@@ -199,7 +199,7 @@ void SensorRiken :: readRikenGff3 (GeneFeatureSet & geneFeatureSet ,DNASeq *X, s
   int beg5, end5;
   int beg3, end3;
   RAFLgene tmp;
-  map < string, vector < string > >::iterator it= geneFeatureSet.getIteratorParentToChildren();
+  map < string, vector <GeneFeature *> >::iterator it= geneFeatureSet.getIteratorParentToChildren();
   //vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
   int nbGeneFeature=geneFeatureSet.getNbParentFeature();
   int i=0;
@@ -211,8 +211,8 @@ void SensorRiken :: readRikenGff3 (GeneFeatureSet & geneFeatureSet ,DNASeq *X, s
     {
       fprintf(stderr, "\nWARNING: Parent in gff3 hasn't 2 children (5' and 3' exon)\n");
     }
-    GeneFeature * child5 = geneFeatureSet.getGeneFeature((*it).second[0]);
-    GeneFeature * child3 = geneFeatureSet.getGeneFeature((*it).second[1]);
+    GeneFeature * child5 = ((*it).second[0]);
+    GeneFeature * child3 = ((*it).second[1]);
     beg5 = child5->getLocus()->getStart();
     end5 = child5->getLocus()->getEnd();
     if ( child5->getLocus()->getStrand() == '-' )
