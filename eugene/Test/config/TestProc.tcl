@@ -266,21 +266,21 @@ set NewValue1(Repeat.ExonPenalty*)	1.0
 #################################################################
 ##### Sensors AnnotaStruct #####
 set NewValue1(AnnotaStruct.FileExtension)     gff
-set NewValue1(AnnotaStruct.Start*)            1
+set NewValue1(AnnotaStruct.Start*)            0.1
 set NewValue1(AnnotaStruct.StartType)         p 
-set NewValue1(AnnotaStruct.Stop*)             1
+set NewValue1(AnnotaStruct.Stop*)             0.2
 set NewValue1(AnnotaStruct.StopType)          p
-set NewValue1(AnnotaStruct.Acc*)              1
+set NewValue1(AnnotaStruct.Acc*)              0.3
 set NewValue1(AnnotaStruct.AccType)           p
-set NewValue1(AnnotaStruct.Don*)              1
+set NewValue1(AnnotaStruct.Don*)              0.4
 set NewValue1(AnnotaStruct.DonType)           p
-set NewValue1(AnnotaStruct.TrStart*)          1
+set NewValue1(AnnotaStruct.TrStart*)          0.5
 set NewValue1(AnnotaStruct.TrStartType)       p
-set NewValue1(AnnotaStruct.TrStop*)           1
+set NewValue1(AnnotaStruct.TrStop*)           0.6
 set NewValue1(AnnotaStruct.TrStopType)        p
-set NewValue1(AnnotaStruct.Exon*)             10
-set NewValue1(AnnotaStruct.Intron*)           10
-set NewValue1(AnnotaStruct.CDS*)              10
+set NewValue1(AnnotaStruct.Exon*)             1
+set NewValue1(AnnotaStruct.Intron*)           2
+set NewValue1(AnnotaStruct.CDS*)              3
 ##### IfElse #####
 set NewValue1(IfElse.SensorIf)		NG2
 set NewValue1(IfElse.SensorElse)	SPred
