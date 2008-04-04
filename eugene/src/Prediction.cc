@@ -869,7 +869,8 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 	  char code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : 0;
       if (estopt) CheckConsistency(start, end, state, &cons, &incons);
 
-      int type_sofa = getTypeSofa(state);
+      int type_sofa_cds = getTypeSofa(state,true); // CDS
+      int type_sofa = getTypeSofa(state,false);    // exon
       //selon le type on renseigne une ligne existante ou nouvelle
       // d'arn, de cds ou des 2
       switch(type_sofa)
@@ -883,7 +884,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
                                            vGene[i]->vFea[j]->strand,
                                            vGene[i]->vFea[j]->framegff);
               //les attributs
-              setGff3Attributes(pre_arn_line, state, type_sofa, fea_name, j,code_variant, rna_id);
+              setGff3Attributes(pre_arn_line, state, type_sofa, fea_name, j,code_variant, rna_id, false);
             //on l'ajoute au vecteur
               pre_arn_lines.push_back(pre_arn_line);
               break;
@@ -902,16 +903,16 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
                                            vGene[i]->vFea[j]->framegff);
               //attributs
                 setGff3Attributes(pre_arn_line, state, SOFA_EXON,
-                                  fea_name, j, code_variant, rna_id);
+                                  fea_name, j, code_variant, rna_id, false);
                 pre_arn_lines.push_back(pre_arn_line);
               }
               
-              arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
+              arn_line = fillGff3Line(type_sofa_cds, start+offset, end+offset,
                                         vGene[i]->vFea[j]->strand,
                                         vGene[i]->vFea[j]->framegff);
               //attributs
-              setGff3Attributes(arn_line, state, type_sofa,
-                                fea_name, j, code_variant, rna_id);
+              setGff3Attributes(arn_line, state, type_sofa_cds,
+                                fea_name, j, code_variant, rna_id, true);
               arn_lines.push_back(arn_line);
               //je mets � jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
@@ -940,17 +941,17 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
               if((SnglF1<=state) && (state <=SnglR3))
               //je passe nbTracks pour etre sur d'etre hors zone
                 setGff3Attributes(pre_arn_lines.back(), NbTracks, type_sofa, fea_name,
-                                  vGene[i]->vFea[j]->number, code_variant, rna_id);
+                                  vGene[i]->vFea[j]->number, code_variant, rna_id, false);
               else
                 setGff3Attributes(pre_arn_lines.back(), state, type_sofa, fea_name,
-                                  vGene[i]->vFea[j]->number, code_variant, rna_id);
+                                  vGene[i]->vFea[j]->number, code_variant, rna_id, false);
 
               arn_line = fillGff3Line(SOFA_CDS, start+offset, end+offset,
                                       vGene[i]->vFea[j]->strand,
                                       vGene[i]->vFea[j]->framegff);
               //les attributs
               setGff3Attributes(arn_line, state, SOFA_CDS,
-                                fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id);
+                                fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id, true);
               arn_lines.push_back(arn_line);
               //je mets � jour la taille de l'ARNm
               taille_mRNA += (end-start+1);
@@ -961,7 +962,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
                                             vGene[i]->vFea[j]->strand,
                                             vGene[i]->vFea[j]->framegff);
                 //les attributs
-                setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name, j, code_variant, rna_id);
+                setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name, j, code_variant, rna_id, false);
                 pre_arn_lines.push_back(pre_arn_line);
       }//fin switch
       //si on vient d'ajouter une ligne dans les ARNs
@@ -1723,7 +1724,7 @@ std::cerr << "bad previous !" << std::endl;
 void
   Prediction::setGff3Attributes(Gff3Line* line, int type_egn,
                                 int type_sofa, std::string fea_name,
-                                int j, char code_variant, std::string gene_id)
+                                int j, char code_variant, std::string gene_id, bool coding)
 {
   std::string fea_id = Sofa::getName(type_sofa) + ":"
                       + fea_name + to_string(j);
@@ -1732,5 +1733,5 @@ void
   line->setAttribute("ID=" + fea_id);
   line->addAttribute("Parent="+gene_id);
   line->addAttribute("Ontology_term="
-                    + Sofa::codeToString(getTypeSofa(type_egn, false)));
+                    + Sofa::codeToString(getTypeSofa(type_egn, coding, false)));
 }

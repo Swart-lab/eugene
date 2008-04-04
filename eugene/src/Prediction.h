@@ -151,7 +151,7 @@ class Prediction
                             char strand, int framegff);
   void setGff3Attributes(Gff3Line* line, int type_egn,
                           int type_sofa, std::string fea_name,
-                          int j, char code, std::string gene_id);
+                          int j, char code, std::string gene_id, bool coding);
   bool previousExonMustBeUpdated(Gff3Line* line, int start);
   //SEB
 
