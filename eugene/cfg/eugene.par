@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5
+EuGene.version		3.5a
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -256,21 +256,22 @@ Repeat.ExonPenalty*	1.0
 #
 ##### Sensors AnnotaStruct #####
 AnnotaStruct.FileExtension      gff
-AnnotaStruct.Start*             1
+AnnotaStruct.TranscriptFeature  transcript
+AnnotaStruct.Start*             0.1
 AnnotaStruct.StartType          p      # p: probability  s: score   i: inline score
-AnnotaStruct.Stop*              1
-AnnotaStruct.StopType           p
-AnnotaStruct.Acc*               1
-AnnotaStruct.AccType            p
-AnnotaStruct.Don*               1
-AnnotaStruct.DonType            p
-AnnotaStruct.TrStart*           1
-AnnotaStruct.TrStartType        p
-AnnotaStruct.TrStop*            1
-AnnotaStruct.TrStopType         p
-AnnotaStruct.Exon*              10
-AnnotaStruct.Intron*            10
-AnnotaStruct.CDS*               10
+AnnotaStruct.Stop* 0.2
+AnnotaStruct.StopType p
+AnnotaStruct.Acc* 0.3
+AnnotaStruct.AccType p
+AnnotaStruct.Don* 0.4
+AnnotaStruct.DonType p
+AnnotaStruct.TrStart* 0.5
+AnnotaStruct.TrStartType p
+AnnotaStruct.TrStop* 0.6
+AnnotaStruct.TrStopType p
+AnnotaStruct.Exon* 2
+AnnotaStruct.Intron* 3
+AnnotaStruct.CDS* 4
 #AnnotaStruct.format             GFF3
 #
 ##### IfElse #####
@@ -396,6 +397,7 @@ Sensor.Tester 		1
 ################### OPTIMIZATION PARAMETERS #####################
 #################################################################
 ParaOptimization.Use 0
+ParaOptimization.Regularizer	0.0
 ParaOptimization.TrueCoordFile ---
 ParaOptimization.EvalPredDir   ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
