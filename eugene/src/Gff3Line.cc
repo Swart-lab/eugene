@@ -55,12 +55,12 @@ Gff3Line::Gff3Line(std::string seq_id)
 }
 
 //renvoie le type sofa le + approprie au type eugene
-int getTypeSofa(int state_egn, bool sofa)
+int getTypeSofa(int state_egn, bool coding, bool sofa)
 {
   int ret_val;
     if(state_egn <= InitR3)
 //        str = "five_prime_coding_exon";//"E.Init";
-        return (sofa) ? SOFA_EXON : SO_5_CODING_EXON;
+        return (sofa) ? SOFA_EXON : (coding ? SO_5_CODING_EXON : SO_5_EXON);
     if(state_egn <= SnglR3)
 //        str = "single_exon";//"E.Sngl";
         return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;
@@ -70,7 +70,7 @@ int getTypeSofa(int state_egn, bool sofa)
 //        str = "SO:0000201";  //"E.Intr";
     if(state_egn <= TermR3)
 //        str = "three_prime_coding_exon";//"E.Term";
-      return (sofa) ? SOFA_EXON : SO_3_CODING_EXON;
+      return (sofa) ? SOFA_EXON : (coding ? SO_3_CODING_EXON : SO_3_EXON);
     if(state_egn <= IntronR2AG)
       return SOFA_INTRON;    //"Intron";
     if(state_egn == InterGen)

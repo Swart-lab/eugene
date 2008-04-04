@@ -45,8 +45,10 @@ enum
  */
 enum
 {
-  SO_5_CODING_EXON = 200,       ///<  un exon contenant CDS+UTR5' ou CDS 5'
-  SO_3_CODING_EXON = 202,       ///<  un exon contenant CDS+UTR3' ou CDS 3'
+  SO_5_EXON = 200,       ///<  un exon contenant CDS/UTR 5'
+  SO_3_EXON = 202,       ///<  un exon contenant  CDS/UTR 3'
+  SO_5_CODING_EXON = 196,       ///<  un exon contenant CDS 5'
+  SO_3_CODING_EXON = 197,       ///<  un exon contenant  CDS 3'
   SO_5_NONCODING_EXON = 445,    ///<  un exon de 5'UTR (du pre-ARNm)
   SO_3_NONCODING_EXON = 444,    ///<  un exon d'UTR3' (du pre-ARNm)
   SO_SINGLE_EXON = 5845,        ///<  un exon 'solitaire'
@@ -230,6 +232,6 @@ class Gff3Line
   * Si sofa est faux, alors c'est le code SO qui sera renvoyer
   * \todo le code sofa est-il un nombre ou une chaine de chiffres ?
   */
-  int getTypeSofa(int state_egn, bool sofa=true);
+  int getTypeSofa(int state_egn, bool coding, bool sofa=true);
 
 #endif //__GFF3Line_H__
