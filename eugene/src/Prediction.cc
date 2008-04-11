@@ -1019,7 +1019,7 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
   int offset = PAR.getI("Output.offset");
   int stepid = PAR.getI("Output.stepid");
   int estopt = PAR.getI("Sensor.Est.use", 0, PAR.getI("EuGene.sloppy"));
-  int state, forward, start, end, don, acc;
+  int state, forward, start, end, don, acc, phase, frame;
   int incons = 0, cons = 0;
 
   /* Seq Type S Lend Rend Length Phase Frame Ac Do Pr */
@@ -1028,6 +1028,8 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
     forward = (vGene[i]->vFea[0]->strand == '+') ? 1 : 0;
     for(int j=0; j<vGene[i]->nbFea(); j++) {
       state = vGene[i]->vFea[j]->state;
+      phase = vGene[i]->vFea[j]->phase;
+      frame = vGene[i]->vFea[j]->frame;
 
       // Print introns ?
       if( (PAR.getI("Output.intron") == 0) &&
@@ -1037,8 +1039,16 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 
       start = vGene[i]->vFea[j]->start;
       end   = vGene[i]->vFea[j]->end;
-      
-     if (estopt) CheckConsistency(start, end, state, &cons, &incons);
+
+	// Frameshift detection: we just concatenate all the parts
+	// of the exon in one. The phase will be the "initial" phase.
+
+	// If we are in an exon and there is something after it which is an exon too
+	while ((state <= TermR3) && (j < vGene[i]->nbFea()-1) && (vGene[i]->vFea[j+1]->state <= TermR3))
+	{
+		j++;
+		end = vGene[i]->vFea[j]->end;
+	}
  
       if (forward) {
 		don = offset + start - 1;
@@ -1047,9 +1057,10 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 		acc = offset + start - 1;
 		don = offset + end   + 1;
       }
-    	  
+
       // araset ?
       if (a) fprintf(OUT, "%s ",seqName);
+
       else   
 	{
 	  fprintf(OUT, "%s.%d",seqName, ((vGene[i]->geneNumber)*stepid)+1);
@@ -1069,18 +1080,20 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
       }
       else 
       {
-		if(vGene[i]->vFea[j]->phase == 9)
+		if(phase == 9)
 	  		fprintf(OUT," Unk.");
 		else
-	  		fprintf(OUT,"   %+2d",vGene[i]->vFea[j]->phase);
+	  		fprintf(OUT,"   %+2d", phase);
 	
-		if(vGene[i]->vFea[j]->frame == 0)
+		if(frame == 0)
 	  		fprintf(OUT,"      NA");
 		else
-	  		fprintf(OUT,"      %+2d",vGene[i]->vFea[j]->frame);
+	  		fprintf(OUT,"      %+2d",frame);
 	
 		fprintf(OUT," %7d %7d ", don, acc);
       }
+
+      if (estopt) CheckConsistency(start, end, state, &cons, &incons);
       fprintf(OUT,"  %3.0f.%-3.0f\n",100.0*(double)cons/(end-start+1),
 	      100.0*(double)incons/(end-start+1));
     }
