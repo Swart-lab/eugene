@@ -62,7 +62,13 @@ OptiAlgorithm::OptiAlgorithm(void)
     ParaMax.push_back( PAR.getD("ParaOptimization.Para.Max" , i) );
     c = PAR.getI("ParaOptimization.Para.Cluster", i);
     ParaCluster.push_back( c );
-    ParaClusters[c].push_back( i );
+    if (c < ParaClusters.size())
+        ParaClusters[c].push_back( i );
+    else
+	{
+	    std::cerr <<"ERROR: Bad cluster number (" << c << ") for parameter "<< ParaName.back() <<" in the parameter file."<<std::endl; 
+	    exit(100);
+	}
   }
   for (int i=0; i<n; i++) 
     // Name of parameters to optimize must be <name>* or <name>*[<nn>], 
