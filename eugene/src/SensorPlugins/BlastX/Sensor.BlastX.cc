@@ -164,6 +164,7 @@ SensorBlastX :: ~SensorBlastX ()
     delete [] ProtMatchPhase;
 }
 
+
 // ----------------------
 //  Init blastX.
 // ----------------------
@@ -173,6 +174,8 @@ void SensorBlastX :: Init (DNASeq *X)
     int    Len = X->SeqLen;
     int    level, levelidx, Pphase = 0;
     float GlobalScore,    PGlobalScore = 0;
+
+#define CLIP(X) (Max(0,Min(Len,(X))))
 
     vPos.clear();
     vPMatch.clear();
@@ -222,7 +225,7 @@ void SensorBlastX :: Init (DNASeq *X)
                 if ((MyHSP->Start-MyHSP->Prev->End) >= minIn)
                 {
 
-                    for(j = MyHSP->Prev->End+1; j < MyHSP->Prev->End+1+(minIn)/2; j++)
+                    for(j = CLIP(MyHSP->Prev->End+1); j < CLIP(MyHSP->Prev->End+1+(minIn)/2); j++)
                     {
                         // begining of the intron only, during a short region
                         // the score depends on the adjacent exon
@@ -245,7 +248,7 @@ void SensorBlastX :: Init (DNASeq *X)
                         }
                     }
 
-                    for (j = MyHSP->Start+1 - minIn/2; j < MyHSP->Start+1; j++)
+                    for (j = CLIP(MyHSP->Start+1 - minIn/2); j < CLIP(MyHSP->Start)+1; j++)
                     {
                         // ...and the end of the intron
                         if (keyBXLevel[level] >= ProtMatchLevel[j])
@@ -282,13 +285,13 @@ void SensorBlastX :: Init (DNASeq *X)
                     int from,to;
                     if ((MyHSP->Start-MyHSP->Prev->End) >= minIn)
                     {
-                        from = MyHSP->Prev->End+1+(minIn)/2;
-                        to   = MyHSP->Start - minIn/2;
+                        from = CLIP(MyHSP->Prev->End+1+(minIn)/2);
+                        to   = CLIP(MyHSP->Start - minIn/2);
                     }
                     else
                     {
-                        from = MyHSP->Prev->End+1;
-                        to = MyHSP->Start;
+                        from = CLIP(MyHSP->Prev->End+1);
+                        to = CLIP(MyHSP->Start);
                     }
 
                     for (j = from; j <= to; j++)
@@ -313,14 +316,14 @@ void SensorBlastX :: Init (DNASeq *X)
                 }
 
                 if (PAR.getI("Output.graph") && levelidx <3)
-                    PlotBlastGap(MyHSP->Prev->End,Pphase,MyHSP->Start,MyHSP->Phase,levelidx);
+                    PlotBlastGap(CLIP(MyHSP->Prev->End),Pphase,CLIP(MyHSP->Start),MyHSP->Phase,levelidx);
             }
 
             // HITS -> CODING
             if (PAR.getI("Output.graph") && levelidx<3)
-                PlotBlastHit(MyHSP->Start-1,MyHSP->End-1,MyHSP->Phase,levelidx);
+                PlotBlastHit(CLIP(MyHSP->Start-1),CLIP(MyHSP->End-1),MyHSP->Phase,levelidx);
 
-            for (j = MyHSP->Start; j < MyHSP->End+1; j++)
+            for (j = CLIP(MyHSP->Start); j < CLIP(MyHSP->End+1); j++)
                 if (keyBXLevel[level] >= ProtMatchLevel[j])
                     if (keyBXLevel[level] > ProtMatchLevel[j])
                     {
@@ -356,7 +359,7 @@ void SensorBlastX :: Init (DNASeq *X)
     
     index = 0;
 }
-
+#undef CLIP
 
 // --------------------------
 //  GiveInfo Content BlastX.
@@ -500,7 +503,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 }
 
 // -------------------------------------------------------------------------
-//  Post analyse (Analyse de la prédiction (features) par rapport aux Prot)
+//  Post analyse (Analyse de la prï¿½diction (features) par rapport aux Prot)
 //    debut/fin  = debut/fin de traduit
 // -------------------------------------------------------------------------
 void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
@@ -522,7 +525,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 
     /***********************************************************************/
     /** Objectif : obtenir un vecteur contenant les index des prots       **/
-    /**            qui supportent la prédiction                           **/
+    /**            qui supportent la prï¿½diction                           **/
     /***********************************************************************/
     // si l'iteration precedente a atteint l'extremite
     if (ProtIndex >= Size)
@@ -564,7 +567,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 
 
     /***********************************************************************/
-    /* Objectif : Analyser chaque feature predite -> supportée ?           */
+    /* Objectif : Analyser chaque feature predite -> supportï¿½e ?           */
     /***********************************************************************/
     int  start = 0, end = 0, len;
     char fea[5];
@@ -599,7 +602,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
             if (numF != -1)
             {
                 if ((int)vSupProtI.size() > 0)
-                    // Longueur totale supportée par les prots
+                    // Longueur totale supportï¿½e par les prots
                     len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
 
                 if (len > 0)
@@ -614,11 +617,11 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 
                     for (j=0; j<(int)vSupProtI.size(); j++)
                     {
-                        // Longueur supportée par la prot
+                        // Longueur supportï¿½e par la prot
                         len = LenSup(HitTable, pred, vSupProtI, j, start, end);
                         HitTable[vSupProtI[j]]->Support = (int)((float)len/(end-start+1)*100);
                     }
-                    // On copie la hittable pour trier sur le % supporté
+                    // On copie la hittable pour trier sur le % supportï¿½
                     for (int k=0; k<NumProt; k++)
                         TMPHitTable[k] = HitTable[k];
                     qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
@@ -634,7 +637,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     }
 
     /***********************************************************************/
-    /* Objectif : Analyser la CDS et le gene predit -> supportée ?         */
+    /* Objectif : Analyser la CDS et le gene predit -> supportï¿½e ?         */
     /***********************************************************************/
     start = debut;
     end   = fin;
@@ -644,7 +647,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     {
         len = 0;
         if((int)vSupProtI.size() > 0)
-            // Longueur totale supportée par les prots
+            // Longueur totale supportï¿½e par les prots
             len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
 
         if(len > 0)
@@ -663,11 +666,11 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 
             for(j=0; j<(int)vSupProtI.size(); j++)
             {
-                // Longueur supportée par la prot
+                // Longueur supportï¿½e par la prot
                 len = LenSup(HitTable, pred, vSupProtI, j, start, end);
                 HitTable[vSupProtI[j]]->Support = (int)((float)len/codingNuc*100);
             }
-            // On copie la hittable pour trier sur le % supporté
+            // On copie la hittable pour trier sur le % supportï¿½
             for (int k=0; k<NumProt; k++)
                 TMPHitTable[k] = HitTable[k];
             qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
