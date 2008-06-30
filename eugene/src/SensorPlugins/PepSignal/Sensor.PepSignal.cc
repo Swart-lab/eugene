@@ -169,7 +169,7 @@ void SensorPepSignal :: Init (DNASeq *X)
 // ------------------------
 //  GiveInfo signal start.
 // ------------------------
-void SensorPepSignal :: GiveInfo (DNASeq *X, int pos, DATA *d)
+void SensorPepSignal :: GiveInfo (DNASeq *X, int pos, DATA *d, double *parArray)
 {
   bool update = false;
   double f;
@@ -214,13 +214,11 @@ void SensorPepSignal :: Plot(DNASeq *X)
   double f;
 
   for (int i =0; i < (int)vPosF.size(); i++) {
-    f = pow(vValF[i], startB)*(exp(-startP));
-    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.5, NORM(log(f),4.0), 2);
+    PlotBarF(vPosF[i], (vPosF[i]%3)+1, 0.9, 0.2, 2);
   }
 
   for (int i =0; i < (int)vPosR.size(); i++) {
-    f = pow(vValR[i], startB)*(exp(-startP));
-    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.5, NORM(log(f),4.0), 2);
+    PlotBarF(vPosR[i], -((X->SeqLen-vPosR[i])%3)-1, 0.9, 0.2, 2);
   }
 }
 
