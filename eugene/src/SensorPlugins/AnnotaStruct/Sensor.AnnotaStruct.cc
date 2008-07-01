@@ -609,6 +609,8 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 	  vCon.push_back(new Contents(startC, endC, DATA::IntronF+edge,scF));
 	else if(!strcmp(feature, "utr5"))
 	  vCon.push_back(new Contents(startC, endC, DATA::UTR5F+edge,  scF));
+	else if(!strcmp(feature, "interg"))
+	  vCon.push_back(new Contents(startC, endC, DATA::InterG,  scF));	  
 	else if(!strcmp(feature, "utr3"))
 	  vCon.push_back(new Contents(startC, endC, DATA::UTR3F+edge,  scF));
 	else if(!strcmp(feature, "utr")) {
@@ -1106,7 +1108,7 @@ void SensorAnnotaStruct :: PushInCon(int d, int e, float sc,
 // ------------------------
 //  GiveInfo.
 // ------------------------
-void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
+void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d, double *parArray)
 {
   Signals TmpSig;
   bool  update = false;
