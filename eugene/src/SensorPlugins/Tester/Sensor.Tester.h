@@ -80,8 +80,8 @@ class SensorTester : public Sensor
   void ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x);
   void ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq *X);
   void ReadAnnotation(DNASeq *);
-  char* SigType_TF(int, int, char **);
-  char* State(int);
+  const char* SigType_TF(int, int, const char **);
+  const char* State(int);
 
   void AnalyzeSPSN(void);
   void UpdateTP_FP_TN_FN(int no_threshold, bool is_don, bool is_annotated, bool is_detected);

@@ -248,9 +248,9 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   if (!IsSPSN) {    
     DATA Data;
-    char *predSigType = new char[10];
-    char *tf;
-    char *truthState;
+    const char *predSigType = new char[10];
+    const char *tf;
+    const char *truthState;
     
     for(int j=0; j<DATA::LastSigType; j++) Data.sig[j].Clear();
     sensor->GiveInfo(X,pos,&Data);
@@ -663,7 +663,7 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
 // -------------------------------------------
 //  SigType_TF (Cf:enum SigType in SensorIF.h)
 // -------------------------------------------
-char* SensorTester :: SigType_TF(int i, int pos, char **sType)
+const char* SensorTester :: SigType_TF(int i, int pos, const char **sType)
 {
   switch (i) {
   case 2:
@@ -687,7 +687,7 @@ char* SensorTester :: SigType_TF(int i, int pos, char **sType)
 // -------
 //  State
 // -------
-char* SensorTester :: State(int pos)
+const char* SensorTester :: State(int pos)
 {
   switch (gene->GetStateForPos(pos)) {
   case 0:

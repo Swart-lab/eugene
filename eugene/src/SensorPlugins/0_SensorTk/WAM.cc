@@ -44,7 +44,7 @@ WAM :: WAM ()
 // --------------------------------------------//
 //           Constructor
 // --------------------------------------------//
-WAM :: WAM (int order, int length, char* alphabet, char* prefixfilename)
+WAM :: WAM (int order, int length, const char* alphabet, char* prefixfilename)
 {
   int i;
   int prefixnamelength;

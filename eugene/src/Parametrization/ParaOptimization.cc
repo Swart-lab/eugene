@@ -148,7 +148,8 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
   std::ifstream feval;
   double spg, sng, spe, sne;
   Prediction* pred;
-  char* c = "sequence"; char ** cc = &c;
+  const char* c = "sequence"; 
+  const char ** cc = &c;
   FILE   *fp;
 
   DetailedEvaluation = "";

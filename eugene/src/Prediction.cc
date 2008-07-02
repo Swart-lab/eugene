@@ -656,7 +656,7 @@ void Prediction :: Print (DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const ch
   int  trunclen =      PAR.getI("Output.truncate");
   strcpy(outputFormat, PAR.getC("Output.format"));
 
-  char *mode;
+  const char *mode;
   std::ios_base::openmode ccmode;
 
   if (append) 
@@ -1264,7 +1264,7 @@ void Prediction :: PrintHtml (FILE *OUT, char *seqName)
 // -----------------------------------------
 //  State2EGNString (convert state to char*)
 // -----------------------------------------
-char* Prediction :: State2EGNString (int state)
+const char* Prediction :: State2EGNString (int state)
 {
   if(state <= InitR3)                  return "Init";
   if(state <= SnglR3)                  return "Sngl";
@@ -1280,7 +1280,7 @@ char* Prediction :: State2EGNString (int state)
 // -----------------------------------------
 //  State2GFFString (convert state to char*)
 // -----------------------------------------
-char* Prediction :: State2GFFString (int state)
+const char* Prediction :: State2GFFString (int state)
 {
   if(state <= InitR3)                  return "E.Init";
   if(state <= SnglR3)                  return "E.Sngl";
@@ -1571,7 +1571,7 @@ char Prediction :: GetStateForPos(int pos)
 // ------------------------
 //  isStart.
 // ------------------------
-char* Prediction :: IsStart(int p)
+const char* Prediction :: IsStart(int p)
 {
   int state  = GetStateForPos (p);
   int nState = GetStateForPos (p+1);
@@ -1587,7 +1587,7 @@ char* Prediction :: IsStart(int p)
 // ------------------------
 //  isStop.
 // ------------------------
-char* Prediction :: IsStop(int p)
+const char* Prediction :: IsStop(int p)
 {
   int state  = GetStateForPos (p);
   int nState = GetStateForPos (p+1);
@@ -1603,7 +1603,7 @@ char* Prediction :: IsStop(int p)
 // ------------------------
 //  isDon.
 // ------------------------
-char* Prediction :: IsDon(int p)
+const char* Prediction :: IsDon(int p)
 {
   int state  = GetStateForPos (p);
   int nState = GetStateForPos (p+1);
@@ -1618,7 +1618,7 @@ char* Prediction :: IsDon(int p)
 // ------------------------
 //  isAcc.
 // ------------------------
-char* Prediction :: IsAcc(int p)
+const char* Prediction :: IsAcc(int p)
 {
   int pState = GetStateForPos (p);
   int state  = GetStateForPos (p+1);

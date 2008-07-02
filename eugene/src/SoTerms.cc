@@ -61,7 +61,7 @@ void SoTerms::loadFile( char * filename )
 	strcpy (soName, value );
 	idToName_[to_string(soId)]=to_string(soName);
 	nameToId_[to_string(soName)]=to_string(soId);
-	char* resFgets = " ";
+	const char* resFgets = " ";
 	while (fp  && strncmp (line,"[Term]",6)  != 0 && fgets (line, MAX_LINE, fp)!=NULL)
 	{
 	 

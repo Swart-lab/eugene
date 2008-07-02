@@ -49,7 +49,7 @@ class WAM
 
  public:
   WAM();
-  WAM(int order, int length, char* alphabet, char* prefixfilename);
+  WAM(int order, int length, const char* alphabet, char* prefixfilename);
   ~WAM();
   double ScoreTheMotif(char* oligont);  // sum of likelihood ratio for each position of the entire motif
 };

@@ -31,7 +31,7 @@
 #include "markov.h"
 
 
-char* CODEGENETIQUE = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
+const char* CODEGENETIQUE = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
 const int NBRECODONS[64]     = {2,2,2,2,4,4,4,4,6,6,6,6,3,3,1,3,2,2,2,2,4,4,4,4,6,6,6,6,6,6,6,6,2,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,3,2,3,2,6,6,6,6,3,2,1,2,6,2,6,2};
 
 /////////////////////////////////////////////////////////
@@ -805,7 +805,7 @@ template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: cumuleVAL (int indic
 // cumule les valeurs des cases des codons synonymes et renvoie le total.
 template<class CHAINE, typename T> T TabChaine<CHAINE,T> :: cumuleVAL (char aa) const
 {
-  char* codegenetique=CODEGENETIQUE;
+  const char* codegenetique=CODEGENETIQUE;
   T cumul=0;
   for (int i=0 ; i<64 ; i++) {
     if ( codegenetique[i] == aa )

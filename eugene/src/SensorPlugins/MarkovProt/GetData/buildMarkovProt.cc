@@ -35,7 +35,7 @@
 #include "../../../DNASeq.cc"
 
 int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
-char* DBfile     = "/Annotation/Z_Sylvain/sprot_rel41_noFragm.fasta";  // DB infile
+const char* DBfile     = "/Annotation/Z_Sylvain/sprot_rel41_noFragm.fasta";  // DB infile
 char* MATRIXfile = "SwissProt41.noFragm.mininfo1000.order2.usi.bin";  // outfile matrix
 int OCCURENCE_MINI =1000;
 

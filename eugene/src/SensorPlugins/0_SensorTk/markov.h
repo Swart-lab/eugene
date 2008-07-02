@@ -183,7 +183,7 @@ class UsageCode : public TabChaine <ChaineADN,int>
   const int nbrecodons;  // ty. 64 avec les stops
   const int offset;      // ty.21, cad le nbre de cases du
                          // tableau val inutiles (lgr des mots<3)
-  char *codegenetique; // char[65], une lettre (de l'a.a.) par codon.
+  const char *codegenetique; // char[65], une lettre (de l'a.a.) par codon.
                        // pourra faire l'objet d'une classe, avec le code
                        // standard par defaut
   // codegenetique= "                     KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";  

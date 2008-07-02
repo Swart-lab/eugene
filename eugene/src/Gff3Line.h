@@ -23,28 +23,21 @@
 //sofa->j'ai pas trouv� de raison de mettre des entiers plutot que des chaines
 //sauf l'enum
 /** \enum
- *  la liste des codes SOFA
+ *  la liste des codes SOFA et des codes SO (moins ceux deja present dans sofa)
  *  \link http://song.cvs.sourceforge.net/song/ontology/sofa.obo?view=log
+ *  \link http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log
  */
 enum
 {
   SOFA_GENE= 704,           ///<  un gene
   SOFA_MRNA = 234,          ///<  ARNm episse "does not contain introns"
-  
   SOFA_EXON = 147,          ///<  un exon de l'ARNm episse
   SOFA_INTRON = 188,        ///<  un intron de l'ARNm
   SOFA_INTERGEN = 605,      ///<  region entre 2 genes
-  
   SOFA_5_UTR = 204,         ///<  5'UTR (de l'ARNm episse)
   SOFA_3_UTR = 205,         ///<  UTR3' (de l'ARNm episse)
-  SOFA_CDS = 316            ///<  un CDS avec un start ET un stop
-};
-/** \enum
- *  la liste des codes SO moins ceux deja present dans sofa
- *  \link http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log
- */
-enum
-{
+  SOFA_CDS = 316,            ///<  un CDS avec un start ET un stop
+
   SO_5_EXON = 200,       ///<  un exon contenant CDS/UTR 5'
   SO_3_EXON = 202,       ///<  un exon contenant  CDS/UTR 3'
   SO_5_CODING_EXON = 196,       ///<  un exon contenant CDS 5'

@@ -125,8 +125,8 @@ class Prediction
   void  PrintHtml       (FILE*, char*);
 
   // Convert state in string
-  char* State2EGNString (int);
-  char* State2GFFString (int);
+  const char* State2EGNString (int);
+  const char* State2GFFString (int);
   
   // Verif coherence EST: calcul le nombre de nuc. coherents et
   // incoherents avec les match est
@@ -176,10 +176,10 @@ class Prediction
   Gene *FindGene(int start, int end);
 
   // Need by Sensor Tester
-  char* IsStart       (int);
-  char* IsStop        (int);
-  char* IsDon         (int);
-  char* IsAcc         (int);
+  const char* IsStart       (int);
+  const char* IsStop        (int);
+  const char* IsDon         (int);
+  const char* IsAcc         (int);
   bool  IsState       (DATA::SigType sig_type, int pos, char strand);
 };
 
