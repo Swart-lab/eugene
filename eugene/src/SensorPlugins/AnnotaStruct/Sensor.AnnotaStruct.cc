@@ -1108,7 +1108,7 @@ void SensorAnnotaStruct :: PushInCon(int d, int e, float sc,
 // ------------------------
 //  GiveInfo.
 // ------------------------
-void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d, double *parArray)
+void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   Signals TmpSig;
   bool  update = false;
