@@ -169,7 +169,7 @@ void SensorPepSignal :: Init (DNASeq *X)
 // ------------------------
 //  GiveInfo signal start.
 // ------------------------
-void SensorPepSignal :: GiveInfo (DNASeq *X, int pos, DATA *d, double *parArray)
+void SensorPepSignal :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   bool update = false;
   double f;
