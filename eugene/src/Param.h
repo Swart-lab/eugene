@@ -74,9 +74,9 @@ class Parameters
   void   initParam (int, char *[]);
   int    count(char *key);
   bool   probeKey(char *key, int index = 0);
-  char*  getC    (char *key, int index = 0, int sloppy = 0);
-  double getD    (char *key, int index = 0, int sloppy = 0);
-  int    getI    (char *key, int index = 0, int sloppy = 0);
+  char*  getC    (const char *key, int index = 0, int sloppy = 0);
+  double getD    (const char *key, int index = 0, int sloppy = 0);
+  int    getI    (const char *key, int index = 0, int sloppy = 0);
   int    getUseSensor (char **, int*);
   void   set  (const char *key, const char *value);
   void   setD (const char *key, double n);

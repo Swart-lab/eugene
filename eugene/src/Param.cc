@@ -478,22 +478,22 @@ bool Parameters::probeKey(char *key, int index){
 // ------------------------
 //  getChar param.
 // ------------------------
-char* Parameters :: getC(char *key, int index, int sloppy)
+char* Parameters :: getC(const char *key, int index, int sloppy)
 {
   if (!index && m.count(key))
     return (char*)m[key];
 
   int len = strlen(key);
   char *altkey = new char[len+10];
+  char * charptr;
 
   strcpy(altkey,key);
-  key = altkey+len;
-  sprintf(key,"[%d]",index);
+  sprintf(altkey+len,"[%d]",index);
 
   if (m.count(altkey)) {
-    key = (char*)m[altkey];
+    charptr = (char*)m[altkey];
     delete [] altkey;
-    return key;
+    return charptr;
   }
   else 
   {
@@ -508,7 +508,7 @@ char* Parameters :: getC(char *key, int index, int sloppy)
 // ------------------------
 //  getDouble param.
 // ------------------------
-double Parameters :: getD(char *key, int index, int sloppy)
+double Parameters :: getD(const char *key, int index, int sloppy)
 {
   char *res = getC(key,index,sloppy);
   double dou = 0.0;
@@ -525,7 +525,7 @@ double Parameters :: getD(char *key, int index, int sloppy)
 // ------------------------
 //  getInt param.
 // ------------------------
-int Parameters :: getI(char *key, int index, int sloppy)
+int Parameters :: getI(const char *key, int index, int sloppy)
 {
   char *res = getC(key,index,sloppy);
   
