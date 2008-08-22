@@ -23,6 +23,7 @@
 // ------------------------------------------------------------------
 
 #include "Sensor.BlastX.h"
+#include "assert.h"
 
 extern Parameters PAR;
 
@@ -451,6 +452,8 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
     fprintf(MINFO, "#=========================================#\n");
 
     index=0;
+
+    // Sorts the HitTable according to the start then nbgaps then end
     qsort((void *)HitTable, NumProt, sizeof(void *), HitsCompareLex);
 
     // Reset static in Prot Support or FEA Support
@@ -504,19 +507,21 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 
 // -------------------------------------------------------------------------
 //  Post analyse (Analyse de la pr�diction (features) par rapport aux Prot)
-//    debut/fin  = debut/fin de traduit
+//    debut/fin  = debut/fin de la CDS (from ATG to STOP). 
+//    Size  is the number of proteins available
 // -------------------------------------------------------------------------
 void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
                                  int fin, Hits **HitTable, int Size, int NumGene)
 {
     static int ProtIndex;
     Block *ThisBlock;
-    int SupportProt, i, j;
+    int i, j;
     int from  = 0, to = 0;
     int state = 0;
     std::vector <int> vSupProtI;                // index prot supportant pred
-    Hits **TMPHitTable = new Hits *[NumProt+1]; // need for sort by % support
+    Hits **TMPHitTable; 			// needed for sorting by % support
 
+    // Used to initialize the static 
     if (pred == NULL)
     {
         ProtIndex = 0;
@@ -538,13 +543,12 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     if (ProtIndex >= 0  &&  HitTable[ProtIndex]->End < debut)
         ProtIndex++;
 
-    while (ProtIndex >=0  &&  ProtIndex < Size)
+    while (ProtIndex >= 0  &&  ProtIndex < Size)
     {
         // la derniere prot exploitable est passee
         if (HitTable[ProtIndex]->Start > fin)
             break;
 
-        SupportProt = 0;
         ThisBlock = HitTable[ProtIndex]->Match;
 
         while (ThisBlock)
@@ -553,23 +557,33 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
             to   = Min(fin,   ThisBlock->End);
             if (from < to)
             {
-                SupportProt = 1;
+                vSupProtI.push_back( ProtIndex );// Si Prot supporte potentiellement
                 break;
             }
             ThisBlock = ThisBlock->Next;
         }
-
-        // Si Prot supporte potentiellement
-        if (SupportProt)
-            vSupProtI.push_back( ProtIndex );
         ProtIndex++;
     }
 
+    /***********************************************************************/
+    // Analysis of each coding exon over each protein.and cpomputation of combined
+    // statistics (all proteins on each exon and on the CDS overall).
+    /***********************************************************************/
 
-    /***********************************************************************/
-    /* Objectif : Analyser chaque feature predite -> support�e ?           */
-    /***********************************************************************/
-    int  start = 0, end = 0, len;
+    // Needed to sort by support
+    TMPHitTable = new Hits *[(int)vSupProtI.size()];
+
+    // Sup will contain for each base of the CDS which are supported or not.
+    unsigned char *Sup = new unsigned char[fin-debut+1];
+    for (i=0; i<=fin-debut; i++) Sup[i] = 0;
+
+    // CDSSupport will store the number of base supported by each protein, overall (CDS level)
+    int* CDSSupport = new int[vSupProtI.size()];
+    for (j=0; j<(int)vSupProtI.size(); j++) CDSSupport[j] = 0;
+
+    // we go over each coding exon of the gene
+
+    int  start, end, len, numF, nlen, tlen = 0;
     char fea[5];
     char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
     int  codingNuc = 0;
@@ -580,162 +594,123 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
         start = pred->vGene[NumGene-1]->vFea[i]->start;
         end   = pred->vGene[NumGene-1]->vFea[i]->end;
 
-        if ( (start >= debut)  &&  (end <= fin))
+        if ((start >= debut) && (end <= fin) && (state <= TermR3)) // Coding exon inside
         {
-            len      = 0;
-            int numF = -1;
+            numF = pred->vGene[NumGene-1]->vFea[i]->number;
+            strcpy(fea, "Exon");
+ 	    codingNuc += (end - start + 1);
+	    len = 0;
 
-            if (state <= TermR3  ||  (state >= UTR5F && state <= UTR3R))
-                numF = pred->vGene[NumGene-1]->vFea[i]->number;
+	    for (j=0; j<(int)vSupProtI.size(); j++)
+	    {
+		nlen = 0;
+		HitTable[vSupProtI[j]]->Support = LenSup(HitTable, state, Sup+start-debut, vSupProtI, nlen , j, start, end);
+		CDSSupport[j] += nlen;
+                len += nlen;
+                tlen+= nlen; //CDS overall count
+	    }
 
-
-            if (state <= TermR3)
+            if (len > 0)
             {
-                strcpy(fea, "Exon");
- 				codingNuc += (end - start + 1);
-            }
-            else if(state == UTR5F  ||  state == UTR5R)
-                strcpy(fea, "UTR5");
-            else if(state == UTR3F  ||  state == UTR3R)
-                strcpy(fea, "UTR3");
-
-            if (numF != -1)
-            {
-                if ((int)vSupProtI.size() > 0)
-                    // Longueur totale support�e par les prots
-                    len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
-
-                if (len > 0)
-                {
-                    fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
+                fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
                             pred->seqName, (((NumGene-1)*stepid)+1), numF,
                             fea,start,end,len,strand);
-                    fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
+                fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 
-                    for (int k=0;  k<NumProt;  k++)
-                        HitTable[k]->Support = 0;
+                // On copie la hittable pour trier sur le support
+                for (int k=0; k<(int)vSupProtI.size(); k++)
+                    TMPHitTable[k] = HitTable[vSupProtI[k]];
+                qsort((void*)TMPHitTable, (int)vSupProtI.size(), sizeof(void*), HitsCompareSup);
 
-                    for (j=0; j<(int)vSupProtI.size(); j++)
-                    {
-                        // Longueur support�e par la prot
-                        len = LenSup(HitTable, pred, vSupProtI, j, start, end);
-                        HitTable[vSupProtI[j]]->Support = (int)((float)len/(end-start+1)*100);
-                    }
-                    // On copie la hittable pour trier sur le % support�
-                    for (int k=0; k<NumProt; k++)
-                        TMPHitTable[k] = HitTable[k];
-                    qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
-
-                    // On affiche les ppNumber premiers hits supportant
-                    for (j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
-                        fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
-                                TMPHitTable[j]->Support, TMPHitTable[j]->Level);
-                    fprintf(MINFO, "\n");
-                }
+                // On affiche les ppNumber premiers hits supportant
+                for (j=0; j<(int)vSupProtI.size() && j<ppNumber && TMPHitTable[j]->Support!=0;j++)
+                    fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
+                            (int)((float)TMPHitTable[j]->Support/(end-start+1)*100), TMPHitTable[j]->Level);
+                fprintf(MINFO, "\n");
             }
         }
     }
 
-    /***********************************************************************/
-    /* Objectif : Analyser la CDS et le gene predit -> support�e ?         */
-    /***********************************************************************/
+    // Now, output overall CDS statistics.
+
     start = debut;
     end   = fin;
     strcpy(fea, "CDS");
 
     if (end >= start)
     {
-        len = 0;
-        if((int)vSupProtI.size() > 0)
-            // Longueur totale support�e par les prots
-            len = LenSup(HitTable, pred, vSupProtI, -1, start, end);
-
-        if(len > 0)
+        if (tlen > 0)
         {
             fprintf(MINFO, "%s.%d  \tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
                     pred->seqName, (((NumGene-1)*stepid)+1), fea,
-                    start, end, len, strand);
-            fprintf(MINFO, "%d\t", (int)((float)len/codingNuc*100));
-            for (int k=0;  k<NumProt;  k++)
-                HitTable[k]->Support = 0;
-
-			if ( (int)((float)len/codingNuc*100) > 100 )
-			{
-				exit(3);
-			}
+                    start, end, tlen, strand);
+            fprintf(MINFO, "%d\t", (int)((float)tlen/codingNuc*100));
 
             for(j=0; j<(int)vSupProtI.size(); j++)
-            {
-                // Longueur support�e par la prot
-                len = LenSup(HitTable, pred, vSupProtI, j, start, end);
-                HitTable[vSupProtI[j]]->Support = (int)((float)len/codingNuc*100);
-            }
-            // On copie la hittable pour trier sur le % support�
-            for (int k=0; k<NumProt; k++)
-                TMPHitTable[k] = HitTable[k];
-            qsort((void*)TMPHitTable, NumProt, sizeof(void*), HitsCompareSup);
+                HitTable[vSupProtI[j]]->Support = (int)((float)CDSSupport[j]/codingNuc*100);
+            
+            // On copie la hittable pour trier sur le support
+            for (int k=0; k<(int)vSupProtI.size(); k++)
+                TMPHitTable[k] = HitTable[vSupProtI[k]];
+            qsort((void*)TMPHitTable, (int)vSupProtI.size(), sizeof(void*), HitsCompareSup);
 
             // On affiche les ppNumber premiers hits supportant
-            for(j=0; j<NumProt && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
+            for(j=0; j<(int)vSupProtI.size() && j<ppNumber && TMPHitTable[j]->Support!=0; j++)
                 fprintf(MINFO, "%s(%d,%d) ", TMPHitTable[j]->Name,
                         TMPHitTable[j]->Support, TMPHitTable[j]->Level);
             fprintf(MINFO, "\n");
         }
     }
+
     vSupProtI.clear();
     if(TMPHitTable != NULL)
         delete [] TMPHitTable;
-    TMPHitTable = NULL;
+    if(CDSSupport != NULL)
+        delete [] CDSSupport;
+    if(Sup != NULL)
+        delete [] Sup;
+
     return;
 }
 
 // -------------------------------------------------------------------------
-//  Length supported by Prot.
-//    If index = -1 -> Length supported by ALL Prot.
-//    Else          -> Length supported by ONE Prot.
+//  Nb nuc of one coding region of fixed state "state" supported by Prot. with
+// corresponding index.
+// The Sup array stores the already supported nuc. of the region.
+// additional sup will be incrementd only if the nuc is not already supported
+// supported returned is the number of nuc supported ignoring "Sup".
 // -------------------------------------------------------------------------
-int SensorBlastX :: LenSup(Hits **HitTable, Prediction *pred,
-                           std::vector<int> vSupProtI,
+int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
+                           std::vector<int> vSupProtI, int& additionalsup,
                            int index, int beg, int end)
 {
     int supported = 0;
-//    unsigned char *Sup;
-	short *Sup;
     Block *ThisBlock;
     int from  = 0, to = 0;
-    int state = 0;
-    int i, j;
+    int j;
 
-    // Sup = new unsigned char[end-beg+1];
-	Sup = new short[end-beg+1];
-    for (i=0; i<=(end-beg); i++)
-        Sup[i]=0;
+    assert(state <= TermR3);
 
-    i = (index == -1  ?  0 : index);
-
-    for(; i<(int)vSupProtI.size() || i==index; i++)
+    ThisBlock = HitTable[vSupProtI[index]]->Match;
+    while (ThisBlock)
     {
-        ThisBlock = HitTable[vSupProtI[i]]->Match;
-        while (ThisBlock)
-        {
-            from = Max(beg, ThisBlock->Start+1);
-            to   = Min(end, ThisBlock->End+1);
+        from = Max(beg, ThisBlock->Start+1);
+        to   = Min(end, ThisBlock->End+1);
 
-            for (j = from; j <= to; j++)
+        for (j = from; j <= to; j++)
+        {
+            if (State2Phase[state] == ThisBlock->Phase)
             {
-                state = pred->GetStateForPos(j);
-                if ((Sup[j-beg] ==0) &&  (State2Phase[state] == ThisBlock->Phase) && state <= TermR3 )
-                {
-                    Sup[j-beg] = 1;
-                    supported++;
-                }
+                if (Sup[j-beg] == 0) 
+		{
+		    additionalsup++;
+		    Sup[j-beg] = 1;
+		}
+                supported++;
             }
-            ThisBlock = ThisBlock->Next;
         }
-        if (index != -1)
-            break;
+        ThisBlock = ThisBlock->Next;
     }
-    delete [] Sup;
     return supported;
 }
 

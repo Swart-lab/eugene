@@ -54,8 +54,9 @@ class SensorEst : public Sensor
 		     int debut, int fin, Hits **HitTable, int Size);
   void   FEASupport (Prediction *, FILE *, int Tdebut,    int Tfin,
 		     int debut, int fin, Hits **HitTable, int Size, int NumG);
-  int    LenSup     (Hits **HitTable, std::vector<int> vSupEstI,
-		     int index, int beg, int end);
+  int    LenSup(Hits **HitTable, unsigned char *Sup, 
+		std::vector<int> vSupEstI, int &additionalsup,
+                int index, int beg, int end);
   void Print (char name[FILENAME_MAX+1]);
  public:
   SensorEst               (int n, DNASeq *X);

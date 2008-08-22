@@ -54,10 +54,13 @@ class SensorBlastX : public Sensor
   int  NumProt;
   void ProtSupport (Prediction *, FILE *, int debut, int fin,
 		    Hits **HitTable,  int Size,  int NumG);
-  int  LenSup      (Hits **HitTable, Prediction *pred,
-		    std::vector<int> vSupProtI,
-		    int index, int beg, int end);
+
+  int  LenSup      (Hits **HitTable, int state, unsigned char* Sup,
+                    std::vector<int> vSupProtI, int& additionalsup,
+                    int index, int beg, int end);
+
   void Print (char name[FILENAME_MAX+1]);
+
  public:
   SensorBlastX            (int n, DNASeq *X);
   virtual ~SensorBlastX   ();
