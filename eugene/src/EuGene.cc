@@ -147,7 +147,7 @@ Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
   int	FirstNuc = (Forward ? From : To+1);
   int   LastNuc  = (Forward ? To+1 : From);
 
-  if (!AltEstDB-> voae_AltEst[idx].CompatibleWith(optpred))
+  if (!AltEstDB->voae_AltEst[idx].CompatibleWith(optpred))
     {
 
       Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
@@ -337,15 +337,21 @@ int main  (int argc, char * argv [])
 	if (PAR.getI("AltEst.use")) {
 
 	  int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+	  int RepredictMargin = PAR.getI("AltEst.RepredictMargin");
 	  int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
 	  AltEst *AltEstDB = new AltEst(TheSeq);
 
 	  std::vector <Prediction*> vPred;
 	  Prediction* AltPred;
 	  Gene *baseGene;
-	  for (int altidx = 0; altidx<AltEstDB->totalAltEstNumber; altidx++)
+	  for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
 	    {
-	      AltPred = AltPredict(TheSeq,fromPos,toPos,MS,AltEstDB,pred,altidx);
+	      int localFrom,localTo;
+
+	      localFrom = Max(fromPos,AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
+	      localTo = Min(toPos, AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
+
+	      AltPred = AltPredict(TheSeq,localFrom,localTo,MS,AltEstDB,pred,altidx);
 
 	      if (AltPred) {
             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
