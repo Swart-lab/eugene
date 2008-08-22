@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5a
+EuGene.version		3.5b
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -63,6 +63,7 @@ AltEst.minIn				40
 AltEst.maxEx				10000
 AltEst.minEx				3
 AltEst.exonucleasicLength	10
+AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
 AltEst.verbose			0
 #AltEst.format  		GFF3
