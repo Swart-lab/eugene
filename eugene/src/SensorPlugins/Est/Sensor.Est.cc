@@ -886,7 +886,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
    {
 	state = pred->vGene[NumGene-1]->vFea[i]->state;
 	start = pred->vGene[NumGene-1]->vFea[i]->start;
-	assert(state > 0); // no intergenic region here
+	assert(State2Status[state] > 0); // no intergenic region here
 
 	if ((State2Status[state] >= 2) != currentStateTranscribed)
 	{
