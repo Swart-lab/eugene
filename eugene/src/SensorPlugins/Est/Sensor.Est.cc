@@ -697,6 +697,8 @@ void SensorEst :: PostAnalyse(Prediction *pred, FILE *MINFO)
 	}
         else
 	{
+	    //printf("Gene number %d\n",i);
+	    //pred->SanityCheck();
             // Analyse de la pr�diction (des features) par rapport aux EST
             FEASupport(pred, MINFO, trStart, trEnd, cdsStart, cdsEnd, HitTable, NumEST, i+1);
 	}
@@ -895,7 +897,11 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	    currentStateTranscribed = (State2Status[state] >= 2);
 	}
    }
-   if (State2Status[state] >= 2) vTranscriptStarts.push_back(pred->vGene[NumGene-1]->vFea[i-1]->end+1); // last exon
+   if (State2Status[state] >= 2) 
+    {
+	vTranscriptStarts.push_back(pred->vGene[NumGene-1]->vFea[i-1]->end+1); // last exon
+	//printf(" %d",pred->vGene[NumGene-1]->vFea[i-1]->end+1);
+    }
    //printf("\n");
 
     /***********************************************************************/
@@ -946,7 +952,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	}
 
 	// We can assume that the first match starts in the current ExonIndex.
-        while (ThisBlock && ConsistentEST)
+        while (ThisBlock && ConsistentEST && exonIndex+1 < vTranscriptStarts.size())
         {
             // The GAP case
             if (ThisBlock->Prev != NULL)
@@ -956,6 +962,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	    
                 //printf("Est GAP (%d-%d) compared to (%d,%d)\n",from,to,vTranscriptStarts[exonIndex],vTranscriptStarts[exonIndex+1]-1);
 	        ConsistentEST &= ((from >= vTranscriptStarts[exonIndex]) && to < vTranscriptStarts[exonIndex+1]);
+	        //printf("G exonindex %d size %d\n",exonIndex,vTranscriptStarts.size());
 
 	        exonIndex++;
             }
@@ -965,7 +972,8 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
             to     = Min(Tfin,   ThisBlock->End);
 	    
 	    //printf("Est MATCH (%d-%d) compared to in (%d,%d)\n",from,to,vTranscriptStarts[exonIndex],vTranscriptStarts[exonIndex+1]-1);
-	    ConsistentEST &= ((from >= vTranscriptStarts[exonIndex]) && to < vTranscriptStarts[exonIndex+1]);
+	    //printf("M exonindex %d size %d\n",exonIndex,vTranscriptStarts.size());
+	    ConsistentEST &= ((from >= vTranscriptStarts[exonIndex]) && (to < vTranscriptStarts[exonIndex+1]));
 
             ThisBlock = ThisBlock->Next;
 	    exonIndex++;
@@ -1007,6 +1015,8 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
         end   = pred->vGene[NumGene-1]->vFea[i]->end;
 
 	// Coord of tDebut/Tfin start at 0. start/end start at 1
+	//printf("NumGene %i state %i start %d Tdebut+1 %d end %d Tfin+1 %d\n", NumGene, state,start,Tdebut+1,end,Tfin+1);
+
 	assert((start >= Tdebut+1) && (end <= Tfin+1));
         len      = 0;
         int numF = -1;
@@ -1029,7 +1039,8 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 	for (j=0; j<(int)vSupEstI.size(); j++)
         {
 	    nlen = 0;
-	    HitTable[vSupEstI[j]]->Support = LenSup(HitTable, Sup+start-debut-1, vSupEstI, nlen , j, start, end);
+	    //printf("offset in Sup (start-debut-1) %d start %i debut %i\n",start-Tdebut-1,start,debut);
+	    HitTable[vSupEstI[j]]->Support = LenSup(HitTable, Sup+start-Tdebut-1, vSupEstI, nlen , j, start, end);
             len += nlen;
 	    GeneSupport[j] += HitTable[vSupEstI[j]]->Support;
             transcLen+= nlen; //transcript overall count
@@ -1164,6 +1175,7 @@ int SensorEst :: LenSup(Hits **HitTable, unsigned char *Sup,
 	//if (from <= to) printf("MATCH %d-%d => %d\n",from,to,to-from+1); 
         for (j=from; j<=to; j++)
 	{
+	    //printf("j-from %d\n",j-from);
             if (!Sup[j-from])
             {
                 Sup[j-from] = 1;
