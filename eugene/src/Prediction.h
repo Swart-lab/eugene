@@ -168,6 +168,7 @@ class Prediction
   ~Prediction ();
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
+  void  SanityCheck();
   void  DeleteOutOfRange(int s,int e);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
   void  PrintGeneInfo (FILE*);

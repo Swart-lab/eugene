@@ -504,6 +504,26 @@ void Prediction :: clear()
   optimalPath = 0;
 }
 // --------------------------
+// Sanity check
+// --------------------------
+void Prediction :: SanityCheck()
+{
+    for(int i=0; i<nbGene; i++) 
+	{
+	std::vector <Feature*>::iterator featindex;
+	std::vector <Feature*>::reverse_iterator rfeatindex; 	
+  		
+	for (featindex = vGene[i]->vFea.begin(); featindex != vGene[i]->vFea.end(); featindex++)
+	    {
+		//printf("start %i end %i trStart %i trEnd %i\n",(*featindex)->start,(*featindex)->end,vGene[i]->trStart,vGene[i]->trEnd);
+
+		assert((*featindex)->start >= vGene[i]->trStart+1);
+	        assert((*featindex)->end <= vGene[i]->trEnd+1);
+	    }
+	}
+    printf("Prediction Sanity Check passed\n");
+}
+// --------------------------
 //  TrimAndUpdate: 
 // 	- modifies the prediction to Trim UTR according to EST support
 //  	- computes all statistics (length and intron numbers) 
