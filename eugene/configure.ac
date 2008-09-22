@@ -119,6 +119,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/StartWAM/Makefile
 	src/SensorPlugins/Tester/Makefile
 	src/SensorPlugins/Transcript/Makefile
+	src/SensorPlugins/QualData/Makefile
 	plugins/Makefile
 	doc/Makefile
 ])
