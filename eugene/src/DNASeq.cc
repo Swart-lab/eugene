@@ -488,11 +488,17 @@ void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
   
   return;
 }
+
+
+/* (bl0b) define IsCodeN predicate */
+#define CodeN (CodeA|CodeC|CodeG|CodeT)
+#define _IsN(_x) (((_x) & CodeN) == CodeN)
+
 // ---------------------------------------------------------------------
 // test if an acceptor consensus site starts at position i. Returns true if
 // an AG occurs precisely
 // ---------------------------------------------------------------------
-bool DNASeq :: IsAcc(int i,int sens)
+double DNASeq :: IsAcc(int i,int sens)
 {
   int mode = 0;
 
@@ -501,14 +507,28 @@ bool DNASeq :: IsAcc(int i,int sens)
     mode = 2;
   }
   
-  if ((*this)(i,mode) != CodeA) return false;
-  return ((*this)(i+1,mode) == CodeG);
+  /* (bl0b) Recognize degenerated sites */
+  /*if ((*this)(i,mode) != CodeA) return false;*/
+  /*return ((*this)(i+1,mode) == CodeG);*/
+  /* bool return version */
+  //if ( !( (*this)(i,mode) & CodeA) ) return false;
+  //return !!( (*this)(i+1,mode) & CodeG );
+  if( ((*this)(i,mode) & CodeA) && ((*this)(i+1,mode)&CodeG) ) {
+  	int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));
+	if(num_N) {
+		int N_factor = 1 << (num_N<<1);
+		/* N_factor is 4 or 16 */
+		return 1.0 / N_factor;
+	}
+	return 1.0;
+  }
+  return 0.0;
 }
 // ---------------------------------------------------------------------
 // test if a donor consensus site starts at position i. Returns true if
 // a GT/GC may occur
 // ---------------------------------------------------------------------
-bool DNASeq :: IsDon(int i,int sens)
+double DNASeq :: IsDon(int i,int sens)
 {
   int mode = 0;
 
@@ -517,9 +537,24 @@ bool DNASeq :: IsDon(int i,int sens)
     mode = 2;
   }
   
-  if ((*this)(i,mode) != CodeG) return false;
-  return (((*this)(i+1,mode) == CodeT) || ((*this)(i+1,mode) == CodeC));
+  /* (bl0b) Recognize degenerated sites */
+  /*if ((*this)(i,mode) != CodeG) return false;*/
+  /*return (((*this)(i+1,mode) == CodeT) || ((*this)(i+1,mode) == CodeC));*/
+  /* bool return version */
+  //if ( !( (*this)(i,mode) & CodeG) ) return false;
+  //return !!( (*this)(i,mode) & (CodeC|CodeT) );
+  if( ((*this)(i,mode) & CodeG) && ((*this)(i+1,mode) & (CodeC|CodeT)) ) {
+  	int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));
+	if(num_N) {
+		int N_factor = 1 << (num_N<<1);
+		/* N_factor is 4 or 16 */
+		return 1.0 / N_factor;
+	}
+	return 1.0;
+  }
+  return 0.0;
 }
+
 // ---------------------------------------------------------------------
 // test if a Stop Codon starts at position i. Returns the number of
 // possible matches with a STOP codon i.e. T{AA,AG,GA}

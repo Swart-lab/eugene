@@ -80,8 +80,8 @@ class  DNASeq
 
   int    IsStartStop(int i);
   int    IsStopStop(int i);
-  bool   IsAcc(int i,int sens);
-  bool   IsDon(int i,int sens);
+  double IsAcc(int i,int sens);
+  double IsDon(int i,int sens);
   double IsStop(int i,int sens);
   double IsStart(int i,int sens);
   double IsEStart(int i,int sens);
