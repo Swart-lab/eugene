@@ -514,13 +514,14 @@ double DNASeq :: IsAcc(int i,int sens)
   //if ( !( (*this)(i,mode) & CodeA) ) return false;
   //return !!( (*this)(i+1,mode) & CodeG );
   if( ((*this)(i,mode) & CodeA) && ((*this)(i+1,mode)&CodeG) ) {
-  	int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));
-	if(num_N) {
-		int N_factor = 1 << (num_N<<1);
+  	/*int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));*/
+	/*if(num_N) {*/
+		/*int N_factor = 1 << (num_N<<1);*/
 		/* N_factor is 4 or 16 */
-		return 1.0 / N_factor;
-	}
-	return 1.0;
+		/*return 1.0 / N_factor;*/
+	/*}*/
+	/*return 1.0;*/
+	return 1.0 / Degeneracy(i,mode,2);
   }
   return 0.0;
 }
@@ -538,21 +539,26 @@ double DNASeq :: IsDon(int i,int sens)
   }
   
   /* (bl0b) Recognize degenerated sites */
+  
   /*if ((*this)(i,mode) != CodeG) return false;*/
   /*return (((*this)(i+1,mode) == CodeT) || ((*this)(i+1,mode) == CodeC));*/
   /* bool return version */
-  //if ( !( (*this)(i,mode) & CodeG) ) return false;
   //return !!( (*this)(i,mode) & (CodeC|CodeT) );
-  if( ((*this)(i,mode) & CodeG) && ((*this)(i+1,mode) & (CodeC|CodeT)) ) {
-  	int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));
-	if(num_N) {
-		int N_factor = 1 << (num_N<<1);
+  /*if( ((*this)(i,mode) & CodeG) && ((*this)(i+1,mode) & (CodeC|CodeT)) ) {*/
+  	/*int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));*/
+	/*if(num_N) {*/
+		/*int N_factor = 1 << (num_N<<1);*/
 		/* N_factor is 4 or 16 */
-		return 1.0 / N_factor;
-	}
-	return 1.0;
-  }
-  return 0.0;
+		/*return 1.0 / N_factor;*/
+	/*}*/
+	/*return 1.0;*/
+  /*}*/
+  /*return 0.0;*/
+  
+  if ( !((*this)(i,mode) & CodeG) ) return 0.0;
+
+  int count = Code2NumOne[(*this)(i+1,mode) & (CodeT|CodeC)];
+  return ((double)count)/Degeneracy(i,mode,2);
 }
 
 // ---------------------------------------------------------------------
@@ -579,7 +585,7 @@ double DNASeq :: IsStop(int i,int sens)
   if (((*this)(i+1,mode) & CodeG) && ((*this)(i+2,mode) & CodeA))
     count ++;
   
-  return (double)count/ Degeneracy(i,mode);
+  return (double)count/ Degeneracy(i,mode,3);
 }
 // ---------------------------------------------------------------------
 // test if a spliced Stop Codon may start just before position i. 
@@ -717,7 +723,7 @@ double DNASeq :: IsStart(int i,int sens)
 
   if ((First & (CodeA | CodeT | CodeG)) == 0) return 0.0;
 
-  return StartTypePenalty(First) / Degeneracy(i,mode);
+  return StartTypePenalty(First) / Degeneracy(i,mode,3);
 }
 
 // ---------------------------------------------------------------------
@@ -737,18 +743,22 @@ double DNASeq :: IsEStart(int i,int sens)
   if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
   if (((*this)(i,mode) & CodeA) == 0) return 0.0;
 
-  return 1.0 / Degeneracy(i,mode);
+  return 1.0 / Degeneracy(i,mode,3);
 }
 // ---------------------------------------------------------------------
 // Degeneracy : returns the number of possible codons represented by a
 // degenerated codon
 // ---------------------------------------------------------------------
-unsigned char DNASeq :: Degeneracy(int i, int mode)
+unsigned char DNASeq :: Degeneracy(int i, int mode, int len)
 {
-  
-  return (Code2NumOne[(*this)(i+2,mode)] *
-	  Code2NumOne[(*this)(i+1,mode)] *
-	  Code2NumOne[(*this)(i,mode)]);
+  unsigned char ret=1;
+  for(int k=0;k<len;k++) {
+  	ret *= Code2NumOne[(*this)(i+k, mode)];
+  }
+  return ret;
+  //return (Code2NumOne[(*this)(i+2,mode)] *
+  //	  Code2NumOne[(*this)(i+1,mode)] *
+  //	  Code2NumOne[(*this)(i,mode)]);
   
 }
 

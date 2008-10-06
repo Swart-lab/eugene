@@ -60,7 +60,7 @@ class  DNASeq
   void  Print(FILE *);
   void  PrintTr(FILE*,int, int,signed char);
 
-  unsigned char Degeneracy(int i, int sens);
+  unsigned char Degeneracy(int i, int sens, int len);
 
   static const int isTf  = 1;
   static const int isTGf = 2;
