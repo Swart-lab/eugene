@@ -513,6 +513,14 @@ double DNASeq :: IsAcc(int i,int sens)
   /* bool return version */
   //if ( !( (*this)(i,mode) & CodeA) ) return false;
   //return !!( (*this)(i+1,mode) & CodeG );
+
+
+	int count = Code2NumOne[(*this)(i,mode) & CodeA] * Code2NumOne[(*this)(i+1,mode) & (CodeG)];
+	double degen = (double) Degeneracy(i,mode,2);
+	/*fprintf(stderr, "[DEBUG] IsAcc : count=%i degen=%lf\n", count, degen);*/
+	return ((double)count) / degen;
+
+#if 0  
   if( ((*this)(i,mode) & CodeA) && ((*this)(i+1,mode)&CodeG) ) {
   	/*int num_N = _IsN((*this)(i,mode)) + _IsN((*this)(i+1,mode));*/
 	/*if(num_N) {*/
@@ -521,9 +529,12 @@ double DNASeq :: IsAcc(int i,int sens)
 		/*return 1.0 / N_factor;*/
 	/*}*/
 	/*return 1.0;*/
-	return 1.0 / Degeneracy(i,mode,2);
+	double degen = (double) Degeneracy(i,mode,2);
+	fprintf(stderr, "[DEBUG] IsAcc : degen=%lf\n", degen);
+	return 1.0 / degen;
   }
   return 0.0;
+#endif
 }
 // ---------------------------------------------------------------------
 // test if a donor consensus site starts at position i. Returns true if
@@ -555,10 +566,12 @@ double DNASeq :: IsDon(int i,int sens)
   /*}*/
   /*return 0.0;*/
   
-  if ( !((*this)(i,mode) & CodeG) ) return 0.0;
+  /*if ( !((*this)(i,mode) & CodeG) ) return 0.0;*/
 
-  int count = Code2NumOne[(*this)(i+1,mode) & (CodeT|CodeC)];
-  return ((double)count)/Degeneracy(i,mode,2);
+  int count = Code2NumOne[(*this)(i,mode) & CodeG] * Code2NumOne[(*this)(i+1,mode) & (CodeT|CodeC)];
+  double degen = (double) Degeneracy(i,mode,2);
+  /*fprintf(stderr, "[DEBUG] IsDon : count=%i degen=%lf\n", count, degen);*/
+  return ((double)count)/degen;
 }
 
 // ---------------------------------------------------------------------
