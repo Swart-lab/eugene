@@ -14,7 +14,7 @@ foreach TEST $AllGff3Sensors {
 	if {$TEST == "Est"} {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		$OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
-		-D Sensor.${TEST}.use=1 -D Sensor.NG2.use=1 \
+		-D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 \
 		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
 } else {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \

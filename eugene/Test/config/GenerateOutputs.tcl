@@ -77,7 +77,7 @@ foreach sensor $AllSensorsList {
 	if {$sensor == "Est"} {
 	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
 		-A $EUGENE_TEST_PAR \
-		-D Sensor.${sensor}.use=1 -D Sensor.NG2.use=1 \
+		-D Sensor.${sensor}.use=2 -D Sensor.NG2.use=1 \
 		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr }
 	} else {
 	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
@@ -148,7 +148,7 @@ foreach TEST $FunctionalTestList {
 
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
-
+    
     # Save output of software and treat them
     catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) > tmp%FunctionalTest}
 

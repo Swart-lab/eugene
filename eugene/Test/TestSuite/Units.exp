@@ -28,7 +28,7 @@ foreach TEST $AllSensorsList {
 	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
     } else {
 	if {$TEST == "Est"} {
-	   catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 -D Sensor.NG2.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
+	   catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
 	} else {
 	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
 	    catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
