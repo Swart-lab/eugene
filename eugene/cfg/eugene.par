@@ -196,19 +196,35 @@ BlastX.minIn 50
 #BlastX.format   GFF3
 #
 ##### Est sensor parameters #####
-Est.PostProcess	0     # 0 1 OR 2
-Est.PPNumber	5     # For PostProcess = "2"
-Est.estP*	-0.4
-#Est.estP*	-1e4  # forces EuGene to match with est
-Est.estM	6
-Est.utrP*	0.35
-Est.utrM	5
-Est.SpliceBoost* 0.0
-Est.StrongDonor 0.95
-Est.MinDangling 10
-Est.MaxIntron   15000
-Est.MaxInternalIntron   15000
-#Est.format    GFF3
+Est.PostProcess[0]	0     # 0 1 OR 2
+Est.PPNumber[0]	5     # For PostProcess = "2"
+Est.estP*[0]	-0.4
+#Est.estP*[0]	-1e4  # forces EuGene to match with est
+Est.estM[0]	6
+Est.utrP*[0]	0.35
+Est.utrM[0]	5
+Est.SpliceBoost*[0] 0.0
+Est.StrongDonor[0] 0.95
+Est.MinDangling[0] 10
+Est.MaxIntron[0]   15000
+Est.MaxInternalIntron[0]   15000
+Est.FileExtension[0]	.est
+#Est.format[0]    GFF3
+#
+Est.PostProcess[1]	0     # 0 1 OR 2
+Est.PPNumber[1]	5     # For PostProcess = "2"
+Est.estP*[1]	-0.4
+#Est.estP*[1]	-1e4  # forces EuGene to match with est
+Est.estM[1]	6
+Est.utrP*[1]	0.35
+Est.utrM[1]	5
+Est.SpliceBoost*[1] 0.0
+Est.StrongDonor[1] 0.95
+Est.MinDangling[1] 10
+Est.MaxIntron[1]   15000
+Est.MaxInternalIntron[1]   15000
+Est.FileExtension[1]	.est2
+#Est.format[1]    GFF3
 #
 ##### Homology Sensor parameters #####
 Homology.TblastxP*	0

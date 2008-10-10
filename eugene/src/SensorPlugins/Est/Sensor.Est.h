@@ -43,6 +43,7 @@ class SensorEst : public Sensor
   int    ppNumber;
   int    stepid;
   int    N;
+  char  *fileExt; // File name extension
 
   int MinDangling;
   int MaxIntron;

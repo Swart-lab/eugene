@@ -98,11 +98,11 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 
     vPos.clear();
     vESTMatch.clear();
-
+    fileExt        = PAR.getC("Est.FileExtension", N);
     estM           = PAR.getI("Est.estM",N);
     utrM           = PAR.getI("Est.utrM",N);
     ppNumber       = PAR.getI("Est.PPNumber",N);
-    stepid         = PAR.getI("Output.stepid",N);
+    stepid         = PAR.getI("Output.stepid");
     MinDangling    = PAR.getI("Est.MinDangling",N);
     MaxIntron      = PAR.getI("Est.MaxIntron",N);
     MaxIntIntron   = PAR.getI("Est.MaxInternalIntron",N);
@@ -119,7 +119,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
     fflush(stderr);
 
     strcpy(tempname, PAR.getC("fstname"));
-    strcat(tempname, ".est");
+    strcat(tempname, fileExt);
     NumEST = 0;
     Hits * AllEST=NULL;
       
@@ -134,6 +134,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
       strcat(soTerms , filenameSoTerms );
 
       GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+      
       AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
       delete [] soTerms;
       delete geneFeatureSet;
@@ -147,11 +148,6 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 	  AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
 	  HitTable = ESTAnalyzer(AllEST, ESTMatch, estM, &NumEST, X);
 	  fclose(fEST);
-      }
-      else
-      {
-	  fprintf(stderr,"Error while openning %s\n",tempname);
-	  fflush(stderr);
       }
     }
     
