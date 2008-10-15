@@ -315,7 +315,7 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
     if((indexF<(int)vPosF.size()) && (vPosF[indexF] == pos)) {
       d->sig[DATA::Start].weight[Signal::Forward] += ScaleIt(vValF[indexF], startB,startP,isScaled);
       /*fprintf(stderr, "% 5.5i StartF\t%lf\n", pos, X->IsStart(pos, 1));*/
-      d->sig[DATA::Start].weight[Signal::Forward] += log(X->IsStart(pos, 1));
+      d->sig[DATA::Start].weight[Signal::Forward] += log(X->IsEStart(pos, 1));
       d->sig[DATA::Start].weight[Signal::ForwardNo] += ScaleItNo(vValF[indexF], startB,startP,isScaled);
       indexF++;
     }
@@ -332,7 +332,7 @@ void SensorSMachine :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	      /*fprintf(stderr, "% 5.5i %+i StartR\t%lf\n", pos, z, X->IsStart(pos+z, -1));*/
 	/*}*/
       /*fprintf(stderr, "% 5.5i StartR\t%lf\n", pos, X->IsStart(pos-1, -1));*/
-      d->sig[DATA::Start].weight[Signal::Reverse] += log(X->IsStart(pos-1, -1));
+      d->sig[DATA::Start].weight[Signal::Reverse] += log(X->IsEStart(pos-1, -1));
       d->sig[DATA::Start].weight[Signal::ReverseNo] += ScaleItNo(vValR[indexR], startB,startP,isScaled);
       indexR++;
     }
