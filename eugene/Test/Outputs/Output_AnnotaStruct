@@ -2,22 +2,7 @@ Loading sequence...SEQ14AC002535G4G5, 7972 bases read, GC Proportion = 38.0%
 Loading Sensor.AnnotaStruct...done
 Reading gff file....done
 Annotastruct: bad ATG on forward strand
-WARNING: Non AG (nn) acceptor at 8355 (+ strand) !
-WARNING: Non AG (nn) acceptor at 8575 (+ strand) !
-WARNING: Non AG (nn) acceptor at 9005 (+ strand) !
-WARNING: Non AG (nn) acceptor at 9566 (+ strand) !
-WARNING: Non AG (nn) acceptor at 10519 (+ strand) !
-WARNING: Non AG (nn) acceptor at 10895 (+ strand) !
-WARNING: Non AG (nn) acceptor at 11543 (+ strand) !
-WARNING: Non AG (nn) acceptor at 12087 (+ strand) !
 WARNING: Non GT/GC (ca) donor at 2836 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 8471 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 8667 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 9061 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 9655 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 10535 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 11134 (+ strand) !
-WARNING: Non GT/GC (nn) donor at 12005 (+ strand) !
 Optimal path length = -8357.7489
 ---------------------------------------------------------------------
    pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del
