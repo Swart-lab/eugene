@@ -366,12 +366,15 @@ Sensor.Repeat.use	0
 Sensor.AnnotaStruct.use 0
 Sensor.IfElse.use	1
 Sensor.Riken.use	0
+Sensor.QualData.use     0
 #
 # OTHERS SENSORS
 Sensor.GCPlot.use	0
 Sensor.GFF.use		0
 Sensor.Plotter.use	0
 Sensor.Tester.use	0
+#
+Qual.factor*		5.0
 #
 ##### Sensor priorities	 #####
 #  the lower the priority, the first loaded sensor
