@@ -93,7 +93,7 @@ set ArabidopsisTestList {Araset Big}
 ##################### Araset test variables ################################
 set SEQBASE_DIR "/Annotation/Arabidopsis/araset/Genes"
 #"/home/bardou/araset/Genes"
-set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
+set SensorsList(Araset) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX Transcript}
 set SEQ(Araset) {}
 set seq [eval exec ls $SEQBASE_DIR]
 foreach f $seq {
