@@ -25,24 +25,25 @@ it or regenerate `configure' using a newer version of `autoconf'.
 
 The simplest way to compile this package is:
 
-  1. `cd' to the directory containing the package's source code and type
-     `./configure' to configure the package for your system.  If you're
-     using `csh' on an old version of System V, you might need to type
-     `sh ./configure' instead to prevent `csh' from trying to execute
-     `configure' itself.
+  1. type `./reconf' to generate files 'configure' and 'makefile.in'.
+     If you're using `csh' on an old version of System V, you might 
+     need to type `sh ./reconf' instead to prevent `csh' from trying 
+     to execute `reconf' itself.
+
+  2. type `./configure' to configure the package for your system.
 
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
-  2. Type `make' to compile the package.
+  3. Type `make' to compile the package.
 
-  3. Optionally, type `make check' to run any self-tests that come with
+  4. Optionally, type `make check' to run any self-tests that come with
      the package.
 
-  4. Type `make install' to install the programs and any data files and
+  5. Type `make install' to install the programs and any data files and
      documentation.
 
-  5. You can remove the program binaries and object files from the
+  6. You can remove the program binaries and object files from the
      source code directory by typing `make clean'.  To also remove the
      files that `configure' created (so you can compile the package for
      a different kind of computer), type `make distclean'.  There is
@@ -53,6 +54,10 @@ The simplest way to compile this package is:
 
 Compilers and Options
 =====================
+
+   Compilation requirement: use a compiler different from g++ 4.3. To 
+force the usage of a compiler version, for example version 4.2, type:
+      setenv CXX g++-4.2
 
    Some systems require unusual options for compilation or linking that
 the `configure' script does not know about.  You can give `configure'
