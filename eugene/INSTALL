@@ -25,8 +25,8 @@ it or regenerate `configure' using a newer version of `autoconf'.
 
 The simplest way to compile this package is:
 
-  1. type `./reconf' to generate files 'configure' and 'makefile.in'.
-     If you're using `csh' on an old version of System V, you might 
+  1. type `./reconf' to generate the 'configure' and 'makefile.in' files.
+     If you are using `csh' on an old version of System V, you might 
      need to type `sh ./reconf' instead to prevent `csh' from trying 
      to execute `reconf' itself.
 
@@ -55,9 +55,11 @@ The simplest way to compile this package is:
 Compilers and Options
 =====================
 
-   Compilation requirement: use a compiler different from g++ 4.3. To 
-force the usage of a compiler version, for example version 4.2, type:
-      setenv CXX g++-4.2
+   Compilation requirement: don't use g++ version 4.3.  To force the usage of a 
+   specific compiler version, for example version 4.2, type:
+   
+      setenv CXX g++-4.2 (under csh) or
+      export CXX=g++-4.2 (under sh/bash)
 
    Some systems require unusual options for compilation or linking that
 the `configure' script does not know about.  You can give `configure'
