@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5b
+EuGene.version		3.5c
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
