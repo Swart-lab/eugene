@@ -22,7 +22,9 @@
 
 
 #include <string>
-
+#include <climits>
+#include <cstdlib>
+#include <cstring>
 
 class Random {
 

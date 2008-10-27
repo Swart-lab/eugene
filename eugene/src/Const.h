@@ -22,7 +22,10 @@
 #define  CONST_H_INCLUDED
 
 #include <math.h>
-#include <stdlib.h>
+// #include <stdlib.h>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
 
 #define EUGENE_DIR getenv("EUGENEDIR")
 #define DEFAULT_PARA_FILE "cfg/eugene.par"
