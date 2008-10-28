@@ -1,0 +1,30 @@
+Procedure to create a new Eugene release.
+
+0) Prerequise: 'EUGENEDIR' environment variable has to be defined.
+
+
+1) To update the cvs eugene directory, move to $EUGENEDIR and
+   type `cvs update'.
+
+2) Edit $EUGENEDIR/cfg/eugene.par and update the version field:
+   	EuGene.version		3.5c
+
+3) Edit $EUGENEDIR/configure.ac file and update the version:
+   	AM_INIT_AUTOMAKE(eugene, 3.5c)
+
+4) To check the new release is OK, compile and launch tests:
+	make clean
+	./reconf 
+	./configure
+	make
+	make check
+
+5) Commit modified files:
+   	cvs commit cfg/eugene.par configure.ac Makefile.in
+
+6) Create the new release:
+   	cvs tag 'v3_5c_27Oct08'
+
+7) Type `make dist' to create a new tarball file in the 
+   $EUGENEDIR directory, named for instance eugene-3.5c.tar.gz.
+    Put the tarball in the CVS repository. (Section 'Files')
