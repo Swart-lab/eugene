@@ -50,18 +50,42 @@ RUNTESTDEFAULTFLAGS =  --tool TestSuite --srcdir Test --objdir . --outdir Test/T
 
 
 ############## Distribute
-EXTRA_DIST = reconf configure $(srcdir)/config/config.* \
-	     $(srcdir)/config/install-sh \
+EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
              $(srcdir)/config/m* \
-	     $(srcdir)/doc/EuGeneDoc.pdf \
 	     $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* \
 	     $(srcdir)/doc/GenerateDoc.tcl \
 	     $(srcdir)/doc/Doc.tex \
+	     $(srcdir)/doc/Fiches.tex \
+	     $(srcdir)/doc/PCCSC.tex \
+	     $(srcdir)/doc/graph.* \
 	     $(srcdir)/doc/Doc_*.tex \
 	     $(srcdir)/doc/ParaOptimization.pdf \
 	     $(srcdir)/doc/ParaOptimization.fig \
-	     $(srcdir)/src/getopt.h \
+	     $(srcdir)/doc/Sequences/At5g18830.* \
+	     $(srcdir)/doc/Models/Bouml/1* \
+	     $(srcdir)/doc/Models/Bouml/2.session \
+	     $(srcdir)/doc/Models/Bouml/Bouml.prj \
+	     $(srcdir)/doc/Models/Bouml/cpp_includes \
+	     $(srcdir)/doc/Models/Bouml/generation_settings \
+	     $(srcdir)/doc/Models/Bouml/idl_includes \
+	     $(srcdir)/doc/Models/Bouml/java_imports \
+	     $(srcdir)/doc/Models/Bouml/python_imports \
+	     $(srcdir)/doc/Models/Bouml/stereotypes \
+	     $(srcdir)/doc/Models/Bouml/tools \
+	     $(srcdir)/src/SensorPlugins/0_SensorTk/GetData/WAM.README \
+	     $(srcdir)/src/SensorPlugins/BlastX/GetData/blast_parser.pl \
+	     $(srcdir)/src/SensorPlugins/BlastX/GetData/README \
+	     $(srcdir)/src/SensorPlugins/Est/norm4sim4.awk \
+	     $(srcdir)/src/SensorPlugins/Est/sim4.patch \
+	     $(srcdir)/src/SensorPlugins/Homology/GetData/ParseBlastXML.pl \
+	     $(srcdir)/src/SensorPlugins/Homology/GetData/README \
+	     $(srcdir)/src/SensorPlugins/MarkovIMM/GetData/CEM.cc \
+	     $(srcdir)/src/SensorPlugins/MarkovIMM/GetData/EndianConv.h \
+	     $(srcdir)/src/SensorPlugins/User/*.* \
+	     $(srcdir)/src/SensorPlugins/ATGpr/*.* \
 	     $(srcdir)/cfg/eugene.par \
+	     $(srcdir)/cfg/araclean50.par \
+	     $(srcdir)/cfg/araclean80.par \
 	     $(srcdir)/cfg/sofa.obo \
 	     $(srcdir)/models/*.dist \
 	     $(srcdir)/models/*.mat \
@@ -72,7 +96,20 @@ EXTRA_DIST = reconf configure $(srcdir)/config/config.* \
              $(srcdir)/web/Javascripts/diap.js \
              $(srcdir)/web/Images/*.jpg \
              $(srcdir)/Procedures/Eval/egn_evalpred.pl \
-             $(srcdir)/Procedures/Get/egn_*
+             $(srcdir)/Procedures/Get/egn_* \
+             $(srcdir)/Procedures/Dev/sensor_plugin_builder.pl \
+             $(srcdir)/Procedures/Format/*.pl \
+             $(srcdir)/Procedures/Format/ParamParser.pm \
+             $(srcdir)/Procedures/Format/gff2coord.awk \
+             $(srcdir)/Procedures/Format/EuGeneAdapt/*.* \
+             $(srcdir)/Procedures/Format/EuGeneAdapt/seqlogo \
+             $(srcdir)/Test/TestDoc.tex \
+             $(srcdir)/Test/README \
+             $(srcdir)/Test/TestSuite/*.* \
+             $(srcdir)/Test/Sequences/SYNO_ARATH.* \
+             $(srcdir)/Test/config/*.* \
+             $(srcdir)/Procedures/Format/EuGeneAdapt/GFF/*.pm \
+             $(srcdir)/m4/Makefile.am
 
 ############## Install / Uninstall
 uninstall-local:
