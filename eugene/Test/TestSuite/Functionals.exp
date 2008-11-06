@@ -52,7 +52,7 @@ foreach TEST $FunctionalTestList {
 	if {$test_std==1 && $test_png==1} {
  	    pass "${TEST}"
 	    exec rm $IMG($TEST)
-	    catch {exec rm $TRACE_DIR/$FILE_REF($TEST))}
+	    catch {exec rm $TRACE_DIR/$FILE_REF($TEST)}
 	} else {
 	    if {$test_std != 1} {
 		fail "${TEST} (text)"

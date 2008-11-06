@@ -4,7 +4,7 @@ foreach TEST $AllGff3Sensors {
     puts "Performing $TEST unit test Gff3"
 
 # Run eugene
-    if {$TEST != "Est" } {
+    if {$TEST != "Est" && $TEST != "Tester"} {
        eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 	    $OPTIONS(Sensor) \
 	    -D Sensor.${TEST}.use=1 -D ${TEST}.format=GFF3 $SEQ_DIR/$SEQ(Sensor).tfa \
