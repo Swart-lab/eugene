@@ -514,66 +514,6 @@ proc BackQuoteLine {OldLine} {
     return $NewLine
 }
 
-
-#############################################################################
-# Procedure   : PrepareReference
-# Description : Modify an output file in a reference file for test:
-#                 - remove the 2 first lines related to version number
-#                 - move the end of stderr bad placed at the end of the file
-#                 - back quote '+', '(', ')', '|'
-#               Argument : FileName = name of an output file obtained
-#                          with a command eugene -g ... >& FileName
-#                          (write first all stderr, then all stdout)
-# BEWARE      : MUST be an output with graph (-g command argument)
-#############################################################################
-proc PrepareReference {stdout stderr FileName} {
-
-# Remove the first lines related to version number
-    RemoveFirstLines $stderr
-
-# Copy stderr and stdout in the good order in a FileName
-
-    set out [open $stdout {RDONLY}]
-    set err [open $stderr {RDONLY}]
-    set f [open $FileName w]
-    set content ""
-
-    set newline [gets $err]
-    while { ![string match "*Seq         Type    S*" $newline] } {
-	set content "${content}${newline}\n"
-	set newline [gets $err]
-    }
-    set content "${content}${newline}\n"
-    set newline [gets $err]
-    set content "${content}${newline}\n"
-
-    set newline [read -nonewline $out]
-    set content "${content}${newline}\n"
-
-    set newline [read -nonewline $err]
-    set content "${content}${newline}"
-
-    puts $f $content
-
-    close $f
-    close $out
-    close $err
-
-# Place a '.' at the end of line
-# Back quote '+', '(', ')', '|'
-    set f [open $FileName r]
-    set new_content ""
-    foreach line [split [read -nonewline $f] \n] {
-	set line [BackQuoteLine $line]
-	set new_content "${new_content}${line}.\n"
-    }
-    close $f
-    set f [open $FileName w]
-    puts $f $new_content
-    close $f
-}
-
-
 #############################################################################
 # Procedure   : RemoveFirstLines
 # Description : Remove the 2 first lines in the file given in argument
