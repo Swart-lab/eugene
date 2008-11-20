@@ -23,7 +23,7 @@ Procedure to create a new Eugene release.
    	cvs commit cfg/eugene.par configure.ac Makefile.in
 
 6) Create the new release:
-   	cvs tag 'v3_5c_27Oct08'
+   	cvs tag 'v3_5c_27Oct2008'
 
 7) Type `make dist' to create a new tarball file in the 
    $EUGENEDIR directory, named for instance eugene-3.5c.tar.gz.
