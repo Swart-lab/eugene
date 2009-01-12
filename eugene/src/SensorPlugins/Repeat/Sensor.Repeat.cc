@@ -99,12 +99,8 @@ void SensorRepeat :: ReadRepeat (char *name, int SeqLen)
 // -----------------------------
 void SensorRepeat :: ReadRepeatGff3 (char *name, int SeqLen) 
 {
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-  char * soTerms = new char[FILENAME_MAX+1];
-  strcpy(soTerms , PAR.getC("eugene_dir"));
-  strcat(soTerms , filenameSoTerms );
   int deb, fin;
-  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name);
   vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
@@ -134,7 +130,6 @@ void SensorRepeat :: ReadRepeatGff3 (char *name, int SeqLen)
   }
   fprintf(stderr,"done\n");
   delete geneFeatureSet;
-  delete [] soTerms;
 }
 
 // ----------------------

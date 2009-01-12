@@ -31,40 +31,34 @@ extern Parameters PAR;
 // ----------------------
 SensorPepSignal :: SensorPepSignal (int n, DNASeq *X) : Sensor(n)
 {
-char *seqname;
-char tempname[FILENAME_MAX+1];
+  char *seqname;
+  char tempname[FILENAME_MAX+1];
+  seqname = PAR.getC("fstname");
+  strcpy(tempname,seqname);
+  strcat(tempname,".psignal");
+  fprintf(stderr, "Probing PepSignal (starts)....");  
+  fflush(stderr);
 
-	seqname = PAR.getC("fstname");
-	strcpy(tempname,seqname);
-	strcat(tempname,".psignal");
-	fprintf(stderr, "Probing PepSignal (starts)....");  
-	fflush(stderr);
+  inputFormat_ = to_string(PAR.getC("PepSignal.format", GetNumber(),1));
 
-	inputFormat_ = to_string(PAR.getC("PepSignal.format", GetNumber(),1));
-
-	if ( inputFormat_ == "GFF3" )
-	{
-	  strcat(tempname,".gff3");
-	  ReadPepSignalGff3(tempname, X->SeqLen);
-	}
-	else
-	{
-	   ReadPepSignalStarts(tempname, X->SeqLen);
-	}
-	fprintf(stderr,"done\n");
-	fflush(stderr);
-	CheckStart(X,vPosF, vPosR);
+  if ( inputFormat_ == "GFF3" )
+  {
+    strcat(tempname,".gff3");
+    ReadPepSignalGff3(tempname, X->SeqLen);
+  }
+  else
+  {
+     ReadPepSignalStarts(tempname, X->SeqLen);
+  }
+  fprintf(stderr,"done\n");
+  fflush(stderr);
+  CheckStart(X,vPosF, vPosR);
 }
 
 void SensorPepSignal :: ReadPepSignalGff3 (char name[FILENAME_MAX+1], int Len)
 {
   
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-  char * soTerms = new char[FILENAME_MAX+1];
-  strcpy(soTerms , PAR.getC("eugene_dir"));
-  strcat(soTerms , filenameSoTerms );
-  
-  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name);
   vector <GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
@@ -95,7 +89,6 @@ void SensorPepSignal :: ReadPepSignalGff3 (char name[FILENAME_MAX+1], int Len)
     it++;
   }
   delete geneFeatureSet;
-  delete [] soTerms;
 }
 
 // --------------------------

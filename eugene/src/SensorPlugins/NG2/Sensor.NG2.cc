@@ -38,13 +38,14 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
     
   fprintf(stderr, "Reading splice site file (NetGene2)...........");  
   fflush(stderr);
- 
+
+  strcpy(tempname,PAR.getC("fstname"));
+  strcat(tempname,".splices");
+
   inputFormat_ = to_string(PAR.getC("NG2.format", GetNumber(),1));
 
   if ( inputFormat_ == "GFF3" )
   {
-    strcpy(tempname,PAR.getC("fstname"));
-    strcat(tempname,".splices");
     strcat(tempname,".gff3");
     ReadNG2Gff3(tempname, X->SeqLen);
 	
@@ -53,8 +54,6 @@ SensorNG2 :: SensorNG2 (int n, DNASeq *X) : Sensor(n)
   }
   else
   {
-    strcpy(tempname,PAR.getC("fstname"));
-    strcat(tempname,".splices");
     ReadNG2F(tempname, X->SeqLen);
     fprintf(stderr,"forward,");
     fflush(stderr);
@@ -115,7 +114,8 @@ void SensorNG2 :: ReadNG2F(char name[FILENAME_MAX+1], int SeqLen)
   char altsacc[10],altsdon[10];
   int i, j,pos;
   
-  if (!(fp = fopen(name, "r"))) {
+  // FileOpen()??  
+if (!(fp = fopen(name, "r"))) {
     fprintf(stderr, "cannot open splice sites file %s\n", name);
     exit(2);
   }
@@ -193,12 +193,7 @@ void SensorNG2 :: ReadNG2R(char name[FILENAME_MAX+1], int SeqLen)
 // -------------------------------------
 void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
 {
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-  char * soTerms = new char[FILENAME_MAX+1];
-  strcpy(soTerms , PAR.getC("eugene_dir"));
-  strcat(soTerms , filenameSoTerms );
-  
-  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  GeneFeatureSet * geneFeatureSet     = new GeneFeatureSet (name); 
   vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
@@ -252,7 +247,6 @@ void SensorNG2 :: ReadNG2Gff3(char name[FILENAME_MAX+1], int SeqLen)
     i++;
   }
   delete geneFeatureSet;
-  delete [] soTerms;
 }
 
 

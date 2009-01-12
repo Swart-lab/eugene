@@ -122,13 +122,9 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   if ( inputFormat_ == "GFF3" )
   {
     strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-    char * soTerms = new char[FILENAME_MAX+1];
-    strcpy(soTerms , PAR.getC("eugene_dir"));
-    strcat(soTerms , filenameSoTerms );
-    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
     ReadHomologyGff3(*geneFeatureSet, X, MaxHitLen, PROTMAT);
-	delete geneFeatureSet;
+    delete geneFeatureSet;
   }
   else
   {

@@ -39,15 +39,12 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
   fprintf(stderr, "Reading start file (NetStart).................");
   fflush(stderr);
   
-  
-  
-  
-   
+  strcpy(tempname,PAR.getC("fstname"));
+  strcat(tempname,".starts");
+
   inputFormat_ = to_string(PAR.getC("NStart.format", GetNumber(),1));
   if ( inputFormat_ == "GFF3" )
   {
-    strcpy(tempname,PAR.getC("fstname"));
-    strcat(tempname,".starts");
     strcat(tempname,".gff3");
     ReadNStartGff3(tempname, X->SeqLen);
     fprintf(stderr,"forward, reverse done\n");
@@ -55,8 +52,6 @@ SensorNStart :: SensorNStart (int n, DNASeq *X) : Sensor(n)
   }
   else
   {
-    strcpy(tempname,PAR.getC("fstname"));
-    strcat(tempname,".starts");
     ReadNStartF(tempname, X->SeqLen);
     fprintf(stderr,"forward,");
     fflush(stderr);
@@ -160,12 +155,7 @@ void SensorNStart :: ReadNStartR (char name[FILENAME_MAX+1], int Len)
 void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
 {
   
-  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-  char * soTerms = new char[FILENAME_MAX+1];
-  strcpy(soTerms , PAR.getC("eugene_dir"));
-  strcat(soTerms , filenameSoTerms );
-  
-  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name, soTerms);
+  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (name);
   vector< GeneFeature *>::iterator it = geneFeatureSet->getIterator();
   int nbElement=geneFeatureSet->getNbFeature();
   //geneFeatureSet->printFeature();
@@ -202,7 +192,6 @@ void SensorNStart :: ReadNStartGff3 (char name[FILENAME_MAX+1], int Len)
     it++;
   }
   delete geneFeatureSet;
-  delete [] soTerms;
 }
 
 

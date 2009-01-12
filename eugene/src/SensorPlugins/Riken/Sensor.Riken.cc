@@ -75,20 +75,14 @@ SensorRiken :: SensorRiken (int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
   strcat(tempname, ".riken");
-  
   inputFormat_ = to_string(PAR.getC("Riken.format", GetNumber(),1));
   if ( inputFormat_ == "GFF3" )
   {
-    strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-    char * soTerms = new char[FILENAME_MAX+1];
-    strcpy(soTerms , PAR.getC("eugene_dir"));
-    strcat(soTerms , filenameSoTerms );
 
-    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    strcat(tempname,".gff3");
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
     readRikenGff3 (*geneFeatureSet, X, RAFLtmp);
     delete geneFeatureSet;
-    delete [] soTerms;
   }
   else
   {

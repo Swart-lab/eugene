@@ -123,14 +123,9 @@ void SensorGFF :: Init (DNASeq *X)
    if ( inputFormat_ == "GFF3" )
   {
     strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,0);
-    char * soTerms = new char[FILENAME_MAX+1];
-    strcpy(soTerms , PAR.getC("eugene_dir"));
-    strcat(soTerms , filenameSoTerms );
 
-    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname) ;
     ReadGFF3(*geneFeatureSet, X);
-    delete [] soTerms;
     delete geneFeatureSet;
   }
   else
