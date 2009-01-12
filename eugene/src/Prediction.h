@@ -116,9 +116,7 @@ class Prediction
   inline unsigned char GetESTMatch(int i) {return (ESTMatch ? ESTMatch[i] : 0);};
   void  clear			(); 
   void  PrintGff        (FILE*, char*);
-//SEB
   void  PrintGff3        (std::ofstream&, char*, char);
-//SEB
   void  PrintEgnL       (FILE*, char*, int a=0);
   void  PrintEgnS       (FILE*);
   void  PrintEgnD       (FILE*);
