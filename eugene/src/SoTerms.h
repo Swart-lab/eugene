@@ -30,9 +30,9 @@ class SoTerms
   public:
   
     // Constructors/Destructors
-    //SoTerms ( );
     SoTerms();
     ~SoTerms ( );
+    void loadSoFile();
     void loadFile( char * filename );
     bool existsId   (string name);
     bool existsName (string name);

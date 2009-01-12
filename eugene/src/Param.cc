@@ -415,6 +415,7 @@ void Parameters :: ReadPar(std::string  para_file_name)
       key = new char[FILENAME_MAX+1];
       val = new char[FILENAME_MAX+1];
       if(sscanf(line, "%s %s", key, val) == 2) {
+        // SMachine.cmd		"splicemachine.pl "
 	if (val[0] == '"') {
 	  char *from = index(line,'"');
 	  char *to = rindex(from,'"');
@@ -437,7 +438,7 @@ void Parameters :: ReadPar(std::string  para_file_name)
   }
 
   fclose(fp);
-
+  // Check eugene version and the parameter file version are the same 
   if(strcmp(getC("EuGene.version"), VERSION)) {
     fprintf(stderr, "\nIncorrect parameter file version : %s\n", getC("EuGene.version"));
     fprintf(stderr,"Version %s required\n", VERSION);
@@ -480,6 +481,7 @@ bool Parameters::probeKey(char *key, int index){
 // ------------------------
 char* Parameters :: getC(const char *key, int index, int sloppy)
 {
+  // case where there is a unique value for 'key' 
   if (!index && m.count(key))
     return (char*)m[key];
 
@@ -489,10 +491,11 @@ char* Parameters :: getC(const char *key, int index, int sloppy)
 
   strcpy(altkey,key);
   sprintf(altkey+len,"[%d]",index);
-
+  // get the value for key[index]
   if (m.count(altkey)) {
     charptr = (char*)m[altkey];
     delete [] altkey;
+
     return charptr;
   }
   else 
@@ -542,6 +545,7 @@ int Parameters :: getI(const char *key, int index, int sloppy)
   
 // ------------------------
 //  Get Use.Sensor.
+//  Put in key and val respectively the name and the priority of the next used sensor
 // ------------------------
 int Parameters :: getUseSensor(char **key, int *val)
 {

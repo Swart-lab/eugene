@@ -8,7 +8,6 @@
 
 //Feature class:
 #include "Target.h"
-#include "Gap.h"
 #include "Const.h"
     
 /**

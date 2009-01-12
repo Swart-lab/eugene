@@ -9,6 +9,7 @@
 #include "GeneFeature.h"
 #include "SoTerms.h"
 #include "Const.h"
+#include "Param.h"
 
 using namespace std;
 
@@ -30,8 +31,7 @@ class GeneFeatureSet
     static SoTerms * soTerms_ ;
     // Constructors/Destructors
     GeneFeatureSet ( );
-    GeneFeatureSet ( char* featuresFilename, char* soTermsFilename );
-    GeneFeatureSet ( char* soTermsFilename );  
+    GeneFeatureSet ( char* featuresFilename);
     virtual ~GeneFeatureSet ( );
     bool existsGeneFeature ( string geneFeatureId ) ;
     void printFeature();

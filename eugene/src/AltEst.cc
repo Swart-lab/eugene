@@ -392,14 +392,8 @@ AltEst :: AltEst(DNASeq *X)
   if ( inputFormat == "GFF3" )
   {
     strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,1);
-    char * soTerms = new char[FILENAME_MAX+1];
-    strcpy(soTerms , PAR.getC("eugene_dir"));
-    strcat(soTerms , filenameSoTerms );
-    
-    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
     AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
-    delete [] soTerms;
     delete geneFeatureSet;
   }
   else

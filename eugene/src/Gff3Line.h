@@ -85,17 +85,26 @@ class Gff3Line
     class Attribute
     {
       std::string liste_;
+      
       public :
         Attribute(std::string attribut)
-        {  liste_ = attribut;  }
+        {  
+          liste_ = attribut;  
+        }
         ~Attribute()
         {}
+
         ///ajoute un attribut a la liste
         void addAttribute(std::string attribut)
-        {  liste_ += ";" + attribut;  }
+        {  
+          liste_ += ";" + attribut;  
+        }
+        
         ///renvoie la liste d'attributs sous forme d'une chaine
         std::string str()
-        {  return liste_;  }
+        {
+          return liste_;  
+        }
     };
 
 //les attributs:

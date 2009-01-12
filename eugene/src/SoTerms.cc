@@ -18,6 +18,9 @@
     *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "SoTerms.h"
+#include "Param.h"
+
+extern Parameters PAR;
 
 // -----------------------
 //  Default constructeur
@@ -32,6 +35,21 @@ SoTerms::~SoTerms ( )
   idToName_.clear();
   nameToId_.clear();
 }
+
+
+void SoTerms::loadSoFile( )
+{
+  // Get the SoTerm file path
+  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", 0, 0);
+  char * soTerms         = new char[FILENAME_MAX+1];
+  strcpy(soTerms, PAR.getC("eugene_dir"));
+  strcat(soTerms, filenameSoTerms );
+
+  loadFile(soTerms);
+
+  delete []soTerms;
+}
+
 
 void SoTerms::loadFile( char * filename )
 {

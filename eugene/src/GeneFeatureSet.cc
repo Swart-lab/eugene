@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "GeneFeatureSet.h"
 
+extern Parameters PAR;
+
 // -----------------------
 //  Default constructeur
 // -----------------------
@@ -28,21 +30,18 @@ GeneFeatureSet::GeneFeatureSet()
 //Static attribut
 SoTerms *  GeneFeatureSet::soTerms_= new SoTerms ();
 
-//Constructor
-GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename ) 
+// Constructor
+GeneFeatureSet::GeneFeatureSet ( char* featuresFilename ) 
 {
   fflush(stderr);
   lastIndex_=0;
-  // si premier object geneFeatureSet il faut initialiser la variable de classe
+  // if First GeneFeatureSet instanciation => Initalization of class variable
   if ( GeneFeatureSet::soTerms_->size() == 0 ) {
-    GeneFeatureSet::soTerms_->loadFile(soTermsFilename);
+    GeneFeatureSet::soTerms_->loadSoFile();
   }
   FILE *fp;
-  if (!(fp = fopen(featuresFilename, "r"))) {
-    fprintf(stderr, "Class GeneFeatureSet : cannot open file %s\n", featuresFilename);
-  }
-  else
-  {
+  fp = FileOpen(NULL, featuresFilename, "r", PAR.getI("EuGene.sloppy"));
+  if (fp) {
   int i=0;
   char line[MAX_GFF_LINE];
   while(fp  &&  fgets (line, 1500, fp) != NULL) 
@@ -73,17 +72,6 @@ GeneFeatureSet::GeneFeatureSet ( char* featuresFilename, char* soTermsFilename )
  }
 }
 
-//Constructor
-GeneFeatureSet::GeneFeatureSet (char* soTermsFilename ) 
-{
- 
-  // si premier object geneFeatureSet il faut initialiser la variable de classe
-  if ( GeneFeatureSet::soTerms_->size() == 0 ) {
-    //cout<<"Load SoTerms"<<endl;
-    GeneFeatureSet::soTerms_->loadFile(soTermsFilename);
-  }
-
-}
 
 // -----------------------
 //  Destructeur
