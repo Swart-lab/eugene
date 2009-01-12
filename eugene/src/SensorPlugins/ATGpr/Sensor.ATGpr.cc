@@ -95,8 +95,8 @@ void SensorATGpr :: ReadATGprF (char name[FILENAME_MAX+1], int Len)
   int i,j = -1;
   double force;
   
-  if (!(fp = fopen(name, "r"))) {
-    fprintf(stderr, "cannot open ATGpr file %s\n", name);
+  fp = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+  if (!fp) {
     exit(2);
   }
   
