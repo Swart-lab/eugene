@@ -76,14 +76,14 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
     char   tempname[FILENAME_MAX+1];
     FILE * fblast;
 
-    N            = n;
+    N            = n; 
     type         = Type_Content;
     HitTable     = NULL;
     sloppy       = PAR.getI("EuGene.sloppy");
     ppNumber     = PAR.getI("BlastX.PPNumber",N);
     stepid       = PAR.getI("Output.stepid");
     minIn        = PAR.getI("BlastX.minIn");
-    levels       = PAR.getC("BlastX.levels",  N);
+    levels       = PAR.getC("BlastX.levels",  N); //Ex: 012
     intronlevels = PAR.getC("BlastX.activegaps",  N);
     blastxM      = PAR.getI("BlastX.blastxM*",N);
 
@@ -102,23 +102,18 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
         strcat(tempname,".blast");
         i = strlen(tempname);
         tempname[i]   = levels[k];
-        tempname[i+1] = 0;
+        tempname[i+1] = 0; // name.blast1
 	
 	if ( inputFormat_ == "GFF3" )
 	{
 	  strcat(tempname,".gff3");
-	  char * filenameSoTerms = PAR.getC("Gff3.SoTerms", GetNumber(),0);
-	  char * soTerms = new char[FILENAME_MAX+1];
-	  strcpy(soTerms , PAR.getC("eugene_dir"));
-	  strcat(soTerms , filenameSoTerms );
-
-	  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+	
+	  GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
           //geneFeatureSet->printFeature();
 	  fprintf(stderr,"%c ",levels[k]);
 	  fflush(stderr);
 	  
 	  AllProt = AllProt->ReadFromGeneFeatureSet(*geneFeatureSet, &NumProt, (levels[k] - '0'), blastxM, X);
-	  delete [] soTerms;
 	  delete geneFeatureSet;
 	}
 	else
@@ -193,8 +188,7 @@ void SensorBlastX :: Init (DNASeq *X)
     keyBXLevel[7] = PAR.getD("BlastX.level7*", N, sloppy);
     keyBXLevel[8] = PAR.getD("BlastX.level8*", N, sloppy);
     keyBXLevel[9] = PAR.getD("BlastX.level9*", N, sloppy);
- 
- 
+
     ProtMatch      = new float[Len+1];
     ProtMatchLevel = new float[Len+1];
     ProtMatchPhase = new int[Len+1];
