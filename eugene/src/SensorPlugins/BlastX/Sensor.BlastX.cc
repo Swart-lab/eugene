@@ -85,6 +85,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
     minIn        = PAR.getI("BlastX.minIn");
     levels       = PAR.getC("BlastX.levels",  N);
     intronlevels = PAR.getC("BlastX.activegaps",  N);
+    blastxM      = PAR.getI("BlastX.blastxM*",N);
 
     Hits   *AllProt = NULL;
     NumProt = 0;
@@ -116,7 +117,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
 	  fprintf(stderr,"%c ",levels[k]);
 	  fflush(stderr);
 	  
-	  AllProt = AllProt->ReadFromGeneFeatureSet(*geneFeatureSet, &NumProt, (levels[k] - '0'), 20, X);
+	  AllProt = AllProt->ReadFromGeneFeatureSet(*geneFeatureSet, &NumProt, (levels[k] - '0'), blastxM, X);
 	  delete [] soTerms;
 	  delete geneFeatureSet;
 	}
@@ -127,7 +128,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
   
 	  if (fblast)
 	  {
-	      AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), 20, X->SeqLen);
+	      AllProt = AllProt->ReadFromFile(fblast, &NumProt, (levels[k] - '0'), blastxM, X->SeqLen);
 	      fprintf(stderr,"%c ",levels[k]);
 	      fflush(stderr);
 	      fclose(fblast);
@@ -192,7 +193,8 @@ void SensorBlastX :: Init (DNASeq *X)
     keyBXLevel[7] = PAR.getD("BlastX.level7*", N, sloppy);
     keyBXLevel[8] = PAR.getD("BlastX.level8*", N, sloppy);
     keyBXLevel[9] = PAR.getD("BlastX.level9*", N, sloppy);
-    blastxM       = PAR.getI("BlastX.blastxM*",N);
+ 
+ 
     ProtMatch      = new float[Len+1];
     ProtMatchLevel = new float[Len+1];
     ProtMatchPhase = new int[Len+1];
