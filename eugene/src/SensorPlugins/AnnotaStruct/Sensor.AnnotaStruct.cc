@@ -192,15 +192,10 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   strcat(tempname, fileExt);
   if ( inputFormat_ == "GFF3" )
   {
+    
     strcat(tempname,".gff3");
-    char * filenameSoTerms = PAR.getC("Gff3.SoTerms",0,0);
-    char * soTerms = new char[FILENAME_MAX+1];
-    strcpy(soTerms , PAR.getC("eugene_dir"));
-    strcat(soTerms , filenameSoTerms );
-
-    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname, soTerms);
+    GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
     ReadAnnotaStructGff3(*geneFeatureSet,  X->SeqLen);
-    delete [] soTerms;
     delete geneFeatureSet;
   }
   else
