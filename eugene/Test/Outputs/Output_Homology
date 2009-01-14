@@ -2,6 +2,8 @@ Loading sequence...SEQ14AC002535G4G5, 7972 bases read, GC Proportion = 38.0%
 Loading Sensor.Homology.......done
 Reading protmat file.........done
 Reading tblastx data.........done
+Reading protmat file.........done
+Reading tblastx data.........done
 Optimal path length = 0.9163
 ---------------------------------------------------------------------
    pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del

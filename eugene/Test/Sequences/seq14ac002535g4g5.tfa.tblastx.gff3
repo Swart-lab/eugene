@@ -1,2 +1,1 @@
 seq14	tblastx	match	129	236	2e-25	+	.	ID=tblastx:seq14.1;Dbxref=tblastx:ATKIN2_100_207;Target=ATKIN2_100_207 100 207 +;Gap=M108;frame_hit=+3;score_hit=118;target_sequence=KNVRDQQECLPSRSGRWQS*GTLSLLEQSTDRLFKL;
-seq14	tblastx	match	86	130	3e-63	-	.	ID=tblastx:seq14.2;Dbxref=tblastx:ATKIN2_102_58;Target=ATKIN2_102_58 102 58 +;Gap=M-43;frame_hit=-2;score_hit=74;target_sequence=FQIFFSCKIVFDVCF;

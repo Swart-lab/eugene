@@ -24,20 +24,24 @@ foreach TEST $AllSensorsList {
     puts "Performing $TEST unit test"
 
     # Run eugene
-    if {$TEST != "Est" && $TEST != "Tester"} {
-	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
+    if {$TEST == "Est"} {
+	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std } 
     } else {
-	if {$TEST == "Est"} {
-	   catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
+	if {$TEST == "Homology"} {
+	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=2 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
 	} else {
-	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
-	    catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
-     	    catch {exec rm  tmp%stderr tmp%stdout} 
+	    if {$TEST == "Tester"} {
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
+		catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
+		catch {exec rm  tmp%stderr tmp%stdout} 
+	    } else {
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
+	    }
 	}
-	
     }
+
     if {$TEST == "Tester"} {
-	set out  [open exSeqHom.egn.debug {RDONLY}]
+	set out [open exSeqHom.egn.debug {RDONLY}]
     } else {
 	set out [open $SEQ(Sensor).egn.debug {RDONLY}]
     }

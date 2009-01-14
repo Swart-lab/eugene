@@ -4,25 +4,31 @@ foreach TEST $AllGff3Sensors {
     puts "Performing $TEST unit test Gff3"
 
 # Run eugene
-    if {$TEST != "Est" && $TEST != "Tester"} {
-       eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
-	    $OPTIONS(Sensor) \
-	    -D Sensor.${TEST}.use=1 -D ${TEST}.format=GFF3 $SEQ_DIR/$SEQ(Sensor).tfa \
-	2> tmp%stderr
-
-} else {
-	if {$TEST == "Est"} {
+    if {$TEST == "Est"} {
+	eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+	    $OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
+	    -D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 \
+	    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
+    } else {
+	if {$TEST == "Homology"} {
 	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
 		$OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
-		-D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 \
+		-D Sensor.${TEST}.use=2 \
 		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr
-} else {
-	    eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
-		$OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
-		-D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta  \
-		2> tmp%stderr
-}
-}
+	} else {
+	    if {$TEST == "Tester"} {
+		eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		    $OPTIONS(Sensor) -D ${TEST}.format=GFF3 \
+		    -D Sensor.${TEST}.use=1 $SEQ_DIR/exSeqHom.fasta  \
+		    2> tmp%stderr
+	    } else {
+		eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		    $OPTIONS(Sensor) \
+		    -D Sensor.${TEST}.use=1 -D ${TEST}.format=GFF3 $SEQ_DIR/$SEQ(Sensor).tfa \
+		    2> tmp%stderr
+	    }
+	}
+    }
 
     set out [open $SEQ(Sensor).egn.debug {RDONLY}]
     set err [open tmp%stderr {RDONLY}]
