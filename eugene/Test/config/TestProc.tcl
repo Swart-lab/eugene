@@ -244,10 +244,20 @@ set NewValue1(Est.StrongDonor\[1\])	0.95
 set NewValue1(Est.MinDangling\[1\])  10
 set NewValue1(Est.MaxIntron\[1\])    15000
 set NewValue1(Est.FileExtension\[1\]) .est2
+
 ##### Homology Sensor parameters #####
-set NewValue1(Homology.TblastxP*) 	0
-set NewValue1(Homology.TblastxB*) 	0.0595
-set NewValue1(Homology.protmatname)	BLOSUM80
+set NewValue1(Homology.TblastxP*\[0\]) 	0
+set NewValue1(Homology.TblastxB*\[0\]) 	0.0595
+set NewValue1(Homology.protmatname\[0\])	BLOSUM80
+set NewValue1(Homology.MaxHitLen\[0\])	15000
+set NewValue1(Homology.FileExtension\[0\]) .tblastx
+
+set NewValue1(Homology.TblastxP*\[1\]) 	0
+set NewValue1(Homology.TblastxB*\[1\]) 	0.0595
+set NewValue1(Homology.protmatname\[1\])	BLOSUM80
+set NewValue1(Homology.MaxHitLen\[1\])	15000
+set NewValue1(Homology.FileExtension\[1\]) .tblastx2
+
 ##### State penalties (exp length distributions) #####
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100

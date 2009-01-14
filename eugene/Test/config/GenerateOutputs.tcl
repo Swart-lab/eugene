@@ -67,26 +67,29 @@ InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 ##################        Units tests       ############################
 ########################################################################
 foreach sensor $AllSensorsList {
-    # Get stderr and stdout
-    if {$sensor != "Est" && $sensor != "Tester"} {
-	catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-	    -A $EUGENE_TEST_PAR \
-	    -D Sensor.${sensor}.use=1 \
-	    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr }
+
+   # Get stderr and stdout
+    if {$sensor == "Est"} {
+	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		    $OPTIONS(Sensor) -D Sensor.${sensor}.use=2 -D Sensor.NG2.use=1 \
+		    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std } 
     } else {
-	if {$sensor == "Est"} {
-	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-A $EUGENE_TEST_PAR \
-		-D Sensor.${sensor}.use=2 -D Sensor.NG2.use=1 \
-		$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%stderr }
+	if {$sensor == "Homology"} {
+	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+			$OPTIONS(Sensor) -D Sensor.${sensor}.use=2 \
+			$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
 	} else {
-	   catch { eval exec $EUGENE_DIR/$EUGENE $OPTIONS(Sensor) \
-		-A $EUGENE_TEST_PAR \
-		-D Sensor.${sensor}.use=1 $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
+	    if {$sensor == "Tester"} {
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+			    $OPTIONS(Sensor) -D Sensor.${sensor}.use=1 \
+			    $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
 		catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
-     	    	catch {exec mv  tmp%std tmp%stderr} 
-     	    	catch {exec rm  tmp%stdout} 	
- 		
+		catch {exec rm  tmp%stderr tmp%stdout} 
+	    } else {
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+			    $OPTIONS(Sensor) -D Sensor.${sensor}.use=1 \
+			    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
+	    }
 	}
     }
     
@@ -96,7 +99,7 @@ foreach sensor $AllSensorsList {
     } else {
 	set out [open $SEQ(Sensor).egn.debug {RDONLY}]
     }
-    set err [open tmp%stderr {RDONLY}]
+    set err [open tmp%std {RDONLY}]
     set std [open tmp%GenerateOutputs w+]
 
     # Copy stderr and stdout in the reference file

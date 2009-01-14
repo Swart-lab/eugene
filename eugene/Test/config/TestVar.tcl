@@ -44,7 +44,7 @@ set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplice
 
 ############################################################################
 set AllGff3Sensors {AnnotaStruct BlastX Est GFF GSplicer NG2 NStart \
-		    PepSignal Repeat SMachine SPred }
+		    PepSignal Repeat SMachine SPred Homology}
 ############################################################################
 ##################### Units tests variables ################################
 set SEQ(Sensor) {seq14ac002535g4g5}
