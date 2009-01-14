@@ -227,10 +227,19 @@ Est.FileExtension[1]	.est2
 #Est.format[1]    GFF3
 #
 ##### Homology Sensor parameters #####
-Homology.TblastxP*	0
-Homology.TblastxB* 	0.0595
-Homology.protmatname	BLOSUM80
-#Homology.format              GFF3
+Homology.TblastxP*[0]	0
+Homology.TblastxB*[0] 	0.0595
+Homology.protmatname[0]    BLOSUM80
+Homology.MaxHitLen[0]  15000
+#Homology.format[0]              GFF3
+Homology.FileExtension[0]	.tblastx
+
+Homology.TblastxP*[1]	0
+Homology.TblastxB*[1] 	0.0595
+Homology.protmatname[1]    BLOSUM80
+Homology.MaxHitLen[1]  15000
+#Homology.format[1]        GFF3
+Homology.FileExtension[1]	.tblastx2
 #
 ##### State penalties per position #####
 MarkovConst.minGC[0]	-1
