@@ -74,7 +74,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int i, j;
   int Len = X->SeqLen; 
   FILE *protmatfile;
-  const int MaxHitLen  = 15000;
   ProtMat* PROTMAT;
   char tempname[FILENAME_MAX+1];
   int nmax;
@@ -92,10 +91,9 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     }
   }
 
-
   strcpy(tmpdir, PAR.getC("eugene_dir"));
   strcat(tmpdir, MODELS_DIR);
-  strcpy(tempname,PAR.getC("Homology.protmatname"));
+  strcpy(tempname,PAR.getC("Homology.protmatname", GetNumber()));
   // Lecture de la matrice proteique ("BLOSUM62" par defaut)
   protmatfile=FileOpen(tmpdir, tempname, "rt");
   if (protmatfile == NULL) {
@@ -115,9 +113,11 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   
   fprintf(stderr,"Reading tblastx data.........");
   fflush(stderr);
-  strcpy(tempname,PAR.getC("fstname"));
-  strcat(tempname,".tblastx");
-  
+  strcpy(tempname, PAR.getC("fstname"));
+    // concatenation of file extension
+  strcat(tempname, PAR.getC("Homology.FileExtension", GetNumber(),1));
+
+  int MaxHitLen = PAR.getD("Homology.MaxHitLen", GetNumber(),1);
   inputFormat_ = to_string(PAR.getC("Homology.format", GetNumber(),1));
   if ( inputFormat_ == "GFF3" )
   {
@@ -333,8 +333,8 @@ void SensorHomology ::ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *
 // ----------------------
 void SensorHomology :: Init (DNASeq *X)
 {
-  TblastxP= PAR.getD("Homology.TblastxP*");
-  TblastxB= PAR.getD("Homology.TblastxB*");
+  TblastxP= PAR.getD("Homology.TblastxP*", GetNumber());
+  TblastxB= PAR.getD("Homology.TblastxB*", GetNumber());
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
