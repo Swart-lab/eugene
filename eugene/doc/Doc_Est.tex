@@ -22,10 +22,13 @@ The sensor is activated by either:
   the parameter file.
 \end{itemize}
 
-The behavior of the plugin is controlled by 4 parameters:
+The behavior of the plugin is controlled by the following parameters:
 \begin{itemize}
-\item \texttt{Est.est*P} indicates the penalty for violating a transcribed
+\item \texttt{Est.estP*} indicates the penalty for violating a transcribed
   evidence
+\item \texttt{Est.SpliceBoost*} is a bonus used to enhance the score 
+  of predicted splice sites which appear at a hit/gap border of aligned 
+  spliced ESTs.
 \item \texttt{Est.estM} gives the amount of ``fuzzyness'' allowed in
   interpreting a hit/gap border. The nucleotides which are less than
   \texttt{Est.estM} nucleotides away from this border are considered
