@@ -18,19 +18,22 @@ Homology detection has to be performed beforehand by the
 \texttt{TBlastX} software. Resulting alignment files require a
 specific format (see below).
 
-The sensor is activated by either :
+The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-t} argument \index{CmdFlags}{[Homology activation] t}
-\item the value 1 for the parameter \texttt{Sensor.Homology.use} in the
+\item a value higher than 0 for the parameter \texttt{Sensor.Homology.use} in the
   parameter file.
 \end{itemize}
-Here is an example of Homology parameters definition :
+Here is an example of Homology parameters definition:
 \begin{Verbatim}[fontsize=\small]
-Homology.TblastxP*      0
-Homology.TblastxB*      0.0595
-Homology.protmatname    BLOSUM80
-Sensor.Homology.use     1         # Use Homology sensor
-Sensor.Homology         1         # Sensor priority
+Homology.TblastxP*[0]     0
+Homology.TblastxB*[0]     0.0595
+Homology.protmatname[0]   BLOSUM80
+Homology.MaxHitLen[0]     15000
+Homology.FileExtension[0] .tblastx
+Sensor.Homology.use       1         # Use Homology sensor
+Sensor.Homology           1         # Sensor priority
+
 \end{Verbatim}
 
 \texttt{Homology.protmatname} is the name of the file containing the
@@ -45,8 +48,10 @@ sequences'' (Foissac \emph{et. al}, \emph{Nucleic Acids Res.}, 2003,
 
 \paragraph{Native input files format}
 
-The files \texttt{.tblastx} describe a collection of similarities
-sorted by subject sequence and by position on the query sequence.
+The plugin reads information from the file whose name is the concatenation 
+of the sequence file name and the \texttt{Homology.FileExtension} parameter. 
+The file describes a collection of similarities sorted by subject sequence 
+and by position on the query sequence.
 
 These files are obtained by blasting with \texttt{TBlastx} the genomic
 sequence (the query) against a set of other DNA sequences, and by
@@ -104,31 +109,34 @@ Here is an example of the format:
 \paragraph{Gff3 input file format}
 
 The gff3 input mode is activated by setting the value \texttt{GFF3}
-for the parameter \texttt{Homology.format} in the parameter file.  The
-plugin reads the file which name is derived from the sequence name by
-adding the \texttt{.tblastx.gff3} extension. Each line reads as follows:
+for the parameter \texttt{Homology.format} in the parameter file. The
+plugin reads its information from the file whose name is the concatenation
+of the sequence file name, the \texttt{Homology.FileExtension} parameter 
+and the \texttt{.gff3} extension. Each line reads as follows:
 
-\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<est name> <$bp^S$> <$ep^S$> <target strand>;frame\_hit=<$p^S$>;score\_hit=<$s^S$>}
+\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> 
+
+ID=...;Target=<est name> <$bp^S$> <$ep^S$> <target strand>;frame\_hit=<$p^S$>;score\_hit=<$s^S$>}
 
 Gff3 attributes specifications:\\
-Required attributes:\\ 
+Required attributes:
 	\begin{itemize}
 	\item ID
 	\item Target
 	\item target\_sequence : amino acid sequence.
 	\end{itemize}
 
-Optional attributes:\\ 
+Optional attributes:
 	\begin{itemize}
-	\item frame\_hit represent the blast frame.  This information
+	\item frame\_hit represents the blast frame. This information
           can be omitted, but if it's specified, eugene will check it
           is consistent with the similarity positions and reject the
           information otherwise.
-	\item score\_hit :  normalized score.
+	\item score\_hit : normalized score.
 	\end{itemize}
 
 
-Here an extract of \texttt{seq14ac002535g4g5.tfa.blast0.gff3}:
+Here an extract of \texttt{seq14ac002535g4g5.tfa.tblastx.gff3}:
 \begin{Verbatim}[fontsize=\tiny]
 seq14	tblastx	match	129	236	2e-25	+	.	ID=tblastx:seq14.1;Dbxref=tblastx:ATKIN2_100_207;Target=ATKIN2_100_207 100 207 +;frame_hit=+3;score_hit=118;target_sequence=KNVRDQQECLPSRSGRWQS*GTLSLLEQSTDRLFKL;
 seq14	tblastx	match	86	130	3e-63	-	.	ID=tblastx:seq14.2;Dbxref=tblastx:ATKIN2_102_58;Target=ATKIN2_102_58 102 58 +;frame_hit=-2;score_hit=74;target_sequence=FQIFFSCKIVFDVCF;
@@ -136,9 +144,10 @@ seq14	tblastx	match	86	130	3e-63	-	.	ID=tblastx:seq14.2;Dbxref=tblastx:ATKIN2_10
 
 \paragraph{Filtering input information}
 
-Similarities with a length higher than 15,000 nucleodites are
-rejected. A message ``Similarity of extreme length rejected. Check
-tblastx file <NAME>'' is printed to alert the user.
+Note that similarities which have a length higher than 
+\texttt{Homology.MaxHitLen} parameter value are rejected. A message 
+``Similarity of extreme length rejected. Check tblastx file <NAME>'' 
+is printed to alert the user.
 
 \paragraph{Integration of information}
 
