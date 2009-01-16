@@ -18,14 +18,14 @@ The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-d} argument \index{CmdFlags}{[EST activation]
     d}.
-\item the value 1 for the parameter \texttt{Sensor.Est.use} in
+\item a value higher than 0 for the parameter \texttt{Sensor.Est.use} in
   the parameter file.
 \end{itemize}
 
 The behavior of the plugin is controlled by the following parameters:
 \begin{itemize}
 \item \texttt{Est.estP*} indicates the penalty for violating a transcribed
-  evidence
+  evidence.
 \item \texttt{Est.SpliceBoost*} is a bonus used to enhance the score 
   of predicted splice sites which appear at a hit/gap border of aligned 
   spliced ESTs.
@@ -41,7 +41,7 @@ The behavior of the plugin is controlled by the following parameters:
 \item \texttt{Est.utrM} gives the number of UTR nucleotides that will
   be penalized using the previous penalty on the border of transcribed
   evidence.
-\item \texttt{Est.StrongDonor*} gives a threshold $T$ on donor strength
+\item \texttt{Est.StrongDonor} gives a threshold $T$ on donor strength
   inside intronless EST. If a given Donor with scores $a|b$ such that
   $\log(\frac{a}{b}) >T$ then the intronless EST is rejected because
   it goes through a very strong donor site.
@@ -56,12 +56,12 @@ The behavior of the plugin is controlled by the following parameters:
 \item \texttt{Est.MaxInternalIntron} gives the maximum length for any
   gap (representing an intron) in a spliced alignment. If the length
   exceeds this maximum, then the corresponding gap is ignored as
-  a probable bad spliced alignment or chimeric data..
+  a probable bad spliced alignment or chimeric data.
 \end{itemize}
 
 The sensor is also capable of a postprocessing analyse described below
 and activated either by the \texttt{-E} argument or by setting the value
-1 for the parameter \texttt{Sensor.Est.PostProcess} in the parameter
+1 or 2 for the parameter \texttt{Est.PostProcess} in the parameter
 file.
 
 The \texttt{Sensor.Est} is loaded last because it has the highest priority.
@@ -70,29 +70,37 @@ provided by other sensors (splice site prediction sensors) that then have to be 
 
 Here is an example of Est parameters definition.
 \begin{Verbatim}[fontsize=\small]
-Est.PostProcess  FALSE    # Don't postprocess
-Est.estP*        -0.4
-Est.estM         6
-Est.utrP*        0.35
-Est.utrM         5
-Est.StrongDonor* 0.95
-Est.MinDangling  18
-Est.MaxIntron    15000
-Sensor.Est.use   1     # Use EST sensor
-Sensor.Est       20       # Sensor priority: the highest one
+Est.PostProcess[0]       0      # 0 1 OR 2
+Est.PPNumber[0]          5      # For PostProcess = "2"
+Est.estP*[0]             -0.4
+Est.estM[0]              6
+Est.utrP*[0]             0.35
+Est.utrM[0]              5
+Est.SpliceBoost*[0]      0.0
+Est.StrongDonor[0]       0.95
+Est.MinDangling[0]       10
+Est.MaxIntron[0]         15000
+Est.MaxInternalIntron[0] 15000
+Est.FileExtension[0]     .est
+Sensor.Est.use           1      # Use EST sensor
+Sensor.Est               20     # Sensor priority: the highest one
+
 \end{Verbatim}
 
 
 \paragraph{Native input files format}
 
-The input is obtained in a \texttt{.est} file with 8 fields of information
-per ligne:
+The plugin reads information from the file whose name is the concatenation 
+of the sequence file name and the \texttt{Est.FileExtension} parameter. 
+Each line of the input file is composed of 8 fields:
+
 
 \texttt{<$b^S$> <$e^S$> <$s^S$> <$x$> <$b^S$> <est name> <$bq^S$> <$eq^S$>}
 
 where:
 \begin{itemize}
 \item $b^S$ and $e^S$ are the begin and the end of the similarity S on the genomic sequence,
+
 \item $s^S$ is the score of the similarity S (number of identical bases)
 \item $x$ is unused for now
 \item $b^S$ is the strand where the similarity occurs (forward = 0,
@@ -145,35 +153,37 @@ useless on recent sim4 versions.
 \paragraph{Gff3 input file format}
 
 The gff3 input mode is activated by setting the value \texttt{GFF3}
-for the parameter \texttt{Est.format} in the parameter file.  The
-plugin reads its information from the file whose name is derived from
-the sequence name by adding the extension \texttt{.est.gff3}. Each
-line is as follows:
+for the parameter \texttt{Est.format} in the parameter file. The
+plugin reads its information from the file whose name is the concatenation
+of the sequence file name, the \texttt{Est.FileExtension} parameter 
+and the \texttt{.gff3} extension. Each line is as follows:
 
 
-\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> <strand> <.> ID=...;Target=<est name> <$bp^S$> <$ep^S$> <est strand>;score\_hit=<$s^S$>}
+\texttt{<sequence name> <program> <sofa feature> <$b^S$> <$e^S$> <$v^S$> 
+<strand> <.> \\
+ID=...;Target=<est name> <$bp^S$> <$ep^S$> <est strand>;score\_hit=<$s^S$>}
 
-Accepted features (third column):\\
+Accepted features (third column):
 \begin{itemize}
 \item  SO:0000668 or EST\_match
 \end{itemize}
 
 
 Gff3 attributes specifications:\\
-Required attributes:\\ 
+Required attributes:
 	\begin{itemize}
 	\item ID
 	\item Target
 	\end{itemize}
 
-Optional attributes:\\
+Optional attributes:
 	\begin{itemize}
 %	\item frame\_hit represent the blast frame. It can be omitted but if specified, its consistency with the hit coordinates will be cheked and the hit will be rejected if the frame is not consistent.
 	\item score\_hit :  normalized score.
 	\end{itemize}
 
 
-Here an extract of : seq14ac002535g4g5.tfa.blast0.gff3
+Here an extract of : seq14ac002535g4g5.tfa.est.gff3
 \begin{Verbatim}[fontsize=\tiny]
 seq14	gth	EST_match	3261	4698	.	-	.	ID=EST_match:seq14.1;
 seq14	gth	EST_match	3261	3332	0	-	.	ID=EST_match:seq14.1.1;Target=AV537418 1 72 +;score_hit=636;Parent=EST_match:seq14.1;
@@ -234,20 +244,19 @@ When no information exists (None), the UTR tracks are penalized by
 \texttt{Est.utrP*} if and only if there is a Hit evidence at less than
 \texttt{Est.utrM} bases away.
 
-\paragraph{Post analyse}
+\paragraph{Post analysis}
 
-The correspondance between transcribed sequence information and
+The correspondence between transcribed sequence information and
 prediction is analyzed if the \texttt{-E} argument
 \index{CmdFlags}{[EST postprocessing activation] E} is activated or if
-the \texttt{Est.PostProcess} parameter is set to \texttt{1}.
+the \texttt{Est.PostProcess} parameter value is \texttt{1} or \texttt{2}.
 
-For each coding exon predicted, the percentage of nucleotides
-supported by a transcribed sequence is displayed. This count includes
-all EST/cDNA, including those filtered.
+\begin{itemize}
+ \item \texttt{Est.PostProcess = 1}: EST/cDNA are compared to the prediction
 
 For each predicted transcript (from 5'UTR to 3'UTR), each available
-EST/cDNA sequence that overlap the transcript is compared to the
-prediction. The transcribed sequence is then  classified as:
+EST/cDNA sequence that overlaps the transcript is compared to the
+prediction. The transcribed sequence is then classified as:
 \begin{itemize}
 \item Filtered (if it was filtered in the initial filtering process)
 \item Inconsistent (if it is incompatible with the prediction)
@@ -258,11 +267,21 @@ prediction. The transcribed sequence is then  classified as:
   codon)
 \item Support (if it is otherwise consistent with the prediction)
 \end{itemize}
-
 Finally, for each predicted transcript (from 5'UTR to 3'UTR) and
 predicted CDS (from start to stop), the number of predicted
 nucleotides that are supported by existing transcripts (filtered or
 not) is reported.
+
+ \item \texttt{Est.PostProcess = 2}: the prediction is compared to the EST/cDNA
+
+For each predicted coding exon, the percentage of nucleotides
+supported by a transcribed sequence is displayed. This count includes
+all EST/cDNA, including those filtered. 
+Overlapped transcribed sequences are displayed in the last column.
+The \texttt{Est.PPNumber} parameter is the maximum number of displayed 
+transcribed sequences per exon.
+\end{itemize}
+
 
 \paragraph{Graph}
 
