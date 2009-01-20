@@ -1,6 +1,6 @@
 format 58
 "Homology" // src::SensorPlugins::Homology
-  revision 1
+  revision 3
   modified_by 2 "sallet"
   // class settings
   //class diagram settings
@@ -312,6 +312,16 @@ ${body}}
 	
 	
 	
+      end
+
+      attribute 203906 "fileExt"
+	private explicit_type "char*"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
       end
     end
   end

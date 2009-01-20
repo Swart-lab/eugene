@@ -116,7 +116,7 @@ classcanvas 129410 class_ref 137090 // SensorEst
     operation_ref 195458 // GiveInfo
     operation_ref 195586 // Plot
     operation_ref 195714 // PostAnalyse
-  xyz 53 65 2009
+  xyz 51 62 2009
 end
 classcanvas 129666 class_ref 137218 // SensorEuStop
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -218,7 +218,7 @@ classcanvas 131202 class_ref 137986 // SensorHomology
     operation_ref 202242 // Plot
     operation_ref 202370 // PlotAt
     operation_ref 202498 // PostAnalyse
-  xyz 3 287 2024
+  xyz 2 287 2024
 end
 classcanvas 131458 class_ref 138114 // SensorIfElse
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -606,7 +606,7 @@ relationcanvas 130306 relation_ref 137090 // <generalisation>
 end
 relationcanvas 130562 relation_ref 137218 // <generalisation>
   decenter_begin 85
-  decenter_end 737
+  decenter_end 736
   from ref 130434 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b
@@ -646,7 +646,7 @@ relationcanvas 131714 relation_ref 137858 // <unidirectional association>
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 131842 relation_ref 137986 // <unidirectional association>
-  decenter_begin 603
+  decenter_begin 601
   decenter_end 628
   from ref 131458 z 1999 to point 424 1026
   line 141570 z 1999 to ref 128002
@@ -668,7 +668,7 @@ relationcanvas 132354 relation_ref 138242 // <generalisation>
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 132610 relation_ref 138370 // <generalisation>
-  decenter_end 159
+  decenter_end 158
   from ref 132482 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b
@@ -680,14 +680,14 @@ relationcanvas 132866 relation_ref 138498 // <generalisation>
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 133122 relation_ref 138626 // <generalisation>
-  decenter_end 159
+  decenter_end 158
   from ref 132994 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 133378 relation_ref 138754 // <generalisation>
   decenter_begin 368
-  decenter_end 166
+  decenter_end 165
   from ref 133250 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b
@@ -700,7 +700,7 @@ relationcanvas 133634 relation_ref 138882 // <generalisation>
 end
 relationcanvas 133890 relation_ref 139010 // <generalisation>
   decenter_begin 446
-  decenter_end 742
+  decenter_end 740
   from ref 133762 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b
@@ -713,7 +713,7 @@ relationcanvas 134146 relation_ref 139138 // <generalisation>
 end
 relationcanvas 134402 relation_ref 139266 // <generalisation>
   decenter_begin 930
-  decenter_end 704
+  decenter_end 703
   from ref 134274 z 1999 to ref 128002
   no_role_a no_role_b
   no_multiplicity_a no_multiplicity_b

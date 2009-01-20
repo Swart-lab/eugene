@@ -1,6 +1,6 @@
 format 58
 "Est" // src::SensorPlugins::Est
-  revision 3
+  revision 4
   modified_by 2 "sallet"
   // class settings
   //class diagram settings
@@ -416,6 +416,56 @@ ${body}}
 "
 	    classrelation_ref 144002 // HitTable (<unidirectional association>)
 	  b parent class_ref 128642 // Hits
+      end
+
+      attribute 202242 "fileExt"
+	protected explicit_type "char*"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
+      end
+
+      attribute 202370 "estM"
+	protected explicit_type "int"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
+      end
+
+      attribute 202498 "utrM"
+	protected explicit_type "int"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
+      end
+
+      attribute 202626 "estP"
+	protected explicit_type "int"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
+      end
+
+      attribute 202754 "utrP"
+	protected explicit_type "int"
+	cpp_decl "    ${comment}${static}${mutable}${volatile}${const}${type} ${name}${value};
+"
+	java_decl ""
+	php_decl ""
+	python_decl ""
+	idl_decl ""
       end
     end
   end
