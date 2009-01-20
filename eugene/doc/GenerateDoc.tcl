@@ -97,7 +97,7 @@ exec rm  SYNO_ARATH.misc_info
 exec rm At5g18830.fasta.genomicAJ011613.misc_info
 
 # ask for compilation
-exec pdflatex $FIC_TEX_TMP.tex
+exec pdflatex -interaction=nonstopmode $FIC_TEX_TMP.tex
 catch {exec makeindex $CMDFLAGS_INDEX}
-exec pdflatex $FIC_TEX_TMP.tex
+exec pdflatex -interaction=nonstopmode $FIC_TEX_TMP.tex
 puts "eugene documentation generated."
