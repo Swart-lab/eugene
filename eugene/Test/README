@@ -51,7 +51,7 @@ This directory contains all the scripts
 This directory contains the reference files of EuGene outputs. 
     - Output_<test name> : text output file
     - Output_<test name>.png : graph file
-    - Output_<test name>_test : text output file formatted (some caracters are added) to be used with the spawn command.
+    - Output_<test name>_test : text output file formatted (some characters are added) to be used with the spawn command.
 
 ->TestSuite
 This directory contains the test scripts. For example :
