@@ -128,7 +128,7 @@ foreach sensor $AllSensorsList {
     }
 
     # Remove all temporary files
-    catch {exec rm tmp%GenerateOutputs tmp%stderr}
+    catch {exec rm tmp%GenerateOutputs tmp%stderr tmp%std}
     catch {exec rm $SEQ(Sensor).egn.debug $SEQ(Sensor).misc_info exSeqHom.egn.debug exSeqHom.misc_info}
     # Remove created files, note that eugeneTest.par.<date>.OPTI remains
     catch {exec rm Sensor.EuStop.SpSn}
