@@ -36,6 +36,8 @@ class SensorHomology : public Sensor
   double TblastxB;
   void ReadHomology (char name[FILENAME_MAX+1],DNASeq *X,  const int MaxHitLen,ProtMat* PROTMAT);
   void ReadHomologyGff3(GeneFeatureSet & geneFeatureSet ,DNASeq *X,  const int MaxHitLen,ProtMat* PROTMAT);
+
+  char  *fileExt; // File name extension
  public:
   SensorHomology (int n, DNASeq *X);
   virtual ~SensorHomology ();

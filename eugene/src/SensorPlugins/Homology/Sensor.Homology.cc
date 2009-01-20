@@ -79,6 +79,10 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   int nmax;
   int contigbeg;
   char *tmpdir = new char[FILENAME_MAX+1];
+  
+  fileExt       = PAR.getC("Homology.FileExtension", GetNumber(),1);
+  int MaxHitLen = PAR.getD("Homology.MaxHitLen", GetNumber(),1);
+  inputFormat_  = to_string(PAR.getC("Homology.format", GetNumber(),1));
 
   TblastxNumber = new short int*[6];
   TblastxScore = new float*[6];
@@ -115,10 +119,9 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   fflush(stderr);
   strcpy(tempname, PAR.getC("fstname"));
     // concatenation of file extension
-  strcat(tempname, PAR.getC("Homology.FileExtension", GetNumber(),1));
+  strcat(tempname, fileExt);
 
-  int MaxHitLen = PAR.getD("Homology.MaxHitLen", GetNumber(),1);
-  inputFormat_ = to_string(PAR.getC("Homology.format", GetNumber(),1));
+
   if ( inputFormat_ == "GFF3" )
   {
     strcat(tempname,".gff3");
@@ -132,8 +135,6 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
   }
   fprintf(stderr, "done\n");
   fflush(stderr);
-
-
 
   // weighting by the ratio of hits number.
   for (j=0; j<6 ;j++) {
