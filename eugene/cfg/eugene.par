@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5d-1
+EuGene.version		3.5e
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -233,7 +233,6 @@ Homology.protmatname[0]    BLOSUM80
 Homology.MaxHitLen[0]  15000
 #Homology.format[0]              GFF3
 Homology.FileExtension[0]	.tblastx
-
 Homology.TblastxP*[1]	0
 Homology.TblastxB*[1] 	0.0595
 Homology.protmatname[1]    BLOSUM80
