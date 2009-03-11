@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I../lib
 
 # ------------------------------------------------------------------
 # Copyright (C) 2004 INRA <eugene@ossau.toulouse.inra.fr>
@@ -19,18 +19,44 @@
 # Contents: evaluation of a gene annotation
 # ------------------------------------------------------------------
 
+BEGIN
+{
+    my ($dir,$file) = $0 =~ /(.+)\/(.+)/;
+    unshift (@INC,"$dir/../lib");
+}
 
-$setoffset=0;
-$offset=0;
-$borneg=0;
-$borned=0;
-$sortie=1; # 0-> short, 2-> detaillee
-$name2="";
-$ntlevel=0;
-$NOMduPROG = $0;
-@CMD="$NOMduPROG "."@ARGV";
 
-sub description{
+use ParamParser;
+use strict;
+
+
+
+# Variables globales
+my $NOMduPROG = $0;
+my @CMD       = "$NOMduPROG "."@ARGV";
+
+# Nombre de genes reels et predits
+my $nGR = 0;
+my $nGP = 0;
+# gènes FP/FN/VN/VP
+my $FPg = 0;
+my $FNg = 0;
+my $VNg = 0;
+my $VPg = 0;
+# Nombre d'exons reels et predits
+my $nER = 0;my $nEP = 0;
+# exons VP
+my $VPe = 0;
+# FP/VP/FN au niveau nucleotides
+my $FPn = 0;
+my $VPn = 0; 
+my $FNn = 0;
+
+# Nombre de nucleotides predits et reels
+my $nNP=0; my $nNR=0;
+
+sub description
+{
   die <<EOF
 
 ############################################################################ 
@@ -98,7 +124,8 @@ EOF
 }
 
 ############################################################################ 
-sub usage{
+sub usage
+{
   die <<EOF
 
 usage : 
@@ -119,292 +146,411 @@ EOF
 
 ############################################################################ 
 # Fonction qui lit une sequence fasta et renvoie sa longueur 
-sub seqlength{
-  my$filename = $_[0];
-  my$len=0;
+sub seqlength
+{
+  my ($filename) = @_;  
+
+  my $len = 0;
   open(FASTASEQ,"$filename") || die "Can't open seq file $filename in seqlength\n";
-  if (!(<FASTASEQ> =~ /^\s?>/ )) { 
-    die "Fasta format is needed for length calcul for nt level in seq $filename\n";
+  # Check first character of the file is >
+  if (!( <FASTASEQ> =~ /^\s?>/ ) ) 
+  { 
+    die "$filename has to be a fasta file to allow length sequence computing.\n";
   }
-  while (<FASTASEQ>){
+
+  while ( <FASTASEQ> )
+  {
     chomp;
     $len += length($_);
   }
+
   return $len;
 }
 
-############################################################################ 
-# Fonction d'evaluation au niveau gene qui,
-# pour une sequence donnee, regarde si chaque
-# gene reel a une prediction parfaitement egale
-sub evaluation_niveau_gene{
-  my@COORD2D=@{@_[0]}; # 1er argument
-  my@PRED2D=@{@_[1]};  # 2eme argument
+
+=head2 procedure evaluation_niveau_gene
+
+ Title        : evaluation_niveau_gene
+ Usage        : -
+ Function     : Fonction d'evaluation au niveau gene qui pour une sequence donnee, 
+                regarde si chaque gene reel a une prediction parfaitement egale
+                Met à jour le nombre de gene réel et predit ($nGR, $n,GP) et le nombre
+                de gene Vrai positif ($VPg)
+ Args         : $ra_coord2d: reference sur un tableau de genes reels
+                $ra_pred2d : reference sur un tableau de genes predits
+ Globals      : none
+
+=cut
+sub evaluation_niveau_gene
+{
+  my ($ra_coord2d, $ra_pred2d) = @_;
 
   # nbre de genes reels/predits
-  $nGR+=($#COORD2D + 1);
-  $nGP+=($#PRED2D + 1);
-
-  # Vrais positifs:
-  # pour chaque gene reel de la sequence
-  foreach $pointeur_gene_reel (@COORD2D){
-    my@genereelcoord = @{$pointeur_gene_reel};
-    foreach $pointeur_gene_pred (@PRED2D){
-      if("@genereelcoord" eq "@{$pointeur_gene_pred}"){
-	$VPg++;
-      }
+  my $nGeneReels    = scalar(@$ra_coord2d);
+  my $nGenesPredits = scalar(@$ra_pred2d);
+  $nGR += $nGeneReels;
+  $nGP += $nGenesPredits;
+  
+  # Si la structure des deux genes est identique, incrementer le nb de VP
+  foreach my $pointeur_gene_reel (@$ra_coord2d)
+  {
+    my @genereelcoord = @{$pointeur_gene_reel};
+    foreach my $pointeur_gene_pred (@$ra_pred2d)
+    {
+	$VPg++ if("@genereelcoord" eq "@{$pointeur_gene_pred}");
     }
   }
+
+  return;
 }
 
-############################################################################ 
-## Fonction d'evaluation au niveau exon
-sub evaluation_niveau_exon{
-  my@E=@{@_[0]};  # 1er argument
-  my@P=@{@_[1]};  # 2eme argument
-  my$i=0;;
-  my$j=0;;
+
+=head2 procedure evaluation_niveau_exon
+
+ Title        : evaluation_niveau_exon
+ Usage        : -
+ Function     : Fonction d'evaluation au niveau exon qui pour une sequence donnee, 
+                regarde le nombre d exon correctement predit
+                Met à jour le nombre d'exons réel et predit ($nER, $nEP) et le nombre
+                d'exon Vrai positif ($VPe)
+ Args         : $ra_e: reference sur un tableau de position d exon reel
+                $ra_p : reference sur un tableau de positions d exon predit
+ Globals      : none
+
+=cut
+sub evaluation_niveau_exon
+{
+  my ($ra_e, $ra_p) = @_;
 
   # nbre d'exons reels et predits:
-  $nER+=($#E+1)/2;
-  $nEP+=($#P+1)/2;
+  my $nExonsReels   = scalar(@$ra_e);
+  my $nExonsPredits = scalar(@$ra_p);
+  $nER += $nExonsReels/2;
+  $nEP += $nExonsPredits/2;
 
-  # Vrais positifs:
-  for($i=1;$i<=$#E;$i+=2){ # toutes les fins d'exons reels
-    for($j=1;$j<=$#P;$j+=2){ # toutes les fins d'exons predits
+  # Incrementation du nombre de vrai positif
+  # toutes les fins d'exons reels
+  for(my $i = 1; $i < $nExonsReels; $i += 2 )
+  { 
+    # toutes les fins d'exons predits
+    for(my $j = 1; $j < $nExonsPredits; $j += 2 )
+    { 
       # exon correctement predit:
-      $VPe+=(($E[$i-1]==$P[$j-1])&&($E[$i]==$P[$j]));
+      $VPe += (($ra_e->[$i-1] == $ra_p->[$j-1])&&
+               ($ra_e->[$i]   == $ra_p->[$j]  ) );
     }
   }
+
+  return;
 }
 
-############################################################################ 
-## Fonction determinant si la position i est predite dans un etat codant
-sub ispredcoding{
-  my$pos=@_[0]; # 1er arg: position
-  my@P=@{@_[1]};# 2eme arg: tab. des frontieres d'exons predits
-  my$i=0;
-  for($i=0;$i<$#P;$i+=2) {
-    if ($P[$i]>0) {
-      if ( ($P[$i] <= $pos) && ($P[$i+1] >= $pos) ) {
-	return 1;
-      }
+=head2 function ispredcoding
+
+ Title        : ispredcoding
+ Usage        : -
+ Function     : determine si la position pos est predite dans un etat codant
+ Args         : $pos  : $position
+                $ra_p : reference sur un tableau des positions des exons predits
+ Return       : 1 si la position est predit comme codante
+ Globals      : none
+
+=cut
+sub ispredcoding
+{
+  my ($pos, $ra_p) = @_;
+
+  my $p_size = scalar(@$ra_p); # Taille du tableau d'exons
+  
+  for (my $i = 0; $i < ($p_size-1); $i+=2) 
+  {
+    # Cas ou pos est inclu dans un exon 
+    if ($ra_p->[$i] > 0) 
+    {
+	return 1 if ( ($ra_p->[$i] <= $pos) && ($ra_p->[$i+1] >= $pos) );
     }
-    else {
-      if ( ($P[$i+1] <= (-$pos)) && ($P[$i] >= (-$pos)) ) {
-	return 1;
-      }
+    else 
+    {
+	return 1 if ( ($ra_p->[$i+1] <= (-$pos)) && ($ra_p->[$i] >= (-$pos)) );
     }
   }
+
   return 0;
 }
 
-############################################################################ 
-## Fonction determinant s'il y a un chgmt d'etat predit dans un intervalle
-sub ispredchanged{
-  my$beg=@_[0]; # 1er arg
-  my$end=@_[1];
-  my@P=@{@_[1]};
-  my$i=0;
-  foreach $i (@P) {
-    if ( (abs($i) >= $beg) || (abs($i) <= $end) ) {
-      return 1;
-    }
-  }
-  return 0;
-}
 
-############################################################################ 
-## Fonction d'evaluation au niveau nucleotide
-sub evaluation_niveau_nucleotide{
-  my@E=@{@_[0]};  # 1er argument
-  my@P=@{@_[1]};  # 2eme argument
-  my$i=0;;
-  my$j=0;;
-  my$precedent=$borneg; # cas de l'offset gauche
+=head2 procedure evaluation_niveau_nucleotide
 
-#  print "evaluation niveau nt gau=$borneg dro=$borned\n";
-  for( $i=0 ; $i<$#E ; $i+=2 ) { # pour tous les debuts d'exons reels
-    for( $j=$precedent ; $j< abs($E[$i]) ; $j++ ){  # chq nt a partir de la derniere frontiere C->NCodant
-      $FPn += (&ispredcoding($j,\@P));    # (en amont de l'exon reel, donc dans de l'intron)
-      if (&ispredcoding($j,\@P)) { $nNP ++ }
-      
-#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+ Title        : evaluation_niveau_nucleotide
+ Usage        : -
+ Prerequisite : -
+ Function     : Evaluation tous niveaux et affichage des resultats
+ Args         : $ra_e    : reference sur un tableau des positions des exons reels
+                $ra_p    : reference sur un tableau des positions des exons predits
+                $borneg  : position 5' de la region a evaluer
+                $borned  : position 3' de la region a evaluer
+ Globals      : none
+
+=cut
+sub evaluation_niveau_nucleotide
+{
+  my ($ra_e, $ra_p, $borneg, $borned) = @_;
+ 
+  my $precedent = $borneg; # cas de l'offset gauche
+  my $nb_exons  = scalar(@$ra_e);
+
+  # pour tous les debuts d'exons reels
+  for( my  $i = 0; $i < $nb_exons-1; $i+=2 ) 
+  {
+    # chq nt a partir de la derniere frontiere C->NCodant
+    for( my $j = $precedent; $j < abs($ra_e->[$i]); $j++ )
+    {
+      # En amont de l'exon reel, donc dans de l'intron
+      $FPn += (&ispredcoding  ($j, $ra_p) );
+      $nNP++ if (&ispredcoding($j, $ra_p));
     }
-    for ($j = abs($E[$i]); $j <= abs($E[$i+1]); $j++) { # chq nt de l'exon reel
-      $nNR ++;   # nbre total de nucleotides codants
-      if (&ispredcoding($j,\@P)) {      # predit codant aussi, OK
+
+    # Pour chaque nt de l'exon reel
+    for (my $j = abs($ra_e->[$i]); $j <= abs($ra_e->[$i+1]); $j++) 
+    {
+      $nNR++;   # nbre total de nucleotides codants
+      if ( &ispredcoding($j, $ra_p) ) 
+      {    
+	# predit codant
 	$VPn++;
-	$nNP ++ ;
-#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+	$nNP++;
       }
-      else { # loupe!
-#	print" non codant\n";
+      else 
+      { # loupe!
 	$FNn++;
-#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
       }
     }
-    $precedent= abs($E[$i+1])+1;
+    $precedent = abs($ra_e->[$i+1])+1;
   }
-  for ($j=$precedent; $j <= $borned; $j++) { # cas de l'offset droit
-    $FPn += (&ispredcoding($j,\@P));
-    if (&ispredcoding($j,\@P)) { $nNP ++ }
-#      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
+
+  # cas de l'offset droit
+  for (my $j = $precedent; $j <= $borned; $j++) 
+  {
+    $FPn += (   &ispredcoding($j,$ra_p) );
+    $nNP++ if ( &ispredcoding($j,$ra_p) );
   }
+
 #  for($i=0;$i<$#P;$i+=2) { # pour tous les debuts d'exons predits ## ATTENTION!! cas de l'offset chevauchant!
 #    $nNP += (abs($P[$i+1]) - abs($P[$i])) +1;   # nbr total de nt predits codants
 #      print"i=$i, pos=$j, Ei= $E[$i], Ei+1= $E[$i+1], vpn= $VPn, fpn= $FPn, fnn= $FNn, nNP= $nNP\n";
 #  }
+
+  return;
 }
 
 ############################################################################ 
 # Renvoie le nombre d'exons identiques entre 2 genes
-sub nombre_exons_identiques{
-  my@gene1=@{@_[0]};
-  my@gene2=@{@_[1]};
-  my$i=0;
-  my$j=0;
-  my$neID=0;
-  for($i=1;$i<=$#gene1;$i+=2){ # toutes les fins d'exons gene1
-    for($j=1;$j<=$#gene2;$j+=2){ # toutes les fins d'exons gene2
-      # exon identique:
-      $neID+=(($gene1[$i-1]==$gene2[$j-1])&&($gene1[$i]==$gene2[$j]));
-    }
-  }
+=head2 function evaluation_niveau_nucleotide
+
+ Title        : nombre_exons_identiques
+ Usage        : -
+ Prerequisite : -
+ Function     : Renvoie le nombre d'exons identiques entre 2 genes
+ Args         : $ra_gene1  : reference sur un tableau de position d exon du gene1 
+                $ra_gene2  : reference sur un tableau de position d exon du gene2
+ Return       : nombre d exons identique entre les deux genes
+ Globals      : none
+
+=cut
+sub nombre_exons_identiques
+{
+  my ($ra_gene1, $ra_gene2) = @_; 
+
+  my $nb_gene1 = scalar(@$ra_gene1);
+  my $nb_gene2 = scalar(@$ra_gene2);
+  
+  # Nb d'exons identiques
+  my $neID = 0;
+
+  # toutes les fins d'exons gene1
+  for(my $i=1; $i < $nb_gene1; $i+=2)
+  { # toutes les fins d'exons gene2
+      for(my $j=1; $j < $nb_gene2; $j+=2)
+      {
+	  # nombre d exon identique
+	  $neID += 1 if ( ($ra_gene1->[$i-1] == $ra_gene2->[$j-1]) && 
+			  ($ra_gene1->[$i]   == $ra_gene2->[$j]  ) );
+      }
+  } 
+
   return $neID;
 }
 
-############################################################################ 
-# Fonction nouvelle d'evaluation tous niveaux
-# et d'affichage des resultats
-sub evaluation_et_affichage{
-  my@COORD=@{@_[0]}; # 1er argument
-  my@PRED=@{@_[1]};  # 2eme argument
-  my@E=@{@_[2]};
-  my@P=@{@_[3]};
-  my$seq=@_[4];
+=head2 procedure evaluation_et_affichage
 
-  # nbre de genes reels/predits
-  my$ngrtot=($#COORD + 1);
-  my$ngptot=($#PRED + 1);
-  $nGR+=$ngrtot;
-  $nGP+=$ngptot;
+ Title        : evaluation_et_affichage
+ Usage        : -
+ Prerequisite : -
+ Function     : Evaluation tous niveaux et affichage des resultats
+ Args         : $ra_coord: reference sur un tableau de genes reels
+                $ra_pred : reference sur un tableau de genes predits
+                $ra_e    : reference sur un tableau des positions des exons reels
+                $ra_p    : reference sur un tableau des positions des exons predits
+                $seq     : nom de la sequence 
+ Globals      : none
 
-  # nbre d'exons reels et predits:
-  my$nertot=($#E+1)/2;
-  my$neptot=($#P+1)/2;
-  $nEP+=$neptot;
-  $nER+=$nertot;
+=cut
 
-  my$i=0;
-  my$j=0;
-  my$c="";
-  my$p="";
-  my$npredparfaites=0;
-  my$nexonstrouves=0;
+sub evaluation_et_affichage
+{
+  my ($ra_coord, $ra_pred, $ra_e, $ra_p, $seq) = @_;
+
+  # met à jour le nombre de gene reels et predits
+  my $ngrtot = scalar(@$ra_coord);
+  my $ngptot = scalar(@$ra_pred);
+  $nGR += $ngrtot;
+  $nGP += $ngptot;
+  #  met à jour le nombre d'exons reels et predits
+  my $nertot = scalar(@$ra_e)/2;
+  my $neptot = scalar(@$ra_p)/2;
+  $nEP += $neptot;
+  $nER += $nertot;
+
+  my$npredparfaites = 0;
+  my$nexonstrouves  = 0;
+
   print("\n -SEQUENCE ANALYSEE: $seq\n");
 
-  my$ngr=0;
-  my$ngp=0;
-  @PRINT=();
+  my$ngr    = 0; # numero du gene reel etudie
+  my$ngp    = 0; # numero du gene predit etudie
+  my $neid;      # Var utilisee pour connaitre le nb d exon identique entre 2 genes    
+  my @PRINT = ();
 
-  # pour chaque gene reel de la sequence
-  foreach $c (@COORD){
+  # Affichage des informations sur chaque gene reel
+  foreach my $c (@$ra_coord)
+  {
     $ngr++;
-    my@genereel = @{$c};
-    my$ne=($#genereel+1)/2;
-    # affichage coordonnees reelles du gene:
-    print("gene reel  $ngr/$ngrtot:");
-    for($i=0;$i<$#genereel;$i+=2){
+    my @genereel = @{$c};
+    my $ne        = ($#genereel+1)/2; # Nombre d'exons du gene
+ 
+    print("gene reel  $ngr/$ngrtot:"); 
+    # affichage des positions des exons reels du gene
+    for ( my $i=0; $i < $#genereel; $i+=2 )
+    {
       print(" $genereel[$i]-$genereel[$i+1]");
     }
     print(' ... ');
-    $predit=0;
-    $ngp=0;
-    foreach $p (@PRED){
-      # on cherche parmi les genes predits
-      $ngp++;
-      if("@genereel" eq "@{$p}"){
-	# Vrais positifs genes:
+
+    my $predit = 0;
+    $ngp       = 0; # Numero de la prediction etudiee
+    # Recherche si le gène a bien été prédit 
+    foreach my $p (@$ra_pred)
+    {
+      $ngp++; 
+      # Cas ou on trouve exactement le gene
+      if ("@genereel" eq "@{$p}")
+      {
 	$VPg++;
 	$npredparfaites++;
-	$predit=2;
+	$predit = 2;
 	print("OK! (detecte en pred n°$ngp)");
       }
-      else{
-	$neid=&nombre_exons_identiques(\@genereel,$p);
-	if ($neid>0){
+      else
+      {
+	$neid = &nombre_exons_identiques(\@genereel, $p);
+	# Cas ou la structure exon n'a pas ete totalement trouvee
+	if ($neid > 0)
+	{
 	  print("rate! ($neid exons trouve(s) sur $ne en pred n°$ngp)");
-	  $predit=1;
+	  $predit = 1;
 	}
       }
     }
-    ($predit<2) ? push(@PRINT,"fng") : push(@PRINT,"vpg");
-    ($predit>=1)? print("\n") : print("tous les exons rates!\n");
+
+    ($predit <  2) ? push(@PRINT,"fng") : push(@PRINT,"vpg");
+    ($predit >= 1) ? print("\n") : print("tous les exons rates!\n");
   }
 
-  # affichage coordonnees des genes predits:
-  $ngp=0;
-  foreach $p (@PRED){
+  # Affichage des informations sur chaque gene predit
+  $ngp = 0;
+  foreach my $p (@$ra_pred)
+  {
     $ngp++;
-    my@genepred=@{$p};
-    my$ne=($#genepred+1)/2;
+    my @genepred = @{$p};
+    my $ne       = ($#genepred+1)/2;  # Nombre d'exons de la prediction
     print("prediction $ngp/$ngptot:");
-    for($i=0;$i<$#genepred;$i+=2){
+    # affichage des positions des exons predits
+    for ( my $i=0; $i < $#genepred; $i+=2 )
+    {
       print(" $genepred[$i]-$genepred[$i+1]");
     }
     print(" ... ");
-    $predok=0;
-    $numerogene=0;
-    foreach $p (@COORD){
+
+    my $predok     = 0;
+    my $numerogene = 0;
+    # Recherche si la prediction est correcte
+    foreach my $c (@$ra_coord)
+    {
       $numerogene++;
-      if("@genepred" eq "@{$p}"){
-	$predok=2;
+      # Cas ou la prediction du gene est correct
+      if("@genepred" eq "@{$c}")
+      {
+	$predok = 2;
 	print("OK! (parfaite pour gene n°$numerogene)");
       }
-      else{
-	$neid=&nombre_exons_identiques(\@genepred,$p);
-	if ($neid>0){
+      else
+      {
+	$neid = &nombre_exons_identiques(\@genepred, $c);
+        # Cas ou la structure exon n'est pas completement correcte
+	if ( $neid > 0 )
+	{
 	  print("imparfaite (cf gene n°$numerogene)");
 	  $predok=1;
 	}
       }
     }
-    if ($predok<2) { push(@PRINT,"fpg") } # vpg deja mis
-    ($predok==0)? print("faux positif!\n") : print("\n");
+    if ( $predok < 2 ) { push(@PRINT,"fpg") } # vpg deja mis
+    ( $predok == 0 )? print("faux positif!\n") : print("\n");
   }
 
-  # EXONS:
-  $tmpe=&nombre_exons_identiques(\@E,\@P);
-  $VPe+= $tmpe;
-  $nexonstrouves+= $tmpe;
+  # Nombre global d exons identiques
+  my $tmpe        = &nombre_exons_identiques($ra_e, $ra_p);
+  $VPe           += $tmpe;
+  $nexonstrouves += $tmpe;
 
-  for($i=1;$i<=$#P;$i+=2){ # toutes les fins d'exons P
-    my$flag=0;
-    for($j=1;$j<=$#E;$j+=2){ # toutes les fins d'exons E
+  # 2 boucles pour construire le code de la sequence 
+  # (cad pour chaque exon dire si vp, fp ou fn)
+
+  # toutes les fins d'exons predits
+  for (my $i = 1; $i < scalar(@$ra_p); $i+=2)
+  {
+    my $flag = 0;
+    # pour toutes les fins d'exons reels
+    for (my $j = 1; $j < scalar(@$ra_e); $j += 2 )
+    {
       # exon identique:
-      $flag+=(($E[$i-1]==$P[$j-1])&&($E[$i]==$P[$j]));
+      $flag += 1 if ( ( $ra_e->[$i-1] == $ra_p->[$j-1] ) && 
+		      ( $ra_e->[$i]   == $ra_p->[$j]   ) );
     }
-    ($flag==0) ? push(@PRINT,"fpe") : push(@PRINT,"vpe");
+    ( $flag == 0 ) ? push(@PRINT, "fpe") : push(@PRINT, "vpe"); 
   }
-  for($i=1;$i<=$#E;$i+=2){ # toutes les fins d'exons E
-    my$flag=0;
-    for($j=1;$j<=$#P;$j+=2){ # toutes les fins d'exons P
+
+  # toutes les fins d'exons reels
+  for (my $i = 1; $i < scalar(@$ra_e); $i+=2 )
+  { 
+    my $flag = 0; 
+    # pour toutes les fins d'exons predits
+    for(my $j = 1; $j < scalar(@$ra_p); $j+=2 )
+    { 
       # exon identique:
-      $flag+=(($E[$i-1]==$P[$j-1])&&($E[$i]==$P[$j]));
+      $flag += 1 if ( ($ra_e->[$i-1] == $ra_p->[$j-1]) && 
+		      ($ra_e->[$i]   == $ra_p->[$j]  ) );
     }
-    if ($flag==0) { push(@PRINT,"fne") }
+    if ( $flag == 0) { push(@PRINT,"fne") }
   }
 
   print("Code  pour $seq: @PRINT\n");
-
   print("Total pour $seq: ");
-#  print("Pour $ngrtot genes reels, $ngptot prediction(s), dont $npredparfaites parfaite(s) \n");
-#  print("Pour $nertot exons reels, $neptot prediction(s), dont $nexonstrouves parfaite(s)\n\n");
-#  print("$npredparfaites genes bien predits sur $ngrtot (avec $ngptot predictions)\n");
-#  print("$nexonstrouves exons bien predits sur $nertot (avec $neptot predictions)\n");
   print("$ngrtot gene(s), $ngptot predit(s), $npredparfaites trouve(s), $nertot exon(s), $neptot predit(s), $nexonstrouves trouve(s)\n");
+
+  return;
 }
+
+
 
 ########    "LEGENDE" ou guide des symboles ###################
 ##
@@ -420,21 +566,22 @@ sub evaluation_et_affichage{
 ##  
 ################################################################
 
-$FPg=0;$FNg=0;$VNg=0;$VPg=0;$nGR=0;$nGP=0;
-$FPe=0;$FNe=0;$VNe=0;$VPe=0;$nER=0;$nEP=0;
-$FPn=0;$FNn=0;$VNn=0;$VPn=0;$nNR=0;$nNP=0;$nNtot=0;
-$totalseqlen=0;$AC=0;$CC=0;
-@coord=();@pred=();
-@E=();
-@P=();
-@COORD2D=();
-@PRED2D=();
-$nseqreelles=1;
-$nseqpred=1;
+
+
+MAIN: 
+{
+
+my $setoffset = 0;
+my $offset    = 0;
+my $sortie    = 1; # 0-> short, 2-> detaillee
+my $name2     = "";
+my $ntlevel   = 0;
 
 ######################################################################
 ####################          ARGMT            #######################
 ######################################################################
+
+
 # lecture des arguments (pas joli, mais pas besoin de use Getopt::Std)
 if ($#ARGV != 1) {
   if ($ARGV[0] eq '-h') { description() }
@@ -452,17 +599,18 @@ if ($#ARGV != 1) {
       }
       elsif ($1 eq 'p') {
 	if (($2 eq 's') || ($2 eq 'l')) {
-	  $sortie= ( ($2 eq 's') ? 0 : 2 );
+	  $sortie = ( ($2 eq 's') ? 0 : 2 );
 	}
 	else { usage() }
       }
       elsif ($1 eq 'n') {
 	if ($2 eq 't'){
-	  $ntlevel=1;
+	  $ntlevel = 1;
 	}
 	elsif ($2 eq 'tplus') {
-	  if ($name2) {
-	    $ntlevel=2;
+	  if ($name2) 
+	  {
+	    $ntlevel = 2;
 	  }
 	  else {
 	    die "special ntplus option requires first the list of fasta sequences (-f)\n";
@@ -479,177 +627,280 @@ if ($#ARGV != 1) {
 open(COORD,"$ARGV[0]") || die "Can't open fich coord reelles $ARGV[0]\n";
 open(PRED,"$ARGV[1]") || die "Can't open fich coord predites $ARGV[1]\n";
 
-$nlCOORD=0;$nlPRED=0;
-$numgene=0;$j=0;
-$newseqreelle=1;
+my $borneg      = 0;
+my $borned      = 0;
+my $totalseqlen = 0;
+my @E       = (); # Tableau des exons
+my @P       = ();
+my @COORD2D = (); # Contient les coordonnées des exons des gènes réels
+my @PRED2D  = ();
 
-if ($sortie!=0) {
+# Numero de lignes dans les fichiers d'entree
+my $nlCOORD = 0; 
+my $nlPRED  = 0;
+
+my $numgene      = 0; # Numero du gene courant
+my $j            = 0; # Index pour sauvegarder les prédictions (pas clair)
+my $newseqreelle = 1; # Utiliser pour savoir si on est dans une nouvelle seq
+my $gene_en_cours;
+
+my @TMP;
+
+if ($sortie != 0) 
+{
   print("\nEVALUATION DES PREDICTIONS D'EUGENE (@CMD)\n");
 }
 
-while($lCOORD=<COORD>) {
+# For each line of the coordinates file 
+# MtC00289_GC#MtC00289_GC -1001 -1160 -1265 -1857
+while(my $lCOORD = <COORD>) 
+{
   chomp $lCOORD;
   $nlCOORD++;
-  if (($name2) && ($newseqreelle==1)) {
-    chomp($name2=<LS>);
-    $newseqreelle=0;
-  }
-  # Si on est dans une sequence
-  if($lCOORD =~ /(\s+\-?([0-9]+))+/) {
-    $numgene++;
-    @TMP=split(/\s+/,$lCOORD);
-#TMP!! on pourrait verifier si vide avant de shifter (+ de souplesse de format coord)
-    shift @TMP;  # case vide
-    foreach $coord (@TMP){
-      push (@E,$coord); #stocke ensemble des exons de la sequence
-    }
-    @COORD2D[$numgene-1]=([@TMP]);   #stocke ensemble des genes de la sequence
-  }
-  else{
-    if($lCOORD == ""){ # Fin de la sequence
-      $newseqreelle=1;
 
-      # calcul des bornes droite et gauche
-      $borneg= ( (abs($COORD2D[0][0]) - $offset) > 0 ) ? abs($COORD2D[0][0]) - $offset : 1 ;
-      $borned= abs($COORD2D[$#COORD2D][$#{$#COORD2D}]) + $offset;
+  # Cas ou on lit le nom de la sequence dans un fichier (option -fNomFichier)
+  if ( ( $name2 ) && ($newseqreelle == 1 ) ) 
+  {
+    chomp($name2 = <LS> );
+    $newseqreelle = 0;
+  }
+
+  # Si on est dans une sequence
+  if ($lCOORD =~ /(\s+\-?([0-9]+))+/) 
+  {
+    $numgene++;
+    @TMP = split(/\s+/,$lCOORD);  # [MtC00289_GC#MtC00289_GC, -1001, -1160, -1265, -1857]
+    #TMP!! on pourrait verifier si vide avant de shifter (+ de souplesse de format coord)
+    shift @TMP;  # case vide
+    foreach my $coord (@TMP)
+    {
+      push (@E, $coord); #stocke ensemble des exons de la sequence
+    }
+    
+    $COORD2D[$numgene-1] = ([@TMP]); #stocke ensemble des genes de la sequence
+  }
+  else
+  {
+    if ($lCOORD == "")
+    { # Fin de la sequence
+      $newseqreelle = 1;
+
+      # calcul des bornes droite & gauche du gène (pos 5' du 1er exon, pos 3' du dernier)
+      $borneg = ( (abs($COORD2D[0][0])-$offset) > 0 ) ? abs($COORD2D[0][0])-$offset : 1;
+      my $s_tab  = $#COORD2D;
+      my $s_cell = $#{$COORD2D[$s_tab]};
+      $borned    = abs($COORD2D[$s_tab][$s_cell]) + $offset;
 
       ## LECTURE des predictions d'EuGene
-      $j=0;
-      $gene_en_cours=0;
-      foreach $pointeur2D (@PRED2D){
-	@{$pointeur2D}=(); }
-      @PRED2D=();
-      @P=();
-      @TMP=();
+      $j             = 0;
+      $gene_en_cours = 0;
+      
+      @PRED2D = ();
+      @P      = ();
+      @TMP    = ();
+      my $name;
 
-      chomp($lPRED=<PRED>);$nlPRED++;
-      if($lPRED eq ""){ # pas de gene trouve
+      my $lPRED = <PRED>; # Lecture de la ligne suivante dans le fichier de prediction
+      chomp($lPRED);
+      $nlPRED++;
+
+      if($lPRED eq "")
+      { # pas de gene trouve
 	$j++;
-	$name= ( ($name2) ? $name2 : " -NO_NAME- " );
+	$name = ( ($name2) ? $name2 : " -NO_NAME- " );
       }
 
-      while($lPRED ne ""){ # tant qu'il y a un exon trouve
-	if ($lPRED =~ /^([^\s]+)\s+([a-zA-Z]+)\s+([\+\-])\s+([0-9]+)\s+([0-9]+)\s+[0-9]+\s+[^\s]+\s+[^\s]+\s+([0-9]+)\s+([0-9]+)\s+/) {
-	  if ( ($setoffset==0) ||
-	       ((abs($5) >= $borneg) && (abs($4) <= $borned))) {
-	    $name= ( ($name2) ? $name2 : $1);
-	    $type=$2;
-	    $sens=$3;
-	    $beg=$4;
-	    $end=$5;
-#	    ($name= $1) =~ s/\.\d+\.\d+\.\d+//;
-	    $gene_en_cours=1;
-	    # Si format ou fichier mauvais:
-	    if (!( ($type eq "Init")||($type eq "Intr")||($type eq "Term")||($type eq "Sngl"))){ die" Pb(1) format fichier predictions $ARGV[1] ligne $nlPRED\n"};
+      while($lPRED ne "")
+      { 
+        # tant qu'il y a un exon trouve
+	# Id  Term  -   1001  1288  288  -1  -3    1289    1000     0.0
+	if ($lPRED =~ /^([^\s]+)\s+([a-zA-Z]+)\s+([\+\-])\s+([0-9]+)\s+([0-9]+)\s+[0-9]+\s+[^\s]+\s+[^\s]+\s+([0-9]+)\s+([0-9]+)\s+/) 
+	{
+	  my $beg = $4;  # 1001, start position
+	  my $end = $5;  # 1288, stop position
 
-	    # Stockage des exons
-	    $signe=( ("$sens" eq '+')? "" : '-');
-	    push(@P,"$signe$beg");
-	    push(@P,"$signe$end");
-	    push(@TMP,"$signe$beg");
-	    push(@TMP,"$signe$end");
+	  if ( ($setoffset == 0) || 
+               ((abs($end) >= $borneg) && (abs($beg) <= $borned)) ) 
+	  {
+	    $name          = ( ($name2) ? $name2 : $1);
+	    my $type       = $2; # 'Term', type of the feature
+	    my $sens       = $3; # '-', sign
+	    $gene_en_cours = 1;
+
+	    # Si format ou fichier mauvais:
+	    if (!( ($type eq "Init")||($type eq "Intr")||($type eq "Term")||($type eq "Sngl")))
+	    {
+		die " Pb(1) format fichier predictions $ARGV[1] ligne $nlPRED\n";
+	    }
+
+	    # Stockage des exons predits
+	    my $signe = ( ("$sens" eq '+') ? "" : '-');
+	    push(@P,   "$signe$beg");
+	    push(@P,   "$signe$end");
+	    push(@TMP, "$signe$beg");
+	    push(@TMP, "$signe$end");
 
 	    ## fin d'un gene
-	    if ( (($type eq "Term")&&("$sens" eq '+'))||(($type eq "Init")&&("$sens" eq '-'))||($type eq "Sngl")){
+	    if ( (($type eq "Term")&&("$sens" eq '+')) ||
+                 (($type eq "Init")&&("$sens" eq '-')) ||
+                  ($type eq "Sngl"))
+	    {
 	      $j++;
-	      $gene_en_cours=0;
-	      @PRED2D[$j-1]=[@TMP];
-	      @TMP=();
+	      $gene_en_cours = 0;
+	      @PRED2D[$j-1]  = [@TMP]; # Save the exon prediction
+	      @TMP           = ();
 	    }
 	  }
 	}
-	elsif($lPRED !~ /\s+Utr\d\s/) {die"Pb(2) format fichier predictions $ARGV[1] ligne $nlPRED\n"};
-	chomp($lPRED=<PRED>);
+
+	elsif($lPRED !~ /\s+Utr\d\s/) 
+	{
+	    die "Pb(2) format fichier predictions $ARGV[1] ligne $nlPRED\n";
+	}
+
+	chomp($lPRED = <PRED>); # read next prediction line
 	$nlPRED++;
       }
-      if ($gene_en_cours==1) {
+
+
+      if ($gene_en_cours == 1) 
+      {
 	# Cas ou la derniere prediction "continue" apres la sequence
 	# (gene non termine par un "+Term" ou "-Init")
 	$j++;
-	@PRED2D[$j-1]=[@TMP];
-	@TMP=();
-	$gene_en_cours=0;
-      }
-      # Les tableaux de coordonees et predictions sont prets
-      # Si l'offset n'a pas ete defini (ttes les pred ont ete prises), on prend les valeurs extremes (pour niveau nt)
-      if ($setoffset==0) {
-	$borneg= (abs($PRED2D[0][0]) < $borneg) ? abs($PRED2D[0][0]) : $borneg ;
-	$borned= (abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) > $borned) ? abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) : $borned; 
-      }
-      else { # par contre, si offset est defini, on prend l'intervalle mini
-	if (abs($PRED2D[0][0]) < abs($COORD2D[0][0])) {
-	  $borneg= (abs($PRED2D[0][0]) < $borneg) ? $borneg : abs($PRED2D[0][0]);
-	}
-	else { 
-	  $borneg= abs($COORD2D[0][0]);
-	}
-	$borned= (abs($PRED2D[$#PRED2D][$#{$#PRED2D}]) > $borned) ? $borned : abs($PRED2D[$#PRED2D][$#{$#PRED2D}]);
+	@PRED2D[$j-1]  = [@TMP];
+	@TMP           = ();
+	$gene_en_cours = 0;
       }
 
-      if ($sortie == 2) {
-	if ($ntlevel>0) { &evaluation_niveau_nucleotide(\@E,\@P); }
-	&evaluation_et_affichage(\@COORD2D,\@PRED2D,\@E,\@P,$name);
+      $s_tab  = $#COORD2D;
+      $s_cell = $#{$COORD2D[$s_tab]};
+
+      # Les tableaux de coordonnees et predictions sont prets
+      # Si l'offset n'a pas ete defini (ttes les pred ont ete prises), on prend les valeurs extremes (pour niveau nt)
+      if ( $setoffset == 0 ) 
+      {
+	  #print "\nOOOO: Offset 0\n";
+	$borneg = (abs($PRED2D[0][0]) < $borneg) ? abs($PRED2D[0][0]) : $borneg ;
+	$borned = (abs($PRED2D[$s_tab][$s_cell]) > $borned) ? abs($PRED2D[$s_tab][$s_cell]) : $borned; 
       }
-      else {
+      else 
+      { 
+	  #print "\nOOOO: Offset 1\n";
+        
+        # par contre, si offset est defini, on prend l'intervalle mini
+	if (abs($PRED2D[0][0]) < abs($COORD2D[0][0])) 
+	{
+	  $borneg = (abs($PRED2D[0][0]) < $borneg) ? $borneg : abs($PRED2D[0][0]);
+	}
+	else 
+	{ 
+	  $borneg = abs($COORD2D[0][0]);
+	}
+	$s_tab  = $#COORD2D;
+	$s_cell = $#{$COORD2D[$s_tab]};
+	$borned = (abs($PRED2D[$s_tab][$s_cell]) > $borned) ? $borned : abs($PRED2D[$s_tab][$s_cell]);
+      }
+
+      
+      if ($sortie == 2) 
+      {
+	if ($ntlevel > 0) 
+	{ 
+	    &evaluation_niveau_nucleotide(\@E,\@P, $borneg, $borned); 
+	}
+	&evaluation_et_affichage(\@COORD2D, \@PRED2D, \@E, \@P, $name);
+      }
+      else 
+      {
 	&evaluation_niveau_gene(\@COORD2D,\@PRED2D);
 	&evaluation_niveau_exon(\@E,\@P);
-	if ($ntlevel>0) { &evaluation_niveau_nucleotide(\@E,\@P);}
+	if ( $ntlevel > 0 ) 
+	{ 
+	  &evaluation_niveau_nucleotide(\@E,\@P, $borneg, $borned);
+	}
       }
-      $numgene=0;
-      if ($ntlevel==2) {
-	$totalseqlen += &seqlength($name);
+
+      $numgene = 0;
+      if ($ntlevel == 2) 
+      {
+	  $totalseqlen += &seqlength($name);
       }
 
       # liberation memoire tableaux:
-      @E=();
-      @P=();
-      foreach $pointeur2D (@COORD2D){
-	@{$pointeur2D}=(); }
-      @COORD2D=();
-      foreach $pointeur2D (@PRED2D){
-	@{$pointeur2D}=(); }
-      @PRED2D=();
+      @E       = ();
+      @P       = ();
+      @COORD2D = ();
+      @PRED2D  = ();
+
     }
-    else{
+    else
+    {
       die"Pb(3) format fichier coordonnees $ARGV[0] ligne $nlCOORD\n";
     }
   }
 }
 
-if (($nGR==0)||($nER==0)){die"Pb(4) : nbre de seq soumises (ou d'exons) nul!\n"}
-
-$SENSg=($VPg*100)/$nGR;
-$SENSe=($VPe*100)/$nER;
-if ($ntlevel>0) {$SENSn=($VPn*100)/$nNR;}
-
-if (($nGP==0)||($nEP==0)){
-  $SPECg=100;
-  $SPECe=100;
-  $SPECn=100;
-}
-else{
-  $SPECg=($VPg*100)/$nGP;
-  $SPECe=($VPe*100)/$nEP;
-  if ($ntlevel>0) { $SPECn=($VPn*100)/$nNP; }
+if ( ($nGR == 0) || ($nER == 0) )
+{
+  die "Pb(4) : nbre de seq soumises (ou d'exons) nul!\n";
 }
 
-if ($ntlevel>0) { 
-  if ($SENSn != (100*$VPn)/($VPn+$FNn)) {
-    die "internal error computing nt sens:\n VPn=$VPn , nNR=$nNR , sensn= $SENSn\n VPn=$VPn , FNn=$FNn\n";
+# Calcul de sensibilite
+my $SENSg = ($VPg * 100)/$nGR;
+my $SENSe = ($VPe * 100)/$nER;
+my $SENSn;  
+if ( $ntlevel > 0 ) 
+{
+    $SENSn = ($VPn*100)/$nNR;
+}
+
+# Calcul de la specificite
+my $SPECg, my $SPECe, my $SPECn;
+if ( ($nGP == 0) || ($nEP == 0) )
+{
+  $SPECg = 100;
+  $SPECe = 100;
+  $SPECn = 100;
+}
+else
+{
+  $SPECg = ($VPg*100)/$nGP;
+  $SPECe = ($VPe*100)/$nEP;
+  if ($ntlevel > 0) 
+  { 
+      $SPECn = ($VPn*100)/$nNP; 
   }
-  if ($SPECn != (100*$VPn)/($VPn+$FPn)) {
+}
+
+# Verification de la coherence des calculs de sensibilite et de specificite
+if ( $ntlevel > 0 ) 
+{ 
+  if ($SENSn != (100*$VPn)/($VPn+$FNn)) 
+  {
+    die "Internal error computing nt sens:\n VPn=$VPn , nNR=$nNR , sensn= $SENSn\n VPn=$VPn , FNn=$FNn\n";
+  }
+  if ($SPECn != (100*$VPn)/($VPn+$FPn))
+  {
     die "internal error computing nt spec:\n$VPn*100/$nNP != 100*($VPn/($VPn+$FPn))\n VPn=$VPn , nNP=$nNP , specn= $SPECn\n VPn=$VPn , FPn=$FPn\n";
   }
 }
+
 #print"VPn=$VPn , nNP=$nNP , specn= $SPECn\n VPn=$VPn , FPn=$FPn\n";
-if ($sortie==0) {
-  print"$SENSg $SPECg $SENSe $SPECe\n";
+if ( $sortie == 0 ) 
+{
+    print "$SENSg $SPECg $SENSe $SPECe\n";
 }
-else {
+else
+{
   print "\n>TOTAL (@CMD)\n";
   print "$VPg genes bien detectes sur $nGR avec $nGP predictions\n";
   print "$VPe exons bien detectes sur $nER avec $nEP predictions\n";
-  if ($ntlevel>0) {  print "$VPn nt bien detectes sur $nNR avec $nNP predictions\n";}
+  if ( $ntlevel > 0) 
+  {  
+      print "$VPn nt bien detectes sur $nNR avec $nNP predictions\n";
+  }
+  
 #print "$VPn nt codants bien detectes sur $nNR ($FNn rates);$nNP predits dont $FPn faux pos\n";
 #print "\n";
 #print "SENSIBILITE GENES : $SENSg\n";
@@ -658,16 +909,28 @@ else {
 #print "SPECIFICITE EXONS : $SPECe\n";
 #print "SENSIBILITE NUCL  : $SENSn\n";
 #print "SPECIFICITE NUCL  : $SPECn\n";
+
   print"SNG: $SENSg SPG: $SPECg SNE: $SENSe SPE: $SPECe";
-  if ($ntlevel>0) {  print " SNN: $SENSn SPN: $SPECn";}
+  if ( $ntlevel > 0 )
+  {  
+      print " SNN: $SENSn SPN: $SPECn";
+  }
 }
-if ($ntlevel == 2) {
-  $VNn= $totalseqlen -$FPn -$FNn -$VPn;
-  $AC= 0.5*( $VPn/($VPn+$FNn) + $VPn/($VPn+$FPn) + $VNn/($VNn+$FPn) + $VNn/($VNn+$FNn) ) -1;
-  $CC= ( ($VPn*$VNn)-($FNn*$FPn) ) / ( sqrt( ($VPn+$FNn)*($VNn+$FPn)*($VPn+$FPn)*($VNn+$FNn) ) );
+
+if ($ntlevel == 2) 
+{
+  my $VNn = $totalseqlen -$FPn -$FNn -$VPn;
+  my $AC  = 0.5*( $VPn/($VPn+$FNn) + $VPn/($VPn+$FPn) + $VNn/($VNn+$FPn) + $VNn/($VNn+$FNn) ) -1;
+  my $CC  = ( ($VPn*$VNn)-($FNn*$FPn) ) / ( sqrt( ($VPn+$FNn)*($VNn+$FPn)*($VPn+$FPn)*($VNn+$FNn) ) );
   print " AC: $AC CC: $CC";
 }
 print"\n";
+
 if($name2) {close LS}
 close COORD;
 close PRED;
+
+}
+
+
+
