@@ -38,7 +38,7 @@ my @CMD       = "$NOMduPROG "."@ARGV";
 # Nombre de genes reels et predits
 my $nGR = 0;
 my $nGP = 0;
-# gènes FP/FN/VN/VP
+# genes FP/FN/VN/VP
 my $FPg = 0;
 my $FNg = 0;
 my $VNg = 0;
@@ -174,7 +174,7 @@ sub seqlength
  Usage        : -
  Function     : Fonction d'evaluation au niveau gene qui pour une sequence donnee, 
                 regarde si chaque gene reel a une prediction parfaitement egale
-                Met à jour le nombre de gene réel et predit ($nGR, $n,GP) et le nombre
+                Met a jour le nombre de gene reel et predit ($nGR, $n,GP) et le nombre
                 de gene Vrai positif ($VPg)
  Args         : $ra_coord2d: reference sur un tableau de genes reels
                 $ra_pred2d : reference sur un tableau de genes predits
@@ -211,7 +211,7 @@ sub evaluation_niveau_gene
  Usage        : -
  Function     : Fonction d'evaluation au niveau exon qui pour une sequence donnee, 
                 regarde le nombre d exon correctement predit
-                Met à jour le nombre d'exons réel et predit ($nER, $nEP) et le nombre
+                Met a jour le nombre d'exons reel et predit ($nER, $nEP) et le nombre
                 d'exon Vrai positif ($VPe)
  Args         : $ra_e: reference sur un tableau de position d exon reel
                 $ra_p : reference sur un tableau de positions d exon predit
@@ -399,12 +399,12 @@ sub evaluation_et_affichage
 {
   my ($ra_coord, $ra_pred, $ra_e, $ra_p, $seq) = @_;
 
-  # met à jour le nombre de gene reels et predits
+  # met a jour le nombre de gene reels et predits
   my $ngrtot = scalar(@$ra_coord);
   my $ngptot = scalar(@$ra_pred);
   $nGR += $ngrtot;
   $nGP += $ngptot;
-  #  met à jour le nombre d'exons reels et predits
+  #  met a jour le nombre d'exons reels et predits
   my $nertot = scalar(@$ra_e)/2;
   my $neptot = scalar(@$ra_p)/2;
   $nEP += $neptot;
@@ -437,7 +437,7 @@ sub evaluation_et_affichage
 
     my $predit = 0;
     $ngp       = 0; # Numero de la prediction etudiee
-    # Recherche si le gène a bien été prédit 
+    # Recherche si le gene a bien ete predit 
     foreach my $p (@$ra_pred)
     {
       $ngp++; 
@@ -447,7 +447,7 @@ sub evaluation_et_affichage
 	$VPg++;
 	$npredparfaites++;
 	$predit = 2;
-	print("OK! (detecte en pred n°$ngp)");
+	print("OK! (detecte en pred n $ngp)");
       }
       else
       {
@@ -455,7 +455,7 @@ sub evaluation_et_affichage
 	# Cas ou la structure exon n'a pas ete totalement trouvee
 	if ($neid > 0)
 	{
-	  print("rate! ($neid exons trouve(s) sur $ne en pred n°$ngp)");
+	  print("rate! ($neid exons trouve(s) sur $ne en pred n $ngp)");
 	  $predit = 1;
 	}
       }
@@ -490,7 +490,7 @@ sub evaluation_et_affichage
       if("@genepred" eq "@{$c}")
       {
 	$predok = 2;
-	print("OK! (parfaite pour gene n°$numerogene)");
+	print("OK! (parfaite pour gene n $numerogene)");
       }
       else
       {
@@ -498,7 +498,7 @@ sub evaluation_et_affichage
         # Cas ou la structure exon n'est pas completement correcte
 	if ( $neid > 0 )
 	{
-	  print("imparfaite (cf gene n°$numerogene)");
+	  print("imparfaite (cf gene n $numerogene)");
 	  $predok=1;
 	}
       }
@@ -632,7 +632,7 @@ my $borned      = 0;
 my $totalseqlen = 0;
 my @E       = (); # Tableau des exons
 my @P       = ();
-my @COORD2D = (); # Contient les coordonnées des exons des gènes réels
+my @COORD2D = (); # Contient les coordonnees des exons des genes reels
 my @PRED2D  = ();
 
 # Numero de lignes dans les fichiers d'entree
@@ -640,7 +640,7 @@ my $nlCOORD = 0;
 my $nlPRED  = 0;
 
 my $numgene      = 0; # Numero du gene courant
-my $j            = 0; # Index pour sauvegarder les prédictions (pas clair)
+my $j            = 0; # Index pour sauvegarder les predictions (pas clair)
 my $newseqreelle = 1; # Utiliser pour savoir si on est dans une nouvelle seq
 my $gene_en_cours;
 
@@ -685,7 +685,8 @@ while(my $lCOORD = <COORD>)
     { # Fin de la sequence
       $newseqreelle = 1;
 
-      # calcul des bornes droite & gauche du gène (pos 5' du 1er exon, pos 3' du dernier)
+    # calcul des bornes droite & gauche de la region contenant des genes
+      #  (pos 5' du 1er exon du 1er gene, pos 3' du dernier exon du dernier gene)
       $borneg = ( (abs($COORD2D[0][0])-$offset) > 0 ) ? abs($COORD2D[0][0])-$offset : 1;
       my $s_tab  = $#COORD2D;
       my $s_cell = $#{$COORD2D[$s_tab]};
