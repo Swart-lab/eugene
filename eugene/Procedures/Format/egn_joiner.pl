@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I../lib
 
 #=============================================================================#
 #=             Copyright (c) 2004 by INRA. All rights reserved.              =#
