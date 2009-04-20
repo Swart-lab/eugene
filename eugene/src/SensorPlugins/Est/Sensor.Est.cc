@@ -761,7 +761,7 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 
                 for (i = from; i <= to; i++)
                 {
-                    if (State2Status[pred->GetStateForPos(i+1)] != 1) // 1 = transcribed and spliced
+                    if (State2Status[pred->GetStateForPos(i+1)] != SPLICED_TRANSCRIBED) // 1 = transcribed and spliced
                         ConsistentEST = 0;
                 }
             }

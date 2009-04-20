@@ -474,7 +474,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
                 state = pred->vGene[i]->vFea[j]->state;
                 start = pred->vGene[i]->vFea[j]->start;
                 end   = pred->vGene[i]->vFea[j]->end;
-                if (State2Status[state] == 3)
+                if (State2Status[state] == TRANSLATED)
                 { //coding
                     // index=indice du premier match etant > ou = au debut de l'exon
                     while( (index < (int)vPos.size()) && (vPos[index] < start-1) )
@@ -485,7 +485,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
                         // pour chaque nuc de l'exon supporte par un hit
                         while (index < (int)vPos.size() && vPos[index]<end)
                         {
-                            if (State2Phase[state] ==  vPMPhase[index])
+                            if (State2Frame[state] ==  vPMPhase[index])
                                 SupportedNuc++;
                             index++;
                         }
@@ -695,7 +695,7 @@ int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
 
         for (j = from; j <= to; j++)
         {
-            if (State2Phase[state] == ThisBlock->Phase)
+            if (State2Frame[state] == ThisBlock->Phase)
             {
                 if (Sup[j-beg] == 0) 
 		{
