@@ -32,13 +32,11 @@ extern "C"{
 #include "Param.h"
 #include "Hits.h"
 
-//SEB
 #include "Prediction_cte.h"
 #include "Gff3Line.h"
 #include "System.h"
 #include <fstream>
 #include <iostream>
-//SEB
 
 class MasterSensor;
 class DNASeq;
@@ -64,6 +62,8 @@ class Feature
   Feature  ();
   Feature  (signed char, int, int, char, int);
   ~Feature ();
+  bool Overlap (const Feature&);
+  bool IsExon();
 };
 
 
@@ -80,7 +80,7 @@ class Gene
   int inNumber, inLength;
   int utrLength, mrnaLength, geneLength;
   void Update   ();
-  void clear	();
+  void clear    ();
  public:
   int cdsStart, cdsEnd, trStart, trEnd;
   int tuStart, tuEnd; // transcript unit (required for gff3 + alternatives variants)
@@ -91,13 +91,18 @@ class Gene
   std::vector <Feature*> vFea;
   
   Gene  ();
+  Gene (std::string line, int seqLength);
   ~Gene ();
 
   int isDifferent (const Gene& o, int threshold);
   bool operator== (const Gene& o);
+  bool HasSameExons(const Gene& o);
+  bool Overlap (const Gene& o);
   inline int nbFea() {return vFea.size();};
+  int GetExonNumber();
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
+  void Print();
   char GetVariantCode(void);
 
 };
@@ -114,7 +119,7 @@ class Prediction
   unsigned char *ESTMatch;
 
   inline unsigned char GetESTMatch(int i) {return (ESTMatch ? ESTMatch[i] : 0);};
-  void  clear			(); 
+  void  clear     (); 
   void  PrintGff        (FILE*, char*);
   void  PrintGff3        (std::ofstream&, char*, char);
   void  PrintEgnL       (FILE*, char*, int a=0);
@@ -131,7 +136,7 @@ class Prediction
   // debut/fin/etat: debut et fin de la seq. dont l'etat est etat
   // cons/incons: retour des valeurs
   void  CheckConsistency(int debut, int fin, int etat,
-			 int* cons, int* incons);
+       int* cons, int* incons);
 
   // Check and Trim UTR according to EST evidence
   void ESTScan();
@@ -163,6 +168,7 @@ class Prediction
   Prediction  ();
   Prediction  (int From, int To, std::vector <int> vPos,
          std::vector <signed char> vState);
+  Prediction  (const std::string & desc, DNASeq*);
   ~Prediction ();
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
@@ -173,6 +179,14 @@ class Prediction
   void  PlotPred      ();
   char  GetStateForPos(int);
   Gene *FindGene(int start, int end);
+  void Print();
+  std::vector<int> Eval(Prediction* ref, int offset);
+  std::vector<int> EvalGene(Prediction* ref, int start, int end);
+  std::vector<int> EvalExon(Prediction* ref, int start, int end);
+  std::vector<Feature*> GetExons(int start, int end);
+  std::vector<Gene*>    GetGenes(int start, int end);
+  int GetExonNumber();
+  int GetExonLength();
 
   // Need by Sensor Tester
   const char* IsStart       (int);
@@ -204,7 +218,7 @@ const enum DATA::ContentsType SensorContents[NbTracks] = {
   DATA::IntronUTRF, DATA::IntronUTRR
 };
 
-inline int PhaseAdapt(char p) {return State2Frame[(int)p];}
+inline int PhaseAdapt(char p) {return State2Phase[(int)p];}
 
 
 #endif

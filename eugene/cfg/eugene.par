@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5e
+EuGene.version		3.5f
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -67,6 +67,16 @@ AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
 AltEst.verbose			0
 #AltEst.format  		GFF3
+#
+##### Evaluation mode ######
+#Eval.offset   50
+Fitness.wsng  1
+Fitness.wsne  1
+Fitness.wsnn  0
+Fitness.wspg  1
+Fitness.wspe  1
+Fitness.wspn  0
+#
 #######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
@@ -427,7 +437,6 @@ Sensor.Tester 		1
 ParaOptimization.Use 0
 ParaOptimization.Regularizer	0.0
 ParaOptimization.TrueCoordFile ---
-ParaOptimization.EvalPredDir   ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
 ParaOptimization.Test 0
 ParaOptimization.Trace 1

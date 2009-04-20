@@ -23,11 +23,11 @@
 
 #include <vector>
 #include <string>
-
 #include "OptiAlgorithm.h"
 
 class MasterSensor;
 class DNASeq;
+class Prediction;
 
 class ParaOptimization {
 
@@ -44,9 +44,9 @@ class ParaOptimization {
  private:
   std::vector <MasterSensor*>  MSensors;
   std::vector <DNASeq*>        Sequences;
+  std::vector <Prediction*>    References;
   std::vector<std::string>     SeqNames;
   std::string                  TrueCoordFile;
-  std::string                  EvalPredDir;
   std::string                  ExecutableName; // first part of parameter file
   bool                         IsTest;         // if true then test mode: 
                                       // do not read sequences and related info
@@ -54,6 +54,7 @@ class ParaOptimization {
   double	Regularizer;
   void Init(int argc, char* argv[]);
   double NormalLaw(double x);
+  void ReadReferences();
 };
 
 
