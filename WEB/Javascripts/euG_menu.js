@@ -77,11 +77,11 @@ oCMenu.makeMenu('top2','','<img src="Images/m_orga.jpg">','organisms.html')
 
 oCMenu.makeMenu('top2b','','<img src="Images/m_references.jpg">','references.html')
     
-oCMenu.makeMenu('top3','','<img src="Images/m_doc.jpg">','http://mulcyber.toulouse.inra.fr/gf/project/eugene/docman/?subdir=9')
+oCMenu.makeMenu('top3','','<img src="Images/m_doc.jpg">','https://mulcyber.toulouse.inra.fr/docman/view.php/10/1047/EuGeneDoc.pdf')
 
-oCMenu.makeMenu('top4','','<img src="Images/m_download.jpg">','http://mulcyber.toulouse.inra.fr/gf/project/eugene/frs/')
+oCMenu.makeMenu('top4','','<img src="Images/m_download.jpg">','https://mulcyber.toulouse.inra.fr/frs/?group_id=10')
 
-oCMenu.makeMenu('top5','','<img src="Images/m_gforge.jpg">','http://mulcyber.toulouse.inra.fr/gf/project/eugene/')
+oCMenu.makeMenu('top5','','<img src="Images/m_gforge.jpg">','https://mulcyber.toulouse.inra.fr/projects/eugene/')
    
 oCMenu.makeMenu('top6','','<img src="Images/m_links_contacts.jpg">','links.html')
   
