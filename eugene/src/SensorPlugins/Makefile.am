@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------
 
 
-SUBDIRS = 0_SensorTk AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript QualData
+SUBDIRS = 0_SensorTk AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript QualData NStretch
 
 
 
