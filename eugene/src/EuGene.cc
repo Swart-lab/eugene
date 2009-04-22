@@ -15,7 +15,7 @@
 // ------------------------------------------------------------------
 // File:     EuGene.cc
 // Contents: This program finds exons/introns and intergenic regions 
-//           (including UTR)
+//           (including UTRs)
 // ------------------------------------------------------------------
 
 
@@ -390,7 +390,7 @@ int main  (int argc, char * argv [])
 		pred->Print(TheSeq, MS);
 		for (int idx = 0; idx < vPred.size(); idx++) 
 		{
-			vPred[idx]->Print(TheSeq, MS,NULL,1);    		
+			vPred[idx]->Print(TheSeq, MS,NULL,1);
 		}
 	  //delete AltPred;	
 	}
@@ -403,9 +403,9 @@ int main  (int argc, char * argv [])
 	fflush(stderr);
 	fflush(stdout);
       } // fin de traitement de chaque séquence....
-      
+
       fprintf(stderr,"-------------------------------------"	      "--------------------------------\n");
-    
+
       return  0;
     }
 }
