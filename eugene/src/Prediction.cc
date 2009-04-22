@@ -200,7 +200,7 @@ Gene :: Gene(std::string line, DNASeq& seq)
     int rest_codon_lg = 0;  // number of nt in the exon belonging to the previous codon
     int exon_length   = 0;
     int seqLength     = seq.SeqLen;
-    
+
     //read the first field, the name of the sequence
     std::string field;
     istringstream iss(line);
@@ -232,29 +232,31 @@ Gene :: Gene(std::string line, DNASeq& seq)
                 // Compute the frame
                 state += (lpos + rest_codon_lg + 2) % 3; // [Init|Term|Intr]F[1|2|3]]
                 this->AddFeature(state, lpos, rpos); // Add the exon
-                
+
                 // Use to compute the frame of the intron and of the next exon
                 exon_length   = rpos - lpos + 1 - rest_codon_lg;
                 rest_codon_lg = (3 - exon_length%3)%3;
-                
+
                 // Case there is a next intron
                 if ( exons.size() != 2 && ((i+1) < exons.size()-1) )
                 {
-                  intrLPos    = rpos+1;
-                  intrRPos    = exons[i+2]-1;
-                  isStartStop = seq.IsStartStop(intrLPos-1);
-                  // compute the state of the intron
-                  if (rest_codon_lg == 0)      state = IntronF1;
-                  else if (rest_codon_lg == 2) {
-                    if (isStartStop == 1)      state = IntronF2T;
-                    else                       state = IntronF2;
-                  }
-                  else {
-                    if      (isStartStop == 2) state = IntronF3TG;
-                    else if (isStartStop == 4) state = IntronF3TA;
-                    else                       state = IntronF3;
-                  }
-                  this->AddFeature(state, intrLPos, intrRPos);
+                    intrLPos    = rpos+1;
+                    intrRPos    = exons[i+2]-1;
+                    isStartStop = seq.IsStartStop(intrLPos-1);
+                    // compute the state of the intron
+                    if (rest_codon_lg == 0)      state = IntronF1;
+                    else if (rest_codon_lg == 2)
+                    {
+                        if (isStartStop == 1)      state = IntronF2T;
+                        else                       state = IntronF2;
+                    }
+                    else
+                    {
+                        if      (isStartStop == 2) state = IntronF3TG;
+                        else if (isStartStop == 4) state = IntronF3TA;
+                        else                       state = IntronF3;
+                    }
+                    this->AddFeature(state, intrLPos, intrRPos);
                 }
             }
         }
@@ -281,37 +283,39 @@ Gene :: Gene(std::string line, DNASeq& seq)
                 // will be use to compute the frame of the next exon
                 exon_length   = rpos - lpos + 1 - rest_codon_lg;
                 rest_codon_lg = (3 - exon_length%3)%3;
-                
+
                 // Case there is a next intron
                 if ( exons.size() != 2 && ( (i-1) > 0 ) )
                 {
-                  intrLPos    = abs(exons[i-2])+1;
-                  intrRPos    = lpos-1;
-                  isStartStop = seq.IsStartStop(seq.SeqLen -intrLPos);
-                  // compute the state of the intron
-                  if (rest_codon_lg == 0)       state = IntronR1;
-                  else if (rest_codon_lg == 2) {
-                    if (isStartStop == 32)      state = IntronR2AG;
-                    else                        state = IntronR2;
-                  }
-                  else {
-                    if      (isStartStop == 8)  state = IntronR3G;
-                    else if (isStartStop == 16) state = IntronR3A;
-                    else                        state = IntronR3;
-                  }
-                  
-                  vStates.push_back(state);
-                  vStart.push_back(intrLPos);
-                  vStop.push_back(intrRPos);
+                    intrLPos    = abs(exons[i-2])+1;
+                    intrRPos    = lpos-1;
+                    isStartStop = seq.IsStartStop(seq.SeqLen -intrLPos);
+                    // compute the state of the intron
+                    if (rest_codon_lg == 0)       state = IntronR1;
+                    else if (rest_codon_lg == 2)
+                    {
+                        if (isStartStop == 32)      state = IntronR2AG;
+                        else                        state = IntronR2;
+                    }
+                    else
+                    {
+                        if      (isStartStop == 8)  state = IntronR3G;
+                        else if (isStartStop == 16) state = IntronR3A;
+                        else                        state = IntronR3;
+                    }
+
+                    vStates.push_back(state);
+                    vStart.push_back(intrLPos);
+                    vStop.push_back(intrRPos);
                 }
             }
             // Add the features
             while (!vStates.empty())
             {
-              this->AddFeature(vStates.back(), vStart.back(), vStop.back());
-              vStates.pop_back();
-              vStart.pop_back();
-              vStop.pop_back();
+                this->AddFeature(vStates.back(), vStart.back(), vStop.back());
+                vStates.pop_back();
+                vStart.pop_back();
+                vStop.pop_back();
             }
         }
     }
@@ -411,14 +415,14 @@ bool Gene :: operator== (const Gene& o)
     int shift = 0;
 
     while ((idxo+shift < o.vFea.size()) &&
-           (idxt+shift < this->nbFea()) &&
-           (State2Status[o.vFea[idxo+shift]->state]     != UNTRANSLATED) && //not UTR
-           (State2Status[this->vFea[idxt+shift]->state] != UNTRANSLATED) // not UTR
-            )
+            (idxt+shift < this->nbFea()) &&
+            (State2Status[o.vFea[idxo+shift]->state]     != UNTRANSLATED) && //not UTR
+            (State2Status[this->vFea[idxt+shift]->state] != UNTRANSLATED) // not UTR
+          )
     {
         if ((o.vFea[idxo+shift]->start != this->vFea[idxt+shift]->start) ||
-            (o.vFea[idxo+shift]->end   != this->vFea[idxt+shift]->end)   ||
-            (o.vFea[idxo+shift]->state != this->vFea[idxt+shift]->state)) return false;
+                (o.vFea[idxo+shift]->end   != this->vFea[idxt+shift]->end)   ||
+                (o.vFea[idxo+shift]->state != this->vFea[idxt+shift]->state)) return false;
         shift++;
     }
     // we assume the gene structures satisfy the structural constraints
@@ -1117,6 +1121,11 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
             continue;
         }
 
+        //je pars du principe que la premiere structure me donne le brin du gene
+	// done also on variants to have a corrrect strand on variant mRNA
+        if (vGene[i]->nbFea() > 0)
+            gene_line.setStrand(vGene[i]->vFea[0]->strand);
+
         if ( ! vGene[i]->isvariant ) // only for the optimal prediction
         {
             int tr_min = (vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
@@ -1132,9 +1141,6 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
             gene_line.setAttribute("ID=" + gene_id);
             gene_line.addAttribute("Name=" + gene_name);
             gene_line.addAttribute("length=" + to_string(vGene[i]->geneLength));
-            //je pars du principe que la premiere structure me donne le brin du gene
-            if (vGene[i]->nbFea() > 0)
-                gene_line.setStrand(vGene[i]->vFea[0]->strand);
             gene_line.print(out);
         }
 //  --  --  fin de la ligne du gene  --  --
