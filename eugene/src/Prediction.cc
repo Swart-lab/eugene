@@ -190,14 +190,17 @@ Gene :: Gene ()
 // line contains the exon structure of the gene. First field is the name of the sequence
 // line example:  SEQ 429 545 665 750 835 1125 1255 1591
 // ------------------------
-Gene :: Gene(std::string line, int seqLength)
+Gene :: Gene(std::string line, DNASeq& seq)
 {
     std::vector<int> exons; // vector containing the exon positions
     int lpos, rpos;         // left and right positions of an exon
-    signed char state;      // nature of the exons
-    int rest_codon_lg = 0;  // number of nt of the exon belonging to the previous codon
+    int intrLPos, intrRPos; // left and right positions of an intron
+    int isStartStop;        // use to find specific introns
+    signed char state;      // nature of the exon/intron
+    int rest_codon_lg = 0;  // number of nt in the exon belonging to the previous codon
     int exon_length   = 0;
-
+    int seqLength     = seq.SeqLen;
+    
     //read the first field, the name of the sequence
     std::string field;
     istringstream iss(line);
@@ -216,61 +219,99 @@ Gene :: Gene(std::string line, int seqLength)
         // Gene on the forward strand
         if (exons[0] >= 0)
         {
-            // for each exon, compute its state
+            // Add one exon and the next intron
             for (int i=0; i < exons.size()-1; i+=2)
             {
                 lpos = exons[i];
                 rpos = exons[i+1];
-                // Compute the nature of the exons
-                //   Case it's a single exon
-                if ( exons.size() == 2 ) state = SnglF1;
-                //   Case its the first exon
-                else if ( i == 0 ) state = InitF1;
-                //   Case it's the last exon
-                else if ( (i+1) == exons.size()-1 ) state = TermF1;
-                // Internal exon
-                else state = IntrF1;
+                // Compute the state of the exon
+                if ( exons.size() == 2 )            state = SnglF1; // Case single exon
+                else if ( i == 0 )                  state = InitF1; // Case first exon
+                else if ( (i+1) == exons.size()-1 ) state = TermF1; // Case last exon
+                else                                state = IntrF1; // Internal exon
                 // Compute the frame
                 state += (lpos + rest_codon_lg + 2) % 3; // [Init|Term|Intr]F[1|2|3]]
-
-                this->AddFeature(state, abs(lpos), abs(rpos));
-                // Use to compute the frame of the next exon
-                exon_length   = abs(rpos) - abs(lpos) + 1 - rest_codon_lg;
+                this->AddFeature(state, lpos, rpos); // Add the exon
+                
+                // Use to compute the frame of the intron and of the next exon
+                exon_length   = rpos - lpos + 1 - rest_codon_lg;
                 rest_codon_lg = (3 - exon_length%3)%3;
+                
+                // Case there is a next intron
+                if ( exons.size() != 2 && ((i+1) < exons.size()-1) )
+                {
+                  intrLPos    = rpos+1;
+                  intrRPos    = exons[i+2]-1;
+                  isStartStop = seq.IsStartStop(intrLPos-1);
+                  // compute the state of the intron
+                  if (rest_codon_lg == 0)      state = IntronF1;
+                  else if (rest_codon_lg == 2) {
+                    if (isStartStop == 1)      state = IntronF2T;
+                    else                       state = IntronF2;
+                  }
+                  else {
+                    if      (isStartStop == 2) state = IntronF3TG;
+                    else if (isStartStop == 4) state = IntronF3TA;
+                    else                       state = IntronF3;
+                  }
+                  this->AddFeature(state, intrLPos, intrRPos);
+                }
             }
         }
         else // Strand -
         {
-            std::vector<signed char> vStates; // vector use to save states of the exons
+            std::vector<signed char> vStates; // vector use to save states of the features
+            std::vector<int> vStart; // vector use to save start pos of the features
+            std::vector<int> vStop; // vector use to save stop pos of the features
             // scan the exons starting by the end
             for (int i=exons.size()-1; i > 0; i-=2)
             {
-                lpos = exons[i-1];
-                rpos = exons[i];
+                lpos = abs(exons[i-1]);
+                rpos = abs(exons[i]);
                 // Compute the nature of the exons
-                //   Case it's a single exon
-                if ( exons.size() == 2 )        state = SnglR1;
-                //   Case its the last exon
-                else if ( (i-1) == 0 )          state = TermR1;
-                //   Case it's the first exon
-                else if ( i == exons.size()-1 ) state = InitR1;
-                //  Case internal exon
-                else                            state = IntrR1;
+                if ( exons.size() == 2 )        state = SnglR1; // Case single exon
+                else if ( (i-1) == 0 )          state = TermR1; // Case last exon
+                else if ( i == exons.size()-1 ) state = InitR1; // Case first exon
+                else                            state = IntrR1; // Case internal exon
                 // Compute the frame
-                state += (seqLength - abs(rpos) + rest_codon_lg) %3; //[Init|Term|Intr]R[1|2|3]]
+                state += (seqLength - rpos + rest_codon_lg) %3; //[Init|Term|Intr]R[1|2|3]]
                 vStates.push_back(state);
-
+                vStart.push_back(lpos);
+                vStop.push_back(rpos);
                 // will be use to compute the frame of the next exon
-                exon_length   = abs(rpos) - abs(lpos) + 1 - rest_codon_lg;
+                exon_length   = rpos - lpos + 1 - rest_codon_lg;
                 rest_codon_lg = (3 - exon_length%3)%3;
+                
+                // Case there is a next intron
+                if ( exons.size() != 2 && ( (i-1) > 0 ) )
+                {
+                  intrLPos    = abs(exons[i-2])+1;
+                  intrRPos    = lpos-1;
+                  isStartStop = seq.IsStartStop(seq.SeqLen -intrLPos);
+                  // compute the state of the intron
+                  if (rest_codon_lg == 0)       state = IntronR1;
+                  else if (rest_codon_lg == 2) {
+                    if (isStartStop == 32)      state = IntronR2AG;
+                    else                        state = IntronR2;
+                  }
+                  else {
+                    if      (isStartStop == 8)  state = IntronR3G;
+                    else if (isStartStop == 16) state = IntronR3A;
+                    else                        state = IntronR3;
+                  }
+                  
+                  vStates.push_back(state);
+                  vStart.push_back(intrLPos);
+                  vStop.push_back(intrRPos);
+                }
             }
             // Add the features
-            for (int i=0; i < exons.size()-1; i+=2)
+            while (!vStates.empty())
             {
-                lpos = exons[i];
-                rpos = exons[i+1];
-                this->AddFeature(vStates.back(), abs(lpos), abs(rpos));
-                vStates.pop_back();
+              this->AddFeature(vStates.back(), vStart.back(), vStop.back());
+              vStates.pop_back();
+              vStart.pop_back();
+              vStop.pop_back();
             }
         }
     }
@@ -369,19 +410,21 @@ bool Gene :: operator== (const Gene& o)
     while (State2Status[this->vFea[idxt]->state] != TRANSLATED) idxt++;
     int shift = 0;
 
-    while ((State2Status[o.vFea[idxo+shift]->state] != UNTRANSLATED) && //not UTR
-            (State2Status[this->vFea[idxt]->state] != UNTRANSLATED) && // not UTR
-            (idxo+shift < o.vFea.size()) &&
-            (idxt+shift < this->nbFea()))
+    while ((idxo+shift < o.vFea.size()) &&
+           (idxt+shift < this->nbFea()) &&
+           (State2Status[o.vFea[idxo+shift]->state]     != UNTRANSLATED) && //not UTR
+           (State2Status[this->vFea[idxt+shift]->state] != UNTRANSLATED) // not UTR
+            )
     {
         if ((o.vFea[idxo+shift]->start != this->vFea[idxt+shift]->start) ||
-                (o.vFea[idxo+shift]->end != this->vFea[idxt+shift]->end) ||
-                (o.vFea[idxo+shift]->state != this->vFea[idxt+shift]->state)) return false;
+            (o.vFea[idxo+shift]->end   != this->vFea[idxt+shift]->end)   ||
+            (o.vFea[idxo+shift]->state != this->vFea[idxt+shift]->state)) return false;
         shift++;
     }
     // we assume the gene structures satisfy the structural constraints
     // of complete genes. If the final exon is identical, it is a term
     // exon and the 2 CDS are identical.
+
     return true;
 }
 
@@ -706,7 +749,7 @@ Prediction :: Prediction (const std::string & desc, DNASeq* sequence )
     while ( std::getline(ss, line, '\n') )
     {
         // SEQ1 429 545 665 750 835 1125 1255 1591
-        Gene* gene = new Gene(line, this->X->SeqLen);
+        Gene* gene = new Gene(line, *(this->X));
         this->nbGene++;
         this->vGene.push_back(gene);
     }
@@ -2087,7 +2130,6 @@ Prediction::setGff3Attributes(Gff3Line* line, int type_egn,
 void Prediction::Print()
 {
     int state, start, end, phase, frame;
-    cout << "length " << this->X->SeqLen << "\n";
     for (int i=0; i<nbGene; i++)
     {
         printf("Gene %d :\n",(i+1));
@@ -2112,7 +2154,6 @@ std::vector<int> Prediction :: Eval(Prediction * ref, int offset)
 {
     std::vector<int> vEval;    //[TPg, PGnb, RGnb, TPe, PEnb, REnb, TPn, PNnb, RNnb]
     std::vector<int> vExonEval;
-
     // Compute positions of the region around the reference +/- offset
     int regionStart, regionStop;
 
@@ -2134,7 +2175,6 @@ std::vector<int> Prediction :: Eval(Prediction * ref, int offset)
     // Compute the nb of TP exon/nt, of predicted exon/nt in the region and of ref exon/nt
     vExonEval = this->EvalExon(ref, regionStart, regionStop);
     vEval.insert(vEval.end(), vExonEval.begin(), vExonEval.end());
-
     return vEval;
 }
 
@@ -2182,7 +2222,7 @@ std::vector<int> Prediction :: EvalGene(Prediction* ref, int start, int end)
         }
         else // overlapping genes
         {
-            if ( predGene->HasSameExons(*refGene) )
+            if (*predGene == *refGene) // if the gene are identical
             {
                 TPGene += 1; // gene TP ++
                 iPredGene++;
@@ -2213,7 +2253,6 @@ std::vector<int> Prediction :: EvalGene(Prediction* ref, int start, int end)
     vResult[0] = TPGene;
     vResult[1] = predGeneNb;
     vResult[2] = realGeneNb;
-
     return vResult;
 }
 

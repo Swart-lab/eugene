@@ -91,7 +91,7 @@ class Gene
   std::vector <Feature*> vFea;
   
   Gene  ();
-  Gene (std::string line, int seqLength);
+  Gene (std::string line, DNASeq& seq);
   ~Gene ();
 
   int isDifferent (const Gene& o, int threshold);
