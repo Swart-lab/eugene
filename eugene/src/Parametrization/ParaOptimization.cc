@@ -153,7 +153,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
 {
     OptiAlgorithm* algo = Algorithms[AlgoIndex];
     double fitness = 0;
-    double spg, sng, spe, sne; // specificity/sensibility gene/exon
+    double spg, sng, spe, sne, spn, snn; // specificity/sensibility gene/exon/nt
     Prediction* pred, *ref;
     int TPg = 0, TPe = 0, TPn = 0; // nb of True positive in gene/exon/nucleotide
     int RGnb = 0, PGnb = 0; //number of real genes/predicted genes
@@ -232,13 +232,13 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
                 delete pred;
             }
 
-            sng = (double)(TPg*100)/(double)RGnb;
-            sne = (double)(TPe*100)/(double)REnb;
-            spg = (double)(TPg*100)/(double)PGnb;
-            spe = (double)(TPe*100)/(double)PEnb;
-            // not use now
-            double snn = (double)(TPn*100)/(double)RNnb;
-            double spn = (double)(TPn*100)/(double)PNnb;
+            if (RGnb > 0) sng = (double)(TPg*100)/(double)RGnb; else sng = 0;
+            if (REnb > 0) sne = (double)(TPe*100)/(double)REnb; else sne = 0;
+            if (RNnb > 0) snn = (double)(TPn*100)/(double)RNnb; else snn = 0;
+            if (PGnb > 0) spg = (double)(TPg*100)/(double)PGnb; else spg = 0;
+            if (PEnb > 0) spe = (double)(TPe*100)/(double)PEnb; else spe = 0;
+            if (PNnb > 0) spn = (double)(TPn*100)/(double)PNnb; else spn = 0;
+
             if (is_detail_required)
             {
                 std::stringstream DetailedEvaluationStream;
@@ -255,7 +255,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
                 float wspe = PAR.getI("Fitness.wspe");
                 float wspn = PAR.getI("Fitness.wspn");
                 // Compute fitness
-                fitness = pow(pow(sng,wsng)*pow(spg,wspg)*pow(sne,wsne)*pow(spe,wspe)*pow(snn,wsnn)*pow(spn,wspn), float(1/(wsng + wspg + wsne + wspe + wsnn + wspn)) ) -(mag_penalty*Regularizer);
+                fitness = pow(pow(sng,wsng)*pow(spg,wspg)*pow(sne,wsne)*pow(spe,wspe)*pow(snn,wsnn)*pow(spn,wspn), float(1/max((wsng + wspg + wsne + wspe + wsnn + wspn),(float)1.0)) ) -(mag_penalty*Regularizer);
             }
             else
             {
