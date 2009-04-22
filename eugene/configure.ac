@@ -120,6 +120,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/Tester/Makefile
 	src/SensorPlugins/Transcript/Makefile
 	src/SensorPlugins/QualData/Makefile
+	src/SensorPlugins/NStretch/Makefile
 	plugins/Makefile
 	doc/Makefile
 ])
