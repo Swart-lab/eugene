@@ -195,7 +195,6 @@ Gene :: Gene(std::string line, DNASeq& seq)
     std::vector<int> exons; // vector containing the exon positions
     int lpos, rpos;         // left and right positions of an exon
     int intrLPos, intrRPos; // left and right positions of an intron
-    int isStartStop;        // use to find specific introns
     signed char state;      // nature of the exon/intron
     int rest_codon_lg = 0;  // number of nt in the exon belonging to the previous codon
     int exon_length   = 0;
@@ -242,19 +241,18 @@ Gene :: Gene(std::string line, DNASeq& seq)
                 {
                     intrLPos    = rpos+1;
                     intrRPos    = exons[i+2]-1;
-                    isStartStop = seq.IsStartStop(intrLPos-1);
                     // compute the state of the intron
-                    if (rest_codon_lg == 0)      state = IntronF1;
+                    if (rest_codon_lg == 0)         state = IntronF1;
                     else if (rest_codon_lg == 2)
                     {
-                        if (isStartStop == 1)      state = IntronF2T;
-                        else                       state = IntronF2;
+                        if (seq[intrLPos-2] == 't') state = IntronF2T;
+                        else                        state = IntronF2;
                     }
                     else
                     {
-                        if      (isStartStop == 2) state = IntronF3TG;
-                        else if (isStartStop == 4) state = IntronF3TA;
-                        else                       state = IntronF3;
+                        if      (seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'g') state = IntronF3TG;
+                        else if (seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'a') state = IntronF3TA;
+                        else  state = IntronF3;
                     }
                     this->AddFeature(state, intrLPos, intrRPos);
                 }
@@ -289,21 +287,19 @@ Gene :: Gene(std::string line, DNASeq& seq)
                 {
                     intrLPos    = abs(exons[i-2])+1;
                     intrRPos    = lpos-1;
-                    isStartStop = seq.IsStartStop(seq.SeqLen -intrLPos);
                     // compute the state of the intron
                     if (rest_codon_lg == 0)       state = IntronR1;
                     else if (rest_codon_lg == 2)
                     {
-                        if (isStartStop == 32)      state = IntronR2AG;
-                        else                        state = IntronR2;
+                        if (seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'c') state = IntronR2AG;
+                        else                                                  state = IntronR2;
                     }
                     else
                     {
-                        if      (isStartStop == 8)  state = IntronR3G;
-                        else if (isStartStop == 16) state = IntronR3A;
+                        if      (seq[intrLPos-2] == 'c')  state = IntronR3G;
+                        else if (seq[intrLPos-2] == 't') state = IntronR3A;
                         else                        state = IntronR3;
                     }
-
                     vStates.push_back(state);
                     vStart.push_back(intrLPos);
                     vStop.push_back(intrRPos);
