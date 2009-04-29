@@ -317,7 +317,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
                 (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
             return (State2Status[g->vFea[idxf]->state] >= 2); // not (IG or intron)
     }
-    return true;
+    return false;
 }
 
 // --------------------------------------
