@@ -347,7 +347,6 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
         DATA dTmp;
 
         ThisEST = HitTable[index];
-
         // Le veritable  brin est a priori indetermine
         TheStrand = HitForward | HitReverse;
         Inc = 0;
@@ -395,8 +394,16 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
             }
 
             // si on a un gap ?
-            if ((ThisBlock->Prev != NULL) &&
-                    abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6)
+            if (ThisBlock->Prev != NULL)
+//             {cerr << "coord hsp" << ThisBlock->Prev->Start << "-" <<ThisBlock->Prev->End <<" , " << ThisBlock->Start << "-" << ThisBlock->End << "\n";
+//             cerr << "gen  hsp" << ThisBlock->Prev->LStart << "-" <<ThisBlock->Prev->LEnd <<" , " << ThisBlock->LStart << "-" << ThisBlock->LEnd << "\n";}
+            // si on a un gap ?
+            if ( (ThisBlock->Prev != NULL) &&
+               ( ( (ThisBlock->Prev->LStart <=  ThisBlock->LStart) &&
+                   (abs(ThisBlock->LStart-ThisBlock->Prev->LEnd) <= estM)) || 
+                 ( (ThisBlock->Prev->LStart > ThisBlock->LStart) &&
+                   (abs(ThisBlock->Prev->LStart-ThisBlock->LEnd <= estM) ))
+               ))
             {
                 DonF = NINFINITY;
                 DonR = NINFINITY;
@@ -471,8 +478,12 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
             }
 
             // si on a un gap
-            if ((ThisBlock->Prev != NULL) &&
-                    abs(ThisBlock->Prev->LEnd - ThisBlock->LStart) <= 6)
+            if ( (ThisBlock->Prev != NULL) &&
+               ( ( (ThisBlock->Prev->LStart <=  ThisBlock->LStart) &&
+                   (abs(ThisBlock->LStart-ThisBlock->Prev->LEnd) <= estM)) || 
+                 ( (ThisBlock->Prev->LStart > ThisBlock->LStart) &&
+                   (abs(ThisBlock->Prev->LStart-ThisBlock->LEnd <= estM) ))
+               ))
             {
                 for (i=ThisBlock->Prev->End+1+EstM; !Inc && i<ThisBlock->Start-EstM; i++)
                     if (((ESTMatch[i] & Gap) && !(ESTMatch[i] & (TheStrand << HitToGap))) ||
@@ -533,7 +544,11 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                     PlotESTHit(ThisBlock->Start,ThisBlock->End,-1,1);
 
                 if (PAR.getI("Output.graph") && (ThisBlock->Prev != NULL) &&
-                        abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6)
+                   ( ( (ThisBlock->Prev->LStart <=  ThisBlock->LStart) &&
+                       (abs(ThisBlock->LStart-ThisBlock->Prev->LEnd) <= estM)) || 
+                     ( (ThisBlock->Prev->LStart > ThisBlock->LStart) &&
+                       (abs(ThisBlock->Prev->LStart-ThisBlock->LEnd <= estM) ))
+                   ))
                 {
                     if (TheStrand & HitForward)
                         PlotESTGap(ThisBlock->Prev->End,ThisBlock->Start,1,1);
@@ -593,10 +608,13 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                         PlotESTHit(ThisBlock->Start,ThisBlock->End,-1,0);
                 }
 
-                if ((ThisBlock->Prev != NULL) &&
-                        abs(ThisBlock->Prev->LEnd-ThisBlock->LStart) <= 6)
+                if ( (ThisBlock->Prev != NULL) &&
+                     ( ( (ThisBlock->Prev->LStart <=  ThisBlock->LStart) &&
+                         (abs(ThisBlock->LStart-ThisBlock->Prev->LEnd) <= estM)) || 
+                       ( (ThisBlock->Prev->LStart > ThisBlock->LStart) &&
+                         (abs(ThisBlock->Prev->LStart-ThisBlock->LEnd <= estM) ))
+                   ))
                 {
-
                     for (i = Max(0,ThisBlock->Prev->End+1-EstM);
                             i < Min(X->SeqLen, ThisBlock->Prev->End+1+EstM); i++)
                         if ((Info = (ESTMatch[i] & MLeft)))
