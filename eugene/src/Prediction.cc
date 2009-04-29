@@ -62,12 +62,13 @@ bool Prediction :: IsOriginal(Prediction* optPred, std::vector <Prediction*>& al
 // -----------------------
 void Prediction :: ESTScan()
 {
-    int i, NumEST;
+    int i, NumEST, EstInstanceNb;
     Hits *ThisEST = NULL, *AllEST = NULL;
     Block *ThisBlock = NULL;
     char tempname[FILENAME_MAX+1];
     FILE *fEST;
-
+    char  *fileExt;           // extension of an EST file
+    std::string inputFormat;  // format of an EST file
     ESTMatch = NULL;
 
     // If no EST data, do  nothing
@@ -76,33 +77,51 @@ void Prediction :: ESTScan()
     ESTMatch = new unsigned char[X->SeqLen+1];
     for (i = 0; i <= X->SeqLen; i++) ESTMatch[i] = 0;
 
-    strcpy(tempname, PAR.getC("fstname"));
-    strcat(tempname, ".est");
-    fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
-    NumEST = 0;
-    if (fEST)
+    NumEST        = 0;
+    EstInstanceNb = PAR.getI("Sensor.Est.use"); // number of EST instances
+    
+    for (int i=0; i<EstInstanceNb; i++)
     {
-        AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
-        fclose(fEST);
-
-        ThisEST = AllEST; // start from first one.
-        while (ThisEST)
+        fileExt = PAR.getC("Est.FileExtension", i);
+        strcpy(tempname, PAR.getC("fstname"));
+        strcat(tempname, fileExt);
+        inputFormat = "";
+        inputFormat = to_string(PAR.getC("Est.format", i, 1));
+        if ( inputFormat == "GFF3" )
         {
-            ThisBlock = ThisEST->Match;
-            while (ThisBlock)
-            {
-                //Mark Hit
-                for (i = ThisBlock->Start; i <= ThisBlock->End; i++) ESTMatch[i] |= Hit;
-                // A Gap ?
-                if (ThisBlock->Prev != NULL) // Mark Gap
-                    for (i = ThisBlock->Prev->End; i <= ThisBlock->Start; i++) ESTMatch[i] |= Gap;
-
-                ThisBlock = ThisBlock->Next;
-            }
-            ThisEST = ThisEST->Next;
+            strcat(tempname,".gff3");
+            GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
+            AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
+            delete geneFeatureSet;
         }
-        delete AllEST;
+        else 
+        {
+          fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+          if (fEST)
+          {
+            AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
+            fclose(fEST);
+          }
+        }
     }
+
+    ThisEST = AllEST; // start from first one.
+    while (ThisEST)
+    {
+        ThisBlock = ThisEST->Match;
+        while (ThisBlock)
+        {
+            //Mark Hit
+            for (i = ThisBlock->Start; i <= ThisBlock->End; i++) ESTMatch[i] |= Hit;
+            // A Gap ?
+            if (ThisBlock->Prev != NULL) // Mark Gap
+                for (i = ThisBlock->Prev->End; i <= ThisBlock->Start; i++) ESTMatch[i] |= Gap;
+
+            ThisBlock = ThisBlock->Next;
+        }
+        ThisEST = ThisEST->Next;
+    }
+    delete AllEST;
 }
 
 /*************************************************************
