@@ -30,10 +30,11 @@ class Block
  public:
   Block ();
   Block(int Start, int End, int LStart, int LEnd, int Ph, int Scr);
+  
   ~Block ();
   
   void AddBlockAfter(int Start,int End,int LStart,int LEnd,int Ph,int Scr,char *HSP = NULL);
-  
+  void AddBlockAfter(Block* newBlock, char *HSP = NULL);
   int Start;
   int End;
   int Phase;
