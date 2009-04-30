@@ -436,6 +436,17 @@ process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove
 \item \texttt{Gff3.SoTerm}: indicates the path where sofa (Sequence Ontology Feature Terms) terms are store.
   The path is relative to EUGENEDIR.
 
+\item \texttt{Eval.offset}: using during the evaluation of a prediction. 
+The prediction is compared with a reference (the real gene structure). 
+The region in which compare the prediction and the reference is defined 
+	as the reference positions +/- the offset.
+
+\item \texttt{Fitness.wsng}, \texttt{Fitness.wsne}, 
+\texttt{Fitness.wsnn}, \texttt{Fitness.wspg}, 
+\texttt{Fitness.wspe}, \texttt{Fitness.wsspn}: 
+indicate respectively the weight of the gene sensitivity, of the exon sensitivity, 
+of the nucleotide sensitivity, of the gene specificity, of the exon specificity 
+and of the nucleotide specificity in the fitness computing.
 \end{itemize}
 
 {\bf Specification of explicit penalty distributions on length}
@@ -714,6 +725,7 @@ We now descrive each plugin, its behavior and parameters.
 \input{Doc_MarkovIMM.tex}
 \input{Doc_MarkovProt.tex}
 \input{Doc_Repeat.tex}
+\input{Doc_NStretch.tex}
 
 \subsection{\texttt{Mixed signal/content plugins}}
 \input{Doc_AnnotaStruct.tex}
