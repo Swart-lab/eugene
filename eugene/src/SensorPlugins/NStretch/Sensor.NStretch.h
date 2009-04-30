@@ -6,7 +6,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
@@ -30,6 +30,7 @@ class SensorNStretch : public Sensor
 private:
     unsigned char *insideNStretch;
     double stretchPenalty;
+    int maxLengthWithoutPenalty; // Penalize region of N with a length upper than maxLengthWithoutPenalty
 
 public:
     SensorNStretch  (int n, DNASeq *X);
@@ -40,6 +41,9 @@ public:
     virtual void PostAnalyse(Prediction *, FILE *);
 };
 
-extern "C" SensorNStretch * builder0(int n, DNASeq *X) {  return new SensorNStretch(n, X); }
+extern "C" SensorNStretch * builder0(int n, DNASeq *X)
+{
+    return new SensorNStretch(n, X);
+}
 
 #endif
