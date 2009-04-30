@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5f
+EuGene.version		3.5g
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -284,6 +284,9 @@ Repeat.UTRPenalty*	0.0
 Repeat.IntronPenalty*	0.1
 Repeat.ExonPenalty*	1.0
 #Repeat.format        GFF3
+##### NStretch sensor parameters #####
+NStretch.stretchPenalty 1.0
+NStretch.maxLengthWithoutPenalty      5000
 #
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################
@@ -379,6 +382,7 @@ Sensor.MarkovIMM.use	1
 #Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	0
 Sensor.Repeat.use	0
+Sensor.NStretch.use 0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
@@ -418,6 +422,7 @@ Sensor.MarkovConst 	10
 Sensor.MarkovIMM 	1
 Sensor.MarkovProt 	1
 Sensor.Repeat 		10
+Sensor.NStretch   1
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct     1
@@ -437,6 +442,7 @@ Sensor.Tester 		1
 ParaOptimization.Use 0
 ParaOptimization.Regularizer	0.0
 ParaOptimization.TrueCoordFile ---
+ParaOptimization. EvalPredDir ../Procedures/Eval
 ParaOptimization.Algorithm GENETIC+LINESEARCH
 ParaOptimization.Test 0
 ParaOptimization.Trace 1
