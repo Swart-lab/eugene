@@ -85,7 +85,6 @@ void Prediction :: ESTScan()
         fileExt = PAR.getC("Est.FileExtension", i);
         strcpy(tempname, PAR.getC("fstname"));
         strcat(tempname, fileExt);
-        inputFormat = "";
         inputFormat = to_string(PAR.getC("Est.format", i, 1));
         if ( inputFormat == "GFF3" )
         {
