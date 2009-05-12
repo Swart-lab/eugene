@@ -61,7 +61,7 @@ Block ::  Block(int start, int end,int lstart,int lend,int Ph,int Scr)
 }
 
 // ---------------------------------------------------------------------
-//  Create a bew Block and insert it after
+//  Create a new Block and insert it after
 // ---------------------------------------------------------------------
 void Block ::  AddBlockAfter(int start,int end,int lstart,int lend,int Ph,int Scr, char *HSP)
 {
@@ -242,20 +242,19 @@ Hits* Hits::ReadFromFile(FILE* HitFile, int *NumHits, int level, int margin, int
 Hits* Hits::ReadFromGeneFeatureSet(GeneFeatureSet & HitSet , int *NumHits, int level, int margin, DNASeq *X )
 {
     int maxPos = X->SeqLen;
-    char   *HitId;
     int    deb, fin, phase, HSPDeb, HSPFin, poids;
     double hitEvalue;
     string idSo;
-    char   A[512], strand, hitStrand;
+    char   HitId[512], strand, hitStrand;
     Block *ThisBlock = NULL;
     Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
     Block * newBlock;
     // Blocks of one parent
     vector<Block*> vBlocks;
     const int MaxHitLen = 15000;
-    A[0]   = 0;
-    HitId  = A;
+    HitId[0]   = 0;
 
+    //  because this Hit mais be non empty at the method's start
     if (ThisHit != NULL)
         for (int i=0; i<*NumHits-1; i++) ThisHit = ThisHit->Next;
 
