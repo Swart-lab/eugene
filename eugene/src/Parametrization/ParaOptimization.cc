@@ -162,7 +162,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
     DetailedEvaluation = "";
     // Init the offset value
     int evalOffset;
-    char* offsetKey = (char*)"Eval.offset";
+    char* offsetKey = (char *)"Eval.offset";
     if ( PAR.probeKey(offsetKey) == false)
     {
         evalOffset = INT_MAX/2;
@@ -246,19 +246,26 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
                 DetailedEvaluation = DetailedEvaluationStream.str();
             }
 
-            if (!is_detail_required)
-            {
-                float wsng = PAR.getI("Fitness.wsng");
-                float wsne = PAR.getI("Fitness.wsne");
-                float wsnn = PAR.getI("Fitness.wsnn");
-                float wspg = PAR.getI("Fitness.wspg");
-                float wspe = PAR.getI("Fitness.wspe");
-                float wspn = PAR.getI("Fitness.wspn");
-                // Compute fitness
-                fitness = pow(pow(sng,wsng)*pow(spg,wspg)*pow(sne,wsne)*pow(spe,wspe)*pow(snn,wsnn)*pow(spn,wspn), float(1/max((wsng + wspg + wsne + wspe + wsnn + wspn),(float)1.0)) ) -(mag_penalty*Regularizer);
-            }
-            else
-            {
+  		if (!is_detail_required)
+		{
+		    double wsng = PAR.getD("Fitness.wsng");
+		    double wsne = PAR.getD("Fitness.wsne");
+		    double wsnn = PAR.getD("Fitness.wsnn");
+		    double wspg = PAR.getD("Fitness.wspg");
+		    double wspe = PAR.getD("Fitness.wspe");
+		    double wspn = PAR.getD("Fitness.wspn");
+		    if ((wsng + wspg + wsne + wspe + wsnn + wspn) <= 0.0 )
+		    {
+		        cerr << "Incorrect fitness weights (zero sum) in parameter file\n";
+		        exit(2);
+		
+		    }
+		
+		    // Compute fitness
+		    fitness = pow(pow(sng,wsng)*pow(spg,wspg)*pow(sne,wsne)*pow(spe,wspe)*pow(snn,wsnn)*pow(spn,wspn), 1.0L/(wsng + wspg + wsne + wspe + wsnn + wspn)) -(mag_penalty*Regularizer);
+		}
+		else
+		{
                 fitness = 0;
             }
         }
