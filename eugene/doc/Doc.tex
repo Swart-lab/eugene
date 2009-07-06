@@ -778,11 +778,30 @@ parameter file are:
 \item the parameters of the optimization algorithm, and for the Line
   Search algorithm complementary information on the parameters to
   optimize (initial value, step of discretization, ...),
-\item a file with the coordinates of genes for the sequences set.
+\item a file with the coordinates of genes for the sequences set. See below its description.
 \item it is possible to include a regulizing term in the criteria
 optimized using the \texttt{ParaOptimization.Regularizer} parameter.
 The sum of all the absolute values of the parameters multiplied by this parameter is subtracted from the original fitness to define the final fiteness optimized.\end{itemize}
 
+\paragraph{Description of the file with the coordinates of genes}
+One line of the file describes one gene. The first field of the line is the sequence name. The followed fields are the list of respectively start and stop positions of the exons of the gene. 
+The fields are separated by spaces.
+An empty line is required to separate two different sequences.
+Note that the order of the sequences is important: the order has to be similar to the result of the 'ls 'command.
+
+Example:
+{\scriptsize \begin{verbatim}
+SEQ1 429 545 665 750
+SEQ1 -2001 -2342 -2424 -2522
+
+SEQ2 1000 1230 1521 1690 2510 2600
+
+\end{verbatim}}
+This example describes 2 sequences named SEQ1 et SEQ2. SEQ1 is composed of two genes: the first gene is composed of two exons on the forward strand [429-545] [665-750], 
+the second of two exons on the reverse strand [2001-2342] [2424-2522].
+SEQ2 has a unique gene composed of three exons [1000-1230] [1521-1690] [2510-2600]
+
+\paragraph{Optimization parameter definition example}
 Here is a simplified example of optimization parameters definition in the parameter file. 
 {\scriptsize \begin{verbatim}
 #################################################################
