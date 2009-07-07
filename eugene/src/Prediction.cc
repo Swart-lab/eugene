@@ -2168,7 +2168,9 @@ void Prediction::Print()
 
 // ------------------------
 // Eval the prediction in comparaison with the reference in gene/exon/nucleotide level
+// TP: true positive, P* predicted *, R* real/reference *, N nuccleotide, E exon, G gene
 // Return a vector [TPg, PGnb, RGnb, TPe, PEnb, REnb, TPn, PNnb, RNnb]
+// offset is the size of the region added before/after the reference
 // ------------------------
 std::vector<int> Prediction :: Eval(Prediction * ref, int offset)
 {
@@ -2199,23 +2201,18 @@ std::vector<int> Prediction :: Eval(Prediction * ref, int offset)
 }
 
 // ------------------------
-//  Return true if the gene overlaps the gene g
+//  Return true if the CDS of the gene overlaps the CDS of the gene g
 // ------------------------
 bool Gene :: Overlap(const Gene& g)
 {
-    if ( (this->cdsStart <= g.cdsEnd) && (this->cdsEnd >= g.cdsStart ) )
-    {
-        return true;
-    }
-    return false;
+    return ( (this->cdsStart <= g.cdsEnd) && (this->cdsEnd >= g.cdsStart ) );
 }
 
 // ------------------------
 // Eval the predicted genes in comparaison with the reference genes
 // Return a vector of 3 int:
 //<TP gene nb, the nb of predicted genes in the region [start-end], the nb of real genes>
-// NOTE: THE NUMBER OF REAL GENES IS EQUAL TO THE NUMBER OF GENES OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETLY INCLUDED BETWEEN START AND END POSITIONS
-
+// NOTE: THE NUMBER OF REAL GENES IS EQUAL TO THE NUMBER OF GENES OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETELY INCLUDED BETWEEN START AND END POSITIONS
 // ------------------------
 std::vector<int> Prediction :: EvalGene(Prediction* ref, int start, int end)
 {
@@ -2281,7 +2278,7 @@ std::vector<int> Prediction :: EvalGene(Prediction* ref, int start, int end)
 // Return a vector of 6 int:
 //<TP exons nb, the nb of predicted exons in the region [start-end], the nb of real exons,
 // TP nucleotides nb, the nb of nt predicted as coding in the region, the nb of nt really coding>
-// NOTE: THE NUMBER OF REAL EXONS IS EQUAL TO THE NUMBER OF EXONS OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETLY INCLUDED BETWEEN START AND END POSITIONS
+// NOTE: THE NUMBER OF REAL EXONS IS EQUAL TO THE NUMBER OF EXONS OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETELY INCLUDED BETWEEN START AND END POSITIONS
 // ------------------------
 std::vector<int>  Prediction :: EvalExon(Prediction * ref, int start, int end)
 {
@@ -2357,7 +2354,7 @@ std::vector<int>  Prediction :: EvalExon(Prediction * ref, int start, int end)
 
                 // Compute the number of overlapping nucleotides and inc nucleotide TP
                 overlapStart = max(predExon->start, refExon->start);
-                overlapEnd   = max(predExon->end, refExon->end);
+                overlapEnd   = min(predExon->end, refExon->end);
                 TPnt += overlapEnd - overlapStart + 1; // nucleotide TP += overlap length
             }
         }
