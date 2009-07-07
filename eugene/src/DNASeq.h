@@ -60,8 +60,11 @@ class  DNASeq
   void  Print(FILE *);
   void  PrintTr(FILE*,int, int,signed char);
 
+  // Degeneracy returns the number of possible completely known sequence
+  // represented by a degenerated subsequence
   unsigned char Degeneracy(int i, int sens, int len);
 
+  // bit vector values for spliced stop detection
   static const int isTf  = 1;
   static const int isTGf = 2;
   static const int isTAf = 4;
@@ -78,28 +81,39 @@ class  DNASeq
   static const int isAr  = 64;
   static const int isARr = 128;
 
+  // see comments in .cc, used to detect possible spliced stops
+  // returns a bit vector inside an int.
   int    IsStartStop(int i);
   int    IsStopStop(int i);
-  double IsAcc(int i,int sens);
-  double IsDon(int i,int sens);
-  double IsStop(int i,int sens);
-  double IsStart(int i,int sens);
-  double IsEStart(int i,int sens);
+
+  // returns the fraction of completely known sequences that represent the
+  // corresponding signal. Example: IsStop on TGN returns 0.25 (only TGA is a Stop)
+  double IsAcc(int pos,int strand);
+  double IsDon(int pos,int strand);
+  double IsStop(int pos,int strand);
+  double IsStart(int pos,int strand); // prokaryotic case
+  double IsEStart(int pos,int strand);
   
-  double Markov(int);
-  double MarkovR(int);
-  double GC_AT(int);
+  // Computes the markov probability of emission of the nuc. at position pos
+  double Markov(int pos);
+  // same for the reverse strand.
+  double MarkovR(int pos);
+  // returns the GC or AT% depending on the nuc. at position pos (GC or AT).
+  double GC_AT(int pos);
 
   unsigned short Nuc2Code(char Ch);
 
+  // copy from Pos to Len to To. mode is ambiguous or not. Len < 0 means reverse complement.
   void Transfer(int Pos, int Len, char *To, int mode);
+  // compute the Frame (as in blast). Strand is '+' or anything else.
   int Pos2Frame(int pos, char strand);
+  // remove ambiguity in the nuc. at pos
   unsigned short Unambit (int pos);
 
-  char operator [] (int i);
-  char operator () (int i);
-  unsigned short operator () (int i, int mode);
-  char AA(int i, int mode);
-  char nt(int i, int mode);
+  char operator [] (int i); // reads DNA char at position i (forward)
+  char operator () (int i); // reads DNA char at position i (complement)
+  unsigned short operator () (int i, int mode); // reads code at position i (mode: 0/forward, 1/complement, 2/revcomp)
+  char AA(int i, int mode); // translate the codon at position i, using mode as above.
+  char nt(int i, int mode); // dead code ?
 };
 #endif

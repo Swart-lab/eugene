@@ -38,14 +38,19 @@
 #include "System.h"
 
 // ---------------------------------------------------------------------
-// Attention, ces tables dependent des codes employes pour coder les
-// nucleotides
+// Warning. These tables depend on the numerical representation of 
+// Code: numeric code of a nucleotide (bit vector)
+// Nuc:  corresponding char in the IUPAC representation, lower case
+// CNuc: complement IUPAC
+// UNuc: unambiguous IUPAC (arbitrary choice, preferring C to avoid stop codons)
+// Bit: bit position of the unambiguous code (T is 8 (code) and 3 (bit))
+// CCode: complement code
 // ---------------------------------------------------------------------
 
 //                            0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-const char  Code2Nuc[16]  = {'-','a','c','m','g','r','s','v','t','w','y','h','k','d','b','n'};
-const char  Code2CNuc[16] = {'-','t','g','k','c','y','s','b','a','w','r','d','m','h','v','n'};
-const char  Code2UNuc[16] = {'-','a','c','c','g','g','c','c','t','t','c','c','t','g','c','c'};
+const char  Code2Nuc[16]  = {'-','a','c','m','g','r','s','v','t','w','y','h','k','d','b','n'}; // numeric code to DNA char
+const char  Code2CNuc[16] = {'-','t','g','k','c','y','s','b','a','w','r','d','m','h','v','n'}; // numeric code to complement DNA char
+const char  Code2UNuc[16] = {'-','a','c','c','g','g','c','c','t','t','c','c','t','g','c','c'}; // numeric code to unambiguous DNA char
 
 
 const unsigned short Code2UCode[16] = {0    ,CodeA,CodeC,CodeC,
@@ -65,11 +70,10 @@ const unsigned short Code2CCode[16] = {0    ,CodeT,CodeG,CodeT|CodeG,
 
 const unsigned short Code2Code[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
-//                                     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
-const int Code2NumOne[16]  = {0,  1,  1,  2,  1,  2,  2,  3,  1,  2,  2,  3,  2,  3,  3,  4};
+//                            0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
+const int Code2NumOne[16]  = {0,  1,  1,  2,  1,  2,  2,  3,  1,  2,  2,  3,  2,  3,  3,  4}; // number of possible different nucleotides
 
-// Traduction
-
+// Translation table for codons
 const unsigned char Trad[64] = {'K','N','K','N','T','T','T','T',
 				'R','S','R','S','I','I','M','I',
 				'Q','H','Q','H','P','P','P','P',
@@ -107,7 +111,7 @@ DNASeq :: DNASeq(int L)
 // ---------------------------------------------------------------------
 // Construct a DNASeq from a filename and store the contents of the
 // file into Sequence, Allocate memory as needed. Assumes FASTA
-// firts. If no > is found assumes raw DNA every unknown DNA char is
+// first. If no > is found assumes raw DNA every unknown DNA char is
 // replaced by N
 // ---------------------------------------------------------------------
 DNASeq :: DNASeq (char *filename)
@@ -180,6 +184,7 @@ DNASeq :: ~ DNASeq  ()
 
 // ---------------------------------------------------------------------
 //  Return the char at position i
+//  On the sequence ATG, (*this)[2] returns 'g' 
 // ---------------------------------------------------------------------
 
 char DNASeq :: operator [] (int i)
@@ -191,6 +196,7 @@ char DNASeq :: operator [] (int i)
 }
 // ---------------------------------------------------------------------
 //  Return the complement char at position i
+//  On the sequence ATG, (*this)(2) returns 'c' 
 // ---------------------------------------------------------------------
 
 char DNASeq :: operator () (int i)
@@ -200,7 +206,12 @@ char DNASeq :: operator () (int i)
   else
     return  Code2CNuc[Sequence[i] & MASKSEQ];
 }
-
+// ---------------------------------------------------------------------
+// Reads the numerical ccode at position i.
+// 	mode 0 is for forward
+// 	mode 1 is for complement
+// 	mode 2 is reverse complement (starts from the end)
+// ---------------------------------------------------------------------
 unsigned short DNASeq :: operator () (int i, int mode)
 {
   if ((i >= SeqLen) || (i < 0))
@@ -474,13 +485,13 @@ void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
   
   if  (Len > 0) {
     // We go forward
-    for  (i = 0;  i < Len;  i ++) 
+    for  (i = 0;  i < Len;  i++) 
       To[i] = decode[Sequence[Pos + i] & MASKSEQ];
    
     To [i] = '\0';
   }
   else  {
-    for  (i = 0;  i < - Len;  i ++) 
+    for  (i = 0;  i < -Len;  i++) 
       To[i] = decode[Complement(Sequence[Pos - i] & MASKSEQ)];
     
     To [i] = '\0';
@@ -628,7 +639,7 @@ int DNASeq :: IsStartStop(int i)
   }
 
   i = SeqLen -i -1;
-    
+
   // le T
   if (((*this)(i,2)) & CodeT) stop |= isTr; //StopAfterAG
 
@@ -687,7 +698,7 @@ int DNASeq :: IsStopStop(int i)
   return stop;
 }
 // ---------------------------------------------------------------------
-// Return simply A,T,C,G or N depending on the nucleotide at position i
+// Returns simply A,T,C,G or N depending on the nucleotide at position i
 // ---------------------------------------------------------------------
 char DNASeq :: nt(int i, int mode)
 {
@@ -759,8 +770,8 @@ double DNASeq :: IsEStart(int i,int sens)
   return 1.0 / Degeneracy(i,mode,3);
 }
 // ---------------------------------------------------------------------
-// Degeneracy : returns the number of possible codons represented by a
-// degenerated codon
+// Degeneracy : returns the number of possible completely known sequence
+// represented by a degenerated subsequence
 // ---------------------------------------------------------------------
 unsigned char DNASeq :: Degeneracy(int i, int mode, int len)
 {
@@ -769,13 +780,11 @@ unsigned char DNASeq :: Degeneracy(int i, int mode, int len)
   	ret *= Code2NumOne[(*this)(i+k, mode)];
   }
   return ret;
-  //return (Code2NumOne[(*this)(i+2,mode)] *
-  //	  Code2NumOne[(*this)(i+1,mode)] *
-  //	  Code2NumOne[(*this)(i,mode)]);
-  
 }
 
-//Return frame blast
+// ---------------------------------------------------------------------
+// Returns Blast Frame (1,2,3 -1, -2, -3)
+// ---------------------------------------------------------------------
 int DNASeq :: Pos2Frame(int pos, char strand)
 {
   int frame=0;
@@ -785,7 +794,7 @@ int DNASeq :: Pos2Frame(int pos, char strand)
       if ( frame == 0 )
 	frame = 3 ;
   }
-  else               
+  else
   { 
       frame = (SeqLen - pos -1 ) % 3;
       if ( frame == 0 )
