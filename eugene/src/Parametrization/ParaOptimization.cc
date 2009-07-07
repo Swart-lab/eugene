@@ -310,6 +310,7 @@ double ParaOptimization::NormalLaw(double x)
 void ParaOptimization :: ReadReferences()
 {
     std::string line;
+    std::string space(" \t\n\r\f\v");
     std::string buffer;
     std::string seqName;
     std::string fileName;
@@ -322,7 +323,8 @@ void ParaOptimization :: ReadReferences()
     std::getline(ifs, line);
     while ( !ifs.eof() )
     {
-        if ( line == "" ) // End of the gene description of a sequence
+	// Empty line (all space), end of the gene description of a sequence
+        if ( line.find_first_not_of(space) == line.npos )
         {
             iSeq++;
             if ( iSeq >= this->SeqNames.size() )
