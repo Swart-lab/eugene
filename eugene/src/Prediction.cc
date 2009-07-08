@@ -178,7 +178,7 @@ bool Feature :: Overlap(const Feature& f)
 }
 
 // ------------------------
-//  Return true if the feature is an exon
+//  Return true if the feature is a coding exon
 // ------------------------
 bool Feature :: IsExon()
 {
@@ -572,7 +572,7 @@ void Gene :: Update ()
             ((stateBack == -1) ? phase=-1 : phase = PhaseAdapt(stateBack));
         else
             ((stateNext == -1) ? phase=-1 : phase = PhaseAdapt(stateNext));
-
+		// Init or Sngl
         if (state <= SnglR3) vFea[i]->phase = (forward) ? 1: -1;
         else
         {
