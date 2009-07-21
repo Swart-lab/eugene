@@ -188,7 +188,6 @@ void Track :: Sweep(int pos) {
       It->Prev->Next = It->Next;
       delete It;
       NumBPCollect++;
-      fflush(stdout);
     }
 
     It = It->Next;
@@ -339,7 +338,7 @@ Prediction* Track :: BackTrace (int From, int To, int Forward)
   }
   
   if (Forward) {
-    vPos[0] -=  1;  
+    vPos[0] -=  1;
     reverse(vState.begin(), vState.end());
     reverse(vPos.begin(),   vPos.end());
   }
