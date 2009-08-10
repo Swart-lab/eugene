@@ -238,6 +238,7 @@ void Track :: ForceNew(char state, int pos, double cost, BackPoint *Or)
 }
 // ----------------------------------------------------------------
 // Returns the best BackPoint taking into account length penalties
+// Update value of *cost
 // ----------------------------------------------------------------
 BackPoint *Track :: BestUsable(int pos, double *cost, int pen)
 {
