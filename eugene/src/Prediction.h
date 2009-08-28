@@ -35,6 +35,7 @@ extern "C"{
 #include "Prediction_cte.h"
 #include "Gff3Line.h"
 #include "System.h"
+#include "State.h"
 #include <fstream>
 #include <iostream>
 
@@ -48,22 +49,26 @@ class DNASeq;
 class Feature
 {
  private:
-
  public:
-  int  number;
+  int    number;
   signed char state;
-  int  start;
-  int  end;
-  char strand;
-  int  phase;
-  int  framegff;
-  int  frame;
+  int    start;
+  int    end;
+  char   strand;
+  int    phase;
+  int    framegff;
+  int    frame;
+  State* featureState;
   
   Feature  ();
   Feature  (signed char, int, int, char, int);
   ~Feature ();
-  bool Overlap (const Feature&);
-  bool IsExon();
+  bool      Overlap (const Feature&);
+  bool      IsCodingExon();
+  bool      IsUTR();
+  bool      IsIntergenic();
+  bool      IsTranscribedAndUnspliced();
+  short int GetFrame(); // compute the frame according to the state
 };
 
 
@@ -149,14 +154,12 @@ class Prediction
   // PrintHtml : -ph print the end of the HTML output
   void  EndHTML         (FILE*);
 
-  //SEB
   Gff3Line* fillGff3Line(int type_sofa, int start, int end,
                             char strand, int framegff);
   void setGff3Attributes(Gff3Line* line, int type_egn,
                           int type_sofa, std::string fea_name,
                           int j, char code, std::string gene_id, bool coding);
   bool previousExonMustBeUpdated(Gff3Line* line, int start);
-  //SEB
 
 
  public:
@@ -177,7 +180,7 @@ class Prediction
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
-  char  GetStateForPos(int);
+  State* GetStateAtPos(int); 
   Gene *FindGene(int start, int end);
   void Print();
   std::vector<int> Eval(Prediction* ref, int offset);

@@ -79,7 +79,7 @@ void Prediction :: ESTScan()
 
     NumEST        = 0;
     EstInstanceNb = PAR.getI("Sensor.Est.use"); // number of EST instances
-    
+
     for (int i=0; i<EstInstanceNb; i++)
     {
         fileExt = PAR.getC("Est.FileExtension", i);
@@ -93,14 +93,14 @@ void Prediction :: ESTScan()
             AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
             delete geneFeatureSet;
         }
-        else 
+        else
         {
-          fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
-          if (fEST)
-          {
-            AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
-            fclose(fEST);
-          }
+            fEST = FileOpen(NULL, tempname, "r", PAR.getI("EuGene.sloppy"));
+            if (fEST)
+            {
+                AllEST = AllEST->ReadFromFile(fEST, &NumEST, -1, 0,X->SeqLen);
+                fclose(fEST);
+            }
         }
     }
 
@@ -139,6 +139,7 @@ Feature :: Feature ()
     phase    = 9;
     framegff = 9;
     frame    = 9;
+    featureState = new State(-1);
 }
 
 // ------------------------
@@ -148,6 +149,7 @@ Feature :: Feature (signed char n, int s, int e, char st, int fr)
 {
     number   = 0;
     state    = n;
+    featureState = new State(n);
     start    = s;
     end      = e;
     strand   = st;
@@ -180,11 +182,42 @@ bool Feature :: Overlap(const Feature& f)
 // ------------------------
 //  Return true if the feature is a coding exon
 // ------------------------
-bool Feature :: IsExon()
+bool Feature :: IsCodingExon()
 {
-    if (State2Status[this->state] == TRANSLATED)
-        return true;
-    return false;
+    return this->featureState->IsCodingExon();
+}
+
+// ------------------------
+//  Return true if the feature is an UTR
+// ------------------------
+bool Feature :: IsUTR()
+{
+    return this->featureState->IsUTR();
+}
+
+// ------------------------
+//  Return true if the feature is transcribed but no spliced  (UTR or Exon)
+// ------------------------
+bool Feature::IsTranscribedAndUnspliced()
+{
+    return this->featureState->IsTranscribedAndUnspliced();
+}
+
+// ------------------------
+//  Return true if the feature is an intergenic region
+// ------------------------
+bool Feature::IsIntergenic()
+{
+    return this->featureState->IsIntergenic();
+}
+
+// ------------------------
+// Return the real frame of the feature 
+// See the grame definition in the EuGene Trac
+// ------------------------
+short int Feature::GetFrame()
+{
+	return this->featureState->GetFrame();
 }
 
 /*************************************************************
@@ -387,15 +420,14 @@ int Gene :: isDifferent (const Gene& o, int threshold)
     int nDiff = 0;
 
     //first coding exon in each
-    while (State2Status[o.vFea[idxo]->state] != TRANSLATED) idxo++;
-    while (State2Status[this->vFea[idxt]->state] != TRANSLATED) idxt++;
-
+    while (! o.vFea[idxo]->IsCodingExon() )     idxo++;
+    while (! this->vFea[idxt]->IsCodingExon() ) idxt++;
     int shift = 0;
 
     while ((idxo+shift < o.vFea.size()) &&
             (idxt+shift < this->nbFea()) &&
-            (State2Status[o.vFea[idxo+shift]->state] != UNTRANSLATED) && //not UTR
-            (State2Status[this->vFea[idxt]->state] != UNTRANSLATED) // not UTR
+            (!o.vFea[idxo+shift]->IsUTR()) && // not UTR
+            (!this->vFea[idxt]->IsUTR())      // not UTR
           )
     {
         if ((o.vFea[idxo+shift]->state == this->vFea[idxt+shift]->state) &&
@@ -424,14 +456,14 @@ bool Gene :: operator== (const Gene& o)
     int idxt = 0;
 
     //first coding exon in each
-    while (State2Status[o.vFea[idxo]->state] != TRANSLATED) idxo++;
-    while (State2Status[this->vFea[idxt]->state] != TRANSLATED) idxt++;
+    while (!o.vFea[idxo]->IsCodingExon()) idxo++;
+    while (!this->vFea[idxt]->IsCodingExon()) idxt++;
     int shift = 0;
 
     while ((idxo+shift < o.vFea.size()) &&
             (idxt+shift < this->nbFea()) &&
-            (State2Status[o.vFea[idxo+shift]->state]     != UNTRANSLATED) && //not UTR
-            (State2Status[this->vFea[idxt+shift]->state] != UNTRANSLATED) // not UTR
+            (!o.vFea[idxo+shift]->IsUTR()) &&  // not UTR
+            (!this->vFea[idxt+shift]->IsUTR()) // not UTR
           )
     {
         if ((o.vFea[idxo+shift]->start != this->vFea[idxt+shift]->start) ||
@@ -456,11 +488,11 @@ bool Gene :: HasSameExons (const Gene& o)
 
     while ( (idxo < o.vFea.size() ) && ( idxt < this->nbFea() ) )
     {
-        if ( !o.vFea[idxo]->IsExon() )
+        if ( !o.vFea[idxo]->IsCodingExon() )
         {
             idxo++;
         }
-        else if ( !this->vFea[idxt]->IsExon() )
+        else if ( !this->vFea[idxt]->IsCodingExon() )
         {
             idxt++;
         }
@@ -518,7 +550,8 @@ void Gene :: Update ()
     for (int i=0; i<nbFea(); i++)
     {
         state = vFea[i]->state;
-        if (state <= TermR3)
+
+	if (vFea[i]->IsCodingExon())
         {
             exNumber++;
             exLength += vFea[i]->end - vFea[i]->start + 1;
@@ -555,8 +588,7 @@ void Gene :: Update ()
     int nb = (forward) ? 1 : exNumber;
     for (int i=0; i<nbFea(); i++)
     {
-        state = vFea[i]->state;
-        if (state <= TermR3)
+	if (vFea[i]->IsCodingExon())
         {
             vFea[i]->number = nb;
             (forward) ? nb++ : nb--;
@@ -572,7 +604,7 @@ void Gene :: Update ()
             ((stateBack == -1) ? phase=-1 : phase = PhaseAdapt(stateBack));
         else
             ((stateNext == -1) ? phase=-1 : phase = PhaseAdapt(stateNext));
-		// Init or Sngl
+        // Init or Sngl
         if (state <= SnglR3) vFea[i]->phase = (forward) ? 1: -1;
         else
         {
@@ -591,7 +623,7 @@ void Gene :: Update ()
         if ( forward  && complete==2  || !forward && complete!=3) break;
 
         state = vFea[i]->state;
-        if (state > TermR3) continue;
+	if (!vFea[i]->IsCodingExon()) continue;
 
         if (!forward && state >= TermR1) lengff = exLength;
 
@@ -638,7 +670,8 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
     fprintf(F,"%s\t", comp);
     for (i=0; i<nbFea(); i++)
     {
-        if (vFea[i]->state <= TermR3)
+        //if (vFea[i]->state <= TermR3)
+	if (vFea[i]->IsCodingExon())
         {
             if (nofirst) fprintf(F,",");
             else         nofirst = true;
@@ -655,14 +688,13 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
     nofirst = false;
     for (i=0; i<nbFea(); i++)
     {
-        state = vFea[i]->state;
-        if (state <= TermR3 || (state >= UTR5F && state <= UTR3R))
+	if (vFea[i]->IsCodingExon() || vFea[i]->IsUTR())
         {
             char sep = ',';
             // Si exon et etat d'avant utr OU
             // si utr  et etat d'avant exon
-            if ((state <= TermR3 && (i!=0 && vFea[i-1]->state >= UTR5F)) ||
-                    (state >= UTR5F  && (i!=0 && vFea[i-1]->state <= TermR3)))
+	    if ( (vFea[i]->IsCodingExon()  && (i != 0 && vFea[i-1]->state >= UTR5F)) ||
+                 (vFea[i]->state >= UTR5F  && (i != 0 && vFea[i-1]->IsCodingExon()))  )
                 sep = ':';
             if (nofirst) fprintf(F,"%c",sep);
             else         nofirst = true;
@@ -1136,7 +1168,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
         }
 
         //je pars du principe que la premiere structure me donne le brin du gene
-	// done also on variants to have a corrrect strand on variant mRNA
+        // done also on variants to have a corrrect strand on variant mRNA
         if (vGene[i]->nbFea() > 0)
             gene_line.setStrand(vGene[i]->vFea[0]->strand);
 
@@ -1376,9 +1408,8 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
 
             // Frameshift detection: we just concatenate all the parts
             // of the exon in one. The phase will be the "initial" phase.
-
-            // If we are in an exon and there is something after it which is an exon too
-            while ((state <= TermR3) && (j < vGene[i]->nbFea()-1) && (vGene[i]->vFea[j+1]->state <= TermR3))
+	    while ( (vGene[i]->vFea[j]->IsCodingExon()) && 
+                    (j < vGene[i]->nbFea()-1) && (vGene[i]->vFea[j+1]->IsCodingExon()) )
             {
                 j++;
                 end = vGene[i]->vFea[j]->end;
@@ -1446,16 +1477,17 @@ void Prediction :: PrintEgnS (FILE *OUT)
 {
     int offset = PAR.getI("Output.offset");
     int line = 0;
-    int state, start, end;
-
+    int start, end;
+   // int state;
     for (int i=0; i<nbGene; i++)
     {
         if (i!=0)
             fprintf(OUT,"\n");
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
-            if (state <= TermR3)
+            //state = vGene[i]->vFea[j]->state;
+            //if (state <= TermR3)
+	    if (vGene[i]->vFea[j]->IsCodingExon())
             {
                 start = offset + vGene[i]->vFea[j]->start;
                 end   = offset + vGene[i]->vFea[j]->end;
@@ -1893,24 +1925,24 @@ Gene *Prediction :: FindGene (int start, int end)
 void Prediction :: PlotPred ()
 {
     const int predWidth = 2;
-    int state, start, end;
+    int start, end;
+    short int featureFrame;
     int endBack = 0;
 
     for (int i=0; i<nbGene; i++)
     {
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
-            start = vGene[i]->vFea[j]->start;
-            end   = vGene[i]->vFea[j]->end;
-
+	    featureFrame = vGene[i]->vFea[j]->GetFrame();
+            start        = vGene[i]->vFea[j]->start;
+            end          = vGene[i]->vFea[j]->end;
             // Plot interg
             for (int k=endBack+1; k<start; k++)
                 PlotBarI(k, 0, 0.4, predWidth, 4);
             endBack = end;
 
             for (int k=start; k<end; k++)
-                PlotBarI(k, State2Frame[state], 0.4, predWidth, 1);
+ 		PlotBarI(k, featureFrame, 0.4, predWidth, 1);
         }
     }
 }
@@ -1918,48 +1950,57 @@ void Prediction :: PlotPred ()
 // -------------------------------
 //  get the state for a given pos.
 // -------------------------------
-char Prediction :: GetStateForPos(int pos)
+State* Prediction :: GetStateAtPos(int pos)
 {
     for (int i=0; i<nbGene; i++)
     {
-        if ( pos < vGene[i]->vFea[0]->start ) return InterGen;
+        if ( pos < vGene[i]->vFea[0]->start ) return new State(InterGen); // IG
         else
             if ( pos <= vGene[i]->vFea[vGene[i]->nbFea()-1]->end )
                 for (int j=0; j<vGene[i]->nbFea(); j++)
                     if (pos <= vGene[i]->vFea[j]->end)
-                        return vGene[i]->vFea[j]->state;
+                        return vGene[i]->vFea[j]->featureState;
     }
-    return -1;
+    return new State(-1);
 }
 
+
 // ------------------------
-//  isStart.
+//  isStart. 
+// True if a start codon starts at the position (p+1) in the strand forward
+// True if a stard codon starts at the position p in the reverse strand 
 // ------------------------
 const char* Prediction :: IsStart(int p)
 {
-    int state  = GetStateForPos (p);
-    int nState = GetStateForPos (p+1);
+    State* currentState = GetStateAtPos(p);
+    State* nextState    = GetStateAtPos(p+1);
 
-    if (1 <= State2Frame[nState] && State2Frame[nState] <= 3  &&  state >= InterGen)
+    // If the next position is coding exon on strand forward AND that position is IG or UTR or UTR Intron
+    if (nextState->IsForwardCodingExon() && (!currentState->InStartStopRegion()))
         return "True";
-    if (-3 <= State2Frame[state] && State2Frame[state] <= -1  &&
-            (nState >= InterGen || p+1 >= vGene[0]->cdsEnd + 1))
+
+    if (currentState->IsReverseCodingExon()  && 
+	( (!nextState->InStartStopRegion()) || (p+1 >= vGene[0]->cdsEnd + 1)) )
         return "True";
+
     return "False";
 }
 
 // ------------------------
 //  isStop.
+// True if a stop codon stops at the position p on strand forward
+// True if a stop codon stops at the position p+1 on reverse strand
 // ------------------------
 const char* Prediction :: IsStop(int p)
 {
-    int state  = GetStateForPos (p);
-    int nState = GetStateForPos (p+1);
+    State *currentState = GetStateAtPos (p);
+    State *nextState    = GetStateAtPos (p+1);
 
-    if (state != -1  &&  1 <= State2Frame[state] && State2Frame[state] <= 3  &&
-            (nState >= InterGen || p+1 >= vGene[0]->cdsEnd + 1))
+    if ( currentState->IsDefined()  &&  currentState->IsForwardCodingExon()  &&
+         ((!nextState->InStartStopRegion()) || (p+1 >= vGene[0]->cdsEnd + 1)) )
         return "True";
-    if (-3 <= State2Frame[nState] && State2Frame[nState] <= -1 &&  state >= InterGen)
+
+    if ((!currentState->InStartStopRegion()) && nextState->IsReverseCodingExon())
         return "True";
     return "False";
 }
@@ -1969,12 +2010,12 @@ const char* Prediction :: IsStop(int p)
 // ------------------------
 const char* Prediction :: IsDon(int p)
 {
-    int state  = GetStateForPos (p);
-    int nState = GetStateForPos (p+1);
+    State *currentState = GetStateAtPos (p);
+    State *nextState    = GetStateAtPos (p+1);
 
-    if (1 <= State2Frame[state] && State2Frame[state] <= 3 &&  nState == IntronF1)
+    if (currentState->IsForwardCodingExon() &&  nextState->GetState() == IntronF1)
         return "True";
-    if (-3 <= State2Frame[nState] && State2Frame[nState] <= -1 &&  state == IntronR1)
+    if (nextState->IsReverseCodingExon() &&  currentState->GetState() == IntronR1)
         return "True";
     return "False";
 }
@@ -1984,12 +2025,12 @@ const char* Prediction :: IsDon(int p)
 // ------------------------
 const char* Prediction :: IsAcc(int p)
 {
-    int pState = GetStateForPos (p);
-    int state  = GetStateForPos (p+1);
+    State *previousState = GetStateAtPos (p);
+    State *currentState  = GetStateAtPos (p+1);
 
-    if (1 <= State2Frame[state] && State2Frame[state] <= 3 &&  pState == IntronF1)
+    if (currentState->IsForwardCodingExon() &&  previousState->GetState() == IntronF1)
         return "True";
-    if (-3 <= State2Frame[pState] && State2Frame[pState] <= -1  &&  state == IntronR1)
+    if (previousState->IsReverseCodingExon()  &&  currentState->GetState() == IntronR1)
         return "True";
     return "False";
 }
@@ -2013,21 +2054,25 @@ bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
 {
     bool is_state = false;
     bool bad_strand = false;
-    int state, nState, pState;
-
+    //int state, nState, pState;
+    State *currentState;		
+    State *nextState;
+    State *previousState;
     if (sig_type == DATA::Start)
     {
-        state  = GetStateForPos (pos);
-        nState = GetStateForPos (pos+1);
+	currentState = GetStateAtPos (pos);
+	nextState    = GetStateAtPos (pos+1);
+
         if (strand == '+')
         {
-            if ((1 <= State2Frame[nState] && State2Frame[nState] <= 3) && state == InterGen)
+	    // Intergenic then coding exon
+	    if ( (currentState->IsIntergenic()) && (nextState->IsForwardCodingExon()) )
                 is_state = true;
         }
         else if (strand == '-')
         {
-            if ((-3 <= State2Frame[state] && State2Frame[state] <= -1)  &&
-                    (nState == UTR5R || pos == vGene[0]->cdsEnd + 1))
+	    if ( currentState->IsReverseCodingExon() && 
+                 (nextState->GetState() == UTR5R || pos == vGene[0]->cdsEnd + 1) )
                 is_state = true;
         }
         else bad_strand = true;
@@ -2035,52 +2080,56 @@ bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
     }
     else if (sig_type == DATA::Stop)
     {
-        state  = GetStateForPos (pos);
-        nState = GetStateForPos (pos+1);
+	currentState = GetStateAtPos (pos);
+	nextState    = GetStateAtPos (pos+1);
+
         if (strand == '+')
         {
-            if ( (1 <= State2Frame[state] && State2Frame[state] <= 3) &&
-                    (nState == UTR3F || pos == vGene[0]->cdsEnd + 1))
+            if (currentState->IsForwardCodingExon() && 
+		((nextState->GetState() == UTR3F) || (pos == vGene[0]->cdsEnd + 1)) )
                 is_state = true;
         }
         else if (strand == '-')
         {
-            if ( (-3 <= State2Frame[nState] && State2Frame[nState] <= -1)  &&
-                    (state == UTR3R || state == InterGen) ) is_state = true;
+            if (nextState->IsReverseCodingExon() && 
+		(currentState->GetState() == UTR3R || currentState->IsIntergenic()) )
+		is_state = true;
         }
         else bad_strand = true;
 
     }
     else if (sig_type == DATA::Acc)
     {
-        pState = GetStateForPos (pos);
-        state  = GetStateForPos (pos+1);
+	previousState = GetStateAtPos (pos);
+	currentState  = GetStateAtPos (pos+1);
+
         if (strand == '+')
         {
-            if ((1 <= State2Frame[state] && State2Frame[state]<= 3) &&
-                    (4 <= State2Phase[pState] && State2Phase[pState] <= 6)) is_state = true;
+	    // If the the current position is in an exon and the previous position is in an intron 
+	    if (currentState->IsForwardCodingExon() && previousState->IsForwardIntron() ) is_state = true;
         }
         else if (strand == '-')
         {
-            if ( (-3 <= State2Frame[pState] && State2Frame[pState] <= -1)  &&
-                    (-6 <= State2Phase[state] && State2Phase[state] <= -4)) is_state = true;
+	     // If the current position (pos+1) is in an intron and the previous is in coding on the reverse strand 
+           if ( previousState->IsReverseCodingExon() && currentState->IsReverseIntron() ) is_state = true;
         }
         else bad_strand = true;
 
     }
     else if (sig_type == DATA::Don)
     {
-        state  = GetStateForPos (pos);
-        nState = GetStateForPos (pos+1);
+	currentState = GetStateAtPos (pos);
+	nextState    = GetStateAtPos (pos+1);
+
         if (strand == '+')
         {
-            if ((1 <= State2Frame[state] && State2Frame[state] <= 3) &&
-                    (4 <= State2Phase[nState] && State2Phase[nState] <= 6)) is_state = true;
+            // If the current position is coding and the next position is an intron on the forward strand 
+            if ( currentState->IsForwardCodingExon() && nextState->IsForwardIntron()) is_state = true;
         }
         else if (strand == '-')
         {
-            if ( (-3 <= State2Frame[nState] && State2Frame[nState] <= -1) &&
-                    (-6 <= State2Phase[state] && State2Phase[state] <= -4)) is_state = true;
+            // If the current position is an intron and the next position an exon in the reverse strand
+            if ( currentState->IsReverseIntron() && nextState->IsReverseCodingExon() ) is_state = true;
         }
         else bad_strand = true;
 
@@ -2392,7 +2441,7 @@ std::vector<Feature*> Prediction :: GetExons(int begin, int end)
         for (int j = 0; j < this->vGene[i]->nbFea(); j++)
         {
             feat = this->vGene[i]->vFea[j];
-            if ( (feat->IsExon() == true) && (feat->start <= end) && (feat->end >= begin) )
+            if ( (feat->IsCodingExon() == true) && (feat->start <= end) && (feat->end >= begin) )
             {
                 vSelectedExons.push_back(feat);
             }
