@@ -432,7 +432,9 @@ void SensorBlastX :: Plot(DNASeq *X)
 // ------------------
 void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
-    int state    = 0, start  = 0, end = 0;
+    //int state    = 0, start  = 0, end = 0;
+    int start  = 0, end = 0;
+    short int frame;
     int cdsStart = 0, cdsEnd = 0;
     int CodingNuc    = 0;
     int SupportedNuc = 0;
@@ -464,17 +466,17 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 
         if (pprocess == 1)
         {
-
             // WARNING: this analysis does only take into account the hits
             // that have not be "shadowed" by other stronger hits in the
             // Init phase.
-
+	
             for (int j=0; j<pred->vGene[i]->nbFea(); j++)
             {
-                state = pred->vGene[i]->vFea[j]->state;
+                frame = pred->vGene[i]->vFea[j]->GetFrame();
                 start = pred->vGene[i]->vFea[j]->start;
                 end   = pred->vGene[i]->vFea[j]->end;
-                if (State2Status[state] == TRANSLATED)
+
+		if (pred->vGene[i]->vFea[j]->IsCodingExon())
                 { //coding
                     // index=indice du premier match etant > ou = au debut de l'exon
                     while( (index < (int)vPos.size()) && (vPos[index] < start-1) )
@@ -485,7 +487,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
                         // pour chaque nuc de l'exon supporte par un hit
                         while (index < (int)vPos.size() && vPos[index]<end)
                         {
-                            if (State2Frame[state] ==  vPMPhase[index])
+			    if (frame == vPMPhase[index])
                                 SupportedNuc++;
                             index++;
                         }
@@ -513,7 +515,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     Block *ThisBlock;
     int i, j;
     int from  = 0, to = 0;
-    int state = 0;
+
     std::vector <int> vSupProtI;                // index prot supportant pred
     Hits **TMPHitTable; 			// needed for sorting by % support
 
@@ -583,14 +585,15 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
     char fea[5];
     char strand = pred->vGene[NumGene-1]->vFea[0]->strand;
     int  codingNuc = 0;
+    State *featState = NULL;
 
     for (i=0; i<pred->vGene[NumGene-1]->nbFea(); i++)
     {
-        state = pred->vGene[NumGene-1]->vFea[i]->state;
-        start = pred->vGene[NumGene-1]->vFea[i]->start;
-        end   = pred->vGene[NumGene-1]->vFea[i]->end;
+        featState = pred->vGene[NumGene-1]->vFea[i]->featureState;
+        start     = pred->vGene[NumGene-1]->vFea[i]->start;
+        end       = pred->vGene[NumGene-1]->vFea[i]->end;
 
-        if ((start >= debut) && (end <= fin) && (state <= TermR3)) // Coding exon inside
+        if ((start >= debut) && (end <= fin) && (pred->vGene[NumGene-1]->vFea[i]->IsCodingExon())) // Coding exon inside
         {
             numF = pred->vGene[NumGene-1]->vFea[i]->number;
             strcpy(fea, "Exon");
@@ -600,7 +603,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 	    for (j=0; j<(int)vSupProtI.size(); j++)
 	    {
 		nlen = 0;
-		HitTable[vSupProtI[j]]->Support = LenSup(HitTable, state, Sup+start-debut, vSupProtI, nlen , j, start, end);
+		HitTable[vSupProtI[j]]->Support = LenSup(HitTable, featState, Sup+start-debut, vSupProtI, nlen , j, start, end);
 		CDSSupport[j] += nlen;
                 len += nlen;
                 tlen+= nlen; //CDS overall count
@@ -676,7 +679,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
 // additional sup will be incrementd only if the nuc is not already supported
 // supported returned is the number of nuc supported ignoring "Sup".
 // -------------------------------------------------------------------------
-int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
+int SensorBlastX :: LenSup(Hits **HitTable, State *FeatState, unsigned char* Sup,
                            std::vector<int> vSupProtI, int& additionalsup,
                            int index, int beg, int end)
 {
@@ -684,8 +687,10 @@ int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
     Block *ThisBlock;
     int from  = 0, to = 0;
     int j;
-
-    assert(state <= TermR3);
+    
+    assert(FeatState->IsCodingExon());
+    
+    short int FeatFrame = FeatState->GetFrame();	
 
     ThisBlock = HitTable[vSupProtI[index]]->Match;
     while (ThisBlock)
@@ -695,7 +700,7 @@ int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
 
         for (j = from; j <= to; j++)
         {
-            if (State2Frame[state] == ThisBlock->Phase)
+	    if (FeatFrame == ThisBlock->Phase)
             {
                 if (Sup[j-beg] == 0) 
 		{
@@ -709,7 +714,6 @@ int SensorBlastX :: LenSup(Hits **HitTable, int state, unsigned char* Sup,
     }
     return supported;
 }
-
 
 void SensorBlastX :: Print (char name[FILENAME_MAX+1])
 {

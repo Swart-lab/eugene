@@ -779,7 +779,8 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 
                 for (i = from; i <= to; i++)
                 {
-                    if (State2Status[pred->GetStateForPos(i+1)] != SPLICED_TRANSCRIBED) // 1 = transcribed and spliced
+                    //if it's not an intron
+		    if (!pred->GetStateAtPos(i+1)->IsIntron())
                         ConsistentEST = 0;
                 }
             }
@@ -790,7 +791,8 @@ void SensorEst :: ESTSupport(Prediction *pred, FILE *MINFO, int Tdebut, int Tfin
 
             for (i = from; i <= to; i++)
             {
-                if (State2Status[pred->GetStateForPos(i+1)] < 2) // 2 = transcribed and not spliced
+                //if it's not (transcribed and not spliced)
+		if (!pred->GetStateAtPos(i+1)->IsTranscribedAndUnspliced())
                     ConsistentEST = 0;
             }
             ThisBlock = ThisBlock->Next;
@@ -870,7 +872,8 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
     Block *ThisBlock;
     int ConsistentEST, i, j;
     int from = 0, to = 0;
-    int state, start, end, len;
+    int start, end, len;
+    State *featState;
     std::vector <int> vSupEstI;  // index des transcrits supportant la pred
 
     if (pred == NULL)
@@ -890,28 +893,26 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 
    // Check first feature: transcribed or not (partial gene)
    i = 0;
-   state = pred->vGene[NumGene-1]->vFea[i]->state;
-   if (State2Status[state] <2) i++;
+   if (!pred->vGene[NumGene-1]->vFea[i]->IsTranscribedAndUnspliced()) i++;
 	
    for (; i < pred->vGene[NumGene-1]->nbFea(); i++)
    {
-	state = pred->vGene[NumGene-1]->vFea[i]->state;
-	start = pred->vGene[NumGene-1]->vFea[i]->start;
-	assert(State2Status[state] > 0); // no intergenic region here
-
-	if ((State2Status[state] >= 2) != currentStateTranscribed)
+	start = pred->vGene[NumGene-1]->vFea[i]->start; 
+	assert(pred->vGene[NumGene-1]->vFea[i]->IsIntergenic() == false); // no intergenic region here
+	
+	// si on change d etat : si on passe de IG ou INTRON vers transcrit episse (UTR ou EXON), ou le contraire
+	if (pred->vGene[NumGene-1]->vFea[i]->IsTranscribedAndUnspliced() != currentStateTranscribed)
 	{
 	    vTranscriptStarts.push_back(start-1);
-            //printf(" %d",start-1);
-	    currentStateTranscribed = (State2Status[state] >= 2);
+	    currentStateTranscribed =  pred->vGene[NumGene-1]->vFea[i]->IsTranscribedAndUnspliced();
 	}
    }
-   if (State2Status[state] >= 2) 
+
+    if (pred->vGene[NumGene-1]->vFea[i-1]->IsTranscribedAndUnspliced() )
     {
 	vTranscriptStarts.push_back(pred->vGene[NumGene-1]->vFea[i-1]->end+1); // last exon
-	//printf(" %d",pred->vGene[NumGene-1]->vFea[i-1]->end+1);
     }
-   //printf("\n");
+
 
     /***********************************************************************/
     /** Objectif : obtenir un vecteur contenant les index des transcrits  **/
@@ -1019,9 +1020,9 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
 
     for (i = 0; i < pred->vGene[NumGene-1]->nbFea(); i++)
     {
-        state = pred->vGene[NumGene-1]->vFea[i]->state;
-        start = pred->vGene[NumGene-1]->vFea[i]->start;
-        end   = pred->vGene[NumGene-1]->vFea[i]->end;
+	featState = pred->vGene[NumGene-1]->vFea[i]->featureState; 
+        start     = pred->vGene[NumGene-1]->vFea[i]->start;
+        end       = pred->vGene[NumGene-1]->vFea[i]->end;
 
 	// Coord of tDebut/Tfin start at 0. start/end start at 1
 	//printf("NumGene %i state %i start %d Tdebut+1 %d end %d Tfin+1 %d\n", NumGene, state,start,Tdebut+1,end,Tfin+1);
@@ -1030,18 +1031,18 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
         len      = 0;
         int numF = -1;
 
-        if (State2Status[state] >= 2) // >= 2: transcribed unspliced
+	if (pred->vGene[NumGene-1]->vFea[i]->IsTranscribedAndUnspliced())
             numF = pred->vGene[NumGene-1]->vFea[i]->number;
 
 	inCDS = ((start-1 >= debut) && (end-1 <= fin));
 
-        if (state <= TermR3)
+	if (featState->IsCodingExon())
         {
             strcpy(fea, "Exon");
 	}
-        else if (state == UTR5F  ||  state == UTR5R)
+	else if (featState->IsUTR5())
             strcpy(fea, "UTR5");
-        else if (state == UTR3F  ||  state == UTR3R)
+	else if (featState->IsUTR3())
             strcpy(fea, "UTR3");
 
         len = 0;

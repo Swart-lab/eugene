@@ -251,7 +251,6 @@ void SensorTester :: GiveInfo (DNASeq *X, int pos, DATA *d)
     const char *predSigType = new char[10];
     const char *tf;
     const char *truthState;
-    
     for(int j=0; j<DATA::LastSigType; j++) Data.sig[j].Clear();
     sensor->GiveInfo(X,pos,&Data);
 
@@ -684,7 +683,7 @@ const char* SensorTester :: SigType_TF(int i, int pos, const char **sType)
 // -------
 const char* SensorTester :: State(int pos)
 {
-  switch (gene->GetStateForPos(pos)) {
+  switch (gene->GetStateAtPos(pos)->GetState()) {
   case 0:
     return "InitF";
   case 3:

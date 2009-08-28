@@ -279,7 +279,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
         if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
                 (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
         {
-            if (State2Status[g->vFea[idxf]->state] < 2) // IG or intron
+	    if (! State(g->vFea[idxf]->state).IsTranscribedAndUnspliced() )
                 return false;
             else break;
         }
@@ -292,14 +292,11 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     {
         if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
             firstOk = true;
-
-        if (!firstOk && (State2Status[g->vFea[idxf]->state] < 2)) // IG or intron: broken
+	if (!firstOk && ( ! g->vFea[idxf]->IsTranscribedAndUnspliced()) ) // IG or intron: broken
             return false;
 
-        if (firstOk &&
-                (g->vFea[idxf]->end ==
-                 vi_ExonStart[idxe+1]))
-            if (State2Status[g->vFea[idxf]->state] < 2) // IG or intron
+        if (firstOk && (g->vFea[idxf]->end == vi_ExonStart[idxe+1]))
+            if ( !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
             {
                 idxe++;
                 idxf++;
@@ -315,7 +312,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     {
         if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &&
                 (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
-            return (State2Status[g->vFea[idxf]->state] >= 2); // not (IG or intron)
+	      return  (g->vFea[idxf]->IsTranscribedAndUnspliced());
     }
     return false;
 }

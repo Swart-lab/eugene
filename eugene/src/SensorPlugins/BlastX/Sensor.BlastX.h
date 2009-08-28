@@ -55,7 +55,7 @@ class SensorBlastX : public Sensor
   void ProtSupport (Prediction *, FILE *, int debut, int fin,
 		    Hits **HitTable,  int Size,  int NumG);
 
-  int  LenSup      (Hits **HitTable, int state, unsigned char* Sup,
+  int  LenSup      (Hits **HitTable, State* state, unsigned char* Sup,
                     std::vector<int> vSupProtI, int& additionalsup,
                     int index, int beg, int end);
 
