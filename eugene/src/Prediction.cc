@@ -132,12 +132,12 @@ void Prediction :: ESTScan()
 Feature :: Feature ()
 {
     number   = 0;
-    state    = -1;
+    //state    = -1;
     start    = -1;
     end      = -1;
     strand   = '.';
     phase    = 9;
-    framegff = 9;
+    phasegff = 9;
     frame    = 9;
     featureState = new State(-1);
 }
@@ -148,13 +148,13 @@ Feature :: Feature ()
 Feature :: Feature (signed char n, int s, int e, char st, int fr)
 {
     number   = 0;
-    state    = n;
+    //state    = n;
     featureState = new State(n);
     start    = s;
     end      = e;
     strand   = st;
     phase    = 9;
-    framegff = 9;
+    phasegff = 9;
     frame    = fr;
 }
 
@@ -430,7 +430,7 @@ int Gene :: isDifferent (const Gene& o, int threshold)
             (!this->vFea[idxt]->IsUTR())      // not UTR
           )
     {
-        if ((o.vFea[idxo+shift]->state == this->vFea[idxt+shift]->state) &&
+        if ((o.vFea[idxo+shift]->featureState->GetState() == this->vFea[idxt+shift]->featureState->GetState()) &&
                 (abs(o.vFea[idxo+shift]->start - this->vFea[idxt+shift]->start) <= threshold) &&
                 (abs(o.vFea[idxo+shift]->end - this->vFea[idxt+shift]->end)  <= threshold))
         {
@@ -468,7 +468,7 @@ bool Gene :: operator== (const Gene& o)
     {
         if ((o.vFea[idxo+shift]->start != this->vFea[idxt+shift]->start) ||
                 (o.vFea[idxo+shift]->end   != this->vFea[idxt+shift]->end)   ||
-                (o.vFea[idxo+shift]->state != this->vFea[idxt+shift]->state)) return false;
+                (o.vFea[idxo+shift]->featureState->GetState() != this->vFea[idxt+shift]->featureState->GetState())) return false;
         shift++;
     }
     // we assume the gene structures satisfy the structural constraints
@@ -498,7 +498,7 @@ bool Gene :: HasSameExons (const Gene& o)
         }
         else
         {
-            if ( (o.vFea[idxo]->state != this->vFea[idxt]->state) ||
+            if ( (o.vFea[idxo]->featureState->GetState() != this->vFea[idxt]->featureState->GetState()) ||
                     (o.vFea[idxo]->start != this->vFea[idxt]->start) ||
                     (o.vFea[idxo]->end   != this->vFea[idxt]->end  ) )
             {
@@ -519,7 +519,7 @@ void Gene :: AddFeature (signed char state, int start, int end)
 {
     char strand = (PhaseAdapt(state) > 0) ? '+' : '-';
     int  frame  = PhaseAdapt(state);
-
+    
     // If state == utr PhaseAdapt return 0 so
     if (state == UTR5F  ||  state == UTR3F) strand = '+';
 
@@ -539,7 +539,7 @@ void Gene :: AddFeature (signed char state, int start, int end)
 // ------------------------
 void Gene :: Update ()
 {
-    int state, phase, framegff, lengff = 0;
+    int state, phase, phasegff, lengff = 0;
     int stateBack = -1;
     int stateNext = -1;
     int forward   = (vFea[0]->strand == '+') ? 1 : 0;
@@ -549,7 +549,7 @@ void Gene :: Update ()
     // Compute Gene informations
     for (int i=0; i<nbFea(); i++)
     {
-        state = vFea[i]->state;
+        state = vFea[i]->featureState->GetState();
 
 	if (vFea[i]->IsCodingExon())
         {
@@ -571,7 +571,7 @@ void Gene :: Update ()
     }
     trStart = vFea[0]->start - 1;
     trEnd = vFea[nbFea()-1]->end - 1;
-    if (vFea[nbFea()-1]->state < UTR5F) cdsEnd = trEnd;
+    if (vFea[nbFea()-1]->featureState->GetState() < UTR5F) cdsEnd = trEnd;
 
     mrnaLength = exLength   + utrLength;
     geneLength = mrnaLength + inLength;
@@ -598,8 +598,8 @@ void Gene :: Update ()
     // Compute phase (feature)
     for (int i=0; i<nbFea(); i++)
     {
-        state = vFea[i]->state;
-        if (i+1 < nbFea()) stateNext = vFea[i+1]->state;
+        state = vFea[i]->featureState->GetState();
+        if (i+1 < nbFea()) stateNext = vFea[i+1]->featureState->GetState();
         if (forward)
             ((stateBack == -1) ? phase=-1 : phase = PhaseAdapt(stateBack));
         else
@@ -614,28 +614,28 @@ void Gene :: Update ()
         stateBack = state;
     }
 
-    // Compute framegff (feature)
+    // Compute phasegff (feature)
     for (int i=0; i<nbFea(); i++)
     {
-        // On ne peut calculer la framegff qd :
+        // On ne peut calculer la phasegff qd :
         //  - on a pas le debut d'un gene forward
         //  - on a pas le gene entier pour un reverse
         if ( forward  && complete==2  || !forward && complete!=3) break;
 
-        state = vFea[i]->state;
+        state = vFea[i]->featureState->GetState();
 	if (!vFea[i]->IsCodingExon()) continue;
 
         if (!forward && state >= TermR1) lengff = exLength;
 
         if (state <= SnglR3)
         {
-            vFea[i]->framegff = 0;
+            vFea[i]->phasegff = 0;
             if (forward) lengff = vFea[i]->end - vFea[i]->start +1;
         }
         else
         {
             if (!forward) lengff -= vFea[i]->end - vFea[i]->start +1;
-            vFea[i]->framegff = ( 3 - (lengff % 3) ) %3;
+            vFea[i]->phasegff = ( 3 - (lengff % 3) ) %3;
             if (forward)  lengff +=  vFea[i]->end - vFea[i]->start +1;
         }
     }
@@ -670,7 +670,6 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
     fprintf(F,"%s\t", comp);
     for (i=0; i<nbFea(); i++)
     {
-        //if (vFea[i]->state <= TermR3)
 	if (vFea[i]->IsCodingExon())
         {
             if (nofirst) fprintf(F,",");
@@ -693,8 +692,8 @@ void Gene :: PrintInfo (FILE *F, int nb, char *seqName)
             char sep = ',';
             // Si exon et etat d'avant utr OU
             // si utr  et etat d'avant exon
-	    if ( (vFea[i]->IsCodingExon()  && (i != 0 && vFea[i-1]->state >= UTR5F)) ||
-                 (vFea[i]->state >= UTR5F  && (i != 0 && vFea[i-1]->IsCodingExon()))  )
+	    if ( (vFea[i]->IsCodingExon()  && (i != 0 && vFea[i-1]->featureState->GetState() >= UTR5F)) ||
+                 (vFea[i]->featureState->GetState() >= UTR5F  && (i != 0 && vFea[i-1]->IsCodingExon()))  )
                 sep = ':';
             if (nofirst) fprintf(F,"%c",sep);
             else         nofirst = true;
@@ -722,7 +721,7 @@ void Gene::Print()
 
     for (int i=0; i < this->nbFea(); i++)
     {
-        state = this->vFea[i]->state;
+        state = this->vFea[i]->featureState->GetState();
         start = this->vFea[i]->start;
         end   = this->vFea[i]->end;
         phase = this->vFea[i]->phase;
@@ -878,7 +877,7 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
 
             for (featindex = vGene[i]->vFea.begin(); featindex != vGene[i]->vFea.end(); )
             {
-                state = (*featindex)->state;
+                state = (*featindex)->featureState->GetState();
                 if (state <= InterGen) break; // Not UTR or UTRIntron
                 start = (*featindex)->start;
                 end = (*featindex)->end;
@@ -897,7 +896,7 @@ void Prediction :: TrimAndUpdate(DNASeq* x)
             // Same on right
             for (rfeatindex = vGene[i]->vFea.rbegin(); rfeatindex != vGene[i]->vFea.rend(); )
             {
-                state = (*rfeatindex)->state;
+                state = (*rfeatindex)->featureState->GetState();
                 if (state <= InterGen) break; // Not UTR or UTRIntron
                 start = (*rfeatindex)->start;
                 end = (*rfeatindex)->end;
@@ -1113,7 +1112,7 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
 
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
+            state = vGene[i]->vFea[j]->featureState->GetState();
             // Print introns ?
             if ( (PAR.getI("Output.intron") == 0) &&
                     (state >= IntronF1 && state <= InterGen) ||
@@ -1131,10 +1130,10 @@ void Prediction :: PrintGff (FILE *OUT, char *seqName)
                     State2GFFString(state), start+offset, end+offset,
                     100.0*(double)cons/(end-start+1), 100.0*(double)incons/(end-start+1),
                     vGene[i]->vFea[j]->strand);
-            if (vGene[i]->vFea[j]->framegff == 9)
+            if (vGene[i]->vFea[j]->phasegff == 9)
                 fprintf(OUT, ".\n");
             else
-                fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->framegff));
+                fprintf(OUT, "%d\n",abs(vGene[i]->vFea[j]->phasegff));
         }
     }
     //ajoute une ligne vide en fin de fichier
@@ -1220,7 +1219,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
+            state = vGene[i]->vFea[j]->featureState->GetState();
             // Print introns ?
             if ( (PAR.getI("Output.intron") == 0) &&
                     (state >= IntronF1 && state <= InterGen) ||
@@ -1245,7 +1244,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
             case SO_UTR_INTRON  :
                 pre_arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
                                             vGene[i]->vFea[j]->strand,
-                                            vGene[i]->vFea[j]->framegff);
+                                            vGene[i]->vFea[j]->phasegff);
                 //les attributs
                 setGff3Attributes(pre_arn_line, state, type_sofa, fea_name, j,code_variant, rna_id, false);
                 //on l'ajoute au vecteur
@@ -1263,7 +1262,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
                 {
                     pre_arn_line = fillGff3Line(SOFA_EXON, start+offset, end+offset,
                                                 vGene[i]->vFea[j]->strand,
-                                                vGene[i]->vFea[j]->framegff);
+                                                vGene[i]->vFea[j]->phasegff);
                     //attributs
                     setGff3Attributes(pre_arn_line, state, SOFA_EXON,
                                       fea_name, j, code_variant, rna_id, false);
@@ -1272,7 +1271,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 
                 arn_line = fillGff3Line(type_sofa_cds, start+offset, end+offset,
                                         vGene[i]->vFea[j]->strand,
-                                        vGene[i]->vFea[j]->framegff);
+                                        vGene[i]->vFea[j]->phasegff);
                 //attributs
                 setGff3Attributes(arn_line, state, type_sofa_cds,
                                   fea_name, j, code_variant, rna_id, true);
@@ -1292,7 +1291,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
                 {
                     pre_arn_line = fillGff3Line(SOFA_EXON, start+offset, end+offset,
                                                 vGene[i]->vFea[j]->strand,
-                                                vGene[i]->vFea[j]->framegff);
+                                                vGene[i]->vFea[j]->phasegff);
                     pre_arn_lines.push_back(pre_arn_line);
                 }
                 //les attributs
@@ -1311,7 +1310,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
 
                 arn_line = fillGff3Line(SOFA_CDS, start+offset, end+offset,
                                         vGene[i]->vFea[j]->strand,
-                                        vGene[i]->vFea[j]->framegff);
+                                        vGene[i]->vFea[j]->phasegff);
                 //les attributs
                 setGff3Attributes(arn_line, state, SOFA_CDS,
                                   fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id, true);
@@ -1323,7 +1322,7 @@ void Prediction :: PrintGff3 (std::ofstream& out, char *seqName, char append)
             default :
                 pre_arn_line = fillGff3Line(type_sofa, start+offset, end+offset,
                                             vGene[i]->vFea[j]->strand,
-                                            vGene[i]->vFea[j]->framegff);
+                                            vGene[i]->vFea[j]->phasegff);
                 //les attributs
                 setGff3Attributes(pre_arn_line, state, SOFA_CDS, fea_name, j, code_variant, rna_id, false);
                 pre_arn_lines.push_back(pre_arn_line);
@@ -1393,7 +1392,7 @@ void Prediction :: PrintEgnL (FILE *OUT, char *seqName, int a)
         forward = (vGene[i]->vFea[0]->strand == '+') ? 1 : 0;
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
+            state = vGene[i]->vFea[j]->featureState->GetState();
             phase = vGene[i]->vFea[j]->phase;
             frame = vGene[i]->vFea[j]->frame;
 
@@ -1591,7 +1590,7 @@ void Prediction :: PrintHtml (FILE *OUT, char *seqName)
     {
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
+            state = vGene[i]->vFea[j]->featureState->GetState();
 
             // Print introns ?
             if ( (PAR.getI("Output.intron") == 0) &&
@@ -1626,10 +1625,10 @@ void Prediction :: PrintHtml (FILE *OUT, char *seqName)
                     "  <font face=\"monospace\">",
                     start, end, vGene[i]->vFea[j]->strand);
 
-            if (vGene[i]->vFea[j]->framegff == 9)
+            if (vGene[i]->vFea[j]->phasegff == 9)
                 fprintf(OUT, ".");
             else
-                fprintf(OUT, "%d",abs(vGene[i]->vFea[j]->framegff));
+                fprintf(OUT, "%d",abs(vGene[i]->vFea[j]->phasegff));
             fprintf(OUT, "</font></td>\n</tr>\n");
         }
     }
@@ -2154,15 +2153,15 @@ bool Prediction :: IsState (DATA::SigType sig_type, int pos, char strand)
 //  --  --  delocalisation pour eclaircir le code
 Gff3Line*
 Prediction::fillGff3Line(int type_sofa, int start, int end,
-                         char strand, int framegff)
+                         char strand, int phasegff)
 {
     Gff3Line* line = new Gff3Line(seqName);
     line->setType(type_sofa);
     line->setStart(start);
     line->setEnd(end);
     line->setStrand(strand);
-    if (framegff != 9)
-        line->setPhase(abs(framegff));
+    if (phasegff != 9)
+        line->setPhase(abs(phasegff));
     return line;
 }
 
@@ -2205,7 +2204,7 @@ void Prediction::Print()
 
         for (int j=0; j<vGene[i]->nbFea(); j++)
         {
-            state = vGene[i]->vFea[j]->state;
+            state = vGene[i]->vFea[j]->featureState->GetState();
             start = vGene[i]->vFea[j]->start;
             end   = vGene[i]->vFea[j]->end;
             phase = vGene[i]->vFea[j]->phase;

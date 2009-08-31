@@ -51,12 +51,12 @@ class Feature
  private:
  public:
   int    number;
-  signed char state;
+  //signed char state;
   int    start;
   int    end;
   char   strand;
   int    phase;
-  int    framegff;
+  int    phasegff;
   int    frame;
   State* featureState;
   
@@ -155,7 +155,7 @@ class Prediction
   void  EndHTML         (FILE*);
 
   Gff3Line* fillGff3Line(int type_sofa, int start, int end,
-                            char strand, int framegff);
+                            char strand, int phasegff);
   void setGff3Attributes(Gff3Line* line, int type_egn,
                           int type_sofa, std::string fea_name,
                           int j, char code, std::string gene_id, bool coding);
