@@ -279,7 +279,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
         if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
                 (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
         {
-	    if (! State(g->vFea[idxf]->state).IsTranscribedAndUnspliced() )
+	    if (! g->vFea[idxf]->IsTranscribedAndUnspliced() )
                 return false;
             else break;
         }
