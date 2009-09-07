@@ -54,40 +54,6 @@ Gff3Line::Gff3Line(std::string seq_id)
 //fprintf(stderr, "ctr2 gff3Line\n");// << std::endl;
 }
 
-//renvoie le type sofa le + approprie au type eugene
-int getTypeSofa(int state_egn, bool coding, bool sofa)
-{
-  int ret_val;
-    if(state_egn <= InitR3)
-//        str = "five_prime_coding_exon";//"E.Init";
-        return (sofa) ? SOFA_EXON : (coding ? SO_5_CODING_EXON : SO_5_EXON);
-    if(state_egn <= SnglR3)
-//        str = "single_exon";//"E.Sngl";
-        return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;
-    if(state_egn <= IntrR3)
-        //interior_exon et interior_coding_exon ne sont pas dans SOFA
-      return (sofa) ? SOFA_EXON : SO_INTERIOR_EXON;  //"E.Intr";
-//        str = "SO:0000201";  //"E.Intr";
-    if(state_egn <= TermR3)
-//        str = "three_prime_coding_exon";//"E.Term";
-      return (sofa) ? SOFA_EXON : (coding ? SO_3_CODING_EXON : SO_3_EXON);
-    if(state_egn <= IntronR2AG)
-      return SOFA_INTRON;    //"Intron";
-    if(state_egn == InterGen)
-      return SOFA_INTERGEN;  //"InterG";
-    if(state_egn == UTR5F || state_egn == UTR5R)
-      return SOFA_5_UTR;  //"UTR5";
-    if(state_egn == UTR3F || state_egn == UTR3R)
-      return SOFA_3_UTR;  //"UTR3";
-//    if(state_egn >= IntronU5F)
-    if(state_egn <= IntronU3R)
-      return SO_UTR_INTRON;    //"Intron";
-//     si ce n'est rien de tout ca, je renvoies SOFA_EXON
-//     a cause des attributs,
-//     je dois pouvoir recuperer un SOFA_EXON avec un sofa a false
-//     a changer quand la fonction setOntology sera ecrite
-    return SOFA_EXON;
-}
 
 //--  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --  --
 

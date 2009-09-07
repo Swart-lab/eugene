@@ -21,6 +21,7 @@
 #define  STATE_H_INCLUDED
 
 #include "Prediction_cte.h"
+#include "Gff3Line.h"
 
 class State
 {
@@ -30,9 +31,12 @@ public:
     State();
     State(char state);
     char GetState();
+    char GetStrand();
     short int GetFrame(); /* Return the frame - See the definition on the EuGene Trac */
     bool IsIntergenic(void);
     bool IsIntron(void);
+    bool IsIntronInStartStopRegion(void);
+    bool IsUTRIntron(void);
     bool IsForwardIntron(void);
     bool IsReverseIntron(void);
     bool IsUTR(void);
@@ -44,6 +48,19 @@ public:
     bool IsTranscribedAndUnspliced(void);
     bool InStartStopRegion(); /* true if its an element including between a start and a stop codon */
     bool IsDefined();
+    bool IsInitExon();
+    bool IsSnglExon();
+    bool IsTermExon();
+    const char* State2EGNString();
+    const char* State2GFFString ();
+    //mon bricolage -> devrait etre dans prediction.cc ?
+/** \brief renvoie le type (code SOFA ou SO) de la structure
+  * Par defaut,la fonction renverra le code SOFA le plus proche.
+  * Si sofa est faux, alors c'est le code SO qui sera renvoyer
+  * \todo le code sofa est-il un nombre ou une chaine de chiffres ?
+  */
+  int getTypeSofa(bool coding, bool sofa=true);
+
 
 };
 

@@ -51,24 +51,24 @@ class Feature
  private:
  public:
   int    number;
-  //signed char state;
   int    start;
   int    end;
   char   strand;
   int    phase;
-  int    phasegff;
   int    frame;
   State* featureState;
   
   Feature  ();
-  Feature  (signed char, int, int, char, int);
+  Feature  (signed char, int, int);
   ~Feature ();
   bool      Overlap (const Feature&);
   bool      IsCodingExon();
+  bool      IsIntron();
   bool      IsUTR();
+  bool      IsUTRIntron();
   bool      IsIntergenic();
   bool      IsTranscribedAndUnspliced();
-  short int GetFrame(); // compute the frame according to the state
+  void      ComputePhase(int);
 };
 
 
@@ -84,7 +84,7 @@ class Gene
   int exNumber;
   int inNumber, inLength;
   int utrLength, mrnaLength, geneLength;
-  void Update   ();
+  void Update   (int);
   void clear    ();
  public:
   int cdsStart, cdsEnd, trStart, trEnd;
@@ -131,10 +131,6 @@ class Prediction
   void  PrintEgnS       (FILE*);
   void  PrintEgnD       (FILE*);
   void  PrintHtml       (FILE*, char*);
-
-  // Convert state in string
-  const char* State2EGNString (int);
-  const char* State2GFFString (int);
   
   // Verif coherence EST: calcul le nombre de nuc. coherents et
   // incoherents avec les match est
@@ -156,9 +152,9 @@ class Prediction
 
   Gff3Line* fillGff3Line(int type_sofa, int start, int end,
                             char strand, int phasegff);
-  void setGff3Attributes(Gff3Line* line, int type_egn,
+ void setGff3Attributes(Gff3Line* line, State* featState,
                           int type_sofa, std::string fea_name,
-                          int j, char code, std::string gene_id, bool coding);
+                          int j, char code_variant, std::string gene_id, bool coding);
   bool previousExonMustBeUpdated(Gff3Line* line, int start);
 
 

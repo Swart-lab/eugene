@@ -60,7 +60,7 @@ bool State::IsIntergenic(void)
 
 
 // ----------------------
-//  Return true if it an intron
+//  Return true if it is an intron (including intron in utr region)
 // ----------------------
 bool State::IsIntron(void)
 {
@@ -71,6 +71,25 @@ bool State::IsIntron(void)
     return false;
 }
 
+// ----------------------
+//  Return true if it is an intron of a region between a start and stop (excuding intron in utr region)
+// ----------------------
+bool State::IsIntronInStartStopRegion(void)
+{
+	if (this->state >= IntronF1 && this->state <= IntronR2AG)
+		return true;
+	return false;	
+}
+
+// ----------------------
+//  Return true if it is an intron of an UTR region
+// ----------------------
+bool State::IsUTRIntron(void)
+{
+	if ( this->state >= IntronU5F)
+		return true;
+	return false;
+}
 // ----------------------
 //  Return true if it is an UTR
 // ----------------------
@@ -170,6 +189,7 @@ bool State::IsForwardIntron(void)
     return false;
 }
 
+
 // -----------------------
 // Return true if its an intron in the reverse strand
 // NOTE: remplacer ce test par IsIntron && IsReverse
@@ -212,4 +232,117 @@ bool State::IsDefined()
     if (this->state >= 0)
         return true;
     return false;
+}
+
+// ------------------------
+//  Return the strand 
+// ------------------------
+char State::GetStrand()
+{
+	char strand = (State2Frame[this->state] > 0) ? '+' : '-';
+	    // If state == utr PhaseAdapt return 0 so
+    	if (this->state == UTR5F  ||  this->state == UTR3F) strand = '+';
+	return strand;
+}
+
+// ------------------------
+//  Return true if it is an initial exon
+// ------------------------
+bool State::IsInitExon()
+{
+	if (this->state <= InitR3)
+		return true;
+	return false;
+}
+
+// ------------------------
+//  Return true if it is an single exon
+// ------------------------
+bool State::IsSnglExon()
+{
+	if (this->state >= SnglF1 && this->state <= SnglR3)
+		return true;
+	return false;
+}
+
+// ------------------------
+//  Return true if it is a terminal exon
+// ------------------------
+bool State::IsTermExon()
+{
+	if (this->state >= TermF1 && this->state <= TermR3)
+		return true;
+	return false;
+}
+
+
+// -----------------------------------------
+//  Convert the state in string
+// -----------------------------------------
+const char* State::State2EGNString()
+{
+    if (this->IsInitExon())                  return "Init";
+    if (this->state <= SnglR3)                  return "Sngl";
+    if (this->state <= IntrR3)                  return "Intr";
+    if (this->state <= TermR3)                  return "Term";
+    if (this->state <= IntronR2AG)              return "Intron";
+    if (this->state == InterGen)                return "InterG";
+    if (this->state == UTR5F || state == UTR5R) return "Utr5";
+    if (this->state == UTR3F || state == UTR3R) return "Utr3";
+    if (this->state >= IntronU5F)               return "Intron";
+}
+
+// -----------------------------------------
+//  State2GFFString (convert state to char*)
+// -----------------------------------------
+const char* State :: State2GFFString ()
+{
+    if (this->IsInitExon())                  return "E.Init";
+    if (this->state <= SnglR3)                  return "E.Sngl";
+    if (this->state <= IntrR3)                  return "E.Intr";
+    if (this->state <= TermR3)                  return "E.Term";
+    if (this->state <= IntronR2AG)              return "Intron";
+    if (this->state == InterGen)                return "InterG";
+    if (this->state == UTR5F || state == UTR5R) return "UTR5";
+    if (this->state == UTR3F || state == UTR3R) return "UTR3";
+    if (this->state >= IntronU5F)               return "Intron";
+}
+
+// -----------------------------------------
+//  Return the SOFA type. If sofa==false, return the SO code 
+// TODO:  Modifier ce test if (!this->IsDefined()) return SOFA_EXON; 
+// -----------------------------------------
+int State::getTypeSofa(bool coding, bool sofa)
+{
+	if (!this->IsDefined()) return SOFA_EXON; 
+
+    if(this->state <= InitR3)
+//        str = "five_prime_coding_exon";//"E.Init";
+        return (sofa) ? SOFA_EXON : (coding ? SO_5_CODING_EXON : SO_5_EXON);
+    if(this->state <= SnglR3)
+//        str = "single_exon";//"E.Sngl";
+        return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;
+    if(this->state <= IntrR3)
+        //interior_exon et interior_coding_exon ne sont pas dans SOFA
+      return (sofa) ? SOFA_EXON : SO_INTERIOR_EXON;  //"E.Intr";
+//        str = "SO:0000201";  //"E.Intr";
+    if(this->state <= TermR3)
+//        str = "three_prime_coding_exon";//"E.Term";
+      return (sofa) ? SOFA_EXON : (coding ? SO_3_CODING_EXON : SO_3_EXON);
+    if(this->state <= IntronR2AG)
+      return SOFA_INTRON;    //"Intron";
+    if(this->state == InterGen)
+      return SOFA_INTERGEN;  //"InterG";
+    if(this->state == UTR5F || this->state == UTR5R)
+      return SOFA_5_UTR;  //"UTR5";
+    if(this->state == UTR3F || this->state == UTR3R)
+      return SOFA_3_UTR;  //"UTR3";
+//    if(state_egn >= IntronU5F)
+    if(this->state <= IntronU3R)
+      return SO_UTR_INTRON;    //"Intron";
+//     si ce n'est rien de tout ca, je renvoies SOFA_EXON
+//     a cause des attributs,
+//     je dois pouvoir recuperer un SOFA_EXON avec un sofa a false
+//     a changer quand la fonction setOntology sera ecrite
+    return SOFA_EXON;
 }

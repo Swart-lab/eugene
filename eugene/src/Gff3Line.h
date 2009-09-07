@@ -227,13 +227,4 @@ class Gff3Line
     {  attr_->addAttribute(str);  }
 };
 
-//mon bricolage -> devrait etre dans prediction.cc ?
-/** \brief renvoie le type (code SOFA ou SO) de la structure
-  * state_egn est le type decrit par eugene. Par defaut,
-  * la fonction renverra le code SOFA le plus proche.
-  * Si sofa est faux, alors c'est le code SO qui sera renvoyer
-  * \todo le code sofa est-il un nombre ou une chaine de chiffres ?
-  */
-  int getTypeSofa(int state_egn, bool coding, bool sofa=true);
-
 #endif //__GFF3Line_H__
