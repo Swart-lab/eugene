@@ -472,7 +472,7 @@ void SensorBlastX :: PostAnalyse(Prediction *pred, FILE *MINFO)
 	
             for (int j=0; j<pred->vGene[i]->nbFea(); j++)
             {
-                frame = pred->vGene[i]->vFea[j]->GetFrame();
+                frame = pred->vGene[i]->vFea[j]->frame;
                 start = pred->vGene[i]->vFea[j]->start;
                 end   = pred->vGene[i]->vFea[j]->end;
 

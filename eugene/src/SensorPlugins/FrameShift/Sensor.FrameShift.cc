@@ -88,7 +88,7 @@ void SensorFrameShift :: PostAnalyse(Prediction *pred, FILE *MINFO)
             {
                 if (pred->vGene[i]->vFea[j]->IsCodingExon())
                 {
-                    frame = pred->vGene[i]->vFea[j]->GetFrame();
+                    frame = pred->vGene[i]->vFea[j]->frame;
                     if (posFs != -1)  // Frameshift plot
                     {
                         PlotLine(posFs, posFs, frame, frameBack, 0.4, 0.4, 1);
