@@ -23,6 +23,7 @@
 
 #include "../../Sensor.h"
 #include "../../Hits.h"
+#include "../../State.h"
 
 /*************************************************************
  **                     SensorBlastX                        **

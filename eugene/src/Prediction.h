@@ -217,7 +217,5 @@ const enum DATA::ContentsType SensorContents[NbTracks] = {
   DATA::IntronUTRF, DATA::IntronUTRR
 };
 
-inline int PhaseAdapt(char p) {return State2Phase[(int)p];}
-
 
 #endif

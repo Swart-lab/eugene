@@ -375,8 +375,8 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
         {
 
             // EXON: phase is non 0 and different then penalize
-            for (i = DATA::ExonF1; i<= DATA::ExonR3; i++)       //exons
-                if (vPMPhase[iter-vPos.begin()] && (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i)))
+            for (i = DATA::ExonF1; i<= DATA::ExonR3; i++) //exons
+                if (vPMPhase[iter-vPos.begin()] && (vPMPhase[iter-vPos.begin()] != State(i).GetFrame()))
                     //	if(vPMatch[iter-vPos.begin()] < 0 ||
                     //	   ((vPMatch[iter-vPos.begin()] > 0) &&
                     //	    (vPMPhase[iter-vPos.begin()] != PhaseAdapt(i))))
@@ -401,7 +401,7 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
     {
         // EXON: phase is non 0 and different then penalize
         for (i = DATA::ExonF1; i<= DATA::ExonR3; i++)       //exons
-            if (vPMPhase[index] && (vPMPhase[index] != PhaseAdapt(i)))
+            if (vPMPhase[index] && (vPMPhase[index] != State(i).GetFrame()))
                 //if(vPMatch[index] < 0 ||
                 //	 ((vPMatch[index] > 0) && (vPMPhase[index] != PhaseAdapt(i))))
                 d->contents[i] += -fabs(vPMatch[index]);
