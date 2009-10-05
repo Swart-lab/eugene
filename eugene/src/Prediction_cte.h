@@ -119,14 +119,7 @@ enum Frame
     FrameIntronF =  4, FrameIntronR = -4, FrameIG =  0
 };
 
-enum Phase
-{
-    PhaseIG       =  0,
-    Phase1F       =  1, Phase2F       =  2, Phase3F       =  3,
-    Phase1R       = -1, Phase2R       = -2, Phase3R       = -3,
-    PhaseIntron1F =  4, PhaseIntron2F =  5, PhaseIntron3F =  6,
-    PhaseIntron1R = -4, PhaseIntron2R = -5, PhaseIntron3R = -6
-};
+
 
 // 0 = interG, 1,2,3 = coding phase. 4 = intron. sign = strandness
 const short int State2Frame[NbTracks] =
@@ -148,28 +141,6 @@ const short int State2Frame[NbTracks] =
     FrameIG, FrameIG,
     FrameIntronF, FrameIntronR,
     FrameIntronF, FrameIntronR
-};
-
-// same with intron phase
-const short int State2Phase[NbTracks] =
-{
-    Phase1F, Phase2F, Phase3F,
-    Phase1R, Phase2R, Phase3R,
-    Phase1F, Phase2F, Phase3F,
-    Phase1R, Phase2R, Phase3R,
-    Phase1F, Phase2F, Phase3F,
-    Phase1R, Phase2R, Phase3R,
-    Phase1F, Phase2F, Phase3F,
-    Phase1R, Phase2R, Phase3R,
-    PhaseIntron1F, PhaseIntron2F, PhaseIntron3F,
-    PhaseIntron1R, PhaseIntron2R, PhaseIntron3R,
-    PhaseIntron2F, PhaseIntron3F, PhaseIntron3F,
-    PhaseIntron3R, PhaseIntron3R, PhaseIntron2R,
-    PhaseIG,
-    PhaseIG, PhaseIG,
-    PhaseIG, PhaseIG,
-    PhaseIntron1F, PhaseIntron1R,
-    PhaseIntron1F, PhaseIntron1R
 };
 
 #endif  //__PREDICTION_CTE_H__
