@@ -25,13 +25,13 @@ AM_CFLAGS =
 
 bin_PROGRAMS = eugene
 
-eugene_SOURCES = EuGene.cc DAG.cc DAG.h Hits.cc Hits.h DNASeq.cc DNASeq.h \
-	System.cc System.h Prediction.cc Prediction.h BackP.cc BackP.h Sensor.cc Sensor.h \
-	Dll.cc Dll.h MSensor.cc MSensor.h Param.cc Param.h PenaltyDist.cc \
-	PenaltyDist.h SensorIF.h Const.h AltEst.cc AltEst.h Gff3Line.cc Gff3Line.h \
-	Attributes.cc Attributes.h Gap.cc Gap.h GeneFeature.cc GeneFeature.h \
-	GeneFeatureSet.cc GeneFeatureSet.h getopt.h Locus.cc Locus.h Prediction_cte.h \
-	SoTerms.cc SoTerms.h Target.cc Target.h Range.cc Range.h
+eugene_SOURCES = AltEst.cc AltEst.h Attributes.cc Attributes.h BackP.cc BackP.h \
+	Const.h DAG.cc DAG.h DNASeq.cc DNASeq.h Dll.cc Dll.h EuGene.cc Gap.cc Gap.h \
+	GeneFeature.cc GeneFeature.h GeneFeatureSet.cc GeneFeatureSet.h Gff3Line.cc Gff3Line.h \
+	Hits.cc Hits.h Locus.cc Locus.h MSensor.cc MSensor.h Param.cc Param.h \
+	PenaltyDist.cc PenaltyDist.h Prediction.cc Prediction.h Prediction_cte.h Range.cc \
+	Range.h Sensor.cc Sensor.h SensorIF.h State.h State.cc SoTerms.cc SoTerms.h System.cc \
+	System.h Target.cc Target.h getopt.h
 
 eugene_LDADD = Parametrization/libParametrization.a  GDIF/libGDIF.a -ldl
 
