@@ -176,14 +176,53 @@ extern Parameters PAR;
 SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
-  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
-  char exonRead[20], intronRead[20], cdsRead[20];
   // all types are possible.
   type = Type_Any;
 
-  fileExt   = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
+// Inilialize the inline parameters
+  char exonRead[20], intronRead[20], cdsRead[20];
+  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
+  strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
+  strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
+  strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
+  strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
+  strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
+  strcpy(accRead,PAR.getC("AnnotaStruct.Acc*",         GetNumber()));
+  strcpy(donRead,PAR.getC("AnnotaStruct.Don*",         GetNumber()));
+  strcpy(tStartRead,PAR.getC("AnnotaStruct.TrStart*",  GetNumber()));
+  strcpy(tStopRead,PAR.getC("AnnotaStruct.TrStop*",    GetNumber()));
+
+  if (exonRead[0] != 'i') exonInline = 0;
+  else	exonInline = 1;
+
+  if (intronRead[0] != 'i') intronInline = 0;
+  else intronInline = 1;
+
+  if (cdsRead[0] != 'i') cdsInline = 0;
+  else cdsInline = 1;
+
+  if (startRead[0] != 'i') startInline = 0;
+  else startInline= 1;
+  
+  if (stopRead[0] != 'i') stopInline = 0;	
+  else stopInline = 1;
+  
+  if (accRead[0] != 'i') accInline = 0;
+  else accInline = 1;
+  
+  if (donRead[0] != 'i') donInline=0;
+  else donInline= 1;
+  
+  if (tStartRead[0] != 'i') tStartInline = 0;
+  else tStartInline = 1;
+
+  if (tStopRead[0] != 'i') tStopInline = 0;
+  else tStopInline = 1;
+
+
+  fileExt       = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
   transFeatName = to_string(PAR.getC("AnnotaStruct.TranscriptFeature", GetNumber()));
-  inputFormat_ = to_string(PAR.getC("AnnotaStruct.format", GetNumber(),1));
+  inputFormat_  = to_string(PAR.getC("AnnotaStruct.format", GetNumber(),1));
   
   fprintf(stderr, "Reading %s file....", fileExt);
   fflush(stderr);
@@ -192,7 +231,6 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   strcat(tempname, fileExt);
   if ( inputFormat_ == "GFF3" )
   {
-    
     strcat(tempname,".gff3");
     GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
     ReadAnnotaStructGff3(*geneFeatureSet,  X->SeqLen);
@@ -315,36 +353,14 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
   strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
 
-  if (exonRead[0] != 'i')
-  {
-  	exonPAR   = atof(exonRead);
-	exonInline=0;
-  }
-  else
-  {
-	exonPAR   = 0;
-	exonInline= 1;
-  }
-  if (intronRead[0] != 'i')
-  {
-  	intronPAR = atof(intronRead);
-	intronInline = 0;
-  }	
-  else
-  {
-	intronPAR = 0;
-  	intronInline = 1;
-  }
-  if (cdsRead[0] != 'i')
-  {
-	cdsPAR = atof(cdsRead);
-     	cdsInline = 0;
-  }
-  else
-  {
-	cdsPAR   = 0;
-	cdsInline = 1;
-  }
+  if (exonRead[0] != 'i') exonPAR   = atof(exonRead);
+  else exonPAR = 0;
+
+  if (intronRead[0] != 'i') intronPAR = atof(intronRead);
+  else intronPAR = 0;
+
+  if (cdsRead[0] != 'i') cdsPAR = atof(cdsRead);
+  else cdsPAR = 0;
 
   strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
   strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
@@ -358,62 +374,14 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   strcpy(accPAR,    PAR.getC("AnnotaStruct.AccType",     GetNumber()));
   strcpy(donPAR,    PAR.getC("AnnotaStruct.DonType",     GetNumber()));
   strcpy(tStartPAR, PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
-  strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
-  if (startRead[0] != 'i')
-  {
- 	strcat(startPAR,  startRead);
- 	startInline=0;
-  }
-  else
-  {
-	startInline= 1;
-  }
-  if (stopRead[0] != 'i')
-  {
-  	strcat(stopPAR,  stopRead);
-	stopInline = 0;
-  }	
-  else
-  {
-  	stopInline = 1;
-  }
-  if (accRead[0] != 'i')
-  {
-	strcat(accPAR, accRead);
-     	accInline = 0;
-  }
-  else
-  {
-	accInline = 1;
-  }
-  if (donRead[0] != 'i')
-  {
- 	strcat(donPAR, donRead);
- 	donInline=0;
-  }
-  else
-  {
-	donInline= 1;
-  }
-  if (tStartRead[0] != 'i')
-  {
-  	strcat(tStartPAR, tStartRead);
-	tStartInline = 0;
-  }	
-  else
-  {
-  	tStartInline = 1;
-  }
-  if (tStopRead[0] != 'i')
-  {
-	strcat(tStopPAR,  tStopRead);
-     	tStopInline = 0;
-  }
-  else
-  {
-	tStopInline = 1;
-  }
-  
+  strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));	
+
+  if (startRead[0]  != 'i') strcat(startPAR,  startRead);
+  if (stopRead[0]   != 'i') strcat(stopPAR,   stopRead);
+  if (accRead[0]    != 'i') strcat(accPAR,    accRead);
+  if (donRead[0]    != 'i') strcat(donPAR,    donRead);
+  if (tStartRead[0] != 'i') strcat(tStartPAR, tStartRead);
+  if (tStopRead[0]  != 'i') strcat(tStopPAR,  tStopRead);
 
   PosSigGiveInfo = -1;
   PosConGiveInfo = -1;
