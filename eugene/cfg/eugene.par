@@ -295,8 +295,8 @@ NStretch.maxLengthWithoutPenalty      5000
 ##### Sensors AnnotaStruct #####
 AnnotaStruct.FileExtension      gff
 AnnotaStruct.TranscriptFeature  transcript
-AnnotaStruct.Start*             0.1
-AnnotaStruct.StartType          p      # p: probability  s: score   i: inline score
+AnnotaStruct.Start*             0.1    # i: inline score (GFF3 format only)
+AnnotaStruct.StartType          p      # p: probability  s: score  
 AnnotaStruct.Stop* 0.2
 AnnotaStruct.StopType p
 AnnotaStruct.Acc* 0.3
