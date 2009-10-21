@@ -827,13 +827,6 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     else if ( idSo == "SO:0000188" && onthology_term == "SO:0000191") //intron not UTR !
       vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge, (intronInline ? new float(scF) : &intronPAR)));
 
-    else if ( idSo == "SO:0000147" ) //E.Any 
-    {
-      PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
-      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, (exonInline ? new float(scF) : &exonPAR)));
-      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
-    }
-
     else if ( idSo == "SO:0000188" ) // "Intron.Any"
     {
       vSig.push_back(new Signals (startS-1, DATA::Don, edge, GetScoreC(DATA::Don,scF, donInline)));
@@ -841,6 +834,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge, (intronInline ? new float(scF) : &intronPAR)));
       vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge, (intronInline ? new float(scF) : &intronPAR)));
     }
+
     else if ( idSo == "SO:0000147" && onthology_term == "SO:0000200") //"E.First"
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
@@ -854,7 +848,6 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
       vSig.push_back(new Signals (endS,  DATA::tStop, edge, GetScoreC(DATA::tStop,scF, tStopInline)));
     }
-
     else if (idSo == "SO:0000147" && onthology_term.find("SO:0000202")!= string::npos && onthology_term.find("SO:0000200")!= string::npos) 
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
@@ -862,6 +855,12 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
       vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
       vSig.push_back(new Signals(endS,     DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, tStopInline)));
+    }
+    else if ( idSo == "SO:0000147" ) //E.Any 
+    {
+      PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
+      vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, (exonInline ? new float(scF) : &exonPAR)));
+      vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
     }
 
     else if ((*it)->getType() != transFeatName)
