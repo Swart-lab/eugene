@@ -40,7 +40,7 @@ Here is an example of BlastX parameters definition.
 \begin{Verbatim}[fontsize=\small]
 BlastX.postProcess 1     # analyse prediction accorded to BlastX information
 BlastX.levels      012      # use levels 0, 1, and 2
-BlastX.levels      0        # make gap active on level 0
+BlastX.activegaps      0    # make gap active on level 0
 BlastX.level0*     0.2      # confidence in the level 0
 BlastX.level1*     0.0      # confidence in the level 1
 BlastX.level2*     0.0      # confidence in the level 2
@@ -175,18 +175,18 @@ Let $l^S$ be the length of the similarity in nucleotide.
 
 \underline{Valuation for intron position}\\
 
-Intron is only possible if:
+An intron is consider as more likely when there is sufficient gap between 2 HSP 
+on the genomic sequence and the corresponding positions on the same 
+protein are close together:
 \begin{itemize}
-\item the similarities before or after in the same file are on the
-  same protein, strand and near. That is have the same protein name,
-  the same sense and have a maximum distance or overlap of
-  \texttt{BlastX.blastxM*} amino acids.
-\item the distance in nucleotide on the sequence is upper than
-  \texttt{BlastX.minIn}.
+\item on the protein side,  two HSP of the same protein appear on the same strand
+  with a  maximum gap or overlap bteween the HSPs of \texttt{BlastX.blastxM*} amino acids.
+\item on the genomic side, the length of the gap (in nucleotide) between 
+the two HSPs is larger than \texttt{BlastX.minIn}.
 \end{itemize}
-Considering a similarity S with 2 similarities before and after in
-accordance with these conditions, an intron is incitated on a small
-length of \texttt{BlastX.minIn}/2 on both sides of S. 
+Considering a gap S between 2 HSPs in these conditions, 
+intron predictions are favored on a small region of
+length \texttt{BlastX.minIn}/2 on both sides of the gap (inside the gap). 
 \begin{itemize}
 \item from $i = b^S -$ BlastX.minIn$/2$ to $i = b^S$ 
 \item from $i = e^S$ to $i = e^S +$ BlastX.minIn$/2$ 
@@ -198,10 +198,10 @@ length of \texttt{BlastX.minIn}/2 on both sides of S.
   \end{itemize}
 \end{itemize}
 
-If the \texttt{activegaps} parameter is active for a level, then all the bases
-in the gap and not mentionned above are also penalized but only for
-intergenic, UTR and UTR introns states. The penality used is the minimum
-of the weights used for the left and right HSP.
+If furthermore, the \texttt{activegaps} parameter is set for a level, then for all the bases
+in the gap S which have not already been considered in the step above, the
+intergenic, UTR and UTR introns states are also penalized. The penality used is the minimum
+of the weights used for the left and right HSP around the gap S.
 
 A-2/ Combining extracted information\\
 
