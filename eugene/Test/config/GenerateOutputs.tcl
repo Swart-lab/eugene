@@ -70,23 +70,23 @@ foreach sensor $AllSensorsList {
 
    # Get stderr and stdout
     if {$sensor == "Est"} {
-	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
 		    $OPTIONS(Sensor) -D Sensor.${sensor}.use=2 -D Sensor.NG2.use=1 \
 		    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std } 
     } else {
 	if {$sensor == "Homology"} {
-	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+	    catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
 			$OPTIONS(Sensor) -D Sensor.${sensor}.use=2 \
 			$SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
 	} else {
 	    if {$sensor == "Tester"} {
-		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
 			    $OPTIONS(Sensor) -D Sensor.${sensor}.use=1 \
 			    $SEQ_DIR/exSeqHom.fasta 2> tmp%stderr > tmp%stdout }
 		catch {exec cat tmp%stderr tmp%stdout > tmp%std} 
 		catch {exec rm  tmp%stderr tmp%stdout} 
 	    } else {
-		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR \
+		catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR \
 			    $OPTIONS(Sensor) -D Sensor.${sensor}.use=1 \
 			    $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std }
 	    }
