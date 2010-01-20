@@ -40,11 +40,9 @@ if {$action=="Test"} {
 set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
 		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
 		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
-		    Tester Transcript NcRNA}
+		    Tester Transcript }
 
 ############################################################################
-# At the moment, NcRNA  is not in this list because the gff3 format for this 
-# sensor is already tested in unit tests
 set AllGff3Sensors {AnnotaStruct BlastX Est GFF GSplicer NG2 NStart \
 		    PepSignal Repeat SMachine SPred Homology}
 ############################################################################
@@ -53,7 +51,7 @@ set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA}
+set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest }
 
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
@@ -123,12 +121,7 @@ set IMG(SeqAlt) {At5g18830.fasta.genomicAJ011613.000.png}
 set FILE_REF(SeqAlt) Output_SeqAlt
 set OPTIONS(SeqAlt) "-po -g -a"
 
-##################### SeqNcRNA test variables ###############################
-set SensorsList(SeqNcRNA) {MarkovIMM MarkovConst NStart Transcript NcRNA EuStop IfElse}
-set SEQ(SeqNcRNA) {seq14ac002535g4g5.tfa}
-set IMG(SeqNcRNA) {seq14ac002535g4g5.000.png}
-set FILE_REF(SeqNcRNA) Output_SeqNcRNA
-set OPTIONS(SeqNcRNA) "-po -g -a"
+
 ######################################################################################### Parameters optimization ##############################
 set FILE_REF(Optimization) Output_Optimization
 
