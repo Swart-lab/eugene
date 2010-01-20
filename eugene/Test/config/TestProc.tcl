@@ -105,15 +105,13 @@ set NewValue1(EuGene.IntronDist)	intron.dist
 set NewValue1(EuGene.InterGDist)	intergenic.dist
 set NewValue1(EuGene.5PrimeDist)	utr.dist
 set NewValue1(EuGene.3PrimeDist)	utr.dist
-set NewValue1(EuGene.RnaDist)	    rna.dist
 ##### Priors #####
 set NewValue1(EuGene.SplicedStopPen)    1e999.0
-set NewValue1(EuGene.ExonPrior)	        0.18	
+set NewValue1(EuGene.ExonPrior)	        0.33	
 set NewValue1(EuGene.IntronPrior)	0.17	
 set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
-set NewValue1(EuGene.RnaPrior)	0.15
 ##### Output control ######
 set NewValue1(Output.MinCDSLen)		60
 set NewValue1(Output.truncate)		5
@@ -131,7 +129,6 @@ set NewValue1(Output.offset)		0
 set NewValue1(Output.normopt)		1
 set NewValue1(Output.Prefix)		./
 set NewValue1(Output.webdir)            LOCAL
-set NewValue1(Output.intron)		0
 #################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
@@ -247,6 +244,7 @@ set NewValue1(Est.StrongDonor\[1\])	0.95
 set NewValue1(Est.MinDangling\[1\])  10
 set NewValue1(Est.MaxIntron\[1\])    15000
 set NewValue1(Est.FileExtension\[1\]) .est2
+
 ##### Homology Sensor parameters #####
 set NewValue1(Homology.TblastxP*\[0\]) 	0
 set NewValue1(Homology.TblastxB*\[0\]) 	0.0595
@@ -285,12 +283,6 @@ set NewValue1(MarkovProt.order)        2
 set NewValue1(Repeat.UTRPenalty*)	0.0
 set NewValue1(Repeat.IntronPenalty*)	0.1
 set NewValue1(Repeat.ExonPenalty*)	1.0
-#### NcRNA sensor parameters ####
-set NewValue1(NcRNA.FileExtension) ncrna
-set NewValue1(NcRNA.NcpRna*)   1
-set NewValue1(NcRNA.TStartNcp*)  1
-set NewValue1(NcRNA.TStopNcp*)  1
-set NewValue1(NcRNA.Format) GFF3
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################
 #################################################################
@@ -370,8 +362,6 @@ set NewValue1(Sensor.MarkovConst.use)	0
 set NewValue1(Sensor.MarkovIMM.use)	0
 set NewValue1(Sensor.MarkovProt.use)	0
 set NewValue1(Sensor.Repeat.use)	0
-set NewValue1(Sensor.NStretch.use) 0
-set NewValue1(Sensor.NcRNA.use) 0
 # SIGNAL/CONTENT SENSORS
 set NewValue1(Sensor.AnnotaStruct.use)  0
 set NewValue1(Sensor.IfElse.use)	0
@@ -404,8 +394,6 @@ set NewValue1(Sensor.MarkovConst$space) 1
 set NewValue1(Sensor.MarkovIMM$space) 	1
 set NewValue1(Sensor.MarkovProt$space)	1
 set NewValue1(Sensor.Repeat$space)	1
-set NewValue1(Sensor.NStretch$space)   1
-set NewValue1(Sensor.NcRNA$space)  1
 # SIGNAL/CONTENT SENSORS
 set NewValue1(Sensor.AnnotaStruct$space) 1
 set NewValue1(Sensor.IfElse$space)	1
