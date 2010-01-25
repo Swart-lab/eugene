@@ -1,6 +1,6 @@
 format 58
 "Bouml"
-  revision 1
+  revision 2
   modified_by 2 "sallet"
 
 
@@ -36,5 +36,7 @@ format 58
 
   mark_for_import
   
+  ncouples 1
+  key "check-out-cmd" value "specify the command containing %file and %dir or %dironly"
   package_ref 128002 // src
 end

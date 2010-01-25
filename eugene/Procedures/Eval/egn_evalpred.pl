@@ -731,7 +731,7 @@ while(my $lCOORD = <COORD>)
 	    # Si format ou fichier mauvais:
 	    if (!( ($type eq "Init")||($type eq "Intr")||($type eq "Term")||($type eq "Sngl")))
 	    {
-		die " Pb(1) format fichier predictions $ARGV[1] ligne $nlPRED\n";
+		die " Pb(1) format fichier predictions $ARGV[1] ligne $nlPRED type $type\n";
 	    }
 
 	    # Stockage des exons predits
@@ -754,7 +754,7 @@ while(my $lCOORD = <COORD>)
 	  }
 	}
 
-	elsif($lPRED !~ /\s+Utr\d\s/) 
+	elsif($lPRED !~ /\s+Utr\d\s/ && $lPRED !~ /\sncRNA\s/) 
 	{
 	    die "Pb(2) format fichier predictions $ARGV[1] ligne $nlPRED\n";
 	}

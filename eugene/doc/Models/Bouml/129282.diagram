@@ -84,7 +84,7 @@ relationcanvas 128770 relation_ref 136706 // <generalisation>
 end
 relationcanvas 129026 relation_ref 130562 // <unidirectional association>
   decenter_begin 136
-  decenter_end 197
+  decenter_end 196
   from ref 128898 z 1999 to point 113 958
   line 129282 z 1999 to point 146 959
   line 131202 z 1999 to ref 128898
@@ -92,7 +92,7 @@ relationcanvas 129026 relation_ref 130562 // <unidirectional association>
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 129538 relation_ref 144002 // <unidirectional association>
-  decenter_begin 210
+  decenter_begin 209
   decenter_end 679
   from ref 128642 z 2003 to ref 128898
   role_a_pos 432 544 3000 no_role_b

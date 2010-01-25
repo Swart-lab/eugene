@@ -55,7 +55,7 @@ classcanvas 128898 class_ref 130434 // Locus
     operation_ref 150018 // getStrand
     operation_ref 150146 // getString
     operation_ref 150274 // operator <<
-  xyz 372 500 3005
+  xyz 367 560 3005
 end
 classcanvas 129154 class_ref 130562 // GeneFeatureSet
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -96,14 +96,14 @@ classcanvas 129922 class_ref 131202 // Gff3Line
     operation_ref 147074 // setStrand
     operation_ref 147202 // setPhase
     operation_ref 147330 // setAttribute
-  xyz 77 840 2000
+  xyz 59 909 2000
 end
 classcanvas 130050 class_ref 131074 // Sofa
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
   hidden_operations
     operation_ref 144130 // Sofa
     operation_ref 144258 // ~Sofa
-  xyz 364 863 2000
+  xyz 378 944 2000
 end
 classcanvas 130946 class_ref 128898 // Target
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -126,7 +126,7 @@ classcanvas 130946 class_ref 128898 // Target
     operation_ref 169602 // getScoreHit
     operation_ref 169858 // getString
     operation_ref 169986 // operator <<
-  xyz 16 411 3015
+  xyz 29 468 3015
 end
 classcanvas 131458 class_ref 131330 // Attribute
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -134,7 +134,7 @@ classcanvas 131458 class_ref 131330 // Attribute
     operation_ref 144642 // Attribute
     operation_ref 144770 // ~Attribute
     operation_ref 145026 // str
-  xyz 425 981 2005
+  xyz 428 1061 2005
 end
 classcanvas 132226 class_ref 128386 // Prediction
   draw_all_relations default hide_attributes default hide_operations default show_members_full_definition default show_members_visibility default show_members_stereotype default show_members_multiplicity default show_members_initialization default member_max_width 0 show_parameter_dir default show_parameter_name default package_name_in_tab default class_drawing_mode default drawing_language default show_context_mode default auto_label_position default show_infonote default shadow default show_stereotype_properties default
@@ -173,7 +173,7 @@ classcanvas 132226 class_ref 128386 // Prediction
     operation_ref 161538 // IsDon
     operation_ref 161666 // IsAcc
     operation_ref 161794 // IsState
-  xyz 29 654 2000
+  xyz 47 711 2000
 end
 relationcanvas 128770 relation_ref 129794 // <unidirectional association>
   decenter_end 772
@@ -184,7 +184,7 @@ end
 relationcanvas 129026 relation_ref 129666 // <unidirectional association>
   decenter_end 513
   from ref 128642 z 1999 to ref 128898
-  role_a_pos 438 475 3000 no_role_b
+  role_a_pos 437 530 3000 no_role_b
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 129282 relation_ref 129922 // <unidirectional association>
@@ -196,7 +196,7 @@ relationcanvas 129282 relation_ref 129922 // <unidirectional association>
 end
 relationcanvas 129410 relation_ref 130050 // <unidirectional association>
   decenter_begin 112
-  decenter_end 144
+  decenter_end 143
   from ref 129154 z 1999 stereotype "<<vector>>" xyz 322 181 3000 to ref 128642
   role_a_pos 374 197 3000 no_role_b
   no_multiplicity_a no_multiplicity_b
@@ -210,12 +210,12 @@ end
 relationcanvas 131074 relation_ref 132226 // <unidirectional association>
   decenter_begin 717
   from ref 130946 z 1999 to ref 128898
-  role_a_pos 315 523 3000 no_role_b
+  role_a_pos 307 594 3000 no_role_b
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 131202 relation_ref 128258 // <unidirectional association>
   from ref 128514 z 1999 to ref 130946
-  role_a_pos 145 386 3000 no_role_b
+  role_a_pos 156 438 3000 no_role_b
   no_multiplicity_a no_multiplicity_b
 end
 line 131586 ---+ decenter_begin 625 decenter_end 574
@@ -224,7 +224,7 @@ relationcanvas 131714 relation_ref 130306 // <unidirectional association>
   decenter_begin 465
   decenter_end 140
   from ref 129922 z 1999 to ref 131458
-  role_a_pos 381 966 3000 no_role_b
+  role_a_pos 383 1042 3000 no_role_b
   no_multiplicity_a no_multiplicity_b
 end
 relationcanvas 132354 relation_ref 144386 // <association>

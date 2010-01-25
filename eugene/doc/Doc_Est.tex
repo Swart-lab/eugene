@@ -13,6 +13,8 @@ incompatible with the alignment. The spliced alignments must be
 performed beforehand using a spliced aligner such as \texttt{sim4} or
 \texttt{spidey}. The output of these aligners must be converted in the
 adequate format (see below). 
+To take into account information from ncRNA hits too, set 
+\texttt{Est.mRNAOnly} to 0.
 
 The sensor is activated by either:
 \begin{itemize}
@@ -57,6 +59,12 @@ The behavior of the plugin is controlled by the following parameters:
   gap (representing an intron) in a spliced alignment. If the length
   exceeds this maximum, then the corresponding gap is ignored as
   a probable bad spliced alignment or chimeric data.
+\item \texttt{Est.mRNAOnly} In the default mode (1), the plugin reads 
+transcribed sequences which are mRNA fragments or complete cDNA, 
+so the plugin always penalizes ncRNA states. Set this parameter to 0 
+to read non coding RNA fragments too: in this case, only ncRNA tracks 
+which are incompatible with the alignment will be penalized.
+
 \end{itemize}
 
 The sensor is also capable of a postprocessing analyse described below
@@ -81,6 +89,7 @@ Est.StrongDonor[0]       0.95
 Est.MinDangling[0]       10
 Est.MaxIntron[0]         15000
 Est.MaxInternalIntron[0] 15000
+Est.mRNAOnly[0]          1
 Est.FileExtension[0]     .est
 Sensor.Est.use           1      # Use EST sensor
 Sensor.Est               20     # Sensor priority: the highest one

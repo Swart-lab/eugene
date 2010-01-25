@@ -20,6 +20,7 @@ The high-level entries allow to take into account information on:
   translation stop and splice sites) that may come from other gene
   predictors that may predict CDS (either \emph{ab initio} or homology based
   predictors).
+\item \textbf{ncRNA} (involving non coding protein RNA region, ncRNA transcription start and ncRNA transcription stop).
 \end{itemize}
 The high-level entries are actually automatically expanded in
 elementary (low-level) information as the plugin reads the data. The
@@ -35,34 +36,41 @@ The low-level entries allow to directly modify every edge of the
 underlying prediction graph of \EuGene\ as the (now obsolete)
 \texttt{User} plugin allowed. The weights of all signals edges
 (transcription start and stop, translation start and stop, splice
-sites, insertions and deletions) and contents edges (exons, introns,
-UTR, UTR introns and intergenic regions) can be directly modified
+sites, insertions and deletions, ncRNA transcription start and stop) 
+and contents edges (exons, introns,
+UTR, UTR introns, intergenic regions and ncRNA) can be directly modified
 using this plugin.
 
-The sensor is activated by using the value 1 for the parameter
+To activate the sensor, put the number of AnnotaStruct instances you want to create to the parameter
 \texttt{Sensor.AnnotaStruct.use} in the parameter file.
 
 Here is an example of AnnotaStruct parameters definition :
 \begin{Verbatim}[fontsize=\small]
-AnnotaStruct.FileExtension    gff
-AnnotaStruct.TranscriptFeature  mRNA
-AnnotaStruct.Exon*            1
-AnnotaStruct.Intron*          2
-AnnotaStruct.CDS*             3
-AnnotaStruct.StartType        p 
-AnnotaStruct.Start*           0.1
-AnnotaStruct.StopType         p 
-AnnotaStruct.Stop*            0.1
-AnnotaStruct.AccType          p 
-AnnotaStruct.Acc*             0.1
-AnnotaStruct.DonType          p 
-AnnotaStruct.Don*             0.1
-AnnotaStruct.TrStartType      p 
-AnnotaStruct.TrStart*         0.1
-AnnotaStruct.TrStopType       p 
-AnnotaStruct.TrStop*          0.1
-Sensor.AnnotaStruct.use       1         # Use AnnotaStruct sensor
-Sensor.AnnotaStruct           1         # Sensor priority
+AnnotaStruct.FileExtension[0]    gff
+AnnotaStruct.TranscriptFeature[0]  mRNA
+AnnotaStruct.Exon*[0]            1
+AnnotaStruct.Intron*[0]          2
+AnnotaStruct.CDS*[0]             3
+AnnotaStruct.ncpRNA*[0]          2
+AnnotaStruct.StartType[0]        p 
+AnnotaStruct.Start*[0]           0.1
+AnnotaStruct.StopType[0]         p 
+AnnotaStruct.Stop*[0]            0.1
+AnnotaStruct.AccType[0]          p 
+AnnotaStruct.Acc*[0]             0.1
+AnnotaStruct.DonType[0]          p 
+AnnotaStruct.Don*[0]             0.1
+AnnotaStruct.TrStartType[0]      p 
+AnnotaStruct.TrStart*[0]         0.1
+AnnotaStruct.TrStopType[0]       p 
+AnnotaStruct.TrStop*[0]          0.1
+AnnotaStruct.TrStartNcpType[0]   p
+AnnotaStruct.TrStartNcp*[0]      0.1
+AnnotaStruct.TrStopNcpType[0]    p
+AnnotaStruct.TrStopNcp*[0]       0.1
+
+Sensor.AnnotaStruct.use       1         # Use one AnnotaStruct sensor instance
+Sensor.AnnotaStruct          1         # Sensor priority
 \end{Verbatim}
 
 \paragraph{Native GGF-like input files format}
@@ -87,6 +95,8 @@ signals, the following features are recognized:
 \item \texttt{don}: for donor splice sites.
 \item \texttt{ins}: for insertion (frameshift).
 \item \texttt{del}: for deletion (frameshift).
+\item \texttt{trStartNcp}: for ncRNA transcription starts.
+\item \texttt{trStopNcp}: for ncRNA transcription stops.
 \end{itemize}
 In this case, the start and the strand field are used to indicate the
 signal position. The score field is used to indicate the weight that
@@ -114,10 +124,12 @@ For contents edges, the following features are recognized:
 \item \texttt{utr3}: for 3' UTR.
 \item \texttt{utr}: for both 5' or 3' UTR.
 \item \texttt{intronutr}: for UTR introns.
+\item \texttt{ncrna}: for non coding protein RNA.
 \end{itemize}
 The start and end fields together with the strand field delimit the
 region considered. All corresponding contents edges will be modified
 by the weight indicated in the score field.
+
 
 
 High-level information may either be used to express knowledge about
@@ -179,7 +191,7 @@ are recognized:
 \item \texttt{E.First}: the first biological exon (containing UTR and
   possibly part of CDS too). A transcription start signal is weighted
   according to the \texttt{AnnotaStruct.TrStart*} parameter value. The
-  UTR5 and coding exon contents edge are reweighted according to the
+  UTR5 and coding exon contents edges are reweighted according to the
   \texttt{AnnotaStruct.Exon*} parameter value.
 \item \texttt{E.Last}: the last biological exon. A transcription stop
   signal is weighted according to the \texttt{Annota\-Struct.TrStop*}
@@ -189,9 +201,16 @@ are recognized:
 \item \texttt{E.Extreme}: used for a biological exon on the extremity
   (either first or last).  A transcription start and stop are
   generated at each respective extremities according to the
-  \texttt{AnnotaStruct.TrStart*} and \texttt{AnnotaStruct.TrStop*}
+  \texttt{AnnotaStruct.trStart*} and \texttt{AnnotaStruct.trStop*}
   parameter values. The UTR5, UTR3 and coding exon contents edges are
   reweighted according to the \texttt{AnnotaStruct.Exon*} parameter
+  value.
+\item \texttt{ncRNA}: a non coding protein RNA (at the moment, EuGene doesn't 
+predicted ncRNA intron). A non coding protein transcription start and stop are
+  generated at each respective extremities according to the
+  \texttt{AnnotaStruct.trStartNcp*} and \texttt{AnnotaStruct.trStopNcp*}
+  parameter values. The ncRNA content edge is
+  reweighted according to the \texttt{AnnotaStruct.ncpRNA*} parameter
   value.
 \item \texttt{Intron.Any}: ?
 \end{itemize}
@@ -219,6 +238,7 @@ always be interpreted as score.
 AnnotaStruct.Exon*            i
 AnnotaStruct.Intron*          i
 AnnotaStruct.CDS*             i
+nnotaStruct.ncpRNA*           i
 AnnotaStruct.StartType        p 
 AnnotaStruct.Start*           i
 AnnotaStruct.StopType         p 
@@ -231,15 +251,19 @@ AnnotaStruct.TrStartType      p
 AnnotaStruct.TrStart*         i
 AnnotaStruct.TrStopType       p 
 AnnotaStruct.TrStop*          i
+AnnotaStruct.TrStartNcpType   p
+AnnotaStruct.TrStartNcp*      i
+AnnotaStruct.TrStopNcpType    p  
+AnnotaStruct.TrStopNcp*       i
 \end{Verbatim}
 
 Here is the correspondance beetween GFF native AnnotaStruct features
 and gff3 features. A direct translation between the two formats is not
 always possible (for example, low-level content information cannot be
-given directly in GFF3, but  can be indirectly achieved by setting
+given directly in GFF3, but can be indirectly achieved by setting
 signal at zero, and using the transcribed sequence feature).
 
-Each GFF feature is translated in a GFF3 feature and may
+Each GFF feature is translated in a GFF3 feature and some may
 require an additional ontology term given below.
 
 Low-level information:
@@ -252,6 +276,7 @@ Low-level information:
 \item \texttt{don}: 	SO:0000163 (donor)
 \item \texttt{ins}: 	SO:0000366 (insertion\_site)
 \item \texttt{del}: 	SO:0000687 (deletion\_junction)
+\item \texttt{trStartNcp} and \texttt{trStopNcp} : no corresponding feature
 \end{itemize}
 High-level information:
 
@@ -274,6 +299,9 @@ Transcribed region information
 \item \texttt{E.Last}: 		SO:0000147 (exon)	Ontology term :	SO:0000202 (three\_prime\_coding\_exon)
 \item \texttt{E.Extreme}: 	SO:0000147 (exon)	Ontology term :	SO:0000200,SO:0000202
 \item \texttt{Intron.Any}: 	SO:0000188 (intron)
+\item \texttt{ncRNA}: 	        SO:0000655 (ncRNA) or other SO terms derived from ncRNA, for instance SO:0000252 (rRNA) or SO:0000253 (tRNA). 
+See  \texttt{http://www.sequenceontology.org/wiki/index.php/} \texttt{Category:SO:0000655\_!\_ncRNA} for details.
+
 \end{itemize}
 Figure of Ontology terms
 
