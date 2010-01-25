@@ -17,6 +17,7 @@ using namespace std;
     id: SO:0000000
     name: Sequence_Ontology
     subset: SOFA
+    is_a: SO:... ! 
 
  */
 
@@ -24,9 +25,10 @@ using namespace std;
 class SoTerms
 {
   private:
-    map <string,string> idToName_;
-    map <string,string> nameToId_;
-    
+    map <string,string>  idToName_;
+    map <string,string>  nameToId_;
+    map <string, string> isA_; 
+
   public:
   
     // Constructors/Destructors
@@ -38,7 +40,9 @@ class SoTerms
     bool existsName (string name);
     int size();
     void Print ();
-    string getIdFromName (string name);
+    string getIdFromName(string name);
+    string getIsAFromId (string id);
+    bool   isANcRNA     (string id);
 
 };
 #endif // SOTERMS_H

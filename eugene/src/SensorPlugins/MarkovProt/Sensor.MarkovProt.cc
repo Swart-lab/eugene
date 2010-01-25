@@ -216,6 +216,8 @@ void SensorMarkovProt :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[DATA::UTR5R] += NonCodingR;
   d->contents[DATA::UTR3F] += NonCodingF;
   d->contents[DATA::UTR3R] += NonCodingR;
+  d->contents[DATA::RNAF] += NonCodingF;
+  d->contents[DATA::RNAR] += NonCodingF;
 
   delete peptid;
   delete codon;

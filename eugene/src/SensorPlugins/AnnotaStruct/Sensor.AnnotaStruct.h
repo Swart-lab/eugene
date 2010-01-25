@@ -20,44 +20,6 @@
 #include <algorithm>
 #include "../../Sensor.h"
 
-/*************************************************************
- **                       Signals Object                    **
- *************************************************************/
-class Signals
-{
- private:
-  
- public:
-  int   pos;
-  int   type;
-  int   edge;
-  char  *score;
-    
-  Signals  ();
-  Signals  (int, int, int, char*);
-  ~Signals ();
-  void PrintS ();
-  bool operator < (int i) { if (pos < i) return true; else return false; }
-};
-
-/*************************************************************
- **                      Contents Object                    **
- *************************************************************/
-class Contents
-{
- private:
-  
- public:
-  int    start;
-  int    end;
-  int    type;
-  float *score;
-    
-  Contents  ();
-  Contents  (int, int, int, float*);
-  ~Contents ();
-  void PrintC ();
-};
 
 /*************************************************************
  **                      SensorAnnotaStruct
@@ -73,10 +35,12 @@ class SensorAnnotaStruct : public Sensor
   string  transFeatName;
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
-  float exonPAR,      intronPAR,     cdsPAR;
-  int  exonInline,      intronInline,     cdsInline;
+  char tStartNcpPAR[20], tStopNcpPAR[20];
+  float exonPAR,      intronPAR,     cdsPAR, ncpRnaPAR;
+  int  exonInline,      intronInline,     cdsInline, ncpRnaInline;
   int  startInline,      stopInline,     accInline;
   int  donInline,      tStartInline,     tStopInline;
+  int  tStartNcpInline, tStopNcpInline;
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
   void FillOntologyTerm(GeneFeatureSet & geneFeatureSet);
   void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet, int len);

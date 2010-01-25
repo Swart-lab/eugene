@@ -68,6 +68,7 @@ class Feature
   bool      IsUTRIntron();
   bool      IsIntergenic();
   bool      IsTranscribedAndUnspliced();
+  bool      IsNcpRna();
   void      ComputePhase(int);
 };
 
@@ -92,6 +93,7 @@ class Gene
   int exLength;
   int geneNumber;
   bool isvariant; // true = is a splice variant
+  bool isNcpRna;   // true id it is a non protein coding rna
   int hasvariant; // has n splice variant (or is number n splice variant if is variant is true)
   std::vector <Feature*> vFea;
   
@@ -214,7 +216,8 @@ const enum DATA::ContentsType SensorContents[NbTracks] = {
   DATA::UTR5F, DATA::UTR3F, 
   DATA::UTR5R, DATA::UTR3R, 
   DATA::IntronUTRF, DATA::IntronUTRR, 
-  DATA::IntronUTRF, DATA::IntronUTRR
+  DATA::IntronUTRF, DATA::IntronUTRR,
+  DATA::RNAF, DATA::RNAR
 };
 
 

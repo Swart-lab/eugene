@@ -24,7 +24,8 @@ enum Tracks
     UTR5R     = 39, UTR3R      = 40,
     IntronU5F = 41, IntronU5R  = 42,
     IntronU3F = 43, IntronU3R  = 44,
-    NbTracks  = 45
+    RnaF      = 45, RnaR       = 46,
+    NbTracks  = 47
 };
 
 
@@ -48,7 +49,8 @@ const enum Tracks ReverseIt[NbTracks] =
     UTR5R,UTR3R,
     UTR5F, UTR3F,
     IntronU5R, IntronU5F,
-    IntronU3R, IntronU3F
+    IntronU3R, IntronU3F,
+    RnaR,      RnaF
 };
 
 const short int UnorientedTracks[1] = {InterGen};
@@ -62,7 +64,7 @@ const short int ForwardTracks[(NbTracks-1)/2] =
     IntronF1,IntronF2,IntronF3,
     IntronF2T,IntronF3TG,IntronF3TA,
     UTR5F,UTR3F,
-    IntronU5F,IntronU3F
+    IntronU5F,IntronU3F, RnaF
 };
 
 const short int ReverseTracks[(NbTracks-1)/2] =
@@ -74,7 +76,7 @@ const short int ReverseTracks[(NbTracks-1)/2] =
     IntronR1,IntronR2,IntronR3,
     IntronR3G,IntronR3A,IntronR2AG,
     UTR5R,UTR3R,
-    IntronU5R,IntronU3R
+    IntronU5R,IntronU3R, RnaR
 };
 
 // 0: untranscribed
@@ -86,7 +88,8 @@ enum Status
     UNTRANSCRIBED       = 0,
     SPLICED_TRANSCRIBED = 1,
     UNTRANSLATED        = 2,
-    TRANSLATED          = 3
+    TRANSLATED          = 3,
+    RNA                 = 4
 };
 
 
@@ -108,7 +111,8 @@ const short int State2Status[NbTracks] =
     UNTRANSLATED,UNTRANSLATED,
     UNTRANSLATED,UNTRANSLATED,
     SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
-    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED
+    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
+    RNA, RNA
 };
 
 
@@ -121,7 +125,8 @@ enum Frame
 
 
 
-// 0 = interG, 1,2,3 = coding phase. 4 = intron. sign = strandness
+// 0 = interG, 1,2,3 = coding phase. 4 = intron or rna. sign = strandness
+// rna frame is 4, to allow to display rna to the intronic track in graphic output
 const short int State2Frame[NbTracks] =
 {
     Frame1F, Frame2F, Frame3F,
@@ -139,6 +144,7 @@ const short int State2Frame[NbTracks] =
     FrameIG,
     FrameIG, FrameIG,
     FrameIG, FrameIG,
+    FrameIntronF, FrameIntronR,
     FrameIntronF, FrameIntronR,
     FrameIntronF, FrameIntronR
 };

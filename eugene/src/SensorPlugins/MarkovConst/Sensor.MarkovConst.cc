@@ -76,6 +76,8 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       d->contents[DATA::UTR3R]+= log(transUTR3);
       d->contents[DATA::IntronUTRF] += log(transIntronU);
       d->contents[DATA::IntronUTRR] += log(transIntronU);
+      d->contents[DATA::RNAF] += log(transInter);
+      d->contents[DATA::RNAR] += log(transInter);
     }
 }
 

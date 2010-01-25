@@ -186,3 +186,121 @@ void Sensor :: PlotRepeat(int start, int end)
   for (int i = start; i<= end; i++)
     PlotBarI(i, 0, 0.25, 2, 6);
 }
+
+
+/*************************************************************
+ **                     Signals object                      **
+ *************************************************************/
+// -------------------------
+//  Default constructor.
+// -------------------------
+Signals :: Signals ()
+{
+  pos   = -1;
+  type  = -1;
+  edge  = -1;
+  score = NULL; 
+}
+
+// -------------------------
+//  Constructor.
+// -------------------------
+Signals :: Signals (int p, int t, int e, char *s)
+{
+  pos   = p;
+  type  = t;
+  edge  = e;
+  score = s;
+}
+
+
+// -------------------------
+//  Default destructor.
+// -------------------------
+Signals :: ~Signals () {}
+
+// -------------------------
+//  Print
+//--------------------------
+void Signals :: PrintS ()
+{
+  char t[7];
+  char s = '+';
+
+  switch (type) {
+  case DATA::tStart    : strcpy(t, "tStart   "); break;
+  case DATA::tStop     : strcpy(t, "tStop    "); break;
+  case DATA::Start     : strcpy(t, "Start    "); break;
+  case DATA::Stop      : strcpy(t, "Stop     "); break;
+  case DATA::Don       : strcpy(t, "Acc      "); break;
+  case DATA::Acc       : strcpy(t, "Don      "); break;
+  case DATA::Ins       : strcpy(t, "Ins      "); break;
+  case DATA::Del       : strcpy(t, "Del      "); break;
+  case DATA::tStartNcp : strcpy(t, "tStartNcp"); break;
+  case DATA::tStopNcp  : strcpy(t, "tStopNcp "); break;
+  }
+  if (edge) s = '-';
+  fprintf(stdout, "%d\t%s %c %s\n", pos, t, s, score);
+}
+
+
+/*************************************************************
+ **                    Contents object                      **
+ *************************************************************/
+// -------------------------
+//  Default constructor.
+// -------------------------
+Contents :: Contents ()
+{
+  start = -1;
+  end   = -1;
+  type  = -1;
+  score = NULL ;
+}
+
+// -------------------------
+//  Default constructor.
+// -------------------------
+Contents :: Contents (int sta, int e, int t, float *s)
+{
+  start = sta;
+  end   = e;
+  type  = t;
+  score = s;
+}
+
+// -------------------------
+//  Default destructor.
+// -------------------------
+Contents :: ~Contents () {}
+
+// -------------------------
+//  Print
+//--------------------------
+void Contents :: PrintC ()
+{
+  char t[11];
+
+  switch (type) {
+  case DATA::ExonF1     : strcpy(t, "ExonF1    "); break;
+  case DATA::ExonF2     : strcpy(t, "ExonF2    "); break;
+  case DATA::ExonF3     : strcpy(t, "ExonF3    "); break;
+  case DATA::ExonR1     : strcpy(t, "ExonR1    "); break;
+  case DATA::ExonR2     : strcpy(t, "ExonR2    "); break;
+  case DATA::ExonR3     : strcpy(t, "ExonR3    "); break;
+  case DATA::IntronF    : strcpy(t, "IntronF   "); break;
+  case DATA::IntronR    : strcpy(t, "IntronR   "); break;
+  case DATA::InterG     : strcpy(t, "InterG    "); break;
+  case DATA::UTR5F      : strcpy(t, "UTR5F     "); break;
+  case DATA::UTR5R      : strcpy(t, "UTR5R     "); break;
+  case DATA::UTR3F      : strcpy(t, "UTR3F     "); break;
+  case DATA::UTR3R      : strcpy(t, "UTR3R     "); break;
+  case DATA::IntronUTRF : strcpy(t, "IntronUTRF"); break;
+  case DATA::IntronUTRR : strcpy(t, "IntronUTRR"); break;
+  case DATA::RNAF       : strcpy(t, "RnaF      "); break;
+  case DATA::RNAR       : strcpy(t, "RnaR      "); break;
+  }
+  fprintf(stdout, "%d\t%d\t%s %f\n", start, end, t, *score);
+}
+
+

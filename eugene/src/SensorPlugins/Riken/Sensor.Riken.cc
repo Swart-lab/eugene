@@ -385,7 +385,10 @@ void SensorRiken :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
     //InterG
     if (RAFLpos == 3) {
-      d->contents[DATA::InterG] += RAFLPenalty;     
+      d->contents[DATA::InterG] += RAFLPenalty;
+      d->contents[DATA::RNAF] += RAFLPenalty; 
+      d->contents[DATA::RNAR] += RAFLPenalty; 
+      
       
       // Warning SIGNAL START MODIFICATION //
       d->sig[DATA::Start].weight[Signal::ForwardNo] = 0.0;

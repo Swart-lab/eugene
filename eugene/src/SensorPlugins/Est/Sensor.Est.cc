@@ -106,6 +106,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
     MinDangling    = PAR.getI("Est.MinDangling",N);
     MaxIntron      = PAR.getI("Est.MaxIntron",N);
     MaxIntIntron   = PAR.getI("Est.MaxInternalIntron",N);
+    mRNAOnly       = PAR.getI("Est.mRNAOnly", N);
     DonorThreshold = PAR.getD("Est.StrongDonor",N);
     DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
 
@@ -223,7 +224,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
                 d->sig[DATA::Don].weight[Signal::Reverse] != 0.0)
             d->sig[DATA::Don].weight[Signal::Reverse] += spliceBoost;
 
-        // Exon ou UTR  Forward
+        // Exon ou UTR Forward (ou Rna Forward if not mRNAOnly)
         // Si on a un Gap EST ou si l'on connait le sens du match EST
         if ((cESTMatch & Gap) ||
                 ((cESTMatch & Hit) && !(cESTMatch & HitForward)))
@@ -232,9 +233,11 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             d->contents[DATA::UTR3F] += estP;
             for(int i=0; i<3; i++)
                 d->contents[i] += estP;
+            if (!this->mRNAOnly) 
+		d->contents[DATA::RNAF] += estP;
         }
 
-        // Exon ou UTR Reverse
+        // Exon ou UTR ou Reverse (ou Rna reverse if not mRNAOnly)
         // Si on a un Gap EST ou si l'on connait le sens du match EST
         if ((cESTMatch & Gap) ||
                 ((cESTMatch & Hit) && !(cESTMatch & HitReverse)))
@@ -243,6 +246,8 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             d->contents[DATA::UTR3R] += estP;
             for(int i=3; i<6; i++)
                 d->contents[i] += estP;
+            if (!this->mRNAOnly)
+		d->contents[DATA::RNAR] += estP; 
         }
 
         // Intron Forward
@@ -265,6 +270,13 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
         // Intergenique: tout le temps si on a un match
         d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
+
+        // Penalize RNA if there is a match and that mRNAonly is activated
+        if (this->mRNAOnly && (cESTMatch & (Gap|Hit)))
+	{
+            d->contents[DATA::RNAF] += estP;
+	    d->contents[DATA::RNAR] += estP;
+	}
 
         d->EstMatch = cESTMatch;  // WARNING : EST -> on est dans intron
         index++;

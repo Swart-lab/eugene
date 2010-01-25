@@ -234,24 +234,30 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[DATA::IntronUTRF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
   d->contents[DATA::IntronUTRR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
   
-  // InterG
+  // InterG and RNA
   switch (IntergenicModel)
     {
       // Before 3.4, known as useM0asIG=true: uses a Oth order markov
       // model with seq. GC%
     case 0:  
       d->contents[DATA::InterG] += log(X->GC_AT(pos));
+      d->contents[DATA::RNAF]   += log(X->GC_AT(pos));
+      d->contents[DATA::RNAR]   += log(X->GC_AT(pos));
       break;
      
       // new assymetric model (3.4). This breaks the syymetry between
       // reverse and forward but seems top work better on C. Elegans
     case 1:
       d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      d->contents[DATA::RNAF]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      d->contents[DATA::RNAR]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
       break;
 
       // old symetric model (default before 3.4). Mixes forward and reverse probabilities.
     case 2:
       d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
+      d->contents[DATA::RNAF]   += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
+      d->contents[DATA::RNAR]   += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
       break;
 
     default:

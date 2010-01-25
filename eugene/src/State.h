@@ -51,6 +51,7 @@ public:
     bool IsInitExon();
     bool IsSnglExon();
     bool IsTermExon();
+    bool IsNcpRna();
     const char* State2EGNString();
     const char* State2GFFString ();
     //mon bricolage -> devrait etre dans prediction.cc ?

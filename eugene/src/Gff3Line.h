@@ -37,6 +37,7 @@ enum
   SOFA_5_UTR = 204,         ///<  5'UTR (de l'ARNm episse)
   SOFA_3_UTR = 205,         ///<  UTR3' (de l'ARNm episse)
   SOFA_CDS = 316,            ///<  un CDS avec un start ET un stop
+  SOFA_NCRNA      = 655,            ///< non protein coding rna
 
   SO_5_EXON = 200,       ///<  un exon contenant CDS/UTR 5'
   SO_3_EXON = 202,       ///<  un exon contenant  CDS/UTR 3'
@@ -46,7 +47,8 @@ enum
   SO_3_NONCODING_EXON = 444,    ///<  un exon d'UTR3' (du pre-ARNm)
   SO_SINGLE_EXON = 5845,        ///<  un exon 'solitaire'
   SO_INTERIOR_EXON = 4,         ///<  un exon interieur codant (partie d'un CDS)
-  SO_UTR_INTRON = 446           ///<  un intron d'UTR
+  SO_UTR_INTRON = 446          ///<  un intron d'UTR
+
 };
 
 /**  \class  Sofa

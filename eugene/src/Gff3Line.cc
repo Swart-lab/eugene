@@ -29,6 +29,7 @@ std::string
     case SOFA_CDS :  return "CDS";  break;
     case SOFA_5_UTR :  return "five_prime_UTR";  break;
     case SOFA_3_UTR :  return "three_prime_UTR";  break;
+    case SOFA_NCRNA :  return "ncRNA";
     //par default on renvoie le code au format so::000xx
     default :  return Sofa::codeToString(code_so);
   }

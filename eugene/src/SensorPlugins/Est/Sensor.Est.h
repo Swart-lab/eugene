@@ -43,6 +43,9 @@ class SensorEst : public Sensor
   int    ppNumber;
   int    stepid;
   int    N;
+  int mRNAOnly;  // 0 or 1: 
+                 // 1 if the hits are just mrna hits => ncRNA are penalized
+                 // 0: a hit can be a mrna hit or a ncrna hit: tracks 'ncrna' are not penalized
   char  *fileExt; // File name extension
 
   int MinDangling;

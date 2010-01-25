@@ -75,5 +75,45 @@ class Sensor
   virtual void PostAnalyse(Prediction *, FILE *) = 0;
 };
 
+/*************************************************************
+ **                       Signals Object                    **
+ *************************************************************/
+class Signals
+{
+ private:
+  
+ public:
+  int   pos;
+  int   type;
+  int   edge;
+  char  *score;
+    
+  Signals  ();
+  Signals  (int, int, int, char*);
+  ~Signals ();
+  void PrintS ();
+  bool operator < (int i) { if (pos < i) return true; else return false; }
+};
+
+/*************************************************************
+ **                      Contents Object                    **
+ *************************************************************/
+class Contents
+{
+ private:
+  
+ public:
+  int    start;
+  int    end;
+  int    type;
+  float *score;
+    
+  Contents  ();
+  Contents  (int, int, int, float*);
+  ~Contents ();
+  void PrintC ();
+};
+
+
 #endif
 

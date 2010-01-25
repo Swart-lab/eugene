@@ -40,7 +40,10 @@ class DATA
  public:
   // Signal scores
   enum SigType {tStart = 0, tStop = 1, Start = 2, Stop = 3,
-		Acc = 4, Don = 5, Ins = 6, Del =7, LastSigType = 8};
+		Acc = 4, Don = 5, Ins = 6, Del = 7, 
+		tStartNcp = 8, tStopNcp = 9, // translation start and stop for RNA non coding for protein
+		LastSigType = 10}; // 
+  
   Signal sig[LastSigType];
 
   // Contents scores 
@@ -52,7 +55,8 @@ class DATA
     UTR5F = 9, UTR5R = 10,
     UTR3F = 11, UTR3R =12,
     IntronUTRF = 13, IntronUTRR = 14, 
-    LastContentsType = 15};
+    RNAF = 15, RNAR = 16,
+    LastContentsType = 17};
 
   double  contents[LastContentsType];
 
@@ -70,5 +74,5 @@ enum TYPE_SENSOR {Type_Stop    = 1,    //               : Stop
 		  Type_Content = 128,  //               : Contenu
 		  Type_Any     = 255,  //               : Tous types
 		  Type_None    = 0     //               : Type indefini
-                  }; // Sensor de type inconnu (non encore initialisé)
+                  }; // Sensor de type inconnu (non encore initialisï¿½)
 #endif

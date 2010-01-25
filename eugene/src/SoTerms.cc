@@ -27,7 +27,6 @@ extern Parameters PAR;
 // -----------------------
 SoTerms::SoTerms(  )
 {
-  
 }
 
 SoTerms::~SoTerms ( )
@@ -108,6 +107,14 @@ void SoTerms::loadFile( char * filename )
 	  
 	  //  }
 	  }
+	  else if (strncmp (line,"is_a", 4)  == 0  ) // Save the isA value
+	  {
+             string tmpStr = to_string(line);
+             int    begin  = tmpStr.find_first_of(' ') + 1;
+             string isA    = tmpStr.substr(begin, tmpStr.find_last_of('!') - begin - 1);
+             // Save the 'is-a' value of the current so term
+             isA_[soId] = isA;
+          }
 	}
       }
     }
@@ -125,6 +132,10 @@ void SoTerms::Print (void)
   for ( it=nameToId_.begin() ; it != nameToId_.end(); it++ )
   {
     cout << "nameToId_ Key : " << (*it).first << " Value : " << (*it).second << endl;
+  }
+  for ( it=isA_.begin() ; it != isA_.end(); it++ )
+  {
+    cout << "isA_ Key : " << (*it).first << " Value : " << (*it).second << endl;
   }
 }
 
@@ -169,4 +180,32 @@ string SoTerms::getIdFromName (string name)
     pos=name.find(" ");
   }
   return nameToId_[name];
+}
+
+/* Return the 'is_a' value of the soterm id */
+string SoTerms::getIsAFromId(string id)
+{
+  map<string,string>::iterator iter = isA_.find(id);
+  if ( iter != isA_.end() ) 
+  {
+      return iter->second;
+  }
+
+  return "";
+}
+
+/* Return true if the id represents a term which is a ncRNA 
+(directly the ncRNA term or derived from ncRNA) */
+bool SoTerms::isANcRNA(string id)
+{
+	if (id == "SO:0000655") // Code So for NcRNA
+		return true;
+	else 
+	{
+		string parentId = getIsAFromId(id); // get the parent term id
+		if (parentId == "")
+			return false;
+		else 
+			return SoTerms::isANcRNA(parentId);
+	}
 }

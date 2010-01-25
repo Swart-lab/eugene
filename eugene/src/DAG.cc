@@ -33,7 +33,7 @@ double DAG::IGPrior 		= 0.0;
 double DAG::FivePrior 		= 0.0;
 double DAG::ThreePrior 		= 0.0;
 double DAG::IntronFivePrior 	= 0.0;
-
+double DAG::RnaPrior            = 0.0;
 double DAG::SplicedStopPen 	= 0.0;
 int       DAG::estuse 		= 0;
 double DAG::NormalizingPath	= 0.0;
@@ -73,6 +73,7 @@ DAG :: DAG (int start, int end, Parameters &PAR, DNASeq* Seq)
   DAG::IGPrior    = PAR.getD("EuGene.InterPrior"); 
   DAG::FivePrior  = PAR.getD("EuGene.FivePrimePrior");
   DAG::ThreePrior = PAR.getD("EuGene.ThreePrimePrior");
+  DAG::RnaPrior   = PAR.getD("EuGene.RnaPrior");
   DAG::IntronFivePrior = InPrior;
   DAG::estuse = PAR.getI("Sensor.Est.use");
   DAG::NormalizingPath = 0.0;
@@ -176,6 +177,10 @@ void DAG :: WeightThePrior()
   // Introns d'UTR5
   LBP[IntronU3F].Update(log(IntronFivePrior/2.0)/2.0);
   LBP[IntronU3R].Update(log(IntronFivePrior/2.0)/2.0);
+
+// Introns d'UTR5
+  LBP[RnaF].Update(log(RnaPrior/2.0)/2.0);
+  LBP[RnaR].Update(log(RnaPrior/2.0)/2.0);
 }
 
 // ---------------------------------------------------------------------------
@@ -241,6 +246,10 @@ void DAG :: LoadDistLength()
   // Introns d'UTR3
   LBP[IntronU3F].LoadPenalty(PAR.getC("EuGene.IntronDist"));
   LBP[IntronU3R].LoadPenalty(PAR.getC("EuGene.IntronDist"));
+
+  // Rna 
+  LBP[RnaF].LoadPenalty(PAR.getC("EuGene.RnaDist"));
+  LBP[RnaR].LoadPenalty(PAR.getC("EuGene.RnaDist"));
 }
 // ----------------------------------------------------------------
 //  Build the prediction by backtracing.
@@ -413,7 +422,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
 
   for (int k = 0; k < NbTracks; k++) {
     PrevBP[k] = NULL;
-    PBest[k] = NINFINITY;
+    PBest[k]  = NINFINITY;
   }
   
   // ---------------------------
@@ -494,13 +503,44 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // InterG (from UTR5R)
   // ---------------------------
   if (ISPOSSIBLE(tStart,RStrand))
+  {
     INEED(UTR5R);
+  }
 
   // ---------------------------
   // InterG (from UTR3F)
   // ---------------------------
   if (ISPOSSIBLE(tStop,FStrand))
+  {
     INEED(UTR3F);
+  }
+
+  // ---------------------------
+  // InterG (from RnaR)
+  // ---------------------------
+  if (ISPOSSIBLE(tStartNcp,RStrand))
+  {
+    INEED(RnaR);
+  }
+  // ---------------------------
+  //  InterG (from RnaF)
+  // ---------------------------
+  if (ISPOSSIBLE(tStopNcp,FStrand))
+  {
+    INEED(RnaF);
+  }
+
+  // ---------------------------
+  // RnaF (from InterGen)
+  // ---------------------------
+  if (ISPOSSIBLE(tStartNcp,FStrand))
+    INEED(InterGen);
+
+   // ---------------------------
+  // RnaR (from InterGen)
+  // ---------------------------
+   if (ISPOSSIBLE(tStopNcp,RStrand))
+    INEED(InterGen);
 
   // ---------------------------
   // IntronU5F (from UTR5F)
@@ -656,6 +696,7 @@ inline bool spliceStopPostTxx(int StopStop, enum Signal::Edge Strand)  //x(GA|A(
 #define PICOMP(C,S,B,O) PICOMPEN(C,S,B,O,0.0)
 
 #define INSERT(P)					\
+  /*fprintf(stdout, "P %s, best : %s --> ", State(P).State2EGNString(), State(best).State2EGNString()); */\
   LBP[Strand ? ReverseIt[P] :P].InsertNew(best, position, maxi,PrevBP[best]);
 
 // ----------------------------------------------------------------
@@ -899,10 +940,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // From 5' reverse
+  PICOMP(true,tStartNcp,RStrand, RnaR);
   PICOMP(true,tStart,RStrand, UTR5R);
+
   // From 3' direct
-  PICOMP(true,tStop,FStrand, UTR3F);
-  
+  PICOMP(true,tStopNcp, FStrand, RnaF);
+  PICOMP(true,tStop,    FStrand, UTR3F);
+
   // On reste intergenique
   // et les transstartNO/TransstopNO ???
   
@@ -921,6 +965,31 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   LBP[Strand ? ReverseIt[UTR5F]: UTR5F].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo+Strand]);
   
   INSERT(UTR5F);
+
+  // ----------------------------------------------------------------
+  // ---------------------- Rna Forward ---------------------------
+  // ----------------------------------------------------------------
+  maxi = NINFINITY; best = -1;
+
+  // On vient de l'intergenique. 
+  PICOMP(true,tStartNcp,FStrand, InterGen);
+  //LBP[Strand ? ReverseIt[RnaF]: RnaF].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo+Strand]);
+
+  INSERT(RnaF);
+
+  
+
+  // ----------------------------------------------------------------
+  // ---------------------- Rna Reverse ---------------------------
+  // ----------------------------------------------------------------
+  maxi = NINFINITY; best = -1;
+
+  // On vient de l'intergenique. 
+  PICOMP(true,tStopNcp, RStrand, InterGen);
+
+  //LBP[Strand ? ReverseIt[RnaR]: RnaR].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo-Strand]);
+  INSERT(RnaR);
+
   // ----------------------------------------------------------------
   // ------------------- Introns d'UTR5F ----------------------------
   // ----------------------------------------------------------------

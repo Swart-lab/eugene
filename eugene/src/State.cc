@@ -86,7 +86,7 @@ bool State::IsIntronInStartStopRegion(void)
 // ----------------------
 bool State::IsUTRIntron(void)
 {
-	if ( this->state >= IntronU5F)
+	if ( (this->state >= IntronU5F) && (this->state <= IntronU3R))
 		return true;
 	return false;
 }
@@ -178,11 +178,10 @@ bool State::IsTranscribedAndUnspliced(void)
 
 // -----------------------
 // Return true if its an intron in the forward strand
-// NOTE: remplacer ce test par IsIntron && IsForward
 // -----------------------
 bool State::IsForwardIntron(void)
 {
-    if (State2Frame[this->state] == FrameIntronF)
+    if (this->IsIntron() && this->GetStrand() == '+')
     {
         return true;
     }
@@ -196,7 +195,8 @@ bool State::IsForwardIntron(void)
 // -----------------------
 bool State::IsReverseIntron(void)
 {
-    if (State2Frame[this->state] == FrameIntronR)
+    //if (State2Frame[this->state] == FrameIntronR)
+    if (this->IsIntron() && this->GetStrand() == '-')
     {
         return true;
     }
@@ -206,7 +206,7 @@ bool State::IsReverseIntron(void)
 
 // -----------------------
 // Return true if its an element including between a start and a stop codon
-// Not IG, UTR and UTR Intron
+// Not IG, UTR and UTR Intron, RNA
 // -----------------------
 bool State::InStartStopRegion(void)
 {
@@ -240,7 +240,7 @@ bool State::IsDefined()
 char State::GetStrand()
 {
 	char strand = (State2Frame[this->state] > 0) ? '+' : '-';
-	    // If state == utr PhaseAdapt return 0 so
+	    // If state == utr State2Frame returns 0 so
     	if (this->state == UTR5F  ||  this->state == UTR3F) strand = '+';
 	return strand;
 }
@@ -275,6 +275,19 @@ bool State::IsTermExon()
 	return false;
 }
 
+// ------------------------
+//  Return true if it is a non protein coding rna
+// ------------------------
+bool State::IsNcpRna()
+{
+	if (this->state == RnaF || this->state == RnaR)
+	{
+		return true;
+	}
+	return false;
+}
+
+
 
 // -----------------------------------------
 //  Convert the state in string
@@ -289,7 +302,9 @@ const char* State::State2EGNString()
     if (this->state == InterGen)                return "InterG";
     if (this->state == UTR5F || state == UTR5R) return "Utr5";
     if (this->state == UTR3F || state == UTR3R) return "Utr3";
+    if (this->state == RnaR || this->state == RnaF) return "ncRNA ";
     if (this->state >= IntronU5F)               return "Intron";
+
 }
 
 // -----------------------------------------
@@ -305,6 +320,7 @@ const char* State :: State2GFFString ()
     if (this->state == InterGen)                return "InterG";
     if (this->state == UTR5F || state == UTR5R) return "UTR5";
     if (this->state == UTR3F || state == UTR3R) return "UTR3";
+    if (this->state == RnaR || this->state == RnaF) return "ncRNA";
     if (this->state >= IntronU5F)               return "Intron";
 }
 

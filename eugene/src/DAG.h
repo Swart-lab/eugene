@@ -32,7 +32,7 @@ class DAG
 {
 
    static DNASeq *TheSeq;
-   static double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior;
+   static double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior, RnaPrior;
    static double SplicedStopPen;
    static int estuse;
    static double NormalizingPath;
