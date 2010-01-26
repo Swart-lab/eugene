@@ -331,6 +331,7 @@ AnnotaStruct.TrStopNcpType[0] s
 AnnotaStruct.Exon*[0] 0
 AnnotaStruct.Intron*[0] 0
 AnnotaStruct.CDS*[0] 0
+AnnotaStruct.ncpRNA*[0]  0
 AnnotaStruct.format[0]             GFF3
 #
 AnnotaStruct.FileExtension[1]      genefinder2
@@ -354,6 +355,7 @@ AnnotaStruct.TrStopNcpType[1] s
 AnnotaStruct.Exon*[1] 0
 AnnotaStruct.Intron*[1] 0
 AnnotaStruct.CDS*[1] 4
+AnnotaStruct.ncpRNA*[1]  0
 AnnotaStruct.format[1]             GFF3
 #
 AnnotaStruct.FileExtension[2]      genefinder3
@@ -377,6 +379,7 @@ AnnotaStruct.TrStopNcpType[2] s
 AnnotaStruct.Exon*[2] 1
 AnnotaStruct.Intron*[2] 1
 AnnotaStruct.CDS*[2] 1
+AnnotaStruct.ncpRNA*[2]  0
 AnnotaStruct.format[2]             GFF3
 #
 AnnotaStruct.FileExtension[3]      genefinder4
@@ -400,6 +403,7 @@ AnnotaStruct.TrStopNcpType[3] s
 AnnotaStruct.Exon*[3] 1
 AnnotaStruct.Intron*[3] 1
 AnnotaStruct.CDS*[3] 0
+AnnotaStruct.ncpRNA*[3]  0
 AnnotaStruct.format[3]             GFF3
 #
 ##### IfElse #####
