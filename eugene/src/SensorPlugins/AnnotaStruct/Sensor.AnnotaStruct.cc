@@ -11,11 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-<<<<<<< Sensor.AnnotaStruct.cc
 // $Id$
-=======
-// $Id$
->>>>>>> 1.19.2.1
 // ------------------------------------------------------------------
 // File:     Sensor.AnnotaStruct.cc
 // Contents: Sensor AnnotaStruct
@@ -70,27 +66,24 @@ extern Parameters PAR;
 SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 {
   char tempname[FILENAME_MAX+1];
-<<<<<<< Sensor.AnnotaStruct.cc
-=======
-  char startRead[20], stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20], tStartNcpRead[20], tStopNcpRead[20];
-  char exonRead[20], intronRead[20], cdsRead[20];
-
->>>>>>> 1.19.2.1
   // all types are possible.
   type = Type_Any;
 
 // Inilialize the inline parameters
-  char exonRead[20], intronRead[20], cdsRead[20];
-  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20] ;
+  char exonRead[20], intronRead[20], cdsRead[20], ncpRnaRead[20];
+  char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20],  tStartNcpRead[20], tStopNcpRead[20] ;
   strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
   strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
+  strcpy(ncpRnaRead, PAR.getC("AnnotaStruct.ncpRNA*",  GetNumber()));
   strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
   strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
   strcpy(accRead,PAR.getC("AnnotaStruct.Acc*",         GetNumber()));
   strcpy(donRead,PAR.getC("AnnotaStruct.Don*",         GetNumber()));
   strcpy(tStartRead,PAR.getC("AnnotaStruct.TrStart*",  GetNumber()));
   strcpy(tStopRead,PAR.getC("AnnotaStruct.TrStop*",    GetNumber()));
+  strcpy(tStartNcpRead,PAR.getC("AnnotaStruct.TrStartNcp*", GetNumber()));
+  strcpy(tStopNcpRead,PAR.getC("AnnotaStruct.TrStopNcp*",   GetNumber()));
 
   if (exonRead[0] != 'i') exonInline = 0;
   else	exonInline = 1;
@@ -100,6 +93,9 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 
   if (cdsRead[0] != 'i') cdsInline = 0;
   else cdsInline = 1;
+
+  if (ncpRnaRead[0] != 'i') ncpRnaInline = 0;
+  else  ncpRnaInline = 1;
 
   if (startRead[0] != 'i') startInline = 0;
   else startInline= 1;
@@ -118,6 +114,12 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 
   if (tStopRead[0] != 'i') tStopInline = 0;
   else tStopInline = 1;
+
+  if (tStartNcpRead[0] != 'i') tStartNcpInline = 0;
+  else tStartNcpInline = 1;
+
+  if (tStopNcpRead[0] != 'i') tStopNcpInline = 0;
+  else tStopNcpInline = 1;
 
 
   fileExt       = PAR.getC("AnnotaStruct.FileExtension", GetNumber());
@@ -248,13 +250,12 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
 {
   char exonRead[20], intronRead[20], cdsRead[20], ncpRnaRead[20];
   char startRead[20], stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20], tStartNcpRead[20], tStopNcpRead[20];
- 
+
   strcpy(exonRead,   PAR.getC("AnnotaStruct.Exon*",   GetNumber()));
   strcpy(intronRead, PAR.getC("AnnotaStruct.Intron*", GetNumber()));
   strcpy(cdsRead,    PAR.getC("AnnotaStruct.CDS*",    GetNumber()));
   strcpy(ncpRnaRead, PAR.getC("AnnotaStruct.ncpRNA*", GetNumber()));
 
-<<<<<<< Sensor.AnnotaStruct.cc
   if (exonRead[0] != 'i') exonPAR   = atof(exonRead);
   else exonPAR = 0;
 
@@ -263,49 +264,9 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
 
   if (cdsRead[0] != 'i') cdsPAR = atof(cdsRead);
   else cdsPAR = 0;
-=======
-  if (exonRead[0] != 'i')
-  {
-  	exonPAR   = atof(exonRead);
-	exonInline=0;
-  }
-  else
-  {
-	exonPAR   = 0;
-	exonInline= 1;
-  }
-  if (intronRead[0] != 'i')
-  {
-  	intronPAR = atof(intronRead);
-	intronInline = 0;
-  }	
-  else
-  {
-	intronPAR = 0;
-  	intronInline = 1;
-  }
-  if (cdsRead[0] != 'i')
-  {
-	cdsPAR = atof(cdsRead);
-     	cdsInline = 0;
-  }
-  else
-  {
-	cdsPAR    = 0;
-	cdsInline = 1;
-  }
->>>>>>> 1.19.2.1
 
-  if (ncpRnaRead[0] != 'i')
-  {
-    ncpRnaPAR    = atof(ncpRnaRead);
-    ncpRnaInline = 0;
-  }
-  else
-  {
-    ncpRnaPAR    = 0;
-    ncpRnaInline = 1;
-  }
+  if (ncpRnaRead[0] != 'i') ncpRnaPAR = atof(ncpRnaRead);
+  else ncpRnaPAR = 0;
 
   strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
   strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
@@ -316,104 +277,23 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   strcpy(tStartNcpRead,PAR.getC("AnnotaStruct.TrStartNcp*", GetNumber()));
   strcpy(tStopNcpRead,PAR.getC("AnnotaStruct.TrStopNcp*",  GetNumber()));
 
-<<<<<<< Sensor.AnnotaStruct.cc
-  strcpy(startPAR,  PAR.getC("AnnotaStruct.StartType",   GetNumber()));
-  strcpy(stopPAR,   PAR.getC("AnnotaStruct.StopType",    GetNumber()));
-  strcpy(accPAR,    PAR.getC("AnnotaStruct.AccType",     GetNumber()));
-  strcpy(donPAR,    PAR.getC("AnnotaStruct.DonType",     GetNumber()));
-  strcpy(tStartPAR, PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
-  strcpy(tStopPAR,  PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));	
-
-  if (startRead[0]  != 'i') strcat(startPAR,  startRead);
-  if (stopRead[0]   != 'i') strcat(stopPAR,   stopRead);
-  if (accRead[0]    != 'i') strcat(accPAR,    accRead);
-  if (donRead[0]    != 'i') strcat(donPAR,    donRead);
-  if (tStartRead[0] != 'i') strcat(tStartPAR, tStartRead);
-  if (tStopRead[0]  != 'i') strcat(tStopPAR,  tStopRead);
-=======
-  strcpy(startPAR,     PAR.getC("AnnotaStruct.StartType",      GetNumber()));
-  strcpy(stopPAR,      PAR.getC("AnnotaStruct.StopType",       GetNumber()));
-  strcpy(accPAR,       PAR.getC("AnnotaStruct.AccType",        GetNumber()));
-  strcpy(donPAR,       PAR.getC("AnnotaStruct.DonType",        GetNumber()));
-  strcpy(tStartPAR,    PAR.getC("AnnotaStruct.TrStartType",    GetNumber()));
-  strcpy(tStopPAR,     PAR.getC("AnnotaStruct.TrStopType",     GetNumber()));
+  strcpy(startPAR,     PAR.getC("AnnotaStruct.StartType",   GetNumber()));
+  strcpy(stopPAR,      PAR.getC("AnnotaStruct.StopType",    GetNumber()));
+  strcpy(accPAR,       PAR.getC("AnnotaStruct.AccType",     GetNumber()));
+  strcpy(donPAR,       PAR.getC("AnnotaStruct.DonType",     GetNumber()));
+  strcpy(tStartPAR,    PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
+  strcpy(tStopPAR,     PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
   strcpy(tStartNcpPAR, PAR.getC("AnnotaStruct.TrStartNcpType", GetNumber()));
-  strcpy(tStopNcpPAR,  PAR.getC("AnnotaStruct.TrStopNcpType",  GetNumber()));
-  
-  if (startRead[0] != 'i')
-  {
- 	strcat(startPAR,  startRead);
- 	startInline=0;
-  }
-  else
-  {
-	startInline= 1;
-  }
-  if (stopRead[0] != 'i')
-  {
-  	strcat(stopPAR,  stopRead);
-	stopInline = 0;
-  }	
-  else
-  {
-  	stopInline = 1;
-  }
-  if (accRead[0] != 'i')
-  {
-	strcat(accPAR, accRead);
-     	accInline = 0;
-  }
-  else
-  {
-	accInline = 1;
-  }
-  if (donRead[0] != 'i')
-  {
- 	strcat(donPAR, donRead);
- 	donInline=0;
-  }
-  else
-  {
-	donInline= 1;
-  }
-  if (tStartRead[0] != 'i')
-  {
-  	strcat(tStartPAR, tStartRead);
-	tStartInline = 0;
-  }	
-  else
-  {
-  	tStartInline = 1;
-  }
-  if (tStopRead[0] != 'i')
-  {
-	strcat(tStopPAR,  tStopRead);
-     	tStopInline = 0;
-  }
-  else
-  {
-	tStopInline = 1;
-  }
-  if (tStartNcpRead[0] != 'i')
-  {
-  	strcat(tStartNcpPAR, tStartNcpRead);
-	tStartNcpInline = 0;
-  }	
-  else
-  {
-  	tStartNcpInline = 1;
-  }
-  if (tStopNcpRead[0] != 'i')
-  {
-  	strcat(tStopNcpPAR, tStopNcpRead);
-	tStopNcpInline = 0;
-  }	
-  else
-  {
-  	tStopNcpInline = 1;
-  }
-  
->>>>>>> 1.19.2.1
+  strcpy(tStopNcpPAR,  PAR.getC("AnnotaStruct.TrStopNcpType",  GetNumber()));	
+
+  if (startRead[0]     != 'i') strcat(startPAR,     startRead);
+  if (stopRead[0]      != 'i') strcat(stopPAR,      stopRead);
+  if (accRead[0]       != 'i') strcat(accPAR,       accRead);
+  if (donRead[0]       != 'i') strcat(donPAR,       donRead);
+  if (tStartRead[0]    != 'i') strcat(tStartPAR,    tStartRead);
+  if (tStopRead[0]     != 'i') strcat(tStopPAR,     tStopRead);
+  if (tStartNcpRead[0] != 'i') strcat(tStartNcpPAR, tStartNcpRead);
+  if (tStopNcpRead[0]  != 'i') strcat(tStopNcpPAR,  tStopNcpRead);
 
   PosSigGiveInfo = -1;
   PosConGiveInfo = -1;
@@ -717,13 +597,11 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
   char  feature[50];
   string  onthology_term;
   string idSo;  // id of the so term (ex: SO:0000100)
-  string isA;   // definition of what is the so term (ex: SO:0000655. Use for the ncRNA reading)
 
   char  scoreC[20];
   int   frame = -1;
   
   FillOntologyTerm(geneFeatureSet);
-
   int j=0;
   vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
   
@@ -749,7 +627,6 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       string tmp = GeneFeatureSet::soTerms_->getIdFromName(idSo);
       idSo       = tmp;
     }
-    isA = GeneFeatureSet::soTerms_->getIsAFromId(idSo); // Get the isA value of the so term
 
     /* Phase ? */
     if (strcmp(phase, "."))
@@ -890,22 +767,18 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
       vSig.push_back(new Signals(endS,     DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, tStopInline)));
     }
-<<<<<<< Sensor.AnnotaStruct.cc
     else if ( idSo == "SO:0000147" ) //E.Any 
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, (exonInline ? new float(scF) : &exonPAR)));
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
     }
-
-=======
-    else if (idSo == "SO:0000655" || (isA == "SO:0000655")) // ncRNA or a kind of ncRNA (tRNA, rRNA, ...)
+    else if (GeneFeatureSet::soTerms_->isANcRNA(idSo)) // ncRNA or a kind of ncRNA (tRNA, rRNA, ...)
     {
       vCon.push_back( new Contents(startC, endC, DATA::RNAF+edge, (ncpRnaInline ? new float(scF) : &ncpRnaPAR)));
       vSig.push_back( new Signals (startS-1, DATA::tStartNcp, edge, GetScoreC(DATA::tStartNcp, scF, tStartNcpInline)));
       vSig.push_back( new Signals (endS,     DATA::tStopNcp,  edge, GetScoreC(DATA::tStopNcp, scF, tStopNcpInline))  );
     }
->>>>>>> 1.19.2.1
     else if ((*it)->getType() != transFeatName)
       fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
 	      feature, j);

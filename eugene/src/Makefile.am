@@ -11,11 +11,7 @@
 # You should have received a copy of Artistic License along with
 # this program; if not, please see http://www.opensource.org
 #
-<<<<<<< Makefile.am
 # $Id$
-=======
-# $Id$
->>>>>>> 1.13.2.1
 # ------------------------------------------------------------------
 # File:     Makefile.am
 # Contents: compilation of the src directory
