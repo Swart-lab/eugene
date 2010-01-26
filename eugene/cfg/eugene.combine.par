@@ -465,13 +465,13 @@ Sensor.PepSignal.use	0
 Sensor.SpliceWAM.use	0
 Sensor.SPred.use	0
 Sensor.StartWAM.use	0
-Sensor.Transcript.use	0
+Sensor.Transcript.use	1
 #
 # CONTENT SENSORS
 Sensor.BlastX.use	0
 Sensor.Est.use		0	
 Sensor.Homology.use	0
-Sensor.MarkovConst.use	0
+Sensor.MarkovConst.use	1
 Sensor.MarkovIMM.use	0
 Sensor.MarkovProt.use	0
 Sensor.Repeat.use	0
