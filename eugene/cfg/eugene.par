@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5h-1
+EuGene.version		3.6
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -16,14 +16,16 @@ EuGene.IntronDist	intron.dist
 EuGene.InterGDist	intergenic.dist
 EuGene.5PrimeDist	utr.dist
 EuGene.3PrimeDist	utr.dist
+EuGene.RnaDist	        rna.dist
 #
 ##### Priors #####
 EuGene.SplicedStopPen   1e999.0
-EuGene.ExonPrior	0.33		# Prior on the initial states
+EuGene.ExonPrior	0.18		# Prior on the initial states
 EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
+EuGene.RnaPrior         0.15
 #
 ##### Gff3
 Gff3.SoTerms		cfg/sofa.obo
@@ -218,6 +220,7 @@ Est.StrongDonor[0] 0.95
 Est.MinDangling[0] 10
 Est.MaxIntron[0]   15000
 Est.MaxInternalIntron[0]   15000
+Est.mRNAOnly[0] 1   # 1 if the file contains only hits of mrna, 0 if the file contains hits of mrna or ncrna (in this case, ncrna tracks are not penalized)
 Est.FileExtension[0]	.est
 #Est.format[0]    GFF3
 #
@@ -233,6 +236,7 @@ Est.StrongDonor[1] 0.95
 Est.MinDangling[1] 10
 Est.MaxIntron[1]   15000
 Est.MaxInternalIntron[1]   15000
+Est.mRNAOnly[1] 1   # 1 if the file contains only hits of mrna, 0 if the file contains hits of mrna or ncrna (in this case, ncrna tracks are not penalized)
 Est.FileExtension[1]	.est2
 #Est.format[1]    GFF3
 #
@@ -288,6 +292,19 @@ Repeat.ExonPenalty*	1.0
 NStretch.stretchPenalty 1.0
 NStretch.maxLengthWithoutPenalty      5000
 #
+##### NcRNA sensor parameters ####
+NcRNA.FileExtension[0]  ncrna
+NcRNA.NcpRna*[0] 1 
+NcRNA.TStartNcp*[0] 1
+NcRNA.TStopNcp*[0] 1	
+NcRNA.format[0]        GFF3 # Mandatory
+#
+NcRNA.FileExtension[1]  trna
+NcRNA.NcpRna*[1] 1 
+NcRNA.TStartNcp*[1] 1
+NcRNA.TStopNcp*[1] 1	
+NcRNA.format[1]        GFF3 # Mandatory
+#
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################
 #################################################################
@@ -307,9 +324,14 @@ AnnotaStruct.TrStart*[0] 0.5
 AnnotaStruct.TrStartType[0] p
 AnnotaStruct.TrStop*[0] 0.6
 AnnotaStruct.TrStopType[0] p
+AnnotaStruct.TrStartNcp*[0] 0.5
+AnnotaStruct.TrStartNcpType[0] p
+AnnotaStruct.TrStopNcp*[0] 0.5
+AnnotaStruct.TrStopNcpType[0] p
 AnnotaStruct.Exon*[0] 2
 AnnotaStruct.Intron*[0] 3
 AnnotaStruct.CDS*[0] 4
+AnnotaStruct.ncpRNA*[0]  2
 AnnotaStruct.format[0]             GFF3
 #
 AnnotaStruct.FileExtension[1]      genefinder2
@@ -326,9 +348,14 @@ AnnotaStruct.TrStart*[1] 0.0
 AnnotaStruct.TrStartType[1] s
 AnnotaStruct.TrStop*[1] 0.0
 AnnotaStruct.TrStopType[1] s
+AnnotaStruct.TrStartNcp*[1] 0
+AnnotaStruct.TrStartNcpType[1] s
+AnnotaStruct.TrStopNcp*[1] 0
+AnnotaStruct.TrStopNcpType[1] s
 AnnotaStruct.Exon*[1] 2
 AnnotaStruct.Intron*[1] 3
 AnnotaStruct.CDS*[1] 4
+AnnotaStruct.ncpRNA*[1]  2
 #AnnotaStruct.format[1]             GFF3
 #
 ##### IfElse #####
@@ -394,14 +421,15 @@ Sensor.Transcript.use	1
 #
 # CONTENT SENSORS
 Sensor.BlastX.use	0
-Sensor.Est.use		0
-Sensor.Homology.use	0
+Sensor.Est.use		0	
+Sensor.Homology.use	0	
 Sensor.MarkovConst.use	1
 Sensor.MarkovIMM.use	1
 #Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	0
 Sensor.Repeat.use	0
-Sensor.NStretch.use 0
+Sensor.NStretch.use     0
+Sensor.NcRNA.use        0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
@@ -441,7 +469,8 @@ Sensor.MarkovConst 	10
 Sensor.MarkovIMM 	1
 Sensor.MarkovProt 	1
 Sensor.Repeat 		10
-Sensor.NStretch   1
+Sensor.NStretch         1
+Sensor.NcRNA            1
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct     1
