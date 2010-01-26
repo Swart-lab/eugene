@@ -21,7 +21,7 @@
 AC_INIT(, , [EuGene Team eugene@ossau.toulouse.inra.fr])
 AC_CONFIG_AUX_DIR(config)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(eugene, 3.5h-1)
+AM_INIT_AUTOMAKE(eugene, 3.6)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -121,6 +121,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/Transcript/Makefile
 	src/SensorPlugins/QualData/Makefile
 	src/SensorPlugins/NStretch/Makefile
+	src/SensorPlugins/NcRNA/Makefile
 	plugins/Makefile
 	doc/Makefile
 ])
