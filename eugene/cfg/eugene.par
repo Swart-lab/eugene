@@ -20,12 +20,12 @@ EuGene.RnaDist	        rna.dist
 #
 ##### Priors #####
 EuGene.SplicedStopPen   1e999.0
-EuGene.ExonPrior	0.18		# Prior on the initial states
+EuGene.ExonPrior	0.30		# Prior on the initial states
 EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
-EuGene.RnaPrior         0.15
+EuGene.RnaPrior         0.03
 #
 ##### Gff3
 Gff3.SoTerms		cfg/sofa.obo
