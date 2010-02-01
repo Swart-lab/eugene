@@ -59,6 +59,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/doc/PCCSC.tex \
 	     $(srcdir)/doc/graph.* \
 	     $(srcdir)/doc/Doc_*.tex \
+             $(srcdir)/doc/SO.png \ 
 	     $(srcdir)/doc/ParaOptimization.pdf \
 	     $(srcdir)/doc/ParaOptimization.fig \
 	     $(srcdir)/doc/Sequences/At5g18830.* \
