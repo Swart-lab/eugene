@@ -41,7 +41,7 @@ class DATA
   // Signal scores
   enum SigType {tStart = 0, tStop = 1, Start = 2, Stop = 3,
 		Acc = 4, Don = 5, Ins = 6, Del = 7, 
-		tStartNcp = 8, tStopNcp = 9, // translation start and stop for RNA non coding for protein
+		tStartNpc = 8, tStopNpc = 9, // translation start and stop for non protein coding RNA
 		LastSigType = 10}; // 
   
   Signal sig[LastSigType];

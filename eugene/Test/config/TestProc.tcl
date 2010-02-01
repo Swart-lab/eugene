@@ -287,9 +287,9 @@ set NewValue1(Repeat.IntronPenalty*)	0.1
 set NewValue1(Repeat.ExonPenalty*)	1.0
 #### NcRNA sensor parameters ####
 set NewValue1(NcRNA.FileExtension) ncrna
-set NewValue1(NcRNA.NcpRna*)   1
-set NewValue1(NcRNA.TStartNcp*)  1
-set NewValue1(NcRNA.TStopNcp*)  1
+set NewValue1(NcRNA.NpcRna*)   1
+set NewValue1(NcRNA.TStartNpc*)  1
+set NewValue1(NcRNA.TStopNpc*)  1
 set NewValue1(NcRNA.Format) GFF3
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################

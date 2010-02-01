@@ -518,14 +518,14 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // InterG (from RnaR)
   // ---------------------------
-  if (ISPOSSIBLE(tStartNcp,RStrand))
+  if (ISPOSSIBLE(tStartNpc,RStrand))
   {
     INEED(RnaR);
   }
   // ---------------------------
   //  InterG (from RnaF)
   // ---------------------------
-  if (ISPOSSIBLE(tStopNcp,FStrand))
+  if (ISPOSSIBLE(tStopNpc,FStrand))
   {
     INEED(RnaF);
   }
@@ -533,13 +533,13 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // RnaF (from InterGen)
   // ---------------------------
-  if (ISPOSSIBLE(tStartNcp,FStrand))
+  if (ISPOSSIBLE(tStartNpc,FStrand))
     INEED(InterGen);
 
    // ---------------------------
   // RnaR (from InterGen)
   // ---------------------------
-   if (ISPOSSIBLE(tStopNcp,RStrand))
+   if (ISPOSSIBLE(tStopNpc,RStrand))
     INEED(InterGen);
 
   // ---------------------------
@@ -940,11 +940,11 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // From 5' reverse
-  PICOMP(true,tStartNcp,RStrand, RnaR);
+  PICOMP(true,tStartNpc,RStrand, RnaR);
   PICOMP(true,tStart,RStrand, UTR5R);
 
   // From 3' direct
-  PICOMP(true,tStopNcp, FStrand, RnaF);
+  PICOMP(true,tStopNpc, FStrand, RnaF);
   PICOMP(true,tStop,    FStrand, UTR3F);
 
   // On reste intergenique
@@ -972,7 +972,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
 
   // On vient de l'intergenique. 
-  PICOMP(true,tStartNcp,FStrand, InterGen);
+  PICOMP(true,tStartNpc,FStrand, InterGen);
   //LBP[Strand ? ReverseIt[RnaF]: RnaF].Update(Data.sig[DATA::Start].weight[Signal::ForwardNo+Strand]);
 
   INSERT(RnaF);
@@ -985,7 +985,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
 
   // On vient de l'intergenique. 
-  PICOMP(true,tStopNcp, RStrand, InterGen);
+  PICOMP(true,tStopNpc, RStrand, InterGen);
 
   //LBP[Strand ? ReverseIt[RnaR]: RnaR].Update(Data.sig[DATA::Start].weight[Signal::ReverseNo-Strand]);
   INSERT(RnaR);

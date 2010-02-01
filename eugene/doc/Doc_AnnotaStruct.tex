@@ -20,7 +20,7 @@ The high-level entries allow to take into account information on:
   translation stop and splice sites) that may come from other gene
   predictors that may predict CDS (either \emph{ab initio} or homology based
   predictors).
-\item \textbf{ncRNA} (involving non coding protein RNA region, ncRNA transcription start and ncRNA transcription stop).
+\item \textbf{ncRNA} (involving non protein coding RNA region, ncRNA transcription start and ncRNA transcription stop).
 \end{itemize}
 The high-level entries are actually automatically expanded in
 elementary (low-level) information as the plugin reads the data. The
@@ -51,7 +51,7 @@ AnnotaStruct.TranscriptFeature[0]  mRNA
 AnnotaStruct.Exon*[0]            1
 AnnotaStruct.Intron*[0]          2
 AnnotaStruct.CDS*[0]             3
-AnnotaStruct.ncpRNA*[0]          2
+AnnotaStruct.npcRNA*[0]          2
 AnnotaStruct.StartType[0]        p 
 AnnotaStruct.Start*[0]           0.1
 AnnotaStruct.StopType[0]         p 
@@ -64,10 +64,10 @@ AnnotaStruct.TrStartType[0]      p
 AnnotaStruct.TrStart*[0]         0.1
 AnnotaStruct.TrStopType[0]       p 
 AnnotaStruct.TrStop*[0]          0.1
-AnnotaStruct.TrStartNcpType[0]   p
-AnnotaStruct.TrStartNcp*[0]      0.1
-AnnotaStruct.TrStopNcpType[0]    p
-AnnotaStruct.TrStopNcp*[0]       0.1
+AnnotaStruct.TrStartNpcType[0]   p
+AnnotaStruct.TrStartNpc*[0]      0.1
+AnnotaStruct.TrStopNpcType[0]    p
+AnnotaStruct.TrStopNpc*[0]       0.1
 
 Sensor.AnnotaStruct.use       1         # Use one AnnotaStruct sensor instance
 Sensor.AnnotaStruct          1         # Sensor priority
@@ -95,8 +95,8 @@ signals, the following features are recognized:
 \item \texttt{don}: for donor splice sites.
 \item \texttt{ins}: for insertion (frameshift).
 \item \texttt{del}: for deletion (frameshift).
-\item \texttt{trStartNcp}: for ncRNA transcription starts.
-\item \texttt{trStopNcp}: for ncRNA transcription stops.
+\item \texttt{trStartNpc}: for ncRNA transcription starts.
+\item \texttt{trStopNpc}: for ncRNA transcription stops.
 \end{itemize}
 In this case, the start and the strand field are used to indicate the
 signal position. The score field is used to indicate the weight that
@@ -124,7 +124,7 @@ For contents edges, the following features are recognized:
 \item \texttt{utr3}: for 3' UTR.
 \item \texttt{utr}: for both 5' or 3' UTR.
 \item \texttt{intronutr}: for UTR introns.
-\item \texttt{ncrna}: for non coding protein RNA.
+\item \texttt{ncrna}: for non protein coding RNA.
 \end{itemize}
 The start and end fields together with the strand field delimit the
 region considered. All corresponding contents edges will be modified
@@ -205,12 +205,12 @@ are recognized:
   parameter values. The UTR5, UTR3 and coding exon contents edges are
   reweighted according to the \texttt{AnnotaStruct.Exon*} parameter
   value.
-\item \texttt{ncRNA}: a non coding protein RNA (at the moment, EuGene doesn't 
-predicted ncRNA intron). A non coding protein transcription start and stop are
+\item \texttt{ncRNA}: a non protein coding RNA (at the moment, EuGene doesn't 
+predicted ncRNA intron). A non protein coding transcription start and stop are
   generated at each respective extremities according to the
-  \texttt{AnnotaStruct.trStartNcp*} and \texttt{AnnotaStruct.trStopNcp*}
+  \texttt{AnnotaStruct.trStartNpc*} and \texttt{AnnotaStruct.trStopNpc*}
   parameter values. The ncRNA content edge is
-  reweighted according to the \texttt{AnnotaStruct.ncpRNA*} parameter
+  reweighted according to the \texttt{AnnotaStruct.npcRNA*} parameter
   value.
 \item \texttt{Intron.Any}: ?
 \end{itemize}
@@ -238,7 +238,7 @@ always be interpreted as score.
 AnnotaStruct.Exon*            i
 AnnotaStruct.Intron*          i
 AnnotaStruct.CDS*             i
-nnotaStruct.ncpRNA*           i
+nnotaStruct.npcRNA*           i
 AnnotaStruct.StartType        p 
 AnnotaStruct.Start*           i
 AnnotaStruct.StopType         p 
@@ -251,10 +251,10 @@ AnnotaStruct.TrStartType      p
 AnnotaStruct.TrStart*         i
 AnnotaStruct.TrStopType       p 
 AnnotaStruct.TrStop*          i
-AnnotaStruct.TrStartNcpType   p
-AnnotaStruct.TrStartNcp*      i
-AnnotaStruct.TrStopNcpType    p  
-AnnotaStruct.TrStopNcp*       i
+AnnotaStruct.TrStartNpcType   p
+AnnotaStruct.TrStartNpc*      i
+AnnotaStruct.TrStopNpcType    p  
+AnnotaStruct.TrStopNpc*       i
 \end{Verbatim}
 
 Here is the correspondance beetween GFF native AnnotaStruct features
@@ -276,7 +276,7 @@ Low-level information:
 \item \texttt{don}: 	SO:0000163 (donor)
 \item \texttt{ins}: 	SO:0000366 (insertion\_site)
 \item \texttt{del}: 	SO:0000687 (deletion\_junction)
-\item \texttt{trStartNcp} and \texttt{trStopNcp} : no corresponding feature
+\item \texttt{trStartNpc} and \texttt{trStopNpc} : no corresponding feature
 \end{itemize}
 High-level information:
 

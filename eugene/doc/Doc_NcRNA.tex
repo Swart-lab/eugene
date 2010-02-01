@@ -4,7 +4,7 @@
 \label{ncrna}
 \paragraph{Description}
 
-The plugin allows to take into account information from non coding protein RNA. 
+The plugin allows to take into account information from non protein coding RNA. 
 For each reading ncRNA region, it rewards the ncRNA tracks, and the ncRNA transcription start and stop signals at the region extemities.
 
 To activate the sensor, put the number of NcRNA instances you want to create to the parameter
@@ -13,9 +13,9 @@ To activate the sensor, put the number of NcRNA instances you want to create to 
 Here is an example of NcRNA parameters definition:
 \begin{Verbatim}[fontsize=\small]
 NcRNA.FileExtension[0]  ncrna
-NcRNA.NcpRna*[0]        1 
-NcRNA.TStartNcp*[0]     1
-NcRNA.TStopNcp*[0]      1	
+NcRNA.NpcRna*[0]        1 
+NcRNA.TStartNpc*[0]     1
+NcRNA.TStopNpc*[0]      1	
 NcRNA.format[0]         GFF3 # Mandatory
 
 Sensor.NcRNA.use        1
@@ -53,8 +53,8 @@ No filtering.
 \paragraph{Integration of information}
 
 At each position of a ncRNA region, the ncRNA content edge is reweighted according to the 
-\texttt{NcRNA.NcpRna*} parameter value. ncRNA transcription start and stop signals 
-are generated at each respective extremity according to the \texttt{NcRNA.TStartNcp*} and \texttt{NcRNA.TStopNcp*} parameter values.
+\texttt{NcRNA.NpcRna*} parameter value. ncRNA transcription start and stop signals 
+are generated at each respective extremity according to the \texttt{NcRNA.TStartNpc*} and \texttt{NcRNA.TStopNpc*} parameter values.
 
 
 \paragraph{Post analyse}

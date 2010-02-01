@@ -236,8 +236,8 @@ void Signals :: PrintS ()
   case DATA::Acc       : strcpy(t, "Don      "); break;
   case DATA::Ins       : strcpy(t, "Ins      "); break;
   case DATA::Del       : strcpy(t, "Del      "); break;
-  case DATA::tStartNcp : strcpy(t, "tStartNcp"); break;
-  case DATA::tStopNcp  : strcpy(t, "tStopNcp "); break;
+  case DATA::tStartNpc : strcpy(t, "tStartNpc"); break;
+  case DATA::tStopNpc  : strcpy(t, "tStopNpc "); break;
   }
   if (edge) s = '-';
   fprintf(stdout, "%d\t%s %c %s\n", pos, t, s, score);

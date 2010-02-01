@@ -68,7 +68,7 @@ class Feature
   bool      IsUTRIntron();
   bool      IsIntergenic();
   bool      IsTranscribedAndUnspliced();
-  bool      IsNcpRna();
+  bool      IsNpcRna();
   void      ComputePhase(int);
 };
 
@@ -93,7 +93,7 @@ class Gene
   int exLength;
   int geneNumber;
   bool isvariant; // true = is a splice variant
-  bool isNcpRna;   // true id it is a non protein coding rna
+  bool isNpcRna;   // true id it is a non protein coding rna
   int hasvariant; // has n splice variant (or is number n splice variant if is variant is true)
   std::vector <Feature*> vFea;
   

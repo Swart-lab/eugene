@@ -294,15 +294,15 @@ NStretch.maxLengthWithoutPenalty      5000
 #
 ###### NcRNA sensor parameters ####
 NcRNA.FileExtension[0]  ncrna
-NcRNA.NcpRna*[0] 1 
-NcRNA.TStartNcp*[0] 1
-NcRNA.TStopNcp*[0] 1	
+NcRNA.NpcRna*[0] 1 
+NcRNA.TStartNpc*[0] 1
+NcRNA.TStopNpc*[0] 1	
 NcRNA.format[0]        GFF3 # Mandatory
 #
 NcRNA.FileExtension[1]  trna
-NcRNA.NcpRna*[1] 1 
-NcRNA.TStartNcp*[1] 1
-NcRNA.TStopNcp*[1] 1	
+NcRNA.NpcRna*[1] 1 
+NcRNA.TStartNpc*[1] 1
+NcRNA.TStopNpc*[1] 1	
 NcRNA.format[1]        GFF3 # Mandatory
 #
 #################################################################
@@ -324,14 +324,14 @@ AnnotaStruct.TrStart*[0] 0
 AnnotaStruct.TrStartType[0] s
 AnnotaStruct.TrStop*[0] 0
 AnnotaStruct.TrStopType[0] s
-AnnotaStruct.TrStartNcp*[0] 0
-AnnotaStruct.TrStartNcpType[0] s
-AnnotaStruct.TrStopNcp*[0] 0
-AnnotaStruct.TrStopNcpType[0] s
+AnnotaStruct.TrStartNpc*[0] 0
+AnnotaStruct.TrStartNpcType[0] s
+AnnotaStruct.TrStopNpc*[0] 0
+AnnotaStruct.TrStopNpcType[0] s
 AnnotaStruct.Exon*[0] 0
 AnnotaStruct.Intron*[0] 0
 AnnotaStruct.CDS*[0] 0
-AnnotaStruct.ncpRNA*[0]  0
+AnnotaStruct.npcRNA*[0]  0
 AnnotaStruct.format[0]             GFF3
 #
 AnnotaStruct.FileExtension[1]      genefinder2
@@ -348,14 +348,14 @@ AnnotaStruct.TrStart*[1] 0
 AnnotaStruct.TrStartType[1] s
 AnnotaStruct.TrStop*[1] 0
 AnnotaStruct.TrStopType[1] s
-AnnotaStruct.TrStartNcp*[1] 0
-AnnotaStruct.TrStartNcpType[1] s
-AnnotaStruct.TrStopNcp*[1] 0
-AnnotaStruct.TrStopNcpType[1] s
+AnnotaStruct.TrStartNpc*[1] 0
+AnnotaStruct.TrStartNpcType[1] s
+AnnotaStruct.TrStopNpc*[1] 0
+AnnotaStruct.TrStopNpcType[1] s
 AnnotaStruct.Exon*[1] 0
 AnnotaStruct.Intron*[1] 0
 AnnotaStruct.CDS*[1] 4
-AnnotaStruct.ncpRNA*[1]  0
+AnnotaStruct.npcRNA*[1]  0
 AnnotaStruct.format[1]             GFF3
 #
 AnnotaStruct.FileExtension[2]      genefinder3
@@ -372,14 +372,14 @@ AnnotaStruct.TrStart*[2] 0
 AnnotaStruct.TrStartType[2] s
 AnnotaStruct.TrStop*[2] 0
 AnnotaStruct.TrStopType[2] s
-AnnotaStruct.TrStartNcp*[2] 0
-AnnotaStruct.TrStartNcpType[2] s
-AnnotaStruct.TrStopNcp*[2] 0
-AnnotaStruct.TrStopNcpType[2] s
+AnnotaStruct.TrStartNpc*[2] 0
+AnnotaStruct.TrStartNpcType[2] s
+AnnotaStruct.TrStopNpc*[2] 0
+AnnotaStruct.TrStopNpcType[2] s
 AnnotaStruct.Exon*[2] 1
 AnnotaStruct.Intron*[2] 1
 AnnotaStruct.CDS*[2] 1
-AnnotaStruct.ncpRNA*[2]  0
+AnnotaStruct.npcRNA*[2]  0
 AnnotaStruct.format[2]             GFF3
 #
 AnnotaStruct.FileExtension[3]      genefinder4
@@ -396,14 +396,14 @@ AnnotaStruct.TrStart*[3] 1
 AnnotaStruct.TrStartType[3] s
 AnnotaStruct.TrStop*[3] 1
 AnnotaStruct.TrStopType[3] s
-AnnotaStruct.TrStartNcp*[3] 0
-AnnotaStruct.TrStartNcpType[3] s
-AnnotaStruct.TrStopNcp*[3] 0
-AnnotaStruct.TrStopNcpType[3] s
+AnnotaStruct.TrStartNpc*[3] 0
+AnnotaStruct.TrStartNpcType[3] s
+AnnotaStruct.TrStopNpc*[3] 0
+AnnotaStruct.TrStopNpcType[3] s
 AnnotaStruct.Exon*[3] 1
 AnnotaStruct.Intron*[3] 1
 AnnotaStruct.CDS*[3] 0
-AnnotaStruct.ncpRNA*[3]  0
+AnnotaStruct.npcRNA*[3]  0
 AnnotaStruct.format[3]             GFF3
 #
 ##### IfElse #####

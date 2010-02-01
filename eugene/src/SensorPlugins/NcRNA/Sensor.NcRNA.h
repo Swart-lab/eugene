@@ -32,7 +32,7 @@ class SensorNcRNA : public Sensor
   char  *fileExt; // File name extension
   std::vector <Contents*> vCon;
   std::vector <Signals*>  vSig;
-  char tStartNcp[20], tStopNcp[20], ncpRna[20];
+  char tStartNpc[20], tStopNpc[20], npcRna[20];
   int   iSig, iCon;
 
   void ReadNcRNAGff3(GeneFeatureSet & geneFeatureSet, int len);

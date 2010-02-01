@@ -35,12 +35,12 @@ class SensorAnnotaStruct : public Sensor
   string  transFeatName;
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
-  char tStartNcpPAR[20], tStopNcpPAR[20];
-  float exonPAR,      intronPAR,     cdsPAR, ncpRnaPAR;
-  int  exonInline,      intronInline,     cdsInline, ncpRnaInline;
+  char tStartNpcPAR[20], tStopNpcPAR[20];
+  float exonPAR,      intronPAR,     cdsPAR, npcRnaPAR;
+  int  exonInline,      intronInline,     cdsInline, npcRnaInline;
   int  startInline,      stopInline,     accInline;
   int  donInline,      tStartInline,     tStopInline;
-  int  tStartNcpInline, tStopNcpInline;
+  int  tStartNpcInline, tStopNpcInline;
   void ReadAnnotaStruct(char[FILENAME_MAX+1], int seqlen);
   void FillOntologyTerm(GeneFeatureSet & geneFeatureSet);
   void ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet, int len);

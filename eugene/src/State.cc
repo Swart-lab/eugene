@@ -278,7 +278,7 @@ bool State::IsTermExon()
 // ------------------------
 //  Return true if it is a non protein coding rna
 // ------------------------
-bool State::IsNcpRna()
+bool State::IsNpcRna()
 {
 	if (this->state == RnaF || this->state == RnaR)
 	{

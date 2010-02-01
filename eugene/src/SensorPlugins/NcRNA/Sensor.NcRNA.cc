@@ -47,9 +47,9 @@ SensorNcRNA :: ~SensorNcRNA ()
 void SensorNcRNA :: Init (DNASeq *X)
 {
   // Read parameters
-  strcpy(tStartNcp, PAR.getC("NcRNA.TStartNcp*", GetNumber()));
-  strcpy(tStopNcp,  PAR.getC("NcRNA.TStopNcp*",  GetNumber()));
-  strcpy(ncpRna,    PAR.getC("NcRNA.NcpRna*",    GetNumber()));
+  strcpy(tStartNpc, PAR.getC("NcRNA.TStartNpc*", GetNumber()));
+  strcpy(tStopNpc,  PAR.getC("NcRNA.TStopNpc*",  GetNumber()));
+  strcpy(npcRna,    PAR.getC("NcRNA.NpcRna*",    GetNumber()));
 
   char tempname[FILENAME_MAX+1];
   fileExt      = PAR.getC("NcRNA.FileExtension",    GetNumber());
@@ -185,8 +185,8 @@ void SensorNcRNA :: ReadNcRNAGff3(GeneFeatureSet & geneFeatureSet, int len)
     startC--;
     endC--;
 
-    vCon.push_back( new Contents(startC, endC, DATA::RNAF+edge, new float(atof(ncpRna))));
-    vSig.push_back( new Signals (startS-1, DATA::tStartNcp, edge, tStartNcp) );
-    vSig.push_back( new Signals (endS,     DATA::tStopNcp,  edge, tStopNcp)  );
+    vCon.push_back( new Contents(startC, endC, DATA::RNAF+edge, new float(atof(npcRna))));
+    vSig.push_back( new Signals (startS-1, DATA::tStartNpc, edge, tStartNpc) );
+    vSig.push_back( new Signals (endS,     DATA::tStopNpc,  edge, tStopNpc)  );
   }
 }

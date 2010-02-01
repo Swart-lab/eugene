@@ -187,9 +187,9 @@ bool Feature :: IsCodingExon()
 // ------------------------
 //  Return true if the feature is a non coding rna
 // ------------------------
-bool Feature :: IsNcpRna()
+bool Feature :: IsNpcRna()
 {
-	return this->featureState->IsNcpRna();
+	return this->featureState->IsNpcRna();
 }
 
 // ------------------------
@@ -259,7 +259,7 @@ Gene :: Gene ()
 {
 	complete   = 0;
 	isvariant  = false;
-	isNcpRna    = false;
+	isNpcRna    = false;
 	hasvariant = 0;
 	tuStart    = 0;
 	tuEnd      = 0;
@@ -557,9 +557,9 @@ void Gene :: AddFeature ( signed char state, int start, int end )
 		else if ( featState.IsSnglExon() ) complete += 3;
 		else if ( featState.IsTermExon() ) complete += 2;
 	}
-	if ( featState.IsNcpRna() )
+	if ( featState.IsNpcRna() )
 	{
-		this->isNcpRna = true;
+		this->isNpcRna = true;
 		complete += 3;
 	}
 }
@@ -576,7 +576,7 @@ void Gene :: Update ( int seqLength )
 	// Compute Gene informations: [ex|in]Number, [ex|in|utr]Length, ..
 	for ( int i=0; i<nbFea(); i++ )
 	{
-		if ( vFea[i]->IsCodingExon()  || vFea[i]->IsNcpRna() )
+		if ( vFea[i]->IsCodingExon()  || vFea[i]->IsNpcRna() )
 		{
 			exNumber++;
 			exLength += vFea[i]->end - vFea[i]->start + 1;
@@ -657,7 +657,7 @@ void Gene :: PrintInfo ( FILE *F, int nb, char *seqName )
 			strcpy ( comp, "?" );
 	}
 
-	if ( this->isNcpRna ) // Just display start and stop of the rna
+	if ( this->isNpcRna ) // Just display start and stop of the rna
 	{
 		fprintf ( F,"%s.%d  \tEuGene_misc\tncRNA\t%d\t%d\t%d\t%c\t.\t",
 		          seqName, nb, cdsStart+1, cdsEnd+1, exLength, vFea[0]->strand );
@@ -944,7 +944,7 @@ void Prediction :: UpdateAndDelete()
 		int empty_gene = ( ( *geneindex )->nbFea() < 1 );
 		if ( ! empty_gene )
 			( *geneindex )->Update ( this->X->SeqLen );
-		if ( ( *geneindex )->isNcpRna == false &&
+		if ( ( *geneindex )->isNpcRna == false &&
 		        ( ( *geneindex )->exLength <= MinCDSLen ||  empty_gene || ( RemoveFrags && ( ( *geneindex )->complete != 3 ) ) ) )
 		{
 			nbGene--;
@@ -1168,7 +1168,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append )
 		if ( vGene[i]->nbFea() > 0 )
 			gene_line.setStrand ( vGene[i]->vFea[0]->strand );
 		std::string gene_id;
-		if ( vGene[i]->isNcpRna )
+		if ( vGene[i]->isNpcRna )
 		{
 			gene_id = Sofa::getName ( SOFA_NCRNA ) + ":" + gene_name;
 			gene_line.setStart ( vGene[i]->trStart+1+offset );
@@ -1467,7 +1467,7 @@ void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 			          vGene[i]->vFea[j]->strand,
 			          start+offset, end+offset, end - start +1 );
 
-			if ( featState->IsUTR() || featState->IsNcpRna() )
+			if ( featState->IsUTR() || featState->IsNpcRna() )
 			{
 				fprintf ( OUT,"   NA      NA" ); // No phase No frame
 				fprintf ( OUT,"      NA      NA " );  // No Don No Acc
@@ -1512,7 +1512,7 @@ void Prediction :: PrintEgnS ( FILE *OUT )
 			fprintf ( OUT,"\n" );
 		for ( int j=0; j<vGene[i]->nbFea(); j++ )
 		{
-			if ( vGene[i]->vFea[j]->IsCodingExon() || vGene[i]->vFea[j]->IsNcpRna() )
+			if ( vGene[i]->vFea[j]->IsCodingExon() || vGene[i]->vFea[j]->IsNpcRna() )
 			{
 				start = offset + vGene[i]->vFea[j]->start;
 				end   = offset + vGene[i]->vFea[j]->end;
@@ -1938,7 +1938,7 @@ void Prediction :: PlotPred ()
 
 			for ( int k=start; k<end; k++ )
 			{
-				if ( vGene[i]->vFea[j]->IsNcpRna() ) // change the color if its a ncprna
+				if ( vGene[i]->vFea[j]->IsNpcRna() ) // change the color if its a npcrna
 					PlotBarI ( k, featureFrame, 0.4, predWidth, 11 );
 				else
 					PlotBarI ( k, featureFrame, 0.4, predWidth, 1 );
