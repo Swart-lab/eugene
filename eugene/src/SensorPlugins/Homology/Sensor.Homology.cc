@@ -142,15 +142,15 @@ SensorHomology :: SensorHomology(int n, DNASeq *X) : Sensor(n)
     nmax=0;
     for (i=0 ; i<=Len ; i++) {
       if (TblastxNumber[j][i] > 0) {
-	if (contigbeg == 1) {
-	  nmax = hitsmaxnumber(i,j,Len);
-	}
-	contigbeg=0;
-	TblastxScore[j][i] /= nmax;
+        if (contigbeg == 1) {
+          nmax = hitsmaxnumber(i,j,Len);
+        }
+      contigbeg=0;
+      TblastxScore[j][i] /= nmax;
       }
       else {
-	nmax=0;
-	contigbeg=1;
+        nmax=0;
+        contigbeg=1;
       }
     }
   }
@@ -188,7 +188,6 @@ void SensorHomology:: ReadHomology (char name[FILENAME_MAX+1],DNASeq *X,  const 
   paire[0]=paire[1]= '0';
   paire[2]='\0';
   char tempname[FILENAME_MAX+1];
-  int nmax;
   int contigbeg;
   char *tmpdir = new char[FILENAME_MAX+1];
 
