@@ -24,6 +24,9 @@ foreach TEST $FunctionalTestList {
     puts "Performing $TEST functional test"
 
     foreach seq $SEQ($TEST) {
+	# Restore initial parameters values
+	InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
+
 	# Local variables 
 	set test_std 0
 	set test_png 0
@@ -38,6 +41,7 @@ foreach TEST $FunctionalTestList {
 
    	# Run EuGene
     	catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) > $TRACE_DIR/$FILE_REF($TEST) }
+
 
 	# Remove the first lines related to version number
 	#RemoveFirstLines $TRACE_DIR/$FILE_REF($TEST)
@@ -63,11 +67,9 @@ foreach TEST $FunctionalTestList {
 	    }
 	    catch {exec rm $IMG($TEST)}
 	}
-
-	# Restore initial parameters values
-	InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
     }
 }
+
 
 # Remove temporary files (misc_info)
 set seq [eval exec ls .]
