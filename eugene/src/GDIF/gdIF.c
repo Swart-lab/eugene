@@ -17,6 +17,7 @@
    Contents: Functions for interfacing with libGD
    ------------------------------------------------------------------*/
 
+#include <config.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gd.h>
@@ -25,11 +26,9 @@
 #include <gdfontmb.h>
 #include <gdfontl.h>
 #include <gdfontg.h>
-#ifdef __sun__
-#include <strings.h>
-#endif
-#ifdef __linux__
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
 #endif
 
 #define LMargin 20
