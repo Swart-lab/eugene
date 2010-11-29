@@ -302,6 +302,9 @@ sensitive. The definition order is not important.
   version.
 
 \item \texttt{EuGene.organism}: name of the considered organism.
+
+\item \texttt{EuGene.mode}: Prokaryote or Eukaryote. The ``\texttt{-P}'' command 
+line flag activates the Prokaryote mode.  
    
 \item \texttt{EuGene.PluginsDir}: specify the location of the directory
   where plugins could be found (``\texttt{.so}'' files, sensor specific 
@@ -314,20 +317,27 @@ sensitive. The definition order is not important.
   
 \item \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
   \texttt{EuGene.InterPrior}, \texttt{EuGene.FivePri\-mePrior},
-  \texttt{EuGene.ThreePrimePrior}: prior on the initial/final state of
+  \texttt{EuGene.ThreePrimePrior}, \texttt{EuGene.RnaPrior}, 
+  \texttt{EuGene.BiCodingPrior}, \texttt{EuGene.UIRPrior}: 
+  prior on the initial/final state of
   prediction. The ``\texttt{-s}'' command line flag can override these
   priors by setting all the non intergenic priors to $0.0$. This
-  forces \EuGene\ to start and and its prediction in intergenic mode.
+  forces \EuGene\ to start and end its prediction in intergenic mode.
   
 \item \texttt{EuGene.InitExDist}, \texttt{EuGene.IntrExDist},
   \texttt{EuGene.TermExDist}, \texttt{EuGene.SnglExDist},
   \texttt{EuGene.IntronDist}, \texttt{EuGene.InterDist},
-  \texttt{EuGene.5PrimeDist}, \texttt{EuGene.3PrimeDist}: \EuGene\ 
+  \texttt{EuGene.5PrimeDist}, \texttt{EuGene.3PrimeDist}, 
+  \texttt{EuGene.RnaDist}, \texttt{EuGene.OverlapDist}, \texttt{EuGene.UIRDist}: \EuGene\ 
   can use explicit penalty distributions on the length of the elements
   predicted. This can be an initial exon, and intermediary exon, a
-  terminal exon, a single exon gene, an intron an intergenic region, a
-  5' UTR region or a 3' UTR region. Each parameter specifies the
+  terminal exon, a single exon gene, an intron, an intergenic region, a
+  5' UTR region, a 3' UTR region, a non coding protein RNA, an overlapping exons
+  region or a untranslated intern region (UIR). Each parameter specifies the
   filename of an explicit penalty distribution file (see the following section). %TBD
+  
+\item \texttt{EuGene.CodonTable}: filename of the file which contains 
+the codon table. The path is relative to EUGENEDIR. 
   
 \item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
   predicting genes containing in-frame spliced STOPs. This is
@@ -490,17 +500,29 @@ distribution region with penalty 0.0 for 3, 2.0 for 4, 3.0 for 5
 and the slope is 1, the rest of the distribution will be linear
 with slope 1.
 
+\section{EuGène prokaryote mode}
+ 
+Since version 4, EuGène is able to predict genes for prokaryote genomes and operon structure.
+Activate this mode by puting 'Prokaryote' to the \texttt{EuGene.mode} attributes
+or by using the flag -P in the command line.
+Two genes predicted on the same strand whose distance is inferior to \texttt{Operon.maxDistance} 
+are automatically consider as members of the same operon.   
+
+ \texttt{EuGene.mode}
+
 \section{Splice variant prediction}
 
 Since version 3.4, \EuGene\ allows to predict splice variants based purely on
-experimental data (alternative transcripts observed through EST). The feature
-is still experimental and is activated using the \texttt{-a} flag or 
-equivalently by setting the parameter \texttt{AltEst.use} to 1 or TRUE.\index{CmdFlags}{[splice isoform prediction] a}
+experimental data (alternative transcripts observed through EST or RNAseq data). 
+The feature is still experimental and is activated using the \texttt{-a} flag or 
+equivalently by setting the parameter \texttt{AltEst.use} to 1 or 
+TRUE.\index{CmdFlags}{[splice isoform prediction] a}
 
 In this case, \EuGene\ will look for a file with the same name as the sequence
 file and with a suffix '\texttt{.alt.est}'. This file has the same format as
 the '\texttt{.est}' used by the Est pugin (see later) and contains information
-about genomic region with high quality similarity with EST. The spliced 
+about genomic region with high quality similarity with EST. GFF3 format is 
+allowed, by setting \texttt{AltEst.format} value to GFF3. The spliced 
 alignment algorithm used to create this file should be of high quality, 
 with clear exon-intron frontiers associated with splice sites (use for example
 GeneSeqer or faster GenomeThreader).
@@ -514,9 +536,14 @@ also output.
 
 This feature is controlled by a number of parameters with the '\texttt{AltEst}'
 prefix in the parameter file. The only parameters that you could change are the
-parametrs regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength}, \texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn}, \texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves.
+parameters regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength}, 
+\texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn}, 
+\texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves
+If the ESTs are oriented, you can activate the parameter \texttt{AltEst.strandSpecific}.
 
-Every alignement is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLength} on the first and last hit to account for possible spurious short matches. If these hits are shorter than this amount, they are removed from the available data.
+Every alignment is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLength} 
+on the first and last hit to account for possible spurious short matches. 
+If these hits are shorter than this amount, they are removed from the available data.
 
 Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and the associated information found in
 the \texttt{doc/Sequences/} directory, we can test this as follows:
