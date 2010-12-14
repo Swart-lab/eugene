@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------
 
 
+InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
+
 foreach TEST $AllSensorsList {
 
     # To follow execution
