@@ -60,6 +60,7 @@ if {$key=="Y"} {
 ###########################################################################
 # Copy locally the default parameter file
 exec cp  ${EUGENE_DIR}/cfg/eugene.par $EUGENE_TEST_PAR
+exec cp  ${EUGENE_DIR}/cfg/eugene_prok.par $EUGENE_TEST_PROK_PAR
 # Init parameters values
 InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
@@ -143,15 +144,19 @@ foreach sensor $AllSensorsList {
 ########################      FUNCTIONAL TESTS      ####################
 ########################################################################
 foreach TEST $FunctionalTestList {
-
+	
+	if {$TEST == "ProOverlapGene"} {
+		exec cp $EUGENE_TEST_PROK_PAR $EUGENE_TEST_PAR
+	}
+   
     # Preparation of the parameter file with the correct sensors
     foreach sensor $SensorsList($TEST) \
 	{set NewValue${TEST}(Sensor.${sensor}.use) 1}
-    ModifyParaValue $EUGENE_TEST_PAR  NewValue${TEST}
+    ModifyParaValue $EUGENE_TEST_PAR NewValue${TEST}
 
     # Get the sequence length to have only one png file
     set l [GetSeqLength $SEQ_DIR/$SEQ($TEST)]
-    
+
     # Save output of software and treat them
     catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_TEST_PAR $OPTIONS($TEST) -l $l $SEQ_DIR/$SEQ($TEST) > tmp%FunctionalTest}
 
@@ -174,15 +179,31 @@ foreach TEST $FunctionalTestList {
 
     # 3/ reference file in sp
     if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}]} {
-	exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
+		exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
     } elseif {[catch {exec diff $OUTPUT_DIR/Output_${TEST} tmp%FunctionalTest}]} {
-	AskReplace $OUTPUT_DIR/Output_${TEST}
-	if {[gets stdin] == "Y"} {
-	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
-	} else {
-	    exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}.new
-	}
+		AskReplace $OUTPUT_DIR/Output_${TEST}
+		if {[gets stdin] == "Y"} {
+			exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}
+		} else {
+			exec cp tmp%FunctionalTest $OUTPUT_DIR/Output_${TEST}.new
+		}
     }
+
+	if { $TEST == "ProOverlapGene" } {
+		 if {$erase == 1 || ![file exists $OUTPUT_DIR/Output_${TEST}.gff3]} {
+			 exec cp $GFF3($TEST) $OUTPUT_DIR/Output_${TEST}.gff3
+		 } elseif {[catch {exec diff $GFF3($TEST) $OUTPUT_DIR/Output_${TEST}.gff3}]} {
+			 AskReplace $OUTPUT_DIR/Output_${TEST}.gff3
+			 if {[gets stdin] == "Y"} {
+				 eval exec cp $GFF3($TEST) $OUTPUT_DIR/Output_${TEST}.gff3
+			 } else {
+				 eval exec cp $GFF3($TEST) $OUTPUT_DIR/Output_${TEST}.gff3.new
+			 }
+		 } 
+		# Remove gff3 file
+		exec rm $GFF3($TEST)
+	}
+
     # Remove temporary files tmp%stderr tmp%stdout 
     exec rm tmp%FunctionalTest
 

@@ -20,10 +20,10 @@
 
 set test 0
 
+InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
 
 # Run EuGene
 catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR -Z test test > tmp%stdout}
-
 # Checking the output
 set test [diff $OUTPUT_DIR/$FILE_REF(Optimization) tmp%stdout]
 if {$test == 1} {

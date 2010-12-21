@@ -24,6 +24,7 @@ set timeout 1000 ;# DejaGnu variable, time out if no response for spawn
 source Test/config/TestVar.tcl
 source Test/config/TestProc.tcl
 exec cp -f cfg/eugene.par ${EUGENE_TEST_PAR}
+exec cp -f cfg/eugene_prok.par ${EUGENE_TEST_PROK_PAR}
 ##############################################################################
 
 # Init parameters values

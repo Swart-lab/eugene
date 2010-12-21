@@ -19,7 +19,8 @@
 
 
 ############################# Environment variables ###########################
-set EUGENE_TEST_PAR eugeneTest.par
+set EUGENE_TEST_PAR      eugeneTest.par
+set EUGENE_TEST_PROK_PAR eugeneTestProk.par
 set EUGENE src/eugene
 
 if {$action=="Test"} {
@@ -40,7 +41,7 @@ if {$action=="Test"} {
 set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
 		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
 		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
-		    Tester Transcript NcRNA}
+		    Tester Transcript NcRNA ProStart}
 
 ############################################################################
 # At the moment, NcRNA  is not in this list because the gff3 format for this 
@@ -53,7 +54,26 @@ set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA}
+set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA ProOverlapGene}
+
+##################### ProOverlapGene test variables #########################
+set SensorsList(ProOverlapGene) {MarkovIMM ProStart EuStop Transcript BlastX}
+set SEQ(ProOverlapGene) {SMc.1541000-1552500.fasta}
+set IMG(ProOverlapGene) {SMc.1541000-1552500.000.png}
+set GFF3(ProOverlapGene) {SMc.1541000-1552500.gff3}
+set FILE_REF(ProOverlapGene) Output_ProOverlapGene
+set OPTIONS(ProOverlapGene) "-pog -g"
+set NewValueProOverlapGene(MarkovIMM.matname\[0\]) Sm.mat	
+set NewValueProOverlapGene(EuStop.stopP*) 4.6644
+set NewValueProOverlapGene(Transcript.Start*)	   4.6644
+set NewValueProOverlapGene(Transcript.Stop*)	   4.6644
+set NewValueProOverlapGene(Transcript.StartNpc*)   4.6644
+set NewValueProOverlapGene(Transcript.StopNpc*)    4.6644
+set NewValueProOverlapGene(BlastX.levels)	   01
+set NewValueProOverlapGene(BlastX.level0*)	0.7756
+set NewValueProOverlapGene(BlastX.level1*)	0.0506
+set NewValueProOverlapGene(ProStart.alpha*)	0.8733
+set NewValueProOverlapGene(ProStart.beta*)	7.7582
 
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
@@ -128,6 +148,9 @@ set SensorsList(SeqNcRNA) {MarkovIMM MarkovConst NStart Transcript NcRNA EuStop 
 set SEQ(SeqNcRNA) {seq14ac002535g4g5.tfa}
 set IMG(SeqNcRNA) {seq14ac002535g4g5.000.png}
 set FILE_REF(SeqNcRNA) Output_SeqNcRNA
+set NewValueSeqNcRNA(NcRNA.NpcRna*)     0.1
+set NewValueSeqNcRNA(NcRNA.TStartNpc*) 100
+set NewValueSeqNcRNA(NcRNA.TStopNpc*) 100
 set OPTIONS(SeqNcRNA) "-po -g -a"
 ######################################################################################### Parameters optimization ##############################
 set FILE_REF(Optimization) Output_Optimization

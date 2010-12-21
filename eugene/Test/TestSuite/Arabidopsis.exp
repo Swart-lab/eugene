@@ -20,6 +20,9 @@
 
 foreach TEST $ArabidopsisTestList {
 
+    # Restore initial parameters values
+    InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
+
     # To follow execution
     puts "Performing $TEST Arabidopsis test"
 
@@ -32,6 +35,7 @@ foreach TEST $ArabidopsisTestList {
     
     # Run EuGene
     catch {eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS($TEST) $SEQ($TEST) 2> tmp%stderr > tmp%stdout }
+
     catch {exec rm tmp%stderr}
     if {$TEST == "Araset"} {
 		
@@ -64,8 +68,4 @@ foreach TEST $ArabidopsisTestList {
 	    exec rm $f
 	}
     }
-
-    # Restore initial parameters values
-    InitParameterFile $EUGENE_TEST_PAR $AllSensorsList $EUGENE_DIR
-
 }

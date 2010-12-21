@@ -96,6 +96,9 @@ set space " "
 # Avoid to set set EuGene.version
 set NewValue1(EuGene.organism) 		Arabidopsis
 set NewValue1(EuGene.sloppy)            0
+set NewValue1(EuGene.mode) Eukaryote
+set NewValue1(EuGene.VerboseGC) 0
+set NewValue1(EuGene.GCLatency) 100000
 ##### Lengths #####
 set NewValue1(EuGene.InitExDist)	init.dist
 set NewValue1(EuGene.IntrExDist)	intr.dist
@@ -106,6 +109,8 @@ set NewValue1(EuGene.InterGDist)	intergenic.dist
 set NewValue1(EuGene.5PrimeDist)	utr.dist
 set NewValue1(EuGene.3PrimeDist)	utr.dist
 set NewValue1(EuGene.RnaDist)	    rna.dist
+set NewValue1(EuGene.OverlapDist)	overlap.dist
+set NewValue1(EuGene.UIRDist)	    uir.dist
 ##### Priors #####
 set NewValue1(EuGene.SplicedStopPen)    1e999.0
 set NewValue1(EuGene.ExonPrior)	        0.18	
@@ -114,7 +119,13 @@ set NewValue1(EuGene.InterPrior)	0.4
 set NewValue1(EuGene.FivePrimePrior)	0.03
 set NewValue1(EuGene.ThreePrimePrior)	0.07
 set NewValue1(EuGene.RnaPrior)	0.15
+set NewValue1(EuGene.BiCodingPrior)    0.00
+set NewValue1(EuGene.UIRPrior)         0.00
+####### Usage table #######
+set NewValue1(EuGene.CodonTable)    euk.codontable
 ##### Output control ######
+set NewValue1(Output.RemoveFrags)	0
+set NewValue1(Output.UTRtrim) 0
 set NewValue1(Output.MinCDSLen)		60
 set NewValue1(Output.truncate)		5
 set NewValue1(Output.stepid)		1
@@ -129,9 +140,19 @@ set NewValue1(Output.window)		48
 set NewValue1(Output.format)		l
 set NewValue1(Output.offset)		0
 set NewValue1(Output.normopt)		1
+set NewValue1(Output.intron)		0
+set NewValue1(Output.format)		l
 set NewValue1(Output.Prefix)		./
 set NewValue1(Output.webdir)            LOCAL
-set NewValue1(Output.intron)		0
+##### Evaluation mode parameters ######
+set NewValue1(Fitness.wsng)  1
+set NewValue1(Fitness.wsne)  1
+set NewValue1(Fitness.wsnn)  0
+set NewValue1(Fitness.wspg)  1
+set NewValue1(Fitness.wspe)  1
+set NewValue1(Fitness.wspn)  0
+##### Operon parameter ################
+set NewValue1(Operon.maxDistance) 10 
 #################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
@@ -150,12 +171,14 @@ set NewValue1(PepSignal.startP*)	1
 set NewValue1(PepSignal.startB*)	0
 ##### SpliceMachine parameters #####
 set NewValue1(SMachine.cmd)		"splicemachine.pl "
+set NewValue1(SMachine.isScaled)	1
 set NewValue1(SMachine.accP*)		0.102032725565
 set NewValue1(SMachine.accB*)		5.585
 set NewValue1(SMachine.donP*)		0.020202707318
 set NewValue1(SMachine.donB*)		27.670
 set NewValue1(SMachine.startP*)	        0.052
 set NewValue1(SMachine.startB*)	        0.308
+set NewValue1(SMachine.tSpliceB*)	0.0
 ##### NetGene2 parameters #####
 set NewValue1(NG2.accP*\[0\])     0.903
 set NewValue1(NG2.accB*\[0\])     5.585
@@ -168,6 +191,14 @@ set NewValue1(NG2.donB*\[1\])	27.670
 ##### NetStart parameters #####
 set NewValue1(NStart.startP*)	0.052
 set NewValue1(NStart.startB*)	0.308
+##### ProStart parameters #####
+set NewValue1(ProStart.matchlen)	14
+set NewValue1(ProStart.matchoffset)	3
+set NewValue1(ProStart.RBSPattern) attcctcca
+set NewValue1(ProStart.alpha*)	0.4
+set NewValue1(ProStart.beta*)	6.0
+set NewValue1(ProStart.stackFile) stack.dat
+set NewValue1(ProStart.loopFile) loop.dat
 ##### PatConst sensor (uniform penalties) #####
 set NewValue1(PatConst.type\[0\])	start
 set NewValue1(PatConst.pat\[0\])	ATG
@@ -205,6 +236,8 @@ set NewValue1(StartWAM.ScalePenalty*)		-3.1439
 ##### Transcript parameters #####
 set NewValue1(Transcript.Start*)	4.155
 set NewValue1(Transcript.Stop*)		4.155
+set NewValue1(Transcript.StartNpc*)		30
+set NewValue1(Transcript.StopNpc*)		30
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
 #################################################################
@@ -235,6 +268,8 @@ set NewValue1(Est.SpliceBoost*\[0\]) 0.0
 set NewValue1(Est.StrongDonor\[0\])	0.95
 set NewValue1(Est.MinDangling\[0\])  10
 set NewValue1(Est.MaxIntron\[0\])    15000
+set NewValue1(Est.MaxInternalIntron\[0\])   15000
+set NewValue1(Est.mRNAOnly\[0\]) 1
 set NewValue1(Est.FileExtension\[0\]) .est
 set NewValue1(Est.PostProcess\[1\])	0
 set NewValue1(Est.PPNumber\[1\])     2
@@ -246,6 +281,8 @@ set NewValue1(Est.SpliceBoost*\[1\]) 0.0
 set NewValue1(Est.StrongDonor\[1\])	0.95
 set NewValue1(Est.MinDangling\[1\])  10
 set NewValue1(Est.MaxIntron\[1\])    15000
+set NewValue1(Est.MaxInternalIntron\[1\])   15000
+set NewValue1(Est.mRNAOnly\[1\]) 1
 set NewValue1(Est.FileExtension\[1\]) .est2
 ##### Homology Sensor parameters #####
 set NewValue1(Homology.TblastxP*\[0\]) 	0
@@ -253,7 +290,6 @@ set NewValue1(Homology.TblastxB*\[0\]) 	0.0595
 set NewValue1(Homology.protmatname\[0\])	BLOSUM80
 set NewValue1(Homology.MaxHitLen\[0\])	15000
 set NewValue1(Homology.FileExtension\[0\]) .tblastx
-
 set NewValue1(Homology.TblastxP*\[1\]) 	0
 set NewValue1(Homology.TblastxB*\[1\]) 	0.0595
 set NewValue1(Homology.protmatname\[1\])	BLOSUM80
@@ -264,16 +300,17 @@ set NewValue1(Homology.FileExtension\[1\]) .tblastx2
 set NewValue1(MarkovConst.minGC\[0\])	0
 set NewValue1(MarkovConst.maxGC\[0\])	100
 set NewValue1(MarkovConst.Coding*) 	1.0
-set NewValue1(MarkovConst.IntronUTR*)	0.98
 set NewValue1(MarkovConst.Intron*) 	1.0
+set NewValue1(MarkovConst.IntronUTR*)	0.98
 set NewValue1(MarkovConst.UTR5*)	0.999
 set NewValue1(MarkovConst.UTR3*) 	0.999
+set NewValue1(MarkovConst.UIR*)	0.99
 set NewValue1(MarkovConst.Inter*) 	1.0
 ##### Interpolated Markov Models parameters #####
 set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
 set NewValue1(MarkovIMM.minGC\[0\])	0
 set NewValue1(MarkovIMM.maxGC\[0\])	100
-set NewValue1(MarkovIMM.useM0asIG\[0\])	0
+set NewValue1(MarkovIMM.IntergenicModel\[0\])	2
 set NewValue1(MarkovIMM.maxOrder\[0\])	8
 ##### Markov proteic model parameters #####
 set NewValue1(MarkovProt.matname\[0\])	swissprot.maxorder2.bin
@@ -285,17 +322,21 @@ set NewValue1(MarkovProt.order)        2
 set NewValue1(Repeat.UTRPenalty*)	0.0
 set NewValue1(Repeat.IntronPenalty*)	0.1
 set NewValue1(Repeat.ExonPenalty*)	1.0
+#### NStretch parameters #####
+set NewValue1(NStretch.stretchPenalty) 1.0
+set NewValue1(NStretch.maxLengthWithoutPenalty)      5000
 #### NcRNA sensor parameters ####
 set NewValue1(NcRNA.FileExtension) ncrna
 set NewValue1(NcRNA.NpcRna*)   1
 set NewValue1(NcRNA.TStartNpc*)  1
 set NewValue1(NcRNA.TStopNpc*)  1
-set NewValue1(NcRNA.Format) GFF3
+set NewValue1(NcRNA.format) GFF3
 #################################################################
 ############## SIGNAL/CONTENT SENSORS PARAMETERS ################
 #################################################################
 ##### Sensors AnnotaStruct #####
 set NewValue1(AnnotaStruct.FileExtension)     gff
+set NewValue1(AnnotaStruct.TranscriptFeature)  transcript
 set NewValue1(AnnotaStruct.Start*)            0.1
 set NewValue1(AnnotaStruct.StartType)         p 
 set NewValue1(AnnotaStruct.Stop*)             0.2
@@ -308,9 +349,15 @@ set NewValue1(AnnotaStruct.TrStart*)          0.5
 set NewValue1(AnnotaStruct.TrStartType)       p
 set NewValue1(AnnotaStruct.TrStop*)           0.6
 set NewValue1(AnnotaStruct.TrStopType)        p
+set NewValue1(AnnotaStruct.TrStartNpc*) 0.5
+set NewValue1(AnnotaStruct.TrStartNpcType) p
+set NewValue1(AnnotaStruct.TrStopNpc*) 0.5
+set NewValue1(AnnotaStruct.TrStopNpcType) p
 set NewValue1(AnnotaStruct.Exon*)             1
 set NewValue1(AnnotaStruct.Intron*)           2
 set NewValue1(AnnotaStruct.CDS*)              3
+set NewValue1(AnnotaStruct.npcRNA*)  2
+set NewValue1(AnnotaStruct.Intergenic*) 0
 ##### IfElse #####
 set NewValue1(IfElse.SensorIf)		NG2
 set NewValue1(IfElse.SensorElse)	SPred
@@ -362,6 +409,7 @@ set NewValue1(Sensor.SpliceWAM.use) 	0
 set NewValue1(Sensor.SPred.use)	        0
 set NewValue1(Sensor.StartWAM.use)	0
 set NewValue1(Sensor.Transcript.use)	0
+set NewValue1(Sensor.ProStart.use)	0
 # CONTENT SENSORS
 set NewValue1(Sensor.BlastX.use)	0
 set NewValue1(Sensor.Est.use)		0
@@ -376,11 +424,14 @@ set NewValue1(Sensor.NcRNA.use) 0
 set NewValue1(Sensor.AnnotaStruct.use)  0
 set NewValue1(Sensor.IfElse.use)	0
 set NewValue1(Sensor.Riken.use)	        0
+set NewValue1(Sensor.QualData.use)     0
 # OTHERS SENSORS
 set NewValue1(Sensor.GCPlot.use)	0
 set NewValue1(Sensor.GFF.use)		0
 set NewValue1(Sensor.Plotter.use)	0
 set NewValue1(Sensor.Tester.use)	0
+# AltEst
+set NewValue1(AltEst.use)			0
 #
 ##### Sensor priorities	 #####
 # SIGNAL SENSORS
@@ -396,6 +447,7 @@ set NewValue1(Sensor.SpliceWAM$space) 	1
 set NewValue1(Sensor.SPred$space)	1
 set NewValue1(Sensor.StartWAM$space)	1
 set NewValue1(Sensor.Transcript$space)	1
+set NewValue1(Sensor.ProStart$space)	1
 # CONTENT SENSORS
 set NewValue1(Sensor.BlastX$space)	1
 set NewValue1(Sensor.Est$space)		20
