@@ -47,8 +47,10 @@ SensorTranscript :: ~SensorTranscript ()
 // ----------------------
 void SensorTranscript :: Init (DNASeq *X)
 {
-  transStart = PAR.getD("Transcript.Start*");
-  transStop = PAR.getD("Transcript.Stop*");
+  transStart    = PAR.getD("Transcript.Start*");
+  transStop     = PAR.getD("Transcript.Stop*");
+  transStartNpc = PAR.getD("Transcript.StartNpc*");
+  transStopNpc  = PAR.getD("Transcript.StopNpc*");
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -59,8 +61,10 @@ void SensorTranscript :: Init (DNASeq *X)
 void SensorTranscript :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   for (int i = Signal::Forward; i <= Signal::Reverse; i++) {
-    d->sig[DATA::tStart].weight[i] -= transStart;
-    d->sig[DATA::tStop].weight[i] -= transStop;
+    d->sig[DATA::tStart].weight[i]    -= transStart;
+    d->sig[DATA::tStop].weight[i]     -= transStop;	
+    d->sig[DATA::tStartNpc].weight[i] -= transStartNpc;
+    d->sig[DATA::tStopNpc].weight[i]  -= transStopNpc;
   }
 }
 

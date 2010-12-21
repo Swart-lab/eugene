@@ -36,8 +36,8 @@ class SensorAnnotaStruct : public Sensor
   char  startPAR[20], stopPAR[20],   accPAR[20];
   char  donPAR[20],   tStartPAR[20], tStopPAR[20];
   char tStartNpcPAR[20], tStopNpcPAR[20];
-  float exonPAR,      intronPAR,     cdsPAR, npcRnaPAR;
-  int  exonInline,      intronInline,     cdsInline, npcRnaInline;
+  float exonPAR,      intronPAR,     cdsPAR, npcRnaPAR, igPAR;
+  int  exonInline,      intronInline,     cdsInline, npcRnaInline, igInline;
   int  startInline,      stopInline,     accInline;
   int  donInline,      tStartInline,     tStopInline;
   int  tStartNpcInline, tStopNpcInline;

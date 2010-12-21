@@ -43,6 +43,7 @@ class OneAltEst
  private:
   char id[FILENAME_MAX+1];
   int  start, end, index;
+  char strand;
   int  exonsNumber, totalLength;
   bool altSplicingEvidence;
   std::vector <int> vi_ExonStart;
@@ -51,7 +52,7 @@ class OneAltEst
   
  public:
   OneAltEst  ();
-  OneAltEst  (char* id, int i, int j);
+  OneAltEst  (char* id, int i, int j, char s=0);
   ~OneAltEst ();
   void Reset             ();
   void AddExon           (int, int);
@@ -67,6 +68,7 @@ class OneAltEst
   inline char* GetId()            { return id;  };
   inline int   GetEnd()           { return end; };
   inline int GetStart()           {return start; };
+  inline char GetStrand()         {return strand; }
   inline int   GetAltSplE()       { return altSplicingEvidence; };
   inline void  PutAltSplE(bool b) { altSplicingEvidence = b;    };
   inline void PutIndex(int i) { index = i;};
@@ -89,7 +91,7 @@ class AltEst
   int extremeLengthFilter;
   int nextAdd, nextRemove;
 
-  int  ReadAltFile (char[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen);
+  int  ReadAltFile (char[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen);  // never used
   void Compare     (int &nbIncomp, int &nbNoevidence, int &nbIncluded);
 
  public:

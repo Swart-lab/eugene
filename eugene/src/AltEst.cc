@@ -31,20 +31,24 @@ extern Parameters   PAR;
 OneAltEst :: OneAltEst()
 {
     id[0] = 0;
+    strand = 0;
     start = end = index = exonsNumber = 0;
     totalLength = altSplicingEvidence = 0;
 }
 
-OneAltEst :: OneAltEst(char *ID, int i, int j)
+
+OneAltEst :: OneAltEst(char *ID, int i, int j, char s)
 {
     strcpy(id, ID);
     this->start               = i;
     this->index               = -1;
+    this->strand              = s;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
     this->totalLength         = 0;
     this->AddExon(i, j);
 }
+
 
 // ----------------------
 //  Default destructor.
@@ -60,6 +64,7 @@ void OneAltEst :: Reset ()
 {
     this->start               = -1;
     this->end                 = -1;
+    this->strand              = 0;
     this->index               = -1;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
@@ -209,6 +214,9 @@ bool OneAltEst :: IsInconsistentWith(OneAltEst *other)
     // if this and other are not overlaping they can't be inconsistent
     if (other->start >= this->end) return false;
 
+	// if this and other are overlapping and, not on the same strand, they are inconsistent
+    if ( PAR.getI("AltEst.strandSpecific") && (other->GetStrand() != this->strand) ) return true;
+
     // i reaches the first exon that ends after the begin of other,
     // that is the first exon overlaping other
     for (k=0; k<this->exonsNumber; k++)
@@ -265,8 +273,11 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     Gene *g;
 
     //locate gene
-    g = pred->FindGene(start,end);
-
+    if (PAR.getI("AltEst.strandSpecific"))
+    	g = pred->FindGene(start,end, strand);
+    else
+    	g = pred->FindGene(start,end);
+    
     // if no such gene then it is incompatible.
     if (g == NULL) return false;
 
@@ -322,6 +333,8 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
 // --------------------------------------
 void OneAltEst :: Penalize(int pos, DATA *Data, double altPenalty)
 {
+    int strandSpecific = PAR.getI("AltEst.strandSpecific");
+
     if ((pos < start) | (pos > end)) return;
 
     int idx, inExon = 1;
@@ -343,22 +356,55 @@ void OneAltEst :: Penalize(int pos, DATA *Data, double altPenalty)
         }
     }
 
-    //we don't choose the strand. The splice sites will do this for us
-    if (inExon == 0)
+    if (inExon == 0) // in intron
     {
+        // penalize UTR, UIR RNA regions and coding region
         Data->contents[DATA::UTR5F] -= altPenalty;
         Data->contents[DATA::UTR3F] -= altPenalty;
         Data->contents[DATA::UTR5R] -= altPenalty;
         Data->contents[DATA::UTR3R] -= altPenalty;
+        Data->contents[DATA::UIRF]  -= altPenalty;
+        Data->contents[DATA::UIRR]  -= altPenalty;
+        Data->contents[DATA::RNAF]  -= altPenalty;
+        Data->contents[DATA::RNAR]  -= altPenalty;
         for (int i=0; i<6; i++)
             Data->contents[i] -= altPenalty;
+        if (strandSpecific && strand == '+')
+        {
+        	Data->contents[DATA::IntronR]    -= altPenalty;
+        	Data->contents[DATA::IntronUTRR] -= altPenalty;
+        }
+        else if (strandSpecific && strand == '-')
+        {
+        	Data->contents[DATA::IntronF]    -= altPenalty;
+        	Data->contents[DATA::IntronUTRF] -= altPenalty;
+       }
     }
-    else
+    else // exon
     {
-        Data->contents[DATA::IntronF] -= altPenalty;
+        Data->contents[DATA::IntronF]    -= altPenalty;
         Data->contents[DATA::IntronUTRF] -= altPenalty;
-        Data->contents[DATA::IntronR] -= altPenalty;
+        Data->contents[DATA::IntronR]    -= altPenalty;
         Data->contents[DATA::IntronUTRR] -= altPenalty;
+
+        if (strandSpecific && strand == '+') // penalize utr and coding on strand - 
+        {
+        	Data->contents[DATA::UTR5R] -= altPenalty;
+        	Data->contents[DATA::UTR3R] -= altPenalty;
+        	Data->contents[DATA::UIRR]  -= altPenalty;
+        	Data->contents[DATA::RNAR]  -= altPenalty;
+        	for (int i=3; i<6; i++)
+            	Data->contents[i] -= altPenalty;
+        }
+        else if (strandSpecific && strand == '-') // penalize utr and coding on strand + 
+        {
+        	Data->contents[DATA::UTR5F] -= altPenalty;
+        	Data->contents[DATA::UTR3F] -= altPenalty;
+        	Data->contents[DATA::UIRF]  -= altPenalty;
+        	Data->contents[DATA::RNAF]  -= altPenalty;
+        	for (int i=0; i<3; i++)
+            	Data->contents[i] -= altPenalty;
+        }	
     }
     Data->contents[DATA::InterG] -= altPenalty;
 
@@ -413,19 +459,28 @@ AltEst :: AltEst(DNASeq *X)
     verbose= PAR.getI("AltEst.verbose");
     totalAltEstNumber = 0;
 
+    std::string inputFormat = to_string(PAR.getC("AltEst.format",0,1));	
     strcpy(tempname, PAR.getC("fstname"));
     strcat(tempname, ".alt.est");
-    if (!ProbeFile(NULL,tempname)) return;
+    if ( inputFormat == "GFF3" )
+    {
+        strcat(tempname,".gff3");
+    }
+
+    if (!ProbeFile(NULL,tempname)) 
+    {
+        fprintf(stderr, "No alt. est file...");
+        fflush(stderr);
+        return;
+    }
 
     fprintf(stderr, "Reading alt. spl. evidence...");
     fflush(stderr);
-    //BEGIN NEW CN
-    std::string inputFormat = to_string(PAR.getC("AltEst.format",0,1));
+
     int NumEST=0;
     Hits * AllEST= NULL;
     if ( inputFormat == "GFF3" )
     {
-        strcat(tempname,".gff3");
         GeneFeatureSet * geneFeatureSet = new GeneFeatureSet (tempname);
         AllEST = AllEST->ReadFromGeneFeatureSet(*geneFeatureSet, &NumEST, -1, 0, X);
         delete geneFeatureSet;
@@ -441,8 +496,7 @@ AltEst :: AltEst(DNASeq *X)
         }
     }
     i=convertHitsToAltEst(AllEST,nbUnspliced,nbExtremLen,NumEST);
-    //END NEW CN
-    //i=ReadAltFile (tempname,nbUnspliced,nbExtremLen);
+
 
     fprintf(stderr, " %d read, ",i);
     fflush(stderr);
@@ -499,7 +553,7 @@ int AltEst :: convertHitsToAltEst (Hits * AllEST, int &nbUnspliced, int &nbExtre
         {
             if (ThisBlock == ThisEST->Match) //si premier
             {
-                oaetmp = OneAltEst(ThisEST->getName(), ThisBlock->Start, ThisBlock->End);
+                oaetmp = OneAltEst(ThisEST->getName(), ThisBlock->Start, ThisBlock->End, ThisEST->Strand); 
             }
             else
             {
@@ -529,6 +583,7 @@ int AltEst :: convertHitsToAltEst (Hits * AllEST, int &nbUnspliced, int &nbExtre
 }
 // ----------------------
 //  Read .alt file.
+// Note: never used
 // ----------------------
 int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbExtremLen)
 {
@@ -579,7 +634,7 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
                 }
                 oaetmp.Reset();
             }
-            oaetmp = OneAltEst(EstId, deb-1, fin-1);
+            oaetmp = OneAltEst(EstId, deb-1, fin-1, brin);
             tmp    = PEstId;
             PEstId = EstId;
             EstId  = tmp;
@@ -646,13 +701,18 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                 else   // no inconsistency
                 {
                     // j strictly included in i
-                    if ((includedEstFilter) && (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd()))
+                    if (includedEstFilter) 
                     {
-                        if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
-                        voae_AltEst.erase(voae_AltEst.begin() + j);
-                        totalAltEstNumber--;
-                        j--;
-                        nbIncluded++;
+                    	int strandSpecific = PAR.getI("AltEst.strandSpecific");	
+                    	if ( (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd() ) &&
+                    		 ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
+                    	{
+                    		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
+                    		voae_AltEst.erase(voae_AltEst.begin() + j);
+                    		totalAltEstNumber--;
+                    		j--;
+                    		nbIncluded++;
+                    	}
                     }
                 }
             }

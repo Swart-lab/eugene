@@ -47,6 +47,8 @@ class SensorMarkovIMM : public Sensor
   double maxGC;
   int maxOrder;
   int IntergenicModel;
+  char* npcRNAModel;
+  bool UTRasIG; // need to know how vote for UTR tracks
 
 
  public:

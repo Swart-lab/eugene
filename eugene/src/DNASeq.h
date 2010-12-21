@@ -23,6 +23,10 @@
 #define  DNASEQ_H_INCLUDED
 
 #include <stdio.h>
+#include <vector>
+#include <string>
+#include <map>
+
 
 const unsigned short MASKSEQ = 0x000F;
 
@@ -37,13 +41,26 @@ const unsigned short CodeG = (1 << BitG);
 const unsigned short CodeC = (1 << BitC);
 const unsigned short CodeA = (1 << BitA);
 
+struct my_tolower
+{ 
+    char operator()(char c) const 
+    {
+        return std::tolower(static_cast<unsigned char>(c));
+    } 
+};
+
 class  DNASeq
 {
  private:
   int  Size;
   unsigned short *Sequence;
 
+  std::vector<std::string>           vStart;  // vector of start codon
+  std::vector<std::string>           vStop;  // vector of start codon
+  std::map<std::string, std::string> mCodons; // mCodons["ATG"] = "M";
+ 
   void UpdateMarkov();
+  void initCodonTable();
 
  public:
   DNASeq ();
@@ -62,7 +79,8 @@ class  DNASeq
 
   // Degeneracy returns the number of possible completely known sequence
   // represented by a degenerated subsequence
-  unsigned char Degeneracy(int i, int sens, int len);
+  unsigned char Degeneracy(int i, int sens, int len); 
+  double StartPenalty(int i, int sens);
 
   // bit vector values for spliced stop detection
   static const int isTf  = 1;
@@ -91,8 +109,8 @@ class  DNASeq
   double IsAcc(int pos,int strand);
   double IsDon(int pos,int strand);
   double IsStop(int pos,int strand);
-  double IsStart(int pos,int strand); // prokaryotic case
-  double IsEStart(int pos,int strand);
+  double IsStart(int pos,int strand);
+  double IsProStart(int i,int sens);
   
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);

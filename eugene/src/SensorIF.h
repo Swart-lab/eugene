@@ -56,7 +56,8 @@ class DATA
     UTR3F = 11, UTR3R =12,
     IntronUTRF = 13, IntronUTRR = 14, 
     RNAF = 15, RNAR = 16,
-    LastContentsType = 17};
+    UIRF = 17, UIRR = 18,
+    LastContentsType = 19};
 
   double  contents[LastContentsType];
 

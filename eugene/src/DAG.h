@@ -21,6 +21,7 @@
 #define DAG_H_INCLUDED
 #endif
 
+#include <vector>
 #include "Const.h"
 #include "Prediction.h"
 #include "BackP.h"
@@ -32,7 +33,7 @@ class DAG
 {
 
    static DNASeq *TheSeq;
-   static double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior, RnaPrior;
+   static double ExPrior, InPrior, IGPrior, FivePrior, ThreePrior, IntronFivePrior, RnaPrior, BiCodingPrior, UIRPrior;
    static double SplicedStopPen;
    static int estuse;
    static double NormalizingPath;
@@ -71,7 +72,8 @@ private:
   void ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int position);
   void ComputeRequired(Signal::Edge, DATA, int);
   void ApplyScore(int position, DATA Data, int NoContentsUpdate);  
-  void ApplyLengthPenalty(int position, DATA Data, int NoContentsUpdate);  
+  void ApplyLengthPenalty(int position, DATA Data, int NoContentsUpdate);
+  double SuperMix(double a, double b);
 
   inline int GetStart() { return StartPosition; };
   void Print();

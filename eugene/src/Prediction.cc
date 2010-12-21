@@ -34,6 +34,7 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 {
 	Gene *thisGene = this->vGene[0];
 	Gene *otherGene;
+
 	int mismatch;
 
 	// First check in the optimal prediction.
@@ -41,7 +42,7 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 
 	for ( idx = 0; idx < optPred->vGene.size(); idx++ )
 	{
-		mismatch = thisGene->isDifferent ( * ( optPred->vGene[idx] ), seuil );
+		mismatch = thisGene->isDifferent ( * ( optPred->vGene[idx] ), seuil ); // -1 if the two genes have different structure
 		if ( ( mismatch >= 0 ) && ( mismatch <= seuil ) )
 			return false;
 	}
@@ -123,6 +124,7 @@ void Prediction :: ESTScan()
 	delete AllEST;
 }
 
+
 /*************************************************************
  **                       Feature Object                    **
  *************************************************************/
@@ -182,6 +184,14 @@ bool Feature :: Overlap ( const Feature& f )
 bool Feature :: IsCodingExon()
 {
 	return this->featureState->IsCodingExon();
+}
+
+// ------------------------
+//  Return true if the feature is a bicoding
+// ------------------------
+bool Feature :: IsBicoding()
+{
+	return this->featureState->IsBicoding();
 }
 
 // ------------------------
@@ -259,10 +269,12 @@ Gene :: Gene ()
 {
 	complete   = 0;
 	isvariant  = false;
-	isNpcRna    = false;
+	isNpcRna   = false;
 	hasvariant = 0;
 	tuStart    = 0;
 	tuEnd      = 0;
+	operonNb   = 0;
+	strand     = '.';
 	clear();
 }
 
@@ -273,6 +285,16 @@ Gene :: Gene ()
 // ------------------------
 Gene :: Gene ( std::string line, DNASeq& seq )
 {
+	complete   = 0;
+	isvariant  = false;
+	isNpcRna   = false;
+	hasvariant = 0;
+	tuStart    = 0;
+	tuEnd      = 0;
+	operonNb   = 0;
+	strand     = '.';
+	clear();
+
 	std::vector<int> exons; // vector containing the exon positions
 	int lpos, rpos;         // left and right positions of an exon
 	int intrLPos, intrRPos; // left and right positions of an intron
@@ -299,6 +321,7 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 		// Gene on the forward strand
 		if ( exons[0] >= 0 )
 		{
+			this->strand = '+';
 			// Add one exon and the next intron
 			for ( int i=0; i < exons.size()-1; i+=2 )
 			{
@@ -341,6 +364,7 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 		}
 		else // Strand -
 		{
+			this->strand = '-';
 			std::vector<signed char> vStates; // vector use to save states of the features
 			std::vector<int> vStart; // vector use to save start pos of the features
 			std::vector<int> vStop; // vector use to save stop pos of the features
@@ -449,9 +473,9 @@ int Gene :: isDifferent ( const Gene& o, int threshold )
 	int idxt = 0;
 	int nDiff = 0;
 
-	//first coding exon in each
-	while ( ! o.vFea[idxo]->IsCodingExon() )     idxo++;
-	while ( ! this->vFea[idxt]->IsCodingExon() ) idxt++;
+	//first coding exon or npcrna in each
+	while ( ! o.vFea[idxo]->IsCodingExon()     && !o.vFea[idxo]->IsNpcRna()      ) idxo++;
+	while ( ! this->vFea[idxt]->IsCodingExon() && ! this->vFea[idxt]->IsNpcRna() ) idxt++;
 	int shift = 0;
 
 	while ( ( idxo+shift < o.vFea.size() ) &&
@@ -485,9 +509,9 @@ bool Gene :: operator== ( const Gene& o )
 	int idxo = 0;
 	int idxt = 0;
 
-	//first coding exon in each
-	while ( !o.vFea[idxo]->IsCodingExon() ) idxo++;
-	while ( !this->vFea[idxt]->IsCodingExon() ) idxt++;
+	//first coding exon or ncrna in each
+	while ( !o.vFea[idxo]->IsCodingExon()     && !o.vFea[idxo]->IsNpcRna()     ) idxo++;
+	while ( !this->vFea[idxt]->IsCodingExon() && !this->vFea[idxt]->IsNpcRna() ) idxt++;
 	int shift = 0;
 
 	while ( ( idxo+shift < o.vFea.size() ) &&
@@ -506,6 +530,15 @@ bool Gene :: operator== ( const Gene& o )
 	// exon and the 2 CDS are identical.
 
 	return true;
+}
+
+
+// ------------------------
+// Return true if the gene is non coding for protein
+// ------------------------
+bool Gene :: IsNpcRna()
+{	
+	return isNpcRna;
 }
 
 // ------------------------
@@ -548,6 +581,15 @@ bool Gene :: HasSameExons ( const Gene& o )
 void Gene :: AddFeature ( signed char state, int start, int end )
 {
 	State featState ( state );
+	
+	// If the gene has already a strand, check the feature strand is identical
+	// else set the strand of this feature
+	if (this->strand != '.')
+		assert (featState.GetStrand() == this->strand);
+	else
+		this->strand = featState.GetStrand();
+
+
 	vFea.push_back ( new Feature ( state, start, end ) );
 
 	// Complete : +1 pour un exon init|sngl et +2 pour term|sngl
@@ -569,13 +611,17 @@ void Gene :: AddFeature ( signed char state, int start, int end )
 // ------------------------
 void Gene :: Update ( int seqLength )
 {
-	int forward   = ( vFea[0]->strand == '+' ) ? 1 : 0;
-
 	clear();
 
+	// If the strand gene is not defined, put the same than the first feature
+	if (this->strand == '.')
+		this->strand = vFea[0]->strand;
+	
 	// Compute Gene informations: [ex|in]Number, [ex|in|utr]Length, ..
 	for ( int i=0; i<nbFea(); i++ )
 	{
+		assert (vFea[i]->strand == this->strand); // check all the features of the gene have the same strand
+
 		if ( vFea[i]->IsCodingExon()  || vFea[i]->IsNpcRna() )
 		{
 			exNumber++;
@@ -608,6 +654,7 @@ void Gene :: Update ( int seqLength )
 		cdsEnd   = trEnd   = 0;
 	}
 
+	int forward = ( this->strand == '+' ) ? 1 : 0;
 	// The number of the current exon
 	int nb = ( forward ) ? 1 : exNumber;
 
@@ -660,14 +707,14 @@ void Gene :: PrintInfo ( FILE *F, int nb, char *seqName )
 	if ( this->isNpcRna ) // Just display start and stop of the rna
 	{
 		fprintf ( F,"%s.%d  \tEuGene_misc\tncRNA\t%d\t%d\t%d\t%c\t.\t",
-		          seqName, nb, cdsStart+1, cdsEnd+1, exLength, vFea[0]->strand );
+		          seqName, nb, cdsStart+1, cdsEnd+1, exLength, this->strand );
 		fprintf ( F,"%s\t", comp );
 	}
 	else
 	{
 		// CDS
 		fprintf ( F,"%s.%d  \tEuGene_misc\tCDS\t%d\t%d\t%d\t%c\t.\t",
-		          seqName, nb, cdsStart+1, cdsEnd+1, exLength, vFea[0]->strand );
+		          seqName, nb, cdsStart+1, cdsEnd+1, exLength, this->strand );
 		fprintf ( F,"%s\t", comp );
 		for ( i=0; i<nbFea(); i++ )
 		{
@@ -683,7 +730,7 @@ void Gene :: PrintInfo ( FILE *F, int nb, char *seqName )
 		// Gene
 		fprintf ( F,"%s.%d  \tEuGene_misc\tGene\t%d\t%d\t%d\t%c\t.\t",
 		          seqName, nb, trStart+1, trEnd+1,
-		          geneLength, vFea[0]->strand );
+		          geneLength, this->strand );
 		fprintf ( F,"%s\t", comp );
 		nofirst = false;
 		for ( i=0; i<nbFea(); i++ )
@@ -715,6 +762,31 @@ int Gene :: GetExonNumber()
 	return exNumber;
 }
 
+
+// ------------------------
+//  Return the strand of the gene : '+', '-' or '.' if not defined
+// ------------------------
+char Gene :: GetStrand()
+{
+	return this->strand;
+}
+
+// ------------------------
+//  Return the number of the operon of the gene. 0 if the gene does not belong to an operon
+// ------------------------
+int Gene :: GetOperonNb ()
+{
+	return operonNb;
+}
+
+// ------------------------
+//  Set the number of the operon of the gene
+// ------------------------
+void Gene :: SetOperonNb (int opNb)
+{
+	this->operonNb = opNb;
+}
+
 // ------------------------
 //  Print Gene data
 // ------------------------
@@ -734,6 +806,95 @@ void Gene::Print()
 	}
 }
 
+
+/*************************************************************
+ **                        Operon                       **
+ ************************************************************/
+// ------------------------
+//  Default constructor.
+// ------------------------
+Operon :: Operon()
+{
+	start  = 0;	
+	end    = 0;
+	strand = '.';
+	number = 0;
+	
+}
+
+// ------------------------
+//  Constructor.
+// ------------------------
+Operon :: Operon(int nb)
+{
+	start  = 0;	
+	end    = 0;
+	strand = '.';
+	number = nb;
+	
+}
+
+// ------------------------
+//  Default destructor.
+// ------------------------
+Operon :: ~Operon()
+{
+	// not delete the gene: prediction will do it ?
+}
+
+// ------------------------
+//  Get the start of the operon
+// ------------------------
+int Operon :: GetStart()
+{
+	return this->start;
+}
+
+// ------------------------
+//  Get the end of the operon
+// ------------------------
+int Operon :: GetEnd()
+{
+	return this->end;
+}
+
+// ------------------------
+//  Get the number of the operon
+// ------------------------
+int  Operon :: GetNumber()
+{
+	return this->number;
+}
+
+// ------------------------
+//  Get the strand of the operon
+// ------------------------
+char  Operon :: GetStrand()
+{
+	return this->strand;
+}
+
+// ------------------------
+//  Add a gene to the operon
+// ------------------------
+void Operon :: AddGene(Gene* gene)
+{
+	this->vGenes.push_back(gene);
+
+	// Check the new gene has the same strand than the operon
+	if (this->strand != '.') 
+		assert(this->strand == gene->GetStrand() );
+	else
+		this->strand = gene->GetStrand();
+		
+	// update start and end of the operon
+	if (this->start == 0 || gene->trStart+1 < this->start)
+		this->start = gene->trStart+1;
+	if (gene->trEnd+1 > this->end)
+		this->end = gene->trEnd+1;
+}
+
+
 /*************************************************************
  **                        Prediction                       **
  ************************************************************/
@@ -747,31 +908,156 @@ Prediction :: Prediction ()
 
 // ------------------------
 //  constructor.
+// From one vector of positions and one vector of states, fill vGene vector
 // ------------------------
 Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
                            std::vector <signed char> vState )
 {
 	clear();
-	int start = 1+From;
 
-	for ( int i=0; i< ( int ) vPos.size(); i++ )
+	State currentState;
+	State prevState;
+	int start      = 1 + From;
+	int nb_feat    = (int) vPos.size();
+	int operon_nb  = 0;
+	int prev_start = -1; // EK vérifier que les valeurs de start sont tjs positiives!!!!!;
+    int operon_max_distance = PAR.getI("Operon.maxDistance"); // maximum distance for two genes to be in the same operon
+
+	for ( int i=0; i< nb_feat; i++ )
 	{
-		if ( i!=0 ) start = vPos[i-1] + 1;
-
+		if ( i != 0 ) start = vPos[i-1] + 1;
+		/*cout << "pos : " << start << "-" << vPos[i] << " " << State(vState[i]).State2EGNString() << " " << State(vState[i]).GetStrand();
+		if (State(vState[i]).IsUIR()) cout << " => UIR ";
+		cout << "\n";*/
 		// Si state=intergenique OU start > seqlen on passe
-		if ( vState[i] == InterGen || start > vPos[vPos.size()-1] ) continue;
+		if ( vState[i] == InterGen || start > vPos[nb_feat-1] ) continue;
+		currentState = State(vState[i]);
 
-		// Si premier item OU nvx gene avec ou sans utr
-		// (=> etat=(UTR5F|UTR3R) && etat precedent est intergenique)
-		if ( i==0 ||
-		        ( ( vState[i] == UTR5F || vState[i] == UTR3R || vState[i] == RnaF || vState[i] == RnaR ) && vState[i-1] == InterGen ) ||
-		        ( vState[i] <= TermR3 && vState[i-1] == InterGen ) )
+		// First feature: creation of a new gene
+		if (i == 0)
 		{
 			nbGene++;
 			vGene.push_back ( new Gene() );
 		}
-		vGene[nbGene-1]->AddFeature ( vState[i], start, vPos[i] );
+		else
+		{
+			prevState = State (vState[i-1]);
+			// New gene if: 
+			// - IG followed by an UTR, an exon or a ncrna
+			// - UIR (Note that UIR is saved in the right gene
+			// - two adjacent genes
+			//     soit ce sont deux sngl consecutifs identiques (meme brin, meme frame), |------->|--------->
+			//     soit deux sngl sur des brins differents                    <-------||---------->
+			//     dans les autres cas, il y a un frameshift, on laisse les 2 features dans le meme gene
+			if ( ( prevState.IsIntergenic() && (vState[i] == UTR5F || vState[i] == UTR3R || vState[i] <= TermR3 || currentState.IsNpcRna())  ) ||
+				 currentState.IsUIR()                                                                                                          ||
+				 (prevState.IsSnglExon() && vState[i-1] == vState[i])                                                                          || 
+				 (prevState.IsSnglExon() && currentState.IsSnglExon() && (prevState.GetStrand() != currentState.GetStrand()))  
+			   )
+			{
+				nbGene++;
+				vGene.push_back ( new Gene() );
+			}
+		}
+
+		// ---------------------------------------------------------------------------
+		// Section to manage bicoding states
+		// ---------------------------------------------------------------------------
+		if ( ( (i+1) < nb_feat)  && State(vState[i+1]).IsBicoding() ) // The next feature is bicoding: just save the start position
+		{
+			 if (prev_start == -1) prev_start = start;
+		}
+		else if ( currentState.IsBicoding() ) // If I am bicoding
+		{
+			if ( i == 0 )  // If the prediction starts in bicoding // F1F2  - F2 => Create F1
+			{
+				if ( (i+1) < nb_feat )
+				{
+					vGene[nbGene-1]->AddFeature ( currentState.GetSecondState(vState[i+1]), start, vPos[i]);
+					prev_start = start;
+					nbGene++;
+					vGene.push_back ( new Gene() );
+				}
+				else 
+					cerr << "Warning: case not catch !\n"; // EK: a voir
+			}
+			else if ( i == nb_feat-1 ) // The prediction stops in bicoding
+			{
+				// add the first sngl exon to the current gene
+				vGene[nbGene-1]->AddFeature ( vState[i-1], prev_start, vPos[i] );
+				// create a new gene which just containingg the second sngl exon
+				nbGene++;
+				vGene.push_back ( new Gene() );
+				vGene[nbGene-1]->AddFeature ( currentState.GetSecondState(vState[i-1]), start, vPos[i] );
+				
+			}
+			else  if ( vState[i-1] != vState[i+1] ) // F1 - F1F2 - F2 => Create F1
+			{
+				vGene[nbGene-1]->AddFeature ( vState[i-1], prev_start, vPos[i] );
+				prev_start = start;
+				nbGene++;
+				vGene.push_back ( new Gene() );
+			}
+			else 	// F1 - F1F2 - F1 => Create F2
+			{
+				// create a new gene, save it in the vector (to the position nbGene-2) 
+				// and put the gene in building to the position nbGene-1
+				// EK : a checker!!!!!!!!!!!
+				nbGene++;
+				vGene.push_back ( vGene[nbGene-2] ); 
+				vGene[nbGene-2] = new Gene();
+				vGene[nbGene-2]->AddFeature ( currentState.GetSecondState(vState[i-1]), start, vPos[i]);
+			}
+
+			// Put the two genes in the same operon if there are on the same strand
+			if (currentState.GetStrand() != '*')
+			{
+				// Start of a new operon
+				if (vGene[nbGene-2]->GetOperonNb() == 0 && vGene[nbGene-1]->GetOperonNb() == 0)
+				{
+					operon_nb++;
+				}
+				vGene[nbGene-2]->SetOperonNb(operon_nb);
+				vGene[nbGene-1]->SetOperonNb(operon_nb);
+			}
+		}
+		else if (!currentState.IsUIR() ) // Add the feature to the current gene (except if UIR state)
+		{
+			// Get the start position if needed (case where the previous state is bicoding)
+			if ( prev_start != -1 )
+			{
+				start      = prev_start;
+				prev_start = -1;
+			}
+			vGene[nbGene-1]->AddFeature ( vState[i], start, vPos[i] );
+		}
+
+		// ---------------------------------------------------------------------------
+		// Section to manage operon
+		// Put genes separated by UIR in the same operon
+		// Put two strictly consecutive sngl genes on the same strand in the same operon
+        // Put two consecutive genes, on the same strand whose distance is <= to operon_max_distance, in the same operon
+		// ---------------------------------------------------------------------------
+		if ( i == 0 ) continue;
+		prevState = State (vState[i-1]);
+
+		if ( currentState.IsUIR() || 
+			 (currentState.IsSnglExon() && prevState.IsSnglExon() && currentState.GetStrand() == prevState.GetStrand() ) ||
+			 ( (i > 1) && prevState.IsIntergenic() && State(vState[i-2]).GetStrand() == currentState.GetStrand() && 
+             (vPos[i-1]-vPos[i-2]) <= operon_max_distance )
+           )
+			
+		{
+			assert(nbGene >= 2);
+			if ( vGene[nbGene-2]->GetOperonNb() == 0 ) // new operon
+				operon_nb++;
+			if (vGene[nbGene-2]->GetOperonNb() > 0) 
+				assert(vGene[nbGene-2]->GetOperonNb() == operon_nb); // check the operon of the previous gene is equal to the current operon counter
+			vGene[nbGene-2]->SetOperonNb(operon_nb);
+			vGene[nbGene-1]->SetOperonNb(operon_nb);
+		}
 	}
+
 }
 
 // --------------------------
@@ -827,11 +1113,12 @@ void Prediction :: clear()
 {
 	MS = NULL;
 	X  = NULL;
-	ESTMatch = NULL;
-	seqName[0]  = '\000';
-	nbGene      = 0;
-	optimalPath = 0;
+	ESTMatch     = NULL;
+	seqName[0]   = '\000';
+	nbGene       = 0;
+	optimalPath  = 0;
 }
+
 // --------------------------
 // Sanity check
 // --------------------------
@@ -931,20 +1218,21 @@ void Prediction :: TrimAndUpdate ( DNASeq* x )
 
 // --------------------------
 //  Gene update and deletion of short or fragmentary genes
+//  In procaryote mode: create the operon
 // --------------------------
 void Prediction :: UpdateAndDelete()
 {
 	std::vector <Gene*>::iterator geneindex;
-	int MinCDSLen = PAR.getI ( "Output.MinCDSLen" );
+	int MinCDSLen   = PAR.getI ( "Output.MinCDSLen" );
 	int RemoveFrags = PAR.getI ( "Output.RemoveFrags" );
-	int gIdx = 0;
+	int gIdx        = 0;
 
 	for ( geneindex = vGene.begin(); geneindex != vGene.end(); )
 	{
 		int empty_gene = ( ( *geneindex )->nbFea() < 1 );
 		if ( ! empty_gene )
 			( *geneindex )->Update ( this->X->SeqLen );
-		if ( ( *geneindex )->isNpcRna == false &&
+		if ( ( *geneindex )->IsNpcRna() == false &&
 		        ( ( *geneindex )->exLength <= MinCDSLen ||  empty_gene || ( RemoveFrags && ( ( *geneindex )->complete != 3 ) ) ) )
 		{
 			nbGene--;
@@ -957,25 +1245,34 @@ void Prediction :: UpdateAndDelete()
 			geneindex++;
 		}
 	}
+
+	// Prokaryote case: update operon
+	if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") )
+		this->ComputeOperons(); // Create Operon objects
 }
+
+
 // --------------------------
 //  Delete genes outside of range:
 //  TS modified. Keeps only one gene with maximum overlap with the region.
 // --------------------------
-void Prediction :: DeleteOutOfRange ( int s,int e )
+void Prediction :: DeleteOutOfRange ( int s,int e, char strand )
 {
 	std::vector <Gene*>::iterator geneindex;
 	int overlap = 0;
 	int left,right;
+	char predStrand;
+	int strandSpecific = PAR.getI("AltEst.strandSpecific");
 
 // 1st compute largest Olap
 	for ( geneindex = vGene.begin(); geneindex != vGene.end(); )
 	{
 		left =  Max ( s, ( *geneindex )->trStart ); // left of overlap region (if any)
 		right = Min ( e, ( *geneindex )->trEnd );   // right of overlap region (if any)
+		predStrand = ( *geneindex )->GetStrand();
 		if ( ( right - left ) > overlap ) overlap = right - left;
 
-		if ( ( right - left ) <= 0 )  // delete non overlapping genes
+		if ( (strandSpecific && (predStrand != strand) ) || ( right - left ) <= 0 )  // delete non overlapping genes
 		{
 			nbGene--;
 			geneindex = vGene.erase ( geneindex );
@@ -983,7 +1280,7 @@ void Prediction :: DeleteOutOfRange ( int s,int e )
 		else geneindex++;
 	}
 
-// then keep only one olap'ing gene
+    // then keep only one olap'ing gene
 	for ( geneindex = vGene.begin(); geneindex != vGene.end(); )
 	{
 		left =  Max ( s, ( *geneindex )->trStart ); // left of overlap region (if any)
@@ -999,6 +1296,10 @@ void Prediction :: DeleteOutOfRange ( int s,int e )
 			geneindex++;
 		}
 	}
+
+	// Assert no gene or only one gene (the gene with the highest overlap) was kept
+	assert(nbGene <= 1);
+
 }
 
 
@@ -1030,7 +1331,7 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 	}
 
 	// SeqName
-	if ( trunclen ) sprintf ( nameformat,"%%%d.%ds",trunclen,trunclen );
+	if ( trunclen ) sprintf ( nameformat,"%%1.%ds",trunclen ); 
 	else strcpy ( nameformat,"%s" );
 	sprintf ( seqName, nameformat, X->Name );
 
@@ -1146,72 +1447,97 @@ void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 	fprintf ( OUT, "\n" );
 }
 
-//SEB ------------------------
+// ------------------------
 //  print prediction (GFF3)
 // ------------------------
-void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append )
+void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 {
 	int offset = PAR.getI ( "Output.offset" );
 	int stepid = PAR.getI ( "Output.stepid" );
 	int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
+	vector<int> printedOperon;
 	int start, end;
 	State* featState;
 	int incons = 0, cons = 0;
+
+	bool showOperon = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") && !append) ;
+
 
 	/* name source feature start end score strand frame */
 	for ( int i=0; i<nbGene; i++ )
 	{
 		Gff3Line gene_line ( seqName );
 		std::string gene_name = to_string ( seqName ) +'.'+to_string ( ( vGene[i]->geneNumber*stepid+1 ) );
-		//je pars du principe que la premiere structure me donne le brin du gene
 		// done also on variants to have a corrrect strand on variant mRNA
 		if ( vGene[i]->nbFea() > 0 )
-			gene_line.setStrand ( vGene[i]->vFea[0]->strand );
-		std::string gene_id;
-		if ( vGene[i]->isNpcRna )
+			gene_line.setStrand ( vGene[i]->strand );
+		
+		//  --  --  la ligne du gene  --  --
+		std::string gene_id = Sofa::getName ( SOFA_GENE ) + ":" + gene_name;
+		if ( append &&  ! vGene[i]->isvariant )
 		{
-			gene_id = Sofa::getName ( SOFA_NCRNA ) + ":" + gene_name;
-			gene_line.setStart ( vGene[i]->trStart+1+offset );
-			gene_line.setEnd ( vGene[i]->trEnd+1+offset );
-			gene_line.setType ( SOFA_NCRNA );
+			fprintf ( stderr,"Warning: in append mode, only variant can be printed out gene=%d\n",i );
+			// je laisse l'erreur dans .gff1 pour aider au debugage
+			//continue;
+		}
+
+		if (showOperon && vGene[i]->GetOperonNb() > 0 && 
+			(printedOperon.size() == 0 || printedOperon.back() != vGene[i]->GetOperonNb()) )
+		{
+			printedOperon.push_back(vGene[i]->GetOperonNb());
+			Operon* op = this->GetOperon(vGene[i]->GetOperonNb());
+			
+			// ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+			gene_line.setType (SOFA_OPERON);
+			gene_line.setStart ( op->GetStart());
+			gene_line.setEnd ( op->GetEnd() );
+			std::string op_id = Sofa::getName ( SOFA_OPERON ) + ":" + to_string (op->GetNumber());
+			gene_line.setAttribute ( "ID=" + op_id );
+			gene_line.addAttribute ( "Name=operon." + to_string(op->GetNumber()) );
+			gene_line.print ( out );
+			//ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+		}
+
+		if ( ! vGene[i]->isvariant ) // only for the optimal prediction
+		{
+			int tr_min = ( vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
+			int tr_max = ( vGene[i]->tuEnd )   ?  vGene[i]->tuEnd   : vGene[i]->trEnd;
+
+			//la ligne decrivant le gene
+			gene_line.setType ( SOFA_GENE );
+			gene_line.setStart ( tr_min+1+offset );
+			gene_line.setEnd ( tr_max+1+offset );
+			//l'identifiant du gene = type_sofa:nom_eugene
 			gene_line.setAttribute ( "ID=" + gene_id );
 			gene_line.addAttribute ( "Name=" + gene_name );
+			gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
+			if ( showOperon && vGene[i]->GetOperonNb() > 0 ) gene_line.addAttribute (  "operon_parent="+ Sofa::getName ( SOFA_OPERON ) + ":" + to_string (vGene[i]->GetOperonNb()));
+			gene_line.print ( out );
+		}
+		//  ----  fin de la ligne du gene  ----
+
+		if (vGene[i]->IsNpcRna() )
+		{
+			// -- -- la ligne de l'ARNnc -- -- 
+			gene_line.setStart ( vGene[i]->trStart+1+offset );
+			gene_line.setEnd ( vGene[i]->trEnd+1+offset );
+			std::string ncrna_name = gene_name;
+			if ( vGene[i]->hasvariant )
+			{
+				ncrna_name += to_string ( vGene[i]->GetVariantCode() );
+			}
+
+			gene_line.setType ( SOFA_NCRNA );
+			std::string ncrna_id = Sofa::getName ( SOFA_NCRNA ) + ":"+ ncrna_name;
+			gene_line.setAttribute ( "ID=" + ncrna_id );
+			gene_line.addAttribute ( "Name=" + ncrna_name );
+			gene_line.addAttribute ( "Parent=" + gene_id );
 			gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
 			gene_line.print ( out );
 		}
 		else
 		{
-			//  --  --  la ligne du gene  --  --
-
-			gene_id = Sofa::getName ( SOFA_GENE ) + ":" + gene_name;
-
-			if ( append &&  ! vGene[i]->isvariant )
-			{
-				fprintf ( stderr,"Warning: in append mode, only variant can be printed out gene=%d\n",i );
-				// je laisse l'erreur dans .gff1 pour aider au debugage
-				continue;
-			}
-
-			if ( ! vGene[i]->isvariant ) // only for the optimal prediction
-			{
-				int tr_min = ( vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
-				int tr_max = ( vGene[i]->tuEnd )   ?  vGene[i]->tuEnd   : vGene[i]->trEnd;
-
-				//la ligne decrivant le gene
-				gene_line.setType ( SOFA_GENE );
-				gene_line.setStart ( tr_min+1+offset );
-				gene_line.setEnd ( tr_max+1+offset );
-
-				//l'identifiant du gene = type_sofa:nom_eugene
-
-				gene_line.setAttribute ( "ID=" + gene_id );
-				gene_line.addAttribute ( "Name=" + gene_name );
-				gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
-				gene_line.print ( out );
-			}
-//  --  --  fin de la ligne du gene  --  --
-
-//  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
+			//  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
 			//En fait je me contente d'ecraser ce que je ne veux plus
 
 			gene_line.setStart ( vGene[i]->trStart+1+offset );
@@ -1246,7 +1572,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append )
 //                     (state >= IntronF1 && state <= InterGen) ||
 //                     (state >= IntronU5F) )
 				if ( ( PAR.getI ( "Output.intron" ) == 0 && featState->IsIntronInStartStopRegion() ) ||
-				        featState->IsUTRIntron() )
+				        featState->IsUTRIntron() || featState->IsUIR() )
 					continue;
 
 				start = vGene[i]->vFea[j]->start;
@@ -1414,7 +1740,7 @@ void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 	/* Seq Type S Lend Rend Length Phase Frame Ac Do Pr */
 	for ( int i=0; i<nbGene; i++ )
 	{
-		forward = ( vGene[i]->vFea[0]->strand == '+' ) ? 1 : 0;
+		forward = ( vGene[i]->strand == '+' ) ? 1 : 0;
 		for ( int j=0; j<vGene[i]->nbFea(); j++ )
 		{
 			featState = vGene[i]->vFea[j]->featureState;
@@ -1433,8 +1759,8 @@ void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 
 			// Frameshift detection: we just concatenate all the parts
 			// of the exon in one. The phase will be the "initial" phase.
-			while ( ( vGene[i]->vFea[j]->IsCodingExon() ) &&
-			        ( j < vGene[i]->nbFea()-1 ) && ( vGene[i]->vFea[j+1]->IsCodingExon() ) )
+			while ( ( vGene[i]->vFea[j]->IsCodingExon() ) && (!vGene[i]->vFea[j]->IsBicoding()) &&
+			        ( j < vGene[i]->nbFea()-1 ) && ( vGene[i]->vFea[j+1]->IsCodingExon() ) && (!vGene[i]->vFea[j+1]->IsBicoding()) )
 			{
 				j++;
 				end = vGene[i]->vFea[j]->end;
@@ -1529,13 +1855,13 @@ void Prediction :: PrintEgnD ( FILE *OUT )
 {
 	DATA Data;
 
-	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR   RF   RR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
+	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR     RF    RR   UIRF  UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
 	for ( int i=0; i<X->SeqLen; i++ )
 	{
 		MS->GetInfoAt ( X, i, &Data );
 		MS->PrintDataAt ( X, i, &Data, OUT );
 	}
-	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR   RF   RR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
+	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR   RF   RR   UIRF UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
 }
 
 // --------------------------
@@ -1892,7 +2218,7 @@ void Prediction :: PrintGeneInfo ( FILE* F )
 //  Find the index of the 1st gene maximally overlapping a segment.
 //  NULL if not found. Assumes a sorted prediction.
 // ------------------------------------
-Gene *Prediction :: FindGene ( int start, int end )
+Gene *Prediction :: FindGene ( int start, int end, const char strand )
 {
 	int left, right;
 	int overlap = 0;
@@ -1900,6 +2226,7 @@ Gene *Prediction :: FindGene ( int start, int end )
 
 	for ( int i=0; i<nbGene; i++ )
 	{
+		if (strand && vGene[i]->GetStrand() != strand) continue;
 		left =  Max ( start, vGene[i]->trStart );
 		right = Min ( end, vGene[i]->trEnd );
 
@@ -1915,14 +2242,26 @@ Gene *Prediction :: FindGene ( int start, int end )
 }
 
 // ------------------------
+//  Method to sort gene according to their transcription start
+// ------------------------
+bool GeneSortFunction(const Gene* g1, const Gene* g2)
+{
+	return (g1->trStart <= g2->trStart); 
+}
+
+// ------------------------
 //  plot a prediction.
 // ------------------------
 void Prediction :: PlotPred ()
 {
-	const int predWidth = 2;
+	const int predWidth   = 2;
+	const int operonWidth = 1;
 	int start, end;
 	short int featureFrame;
-	int endBack = 0;
+	int endBack         = 0;
+
+	
+	sort (vGene.begin(), vGene.end(), GeneSortFunction); // sort gene according to their start position
 
 	for ( int i=0; i<nbGene; i++ )
 	{
@@ -1934,14 +2273,32 @@ void Prediction :: PlotPred ()
 			// Plot interg
 			for ( int k=endBack+1; k<start; k++ )
 				PlotBarI ( k, 0, 0.4, predWidth, 4 );
-			endBack = end;
+			if (end > endBack) endBack = end;
 
 			for ( int k=start; k<end; k++ )
 			{
-				if ( vGene[i]->vFea[j]->IsNpcRna() ) // change the color if its a npcrna
-					PlotBarI ( k, featureFrame, 0.4, predWidth, 11 );
+				if ( vGene[i]->vFea[j]->IsNpcRna() )
+				{
+					double pos = (vGene[i]->vFea[j]->strand == '+') ? 0.2 : -0.2;
+					// change the color if it's a npcrna
+					PlotBarI ( k, featureFrame, pos, predWidth, 11 );
+				}
 				else
 					PlotBarI ( k, featureFrame, 0.4, predWidth, 1 );
+			}
+		}
+	}
+	// Display operon
+	if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") )
+	{
+		// print operon in the center of the graphic
+		for (int i=0; i < vOperon.size(); i++)
+		{
+			Operon* op = vOperon[i];
+			for (int j=op->GetStart(); j < op->GetEnd(); j++)
+			{
+				double opPos = (op->GetStrand() == '+') ? 0.2 : -0.2;
+				PlotBarI ( j, 0, opPos, operonWidth, 10 );
 			}
 		}
 	}
@@ -2149,7 +2506,6 @@ bool Prediction :: IsState ( DATA::SigType sig_type, int pos, char strand )
 	return is_state;
 }
 
-
 //SEB--  --  --  --  --  --  --
 //  --  --  delocalisation pour eclaircir le code
 Gff3Line*
@@ -2225,7 +2581,7 @@ void Prediction::Print()
 // Return a vector [TPg, PGnb, RGnb, TPe, PEnb, REnb, TPn, PNnb, RNnb]
 // offset is the size of the region added before/after the reference
 // ------------------------
-std::vector<int> Prediction :: Eval ( Prediction * ref, int offset )
+std::vector<int> Prediction :: Eval ( Prediction * ref, int offset, bool onlyCodingGene )
 {
 	std::vector<int> vEval;    //[TPg, PGnb, RGnb, TPe, PEnb, REnb, TPn, PNnb, RNnb]
 	std::vector<int> vExonEval;
@@ -2246,9 +2602,9 @@ std::vector<int> Prediction :: Eval ( Prediction * ref, int offset )
 	}
 
 	// Compute the nb of TP genes, of predicted genes in the region and of ref genes
-	vEval     = this->EvalGene ( ref, regionStart, regionStop );
+	vEval     = this->EvalGene ( ref, regionStart, regionStop, onlyCodingGene );
 	// Compute the nb of TP exon/nt, of predicted exon/nt in the region and of ref exon/nt
-	vExonEval = this->EvalExon ( ref, regionStart, regionStop );
+	vExonEval = this->EvalExon ( ref, regionStart, regionStop);
 	vEval.insert ( vEval.end(), vExonEval.begin(), vExonEval.end() );
 	return vEval;
 }
@@ -2263,11 +2619,12 @@ bool Gene :: Overlap ( const Gene& g )
 
 // ------------------------
 // Eval the predicted genes in comparaison with the reference genes
+// If onlycodingGene is true, ignore ncrna prediction in the comparison
 // Return a vector of 3 int:
 //<TP gene nb, the nb of predicted genes in the region [start-end], the nb of real genes>
 // NOTE: THE NUMBER OF REAL GENES IS EQUAL TO THE NUMBER OF GENES OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETELY INCLUDED BETWEEN START AND END POSITIONS
 // ------------------------
-std::vector<int> Prediction :: EvalGene ( Prediction* ref, int start, int end )
+std::vector<int> Prediction :: EvalGene ( Prediction* ref, int start, int end, bool onlyCodingGene )
 {
 	std::vector<int> vResult ( 3,0 ); // [TPg, PGnb, RGnb]
 
@@ -2276,15 +2633,19 @@ std::vector<int> Prediction :: EvalGene ( Prediction* ref, int start, int end )
 	int iPredGene  = 0; // index used to scan predicted genes
 	int iRefGene   = 0; // index used to scan genes of the reference
 	int TPGene     = 0; // number of true positive genes
-	int realGeneNb = ref->nbGene;  // number of real genes
-	// Get the predicted genes in the region of reference
-	std::vector<Gene*> vPredGenes = this->GetGenes ( start, end );
+
+	// Get the predicted genes (just the gene coding for protein) in the region of reference
+	std::vector<Gene*> vPredGenes = this->GetGenes ( start, end, onlyCodingGene );
+	// Get the reference genes (just the gene coding for protein) in the region
+	std::vector<Gene*> vRefGenes  =  ref->GetGenes ( start, end, onlyCodingGene );
 	int predGeneNb = vPredGenes.size(); // nb of predicted genes between start and end
+	int realGeneNb = vRefGenes.size();  // nb of reference genes between start and end
 
 	while ( ( iRefGene < realGeneNb ) && ( iPredGene < predGeneNb ) )
 	{
 		predGene = vPredGenes[iPredGene];
-		refGene  = ref->vGene[iRefGene];
+		refGene  = vRefGenes[iRefGene];
+
 		if ( !predGene->Overlap ( *refGene ) )
 		{
 			if ( predGene->cdsStart < refGene->cdsStart ) iPredGene++;
@@ -2333,23 +2694,24 @@ std::vector<int> Prediction :: EvalGene ( Prediction* ref, int start, int end )
 // TP nucleotides nb, the nb of nt predicted as coding in the region, the nb of nt really coding>
 // NOTE: THE NUMBER OF REAL EXONS IS EQUAL TO THE NUMBER OF EXONS OF THE REFERENCE BECAUSE WE SUPPOSE THAT REF IS COMPLETELY INCLUDED BETWEEN START AND END POSITIONS
 // ------------------------
-std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end )
+std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end)
 {
 	std::vector<int> vResult ( 6,0 ); // //[TPe, PEnb, REnb, TPn, PNnb, RNnb]
 
 	int TPexons  = 0; // number of true positive exons
 	int TPnt     = 0; // number of true positive nucleotides
-	int PredNtNb = 0; // number of coding nt between start and end
+	int PredNtNb = 0; // number of coding nt between start and end in the prediction
+	int RealNtNb = 0; // number of coding nt between start and end in the reference
 	int overlapStart, overlapEnd;
 
-	int RealExonNb = ref->GetExonNumber();
-	int RealNtNb   = ref->GetExonLength();
+	// Get the exons between start and end, which belong to a gene coding for protein, for the pred and the ref
 	std::vector<Feature*> vPredExons = this->GetExons ( start, end );
-	std::vector<Feature*> vRefExons  = ref->GetExons ( start, end );
+	std::vector<Feature*> vRefExons  = ref->GetExons  ( start, end );
 	int PredExonNb = vPredExons.size(); // number of exons predicted between start and stop
+	int RealExonNb = vRefExons.size();  // number of real exons between start and stop
 
 	// If some exons were predicted in this region
-	if ( PredExonNb > 0 && vRefExons.size() > 0 )
+	if ( PredExonNb > 0 && RealExonNb > 0 )
 	{
 		int iPredExon = 0;
 		int iRefExon  = 0;
@@ -2362,6 +2724,12 @@ std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end 
 		{
 			predExon = vPredExons[i];
 			PredNtNb += min ( predExon->end, end ) - max ( predExon->start, start ) + 1;
+		}
+		// Compute the number of real coding nt (RealNtNb) 
+		for ( int i = 0; i < RealExonNb; i++ )
+		{
+			refExon = vRefExons[i];
+			RealNtNb += min ( refExon->end, end ) - max ( refExon->start, start ) + 1;
 		}
 
 		while ( iPredExon < PredExonNb && iRefExon < RealExonNb )
@@ -2424,7 +2792,7 @@ std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end 
 }
 
 // ------------------------
-//  Extract the exons including or overlapping the region [ begin,end].
+//  Extract the coding exons of genes coding for protein, including or overlapping the region [begin,end]
 // ------------------------
 std::vector<Feature*> Prediction :: GetExons ( int begin, int end )
 {
@@ -2451,13 +2819,15 @@ std::vector<Feature*> Prediction :: GetExons ( int begin, int end )
 			}
 		}
 	}
+
 	return vSelectedExons;
 }
 
 // ------------------------
 //  Extract the genes which are completly or partially included between begin and end positions.
+// If onlyCodingGene is true, return just the coding protein gene (no ncRNA)
 // ------------------------
-std::vector<Gene*> Prediction :: GetGenes ( int begin, int end )
+std::vector<Gene*> Prediction :: GetGenes ( int begin, int end, bool onlyCodingGene )
 {
 	std::vector<Gene *> vSelectedGenes; // vector of genes including or overlapping in the region
 
@@ -2471,6 +2841,12 @@ std::vector<Gene*> Prediction :: GetGenes ( int begin, int end )
 	// for each gene of the prediction
 	for ( int i=0; i < this->nbGene; i++ )
 	{
+		// If onlyCodingGene, check the gene is not a ncrna
+		if (onlyCodingGene == true && this->vGene[i]->IsNpcRna() == true)
+		{
+			continue;
+		}
+
 		if ( ( this->vGene[i]->cdsStart <= end ) &&
 		        ( this->vGene[i]->cdsEnd   >= begin ) )
 			vSelectedGenes.push_back ( vGene[i] );
@@ -2508,3 +2884,72 @@ int Prediction :: GetExonLength()
 
 	return codingNtNumber;
 }
+
+
+// ------------------------
+// Create operon objects according the operon number of the genes
+// ------------------------
+void Prediction :: ComputeOperons ()
+{
+	int currentOpId = 0;
+	std::vector <Gene*>::iterator   geneindex;
+	std::vector <Operon*>::iterator operonIndex;
+
+	// get the operon number of each gene and deduce the operons
+	for ( geneindex = vGene.begin(); geneindex != vGene.end(); geneindex++)
+	{
+		if ( ( *geneindex )->GetOperonNb() > 0 )
+		{
+			if (( *geneindex )->GetOperonNb() != currentOpId)
+			{
+				vOperon.push_back(new Operon(( *geneindex )->GetOperonNb()));
+				currentOpId = ( *geneindex )->GetOperonNb();
+			}
+			vOperon.back()->AddGene(*geneindex);
+		}
+	}
+
+	// remove the operons composed of only one gene
+	// It can happen after the cleaning of the genes
+	// (ex: deletion of short genes or of uncomplete genes)
+	for ( operonIndex = vOperon.begin(); operonIndex != vOperon.end(); )
+	{
+		if (( *operonIndex )->vGenes.size() == 1)
+		{
+			( *operonIndex )->vGenes[0]->SetOperonNb(0); // update the operon number of the lonely gene
+			operonIndex = vOperon.erase ( operonIndex ); // delete the operon
+		}
+		else
+		{
+			operonIndex++;
+		}
+	}
+}
+
+// ------------------------
+// Print information about operon
+// ------------------------
+void Operon :: Print()
+{
+	cout << "\nOperon " << this->number << " " << this->start << "-" << this->end << " : \n";
+	for (int i=0; i < this->vGenes.size(); i++)
+	{
+		this->vGenes[i]->Print();
+	}
+}
+
+
+// ------------------------
+// Return the operon object according to the number
+// ------------------------
+Operon* Prediction :: GetOperon(int nb)
+{
+	bool found = false;
+	for (int i=0; i < vOperon.size(); i++)
+	{
+		if (vOperon[i]->GetNumber() == nb) return vOperon[i];
+	}
+	return NULL;
+}
+
+

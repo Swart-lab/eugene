@@ -32,10 +32,12 @@
 #else
 #include <strings.h>
 #endif
-
+#include "MSensor.h"
 #include "DNASeq.h"
 #include "Const.h"
-#include "System.h"
+
+extern Parameters PAR;
+
 
 // ---------------------------------------------------------------------
 // Warning. These tables depend on the numerical representation of 
@@ -169,8 +171,86 @@ DNASeq :: DNASeq (char *filename)
   UpdateMarkov();
 
   if (fp != stdin) fclose(fp);
+
+  initCodonTable(); // Initialize the codon table
   
   return;
+}
+
+// -------------------------------------------------------------------------
+// Read the codon table file and save the start codons.
+// -------------------------------------------------------------------------
+void DNASeq :: initCodonTable()
+{
+    // Init the codon table
+  char *CodonFile = new char[FILENAME_MAX+1];
+  strcpy(CodonFile, PAR.getC("eugene_dir")); 
+  strcat(CodonFile, MODELS_DIR);
+  strcat(CodonFile, "/");
+  strcat(CodonFile, PAR.getC("EuGene.CodonTable"));
+
+  std::map<std::string, std::string>::iterator iter;
+  iter = mCodons.begin();
+
+  std::ifstream ifs(CodonFile);
+
+  if (ifs)
+  {
+  	string line, codon, AA, is_start;
+  	while ( std::getline( ifs, line ) ) // AAT   M   +
+  	{
+		istringstream stream (line);
+		codon    = "";
+		AA	     = "";
+		is_start = "";
+		stream >> codon;
+		stream >> AA;
+		stream >> is_start;
+		// put in lower case
+		std::transform(codon.begin(), codon.end(), codon.begin(), my_tolower());
+
+		// Check the codon is composed of A, T, G and C, and its size is 3
+		char* cCodon = (char*)codon.c_str();
+		if ( codon.size() != 3 ||
+		     Code2NumOne[Nuc2Code(cCodon[0])]*Code2NumOne[Nuc2Code(cCodon[1])]*Code2NumOne[Nuc2Code(cCodon[2])] != 1 )
+		{
+			cerr << "\nFail to read EuGene.CodonTable file: the string " << codon << " is not a valid codon.\n";
+			exit(2);
+		}
+		// Check each codon is present only one time
+		iter = mCodons.find(codon);
+		if ( iter != mCodons.end() ) 
+		{
+			cerr << "\nFail to read EuGene.CodonTable file: the codon " << codon << " is found many times.\n";
+			exit(2); 
+		}
+
+		mCodons[codon] = AA; // save the amino acid of the codon --> TODO: check this codon is not previous found
+		
+		// If it's a initiation codon
+		if ( !is_start.compare("+") )
+		{
+			vStart.push_back(codon);
+		}
+		// If it's a stop codon
+		if ( !AA.compare("*") )
+		{
+			vStop.push_back(codon);
+		} 
+  	}
+
+	// Check all the codon was read
+	if (mCodons.size() != 64)
+	{
+		cerr << "\nProblem during the reading of EuGene.CodonTable file: " << mCodons.size() << " codons found rather than 64.\n";
+		exit(2); 
+	}
+  }
+  else
+  { 
+	cerr << "Can't open codon file 'EuGene.CodonTable' " <<  CodonFile << "\n";
+	exit(1);
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -585,32 +665,39 @@ double DNASeq :: IsDon(int i,int sens)
   return ((double)count)/degen;
 }
 
+
 // ---------------------------------------------------------------------
 // test if a Stop Codon starts at position i. Returns the number of
-// possible matches with a STOP codon i.e. T{AA,AG,GA}
+// possible matches with a STOP.
 // ---------------------------------------------------------------------
-double DNASeq :: IsStop(int i,int sens)
+double DNASeq :: IsStop(int i, int sens)
 {
-  int count = 0;
-  int mode = 0;
+  int c1,c2,c3;
+  int mode  = 0;
+  int count = 0; // number of possibility to be a stop codon
 
-  if (sens < 0) {
-    i = SeqLen -i -1;
+  if (sens < 0)  {
+    i    = SeqLen -i -1;
     mode = 2;
   }
-  
-  if (((*this)(i,mode) & CodeT) == 0) return 0.0;
+  c1 = (*this)(i,   mode); // first nuc of the current codon
+  c2 = (*this)(i+1, mode); // second nuc of the current codon
+  c3 = (*this)(i+2, mode); // thirst nuc of the current codon
 
-  // le cas des TA{A,G}
-  if (((*this)(i+1,mode)) & CodeA)
-    count += Code2NumOne[(*this)(i+2,mode) & (CodeA|CodeG)]; 
-  
-  // le cas du TGA
-  if (((*this)(i+1,mode) & CodeG) && ((*this)(i+2,mode) & CodeA))
-    count ++;
-  
-  return (double)count/ Degeneracy(i,mode,3);
+  // Compare with all the stop codon
+  for (int j =0; j < vStop.size(); j++)
+  {
+ 	char* stopCodon = (char*)vStop[j].c_str();
+    // found!
+    if ( (c1 & Nuc2Code(stopCodon[0])) != 0 && 
+		 (c2 & Nuc2Code(stopCodon[1])) != 0 && 
+		 (c3 & Nuc2Code(stopCodon[2])) != 0 )
+		count++;
+  }
+
+  return (double)count / Degeneracy(i,mode,3);
 }
+
 // ---------------------------------------------------------------------
 // test if a spliced Stop Codon may start just before position i. 
 // Sets specific bits depending on the occurrence:
@@ -708,67 +795,111 @@ char DNASeq :: nt(int i, int mode)
   if ((*this)(i,mode) & CodeC) return 'C';
   return 'N';
 }
+
 // ---------------------------------------------------------------------
 // returns a penalty for infrequent start depending on the code of the
-// first nuc. (summed up in case of degeneracy ).
+// first nuc. (summed up in case of degeneracy and averaged).
 // ---------------------------------------------------------------------
-double StartTypePenalty(unsigned short code)
+double DNASeq :: StartPenalty(int i, int sens)
 {
-  double pen = 0.0;
+  double pen   = 0.0;
+  int    numok = 0;
+  int    mode  = 0;
+  unsigned short code;
 
-  if (code & CodeA) pen += 0.8;
-  if (code & CodeG) pen += 0.1;
-  if (code & CodeT) pen += 0.1;
-  if (code & CodeC) pen += 0.00001;
-
-  return pen;
-}
-// ---------------------------------------------------------------------
-// test is a Start Codon appears at position i ({ATG}TG) returns the
-// probability that the seq is a start codon considering a iid
-// model with uniform distribution (1/4) and taking into account 
-// start frequencies
-// ---------------------------------------------------------------------
-double DNASeq :: IsStart(int i,int sens)
-{
-  unsigned short First;
-  int mode = 0;
-
-  if (sens < 0) 
-    {
-      i = SeqLen -i -1;
-      mode = 2;
-    }
-
-  if (((*this)(i+2,mode) & CodeG) == 0) return 0.0;
-  if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
-
-  First = (*this)(i,mode);
-
-  if ((First & (CodeA | CodeT | CodeG)) == 0) return 0.0;
-
-  return StartTypePenalty(First) / Degeneracy(i,mode,3);
-}
-
-// ---------------------------------------------------------------------
-// Version EUCA
-// ---------------------------------------------------------------------
-
-double DNASeq :: IsEStart(int i,int sens)
-{
-  int mode = 0;
-  
-  if (sens < 0)  {
-    i = SeqLen -i -1;
+  if (sens < 0) {
+    i    = SeqLen -i -1;
     mode = 2;
   }
-  
-  if (((*this)(i+2,mode) & CodeG) == 0) return 0.0;
-  if (((*this)(i+1,mode) & CodeT) == 0) return 0.0;
-  if (((*this)(i,mode) & CodeA) == 0) return 0.0;
+  code = (*this)(i,mode);
 
-  return 1.0 / Degeneracy(i,mode,3);
+  if (code & CodeA) {pen += 0.8; numok++;}
+  if (code & CodeG) {pen += 0.1; numok++;}
+  if (code & CodeT) {pen += 0.1; numok++;}
+  //  if (code & CodeC) {pen += 0.00001; numok++;}
+
+  return pen/numok;
 }
+
+
+// ---------------------------------------------------------------------
+// Check if the codon is a start codon. Allow degenerated codon
+// return the probability according to the degeneration
+// ---------------------------------------------------------------------
+double DNASeq :: IsStart(int i, int sens)
+{
+   int c1,c2,c3;
+   short start1, start2, start3;
+   int mode = 0;
+
+   if (sens < 0)  {
+     i    = SeqLen -i -1;
+     mode = 2;
+  }
+  c1 = (*this)(i,mode);
+  c2 = (*this)(i+1,mode);
+  c3 = (*this)(i+2,mode);
+
+  // for each start codon
+  for (int j =0; j < vStart.size(); j++)
+  {
+	
+ 	char* startCodon = (char*)vStart[j].c_str();
+    start1 = Nuc2Code(startCodon[0]);
+    start2 = Nuc2Code(startCodon[1]);
+    start3 = Nuc2Code(startCodon[2]);
+
+    // found!
+    if ( (c1 & start1) != 0 && (c2 & start2) != 0 && (c3 & start3) != 0)
+    	return 1.0 / Degeneracy(i, mode, 3);
+  }
+  // It's not a start codon
+  return 0.0;
+}
+
+
+// ---------------------------------------------------------------------
+// test if a Start Codon appears at position i ({ATG}TG) returns the
+// probability that the seq is a start codon considering a iid
+// model with uniform distribution (1/4) 
+// Note: IsStart from FrameD 
+// ---------------------------------------------------------------------
+double DNASeq :: IsProStart(int i,int sens)
+{
+   int   c1, c2, c3;
+   short start1, start2, start3;
+   int   mode  = 0;
+   int   numok = 0;
+
+   if (sens < 0) {
+     i    = SeqLen -i -1;
+     mode = 2;
+  }
+  c1 = (*this)(i,mode);
+  c2 = (*this)(i+1,mode);
+  c3 = (*this)(i+2,mode);
+  
+  // compare with each start codon
+  for (int i =0; i < vStart.size(); i++)
+  {
+ 	char* startCodon = (char*)vStart[i].c_str();
+    	start1 = Nuc2Code(startCodon[0]);
+    	start2 = Nuc2Code(startCodon[1]);
+    	start3 = Nuc2Code(startCodon[2]);
+       // The codon is a start!
+    	if ( (c1 & start1) != 0 && (c2 & start2) != 0 && (c3 & start3) != 0)
+       {
+    		if (c1 & CodeA) numok++;
+    		if (c1 & CodeT) numok++;
+    		if (c1 & CodeG) numok++;
+      		return (double)numok / Degeneracy(i,mode,3);
+ 	}
+  }
+
+  // It's not a start codon
+  return 0.0;
+}
+
 // ---------------------------------------------------------------------
 // Degeneracy : returns the number of possible completely known sequence
 // represented by a degenerated subsequence
@@ -776,7 +907,8 @@ double DNASeq :: IsEStart(int i,int sens)
 unsigned char DNASeq :: Degeneracy(int i, int mode, int len)
 {
   unsigned char ret=1;
-  for(int k=0;k<len;k++) {
+  for(int k=0; k<len; k++) 
+  {
   	ret *= Code2NumOne[(*this)(i+k, mode)];
   }
   return ret;

@@ -383,7 +383,7 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
                     d->contents[i] += -fabs(vPMatch[iter-vPos.begin()]);
 
             // always penalize these
-            for (i= DATA::InterG; i<= DATA::RNAR; i++)      //inter & UTRs & UTR introns & RNA
+            for (i= DATA::InterG; i<= DATA::UIRR; i++)      //inter & UTRs & UTR introns & RNA & UIR
                 if (vPMatch[iter-vPos.begin()] != 0)
                     d->contents[i] +=  -fabs(vPMatch[iter-vPos.begin()]);
 
@@ -407,7 +407,7 @@ void SensorBlastX :: GiveInfo(DNASeq *X, int pos, DATA *d)
                 d->contents[i] += -fabs(vPMatch[index]);
 
         // always penalize these
-        for (i= DATA::InterG; i<= DATA::RNAR; i++)      //inter & UTRs & UTR introns  & RNA
+        for (i= DATA::InterG; i<= DATA::UIRR; i++)      //inter & UTRs & UTR introns  & RNA & UIR
             if (vPMatch[index] != 0)
                 d->contents[i] +=  -fabs(vPMatch[index]);
 

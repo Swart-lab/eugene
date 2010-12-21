@@ -37,11 +37,11 @@ void AmplifyScore(double Score [], unsigned int normopt)
   
   for  (i = 0;  i < 9;  i ++) 
     if (Min > Score[i]) Min = Score[i];
-  
+
   switch (normopt) {
   case 0:
-    for  (i = 0;  i < 9;  i ++) 
-      Score[i] = exp(Min-Score[i]);
+    for  (i = 0;  i < 9;  i ++)
+      Score[i] = ( (isnan(Score[i])) ? 0 : exp(Min-Score[i]) );
     // pas de normalisation
     
     break;
@@ -49,8 +49,8 @@ void AmplifyScore(double Score [], unsigned int normopt)
   case 1:
     // on suppose que une phase au plus peut coder
     for  (i = 0;  i < 9;  i ++) {
-      Score[i] = exp(Score[i]-Min);
-      Sum += Score[i];
+      Score[i] = ( (isnan(Score[i])) ? 0 : exp(Score[i]-Min) ) ;
+      Sum += Score[i];	
     }
     
     for  (i = 0;  i < 9;  i ++) 
@@ -59,7 +59,8 @@ void AmplifyScore(double Score [], unsigned int normopt)
     
   case 2:
     // chaque phase peut coder independamment
-    for (i = 0; i < 9; i++) Score[i] = exp(Score[i]-Min);
+    for (i = 0; i < 9; i++) 
+      Score[i] = ( (isnan(Score[i])) ? 0 : exp(Score[i]-Min) );
     for (i = 0; i < 6; i++) {
       Sum += Score[i];
       Score [i] /= (Score[6]+Score[7]+Score[8]+Score[i]);
@@ -83,13 +84,17 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   std::vector<BString_Array*> IMMatrix;
   std::string matrixName;
   bool is_initialised = false;
-  char *tmpdir = new char[FILENAME_MAX+1];
+  bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote")) ;
+  char *tmpdir        = new char[FILENAME_MAX+1];
 
-  type = Type_Content;
+  type    = Type_Content;
+  UTRasIG = false;
 
 
   IntergenicModel = (PAR.getI("MarkovIMM.IntergenicModel",GetNumber()));
-  
+  npcRNAModel     = PAR.getC("MarkovIMM.npcRNAModel", GetNumber());
+
+	
   maxOrder = PAR.getI("MarkovIMM.maxOrder",GetNumber());  
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
@@ -136,20 +141,41 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
     // On essaie ensuite de lire un 6eme modele. Si cela echoue,
     // le modele intronique est utilise pour les UTR
     IMMatrix[6] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-    if (IMMatrix[6]->Read(fp)) {
-      fprintf(stderr,"- No UTR model found, using intronic model. ");
-      delete IMMatrix[6];
-      IMMatrix[6] = IMMatrix[3];
-      IMMatrix[5] = IMMatrix[3];
-    } else {
-      fprintf(stderr," 6");
-      IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
-      if (IMMatrix[5]->Read(fp)) {
-	fprintf(stderr,"- No second UTR model found, using intronic model. ");
-	delete IMMatrix[5];
-	IMMatrix[5] = IMMatrix[3];
-      } else fprintf(stderr," 7");
-    }  
+    if (IMMatrix[6]->Read(fp)) 
+    {
+    	if (isProkaryote) // Put a flag to initialize UTR as IG
+    	{
+    		fprintf(stderr,"- No UTR model found, using intergenic model. ");
+    		UTRasIG = true;
+    	}
+    	else // Put intronic value in the UTR columns of the matrix
+    	{
+    		fprintf(stderr,"- No UTR model found, using intronic model. ");
+    		delete IMMatrix[6];
+    		IMMatrix[6] = IMMatrix[3];
+    		IMMatrix[5] = IMMatrix[3];
+    	}
+    }
+    else 
+    {
+    	fprintf(stderr," 6");
+    	IMMatrix[5] = new BString_Array(MODEL_LEN, ALPHABET_SIZE);
+    	if (IMMatrix[5]->Read(fp)) 
+    	{
+    		if (isProkaryote) // Put a flag to initialize UTR as IG
+    		{
+    			fprintf(stderr,"- No UTR model found, using intergenic model. ");
+    			UTRasIG = true;
+    		}
+    		else  // Put intronic value in the UTR columns of the matrix
+    		{
+    			fprintf(stderr,"- No second UTR model found, using intronic model. ");
+    			delete IMMatrix[5];
+    			IMMatrix[5] = IMMatrix[3];
+    		}
+    	}
+    	else fprintf(stderr," 7");
+    }
     fprintf(stderr," ...done\n");
     fclose(fp);
 
@@ -234,30 +260,51 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   d->contents[DATA::IntronUTRF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
   d->contents[DATA::IntronUTRR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
   
-  // InterG and RNA
+  // InterG
   switch (IntergenicModel)
-    {
-      // Before 3.4, known as useM0asIG=true: uses a Oth order markov
-      // model with seq. GC%
-    case 0:  
-      d->contents[DATA::InterG] += log(X->GC_AT(pos));
-      d->contents[DATA::RNAF]   += log(X->GC_AT(pos));
-      d->contents[DATA::RNAR]   += log(X->GC_AT(pos));
-      break;
-     
-      // new assymetric model (3.4). This breaks the syymetry between
-      // reverse and forward but seems top work better on C. Elegans
+  {
+  	// Before 3.4, known as useM0asIG=true: uses a Oth order markov
+  	// model with seq. GC%
+  	case 0:
+  		d->contents[DATA::InterG] += log(X->GC_AT(pos));
+  		d->contents[DATA::UIRF]   += log(X->GC_AT(pos));
+  		d->contents[DATA::UIRR]   += log(X->GC_AT(pos));
+  		if (UTRasIG)
+  		{
+  			d->contents[DATA::UTR5F]  += log(X->GC_AT(pos));
+  			d->contents[DATA::UTR5R]  += log(X->GC_AT(pos));
+  			d->contents[DATA::UTR3F]  += log(X->GC_AT(pos));
+  			d->contents[DATA::UTR3R]  += log(X->GC_AT(pos));
+  		}
+  		 break;
+
+  	// new assymetric model (3.4). This breaks the symetry between
+  	// reverse and forward but seems top work better on C. Elegans
     case 1:
       d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF]/65535.0));
-      d->contents[DATA::RNAF]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
-      d->contents[DATA::RNAR]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      d->contents[DATA::UIRF]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      d->contents[DATA::UIRR]   += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      if (UTRasIG)
+      {
+      	d->contents[DATA::UTR5F]  += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      	d->contents[DATA::UTR5R]  += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      	d->contents[DATA::UTR3F]  += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      	d->contents[DATA::UTR3R]  += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      }
       break;
 
       // old symetric model (default before 3.4). Mixes forward and reverse probabilities.
     case 2:
       d->contents[DATA::InterG] += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
-      d->contents[DATA::RNAF]   += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
-      d->contents[DATA::RNAR]   += log(((double)(*IMMatrix[4])[indexF] + (double)(*IMMatrix[4])[indexR])/131071.0);
+      d->contents[DATA::UIRF]   += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      d->contents[DATA::UIRR]   += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      if (UTRasIG)
+      {
+      	d->contents[DATA::UTR5F]  += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      	d->contents[DATA::UTR5R]  += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      	d->contents[DATA::UTR3F]  += log(((double)(*IMMatrix[4])[indexF]/65535.0));
+      	d->contents[DATA::UTR3R]  += log(((double)(*IMMatrix[4])[indexR]/65535.0));
+      }
       break;
 
     default:
@@ -265,14 +312,27 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
       exit(1);
     }
   
-  // UTR 5' F/R
-  d->contents[DATA::UTR5F] += log((double)(*IMMatrix[6])[indexF]/65535.0);
-  d->contents[DATA::UTR5R] += log((double)(*IMMatrix[6])[indexR]/65535.0);
-  
-  // UTR 3' F/R
-  d->contents[DATA::UTR3F] += log((double)(*IMMatrix[5])[indexF]/65535.0);
-  d->contents[DATA::UTR3R] += log((double)(*IMMatrix[5])[indexR]/65535.0);
-  
+  if (!UTRasIG)
+  {
+  	// UTR 5' F/R
+  	d->contents[DATA::UTR5F] += log((double)(*IMMatrix[6])[indexF]/65535.0);
+  	d->contents[DATA::UTR5R] += log((double)(*IMMatrix[6])[indexR]/65535.0);
+  	// UTR 3' F/R
+  	d->contents[DATA::UTR3F] += log((double)(*IMMatrix[5])[indexF]/65535.0);
+  	d->contents[DATA::UTR3R] += log((double)(*IMMatrix[5])[indexR]/65535.0);
+  }
+
+  if (!strcmp(npcRNAModel, "gc"))
+  {
+  	d->contents[DATA::RNAF]   += log(X->GC_AT(pos));
+  	d->contents[DATA::RNAR]   += log(X->GC_AT(pos));
+  }
+  else
+  {
+  	d->contents[DATA::RNAF]   += log(atof(npcRNAModel));
+  	d->contents[DATA::RNAR]   += log(atof(npcRNAModel));
+  }
+
   return;
 }
 

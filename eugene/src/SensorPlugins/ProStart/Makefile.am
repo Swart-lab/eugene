@@ -14,12 +14,16 @@
 # $Id$
 # ------------------------------------------------------------------
 # File:     Makefile.am
-# Contents: compilation of the SensorPlugins directory
+# Contents: compilation of the ProStart directory
 # ------------------------------------------------------------------
 
+AM_CXXFLAGS = $(eugene_cxxflags)
+AM_CFLAGS = 
 
-SUBDIRS = 0_SensorTk AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst PepSignal Plotter ProStart Repeat Riken SMachine SPred SpliceWAM StartWAM Tester Transcript QualData NStretch NcRNA
 
+noinst_PROGRAMS = Sensor.ProStart.so
+Sensor_ProStart_so_SOURCES = Sensor.ProStart.cc Sensor.ProStart.h 
+Sensor_ProStart_so_LDFLAGS = $(sensors_ldflags)
 
 
 CLEANFILES = *~

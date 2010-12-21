@@ -48,12 +48,16 @@ Sensor :: ~Sensor ()
 void Sensor :: CheckStart(DNASeq *X, std::vector<int> vPosF, std::vector<int> vPosR)
 {
   for (int i = 0; i<(int)vPosF.size(); i++)
-    if (!X->IsEStart(vPosF[i],1))
-      fprintf(stderr,"WARNING: Non ATG start predicted at %d on + strand!\n", vPosF[i]+1);
+  {
+    if (!X->IsStart(vPosF[i],1))
+      fprintf(stderr,"WARNING: Non start predicted at %d on + strand!\n", vPosF[i]+1);
+  }
   
   for (int i = 0; i<(int)vPosR.size(); i++)
-    if (!X->IsEStart(vPosR[i]-1,-1))
-      fprintf(stderr,"WARNING: Non ATG start predicted at %d on - strand!\n", vPosR[i]+1);
+  {
+    if (!X->IsStart(vPosR[i]-1,-1))
+      fprintf(stderr,"WARNING: Non start predicted at %d on - strand!\n", vPosR[i]+1);
+  }
 }
 
 // ---------------------------------------
@@ -299,6 +303,8 @@ void Contents :: PrintC ()
   case DATA::IntronUTRR : strcpy(t, "IntronUTRR"); break;
   case DATA::RNAF       : strcpy(t, "RnaF      "); break;
   case DATA::RNAR       : strcpy(t, "RnaR      "); break;
+  case DATA::UIRF       : strcpy(t, "UIRF      "); break;
+  case DATA::UIRR       : strcpy(t, "UIRR      "); break;
   }
   fprintf(stdout, "%d\t%d\t%s %f\n", start, end, t, *score);
 }

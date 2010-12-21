@@ -69,6 +69,7 @@ class Feature
   bool      IsIntergenic();
   bool      IsTranscribedAndUnspliced();
   bool      IsNpcRna();
+  bool      IsBicoding();
   void      ComputePhase(int);
 };
 
@@ -81,10 +82,13 @@ class Gene
   friend class Prediction;
   
  private:
-  int complete;  //+1:init|sngl +2:term|sngl 3:ALL 
-  int exNumber;
-  int inNumber, inLength;
-  int utrLength, mrnaLength, geneLength;
+  int  complete;  //+1:init|sngl +2:term|sngl 3:ALL 
+  int  exNumber;
+  int  inNumber, inLength;
+  int  utrLength, mrnaLength, geneLength;
+  char strand;
+  bool isNpcRna;   // true if it is a non protein coding rna
+  int  operonNb; // operon number
   void Update   (int);
   void clear    ();
  public:
@@ -93,7 +97,6 @@ class Gene
   int exLength;
   int geneNumber;
   bool isvariant; // true = is a splice variant
-  bool isNpcRna;   // true id it is a non protein coding rna
   int hasvariant; // has n splice variant (or is number n splice variant if is variant is true)
   std::vector <Feature*> vFea;
   
@@ -106,12 +109,39 @@ class Gene
   bool HasSameExons(const Gene& o);
   bool Overlap (const Gene& o);
   inline int nbFea() {return vFea.size();};
-  int GetExonNumber();
+  int  GetExonNumber();
+  char GetStrand();
+  int  GetOperonNb();
+  void SetOperonNb(int);
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
   void Print();
   char GetVariantCode(void);
+  bool IsNpcRna();
 
+};
+
+/*************************************************************
+ **                         Operon Object                     **
+ *************************************************************/
+class Operon
+{
+ private:
+  int  start;
+  int  end;
+  char strand;
+  int  number;
+ public:
+  std::vector <Gene*> vGenes;
+  Operon();
+  Operon(int nb);
+  ~Operon();
+  int  GetStart();
+  int  GetEnd();
+  int  GetNumber();
+  char GetStrand();
+  void AddGene(Gene* gene);
+  void Print();
 };
 
 
@@ -161,8 +191,9 @@ class Prediction
 
 
  public:
-  std::vector <Gene*> vGene;
-  int    nbGene;
+  std::vector <Gene*>   vGene;
+  std::vector <Operon*> vOperon;
+  int    nbGene;        // Number of predicted genes (including gene non coding for protein)
   char   seqName[FILENAME_MAX+1];
   double optimalPath;
 
@@ -174,18 +205,20 @@ class Prediction
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
   void  SanityCheck();
-  void  DeleteOutOfRange(int s,int e);
+  void  DeleteOutOfRange(int s,int e, char strand);
   void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
   State* GetStateAtPos(int); 
-  Gene *FindGene(int start, int end);
+  Gene *FindGene(int start, int end, char strand = 0);
   void Print();
-  std::vector<int> Eval(Prediction* ref, int offset);
-  std::vector<int> EvalGene(Prediction* ref, int start, int end);
+  std::vector<int> Eval(Prediction* ref, int offset, bool onlyCodingGene);
+  std::vector<int> EvalGene(Prediction* ref, int start, int end, bool onlyCodingGene);
   std::vector<int> EvalExon(Prediction* ref, int start, int end);
   std::vector<Feature*> GetExons(int start, int end);
-  std::vector<Gene*>    GetGenes(int start, int end);
+  std::vector<Gene*>    GetGenes(int start, int end, bool onlyCodingGene);
+  void  ComputeOperons();
+  Operon* GetOperon(int nb);
   int GetExonNumber();
   int GetExonLength();
 
@@ -217,7 +250,13 @@ const enum DATA::ContentsType SensorContents[NbTracks] = {
   DATA::UTR5R, DATA::UTR3R, 
   DATA::IntronUTRF, DATA::IntronUTRR, 
   DATA::IntronUTRF, DATA::IntronUTRR,
-  DATA::RNAF, DATA::RNAR
+  DATA::RNAF, DATA::RNAR,
+  DATA::ExonF1, DATA::ExonF1, DATA::ExonF2, // Bicoding: Ces valeurs ne doivent jamais etre appelées
+  DATA::ExonR1, DATA::ExonR1, DATA::ExonR2, // Bicoding: Ces valeurs ne doivent jamais etre appelées
+  DATA::ExonF1, DATA::ExonF1, DATA::ExonF1, // Bicoding: Ces valeurs ne doivent jamais etre appelées
+  DATA::ExonF2, DATA::ExonF2, DATA::ExonF2, // Bicoding: Ces valeurs ne doivent jamais etre appelées
+  DATA::ExonF3, DATA::ExonF3, DATA::ExonF3, // Bicoding: Ces valeurs ne doivent jamais etre appelées
+  DATA::UIRF, DATA::UIRR
 };
 
 

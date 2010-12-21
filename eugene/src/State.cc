@@ -17,6 +17,11 @@
 // Contents: Class State
 
 #include "State.h"
+#include <iostream>
+#include <map>
+#include <vector>
+
+extern std::map<int, std::vector<int> > bicodingStates;
 
 /*************************************************************
  **                      State                              **
@@ -56,6 +61,51 @@ bool State::IsIntergenic(void)
         return true;
     }
     return false;
+}
+
+// ----------------------
+//  Has a sense for a bicoding state
+//  Get the second coding state (other than firstState)
+// ----------------------
+char State::GetSecondState(char firstState)
+{
+	if (!this->IsBicoding() ) 
+	{
+		std::cerr << "Warning: you are trying to get the second state of a non bicoding state\n";
+		return -1;
+	}
+
+	std::vector<int> states = bicodingStates[this->state];
+	if (firstState == states[0]) return states[1];
+	else return states[0];
+}
+
+// ----------------------
+// Return true if the feature is on the forward strand or has no specify strand
+// ----------------------
+bool State::IsForward(void)
+{	
+	if (State2Strand[this->state] == Forward || 
+            State2Strand[this->state] == Forward_Reverse || 
+            State2Strand[this->state] == No_Strand)
+	{
+		return true;
+	}
+	return false;
+}
+
+// ----------------------
+// Return true if the feature is on the reverse strand or has no specify strand
+// ----------------------
+bool State::IsReverse(void)
+{	
+	if (State2Strand[this->state] == Reverse || 
+            State2Strand[this->state] == Forward_Reverse || 
+            State2Strand[this->state] == No_Strand)
+	{
+		return true;
+	}
+	return false;
 }
 
 
@@ -127,6 +177,16 @@ bool State::IsUTR3(void)
 }
 
 // ----------------------
+//  Return true if it is an untranslated internal region 
+// ----------------------
+bool State::IsUIR(void)
+{
+	if (this->state == UIRF || this->state == UIRR)
+		return true;
+	return false;
+}
+
+// ----------------------
 //  Return true if it is a coding exon
 // ----------------------
 bool State::IsCodingExon(void)
@@ -140,11 +200,11 @@ bool State::IsCodingExon(void)
 
 // ----------------------
 //  Return true if coding exon on the strand forward
-// NOTE  A modifier! Return (IsCodingExon() && IsForward())
 // ----------------------
 bool State::IsForwardCodingExon()
 {
-    if (1 <= State2Frame[this->state] && State2Frame[this->state] <= 3)
+    //if (1 <= State2Frame[this->state] && State2Frame[this->state] <= 3)
+    if ( IsForward() && IsCodingExon() )
     {
         return true;
     }
@@ -153,11 +213,11 @@ bool State::IsForwardCodingExon()
 
 // ----------------------
 //  Return true if coding exon on the reverse forward
-// NOTE  A modifier! Return (IsCodingExon() && IsReverse())
 // ----------------------
 bool State::IsReverseCodingExon()
 {
-    if (-3 <= State2Frame[this->state] && State2Frame[this->state] <= -1)
+    //if (-3 <= State2Frame[this->state] && State2Frame[this->state] <= -1)
+    if (IsReverse() && IsCodingExon())
     {
         return true;
     }
@@ -235,14 +295,28 @@ bool State::IsDefined()
 }
 
 // ------------------------
-//  Return the strand 
+//  Return the strand : * if it means both strand, . if not specify
 // ------------------------
 char State::GetStrand()
 {
-	char strand = (State2Frame[this->state] > 0) ? '+' : '-';
+	switch (State2Strand[this->state]) {
+	case Forward:
+		return '+'; 
+		break;
+	case Reverse:
+		return '-';
+		break;
+        case Forward_Reverse:
+		return '*';
+		break;
+	default:
+		return '.';
+		break;
+ 	}
+	//char strand = (State2Frame[this->state] > 0) ? '+' : '-';
 	    // If state == utr State2Frame returns 0 so
-    	if (this->state == UTR5F  ||  this->state == UTR3F) strand = '+';
-	return strand;
+    	//if (this->state == UTR5F  ||  this->state == UTR3F) strand = '+';
+	//return strand;
 }
 
 // ------------------------
@@ -287,6 +361,15 @@ bool State::IsNpcRna()
 	return false;
 }
 
+// ------------------------
+//  Return true if it's a bicoding exon
+// ------------------------
+bool State::IsBicoding()
+{
+   if (this->state >= SnglF1F2 && this->state <= SnglF3R3) return true;
+   else return false;
+}
+
 
 
 // -----------------------------------------
@@ -303,6 +386,8 @@ const char* State::State2EGNString()
     if (this->state == UTR5F || state == UTR5R) return "Utr5";
     if (this->state == UTR3F || state == UTR3R) return "Utr3";
     if (this->state == RnaR || this->state == RnaF) return "ncRNA ";
+    if (this->state == UIRF || this->state == UIRR) return "UIR   ";
+    if (this->state >= SnglF1F2 && this->state <= SnglF3R3) return "BiCoding";
     if (this->state >= IntronU5F)               return "Intron";
 
 }
@@ -321,6 +406,8 @@ const char* State :: State2GFFString ()
     if (this->state == UTR5F || state == UTR5R) return "UTR5";
     if (this->state == UTR3F || state == UTR3R) return "UTR3";
     if (this->state == RnaR || this->state == RnaF) return "ncRNA";
+    if (this->state == UIRF || this->state == UIRR) return "UIR";
+    if (this->state >= SnglF1F2 && this->state <= SnglF3R3) return "BiCoding";
     if (this->state >= IntronU5F)               return "Intron";
 }
 
@@ -356,6 +443,8 @@ int State::getTypeSofa(bool coding, bool sofa)
 //    if(state_egn >= IntronU5F)
     if(this->state <= IntronU3R)
       return SO_UTR_INTRON;    //"Intron";
+    if (this->state >= SnglF1F2 && this->state <= SnglF3R3)   // TODO!!!!!!!!! Voir ca!
+        return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;            // EK
 //     si ce n'est rien de tout ca, je renvoies SOFA_EXON
 //     a cause des attributs,
 //     je dois pouvoir recuperer un SOFA_EXON avec un sofa a false

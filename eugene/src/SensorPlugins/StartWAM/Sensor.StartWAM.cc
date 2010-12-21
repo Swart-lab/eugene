@@ -91,7 +91,7 @@ void SensorStartWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
   MotifExtnd[MotifLength+MarkovianOrder+1] ='\0';
 
   ////////// START Forward (need enough context) //////////////
-  if ( (X->IsEStart(pos,1)) &&
+  if ( (X->IsStart(pos,1)) &&
        (pos-NbNtBeforeATG-MarkovianOrder > 0) && 
        (pos+2+NbNtAfterATG < X->SeqLen) ) {
     score=0.0;
@@ -107,7 +107,7 @@ void SensorStartWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
 
   ////////// START Reverse (need enough context)   //////////////
 
-  if ( (X->IsEStart(pos-1,-1)) &&
+  if ( (X->IsStart(pos-1,-1)) &&
        (pos-1+NbNtBeforeATG+MarkovianOrder < X->SeqLen) &&
        (pos-3-NbNtAfterATG > 0) ) {
     score=0.0;

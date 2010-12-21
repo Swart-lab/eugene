@@ -163,6 +163,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
     // Init the offset value
     int evalOffset;
     char* offsetKey = (char *)"Eval.offset";
+
     if ( PAR.probeKey(offsetKey) == false)
     {
         evalOffset = INT_MAX/2;
@@ -171,6 +172,9 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
     {
         evalOffset = PAR.getI("Eval.offset");
     }
+
+	int ignoreNpcRNA    = PAR.getI("Eval.ignoreNpcRNA");
+	bool onlyCodingGene	= (ignoreNpcRNA == 1) ? true: false; 
 
     if (algo->Para.size() > 0)
     {
@@ -204,7 +208,7 @@ double ParaOptimization::ParaEvaluate (bool is_detail_required)
                 pred = Predict(Sequences[i], MSensors[i]);
                 ref  = this->References[i];
                 // Evaluate the prediction and compute the number of True Positive
-                std::vector<int> vEvalPred = pred->Eval(ref, evalOffset);
+                std::vector<int> vEvalPred = pred->Eval(ref, evalOffset, onlyCodingGene);
                 // Inc the number of TP/predicted/real gene/exon/nt
                 TPg  += vEvalPred[0];
                 PGnb += vEvalPred[1];
@@ -329,7 +333,7 @@ void ParaOptimization :: ReadReferences()
             iSeq++;
             if ( iSeq >= this->SeqNames.size() )
             {
-                std::cerr << "\nERROR: true coordinate file doesn't contain the same number of sequences than loaded sequences.\n";
+                std::cerr << "\nERROR: true coordinate file "<< this->TrueCoordFile.c_str() << " doesn't contain the same number of sequences than loaded sequences.\n";
                 exit(100);
             }
             // Check the sequence name is identical to the fasta file name

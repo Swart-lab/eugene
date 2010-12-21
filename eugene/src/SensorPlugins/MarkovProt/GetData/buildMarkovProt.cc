@@ -31,8 +31,7 @@
 #include "../../0_SensorTk/markov.cc"
 #include "../../../System.h"
 #include "../../../System.cc"
-#include "../../../DNASeq.h"
-#include "../../../DNASeq.cc"
+
 
 int ORDREMAX = 2;  // maximum of 2 recommended (to avoid overfitting)
 const char* DBfile     = "/Annotation/Z_Sylvain/sprot_rel41_noFragm.fasta";  // DB infile

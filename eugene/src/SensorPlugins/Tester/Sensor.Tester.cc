@@ -94,8 +94,8 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
       if (EvaluatedType == EVALUATED_START) {
 	dF = Data.sig[DATA::Start].weight[Signal::Forward];
 	dR = Data.sig[DATA::Start].weight[Signal::Reverse];
-	is_posF = ( X->IsEStart(i,1) != 0 );
-	is_posR = ( X->IsEStart(i-1,-1) != 0 );
+	is_posF = ( X->IsStart(i,1) != 0 );
+	is_posR = ( X->IsStart(i-1,-1) != 0 );
 	is_annotF = gene->IsState(DATA::Start,i,'+');
 	is_annotR = gene->IsState(DATA::Start,i,'-');
 	if (is_posF || is_posR) {

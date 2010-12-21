@@ -70,12 +70,13 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   type = Type_Any;
 
 // Inilialize the inline parameters
-  char exonRead[20], intronRead[20], cdsRead[20], npcRnaRead[20];
+  char exonRead[20], intronRead[20], cdsRead[20], npcRnaRead[20], igRead[20];;
   char startRead[20] ,stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20],  tStartNpcRead[20], tStopNpcRead[20] ;
   strcpy(exonRead,PAR.getC("AnnotaStruct.Exon*",        GetNumber()));
   strcpy(intronRead,PAR.getC("AnnotaStruct.Intron*",    GetNumber()));
   strcpy(cdsRead,PAR.getC("AnnotaStruct.CDS*",         GetNumber()));
   strcpy(npcRnaRead, PAR.getC("AnnotaStruct.npcRNA*",  GetNumber()));
+  strcpy(igRead, PAR.getC("AnnotaStruct.Intergenic*",  GetNumber()));
   strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
   strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
   strcpy(accRead,PAR.getC("AnnotaStruct.Acc*",         GetNumber()));
@@ -96,6 +97,9 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
 
   if (npcRnaRead[0] != 'i') npcRnaInline = 0;
   else  npcRnaInline = 1;
+
+  if (igRead[0] != 'i') igInline = 0;
+  else  igInline = 1;
 
   if (startRead[0] != 'i') startInline = 0;
   else startInline= 1;
@@ -176,16 +180,18 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   // by fgeneshpasa.  If start stop is non canonical -> remove it
   for(int i=(int)vSig.size()-1; i>=0; i--) {
     if (vSig[i]->type == DATA::Start)
-      if(vSig[i]->edge) {
-	if (!X->IsEStart(vSig[i]->pos-1, -1)) { 
+      if(vSig[i]->edge) {	
+	if (!X->IsStart(vSig[i]->pos-1, -1)) { 
+		fprintf(stderr,"Annotastruct: bad ATG on reverse strand at position %d\n", vSig[i]->pos-1);
 		vSig.erase(i+vSig.begin());
-		fprintf(stderr,"Annotastruct: bad ATG on reverse strand\n");
+
 	}
       }
       else {
-	if (!X->IsEStart(vSig[i]->pos, 1))    { 
+	if (!X->IsStart(vSig[i]->pos, 1))    {
+		fprintf(stderr,"Annotastruct: bad ATG on forward strand at position %d\n", vSig[i]->pos);
 		vSig.erase(i+vSig.begin());
-		fprintf(stderr,"Annotastruct: bad ATG on forward strand\n");
+		
 	}
       }
     if (vSig[i]->type ==  DATA::Stop)
@@ -285,7 +291,6 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   strcpy(tStopPAR,     PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
   strcpy(tStartNpcPAR, PAR.getC("AnnotaStruct.TrStartNpcType", GetNumber()));
   strcpy(tStopNpcPAR,  PAR.getC("AnnotaStruct.TrStopNpcType",  GetNumber()));	
-
   if (startRead[0]     != 'i') strcat(startPAR,     startRead);
   if (stopRead[0]      != 'i') strcat(stopPAR,      stopRead);
   if (accRead[0]       != 'i') strcat(accPAR,       accRead);
@@ -631,11 +636,11 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     /* Phase ? */
     if (strcmp(phase, "."))
     {
+	
       if (strand == '+') { frame = (startC - 1) % 3; }
       else               { frame = (len - endC) % 3; }
       frame = (frame + atoi(phase)) % 3;
     }
-
     /* Strand ? */
     if (strand == '+') 
     {
@@ -684,8 +689,9 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vSig.push_back(new Signals(startS,   DATA::Del,    edge, CharCopy(scoreC)));
 
     // High level (contents OR/AND signals)
-    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000196") 
-      //CDS && five_prime_coding_exon_region == E.Init
+
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000196")  
+	// "CDS" and Ontology_term=SO:0000196 (five_prime_coding_exon_coding_region)
     {
       vSig.push_back(new Signals(startS-1, DATA::Start, edge, GetScoreC(DATA::Start,scF, startInline)));
       vSig.push_back(new Signals(endS,     DATA::Don,   edge, GetScoreC(DATA::Don,  scF, donInline)));
@@ -693,20 +699,22 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     }
 
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000004") 
-      //CDS && interior_coding_exon == E.Intr
+      // "CDS" and Ontology_term=SO:0000004	 (interior_coding_exon)
     {
       vSig.push_back(new Signals(startS-1, DATA::Acc, edge,   GetScoreC(DATA::Acc,scF, accInline)));
       vSig.push_back(new Signals(endS,     DATA::Don,   edge, GetScoreC(DATA::Don,scF, donInline)));
       PushInCon(startC, endC, (cdsInline ? new float(scF) : &cdsPAR), strand, phase, frame);
     }
 
-    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000197") //CDS && three_prime_coding_exon_region == E.Term
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0000197") 
+	//CDS && Ontology_term=SO:0000197 (three_prime_coding_exon_region)
     {
       vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, GetScoreC(DATA::Acc,scF, accInline)));
       vSig.push_back(new Signals(endS,     DATA::Stop,  edge, GetScoreC(DATA::Stop,scF, stopInline)));
       PushInCon(startC, endC, (cdsInline ? new float(scF) : &cdsPAR), strand, phase, frame);
     }
-    else if ( idSo == "SO:0000316" && onthology_term == "SO:0005845") //CDS && single_exon == "E.Sngl"
+    else if ( idSo == "SO:0000316" && onthology_term == "SO:0005845") 
+    //CDS && Ontology_term=SO:0005845 (exon_of_single_exon_gene)
     {
       vSig.push_back(new Signals(startS-1, DATA::Start, edge, GetScoreC(DATA::Start,scF, startInline)));
       vSig.push_back(new Signals(endS,     DATA::Stop,  edge, GetScoreC(DATA::Stop,scF, stopInline)));
@@ -726,7 +734,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vSig.push_back(new Signals (endS,    DATA::tStop, edge, GetScoreC(DATA::tStop,scF, tStopInline)));
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (cdsInline ? new float(scF) : &cdsPAR)));
     }
-    else if ( idSo == "SO:0000203" ) //UTR
+    else if ( idSo == "SO:0000203" ) // UTR
     {
       vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
       vSig.push_back(new Signals(endS,     DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, tStopInline)));
@@ -735,10 +743,11 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (cdsInline ? new float(scF) : &cdsPAR)));
     }
 
-    else if ( idSo == "SO:0000188" && onthology_term == "SO:0000191") //intron not UTR !
+    else if ( idSo == "SO:0000188" && onthology_term == "SO:0000191") //intron && Ontology_term = interior_intron
+	
       vCon.push_back(new Contents(startC,endC,DATA::IntronF+edge, (intronInline ? new float(scF) : &intronPAR)));
 
-    else if ( idSo == "SO:0000188" ) // "Intron.Any"
+    else if ( idSo == "SO:0000188" ) // intron
     {
       vSig.push_back(new Signals (startS-1, DATA::Don, edge, GetScoreC(DATA::Don,scF, donInline)));
       vSig.push_back(new Signals (endS,     DATA::Acc, edge, GetScoreC(DATA::Acc,scF, accInline)));
@@ -746,14 +755,14 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back(new Contents(startC,endC,DATA::IntronUTRF+edge, (intronInline ? new float(scF) : &intronPAR)));
     }
 
-    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000200") //"E.First"
+    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000200") // exon and Ontology_term=five_prime_coding_exon
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, (exonInline ? new float(scF) : &exonPAR)));
       vSig.push_back(new Signals (startS-1,DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
     }
 
-    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000202") // "E.Last"
+    else if ( idSo == "SO:0000147" && onthology_term == "SO:0000202") // exon and Ontology_term= "three_prime_coding_exon"
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR3F+edge, (exonInline ? new float(scF) : &exonPAR)));
@@ -767,7 +776,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
       vSig.push_back(new Signals(endS,     DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, tStopInline)));
     }
-    else if ( idSo == "SO:0000147" ) //E.Any 
+    else if ( idSo == "SO:0000147" ) // "exon"  
     {
       PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame);
       vCon.push_back(new Contents(startC,endC,DATA::UTR5F+edge, (exonInline ? new float(scF) : &exonPAR)));
@@ -778,6 +787,24 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
       vCon.push_back( new Contents(startC, endC, DATA::RNAF+edge, (npcRnaInline ? new float(scF) : &npcRnaPAR)));
       vSig.push_back( new Signals (startS-1, DATA::tStartNpc, edge, GetScoreC(DATA::tStartNpc, scF, tStartNpcInline)));
       vSig.push_back( new Signals (endS,     DATA::tStopNpc,  edge, GetScoreC(DATA::tStopNpc, scF, tStopNpcInline))  );
+    }
+
+    else if (idSo == "SO:0000833") // "transcript_region" : vote for Exon/UTR5/UTR3/NcRNA/UIR
+    {
+        PushInCon(startC, endC, (exonInline ? new float(scF) : &exonPAR), strand, phase, frame); // cds
+        vCon.push_back( new Contents(startC, endC, DATA::UTR5F+edge, (exonInline ?   new float(scF) : &exonPAR))); // utr5
+        vCon.push_back( new Contents(startC, endC, DATA::UTR3F+edge, (exonInline ?   new float(scF) : &exonPAR))); // utr3
+        vCon.push_back( new Contents(startC, endC, DATA::UIRF+edge,  (exonInline ?   new float(scF) : &exonPAR))); // uir
+        vCon.push_back( new Contents(startC, endC, DATA::RNAF+edge,  (npcRnaInline ? new float(scF) : &npcRnaPAR))); //ncRNA
+        // transcription start and stop signals
+        vSig.push_back( new Signals (startS-1, DATA::tStartNpc, edge, GetScoreC(DATA::tStartNpc, scF, tStartNpcInline)));
+        vSig.push_back( new Signals (endS,     DATA::tStopNpc,  edge, GetScoreC(DATA::tStopNpc, scF, tStopNpcInline))  );
+        vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF, tStartInline)));
+        vSig.push_back(new Signals(endS,     DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, tStopInline)));
+    }
+    else if (idSo == "SO:0000605") // "intergenic_region"
+    {
+        vCon.push_back(new Contents(startC, endC, DATA::InterG, (igInline ? new float(scF) : &igPAR)));
     }
     else if ((*it)->getType() != transFeatName)
       fprintf(stderr, "WARNING: feature %s line %d unknown => ignored.\n",
@@ -936,7 +963,7 @@ void SensorAnnotaStruct :: GiveInfo (DNASeq *X, int pos, DATA *d)
       d->contents[vCon[iConTMP]->type] += *(vCon[iConTMP]->score);
       iConTMP++;
     }
-    while(iCon < (int)vCon.size()  &&  pos > vCon[iCon]->end) iCon++;
+    while(iCon < (int)vCon.size()  &&  pos >= vCon[iCon]->end) iCon++;
   }
 }
 

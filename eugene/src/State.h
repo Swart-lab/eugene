@@ -34,6 +34,8 @@ public:
     char GetStrand();
     short int GetFrame(); /* Return the frame - See the definition on the EuGene Trac */
     bool IsIntergenic(void);
+    bool IsForward(void);
+    bool IsReverse(void);
     bool IsIntron(void);
     bool IsIntronInStartStopRegion(void);
     bool IsUTRIntron(void);
@@ -42,6 +44,7 @@ public:
     bool IsUTR(void);
     bool IsUTR5(void);
     bool IsUTR3(void);
+    bool IsUIR(void);
     bool IsCodingExon(void);
     bool IsForwardCodingExon(); /* coding exon on the strand forward */
     bool IsReverseCodingExon(); /* coding exon on the strand reverse */
@@ -52,6 +55,8 @@ public:
     bool IsSnglExon();
     bool IsTermExon();
     bool IsNpcRna();
+    bool IsBicoding();
+    char GetSecondState(char);
     const char* State2EGNString();
     const char* State2GFFString ();
     //mon bricolage -> devrait etre dans prediction.cc ?

@@ -38,6 +38,7 @@ enum
   SOFA_3_UTR = 205,         ///<  UTR3' (de l'ARNm episse)
   SOFA_CDS = 316,            ///<  un CDS avec un start ET un stop
   SOFA_NCRNA      = 655,            ///< non protein coding rna
+  SOFA_OPERON = 178,     ///< A group of contiguous genes transcribed as a single (polycistronic) mRNA from a single regulatory region. 
 
   SO_5_EXON = 200,       ///<  un exon contenant CDS/UTR 5'
   SO_3_EXON = 202,       ///<  un exon contenant  CDS/UTR 3'

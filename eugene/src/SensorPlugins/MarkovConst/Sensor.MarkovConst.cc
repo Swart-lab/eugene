@@ -51,6 +51,7 @@ void SensorMarkovConst :: Init (DNASeq *X)
   transInter   = PAR.getD("MarkovConst.Inter*");  //InterG
   transUTR5    = PAR.getD("MarkovConst.UTR5*");   //UTR5
   transUTR3    = PAR.getD("MarkovConst.UTR3*");   //UTR3
+  transUIR     = PAR.getD("MarkovConst.UIR*");   //UIR
 
   minGC = PAR.getD("MarkovConst.minGC",GetNumber());
   maxGC = PAR.getD("MarkovConst.maxGC",GetNumber());
@@ -78,6 +79,8 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       d->contents[DATA::IntronUTRR] += log(transIntronU);
       d->contents[DATA::RNAF] += log(transInter);
       d->contents[DATA::RNAR] += log(transInter);
+      d->contents[DATA::UIRF] += log(transUIR);
+      d->contents[DATA::UIRR] += log(transUIR);
     }
 }
 

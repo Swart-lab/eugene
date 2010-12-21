@@ -106,16 +106,21 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
 
   while ((carg = getopt(argc, argv, POSSIBLE_ARGUMENTS)) != EOF) {
     switch (carg) {
-    case 'A': 
-      if (optarg) name = optarg;
-      else {ShowUsage();  exit(1);}
+    	case 'A':
+      		if (optarg) name = optarg;
+      		else {ShowUsage();  exit(1);}
+	  		break;
+		// Prokaryote mode: load the prokaryote parameter file
+    	case 'P':
+      		name = ((std::string) getC("eugene_dir")) + DEFAULT_PARA_PROK_FILE;
+      		break;
     }
   }
   
   if (name == "") 
     name = ((std::string) getC("eugene_dir"))+DEFAULT_PARA_FILE;
 
-  strcpy(key,"parameters_file");
+  strcpy(key, "parameters_file");
   strcpy(val, name.c_str());
   m[key] = val;
 }
@@ -334,6 +339,9 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["ParaOptimization.Use"] = "1";
       if (optarg) m["ParaOptimization.TrueCoordFile"] = optarg;
       break;
+    case 'P':   /* procaryote mode */
+      m["EuGene.Mode"] = "Prokaryote";
+      break;
 
     case '?':           /* bad option */
       errflag++;
@@ -359,6 +367,7 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "\nUsage: EuGene [options] FASTA-files\n\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  General:\n");
+  fprintf(stderr, "    -P                      Activates the prokaryote mode\n");	
   fprintf(stderr, "    -A paramfile            Selects another parameter file\n");
   fprintf(stderr, "    -a                      Activates the alternative splicing prediction using EST\n");
   fprintf(stderr, "    -D<parameter>=<value>   Changes the parameter value\n"); 

@@ -36,7 +36,7 @@
 //
 //int WAMlength = 9;  // always < 100 !!
 //
-//int consbeg = 2; // the consensus begins at nt n°consbeg
+//int consbeg = 2; // the consensus begins at nt nï¿½consbeg
 //
 //char* signalfile   = "ARA.DON.12.fasta";
 //
@@ -48,7 +48,7 @@
 //char* outname     = "WAM.ARA.START9.FP.";
 
 //int WAMlength = 7;  // always < 100 !!
-//int consbeg = 4; // the consensus begins at nt n°consbeg
+//int consbeg = 4; // the consensus begins at nt nï¿½consbeg
 //char* signalfile   = "ARA.ACC.12.fasta";
 //char* outname     = "WAM.ARA.ACC.L7.TP.";
 //char* signalfile   = "ARA.ACC.12.FP.fasta";
@@ -151,11 +151,11 @@ Stock results in L (L=WAM length) binary files : one per position in the signal.
 
   //----------------------------------------------------------------//
   // PRINT data (stdout)
-  printf("----- WAM COUNTS -----\n");
-  for (i=0;i<WAMlength;i++) {
-    printf("WAMCOUNT[%d]:\n",i);
-    WAMCOUNT[i]->affichagevaleurs();
-  }
+  //printf("----- WAM COUNTS -----\n");
+  //for (i=0;i<WAMlength;i++) {
+    //printf("WAMCOUNT[%d]:\n",i);
+    //WAMCOUNT[i]->affichagevaleurs();
+  //}
 
 
   //----------------------------------------------------------------//
