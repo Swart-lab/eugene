@@ -1,0 +1,33 @@
+18 march 2010
+How create a new plugin?
+
+In src/SensorPlugins, create the plugin directory.
+>mkdir ProStart
+
+Choose a similar plugin and copy the files .h, .cc and Makefile.am in the new directory.
+>cd ProStart
+> cp ../EuStop/Sensor.EuStop.cc Sensor.ProStart.cc
+> cp ../EuStop/Sensor.EuStop.h Sensor.ProStart.h
+> cp ../EuStop/Makefile.am .
+
+In all these files, replace the old name of the plugin by the new.
+In .cc and .h files, method to keep and to implement:
+Init
+Constructor
+Destructor
+GiveInfo
+Plot
+
+Edit $EUGENEDIR/src/SensorPlugins/Makefile.am and add the name of the plugin directory to the list SUBDIRS
+Edit $EUGENEDIR/configure.ac and add the relative path of the Makefile for the new plugin to the AC_CONFIG_FILES list.
+
+Edit $EUGENEDIR/cfg/eugene.apr and add:
+- The plugin parameters (prefixed by 'PluginName.')
+- An attribute to use or not the plugin
+Sensor.ProStart.use	1
+- Give a plugin priority
+##### Sensor priorities	 #####
+Sensor.ProStart		10
+
+
+ 
