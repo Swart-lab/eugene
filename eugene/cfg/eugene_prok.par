@@ -2,8 +2,8 @@
 ###################### GENERAL PARAMETERS #######################
 #################################################################
 EuGene.version		4.0
-EuGene.organism		Arabidopsis
-EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
+EuGene.organism		Meliloti
+EuGene.mode			Prokaryote	# Eukaryote or Prokaryote
 EuGene.sloppy		0
 EuGene.VerboseGC	0
 EuGene.GCLatency	100000
@@ -12,29 +12,29 @@ EuGene.GCLatency	100000
 EuGene.InitExDist	init.dist
 EuGene.IntrExDist	intr.dist
 EuGene.TermExDist	term.dist
-EuGene.SnglExDist	sngl.dist
+EuGene.SnglExDist	sngl_prok.dist
 EuGene.IntronDist	intron.dist
-EuGene.InterGDist	intergenic.dist
-EuGene.5PrimeDist	utr.dist
-EuGene.3PrimeDist	utr.dist
-EuGene.RnaDist	    rna.dist
-EuGene.OverlapDist	overlap.dist
-EuGene.UIRDist		uir_prok.dist # only used in Prokaryote mode
+EuGene.InterGDist	intergenic_prok.dist
+EuGene.5PrimeDist	utr_prok.dist
+EuGene.3PrimeDist	utr_prok.dist
+EuGene.RnaDist   	rna_prok.dist
+EuGene.OverlapDist	overlap_prok.dist
+EuGene.UIRDist		uir_prok.dist   # only used in Prokaryote mode
 #
 #
 ##### Priors #####
 EuGene.SplicedStopPen   1e999.0
-EuGene.ExonPrior	0.25		# Prior on the initial states
-EuGene.IntronPrior	0.15		# Sato et al 1999 / Terryn et al. 1999
-EuGene.InterPrior	0.5
-EuGene.FivePrimePrior	0.03
-EuGene.ThreePrimePrior	0.04
-EuGene.RnaPrior         0.03
-EuGene.BiCodingPrior    0.00
-EuGene.UIRPrior         0.00
+EuGene.ExonPrior	0.9 # Prior on the initial states
+EuGene.IntronPrior	0.0	# Sato et al 1999 / Terryn et al. 1999
+EuGene.InterPrior	0.05
+EuGene.FivePrimePrior	0.01
+EuGene.ThreePrimePrior	0.01
+EuGene.RnaPrior         0.01
+EuGene.BiCodingPrior    0.01
+EuGene.UIRPrior         0.01
 #
 ##### Codon table #####
-EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable
+EuGene.CodonTable	pro.codontable  # pro.codontable or euk.codontable
 #
 #
 ##### Gff3
@@ -42,7 +42,7 @@ Gff3.SoTerms		cfg/sofa.obo
 ##### Output control ######
 Output.RemoveFrags	0
 Output.UTRtrim		0
-Output.MinCDSLen	60
+Output.MinCDSLen	20
 Output.truncate		5
 Output.stepid		1
 Output.graph		0		# Don't produce a graphical output
@@ -77,8 +77,8 @@ AltEst.minEx				3
 AltEst.exonucleasicLength	10
 AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
-AltEst.strandSpecific	0 
 AltEst.verbose			0
+AltEst.strandSpecific	0
 #AltEst.format  		GFF3
 #
 ##### Evaluation mode ######
@@ -99,7 +99,7 @@ Operon.maxDistance 10
 #################################################################
 #
 ##### EuStop parameters #####
-EuStop.stopP*           4.155
+EuStop.stopP*           4.0  #4.155
 #
 ##### FrameShift parameters #####
 FrameShift.Ins*		1e999.0
@@ -149,8 +149,8 @@ NStart.startB*		0.308
 ProStart.matchlen	14
 ProStart.matchoffset	3
 ProStart.RBSPattern attcctcca # E coli (16S genetics/ Steitz J.A.)
-ProStart.alpha*	1.0
-ProStart.beta*	0.3
+ProStart.alpha*	0.4
+ProStart.beta*	6.0
 ProStart.stackFile stack.dat
 ProStart.loopFile loop.dat
 #
@@ -206,10 +206,10 @@ StartWAM.ScaleCoef*	0.1594
 StartWAM.ScalePenalty*	-3.1439
 #
 ##### Transcript parameters #####
-Transcript.Start*	4.155
-Transcript.Stop*	4.155
-Transcript.StartNpc* 30
-Transcript.StopNpc* 30
+Transcript.Start*	   1e-20
+Transcript.Stop*	   1e-20
+Transcript.StartNpc*   10
+Transcript.StopNpc*    10
 #
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
@@ -293,16 +293,16 @@ MarkovConst.UIR*	0.99
 MarkovConst.Inter*	1.0
 #
 ##### Interpolated Markov Models parameters #####
-MarkovIMM.matname[0]	Ara2UTR.mat
+MarkovIMM.matname[0] Ara2UTR.mat
 MarkovIMM.minGC[0]	0
 MarkovIMM.maxGC[0]	100
-MarkovIMM.IntergenicModel[0]	2
+MarkovIMM.IntergenicModel[0]	0
 MarkovIMM.npcRNAModel[0] gc
 MarkovIMM.maxOrder[0]	8
 #MarkovIMM.matname[1]	Ara2UTR.mat
 #MarkovIMM.minGC[1]	50
 #MarkovIMM.maxGC[1]	100
-#MarkovIMM.IntergenicModel[1]	2
+#MarkovIMM.IntergenicModel[1]	0
 #MarkovIMM.npcRNAModel[1] gc
 #MarkovIMM.maxOrder[1]	8
 #
@@ -443,22 +443,21 @@ Sensor.FrameShift.use	0
 Sensor.GSplicer.use	0
 Sensor.SMachine.use	0
 Sensor.NG2.use		0
-Sensor.NStart.use	1
+Sensor.NStart.use	0
 Sensor.PatConst.use	0
 Sensor.PepSignal.use	0
 Sensor.SpliceWAM.use 	0
 Sensor.SPred.use	0
 Sensor.StartWAM.use	0
 Sensor.Transcript.use	1
-Sensor.ProStart.use	0
+Sensor.ProStart.use	1
 #
 # CONTENT SENSORS
 Sensor.BlastX.use	0
 Sensor.Est.use		0	
 Sensor.Homology.use	0	
-Sensor.MarkovConst.use	1
+Sensor.MarkovConst.use	0
 Sensor.MarkovIMM.use	1
-#Sensor.MarkovIMM.use	2
 Sensor.MarkovProt.use	0
 Sensor.Repeat.use	0
 Sensor.NStretch.use     0
@@ -466,7 +465,7 @@ Sensor.NcRNA.use        0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
-Sensor.IfElse.use	1
+Sensor.IfElse.use	0
 Sensor.Riken.use	0
 Sensor.QualData.use     0
 #

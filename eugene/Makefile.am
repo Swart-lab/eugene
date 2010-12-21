@@ -59,7 +59,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/doc/PCCSC.tex \
 	     $(srcdir)/doc/graph.* \
 	     $(srcdir)/doc/Doc_*.tex \
-             $(srcdir)/doc/SO.png \ 
+	     $(srcdir)/doc/SO.png \
 	     $(srcdir)/doc/ParaOptimization.pdf \
 	     $(srcdir)/doc/ParaOptimization.fig \
 	     $(srcdir)/doc/Sequences/At5g18830.* \
@@ -85,6 +85,8 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/src/SensorPlugins/User/*.* \
 	     $(srcdir)/src/SensorPlugins/ATGpr/*.* \
 	     $(srcdir)/cfg/eugene.par \
+	     $(srcdir)/cfg/eugene_prok.par \
+	     $(srcdir)/cfg/eugene.combine.par \
 	     $(srcdir)/cfg/araclean50.par \
 	     $(srcdir)/cfg/araclean80.par \
 	     $(srcdir)/cfg/sofa.obo \
@@ -93,6 +95,8 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/models/*.bin \
 	     $(srcdir)/models/BLOSUM* \
 	     $(srcdir)/models/WAM/WAM* \
+	     $(srcdir)/models/*.codontable \
+	     $(srcdir)/models/*.dat \
              $(srcdir)/web/Style/eugene.css \
              $(srcdir)/web/Javascripts/diap.js \
              $(srcdir)/web/Images/*.jpg \
