@@ -1,0 +1,61 @@
+% Documentation of the ProStart sensor
+
+\subsubsection{\texttt{Sensor.ProStart}}
+\label{prostart}
+\paragraph{Description}
+
+This plugin is dedicated to inject possible translation starts in prokaryote sequences.
+
+This sensor is activated by setting the value 1 for the parameter \texttt{Sensor.ProStart.use} in the parameter file.
+
+\texttt{ProStart.stackFile} and \texttt{ProStart.loopFile} : contain the energetic parameters for computing the RBS 
+(Shine-Delgarno) hybridization energy. Taken and adapted from Turners website.
+\EuGene\ use a simplified RNA binding model which ignores stabilizing loops (eg. tetraloops). 
+The algorithm is essentially a free end-gap global alignement algorithm that takes into account bulges, loops and helices.
+
+\texttt{ProStart.alpha*} and \texttt{ProStart.beta*}: Start parameters $\alpha$ and $\beta$. 
+These parameters are used to control how the RBS quality affect the probability of use of a given START codon. 
+If $E$ is the hybridization energy of the RBS, the following probability is used:
+
+\[\frac{\alpha}{1+\beta\cdot\exp(E/RT)}\]
+  
+So, $\alpha$ gives a basic probability for a START to be used. For $\beta$, the
+higher it is, the stronger the influence of the RBS quality on the use of
+the corresponding START.  START probability is also affected by their type: 
+\texttt{atg} is the preferred START codon, then \texttt{gtg} and \texttt{ttg}.
+
+Here is an example of ProStart parameters definition
+
+\begin{Verbatim}[fontsize=\small]
+ProStart.matchlen 14
+ProStart.matchoffset 3
+ProStart.RBSPattern attcctcca # E coli (16S genetics/ Steitz J.A.)
+ProStart.alpha* 0.4
+ProStart.beta* 6.0
+ProStart.stackFile stack.dat
+ProStart.loopFile loop.dat
+
+Sensor.ProStart.use 1
+Sensor.ProStart 10
+\end{Verbatim}
+                                                           
+\paragraph{Input files format} No input files needed
+
+\paragraph{Integration of information}
+
+If $E$ is the hybridization energy of the RBS, the following probability is used:
+
+  \[p=\frac{\alpha}{1+\beta\cdot\exp(E/RT)}\]
+
+All predictions that use a predicted start receive a $\log(p)$
+penalty while those that go through a predicted start while they
+could have used it receive a $\log(p)$ penalty.
+
+\paragraph{Post analyse}
+
+No post analyse.
+
+\paragraph{Graph}
+
+Predicted starts are visible on exonix tracks as blue vertical lines
+whose length indicates the site score.

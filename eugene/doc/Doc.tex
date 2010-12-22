@@ -18,13 +18,13 @@
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Philipe Bardou \and Marie-Jos\'ee Cros \and Sylvain Foissac \and J\'erome Gouzy \and Annick Moisan \and C\'eline Noirot \and Erika Sallet \and Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
+\author{Erika Sallet \and J\'er\^ome Gouzy \and Philipe Bardou \and Marie-Jos\'ee Cros \and Sylvain Foissac \and  Annick Moisan \and C\'eline Noirot \and Damien Leroux \and Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
 
 \def\abstractname{Overview}
 \setcounter{tocdepth}{3}
 \setcounter{secnumdepth}{3}
 
-\title{\EuGene: an open gene finder for eukaryotes}
+\title{\EuGene: an open gene finder for eukaryotes and prokaryotes}
 
 \begin{document}
 \maketitle
@@ -32,7 +32,7 @@
 
 \begin{abstract}
   \EuGene\ is a sophisticated open gene finder for eukaryotic
-  organisms. It has been developped thanks to funding by INRA
+  organisms, and since version 4.0 also for prokaryotic organisms. It has been developed thanks to funding by INRA
   (permanent scientists and engineers), G\'enoplante and the french
   ministry of research (with one PhD student). It generates text, HTML
   and graphical outputs.
@@ -64,7 +64,7 @@
 
 \chapter{Quick Start}
 
-\section{Annoting a sequence}
+\section{Annotating a sequence}
 Here is a small example based on the \texttt{SYNO\_ARATH.fasta} sequence.
 For reference information on the software, see chapter 2.
 
@@ -101,7 +101,7 @@ that the prediction should start and end in intergenic mode using the
 \texttt{Prior} parameters in the program parameter file (see
 section~\ref{param}).
 
-\EuGene\ produce two kind of output: textual and graphical. To manage this outputs
+\EuGene\ produces two kinds of output: textual and graphical. To manage this outputs
 several options could be use. Two of them (more details see chapter 2):
 \begin{itemize}
 \item \texttt{-p a|d|g|h|l|s|o}: if we want, we may ask for multiple textual output. For example an HTML output
@@ -191,6 +191,7 @@ EXECUTION_TRACE3
 %is supported for 3416 of its 3444 bases.
 
 \section{Using protein similarities}
+\label{protsim}
 
 If one wants also to exploit similarities with homologous proteins, a
 similar file format can be used (see the corresponding plugin). The
@@ -233,6 +234,21 @@ EXECUTION_TRACE4
 \end{Verbatim}
 
 Other plugins are described in the reference section of this document.
+
+\section{Annotating a prokaryote sequence}
+
+Since version 4.0, \EuGene\ is able to annotate prokarotic sequence. \EuGene\ can especially predict overlapping genes and operons structure.
+Here a simple example based on a \textit{Sinorhizobium meliloti} sequence.
+To annotate prokaryotes, the -P flag must be used. Here we want to exploit similarities with 2 proteic databases, 
+so we used the flag -b, followed by the sets of levels to be exploited (``01'' for levels 0 and 1) For more details about protein similarities use, 
+see section~\ref{protsim}.
+
+\EuGene\ results shows that the two last genes are overlapping.
+
+
+\begin{Verbatim}[fontsize=\scriptsize]
+EXECUTION_TRACE5
+\end{Verbatim}
 
 \newpage
 \chapter{Reference documentation}
@@ -336,8 +352,23 @@ line flag activates the Prokaryote mode.
   region or a untranslated intern region (UIR). Each parameter specifies the
   filename of an explicit penalty distribution file (see the following section). %TBD
   
-\item \texttt{EuGene.CodonTable}: filename of the file which contains 
-the codon table. The path is relative to EUGENEDIR. 
+\item \texttt{EuGene.CodonTable}: name of the file which contains 
+the DNA codon table. The path is relative to EUGENEDIR. 
+This file is composed of three columns:
+the first contains the codon ; the second contains the amino acid (Just one letter) or the character '*' if it's a stop codon ;
+the third column contains the character '+' only if it's a start codon.
+
+Extract of the default eukaryote codon table:
+\begin{Verbatim}
+AAA K	
+AAC N
+ACA T
+...
+ATG M +
+...
+TGA *
+\end{Verbatim}
+
   
 \item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
   predicting genes containing in-frame spliced STOPs. This is
@@ -446,17 +477,20 @@ process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove
 \item \texttt{Gff3.SoTerm}: indicates the path where sofa (Sequence Ontology Feature Terms) terms are store.
   The path is relative to EUGENEDIR.
 
-\item \texttt{Eval.offset}: using during the evaluation of a prediction. 
-The prediction is compared with a reference (the real gene structure). 
-The region in which compare the prediction and the reference is defined 
-	as the reference positions +/- the offset.
+\item \texttt{Eval.offset}: during the evaluation of a prediction, the prediction is compared with a 
+reference (the real gene structure). The region in which compare the prediction 
+and the reference is defined as the reference positions +/- the offset.
+(used in optimization mode)
+
+\item \texttt{Eval.ignoreNpcRNA}: Put 1 to ignore the npcRNA 
+for the fitness computing (used in optimization mode)
 
 \item \texttt{Fitness.wsng}, \texttt{Fitness.wsne}, 
 \texttt{Fitness.wsnn}, \texttt{Fitness.wspg}, 
-\texttt{Fitness.wspe}, \texttt{Fitness.wsspn}: 
-indicate respectively the weight of the gene sensitivity, of the exon sensitivity, 
+\texttt{Fitness.wspe}, \texttt{Fitness.wsspn}: indicate respectively the weight 
+of the gene sensitivity, of the exon sensitivity, 
 of the nucleotide sensitivity, of the gene specificity, of the exon specificity 
-and of the nucleotide specificity in the fitness computing.
+and of the nucleotide specificity in the fitness computing. (used in optimization mode)
 \end{itemize}
 
 {\bf Specification of explicit penalty distributions on length}
@@ -500,15 +534,20 @@ distribution region with penalty 0.0 for 3, 2.0 for 4, 3.0 for 5
 and the slope is 1, the rest of the distribution will be linear
 with slope 1.
 
-\section{EuGène prokaryote mode}
+\section{\EuGene's prokaryote mode}
  
-Since version 4, EuGène is able to predict genes for prokaryote genomes and operon structure.
-Activate this mode by puting 'Prokaryote' to the \texttt{EuGene.mode} attributes
-or by using the flag -P in the command line.
-Two genes predicted on the same strand whose distance is inferior to \texttt{Operon.maxDistance} 
+Since version 4.0, \EuGene\ is able to annotate prokaryotic sequences. This mode is activated using 
+the ``\texttt{-P}'' flag or equivalently by setting the parameter \texttt{EuGene.mode} to 'Prokaryote'.
+In this mode, \EuGene\ can predict overlapping genes on the same strand or different strands, and operon structure.
+Operon predictions are only available in the GFF3 output, activated by setting \texttt{Output.format} parameter 
+to \texttt{g}.
+
+Length constraints can be applied to overlap regions and to transcribed regions between genes, by filling respectively 
+ \texttt{EuGene.OverlapDist} and \texttt{EuGene.UIRDist} parameters.
+
+Two genes predicted on the same strand whom distance is inferior to \texttt{Operon.maxDistance} 
 are automatically consider as members of the same operon.   
 
- \texttt{EuGene.mode}
 
 \section{Splice variant prediction}
 
@@ -549,7 +588,7 @@ Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and the associ
 the \texttt{doc/Sequences/} directory, we can test this as follows:
 
 \begin{Verbatim}[fontsize=\scriptsize]
-EXECUTION_TRACE5
+EXECUTION_TRACE6
 \end{Verbatim}
 
 We can see that two predictions are produced for the same region. In this case, it is just one alternative splice site
@@ -743,6 +782,7 @@ We now descrive each plugin, its behavior and parameters.
 \input{Doc_SPred.tex}
 \input{Doc_StartWAM.tex}
 \input{Doc_Transcript.tex}
+\input{Doc_ProStart.tex}
 
 \subsection{\texttt{Content plugins}}
 \input{Doc_BlastX.tex}
@@ -876,7 +916,17 @@ parameter file are:
 \item a file with the coordinates of genes for the sequences set. See below its description.
 \item it is possible to include a regulizing term in the criteria
 optimized using the \texttt{ParaOptimization.Regularizer} parameter.
-The sum of all the absolute values of the parameters multiplied by this parameter is subtracted from the original fitness to define the final fiteness optimized.\end{itemize}
+The sum of all the absolute values of the parameters multiplied by this parameter is subtracted from the original fitness to define the final fiteness optimized.
+\item \texttt{Eval.offset}: during the evaluation of a prediction, the prediction is compared with a 
+reference (the real gene coordinates). The region in which compare the prediction 
+and the reference is defined as the reference positions +/- the offset.
+\item \texttt{Eval.ignoreNpcRNA}: Put 1 to ignore the npcRNA for the fitness computing.
+\item \texttt{Fitness.wsng}, \texttt{Fitness.wsne}, 
+\texttt{Fitness.wsnn}, \texttt{Fitness.wspg}, 
+\texttt{Fitness.wspe}, \texttt{Fitness.wsspn}: indicate respectively the weight of the gene sensitivity, of the exon sensitivity, 
+of the nucleotide sensitivity, of the gene specificity, of the exon specificity 
+and of the nucleotide specificity in the fitness computing.
+\end{itemize}
 
 \paragraph{Description of the file with the coordinates of genes}
 One line of the file describes one gene. The first field of the line is the sequence name. The followed fields are the list of respectively start and stop positions of the exons of the gene. 
