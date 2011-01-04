@@ -112,6 +112,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
              $(srcdir)/Test/README \
              $(srcdir)/Test/TestSuite/*.* \
              $(srcdir)/Test/Sequences/SYNO_ARATH.* \
+             $(srcdir)/Test/Sequences/SMc.1541000-1552500.* \
              $(srcdir)/Test/config/*.* \
              $(srcdir)/Procedures/Format/EuGeneAdapt/GFF/*.pm \
              $(srcdir)/m4/Makefile.am
