@@ -4,17 +4,16 @@
 
 \paragraph{Description}
 
-This plugin injects coding/intronic/utr/intergenic likelihood as
+This plugin injects coding/intronic/utr/rna/intergenic likelihood as
 modeled by interpolated Markov models (introduced in Glimmer, see S.
 Salzberg, A. Delcher, S. Kasif, and O. White.{\em Microbial gene
   identification using interpolated Markov models} Nucleic Acids
 Research 26:2 (1998), 544-548). These models are defined in a
-so-called matrices file (located in the directory specified by the
-\texttt{EuGene.PluginsDir} parameter) whose name is indicated by the
+so-called matrices file (located in the EUGENEDIR/models directory) whose name is indicated by the
 \texttt{MarkovIMM.matname} parameter. Depending on the matrices file,
 this may contain IMM for exons, introns and intergenic data and also
 optionnally 5' and 3' UTR regions. If these 2 last IMMs are absent
-from the matrices file, intronic models are used for UTR.
+from the matrices file, intronic models are used for UTR in eukaryote mode, and intergenic model is used for UTR in prokaryote mode.
 
 The plugin is controlled by two further parameters:
 \texttt{MarkovIMM.minGC} and \texttt{MarkovIMM.maxGC} which indicate
@@ -27,7 +26,7 @@ section~\ref{plug}), this enables the use of several IMM according to
 the GC\% of the input sequence. 
 
 The intergenic track can receive score in three possible ways
-according to the \texttt{IntergenicModel} parameter value~:
+according to the \texttt{MarkovIMM.Interge\-nicModel} parameter value~:
 \begin{enumerate}
 \item[0] In this case, a $O^{th}$ order Markov model that is directly
   estimated from the frequencies in the sequence is used.
@@ -41,11 +40,19 @@ according to the \texttt{IntergenicModel} parameter value~:
   of giving the same score to a sequence and its reverse complement.
 \end{enumerate}
 
+The npcRNA track can receive score in two  possible ways
+according to the \texttt{MarkovIMM.npcRNAModel} parameter value~:
+\begin{enumerate}
+\item  \texttt{gc} In this case, a $O^{th}$ order Markov model that is directly
+  estimated from the frequencies in the sequence is used.
+\item \texttt{numeric value} In this case, a constant score, which is the log of this value.
+\end{enumerate}
+
 The sensor is activated by either:
 \begin{itemize}
 \item the \texttt{-m} argument followed by the filename of the set of Markov models.
   \index{CmdFlags}{[MarkovIMM Markov models file] m}
-\item the value 1 for the parameter \texttt{[Sensor.MarkovIMM.use} in
+\item the value 1 for the parameter \texttt{Sensor.MarkovIMM.use} in
   the parameter file.
 \end{itemize}
 
@@ -54,7 +61,9 @@ Here is an example of MarkovIMM parameters definition.
 MarkovIMM.matname    Ara2UTR.mat
 MarkovIMM.minGC      0
 MarkovIMM.maxGC      100
-MarkovIMM.UseM0asIG  FALSE
+MarkovIMM.IntergenicModel  2
+MarkovIMM.npcRNAModel  gc
+MarkovIMM.maxOrder  8
 Sensor.MarkovIMM.use 1
 Sensor.MarkovIMM     1      # Sensor priority
 \end{Verbatim}

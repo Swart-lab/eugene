@@ -4,10 +4,12 @@
 
 \paragraph{Description}
 
-This simple plugin predicts a possible transcription start and stop at
+This simple plugin predicts a possible transcription start and stop, 
+and a possible transcription start and stop for non protein coding RNA, at
 every position, all with the same uniform cost. These costs are
-respectively set by the \texttt{Transcript.Start*} and
-\texttt{Transcript.Stop*} parameters.
+respectively set by the \texttt{Transcript.Start*}, 
+\texttt{Transcript.Stop*}, \texttt{Transcript.StartNpc*} and 
+\texttt{Transcript.StopNpc*} parameters. 
 
 The sensor is activated by setting the value 1 for the parameter
 \texttt{Sensor.Transcript.use} in the parameter file. 
@@ -16,6 +18,8 @@ Here is an example of Transcript parameters definition.
 \begin{Verbatim}[fontsize=\small]
 Transcript.Start*       4.155
 Transcript.Stop*        4.155
+Transcript.StartNpc*    30
+Transcript.StopNpc*     30
 Sensor.Transcript.use   1   # Use Transcript sensor
 Sensor.Transcript       1      # Sensor priority
 \end{Verbatim}
@@ -29,6 +33,9 @@ No input file needed.
 All predictions that go through a transcription start (resp. stop) are
 penalized by the corresponding \texttt{Transcript.Start*} (resp. 
 \texttt{Transcript.Stop*}) parameter value.
+All predictions that go through a transcription start (resp. stop) of a non protein coding RNA are
+penalized by the corresponding \texttt{Transcript.StartNpc*} (resp. 
+\texttt{Transcript.StopNpc*}) parameter value.
 
 \paragraph{Post analyse}
 

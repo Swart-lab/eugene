@@ -32,15 +32,17 @@
 
 \begin{abstract}
   \EuGene\ is a sophisticated open gene finder for eukaryotic
-  organisms, and since version 4.0 also for prokaryotic organisms. It has been developed thanks to funding by INRA
+  organisms, and since version 4.0 for prokaryotic organisms also. 
+  It has been developed thanks to funding by INRA
   (permanent scientists and engineers), G\'enoplante and the french
   ministry of research (with one PhD student). It generates text, HTML
   and graphical outputs.
   
   \EuGene\ uses a graph based model to predict genes that covers both
   HMM based or more complex Bayesian net based or Conditional Markov Field probabilistic
-  predictions. The model is fixed but complex (with 43 different
-  states) and covers Exon, Intron, UTR, UTR introns\ldots each with a
+  predictions. The model is fixed but complex (with 47 different
+  states in eukaryote mode, and 64 in prokaryote mode) 
+  and covers Exon, Intron, UTR, UTR introns\ldots each with a
   possible explicit distribution on length. The prediction itself
   relies on an optimal linear time and space algorithm for prediction.
   
@@ -191,7 +193,6 @@ EXECUTION_TRACE3
 %is supported for 3416 of its 3444 bases.
 
 \section{Using protein similarities}
-\label{protsim}
 
 If one wants also to exploit similarities with homologous proteins, a
 similar file format can be used (see the corresponding plugin). The
@@ -241,9 +242,9 @@ Since version 4.0, \EuGene\ is able to annotate prokarotic sequence. \EuGene\ ca
 Here a simple example based on a \textit{Sinorhizobium meliloti} sequence.
 To annotate prokaryotes, the -P flag must be used. Here we want to exploit similarities with 2 proteic databases, 
 so we used the flag -b, followed by the sets of levels to be exploited (``01'' for levels 0 and 1) For more details about protein similarities use, 
-see section~\ref{protsim}.
+see section~\ref{blastxlabel}.
 
-\EuGene\ results shows that the two last genes are overlapping.
+\EuGene\ results show that the two last genes are overlapping.
 
 
 \begin{Verbatim}[fontsize=\scriptsize]
@@ -319,19 +320,20 @@ sensitive. The definition order is not important.
 
 \item \texttt{EuGene.organism}: name of the considered organism.
 
-\item \texttt{EuGene.mode}: Prokaryote or Eukaryote. The ``\texttt{-P}'' command 
+\item \texttt{EuGene.mode}: 'Prokaryote' or 'Eukaryote'. The ``\texttt{-P}'' command 
 line flag activates the Prokaryote mode.  
    
-\item \texttt{EuGene.PluginsDir}: specify the location of the directory
-  where plugins could be found (``\texttt{.so}'' files, sensor specific 
-  models files); that is the path to the \texttt{PLUGINS} directory.
-  
   \item \texttt{EuGene.sloppy}: in the default (non-sloppy) mode, 
   \EuGene\ will stop and abort if some needed parameters in the parameter
   file is missing. If the parameter is set to \texttt{1} then a simple warning
   is emitted. Not advised unless you know what you do.
-  
-\item \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
+
+  \item \texttt{EuGene.VerboseGC}: If the parameter is set to \texttt{1} then 
+  display Garbage Collector Info.
+
+  \item \texttt{EuGene.GCLatency}: latency of the garbage collector.
+
+  \item \texttt{EuGene.ExonPrior}, \texttt{EuGene.IntronPrior},
   \texttt{EuGene.InterPrior}, \texttt{EuGene.FivePri\-mePrior},
   \texttt{EuGene.ThreePrimePrior}, \texttt{EuGene.RnaPrior}, 
   \texttt{EuGene.BiCodingPrior}, \texttt{EuGene.UIRPrior}: 
@@ -344,13 +346,22 @@ line flag activates the Prokaryote mode.
   \texttt{EuGene.TermExDist}, \texttt{EuGene.SnglExDist},
   \texttt{EuGene.IntronDist}, \texttt{EuGene.InterDist},
   \texttt{EuGene.5PrimeDist}, \texttt{EuGene.3PrimeDist}, 
-  \texttt{EuGene.RnaDist}, \texttt{EuGene.OverlapDist}, \texttt{EuGene.UIRDist}: \EuGene\ 
+  \texttt{EuGene.RnaDist}, \texttt{EuGene.OverlapDist}, \texttt{EuGene.UIRDist}: 
+  \EuGene\ 
   can use explicit penalty distributions on the length of the elements
   predicted. This can be an initial exon, and intermediary exon, a
   terminal exon, a single exon gene, an intron, an intergenic region, a
-  5' UTR region, a 3' UTR region, a non coding protein RNA, an overlapping exons
-  region or a untranslated intern region (UIR). Each parameter specifies the
+  5' UTR region, a 3' UTR region or a non coding protein RNA. 
+  In prokaryote mode, this can be also an overlapping exons
+  region or a untranslated intern region (UIR). 
+  Each parameter specifies the
   filename of an explicit penalty distribution file (see the following section). %TBD
+
+\item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
+  predicting genes containing in-frame spliced STOPs. This is
+  basically set to an infinite value in order to avoid prediction
+  containing spliced STOPs but setting this to 0.0 can be useful for
+  pseudo-gene prediction\ldots
   
 \item \texttt{EuGene.CodonTable}: name of the file which contains 
 the DNA codon table. The path is relative to EUGENEDIR. 
@@ -358,7 +369,7 @@ This file is composed of three columns:
 the first contains the codon ; the second contains the amino acid (Just one letter) or the character '*' if it's a stop codon ;
 the third column contains the character '+' only if it's a start codon.
 
-Extract of the default eukaryote codon table:
+Excerpt of the default eukaryote codon table:
 \begin{Verbatim}
 AAA K	
 AAC N
@@ -368,13 +379,6 @@ ATG M +
 ...
 TGA *
 \end{Verbatim}
-
-  
-\item \texttt{EuGene.SplicedStopPen}: indicates the penalty for
-  predicting genes containing in-frame spliced STOPs. This is
-  basically set to an infinite value in order to avoid prediction
-  containing spliced STOPs but setting this to 0.0 can be useful for
-  pseudo-gene prediction\ldots
 
 \item \texttt{Output.RemoveFrags}: in the text output, remove any 
 fragmentary gene prediction (missing ATG or STOP or both). The prediction
@@ -473,6 +477,11 @@ process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove
   stderr/stdout output (eg. PNG images, HTML and GFF files...) should go.
   Default is the current directory.
   \index{CmdFlags}{[eugene output directory] O}
+
+\item \texttt{Output.webdir}: location of the directory needed to generate html output. 
+This location has to contain 'Image', 'Style' and 'Javascripts' directories.
+If the parameter is set to \texttt{LOCAL} then the web directory is EUGENEDIR/web. 
+Else this parameter value has to be an URL.
 
 \item \texttt{Gff3.SoTerm}: indicates the path where sofa (Sequence Ontology Feature Terms) terms are store.
   The path is relative to EUGENEDIR.
