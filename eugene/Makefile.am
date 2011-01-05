@@ -139,10 +139,14 @@ install-data-hook:
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
 	$(INSTALL) -m 644 $(srcdir)/doc/EuGeneDoc.pdf $(DESTDIR)/$(pkgdatadir)/doc
 	$(INSTALL) -m 644 $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
+	$(INSTALL) -m 644 $(srcdir)/doc/Sequences/At5g18830.* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
+	$(INSTALL) -m 644 $(srcdir)/doc/Sequences/SMc.1541000-1552500.fasta* $(DESTDIR)/$(pkgdatadir)/doc/Sequences
 	$(INSTALL) -m 644 $(srcdir)/models/*.dist $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/*.mat $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/*.bin $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/*.codontable $(DESTDIR)/$(pkgdatadir)/models
+	$(INSTALL) -m 644 $(srcdir)/models/*.dat $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
 	$(INSTALL) -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
 	$(INSTALL) -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
