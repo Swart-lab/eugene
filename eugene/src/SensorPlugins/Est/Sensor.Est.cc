@@ -190,6 +190,7 @@ void SensorEst :: Init (DNASeq *X)
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
     unsigned char cESTMatch = 0; // current ESTMatch
+    unsigned char Oriented  = 0;
 
     // Peut on faire un bete acces sequentiel ?
     if((index != 0                &&  vPos[index-1] >= pos) ||
@@ -206,6 +207,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
 
         cESTMatch = vESTMatch[index];
+        Oriented = !((cESTMatch & AllForward)  & ((cESTMatch & AllReverse) >> ReverseToForward));
 
         // Favor splice sites in marginal exon-intron regions
         if ((cESTMatch & MLeftForward) &&
@@ -251,8 +253,8 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
         }
 
         // Intron Forward
-        // Si on a un Hit EST ou si l'on connait le sens du match EST
-        if((cESTMatch & Hit) ||
+        // Si on a un Hit EST orienté ou si l'on a un Gap de l'autre côté seulement
+        if(((cESTMatch & Hit) && Oriented) ||
                 ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
         {
             d->contents[DATA::IntronF] += estP;
@@ -260,15 +262,15 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
         }
 
         // Intron Reverse
-        // Si on a un Hit EST ou si l'on connait le sens du match EST
-        if((cESTMatch & Hit) ||
+        // Si on a un Hit EST orienté ou si l'on a un Gap de l'autre côté seulement
+        if(((cESTMatch & Hit) && Oriented) ||
                 ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
         {
             d->contents[DATA::IntronR] += estP;
             d->contents[DATA::IntronUTRR] += estP;
         }
 
-        // Intergenique: tout le temps si on a un match
+        // Intergenique: tout le temps si on a un match (gap ou hit)
         d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
 
         // Penalize RNA if there is a match and that mRNAonly is activated

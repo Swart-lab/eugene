@@ -47,10 +47,13 @@ const unsigned char MLeftForward  = 0x2;
 const unsigned char GapForward    = 0x4;
 const unsigned char MRightForward = 0x8; 
 
-// Shift to go from Hits to ...
+// Left shift to go from Hits to ...
 const  unsigned int HitToMLeft  = 1;
 const  unsigned int HitToGap    = 2;
 const  unsigned int HitToMRight = 3;
+
+// Right shift to go from Reverse to Forward
+const unsigned int  ReverseToForward = 4; 
 
 const unsigned char HitReverse    = 0x10;
 const unsigned char MLeftReverse  = 0x20;
@@ -64,6 +67,9 @@ const unsigned char MReverse      = MLeftReverse  | MRightReverse;
 const unsigned char Gap           = GapForward    | GapReverse;
 const unsigned char MRight        = MRightForward | MRightReverse;
 const unsigned char Margin        = MRight        | MLeft;
+const unsigned char AllForward    = HitForward | MLeftForward | GapForward | MRightForward;
+const unsigned char AllReverse    = HitReverse | MLeftReverse | GapReverse | MRightReverse;
+
 
 const unsigned char NotAHit       = Margin | Gap;
 
