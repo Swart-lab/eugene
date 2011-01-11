@@ -305,7 +305,9 @@ set NewValue1(MarkovConst.IntronUTR*)	0.98
 set NewValue1(MarkovConst.UTR5*)	0.999
 set NewValue1(MarkovConst.UTR3*) 	0.999
 set NewValue1(MarkovConst.UIR*)	0.99
+set NewValue1(MarkovConst.RNA*)	0.99
 set NewValue1(MarkovConst.Inter*) 	1.0
+set NewValue1(MarkovConst.affectedStrand) 	1
 ##### Interpolated Markov Models parameters #####
 set NewValue1(MarkovIMM.matname\[0\])	Ara2UTR.mat
 set NewValue1(MarkovIMM.minGC\[0\])	0
