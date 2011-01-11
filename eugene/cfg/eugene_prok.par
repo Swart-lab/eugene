@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.0
+EuGene.version		4.0a
 EuGene.organism		Meliloti
 EuGene.mode			Prokaryote	# Eukaryote or Prokaryote
 EuGene.sloppy		0
@@ -44,6 +44,7 @@ Output.RemoveFrags	0
 Output.UTRtrim		0
 Output.MinCDSLen	20
 Output.truncate		5
+Output.initid		0
 Output.stepid		1
 Output.graph		0		# Don't produce a graphical output
 Output.resx		900
@@ -93,6 +94,7 @@ Fitness.wspn  0
 #
 ##### Operon parameter ######
 Operon.maxDistance 10
+Operon.initid    0
 #
 #######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
@@ -292,7 +294,7 @@ MarkovConst.UTR3*	0.99
 MarkovConst.UIR*	0.99
 MarkovConst.Inter*	1.0
 MarkovConst.RNA*	0.99
-MarkovConst.affectedStrand  0       # 0 or -1 (strand minus) or 1 (strand +plus)
+MarkovConst.affectedStrand  0       # 0 (both) or -1 (strand minus) or 1 (strand plus)
 #
 ##### Interpolated Markov Models parameters #####
 MarkovIMM.matname[0] Ara2UTR.mat
