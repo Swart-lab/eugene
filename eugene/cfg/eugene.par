@@ -92,7 +92,7 @@ Fitness.wspe  1
 Fitness.wspn  0
 #
 ##### Operon parameter ######
-Operon.maxDistance 10 
+Operon.maxDistance 10
 #
 #######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
@@ -290,7 +290,9 @@ MarkovConst.IntronUTR*	0.98
 MarkovConst.UTR5*	0.99
 MarkovConst.UTR3*	0.99
 MarkovConst.UIR*	0.99
+MarkovConst.RNA*	1.0
 MarkovConst.Inter*	1.0
+MarkovConst.affectedStrand  0      # 0 or -1 (strand minus) or 1 (strand +plus)
 #
 ##### Interpolated Markov Models parameters #####
 MarkovIMM.matname[0]	Ara2UTR.mat
