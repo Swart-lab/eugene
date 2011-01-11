@@ -81,6 +81,7 @@ SensorBlastX :: SensorBlastX (int n, DNASeq *X) : Sensor(n)
     HitTable     = NULL;
     sloppy       = PAR.getI("EuGene.sloppy");
     ppNumber     = PAR.getI("BlastX.PPNumber",N);
+    initid       = PAR.getI("Output.initid");
     stepid       = PAR.getI("Output.stepid");
     minIn        = PAR.getI("BlastX.minIn");
     levels       = PAR.getC("BlastX.levels",  N); //Ex: 012
@@ -612,7 +613,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
             if (len > 0)
             {
                 fprintf(MINFO, "%s.%d.%d\tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-                            pred->seqName, (((NumGene-1)*stepid)+1), numF,
+                            pred->seqName, (((initid+NumGene-1)*stepid)+1), numF,
                             fea,start,end,len,strand);
                 fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 
@@ -641,7 +642,7 @@ void SensorBlastX :: ProtSupport(Prediction *pred, FILE *MINFO, int debut,
         if (tlen > 0)
         {
             fprintf(MINFO, "%s.%d  \tEuGene_prot\t%s\t%d\t%d\t%d\t%c\t.\t",
-                    pred->seqName, (((NumGene-1)*stepid)+1), fea,
+                    pred->seqName, (((initid + NumGene-1)*stepid)+1), fea,
                     start, end, tlen, strand);
             fprintf(MINFO, "%d\t", (int)((float)tlen/codingNuc*100));
 

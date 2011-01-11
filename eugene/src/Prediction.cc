@@ -919,7 +919,8 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
 	State prevState;
 	int start      = 1 + From;
 	int nb_feat    = (int) vPos.size();
-	int operon_nb  = 0;
+	int initOpId   = PAR.getI("Operon.initid");
+	int operon_nb  = initOpId;
 	int prev_start = -1; // EK vérifier que les valeurs de start sont tjs positiives!!!!!;
     int operon_max_distance = PAR.getI("Operon.maxDistance"); // maximum distance for two genes to be in the same operon
 
@@ -1406,6 +1407,7 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 {
 	int offset = PAR.getI ( "Output.offset" );
+	int initid = PAR.getI ( "Output.initid" );
 	int stepid = PAR.getI ( "Output.stepid" );
 	int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
 	int start, end;
@@ -1430,7 +1432,7 @@ void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 			end   = vGene[i]->vFea[j]->end;
 			if ( estopt ) CheckConsistency ( start, end, featState->GetState(), &cons, &incons );
 
-			fprintf ( OUT, "%s.%d",seqName, ( ( vGene[i]->geneNumber ) *stepid ) +1 );
+			fprintf ( OUT, "%s.%d",seqName, ( ( vGene[i]->geneNumber + initid ) *stepid ) +1 );
 			if ( vGene[i]->hasvariant )
 				fprintf ( OUT, "%c",vGene[i]->GetVariantCode() );
 			fprintf ( OUT, ".%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t", vGene[i]->vFea[j]->number,
@@ -1453,6 +1455,7 @@ void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 {
 	int offset = PAR.getI ( "Output.offset" );
+	int initid = PAR.getI ( "Output.initid" );
 	int stepid = PAR.getI ( "Output.stepid" );
 	int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
 	vector<int> printedOperon;
@@ -1467,7 +1470,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 	for ( int i=0; i<nbGene; i++ )
 	{
 		Gff3Line gene_line ( seqName );
-		std::string gene_name = to_string ( seqName ) +'.'+to_string ( ( vGene[i]->geneNumber*stepid+1 ) );
+		std::string gene_name = to_string ( seqName ) +'.'+to_string ( ( (initid + vGene[i]->geneNumber)*stepid+1 ) );
 		// done also on variants to have a corrrect strand on variant mRNA
 		if ( vGene[i]->nbFea() > 0 )
 			gene_line.setStrand ( vGene[i]->strand );
@@ -1731,6 +1734,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 {
 	int offset = PAR.getI ( "Output.offset" );
+	int initid = PAR.getI ( "Output.initid" );
 	int stepid = PAR.getI ( "Output.stepid" );
 	int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
 	int forward, start, end, don, acc, phase, frame;
@@ -1782,7 +1786,7 @@ void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 
 			else
 			{
-				fprintf ( OUT, "%s.%d",seqName, ( ( vGene[i]->geneNumber ) *stepid ) +1 );
+				fprintf ( OUT, "%s.%d",seqName, ( ( initid + vGene[i]->geneNumber ) *stepid ) +1 );
 				if ( vGene[i]->hasvariant )
 					fprintf ( OUT, "%c",vGene[i]->GetVariantCode() );
 				fprintf ( OUT, ".%d\t", vGene[i]->vFea[j]->number );
@@ -1871,6 +1875,7 @@ void Prediction :: PrintHtml ( FILE *OUT, char *seqName )
 {
 	int start, end;
 	int offset     = PAR.getI ( "Output.offset" );
+	int initid     = PAR.getI ( "Output.initid" );
 	int stepid     = PAR.getI ( "Output.stepid" );
 	char *html_dir = new char[FILENAME_MAX+1];
 	strcpy ( html_dir, PAR.getC ( "web_dir" ) );
@@ -1958,7 +1963,7 @@ void Prediction :: PrintHtml ( FILE *OUT, char *seqName )
 			          "  <font face=\"monospace\">%s_%d.%d</font></td>\n"
 			          "<td align=\"center\">\n"
 			          "  <font face=\"monospace\">EuGene_%s</font></td>\n",
-			          lc++%2, seqName, ( i*stepid ) +1, vGene[i]->vFea[j]->number,
+			          lc++%2, seqName, ( (i+initid)*stepid ) +1, vGene[i]->vFea[j]->number,
 			          PAR.getC ( "EuGene.organism" ) );
 			fprintf ( OUT,
 			          " <td align=\"center\">\n  <font face="

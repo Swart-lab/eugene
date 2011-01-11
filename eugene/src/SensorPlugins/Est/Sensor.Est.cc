@@ -102,6 +102,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
     estM           = PAR.getI("Est.estM",N);
     utrM           = PAR.getI("Est.utrM",N);
     ppNumber       = PAR.getI("Est.PPNumber",N);
+    initid         = PAR.getI("Output.initid");
     stepid         = PAR.getI("Output.stepid");
     MinDangling    = PAR.getI("Est.MinDangling",N);
     MaxIntron      = PAR.getI("Est.MaxIntron",N);
@@ -190,7 +191,6 @@ void SensorEst :: Init (DNASeq *X)
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
     unsigned char cESTMatch = 0; // current ESTMatch
-    unsigned char Oriented  = 0;
 
     // Peut on faire un bete acces sequentiel ?
     if((index != 0                &&  vPos[index-1] >= pos) ||
@@ -207,7 +207,6 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     {
 
         cESTMatch = vESTMatch[index];
-        Oriented = !((cESTMatch & AllForward)  & ((cESTMatch & AllReverse) >> ReverseToForward));
 
         // Favor splice sites in marginal exon-intron regions
         if ((cESTMatch & MLeftForward) &&
@@ -253,8 +252,8 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
         }
 
         // Intron Forward
-        // Si on a un Hit EST orienté ou si l'on a un Gap de l'autre côté seulement
-        if(((cESTMatch & Hit) && Oriented) ||
+        // Si on a un Hit EST ou si l'on connait le sens du match EST
+        if((cESTMatch & Hit) ||
                 ((cESTMatch & Gap) && !(cESTMatch & GapForward)))
         {
             d->contents[DATA::IntronF] += estP;
@@ -262,15 +261,15 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
         }
 
         // Intron Reverse
-        // Si on a un Hit EST orienté ou si l'on a un Gap de l'autre côté seulement
-        if(((cESTMatch & Hit) && Oriented) ||
+        // Si on a un Hit EST ou si l'on connait le sens du match EST
+        if((cESTMatch & Hit) ||
                 ((cESTMatch & Gap) && !(cESTMatch & GapReverse)))
         {
             d->contents[DATA::IntronR] += estP;
             d->contents[DATA::IntronUTRR] += estP;
         }
 
-        // Intergenique: tout le temps si on a un match (gap ou hit)
+        // Intergenique: tout le temps si on a un match
         d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
 
         // Penalize RNA if there is a match and that mRNAonly is activated
@@ -1078,7 +1077,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
         if ((numF != -1) && (len > 0))
         {
             fprintf(MINFO, "%s.%d.%d\tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-                    pred->seqName, (((NumGene-1)*stepid)+1), numF,
+                    pred->seqName, (((initid+NumGene-1)*stepid)+1), numF,
                     fea, start, end, len, strand);
             fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
              // On copie la hittable pour trier sur le % support
@@ -1121,7 +1120,7 @@ void SensorEst :: FEASupport(Prediction *pred, FILE *MINFO,int Tdebut,int Tfin,
         if (len > 0)
         {
             fprintf(MINFO, "%s.%d  \tEuGene_cDNA\t%s\t%d\t%d\t%d\t%c\t.\t",
-                    pred->seqName, (((NumGene-1)*stepid)+1), fea,
+                    pred->seqName, (((initid + NumGene-1)*stepid)+1), fea,
                     start+1, end+1, len, strand);
             fprintf(MINFO, "%d\t", (int)((float)len/(end-start+1)*100));
 

@@ -43,6 +43,7 @@ class SensorBlastX : public Sensor
   int    minIn;
   int    blastxM;
   int    ppNumber;
+  int    initid;
   int    stepid;
   int    N;
   int    sloppy;

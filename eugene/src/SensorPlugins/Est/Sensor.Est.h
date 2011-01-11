@@ -41,6 +41,7 @@ class SensorEst : public Sensor
   double spliceBoost;
   int    estM, utrM;
   int    ppNumber;
+  int    initid;
   int    stepid;
   int    N;
   int mRNAOnly;  // 0 or 1: 
