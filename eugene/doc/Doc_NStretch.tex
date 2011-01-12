@@ -4,7 +4,9 @@
 
 \paragraph{Description}
 
-A content sensor that penalizes the stretchs of 'N' longer than \texttt{NStretch.maxLengthW\-ithoutPenalty}.
+A content sensor that penalizes theprediction of anything but
+intergenic regions for stretchs of 'N' longer than
+\texttt{NStretch.maxLengthW\-ithoutPenalty}.
 
 Here is an example of NStretch parameters definition.
 \begin{Verbatim}[fontsize=\small]
@@ -20,7 +22,9 @@ No input files  needed.
 
 \paragraph{Integration of information}
 
-All positions that occur in a stretch of N are penalized using the \texttt{NStretch.str\-etchPenalty} penalty.
+All non-intergenic predictions are penaluzed at positions that occur
+in a stretch of N are penalized using the
+\texttt{NStretch.str\-etchPenalty} penalty.
 
 \paragraph{Post analyse}
 

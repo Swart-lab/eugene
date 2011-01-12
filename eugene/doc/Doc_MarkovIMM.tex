@@ -9,11 +9,13 @@ modeled by interpolated Markov models (introduced in Glimmer, see S.
 Salzberg, A. Delcher, S. Kasif, and O. White.{\em Microbial gene
   identification using interpolated Markov models} Nucleic Acids
 Research 26:2 (1998), 544-548). These models are defined in a
-so-called matrices file (located in the EUGENEDIR/models directory) whose name is indicated by the
-\texttt{MarkovIMM.matname} parameter. Depending on the matrices file,
-this may contain IMM for exons, introns and intergenic data and also
-optionnally 5' and 3' UTR regions. If these 2 last IMMs are absent
-from the matrices file, intronic models are used for UTR in eukaryote mode, and intergenic model is used for UTR in prokaryote mode.
+so-called matrices file (located in the EUGENEDIR/models directory)
+whose name is indicated by the \texttt{MarkovIMM.matname} parameter.
+Depending on the matrices file, this may contain IMM for exons,
+introns and intergenic data and also optionnally 5' and 3' UTR
+regions. If these 2 last IMMs are absent from the matrices file,
+intronic models are used for UTR in eukaryote mode, and intergenic
+model is used for UTR in prokaryote mode.
 
 The plugin is controlled by two further parameters:
 \texttt{MarkovIMM.minGC} and \texttt{MarkovIMM.maxGC} which indicate
