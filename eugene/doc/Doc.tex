@@ -18,7 +18,7 @@
 %\newcommand{\shrink}[1]{}   % hide text
 \newcommand{\shrink}[1]{#1} % no effect
 
-\author{Erika Sallet \and J\'er\^ome Gouzy \and Philipe Bardou \and Marie-Jos\'ee Cros \and Sylvain Foissac \and  Annick Moisan \and C\'eline Noirot \and Damien Leroux \and Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
+\author{Erika Sallet \and J\'er\^ome Gouzy \and Philippe Bardou \and Marie-Jos\'ee Cros \and Sylvain Foissac \and  Annick Moisan \and C\'eline Noirot \and Damien Leroux \and Thomas Schiex \\ Applied Mathematics and Computer Science Dept.\\ INRA Toulouse, France}
 
 \def\abstractname{Overview}
 \setcounter{tocdepth}{3}
@@ -554,7 +554,7 @@ to \texttt{g}.
 Length constraints can be applied to overlap regions and to transcribed regions between genes, by filling respectively 
  \texttt{EuGene.OverlapDist} and \texttt{EuGene.UIRDist} parameters.
 
-Two genes predicted on the same strand whom distance is inferior to \texttt{Operon.maxDistance} 
+Two genes predicted on the same strand whose distance is inferior to \texttt{Operon.maxDistance} 
 are automatically consider as members of the same operon.   
 
 
@@ -593,15 +593,17 @@ Every alignment is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLen
 on the first and last hit to account for possible spurious short matches. 
 If these hits are shorter than this amount, they are removed from the available data.
 
-Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and the associated information found in
-the \texttt{doc/Sequences/} directory, we can test this as follows:
+Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and
+the associated information found in the \texttt{doc/Sequences/}
+directory, we can test this as follows:
 
 \begin{Verbatim}[fontsize=\scriptsize]
 EXECUTION_TRACE6
 \end{Verbatim}
 
-We can see that two predictions are produced for the same region. In this case, it is just one alternative splice site
-that has been used for the exon number 8 in the gene.
+We can see that two predictions are produced for the same region. In
+this case, it is just one alternative splice site that has been used
+for the exon number 8 in the gene.
 
 \section{Plugins}
 \label{plug}
@@ -703,9 +705,9 @@ Sensor.MarkovIMM        2
 \end{Verbatim}
 
 When these sensors will be instanciated, they will look for specific
-parameters. The first instance will use the usual parameters or parameters 
-followed by \texttt{[0]} for this plugin class, the second instance will use parameters 
-followed by \texttt{[1]}.
+parameters. The first instance will use the usual parameters or
+parameters followed by \texttt{[0]} for this plugin class, the second
+instance will use parameters followed by \texttt{[1]}.
 
 \begin{Verbatim}
 MarkovIMM.matname[0]    lowGC.mat 
@@ -923,9 +925,11 @@ parameter file are:
   Search algorithm complementary information on the parameters to
   optimize (initial value, step of discretization, ...),
 \item a file with the coordinates of genes for the sequences set. See below its description.
-\item it is possible to include a regulizing term in the criteria
-optimized using the \texttt{ParaOptimization.Regularizer} parameter.
-The sum of all the absolute values of the parameters multiplied by this parameter is subtracted from the original fitness to define the final fiteness optimized.
+\item it is possible to include a regularizer term in the criteria
+  optimized using the \texttt{ParaOptimization.Regularizer} parameter.
+  The sum of all the absolute values of the parameters (L1-norm)
+  multiplied by the value of this parameter is used to penalize the
+  original fitness to define the final fiteness optimized.
 \item \texttt{Eval.offset}: during the evaluation of a prediction, the prediction is compared with a 
 reference (the real gene coordinates). The region in which compare the prediction 
 and the reference is defined as the reference positions +/- the offset.
