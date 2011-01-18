@@ -79,6 +79,15 @@ void Parameters :: initParam (int argc, char * argv[])
     for (iter = m.begin(); iter!=m.end(); ++iter)
       fprintf(stderr,"%s = %s\n",iter->first, iter->second);
 
+  // check the EuGene mode
+  char* mode = this->getC ("EuGene.mode");
+  if (strcmp(mode, "Eukaryote") && strcmp(mode, "Prokaryote") && strcmp(mode, "Prokaryote2"))
+  {
+    fprintf(stderr, "\nError: \"%s\" is not a correct value for EuGene.mode parameter.\n", mode);
+    fprintf(stderr, "EuGene.mode must be: 'Eukaryote' or 'Prokaryote'.\n");
+    exit(2);
+  }
+
   iter = m.begin();  // Cf. : getUseSensor
   
   fprintf(stderr,"- %s -\n",getC("EuGene.organism"));
@@ -91,6 +100,8 @@ void Parameters :: initParam (int argc, char * argv[])
   } else 
     strcpy(val2, getC("Output.webdir"));
   m[key2] = val2;
+
+
 }
 
 // ---------------------------------------------------
@@ -341,6 +352,15 @@ void Parameters :: ReadArg(int argc, char * argv[])
       break;
     case 'P':   /* procaryote mode */
       m["EuGene.Mode"] = "Prokaryote";
+      if (optarg)
+      {
+        if (strcmp(optarg,  "2"))
+        errflag++;
+        else
+        {
+          m["EuGene.Mode"] = "Prokaryote2";
+        }
+      }
       break;
 
     case '?':           /* bad option */
