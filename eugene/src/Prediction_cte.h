@@ -51,6 +51,26 @@ SnglF3R1, SnglF3R2, SnglF3R3,
 UIRF, UIRR
 };
 
+const int proForwardActiveTracksNb= 11;
+const short int proForwardActiveTracks[proForwardActiveTracksNb]={
+SnglF1, SnglF2, SnglF3,
+InterGen,
+UTR5F, UTR3F,
+RnaF,
+SnglF1F2, SnglF1F3, SnglF2F3,
+UIRF
+};
+
+const int proReverseActiveTracksNb= 11;
+const short int proReverseActiveTracks[proReverseActiveTracksNb]={
+SnglR1, SnglR2, SnglR3,
+InterGen,
+UTR5R, UTR3R,
+RnaR,
+SnglR1R2, SnglR1R3, SnglR2R3,
+UIRR
+};
+
 const int eukActiveTracksNb= 47;
 const short int eukActiveTracks[eukActiveTracksNb]={
     InitF1,  InitF2,  InitF3 ,
