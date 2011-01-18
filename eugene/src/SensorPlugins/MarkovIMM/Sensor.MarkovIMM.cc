@@ -84,7 +84,7 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   std::vector<BString_Array*> IMMatrix;
   std::string matrixName;
   bool is_initialised = false;
-  bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote")) ;
+  bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
   char *tmpdir        = new char[FILENAME_MAX+1];
 
   type    = Type_Content;
