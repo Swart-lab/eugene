@@ -3,7 +3,7 @@
 #################################################################
 EuGene.version		4.0a
 EuGene.organism		Meliloti
-EuGene.mode			Prokaryote	# Eukaryote or Prokaryote
+EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Prokaryote2
 EuGene.sloppy		0
 EuGene.VerboseGC	0
 EuGene.GCLatency	100000
