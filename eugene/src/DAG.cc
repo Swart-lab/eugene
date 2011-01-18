@@ -332,7 +332,8 @@ double DAG :: BuildPrediction (int From, int To, int Forward)
   // Insert best possible backpoint at the start of the algo (the
   // insert is not automatically possible, cf cost dist. 
   // on length)
-  for ( it = activeTracks.begin(); it != activeTracks.end(); ++it) {
+  for ( it = activeTracks.begin(); it != activeTracks.end(); ++it) 
+  {
     PrevBP[*it] = LBP[*it].BestUsable(k, &PBest[*it], 0);
     LBP[*it].ForceNew(*it, k, PBest[*it], PrevBP[*it]);
   }
@@ -340,8 +341,9 @@ double DAG :: BuildPrediction (int From, int To, int Forward)
   // Select where Backtrace should start
   j    = activeTracks[0];        // will contain the number of the tracks where start the backtrace
   maxi = PBest[activeTracks[0]]; // will contain the corresponding score
-  for ( it = activeTracks.begin(); it != activeTracks.end(); ++it) { 
-   BestU = PBest[*it];
+  for ( it = activeTracks.begin(); it != activeTracks.end(); ++it) 
+  { 
+    BestU = PBest[*it];
     // Un test tordu pour casser le cou aux NaN
     if (isnan(maxi) || (BestU > maxi)) {
       maxi = BestU;
@@ -937,7 +939,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
 
   double BestU, maxi = -NINFINITY;
   signed   char best = 'Z';
-  bool isProkaryote = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote")) ;
+  bool isProkaryote = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
 
   // Get information on possible spliced stops
   int StopStop = TheSeq->IsStopStop(position);
