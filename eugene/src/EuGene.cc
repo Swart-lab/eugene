@@ -6,7 +6,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
@@ -14,7 +14,7 @@
 // $Id$
 // ------------------------------------------------------------------
 // File:     EuGene.cc
-// Contents: This program finds exons/introns and intergenic regions 
+// Contents: This program finds exons/introns and intergenic regions
 //           (including UTRs)
 // ------------------------------------------------------------------
 
@@ -27,10 +27,16 @@
 #include <cstdlib>
 
 #ifdef __APPLE__
-// MacOS-X kludge. cmath undefines these macros. Turn them into inlines 
+// MacOS-X kludge. cmath undefines these macros. Turn them into inlines
 #include <math.h>
-inline int (isinf)(double r) { return isinf(r); }
-inline int (isnan)(double r) { return isnan(r); }
+inline int (isinf)(double r)
+{
+    return isinf(r);
+}
+inline int (isnan)(double r)
+{
+    return isnan(r);
+}
 #endif
 
 #include <cmath>
@@ -72,117 +78,183 @@ std::vector<short int> activeTracks;              // Vector containing the numbe
 std::vector<bool> isActiveTrack(NbTracks, false); // Vector of bool. True if a track is active
 std::map<int, vector<int> > bicodingStates;       // Bicoding state content. Ex: bicodingStates[SnglF1R2] = [SnglF1, SnglF2]
 
+
+// -------------------------------------------------------------------------
+// Initialize the active tracks vector.
+// At the moment, just copy the values including in the array proActiveTracks
+// or eukActiveTracks in Prediction_cte.h
+// TODO Load a file and remove these arrays
+// -------------------------------------------------------------------------
+void InitActiveTracks(int strand)
+{
+    char* mode = PAR.getC ("EuGene.mode");
+
+	activeTracks.clear();
+	for (int i=0; i < NbTracks; i++)
+	{
+		isActiveTrack[i] = false;
+	}
+
+    if (!strcmp(mode, "Prokaryote"))
+    {
+        for (int  i = 0; i < proActiveTracksNb; i++)
+        {
+            activeTracks.push_back(proActiveTracks[i]);
+            isActiveTrack[proActiveTracks[i]] = true;
+        }
+    }
+    else if (!strcmp(mode, "Eukaryote"))
+    {
+        for (int  i = 0; i < eukActiveTracksNb; i++)
+        {
+            activeTracks.push_back(eukActiveTracks[i]);
+            isActiveTrack[eukActiveTracks[i]] = true;
+        }
+    }
+	else if (!strcmp(mode, "Prokaryote2"))
+    {	
+		assert ( (strand == 1) || (strand == -1) );
+		if (strand == 1)
+		{
+			for (int  i = 0; i < proForwardActiveTracksNb; i++)
+        	{
+            	activeTracks.push_back(proForwardActiveTracks[i]);
+            	isActiveTrack[proForwardActiveTracks[i]] = true;
+        	}
+		}
+		else
+		{
+			for (int  i = 0; i < proReverseActiveTracksNb; i++)
+        	{
+            	activeTracks.push_back(proReverseActiveTracks[i]);
+            	isActiveTrack[proReverseActiveTracks[i]] = true;
+        	}
+		}
+	}
+    else
+    {
+        fprintf(stderr, "Error: \"%s\" is not a correct value for EuGene.mode parameter.\n", mode);
+        fprintf(stderr, "EuGene.mode must be: 'Eukaryote' or 'Prokaryote'.\n");
+        exit(2);
+    }
+}
+
 // -------------------------------------------------------------------------
 // Compute Optimal Prediction
 // -------------------------------------------------------------------------
-Prediction* Predict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor)
+Prediction* Predict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor, int strand=0)
 {
 
-  int   j, k;
-  int   Data_Len = TheSeq->SeqLen;
-  DATA	Data;
-  int   Forward =  1;//PAR.getI("Sense"); 
-  int   Dir = (Forward ? 1 : -1);
+    int   j, k;
+    int   Data_Len = TheSeq->SeqLen;
+    DATA	Data;
+    int   Forward =  1;//PAR.getI("Sense");
+    int   Dir = (Forward ? 1 : -1);
 
-  int   GCVerbose = PAR.getI("EuGene.VerboseGC");
-  int   GCLatency = PAR.getI("EuGene.GCLatency");
-  DAG   *Dag;
-  Prediction *prediction;
-	
-  // DynaProg end at the lastpos + 1 to account for final signals.
-  int	FirstNuc = (Forward ? From : To+1);
-  int   LastNuc  = (Forward ? To+1 : From);
+    int   GCVerbose = PAR.getI("EuGene.VerboseGC");
+    int   GCLatency = PAR.getI("EuGene.GCLatency");
 
-  // Initialize the central DAG
-  // one more position here for prediction of partial elements at extremities.
+    // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
+    InitActiveTracks(strand);
 
-  Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
-  
-  Dag->LoadDistLength();                       
-  Dag->WeightThePrior();
+    DAG   *Dag;
+    Prediction *prediction;
 
-  // --------------------------------------------------------------------------
-  // Demarrage de la programmation dynamique
-  // --------------------------------------------------------------------------
-  for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir) {
+    // DynaProg end at the lastpos + 1 to account for final signals.
+    int	FirstNuc = (Forward ? From : To+1);
+    int   LastNuc  = (Forward ? To+1 : From);
 
-    // recuperation des infos
-    MSensor->GetInfoAt(TheSeq, nuc, &Data);
-    if (Forward) 
-      Dag->ShortestPathAlgoForward(nuc,Data);
-    else
-      Dag->ShortestPathAlgoBackward(nuc,Data);
+    // Initialize the central DAG
+    // one more position here for prediction of partial elements at extremities.
+    Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
 
-    if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
-  }
+    Dag->LoadDistLength();
+    Dag->WeightThePrior();
 
-  Dag->WeightThePrior();
-  Dag->BuildPrediction(From,To,Forward);
+    // --------------------------------------------------------------------------
+    // Demarrage de la programmation dynamique
+    // --------------------------------------------------------------------------
+    for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
+    {
 
-  Dag->pred->TrimAndUpdate(TheSeq);
-  prediction = Dag->pred;
+        // recuperation des infos
+        MSensor->GetInfoAt(TheSeq, nuc, &Data);
+        if (Forward)
+            Dag->ShortestPathAlgoForward(nuc,Data);
+        else
+            Dag->ShortestPathAlgoBackward(nuc,Data);
 
-  delete Dag;
+        if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+    }
 
-  return prediction;
+    Dag->WeightThePrior();
+    Dag->BuildPrediction(From,To,Forward);
+
+    Dag->pred->TrimAndUpdate(TheSeq);
+    prediction = Dag->pred;
+
+    delete Dag;
+
+    return prediction;
 }
 
 // Same with whole sequence by default
 Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 {
-	return Predict(TheSeq,0,TheSeq->SeqLen-1,MSensor);
+    return Predict(TheSeq,0,TheSeq->SeqLen-1,MSensor);
 }
 // -------------------------------------------------------------------------
 // Compute alternative Predictions based on EST
 // -------------------------------------------------------------------------
-Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor, 
-		AltEst *AltEstDB, Prediction *optpred, int idx)
+Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
+                        AltEst *AltEstDB, Prediction *optpred, int idx)
 {
-  int   j, k;
-  int   Data_Len = TheSeq->SeqLen;
-  DATA	Data;
-  int   Forward =  1;//PAR.getI("Sense"); 
-  int   Dir = (Forward ? 1 : -1);
-  int   GCVerbose = PAR.getI("EuGene.VerboseGC");
-  int   GCLatency = PAR.getI("EuGene.GCLatency");
-  DAG* Dag;
-  Prediction *prediction;
+    int   j, k;
+    int   Data_Len = TheSeq->SeqLen;
+    DATA	Data;
+    int   Forward =  1;//PAR.getI("Sense");
+    int   Dir = (Forward ? 1 : -1);
+    int   GCVerbose = PAR.getI("EuGene.VerboseGC");
+    int   GCLatency = PAR.getI("EuGene.GCLatency");
+    DAG* Dag;
+    Prediction *prediction;
 
-   // DynaProg end at the lastpos + 1 to account for final signals.
-  int	FirstNuc = (Forward ? From : To+1);
-  int   LastNuc  = (Forward ? To+1 : From);
+    // DynaProg end at the lastpos + 1 to account for final signals.
+    int	FirstNuc = (Forward ? From : To+1);
+    int   LastNuc  = (Forward ? To+1 : From);
 
-  if (!AltEstDB->voae_AltEst[idx].CompatibleWith(optpred))
+    if (!AltEstDB->voae_AltEst[idx].CompatibleWith(optpred))
     {
 
-      Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
-	  
-      Dag->LoadDistLength();
-      Dag->WeightThePrior();
+        Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
 
-      for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir) {
-	
-	// recuperation des infos
-	MSensor->GetInfoAt(TheSeq, nuc, &Data);
-	AltEstDB->Penalize(idx,nuc,&Data);
+        Dag->LoadDistLength();
+        Dag->WeightThePrior();
 
-	if (Forward) 
-	  Dag->ShortestPathAlgoForward(nuc,Data);
-	else
-	  Dag->ShortestPathAlgoBackward(nuc,Data);
-	
-	if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
-      }
-      Dag->WeightThePrior();
-      Dag->BuildPrediction(From, To, Forward);
+        for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
+        {
 
-      Dag->pred->TrimAndUpdate(TheSeq);
-      prediction = Dag->pred;
+            // recuperation des infos
+            MSensor->GetInfoAt(TheSeq, nuc, &Data);
+            AltEstDB->Penalize(idx,nuc,&Data);
 
-      delete Dag;
-      return prediction;
+            if (Forward)
+                Dag->ShortestPathAlgoForward(nuc,Data);
+            else
+                Dag->ShortestPathAlgoBackward(nuc,Data);
+
+            if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+        }
+        Dag->WeightThePrior();
+        Dag->BuildPrediction(From, To, Forward);
+
+        Dag->pred->TrimAndUpdate(TheSeq);
+        prediction = Dag->pred;
+
+        delete Dag;
+        return prediction;
     }
-  return NULL;
+    return NULL;
 
 }
 
@@ -191,52 +263,23 @@ Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
 // -------------------------------------------------------------------------
 DNASeq* ReadSequence (char* sequence_name)
 {
-  DNASeq *TheSeq;
-  
-  fprintf(stderr,"-------------------------------------");
-  fprintf(stderr,"--------------------------------\nLoading sequence...");
-  fflush(stderr);
-  
-  TheSeq = new DNASeq(sequence_name);
+    DNASeq *TheSeq;
 
-  fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, TheSeq->SeqLen);
-  
-  fprintf (stderr,"GC Proportion = %.1f%%\n", 
-	   (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
-  
-  return TheSeq;
+    fprintf(stderr,"-------------------------------------");
+    fprintf(stderr,"--------------------------------\nLoading sequence...");
+    fflush(stderr);
+
+    TheSeq = new DNASeq(sequence_name);
+
+    fprintf(stderr,"%s, %d bases read, ",TheSeq->Name, TheSeq->SeqLen);
+
+    fprintf (stderr,"GC Proportion = %.1f%%\n",
+             (TheSeq->Markov0[BitG]+TheSeq->Markov0[BitC])*100.0);
+
+    return TheSeq;
 }
 
-// -------------------------------------------------------------------------
-// Initialize the active tracks vector.
-// At the moment, just copy the values including in the array proActiveTracks 
-// or eukActiveTracks in Prediction_cte.h
-// TODO Load a file and remove these arrays
-// -------------------------------------------------------------------------
-void InitActiveTracks()
-{
-	char* mode = PAR.getC ("EuGene.mode");
 
-	if (!strcmp(mode, "Prokaryote")) {
-		for (int  i = 0; i < proActiveTracksNb; i++)
-		{
-			activeTracks.push_back(proActiveTracks[i]);
-			isActiveTrack[proActiveTracks[i]] = true;
-		}
-	}
-	else if (!strcmp(mode, "Eukaryote")) {
-		for (int  i = 0; i < eukActiveTracksNb; i++)
-		{
-			activeTracks.push_back(eukActiveTracks[i]);
-			isActiveTrack[eukActiveTracks[i]] = true;
-		}
-	}
-	else {
-		fprintf(stderr, "Error: \"%s\" is not a correct value for EuGene.mode parameter.\n", mode);
-    		fprintf(stderr, "EuGene.mode must be: 'Eukaryote' or 'Prokaryote'.\n");
-    		exit(2);	
-	}
-}
 
 // -------------------------------------------------------------------------
 // Fill bicodingStates map.
@@ -244,52 +287,67 @@ void InitActiveTracks()
 // -------------------------------------------------------------------------
 void InitBicoding()
 {
-		vector<int> v;
-		v.push_back(SnglF1); v.push_back(SnglF2); 
-		bicodingStates[SnglF1F2] = v;
-		v.clear();
-		v.push_back(SnglF1); v.push_back(SnglF3); 
-		bicodingStates[SnglF1F3] = v;
-		v.clear();
-		v.push_back(SnglF2); v.push_back(SnglF3); 
-		bicodingStates[SnglF2F3] = v;
-		v.clear();
-		v.push_back(SnglR1); v.push_back(SnglR2); 
-		bicodingStates[SnglR1R2] = v;
-		v.clear();
-		v.push_back(SnglR1); v.push_back(SnglR3); 
-		bicodingStates[SnglR1R3] = v;
-		v.clear();
-		v.push_back(SnglR2); v.push_back(SnglR3); 
-		bicodingStates[SnglR2R3] = v;
-		v.clear();
-		v.push_back(SnglF1); v.push_back(SnglR1); 
-		bicodingStates[SnglF1R1] = v;
-		v.clear();
-		v.push_back(SnglF1); v.push_back(SnglR2); 
-		bicodingStates[SnglF1R2] = v;
-		v.clear();
-		v.push_back(SnglF1); v.push_back(SnglR3); 
-		bicodingStates[SnglF1R3] = v;
-		v.clear();
-		v.push_back(SnglF2); v.push_back(SnglR1); 
-		bicodingStates[SnglF2R1] = v;
-		v.clear();
-		v.push_back(SnglF2); v.push_back(SnglR2); 
-		bicodingStates[SnglF2R2] = v;
-		v.clear();
-		v.push_back(SnglF2); v.push_back(SnglR3); 
-		bicodingStates[SnglF2R3] = v;
-		v.clear();
-		v.push_back(SnglF3); v.push_back(SnglR1); 
-		bicodingStates[SnglF3R1] = v;
-		v.clear();
-		v.push_back(SnglF3); v.push_back(SnglR2); 
-		bicodingStates[SnglF3R2] = v;
-		v.clear();
-		v.push_back(SnglF3); v.push_back(SnglR3); 
-		bicodingStates[SnglF3R3] = v;
-		v.clear();
+    vector<int> v;
+    v.push_back(SnglF1);
+    v.push_back(SnglF2);
+    bicodingStates[SnglF1F2] = v;
+    v.clear();
+    v.push_back(SnglF1);
+    v.push_back(SnglF3);
+    bicodingStates[SnglF1F3] = v;
+    v.clear();
+    v.push_back(SnglF2);
+    v.push_back(SnglF3);
+    bicodingStates[SnglF2F3] = v;
+    v.clear();
+    v.push_back(SnglR1);
+    v.push_back(SnglR2);
+    bicodingStates[SnglR1R2] = v;
+    v.clear();
+    v.push_back(SnglR1);
+    v.push_back(SnglR3);
+    bicodingStates[SnglR1R3] = v;
+    v.clear();
+    v.push_back(SnglR2);
+    v.push_back(SnglR3);
+    bicodingStates[SnglR2R3] = v;
+    v.clear();
+    v.push_back(SnglF1);
+    v.push_back(SnglR1);
+    bicodingStates[SnglF1R1] = v;
+    v.clear();
+    v.push_back(SnglF1);
+    v.push_back(SnglR2);
+    bicodingStates[SnglF1R2] = v;
+    v.clear();
+    v.push_back(SnglF1);
+    v.push_back(SnglR3);
+    bicodingStates[SnglF1R3] = v;
+    v.clear();
+    v.push_back(SnglF2);
+    v.push_back(SnglR1);
+    bicodingStates[SnglF2R1] = v;
+    v.clear();
+    v.push_back(SnglF2);
+    v.push_back(SnglR2);
+    bicodingStates[SnglF2R2] = v;
+    v.clear();
+    v.push_back(SnglF2);
+    v.push_back(SnglR3);
+    bicodingStates[SnglF2R3] = v;
+    v.clear();
+    v.push_back(SnglF3);
+    v.push_back(SnglR1);
+    bicodingStates[SnglF3R1] = v;
+    v.clear();
+    v.push_back(SnglF3);
+    v.push_back(SnglR2);
+    bicodingStates[SnglF3R2] = v;
+    v.clear();
+    v.push_back(SnglF3);
+    v.push_back(SnglR3);
+    bicodingStates[SnglF3R3] = v;
+    v.clear();
 }
 
 
@@ -298,214 +356,229 @@ void InitBicoding()
 // -------------------------------------------------------------------------
 int main  (int argc, char * argv [])
 {
-  DNASeq     *TheSeq;
-  int        Data_Len;
-  Prediction *pred;
-  FILE       *MISC_INFO;
-  char       prefixName[FILENAME_MAX+1];
-  char       grname[FILENAME_MAX+1];
-  char       miname[FILENAME_MAX+1];
-  int        graph;
+    DNASeq     *TheSeq;
+    int        Data_Len;
+    Prediction *pred;
+    FILE       *MISC_INFO;
+    char       prefixName[FILENAME_MAX+1];
+    char       grname[FILENAME_MAX+1];
+    char       miname[FILENAME_MAX+1];
+    int        graph;
 
-  fprintf(stderr,"-------------------------------------"
-	  "--------------------------------\n");
+    fprintf(stderr,"-------------------------------------"
+            "--------------------------------\n");
 
-  // Lecture de la ligne d'arg et du fichier .par
-  PAR.initParam(argc, argv);
+    // Lecture de la ligne d'arg et du fichier .par
+    PAR.initParam(argc, argv);
 
-  // Active the appropriated tracks according to the eugene mode ProKaryote or Eukaryote
-  InitActiveTracks();
-  // init bicoding state map
-  InitBicoding();
+    // init bicoding state map
+    InitBicoding();
 
-  if (PAR.getI("ParaOptimization.Use")) 
-    OPTIM.ParaOptimize(argc, argv);
-  else 
+    if (PAR.getI("ParaOptimization.Use"))
+        OPTIM.ParaOptimize(argc, argv);
+    else
     {
-      // Objectif : limiter les appels à la MAP
-      graph = PAR.getI("Output.graph");
+        // Objectif : limiter les appels à la MAP
+        graph = PAR.getI("Output.graph");
 
-      int sequence;
-      for (sequence = optind; sequence < argc ; sequence++) {
-	
-	PAR.set("fstname", argv[sequence]);
+        int sequence;
+        for (sequence = optind; sequence < argc ; sequence++)
+        {
 
-	// --------------------------------------------------------------------
-	// Lecture de la sequence    
-	// --------------------------------------------------------------------
-	TheSeq = ReadSequence( PAR.getC("fstname") );
-	Data_Len = TheSeq->SeqLen;
-    
-	// --------------------------------------------------------------------
-	// Calcul des positions de prédiction
-	// --------------------------------------------------------------------
- 	int fromPos = PAR.getI("EuGene.from",0,true);
-  	int toPos   = PAR.getI("EuGene.to",0,true);
+            PAR.set("fstname", argv[sequence]);
 
-  	if (toPos) 
-		toPos = Min(Data_Len-1,toPos);
-	else 
-		toPos = Data_Len-1;
+            // --------------------------------------------------------------------
+            // Lecture de la sequence
+            // --------------------------------------------------------------------
+            TheSeq = ReadSequence( PAR.getC("fstname") );
+            Data_Len = TheSeq->SeqLen;
 
-	// --------------------------------------------------------------------
-	// Prefix output file name
-	// --------------------------------------------------------------------
-	strcpy(prefixName, PAR.getC("Output.Prefix"));
-	strcat(prefixName, BaseName(PAR.getC("fstname")));
-	if ( rindex(prefixName, '.') != NULL ) {
-	  if (!strcmp(rindex(prefixName, '.'), ".fasta") ||
-	      !strcmp(rindex(prefixName, '.'), ".fsa")   ||
-	      !strcmp(rindex(prefixName, '.'), ".tfa")   ||
-	      !strcmp(rindex(prefixName, '.'), ".txt"))
-	    *rindex(prefixName, '.') = 0;     // on enleve l'extension
-	}
-	PAR.set("prefixName", prefixName);
+            // --------------------------------------------------------------------
+            // Calcul des positions de prédiction
+            // --------------------------------------------------------------------
+            int fromPos = PAR.getI("EuGene.from",0,true);
+            int toPos   = PAR.getI("EuGene.to",0,true);
 
-	// --------------------------------------------------------------------
-	// Preparation sortie graphique + Scores
-	// --------------------------------------------------------------------
-	if (graph) {
-	  int gto       = PAR.getI("Output.gto");
-	  int gfrom     = PAR.getI("Output.gfrom");
-	  int glen      = PAR.getI("Output.glen");
-      		  
-	  // Construction du nom de sortie (*.png)
-	  strcpy(grname, prefixName);
-	  
-	  if ((gfrom <= 0)|| (gfrom >= Data_Len))
-	    gfrom = 1;
-	  if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
-	    gto = Data_Len;
-	  
-	  if ((PAR.getI("Output.gfrom")!=-1) || PAR.getI("Output.gto")!=-1) {
-	    sprintf(grname+strlen(grname), ".%d", gfrom);
-	    sprintf(grname+strlen(grname), "-%d", gto);
-	  }
-	  
-	  gfrom--;
-	  gto--;
-	  
-	  if (glen < 0)
-	    glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
-	  
-	  InitPNG(PAR.getI("Output.resx"),   PAR.getI("Output.resy"),
-		  PAR.getI("Output.offset"), gfrom, gto,
-		  PAR.getI("Output.golap"), glen, grname);
-	}
-	
-	// --------------------------------------------------------------------
-	// Init MasterSensor
-	// --------------------------------------------------------------------
-	MS = new MasterSensor();
-	MS->InitMaster(TheSeq);
+            if (toPos)
+                toPos = Min(Data_Len-1,toPos);
+            else
+                toPos = Data_Len-1;
 
-	// --------------------------------------------------------------------
-	// Predict: 1st main prediction
-	// --------------------------------------------------------------------
-
-	pred = Predict(TheSeq, fromPos, toPos, MS);
-	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
-
-
-	// --------------------------------------------------------------------
-	// Textual and graphical output
-	// --------------------------------------------------------------------
-	if (graph)
-	  pred->PlotPred();
-
-	if ( ! PAR.getI("AltEst.use") )
-		pred->Print(TheSeq, MS);
-
-	strcpy(miname, prefixName);
-	MISC_INFO = FileOpen(NULL, strcat(miname, ".misc_info"), "wb");
-	pred->PrintGeneInfo(MISC_INFO);
-	MS->PostAnalyse(pred, MISC_INFO);
-	fclose(MISC_INFO);
-
-    	if (graph) {
-	  fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
-	  fflush(stderr);
-	  ClosePNG();
-	  fprintf(stderr, "done\n");
-	}
-
-	// --------------------------------------------------------------------
-	// Load Alternative EST data (if any)
-	// --------------------------------------------------------------------
-	if (PAR.getI("AltEst.use")) 
-	{
-	  int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
-	  int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
-	  int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
-	  AltEst *AltEstDB = new AltEst(TheSeq);
-
-	  std::vector <Prediction*> vPred;
-	  Prediction*               AltPred;
-	  Gene*                     baseGene;
-
-	  for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
-	  {
-	      int localFrom,localTo;
-
-	      localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
-	      localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
-
-	      AltPred = AltPredict(TheSeq,localFrom,localTo,MS,AltEstDB,pred,altidx);
-
-	      if (AltPred) 
-	      {
-            if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+            // --------------------------------------------------------------------
+            // Prefix output file name
+            // --------------------------------------------------------------------
+            strcpy(prefixName, PAR.getC("Output.Prefix"));
+            strcat(prefixName, BaseName(PAR.getC("fstname")));
+            if ( rindex(prefixName, '.') != NULL )
             {
-              delete AltPred;
-              continue;
+                if (!strcmp(rindex(prefixName, '.'), ".fasta") ||
+                        !strcmp(rindex(prefixName, '.'), ".fsa")   ||
+                        !strcmp(rindex(prefixName, '.'), ".tfa")   ||
+                        !strcmp(rindex(prefixName, '.'), ".txt"))
+                    *rindex(prefixName, '.') = 0;     // on enleve l'extension
             }
-            // Delete the gene of the alt prediction which doesn't overlap the EST 
-            AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());	
-            // If genes overlapping the EST was found and if the prediction is original
-            if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+            PAR.set("prefixName", prefixName);
+
+            // --------------------------------------------------------------------
+            // Preparation sortie graphique + Scores
+            // --------------------------------------------------------------------
+            if (graph)
             {
-            	fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
-            	baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
-            	if (baseGene) 
-            	{
-            		baseGene->hasvariant++;
-            		AltPred->vGene[0]->isvariant = true;
-            		AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
-            		AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
-            		baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart) 
-            										  : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
-            		baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)     
-            					  : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
-            	}
-            	else 
-            	{
-            		fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
-            		AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
-            	}
-             	vPred.push_back(AltPred);
+                int gto       = PAR.getI("Output.gto");
+                int gfrom     = PAR.getI("Output.gfrom");
+                int glen      = PAR.getI("Output.glen");
+
+                // Construction du nom de sortie (*.png)
+                strcpy(grname, prefixName);
+
+                if ((gfrom <= 0)|| (gfrom >= Data_Len))
+                    gfrom = 1;
+                if ((gto <= 0)  || (gto <= gfrom) || (gto > Data_Len))
+                    gto = Data_Len;
+
+                if ((PAR.getI("Output.gfrom")!=-1) || PAR.getI("Output.gto")!=-1)
+                {
+                    sprintf(grname+strlen(grname), ".%d", gfrom);
+                    sprintf(grname+strlen(grname), "-%d", gto);
+                }
+
+                gfrom--;
+                gto--;
+
+                if (glen < 0)
+                    glen = ((gto-gfrom+1 <= 6000) ? gto-gfrom+1 : 6000);
+
+                InitPNG(PAR.getI("Output.resx"),   PAR.getI("Output.resy"),
+                        PAR.getI("Output.offset"), gfrom, gto,
+                        PAR.getI("Output.golap"), glen, grname);
             }
-            else delete AltPred;	
-	      }
-	  }
-	  pred->Print(TheSeq, MS);
-	  for (int idx = 0; idx < vPred.size(); idx++) 
-	  {
-		vPred[idx]->Print(TheSeq, MS,NULL,1);
-	  }
-	  //delete AltPred;	
-	}
 
-	// Free used memory
-	delete TheSeq; 
-	delete MS;
-	delete pred;
-	
-	fflush(stderr);
-	fflush(stdout);
-      } // fin de traitement de chaque séquence....
+            // --------------------------------------------------------------------
+            // Init MasterSensor
+            // --------------------------------------------------------------------
+            MS = new MasterSensor();
+            MS->InitMaster(TheSeq);
 
-      fprintf(stderr,"-------------------------------------"	      "--------------------------------\n");
+            // --------------------------------------------------------------------
+            // Predict: 1st main prediction
+            // --------------------------------------------------------------------
+			char* mode = PAR.getC ("EuGene.mode");
 
-      return  0;
+		    if ( strcmp(mode, "Prokaryote2") ) // if its no the special mode two independant prediction on prokaryote mode
+    		{
+            	pred = Predict(TheSeq, fromPos, toPos, MS);
+            	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
+			}
+			else
+			{
+				// predict on the forward strand
+				Prediction* pred2 = Predict(TheSeq, fromPos, toPos, MS,  1);
+				// predict on the reverse strand
+				pred = Predict(TheSeq, fromPos, toPos, MS, -1);
+				pred->AppendPred(pred2);
+			}	
+
+
+            // --------------------------------------------------------------------
+            // Textual and graphical output
+            // --------------------------------------------------------------------
+            if (graph)
+                pred->PlotPred();
+
+            if ( ! PAR.getI("AltEst.use") )
+                pred->Print(TheSeq, MS);
+
+            strcpy(miname, prefixName);
+            MISC_INFO = FileOpen(NULL, strcat(miname, ".misc_info"), "wb");
+            pred->PrintGeneInfo(MISC_INFO);
+            MS->PostAnalyse(pred, MISC_INFO);
+            fclose(MISC_INFO);
+
+            if (graph)
+            {
+                fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
+                fflush(stderr);
+                ClosePNG();
+                fprintf(stderr, "done\n");
+            }
+
+            // --------------------------------------------------------------------
+            // Load Alternative EST data (if any)
+            // --------------------------------------------------------------------
+            if (PAR.getI("AltEst.use"))
+            {
+                int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+                int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+                int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+                AltEst *AltEstDB = new AltEst(TheSeq);
+
+                std::vector <Prediction*> vPred;
+                Prediction*               AltPred;
+                Gene*                     baseGene;
+
+                for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
+                {
+                    int localFrom,localTo;
+
+                    localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
+                    localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
+
+                    AltPred = AltPredict(TheSeq,localFrom,localTo,MS,AltEstDB,pred,altidx);
+
+                    if (AltPred)
+                    {
+                        if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+                        {
+                            delete AltPred;
+                            continue;
+                        }
+                        // Delete the gene of the alt prediction which doesn't overlap the EST
+                        AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+                        // If genes overlapping the EST was found and if the prediction is original
+                        if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+                        {
+                            fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+                            baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
+                            if (baseGene)
+                            {
+                                baseGene->hasvariant++;
+                                AltPred->vGene[0]->isvariant = true;
+                                AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
+                                AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
+                                baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart)
+                                                    : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
+                                baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)
+                                                    : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
+                            }
+                            else
+                            {
+                                fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
+                                AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
+                            }
+                            vPred.push_back(AltPred);
+                        }
+                        else delete AltPred;
+                    }
+                }
+                pred->Print(TheSeq, MS);
+                for (int idx = 0; idx < vPred.size(); idx++)
+                {
+                    vPred[idx]->Print(TheSeq, MS,NULL,1);
+                }
+                //delete AltPred;
+            }
+
+            // Free used memory
+            delete TheSeq;
+            delete MS;
+            delete pred;
+
+            fflush(stderr);
+            fflush(stdout);
+        } // fin de traitement de chaque séquence....
+
+        fprintf(stderr,"-------------------------------------"	      "--------------------------------\n");
+
+        return  0;
     }
 }
