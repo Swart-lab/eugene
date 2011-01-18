@@ -25,6 +25,24 @@
 
 extern Parameters   PAR;
 
+
+
+// ------------------------
+//  Method to sort gene according to their transcription start
+// ------------------------
+bool GeneSortFunction(const Gene* g1, const Gene* g2)
+{
+	return ( g1->trStart <= g2->trStart ); 
+}
+
+// ------------------------
+//  Method to sort Operon according to the start
+// ------------------------
+bool OperonSortFunction(Operon* o1, Operon* o2)
+{
+	return ( o1->GetStart() <= o2->GetStart() ); 
+}
+
 // -----------------------
 //  Prediction: IsOriginal checks is the 1st gene of the current
 //  alternative prediction does not appear either as a gene in the
@@ -874,6 +892,11 @@ char  Operon :: GetStrand()
 	return this->strand;
 }
 
+void Operon :: SetNumber(int nb)
+{
+	this->number = nb;
+}
+
 // ------------------------
 //  Add a gene to the operon
 // ------------------------
@@ -1058,7 +1081,6 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
 			vGene[nbGene-1]->SetOperonNb(operon_nb);
 		}
 	}
-
 }
 
 // --------------------------
@@ -1107,6 +1129,7 @@ Prediction :: ~Prediction ()
 	delete [] ESTMatch;
 
 }
+
 // ------------------------
 //  Initializer
 // ------------------------
@@ -1118,6 +1141,54 @@ void Prediction :: clear()
 	seqName[0]   = '\000';
 	nbGene       = 0;
 	optimalPath  = 0;
+}
+
+// ------------------------
+// Append the genes and the operons of pred2 prediction to the current one
+// Careful: This method doesnt check redundancy nor overlapping!
+// Be sure that all the operons have a different value
+// ------------------------
+void Prediction :: AppendPred(const Prediction* pred2)
+{
+	// concat all the genes
+	// at this step, it can have redundancy on the geneNumber!!
+	for ( int i=0; i < pred2->nbGene; i++ )
+	{
+		this->nbGene++;
+		this->vGene.push_back (pred2->vGene[i]);
+	}
+
+	int nbOperons2 = pred2->vOperon.size();
+	for (int i=0; i < nbOperons2; i++)
+	{
+		this->vOperon.push_back(pred2->vOperon[i]);
+	}
+
+	// sort genes according to their start position
+	sort (vGene.begin(), vGene.end(), GeneSortFunction); 
+	// recompute the gene numbers after the sort
+	std::vector <Gene*>::iterator geneindex;
+	int gIdx = 0;
+	for ( geneindex = vGene.begin(); geneindex != vGene.end(); geneindex++)
+	{
+		( *geneindex )->geneNumber = gIdx;
+		gIdx++;
+	}
+
+	// sort operons according to their start position
+	sort (vOperon.begin(), vOperon.end(), OperonSortFunction);
+	// recompute the operons number
+	std::vector <Operon*>::iterator opindex;
+	int oIdx = 1;
+	for ( opindex = vOperon.begin(); opindex != vOperon.end(); opindex++)
+	{
+		( *opindex )->SetNumber (oIdx);
+		for (int i=0; i < ( *opindex )->vGenes.size(); i++)
+		{
+			( *opindex )->vGenes[i]->SetOperonNb(oIdx);
+		}
+		oIdx++;
+	}
 }
 
 // --------------------------
@@ -1248,7 +1319,7 @@ void Prediction :: UpdateAndDelete()
 	}
 
 	// Prokaryote case: update operon
-	if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") )
+	if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2"))
 		this->ComputeOperons(); // Create Operon objects
 }
 
@@ -1462,8 +1533,8 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 	int start, end;
 	State* featState;
 	int incons = 0, cons = 0;
-
-	bool showOperon = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") && !append) ;
+ 	bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
+	bool showOperon = ( isProkaryote && !append) ;
 
 
 	/* name source feature start end score strand frame */
@@ -1484,21 +1555,35 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 			//continue;
 		}
 
-		if (showOperon && vGene[i]->GetOperonNb() > 0 && 
-			(printedOperon.size() == 0 || printedOperon.back() != vGene[i]->GetOperonNb()) )
+		// Print the operon of the gene if its not already done
+		if (showOperon && vGene[i]->GetOperonNb() > 0 )
 		{
-			printedOperon.push_back(vGene[i]->GetOperonNb());
-			Operon* op = this->GetOperon(vGene[i]->GetOperonNb());
+			int geneOpNb          = vGene[i]->GetOperonNb();
+			bool OpAlreadyDisplay = false;
+			for (int i=0; i < printedOperon.size(); i++)
+			{
+				if (printedOperon[i] == geneOpNb)
+				{
+					OpAlreadyDisplay = true;
+					break;
+				}
+			}
+	
+			if (OpAlreadyDisplay == false)
+			{
+				printedOperon.push_back(geneOpNb);
+				Operon* op = this->GetOperon(geneOpNb);
 			
-			// ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
-			gene_line.setType (SOFA_OPERON);
-			gene_line.setStart ( op->GetStart());
-			gene_line.setEnd ( op->GetEnd() );
-			std::string op_id = Sofa::getName ( SOFA_OPERON ) + ":" + to_string (op->GetNumber());
-			gene_line.setAttribute ( "ID=" + op_id );
-			gene_line.addAttribute ( "Name=operon." + to_string(op->GetNumber()) );
-			gene_line.print ( out );
-			//ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+				// ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+				gene_line.setType (SOFA_OPERON);
+				gene_line.setStart ( op->GetStart());
+				gene_line.setEnd ( op->GetEnd() );
+				std::string op_id = Sofa::getName ( SOFA_OPERON ) + ":" + to_string (op->GetNumber());
+				gene_line.setAttribute ( "ID=" + op_id );
+				gene_line.addAttribute ( "Name=operon." + to_string(op->GetNumber()) );
+				gene_line.print ( out );
+				//ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+			}
 		}
 
 		if ( ! vGene[i]->isvariant ) // only for the optimal prediction
@@ -2246,13 +2331,7 @@ Gene *Prediction :: FindGene ( int start, int end, const char strand )
 	else return vGene[idx];
 }
 
-// ------------------------
-//  Method to sort gene according to their transcription start
-// ------------------------
-bool GeneSortFunction(const Gene* g1, const Gene* g2)
-{
-	return (g1->trStart <= g2->trStart); 
-}
+
 
 // ------------------------
 //  plot a prediction.
@@ -2294,7 +2373,8 @@ void Prediction :: PlotPred ()
 		}
 	}
 	// Display operon
-	if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") )
+    bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
+	if (isProkaryote)
 	{
 		// print operon in the center of the graphic
 		for (int i=0; i < vOperon.size(); i++)

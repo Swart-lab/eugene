@@ -140,6 +140,7 @@ class Operon
   int  GetEnd();
   int  GetNumber();
   char GetStrand();
+  void SetNumber(int );
   void AddGene(Gene* gene);
   void Print();
 };
@@ -221,6 +222,7 @@ class Prediction
   Operon* GetOperon(int nb);
   int GetExonNumber();
   int GetExonLength();
+  void AppendPred(const Prediction*);
 
   // Need by Sensor Tester
   const char* IsStart       (int);
