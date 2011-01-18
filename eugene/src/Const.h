@@ -34,7 +34,7 @@
 #define MODELS_DIR "models"
 #define WEB_DIR "web"
 
-#define POSSIBLE_ARGUMENTS "FGREBPadrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:"
+#define POSSIBLE_ARGUMENTS "FGREBP::adrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:"
 
 const int FASTA_Len = 50;
 const int MAX_LINE  = 300;
