@@ -89,11 +89,12 @@ void InitActiveTracks(int strand)
 {
     char* mode = PAR.getC ("EuGene.mode");
 
+	assert(!strcmp(mode, "Prokaryote") || !strcmp(mode, "Eukaryote") || !strcmp(mode, "Prokaryote2"));
+
+	// Init active track vectors
 	activeTracks.clear();
 	for (int i=0; i < NbTracks; i++)
-	{
 		isActiveTrack[i] = false;
-	}
 
     if (!strcmp(mode, "Prokaryote"))
     {
@@ -111,7 +112,7 @@ void InitActiveTracks(int strand)
             isActiveTrack[eukActiveTracks[i]] = true;
         }
     }
-	else if (!strcmp(mode, "Prokaryote2"))
+	else // "Prokaryote2"
     {	
 		assert ( (strand == 1) || (strand == -1) );
 		if (strand == 1)
@@ -131,12 +132,6 @@ void InitActiveTracks(int strand)
         	}
 		}
 	}
-    else
-    {
-        fprintf(stderr, "Error: \"%s\" is not a correct value for EuGene.mode parameter.\n", mode);
-        fprintf(stderr, "EuGene.mode must be: 'Eukaryote' or 'Prokaryote'.\n");
-        exit(2);
-    }
 }
 
 // -------------------------------------------------------------------------
