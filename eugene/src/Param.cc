@@ -90,8 +90,9 @@ void Parameters :: initParam (int argc, char * argv[])
 
   iter = m.begin();  // Cf. : getUseSensor
   
-  fprintf(stderr,"- %s -\n",getC("EuGene.organism"));
+  fprintf(stderr,"- %s - mode %s -\n",getC("EuGene.organism"), getC("EuGene.mode"));
   fprintf(stderr,"Parameters file %s loaded.\n", getC("parameters_file"));
+
   if (getI("EuGene.sloppy")) fprintf(stderr,"WARNING: Sloppy mode selected.\n");
   strcpy(key2,"web_dir");
   if (!strcmp(getC("Output.webdir"),"LOCAL")) {
@@ -123,7 +124,8 @@ void Parameters :: UpdateParametersFileName(int argc, char * argv[])
 	  		break;
 		// Prokaryote mode: load the prokaryote parameter file
     	case 'P':
-      		name = ((std::string) getC("eugene_dir")) + DEFAULT_PARA_PROK_FILE;
+			if (name.empty())
+				name = ((std::string) getC("eugene_dir")) + DEFAULT_PARA_PROK_FILE;
       		break;
     }
   }
@@ -351,15 +353,13 @@ void Parameters :: ReadArg(int argc, char * argv[])
       if (optarg) m["ParaOptimization.TrueCoordFile"] = optarg;
       break;
     case 'P':   /* procaryote mode */
-      m["EuGene.Mode"] = "Prokaryote";
+      m["EuGene.mode"] = "Prokaryote";
       if (optarg)
       {
         if (strcmp(optarg,  "2"))
-        errflag++;
+        	errflag++;
         else
-        {
-          m["EuGene.Mode"] = "Prokaryote2";
-        }
+          m["EuGene.mode"] = "Prokaryote2";
       }
       break;
 
