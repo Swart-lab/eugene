@@ -32,7 +32,7 @@ extern Parameters   PAR;
 // ------------------------
 bool GeneSortFunction(const Gene* g1, const Gene* g2)
 {
-	return ( g1->trStart <= g2->trStart ); 
+	return ( g1->trStart < g2->trStart ); 
 }
 
 // ------------------------
@@ -40,7 +40,7 @@ bool GeneSortFunction(const Gene* g1, const Gene* g2)
 // ------------------------
 bool OperonSortFunction(Operon* o1, Operon* o2)
 {
-	return ( o1->GetStart() <= o2->GetStart() ); 
+	return ( o1->GetStart() < o2->GetStart() ); 
 }
 
 // -----------------------
