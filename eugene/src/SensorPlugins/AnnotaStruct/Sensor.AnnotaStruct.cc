@@ -86,6 +86,24 @@ SensorAnnotaStruct :: SensorAnnotaStruct (int n, DNASeq *X) : Sensor(n)
   strcpy(tStartNpcRead,PAR.getC("AnnotaStruct.TrStartNpc*", GetNumber()));
   strcpy(tStopNpcRead,PAR.getC("AnnotaStruct.TrStopNpc*",   GetNumber()));
 
+  strcpy(startPAR,     PAR.getC("AnnotaStruct.StartType",   GetNumber()));
+  strcpy(stopPAR,      PAR.getC("AnnotaStruct.StopType",    GetNumber()));
+  strcpy(accPAR,       PAR.getC("AnnotaStruct.AccType",     GetNumber()));
+  strcpy(donPAR,       PAR.getC("AnnotaStruct.DonType",     GetNumber()));
+  strcpy(tStartPAR,    PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
+  strcpy(tStopPAR,     PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
+  strcpy(tStartNpcPAR, PAR.getC("AnnotaStruct.TrStartNpcType", GetNumber()));
+  strcpy(tStopNpcPAR,  PAR.getC("AnnotaStruct.TrStopNpcType",  GetNumber()));
+  if (startRead[0]     != 'i') strcat(startPAR,     startRead);
+  if (stopRead[0]      != 'i') strcat(stopPAR,      stopRead);
+  if (accRead[0]       != 'i') strcat(accPAR,       accRead);
+  if (donRead[0]       != 'i') strcat(donPAR,       donRead);
+  if (tStartRead[0]    != 'i') strcat(tStartPAR,    tStartRead);
+  if (tStopRead[0]     != 'i') strcat(tStopPAR,     tStopRead);
+  if (tStartNpcRead[0] != 'i') strcat(tStartNpcPAR, tStartNpcRead);
+  if (tStopNpcRead[0]  != 'i') strcat(tStopNpcPAR,  tStopNpcRead);
+
+
   if (exonRead[0] != 'i') exonInline = 0;
   else	exonInline = 1;
 
@@ -254,13 +272,14 @@ SensorAnnotaStruct :: ~SensorAnnotaStruct ()
 // ----------------------
 void SensorAnnotaStruct :: Init (DNASeq *X)
 {
-  char exonRead[20], intronRead[20], cdsRead[20], npcRnaRead[20];
+  char exonRead[20], intronRead[20], cdsRead[20], npcRnaRead[20], igRead[20];
   char startRead[20], stopRead[20] ,accRead[20] ,donRead[20] ,tStartRead[20] ,tStopRead[20], tStartNpcRead[20], tStopNpcRead[20];
 
   strcpy(exonRead,   PAR.getC("AnnotaStruct.Exon*",   GetNumber()));
   strcpy(intronRead, PAR.getC("AnnotaStruct.Intron*", GetNumber()));
   strcpy(cdsRead,    PAR.getC("AnnotaStruct.CDS*",    GetNumber()));
   strcpy(npcRnaRead, PAR.getC("AnnotaStruct.npcRNA*", GetNumber()));
+  strcpy(igRead, PAR.getC("AnnotaStruct.Intergenic*",  GetNumber()));
 
   if (exonRead[0] != 'i') exonPAR   = atof(exonRead);
   else exonPAR = 0;
@@ -273,6 +292,10 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
 
   if (npcRnaRead[0] != 'i') npcRnaPAR = atof(npcRnaRead);
   else npcRnaPAR = 0;
+
+  if (igRead[0] != 'i') igPAR = atof(igRead);
+  else igPAR = 0;
+
 
   strcpy(startRead,PAR.getC("AnnotaStruct.Start*",     GetNumber()));
   strcpy(stopRead,PAR.getC("AnnotaStruct.Stop*",       GetNumber()));
@@ -290,7 +313,7 @@ void SensorAnnotaStruct :: Init (DNASeq *X)
   strcpy(tStartPAR,    PAR.getC("AnnotaStruct.TrStartType", GetNumber()));
   strcpy(tStopPAR,     PAR.getC("AnnotaStruct.TrStopType",  GetNumber()));
   strcpy(tStartNpcPAR, PAR.getC("AnnotaStruct.TrStartNpcType", GetNumber()));
-  strcpy(tStopNpcPAR,  PAR.getC("AnnotaStruct.TrStopNpcType",  GetNumber()));	
+  strcpy(tStopNpcPAR,  PAR.getC("AnnotaStruct.TrStopNpcType",  GetNumber()));
   if (startRead[0]     != 'i') strcat(startPAR,     startRead);
   if (stopRead[0]      != 'i') strcat(stopPAR,      stopRead);
   if (accRead[0]       != 'i') strcat(accPAR,       accRead);
@@ -621,6 +644,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     endC           = (*it)->getLocus()->getEnd();
     /* Score ? */
     scF            = (*it)->getScore();
+
     //score by default for ins/del;
     strcat ( scoreC, to_string(scF).c_str() ); 
     strand         = (*it)->getLocus()->getStrand();
