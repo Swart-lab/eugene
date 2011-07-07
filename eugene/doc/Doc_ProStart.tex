@@ -9,8 +9,9 @@ This plugin is dedicated to inject possible translation starts in prokaryote seq
 This sensor is activated by setting the value 1 for the parameter \texttt{Sensor.ProStart.use} in the parameter file.
 
 \texttt{ProStart.stackFile} and \texttt{ProStart.loopFile} : contain the energetic parameters for computing the RBS 
-(Shine-Delgarno) hybridization energy. Taken and adapted from Turners website.
-\EuGene\ use a simplified RNA binding model which ignores stabilizing loops (eg. tetraloops). 
+(Shine-Delgarno) hybridization energy. (The file path is relative to EUGENEDIR/models).
+Taken and adapted from Turners website.
+\EuGene\ uses a simplified RNA binding model which ignores stabilizing loops (eg. tetraloops). 
 The algorithm is essentially a free end-gap global alignement algorithm that takes into account bulges, loops and helices.
 
 \texttt{ProStart.alpha*} and \texttt{ProStart.beta*}: Start parameters $\alpha$ and $\beta$. 

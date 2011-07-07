@@ -236,11 +236,11 @@ EXECUTION_TRACE4
 
 Other plugins are described in the reference section of this document.
 
-\section{Annotating a prokaryote sequence}
+\section{Annotating a prokaryotic sequence}
 
-Since version 4.0, \EuGene\ is able to annotate prokarotic sequence. \EuGene\ can especially predict overlapping genes and operons structure.
+Since version 4.0, \EuGene\ is able to annotate prokarotic sequence. Especially \EuGene\ is capable of predicting overlapping protein genes, (possibly antisense) RNA genes and operon structures.
 Here a simple example based on a \textit{Sinorhizobium meliloti} sequence.
-To annotate prokaryotes, the -P flag must be used. Here we want to exploit similarities with 2 proteic databases, 
+To annotate prokaryotes, the -P flag can be used. Here we want to exploit similarities with 2 proteic databases, 
 so we used the flag -b, followed by the sets of levels to be exploited (``01'' for levels 0 and 1) For more details about protein similarities use, 
 see section~\ref{blastxlabel}.
 
@@ -251,11 +251,13 @@ see section~\ref{blastxlabel}.
 EXECUTION_TRACE5
 \end{Verbatim}
 
+
+
 \newpage
 \chapter{Reference documentation}
 
 To be executed, \EuGene\ needs at least one file: this is the
-so-called parameter file.  \EuGene\ behavior is entirely controlled
+so-called parameter file. \EuGene\ behavior is entirely controlled
 by a set of parameters whose default values are available in this
 file. These default values can be altered by editing this file or for
 some values through flags in the command line (such as \texttt{-d},
@@ -304,7 +306,7 @@ section (see section~\ref{plug}).
 Here is a list of all the parameters not related to a plugin which control \EuGene's
 behavior. When a command line flag exists that can modify the
 corresponding parameter, it is indicated.  All the parameters that
-control \EuGene\'s behavior are available in the parameter file. This
+control \EuGene\ 's behavior are available in the parameter file. This
 file has a relatively strict formatting. Each line can either be a
 comment line (the first character in the line must be a \verb # ) or a
 parameter definition. Empty lines are not allowed. A parameter
@@ -318,10 +320,10 @@ sensitive. The definition order is not important.
   that the parameter file version is consistent with the executable
   version.
 
-\item \texttt{EuGene.organism}: name of the considered organism.
+  \item \texttt{EuGene.organism}: name of the considered organism.
 
-\item \texttt{EuGene.mode}: 'Prokaryote' or 'Eukaryote'. The ``\texttt{-P}'' command 
-line flag activates the Prokaryote mode.  
+  \item \texttt{EuGene.mode}: 'Eukaryote' or 'Prokaryote'. The ``\texttt{-P}'' command 
+  line flag activates the Prokaryote mode.  The value 'Prokaryote2' is also allowed (see section ~\ref{prok})
    
   \item \texttt{EuGene.sloppy}: in the default (non-sloppy) mode, 
   \EuGene\ will stop and abort if some needed parameters in the parameter
@@ -347,7 +349,8 @@ line flag activates the Prokaryote mode.
   \texttt{EuGene.IntronDist}, \texttt{EuGene.InterDist},
   \texttt{EuGene.5PrimeDist}, \texttt{EuGene.3PrimeDist}, 
   \texttt{EuGene.RnaDist}, \texttt{EuGene.OverlapDist}, \texttt{EuGene.UIRDist}: 
-  \EuGene\ 
+  names of the files given explicit penalty distributions on the length. 
+  The path is relative to EUGENEDIR/models. \EuGene\ 
   can use explicit penalty distributions on the length of the elements
   predicted. This can be an initial exon, and intermediary exon, a
   terminal exon, a single exon gene, an intron, an intergenic region, a
@@ -364,7 +367,7 @@ line flag activates the Prokaryote mode.
   pseudo-gene prediction\ldots
   
 \item \texttt{EuGene.CodonTable}: name of the file which contains 
-the DNA codon table. The path is relative to EUGENEDIR. 
+the DNA codon table. The path is relative to EUGENEDIR/models. 
 This file is composed of three columns:
 the first contains the codon ; the second contains the amino acid (Just one letter) or the character '*' if it's a stop codon ;
 the third column contains the character '+' only if it's a start codon.
@@ -399,6 +402,8 @@ process is unchanged,  the prediction is just filtered. \index{CmdFlags}{[Remove
   available as provided by the Est plugin. If no EST evidence is
   available, this means that all UTR predictions will be removed from
   the output.
+
+\item \texttt{Output.initid}: in the text output, initial value for numbering genes.
 
 \item \texttt{Output.stepid}: in the text output, step for numbering genes.
 
@@ -544,9 +549,13 @@ and the slope is 1, the rest of the distribution will be linear
 with slope 1.
 
 \section{\EuGene's prokaryote mode}
- 
+\label{prok}
+
 Since version 4.0, \EuGene\ is able to annotate prokaryotic sequences. This mode is activated using 
 the ``\texttt{-P}'' flag or equivalently by setting the parameter \texttt{EuGene.mode} to 'Prokaryote'.
+The value 'Prokaryote2' is also allowed: \EuGene\ will do two independant predictions on the two strands. 
+It is useful especially to predict antisense ncRNA.
+
 In this mode, \EuGene\ can predict overlapping genes on the same strand or different strands, and operon structure.
 Operon predictions are only available in the GFF3 output, activated by setting \texttt{Output.format} parameter 
 to \texttt{g}.
@@ -555,7 +564,9 @@ Length constraints can be applied to overlap regions and to transcribed regions 
  \texttt{EuGene.OverlapDist} and \texttt{EuGene.UIRDist} parameters.
 
 Two genes predicted on the same strand whose distance is inferior to \texttt{Operon.maxDistance} 
-are automatically consider as members of the same operon.   
+are automatically consider as members of the same operon. 
+\texttt{Operon.initid} indicates the initial value for operon numbering.
+   
 
 
 \section{Splice variant prediction}
@@ -587,7 +598,7 @@ prefix in the parameter file. The only parameters that you could change are the
 parameters regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength}, 
 \texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn}, 
 \texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves
-If the ESTs are oriented, you can activate the parameter \texttt{AltEst.strandSpecific}.
+If the ESTs are oriented, you can activate the parameter \texttt{AltEst.strandSpecific} to take into account the strand.
 
 Every alignment is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLength} 
 on the first and last hit to account for possible spurious short matches. 
@@ -698,7 +709,7 @@ Several instances of the same sensor can be loaded. Eg., if you are
 dealing with an organism that has a large GC\% range, one may use
 several \texttt{Sensor.MarkovIMM}. Imagine you want to use one model
 for sequences who have a GC\% below 50 and another for higher GC\%.
-This can be achieved by instaciating 2 such sensors. 
+This can be achieved by instanciating 2 such sensors. 
 
 \begin{Verbatim}
 Sensor.MarkovIMM        2
@@ -823,7 +834,7 @@ We now descrive each plugin, its behavior and parameters.
 For that, you only need to use the AnnotaStruct plugin (see section~\ref{annotastruct}): create as many AnnotaStruct instances as files to combine.
 
 
-The parameter file \texttt{cfg/eugene.combine.par} is parametrized to combine two files. 
+The parameter file \texttt{EUGENEDIR/cfg/eugene.combine.par} is parametrized to combine two files. 
 In the first file, information about start and stop codons is taken into account, whereas in the second one, it is information about splice sites and CDS.
 \begin{Verbatim}[fontsize=\small]
  ##### Sensors AnnotaStruct #####
@@ -849,6 +860,7 @@ AnnotaStruct.Exon*[0] 0
 AnnotaStruct.Intron*[0] 0
 AnnotaStruct.CDS*[0] 0
 AnnotaStruct.npcRNA*[0]  0
+AnnotaStruct.Intergenic*[0]  0
 AnnotaStruct.format[0]             GFF3
 \end{Verbatim}
 
@@ -875,6 +887,7 @@ AnnotaStruct.Exon*[1] 0
 AnnotaStruct.Intron*[1] 0
 AnnotaStruct.CDS*[1] 4
 AnnotaStruct.npcRNA*[1]  0
+AnnotaStruct.Intergenic*[0]  0
 AnnotaStruct.format[1]             GFF3
 #
 # SIGNAL/CONTENT SENSORS
@@ -936,7 +949,7 @@ and the reference is defined as the reference positions +/- the offset.
 \item \texttt{Eval.ignoreNpcRNA}: Put 1 to ignore the npcRNA for the fitness computing.
 \item \texttt{Fitness.wsng}, \texttt{Fitness.wsne}, 
 \texttt{Fitness.wsnn}, \texttt{Fitness.wspg}, 
-\texttt{Fitness.wspe}, \texttt{Fitness.wsspn}: indicate respectively the weight of the gene sensitivity, of the exon sensitivity, 
+\texttt{Fitness.wspe}, \texttt{Fitness.wsspn} : indicate respectively the weight of the gene sensitivity, of the exon sensitivity, 
 of the nucleotide sensitivity, of the gene specificity, of the exon specificity 
 and of the nucleotide specificity in the fitness computing.
 \end{itemize}
