@@ -83,11 +83,31 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
     sensor = MS->MakeSensor( SensorName, SensorInstance, X); sensor->Init(X);
     //gene = ReadGFFAnnotation(X);
     ReadAnnotation(X);
+
+    int mini = X->SeqLen+1; // start of the region to explore
+    int maxi = 0;           // end   of the region to explore
+
+    // Compute mini and maxi values
+    for ( int i=0; i<gene->nbGene; i++ )
+    {
+        std::vector <Feature*>::iterator featindex;
+        std::vector <Feature*>::reverse_iterator rfeatindex;
+
+        mini = ( gene->vGene[i]->trStart < mini ) ?  gene->vGene[i]->trStart : mini;
+        maxi = ( gene->vGene[i]->trEnd > maxi )   ?  gene->vGene[i]->trEnd : maxi;
+    }
+    // add a margin because IsState depending to the context
+    maxi += 10;
+    maxi = ( maxi >= X->SeqLen ) ? X->SeqLen-1 : maxi;
+    mini -= 10;
+    mini = ( mini >= 0 ) ? mini : 0;
+
     SensorType = sensor->type;
 
-    NbNonCanonicalDetected = 0;
+    NbNonCanonicalDetected  = 0;
     NbNonCanonicalAnnotated = 0;
-    for (int i=0; i<X->SeqLen; i++) {
+
+    for (int i=mini; i <= maxi;  i++) {
       for(int j=0; j<DATA::LastSigType; j++) Data.sig[j].Clear();
       sensor->GiveInfo(X,i,&Data);
 
@@ -98,6 +118,7 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	is_posR = ( X->IsStart(i-1,-1) != 0 );
 	is_annotF = gene->IsState(DATA::Start,i,'+');
 	is_annotR = gene->IsState(DATA::Start,i,'-');
+
 	if (is_posF || is_posR) {
 	  UpdateThreshold(dF); UpdateThreshold(dR); 
 	  std::vector<double> v4; v4.push_back(dF); v4.push_back(dR);
@@ -165,16 +186,17 @@ SensorTester :: SensorTester (int n, DNASeq *X) : Sensor(n)
 	                        v6.push_back( is_posFdon ); v6.push_back( is_posRdon ); 
 	  IsAPositions[NbDoneSequence].push_back( v6 );
 	}
-      } else 
-	{std::cerr<<"ERROR: bad type of sensor to analyze with Tester in SensorTester::SensorTester.\n"; exit(2);}
+      
+    } else 
+	{
+	  std::cerr <<"ERROR: bad type of sensor to analyze with Tester in SensorTester::SensorTester.\n"; exit(2);}
     }
-    
     if (NbNonCanonicalDetected != 0)
-      std::cout<<"BE CAREFUL: in the sequence "<<X->Name<<", "<<NbNonCanonicalDetected
+      std::cerr <<"BE CAREFUL: in the sequence "<<X->Name<<", "<<NbNonCanonicalDetected
 	       <<" SITES DETECTED BY THE SENSOR ARE NON CANONICAL\n"
 	       <<"AND NOT TAKEN INTO ACCOUNT TO ESTIMATE SENSIBILITY AND SPECIFICITY.\n";
     if (NbNonCanonicalAnnotated != 0)
-      std::cout<<"BE CAREFUL: in the sequence "<<X->Name<<", "<<NbNonCanonicalAnnotated
+      std::cerr <<"BE CAREFUL: in the sequence "<<X->Name<<", "<<NbNonCanonicalAnnotated
 	       <<" SITES ARE ANNOTATED.\n"
 	       <<"AND NOT TAKEN INTO ACCOUNT TO ESTIMATE SENSIBILITY AND SPECIFICITY.\n";
 
@@ -312,7 +334,6 @@ void SensorTester ::ReadAnnotation ( DNASeq *X)
 
     strcpy(tempname,PAR.getC("fstname"));
     strcat(tempname,".gff");
-
     if ( inputFormat_ == "GFF3" )
     {
 	strcat(tempname,".gff3");
@@ -370,15 +391,23 @@ void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
 	  if(j==1) std::cerr<<"WARNING: empty gff file !...";
 	} else 
 	  {std::cerr<<"\nError in gff file "<<name<<" line "<<j<<".\n";exit(2);}
-      } else if (strcmp(feature,"Intron") != 0) {
+      } else if (strcmp(feature,"Intron") != 0 ) {
 	if (j==1) {
 	  vPos.push_back  ( start-1  );
 	  vState.push_back( InterGen );
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
-	    if (Todo=="TEST") {
+	    if (Todo == "TEST") 
+		{
 	      vPos.push_back  ( end   );
 	      vState.push_back( UTR5F );
 	    }
+		else
+		{
+	      vPos.pop_back();
+	      vState.pop_back();
+	      vPos.push_back  ( end  );
+	      vState.push_back( InterGen );
+		}
 	  }
 	  else if (strcmp(feature, "E.Init") == 0) {
 	    vPos.push_back  ( end    );
@@ -409,7 +438,8 @@ void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
 	}
 	else {
 	  if (strcmp(feature,"UTR5") == 0 || strcmp(feature,"UTR3") == 0) {
-	    if (Todo=="TEST") {
+	    if (Todo=="TEST") 
+		{
 	      vPos.push_back  ( end   );
 	      vState.push_back( UTR5F );
 	    }
@@ -488,7 +518,7 @@ void SensorTester :: ReadGFFAnnotation(char name[FILENAME_MAX+1], DNASeq *x)
 
   gene = new Prediction(0,x->SeqLen,vPos, vState);
   gene->TrimAndUpdate(x);
-
+  
   vPos.clear();
   vState.clear();
 }
