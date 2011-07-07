@@ -151,8 +151,8 @@ NStart.startB*		0.308
 ProStart.matchlen	14
 ProStart.matchoffset	3
 ProStart.RBSPattern attcctcca # E coli (16S genetics/ Steitz J.A.)
-ProStart.alpha*	1.0
-ProStart.beta*	0.3
+ProStart.alpha*	0.4
+ProStart.beta*	6.0
 ProStart.stackFile stack.dat
 ProStart.loopFile loop.dat
 #

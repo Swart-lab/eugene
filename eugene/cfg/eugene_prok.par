@@ -3,7 +3,7 @@
 #################################################################
 EuGene.version		4.0a
 EuGene.organism		Meliloti
-EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Prokaryote2
+EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Porkaryote2
 EuGene.sloppy		0
 EuGene.VerboseGC	0
 EuGene.GCLatency	100000
@@ -78,8 +78,8 @@ AltEst.minEx				3
 AltEst.exonucleasicLength	10
 AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
-AltEst.verbose			0
 AltEst.strandSpecific	0
+AltEst.verbose			0
 #AltEst.format  		GFF3
 #
 ##### Evaluation mode ######
@@ -94,14 +94,14 @@ Fitness.wspn  0
 #
 ##### Operon parameter ######
 Operon.maxDistance 10
-Operon.initid    0
+Operon.initid      0
 #
 #######################################################################
 ################### SIGNAL SENSORS PARAMETERS####################
 #################################################################
 #
 ##### EuStop parameters #####
-EuStop.stopP*           4.0  #4.155
+EuStop.stopP*           4.0
 #
 ##### FrameShift parameters #####
 FrameShift.Ins*		1e999.0
@@ -208,10 +208,10 @@ StartWAM.ScaleCoef*	0.1594
 StartWAM.ScalePenalty*	-3.1439
 #
 ##### Transcript parameters #####
-Transcript.Start*	   1e-20
-Transcript.Stop*	   1e-20
-Transcript.StartNpc*   10
-Transcript.StopNpc*    10
+Transcript.Start*	   4.155
+Transcript.Stop*	   4.155
+Transcript.StartNpc*   30
+Transcript.StopNpc*    30
 #
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
@@ -286,14 +286,14 @@ Homology.FileExtension[1]	.tblastx2
 ##### State penalties per position #####
 MarkovConst.minGC[0]	-1
 MarkovConst.maxGC[0]	100
-MarkovConst.Coding*	1.0
-MarkovConst.Intron*	1.0
-MarkovConst.IntronUTR*	0.98
-MarkovConst.UTR5*	0.99
-MarkovConst.UTR3*	0.99
-MarkovConst.UIR*	0.99
+MarkovConst.Coding*	0.90
+MarkovConst.Intron*	0.90
+MarkovConst.IntronUTR*	0.90
+MarkovConst.UTR5*	0.90
+MarkovConst.UTR3*	0.90
+MarkovConst.UIR*	0.90
+MarkovConst.RNA*	0.90
 MarkovConst.Inter*	1.0
-MarkovConst.RNA*	0.99
 MarkovConst.affectedStrand  0       # 0 (both) or -1 (strand minus) or 1 (strand plus)
 #
 ##### Interpolated Markov Models parameters #####
@@ -460,7 +460,7 @@ Sensor.ProStart.use	1
 Sensor.BlastX.use	0
 Sensor.Est.use		0	
 Sensor.Homology.use	0	
-Sensor.MarkovConst.use	0
+Sensor.MarkovConst.use	1
 Sensor.MarkovIMM.use	1
 Sensor.MarkovProt.use	0
 Sensor.Repeat.use	0

@@ -25,13 +25,13 @@ EuGene.UIRDist		uir_prok.dist # only used in Prokaryote mode
 ##### Priors #####
 EuGene.SplicedStopPen   1e999.0
 EuGene.ExonPrior	0.25		# Prior on the initial states
-EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
-EuGene.InterPrior	0.4
+EuGene.IntronPrior	0.15		# Sato et al 1999 / Terryn et al. 1999
+EuGene.InterPrior	0.5
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.04
 EuGene.RnaPrior         0.03
-EuGene.BiCodingPrior    0.05
-EuGene.UIRPrior         0.03
+EuGene.BiCodingPrior    0.00
+EuGene.UIRPrior         0.00
 #
 ##### Codon table #####
 EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable
@@ -151,8 +151,8 @@ NStart.startB*		0.308
 ProStart.matchlen	14
 ProStart.matchoffset	3
 ProStart.RBSPattern attcctcca # E coli (16S genetics/ Steitz J.A.)
-ProStart.alpha*	1.0
-ProStart.beta*	0.3
+ProStart.alpha*	0.4
+ProStart.beta*	6.0
 ProStart.stackFile stack.dat
 ProStart.loopFile loop.dat
 #
@@ -210,8 +210,8 @@ StartWAM.ScalePenalty*	-3.1439
 ##### Transcript parameters #####
 Transcript.Start*	4.155
 Transcript.Stop*	4.155
-Transcript.StartNpc* 10
-Transcript.StopNpc* 10
+Transcript.StartNpc* 30
+Transcript.StopNpc* 30
 #
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
