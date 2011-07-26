@@ -74,6 +74,7 @@ set NewValueProOverlapGene(BlastX.level0*)	0.7756
 set NewValueProOverlapGene(BlastX.level1*)	0.0506
 set NewValueProOverlapGene(ProStart.alpha*)	0.8733
 set NewValueProOverlapGene(ProStart.beta*)	7.7582
+set NewValueProOverlapGene(Sensor.MarkovConst.use) 0
 
 ##################### SeqAra test variables #################################
 set SensorsList(SeqAra) {MarkovIMM MarkovConst EuStop NStart IfElse GSplicer Est BlastX}
