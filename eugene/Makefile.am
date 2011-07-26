@@ -52,7 +52,6 @@ RUNTESTDEFAULTFLAGS =  --tool TestSuite --srcdir Test --objdir . --outdir Test/T
 ############## Distribute
 EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
              $(srcdir)/config/m* \
-	     $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* \
 	     $(srcdir)/doc/GenerateDoc.tcl \
 	     $(srcdir)/doc/Doc.tex \
 	     $(srcdir)/doc/Fiches.tex \
@@ -62,7 +61,9 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/doc/SO.png \
 	     $(srcdir)/doc/ParaOptimization.pdf \
 	     $(srcdir)/doc/ParaOptimization.fig \
+	     $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* \
 	     $(srcdir)/doc/Sequences/At5g18830.* \
+	     $(srcdir)/doc/Sequences/SMc.1541000-1552500.fasta* \
 	     $(srcdir)/doc/Models/Bouml/1* \
 	     $(srcdir)/doc/Models/Bouml/2.session \
 	     $(srcdir)/doc/Models/Bouml/Bouml.prj \
@@ -110,7 +111,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
              $(srcdir)/Procedures/Format/EuGeneAdapt/seqlogo \
              $(srcdir)/Test/TestDoc.tex \
              $(srcdir)/Test/README \
-             $(srcdir)/Test/TestSuite/*.* \
+             $(srcdir)/Test/TestSuite/*.exp \
              $(srcdir)/Test/Sequences/SYNO_ARATH.* \
              $(srcdir)/Test/Sequences/SMc.1541000-1552500.* \
              $(srcdir)/Test/config/*.* \
