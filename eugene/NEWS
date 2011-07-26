@@ -1,42 +1,45 @@
 EuGene -- History of visible changes.
 
-Copyright (C) 2004, EuGene Team <eugene@ossau.toulouse.inra.fr>
+Copyright (C) 2011, EuGene Team <eugene-help@lists.mulcyber.toulouse.inra.fr>
 See the end for copying conditions.
 
-Please send eugene bug reports to eugene@ossau.toulouse.inra.fr.
+Please send eugene bug reports to eugene-help@lists.mulcyber.toulouse.inra.fr.
 
-Version 2.0
+Version 4.0a
 
-* Use distributions of exon (init, term, intr, sngl), intron, utr and intergenic 
+*  Current EuGène version
+*  EuGène is able to predict genes for prokaryotic organisms. (more information in doc/EuGeneDoc.pdf generating after compilation)
 
-Version 3.0
+Version 3.6 
 
-* Complete autoconfiscation of the software
+*  Can now predict non protein coding RNA
 
+Version 3.5
+
+* Integrates complete GFF3 based input/output
+
+Version 3.2
+
+* Change the functioning of the software (see the ChangeLog file for more detail)
+ 
 Version 3.1
 
 * New plugin, procedures, parameters, argument
 * debug and improvement of the Est and Repeat sensors 
 * update in documentation
 
+Version 3.0
 
-Version 3.2
+* Complete autoconfiscation of the software
 
-* Change the functioning of the software (see the ChangeLog file for more detail)
- 
-Version 3.5
+Version 2.0
 
-* Integrates complete GFF3 based input/output
-
-Version 4.0
-
-*  EuGène is able to predict genes for prokaryote organisms.
-
+* Use distributions of exon (init, term, intr, sngl), intron, utr and intergenic 
 
 -------------------------------------------------------
 Copying information:
 
-Copyright (C) 2004, EuGene Team <eugene@ossau.toulouse.inra.fr>
+Copyright (C) 2011, EuGene Team <eugene-help@lists.mulcyber.toulouse.inra.fr>
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the

@@ -1,8 +1,10 @@
+
+
 -------------------------------------------------------------------------------
-v4.0 released Janv. 2011
+v4.0a released Juil. 2011
 -------------------------------------------------------------------------------
 
-* EuGene is able to annotate prokarotic sequence. It can predict overlapped genes and operon structure.
+* EuGene is able to annotate prokarotic sequence. It can predict overlapping protein genes (on the same strand or not), unstranslated transcribed internal regions and operon structure.
 
 -------------------------------------------------------------------------------
 v3.6 released Fevr. 2010
