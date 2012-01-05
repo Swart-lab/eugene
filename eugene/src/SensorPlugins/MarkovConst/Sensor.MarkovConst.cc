@@ -45,14 +45,14 @@ SensorMarkovConst :: ~SensorMarkovConst ()
 // ----------------------
 void SensorMarkovConst :: Init (DNASeq *X)
 {
-  transCodant  = PAR.getD("MarkovConst.Coding*"); //Exon
-  transIntron  = PAR.getD("MarkovConst.Intron*"); //Intron
-  transIntronU = PAR.getD("MarkovConst.IntronUTR*"); //IntronUTR
-  transInter   = PAR.getD("MarkovConst.Inter*");  //InterG
-  transUTR5    = PAR.getD("MarkovConst.UTR5*");   //UTR5
-  transUTR3    = PAR.getD("MarkovConst.UTR3*");   //UTR3
-  transUIR     = PAR.getD("MarkovConst.UIR*");   //UIR
-  transRNA     = PAR.getD("MarkovConst.RNA*");   // RNA
+  transCodant  = PAR.getD("MarkovConst.Coding*", GetNumber()); //Exon
+  transIntron  = PAR.getD("MarkovConst.Intron*", GetNumber()); //Intron
+  transIntronU = PAR.getD("MarkovConst.IntronUTR*", GetNumber()); //IntronUTR
+  transInter   = PAR.getD("MarkovConst.Inter*", GetNumber());  //InterG
+  transUTR5    = PAR.getD("MarkovConst.UTR5*", GetNumber());   //UTR5
+  transUTR3    = PAR.getD("MarkovConst.UTR3*", GetNumber());   //UTR3
+  transUIR     = PAR.getD("MarkovConst.UIR*", GetNumber());   //UIR
+  transRNA     = PAR.getD("MarkovConst.RNA*", GetNumber());   // RNA
 
   minGC = PAR.getD("MarkovConst.minGC",GetNumber());
   maxGC = PAR.getD("MarkovConst.maxGC",GetNumber());
