@@ -1702,7 +1702,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 							                              vGene[i]->vFea[j]->phase );
 							//attributs
 							setGff3Attributes ( pre_arn_line, featState, SOFA_EXON,
-							                    fea_name, j, code_variant, rna_id, false );
+							                    fea_name+"utr", j, code_variant, rna_id, false );
 							pre_arn_lines.push_back ( pre_arn_line );
 						}
 
