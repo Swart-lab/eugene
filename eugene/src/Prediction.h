@@ -116,7 +116,7 @@ class Gene
   void AddFeature(signed char state, int start, int end);
   void PrintInfo (FILE*, int, char*);
   void Print();
-  char GetVariantCode(void);
+  std::string GetVariantCode(void) const;
   bool IsNpcRna();
 
 };
@@ -187,7 +187,7 @@ class Prediction
                             char strand, int phasegff);
  void setGff3Attributes(Gff3Line* line, State* featState,
                           int type_sofa, std::string fea_name,
-                          int j, char code_variant, std::string gene_id, bool coding);
+                          int j, std::string code_variant, std::string gene_id, bool coding);
   bool previousExonMustBeUpdated(Gff3Line* line, int start);
 
 

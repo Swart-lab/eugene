@@ -458,14 +458,31 @@ Gene :: ~Gene ()
 //
 // Return the variant code when alternative forms are predicted
 //
-char Gene :: GetVariantCode ()
+std::string Gene :: GetVariantCode () const
 {
-	char code_variant = '\0';
+	std::string code_variant = "";
 
 	if ( this->hasvariant )
 	{
-		code_variant = ( this->isvariant ) ? ( char ) ( 'b'+ ( this->hasvariant-1 ) ) : 'a';
+	    if ( this->isvariant )
+	    {
+		  int entier = (this->hasvariant-1) / 26;
+		  int rest   = (this->hasvariant-1) % 26;
+		  if (entier > 0)
+		  {
+		      code_variant = to_string( (char) ( 'a'+ (entier-1) )) + to_string (( char ) ( 'a'+ ( rest) ));
+		  }
+		    else
+		  {
+		      code_variant =  to_string (( char ) ( 'b'+ ( this->hasvariant-1 ) ));
+		  }
+	    }
+	      else
+	    {
+		code_variant = "a";
+	    }
 	}
+	
 	return code_variant;
 }
 
@@ -1505,7 +1522,7 @@ void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 
 			fprintf ( OUT, "%s.%d",seqName, ( ( vGene[i]->geneNumber + initid ) *stepid ) +1 );
 			if ( vGene[i]->hasvariant )
-				fprintf ( OUT, "%c",vGene[i]->GetVariantCode() );
+				fprintf ( OUT, "%s",vGene[i]->GetVariantCode().c_str() );
 			fprintf ( OUT, ".%d\tEuGene\t%s\t%d\t%d\t%.0f.%.0f\t%c\t", vGene[i]->vFea[j]->number,
 			          featState->State2GFFString(), start+offset, end+offset,
 			          100.0* ( double ) cons/ ( end-start+1 ), 100.0* ( double ) incons/ ( end-start+1 ),
@@ -1612,7 +1629,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 			std::string ncrna_name = gene_name;
 			if ( vGene[i]->hasvariant )
 			{
-				ncrna_name += to_string ( vGene[i]->GetVariantCode() );
+				ncrna_name += vGene[i]->GetVariantCode();
 			}
 
 			gene_line.setType ( SOFA_NCRNA );
@@ -1633,7 +1650,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 			std::string mrna_name = gene_name;
 			if ( vGene[i]->hasvariant )
 			{
-				mrna_name += to_string ( vGene[i]->GetVariantCode() );
+				mrna_name += vGene[i]->GetVariantCode() ;
 			}
 
 			gene_line.setType ( SOFA_MRNA );
@@ -1665,7 +1682,7 @@ void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 
 				start = vGene[i]->vFea[j]->start;
 				end   = vGene[i]->vFea[j]->end;
-				char code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : 0;
+				std::string code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : "";
 				if ( estopt ) CheckConsistency ( start, end, featState->GetState(), &cons, &incons );
 
 				int type_sofa_cds = featState->getTypeSofa ( true ); // CDS
@@ -1873,7 +1890,7 @@ void Prediction :: PrintEgnL ( FILE *OUT, char *seqName, int a )
 			{
 				fprintf ( OUT, "%s.%d",seqName, ( ( initid + vGene[i]->geneNumber ) *stepid ) +1 );
 				if ( vGene[i]->hasvariant )
-					fprintf ( OUT, "%c",vGene[i]->GetVariantCode() );
+					fprintf ( OUT, "%s",vGene[i]->GetVariantCode().c_str() );
 				fprintf ( OUT, ".%d\t", vGene[i]->vFea[j]->number );
 			}
 
@@ -2623,12 +2640,12 @@ Prediction::previousExonMustBeUpdated ( Gff3Line* line, int start )
 // -----------------------------------------
 void Prediction::setGff3Attributes ( Gff3Line* line, State* featState,
                                      int type_sofa, std::string fea_name,
-                                     int j, char code_variant, std::string gene_id, bool coding )
+                                     int j, std::string code_variant, std::string gene_id, bool coding )
 {
 	std::string fea_id = Sofa::getName ( type_sofa ) + ":"
 	                     + fea_name + to_string ( j );
-	if ( code_variant )
-		fea_id += to_string ( code_variant );
+	if ( !code_variant.empty() )
+		fea_id += code_variant;
 	line->setAttribute ( "ID=" + fea_id );
 	line->addAttribute ( "Parent="+gene_id );
 	line->addAttribute ( "Ontology_term="
