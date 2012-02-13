@@ -466,8 +466,8 @@ std::string Gene :: GetVariantCode () const
 	{
 	    if ( this->isvariant )
 	    {
-		  int entier = (this->hasvariant-1) / 26;
-		  int rest   = (this->hasvariant-1) % 26;
+		  int entier = (this->hasvariant-1) / 25;
+		  int rest   = (this->hasvariant-1) % 25;
 		  if (entier > 0)
 		  {
 		      code_variant = to_string( (char) ( 'a'+ (entier-1) )) + to_string (( char ) ( 'a'+ ( rest) ));
