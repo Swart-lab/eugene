@@ -178,7 +178,7 @@ int OneAltEst :: IsFiltered(bool unspliced, bool extremelen, bool verbose,
             if ((vi_ExonStart[j] - vi_ExonEnd[j-1] -1) < minIn)
             {
                 if (verbose) fprintf(stderr,"\n%s removed (intron too short) ...", id);
-                fprintf(stderr,"j : %d vi_ExonStart[j] %d vi_ExonEnd[j-1] %d", j, vi_ExonStart[j], vi_ExonEnd[j-1]);
+                //fprintf(stderr,"j : %d vi_ExonStart[j] %d vi_ExonEnd[j-1] %d", j, vi_ExonStart[j], vi_ExonEnd[j-1]);
                 return 2;
             }
             if ((vi_ExonStart[j] - vi_ExonEnd[j-1] -1) > maxIn)
