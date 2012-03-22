@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.0a
+EuGene.version		4.1
 EuGene.organism		Meliloti
 EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Porkaryote2
 EuGene.sloppy		0
@@ -35,6 +35,8 @@ EuGene.UIRPrior         0.01
 #
 ##### Codon table #####
 EuGene.CodonTable	pro.codontable  # pro.codontable or euk.codontable
+#EuGene.NonCanDon    GC
+#EuGene.NonCanAcc    AC
 #
 #
 ##### Gff3
@@ -245,6 +247,7 @@ Est.estM[0]	6
 Est.utrP*[0]	0.35
 Est.utrM[0]	5
 Est.SpliceBoost*[0] 0.0
+Est.SpliceNonCanP[0] 1.0
 Est.StrongDonor[0] 0.95
 Est.MinDangling[0] 10
 Est.MaxIntron[0]   15000
@@ -261,6 +264,7 @@ Est.estM[1]	6
 Est.utrP*[1]	0.35
 Est.utrM[1]	5
 Est.SpliceBoost*[1] 0.0
+Est.SpliceNonCanP[1] 1.0
 Est.StrongDonor[1] 0.95
 Est.MinDangling[1] 10
 Est.MaxIntron[1]   15000

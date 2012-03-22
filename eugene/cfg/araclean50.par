@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		3.5
+EuGene.version		4.1
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -24,6 +24,15 @@ EuGene.IntronPrior	0.17		# Sato et al 1999 / Terryn et al. 1999
 EuGene.InterPrior	0.4
 EuGene.FivePrimePrior	0.03
 EuGene.ThreePrimePrior	0.07
+EuGene.RnaPrior         0.00
+EuGene.BiCodingPrior    0.00
+EuGene.UIRPrior         0.00
+#
+##### Codon table #####
+EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable
+#EuGene.NonCanDon    GC
+#EuGene.NonCanAcc    AC
+#
 #
 ##### Gff3
 Gff3.SoTerms		cfg/sofa.obo
@@ -203,6 +212,7 @@ Est.estM	6
 Est.utrP*	0.35
 Est.utrM	5
 Est.SpliceBoost* 0.0
+Est.SpliceNonCanP 1.0
 Est.StrongDonor 0.95
 Est.MinDangling 10
 Est.MaxIntron   15000
