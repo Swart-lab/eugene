@@ -54,7 +54,7 @@ set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA ProOverlapGene}
+set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA ProOverlapGene EstNonCanSite}
 
 ##################### ProOverlapGene test variables #########################
 set SensorsList(ProOverlapGene) {MarkovIMM ProStart EuStop Transcript BlastX}
@@ -108,6 +108,14 @@ set SEQ(SeqRest) {seq25ab005234g10g11.tfa}
 set IMG(SeqRest) {seq25ab005234g10g11.000.png}
 set FILE_REF(SeqRest) Output_SeqRest
 set OPTIONS(SeqRest) "-po -g"
+
+##################### EstNonCanSite test variables #########################
+set SensorsList(EstNonCanSite) {EuStop NStart SPred Transcript Est}
+set SEQ(EstNonCanSite) {seq_noncansplicesites.tfa}
+set IMG(EstNonCanSite) {seq_noncansplicesites.000.png}
+set FILE_REF(EstNonCanSite) Output_EstNonCanSite
+set OPTIONS(EstNonCanSite) "-po -g -DEuGene.NonCanDon=TT -DEuGene.NonCanAcc=GG "
+set NewValueEstNonCanSite(Est.SpliceNonCanP\[0\]) 1.0
 
 
 ############################################################################
