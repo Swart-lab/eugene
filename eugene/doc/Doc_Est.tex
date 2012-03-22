@@ -30,6 +30,10 @@ The behavior of the plugin is controlled by the following parameters:
 \item \texttt{Est.SpliceBoost*} is a bonus used to enhance the score 
   of predicted splice sites which appear at a hit/gap border of aligned 
   spliced ESTs.
+\item \texttt{Est.SpliceNonCanP} is the penalty affected if a non canonical
+  splice site is detected on the border of transcribed evidence. Note that 
+  non canonical splice sites are researched only if \texttt{EuGene.NonCanAcc} 
+  and/or \texttt{EuGene.NonCanDon} are defined.
 \item \texttt{Est.estM} gives the amount of ``fuzzyness'' allowed in
   interpreting a hit/gap border. The nucleotides which are less than
   \texttt{Est.estM} nucleotides away from this border are considered
