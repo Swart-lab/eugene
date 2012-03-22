@@ -110,6 +110,7 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
     mRNAOnly       = PAR.getI("Est.mRNAOnly", N);
     DonorThreshold = PAR.getD("Est.StrongDonor",N);
     DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
+    spliceNonCanP  = PAR.getD("Est.SpliceNonCanP", N);
 
     index = 0;
 
@@ -191,7 +192,8 @@ void SensorEst :: Init (DNASeq *X)
 void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
     unsigned char cESTMatch = 0; // current ESTMatch
-
+    unsigned char pESTMatch = 0; // previous ESTMatch
+    
     // Peut on faire un bete acces sequentiel ?
     if((index != 0                &&  vPos[index-1] >= pos) ||
             (index < (int)vPos.size()  &&  vPos[index]   <  pos))
@@ -205,9 +207,43 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     // Si on est dessus
     if (index < (int)vPos.size()  &&  vPos[index] == pos)
     {
-
         cESTMatch = vESTMatch[index];
 
+        // on cherche un eventuel site depissage non canonique
+        if ( ((index-1) >= 0) && vPos[index-1] == (pos-1) )
+        {
+            pESTMatch = vESTMatch[index-1]; // previous position
+
+            // check noncanonical donor site on strand +
+            if ( (pESTMatch & HitForward) && (cESTMatch & Gap) &&
+                    d->sig[DATA::Don].weight[Signal::Forward] == 0.0 && 
+                    ( (pos+1) <= X->SeqLen) && X->IsNonCanDon(pos, 1) )
+            {
+                d->sig[DATA::Don].weight[Signal::Forward] = -spliceNonCanP;
+            }
+            // check noncanonical acceptor site on strand -
+            if ( (pESTMatch & HitReverse) && (cESTMatch & Gap) &&
+                    d->sig[DATA::Acc].weight[Signal::Reverse] == 0.0 && 
+                    ( (pos+1) <= X->SeqLen) && X->IsNonCanAcc(pos+1, -1) )
+            {
+                d->sig[DATA::Acc].weight[Signal::Reverse] = -spliceNonCanP;
+            }
+            // check noncanonical acceptor site on strand +
+            if ( (pESTMatch & Gap) && (cESTMatch & HitForward) &&
+                    d->sig[DATA::Acc].weight[Signal::Forward] == 0.0 && 
+                    ( (pos-2) > 0) && X->IsNonCanAcc(pos-2, 1) )
+            {
+                d->sig[DATA::Acc].weight[Signal::Forward] = -spliceNonCanP;
+            }
+            // check noncanonical donor site on strand -
+            if ( (pESTMatch & Gap) && (cESTMatch & HitReverse) &&
+                    d->sig[DATA::Don].weight[Signal::Reverse] == 0.0 && 
+                    ( (pos-2) > 0 ) && X->IsNonCanDon(pos-1, -1) )
+            {
+                d->sig[DATA::Don].weight[Signal::Reverse] = -spliceNonCanP;
+            }
+        }
+	    
         // Favor splice sites in marginal exon-intron regions
         if ((cESTMatch & MLeftForward) &&
                 d->sig[DATA::Don].weight[Signal::Forward] != 0.0)
@@ -336,7 +372,6 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
     Hits *ThisEST = NULL;
     Block *ThisBlock = NULL;
     
-    
     fprintf(stderr,"%d sequences read\n",*NumEST);
     fflush(stderr);
 
@@ -410,7 +445,7 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
             if (ThisBlock->Prev != NULL)
 //             {cerr << "coord hsp" << ThisBlock->Prev->Start << "-" <<ThisBlock->Prev->End <<" , " << ThisBlock->Start << "-" << ThisBlock->End << "\n";
 //             cerr << "gen  hsp" << ThisBlock->Prev->LStart << "-" <<ThisBlock->Prev->LEnd <<" , " << ThisBlock->LStart << "-" << ThisBlock->LEnd << "\n";}
-            // si on a un gap ?
+            // If there is a gap (check the positions of the two consecutive blocks on the Est follow +/- EstM)
             if ( (ThisBlock->Prev != NULL) &&
                ( ( (ThisBlock->Prev->LStart <=  ThisBlock->LStart) &&
                    (abs(ThisBlock->LStart-ThisBlock->Prev->LEnd) <= estM)) || 
@@ -450,8 +485,19 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                         exit(2);
                     }
                 }
+                
+                // Check if there is a noncanonical site
+		k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+1));
+		if ( DonF == NINFINITY && X->IsNonCanDon(k, 1) )
+		    DonF = 1;
+		if ( AccR == NINFINITY && X->IsNonCanAcc(k+1, -1) )
+		   AccR = 1;
+		k = Min(X->SeqLen,Max(0,ThisBlock->Start));
+		if ( AccF == NINFINITY && X->IsNonCanAcc(k-2, 1) )
+		   AccF = 1;
+		if ( DonR == NINFINITY && X->IsNonCanDon(k-1, -1) )
+		    DonR = 1;
 
-                //	printf("Extreme splices: %f %f - %f %f\n",DonF,AccF,DonR,AccR);
                 WorstSpliceF = Min(WorstSpliceF,DonF);
                 WorstSpliceF = Min(WorstSpliceF,AccF);
                 WorstSpliceR = Min(WorstSpliceR,DonR);
