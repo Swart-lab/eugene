@@ -172,7 +172,8 @@ DNASeq :: DNASeq (char *filename)
 
   if (fp != stdin) fclose(fp);
 
-  initCodonTable(); // Initialize the codon table
+  InitCodonTable(); // Initialize the codon table
+  InitNonCanSites();
   
   return;
 }
@@ -180,7 +181,7 @@ DNASeq :: DNASeq (char *filename)
 // -------------------------------------------------------------------------
 // Read the codon table file and save the start codons.
 // -------------------------------------------------------------------------
-void DNASeq :: initCodonTable()
+void DNASeq :: InitCodonTable()
 {
     // Init the codon table
   char *CodonFile = new char[FILENAME_MAX+1];
@@ -252,6 +253,58 @@ void DNASeq :: initCodonTable()
 	exit(1);
   }
 }
+
+
+// -------------------------------------------------------------------------
+// Read and save the noncanonical splice sites
+// -------------------------------------------------------------------------
+void DNASeq :: InitNonCanSites()
+{
+  char delims[] = ",";
+  char* site;
+  
+  string nonCanDonList = to_string(PAR.getC("EuGene.NonCanDon", 0, 1));
+  string nonCanAccList = to_string(PAR.getC("EuGene.NonCanAcc", 0, 1));
+  
+  // Donor sites
+  if (!nonCanDonList.empty() && nonCanDonList.compare("") != 0)
+  {
+    site = strtok ((char*)nonCanDonList.c_str(), delims );
+    while ( site != NULL )
+    {
+        std::string aSite = to_string(site);
+	if (aSite.size() != 2 || Code2NumOne[Nuc2Code(aSite[0])]*Code2NumOne[Nuc2Code(aSite[1])] != 1 )
+	{
+	    cerr << "\nError EuGene.NonCanDon " << nonCanDonList <<" Uncanonical sites has to be a list of dinucleotides composed of A,T,G,C only.\n";
+	    exit(2); 
+	}
+	else 
+	  vNonCanDon.push_back(aSite);
+
+        site = strtok (NULL, delims); // next site
+    }
+  }
+  // Acceptor sites
+  if (!nonCanAccList.empty() && nonCanAccList.compare("") != 0)
+  {
+    site = strtok ((char*)nonCanAccList.c_str(), delims );
+    while ( site != NULL )
+    {
+        std::string aSite = to_string(site);
+	if (aSite.size() != 2 || Code2NumOne[Nuc2Code(aSite[0])]*Code2NumOne[Nuc2Code(aSite[1])] != 1 )
+	{
+	    cerr << "\nError EuGene.NonCanAcc. Uncanonical sites has to be a list of dinucleotides composed of A,T,G,C only.\n";
+	    exit(2); 
+	}
+	else 
+	  vNonCanAcc.push_back(aSite);
+
+        site = strtok (NULL, delims); // next site
+    }
+  }
+}
+
+
 
 // ---------------------------------------------------------------------
 //  Destroy this DNASeq by freeing its memory.
@@ -585,11 +638,42 @@ void DNASeq :: Transfer(int Pos, int Len, char *To, int mode)
 #define CodeN (CodeA|CodeC|CodeG|CodeT)
 #define _IsN(_x) (((_x) & CodeN) == CodeN)
 
+
+// ---------------------------------------------------------------------
+// test if an acceptor consensus site starts at position i. If not, test
+// if a non canonical acceptor site starts.
+// ---------------------------------------------------------------------
+double  DNASeq :: IsAcc(int i,int sens)
+{
+    double accVal;
+    if (this->IsCanAcc(i, sens) > 0)
+        accVal =  this->IsCanAcc(i, sens);
+    else
+        accVal = this->IsNonCanAcc(i, sens);
+
+    return accVal;
+}
+
+// ---------------------------------------------------------------------
+// test if a donor consensus site starts at position i. If not, test
+// if a non canonical donor site starts.
+// ---------------------------------------------------------------------
+double  DNASeq :: IsDon(int i,int sens)
+{
+    double donVal;
+    if (this->IsCanDon(i, sens) > 0)
+        donVal =  this->IsCanDon(i, sens);
+    else
+        donVal = this->IsNonCanDon(i, sens);
+
+    return donVal;
+}
+
 // ---------------------------------------------------------------------
 // test if an acceptor consensus site starts at position i. Returns true if
 // an AG occurs precisely
 // ---------------------------------------------------------------------
-double DNASeq :: IsAcc(int i,int sens)
+double DNASeq :: IsCanAcc(int i,int sens)
 {
   int mode = 0;
 
@@ -608,7 +692,7 @@ double DNASeq :: IsAcc(int i,int sens)
 
 	int count = Code2NumOne[(*this)(i,mode) & CodeA] * Code2NumOne[(*this)(i+1,mode) & (CodeG)];
 	double degen = (double) Degeneracy(i,mode,2);
-	/*fprintf(stderr, "[DEBUG] IsAcc : count=%i degen=%lf\n", count, degen);*/
+	/*fprintf(stderr, "[DEBUG] IsCanAcc : count=%i degen=%lf\n", count, degen);*/
 	return ((double)count) / degen;
 
 #if 0  
@@ -621,7 +705,7 @@ double DNASeq :: IsAcc(int i,int sens)
 	/*}*/
 	/*return 1.0;*/
 	double degen = (double) Degeneracy(i,mode,2);
-	fprintf(stderr, "[DEBUG] IsAcc : degen=%lf\n", degen);
+	fprintf(stderr, "[DEBUG] IsCanAcc : degen=%lf\n", degen);
 	return 1.0 / degen;
   }
   return 0.0;
@@ -631,7 +715,7 @@ double DNASeq :: IsAcc(int i,int sens)
 // test if a donor consensus site starts at position i. Returns true if
 // a GT/GC may occur
 // ---------------------------------------------------------------------
-double DNASeq :: IsDon(int i,int sens)
+double DNASeq :: IsCanDon(int i,int sens)
 {
   int mode = 0;
 
@@ -661,8 +745,62 @@ double DNASeq :: IsDon(int i,int sens)
 
   int count = Code2NumOne[(*this)(i,mode) & CodeG] * Code2NumOne[(*this)(i+1,mode) & (CodeT|CodeC)];
   double degen = (double) Degeneracy(i,mode,2);
-  /*fprintf(stderr, "[DEBUG] IsDon : count=%i degen=%lf\n", count, degen);*/
+  /*fprintf(stderr, "[DEBUG] IsCanon : count=%i degen=%lf\n", count, degen);*/
   return ((double)count)/degen;
+}
+
+
+// ---------------------------------------------------------------------
+// Test if there is a site at position pos on the strand. 
+// vSite is a vector of allowed sites. All sites are two nucleotide long 
+// are composed of A, T G, and C.
+// Return 1 if there is a site, else 0
+// Important : 
+// on strand +, pos has to be the left start of the site
+// on strand -, pos has to be the right end of the site
+// ---------------------------------------------------------------------
+int DNASeq :: IsSite(const std::vector<std::string> &vSite, int pos, int strand)
+{
+    int mode = 0;
+    // strand minus
+    if (strand < 0)
+    {
+        pos = SeqLen - pos -1;
+        mode = 2;
+    }
+
+    int c1 = (*this)(pos, mode);
+    int c2 = (*this)(pos+1,mode);
+
+    // Compare with all the noncanonical sites
+    for (int i =0; i < vSite.size(); i++)
+    {
+        char* uncanSite = (char*)vSite[i].c_str();
+        // found!
+        if ( ( c1 & Nuc2Code(uncanSite[0]) ) && ( c2 & Nuc2Code(uncanSite[1]) ) )
+            return 1;
+    }
+
+    // not found
+    return 0;
+}
+
+// ---------------------------------------------------------------------
+// Test if there is a non canonic donor site at position pos
+// Return 1 if there is, 0 else 
+// ---------------------------------------------------------------------
+int DNASeq :: IsNonCanDon(int pos, int strand)
+{ 
+    return this->IsSite(vNonCanDon, pos, strand);
+}
+
+// ---------------------------------------------------------------------
+// Test if there is a non canonic acceptor site at position pos
+// Return 1 if there is, 0 else
+// ---------------------------------------------------------------------
+int DNASeq :: IsNonCanAcc(int pos, int strand)
+{
+    return this->IsSite(vNonCanAcc, pos, strand);
 }
 
 

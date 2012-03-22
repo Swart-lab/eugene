@@ -57,10 +57,14 @@ class  DNASeq
 
   std::vector<std::string>           vStart;  // vector of start codon
   std::vector<std::string>           vStop;  // vector of start codon
+  std::vector<std::string>           vNonCanAcc; // vector of non canonical acceptor sites
+  std::vector<std::string>           vNonCanDon; // vector of non canonical donor sites
   std::map<std::string, std::string> mCodons; // mCodons["ATG"] = "M";
  
   void UpdateMarkov();
-  void initCodonTable();
+  void InitCodonTable();
+  void InitNonCanSites();
+  int  IsSite(const std::vector<std::string>&, int, int);
 
  public:
   DNASeq ();
@@ -108,10 +112,16 @@ class  DNASeq
   // corresponding signal. Example: IsStop on TGN returns 0.25 (only TGA is a Stop)
   double IsAcc(int pos,int strand);
   double IsDon(int pos,int strand);
+  double IsCanAcc(int pos,int strand);
+  double IsCanDon(int pos,int strand);
+  int    IsNonCanAcc(int pos, int strand);
+  int    IsNonCanDon(int pos, int strand);
+
   double IsStop(int pos,int strand);
   double IsStart(int pos,int strand);
   double IsProStart(int i,int sens);
-  
+
+
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);
   // same for the reverse strand.
