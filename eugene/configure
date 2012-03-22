@@ -2519,7 +2519,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=eugene
- VERSION=4.0a
+ VERSION=4.1
 
 
 cat >>confdefs.h <<_ACEOF
