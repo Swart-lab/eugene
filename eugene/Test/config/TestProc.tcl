@@ -264,6 +264,7 @@ set NewValue1(Est.estP*\[0\])	-0.4
 set NewValue1(Est.estM\[0\])	        6
 set NewValue1(Est.utrP*\[0\])	0.35
 set NewValue1(Est.utrM\[0\])	        5
+set NewValue1(Est.CdsBoost*\[0\])   0.0
 set NewValue1(Est.SpliceBoost*\[0\]) 0.0
 set NewValue1(Est.SpliceNonCanP\[0\]) 1.0
 set NewValue1(Est.StrongDonor\[0\])	0.95
@@ -277,7 +278,8 @@ set NewValue1(Est.PPNumber\[1\])     2
 set NewValue1(Est.estP*\[1\])	-0.4
 set NewValue1(Est.estM\[1\])	        6
 set NewValue1(Est.utrP*\[1\])	0.35
-set NewValue1(Est.utrM\[\])	        5
+set NewValue1(Est.utrM\[1\])	        5
+set NewValue1(Est.CdsBoost*\[1\]) 0.0
 set NewValue1(Est.SpliceBoost*\[1\]) 0.0
 set NewValue1(Est.SpliceNonCanP\[1\]) 1.0
 set NewValue1(Est.StrongDonor\[1\])	0.95
