@@ -38,6 +38,7 @@ class SensorEst : public Sensor
   int    NumEST;
   double estP, utrP;
   double DonorThreshold;
+  double cdsBoost;
   double spliceBoost;
   double spliceNonCanP; // penalty if there is a non canonical splice site
   int    estM, utrM;

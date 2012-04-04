@@ -182,6 +182,7 @@ void SensorEst :: Init (DNASeq *X)
     estP = PAR.getD("Est.estP*",N);
     utrP = PAR.getD("Est.utrP*",N);
     spliceBoost    = PAR.getD("Est.SpliceBoost*",N);
+    cdsBoost       = PAR.getD("Est.CdsBoost*", N);
     //for(int jj=0;jj<(int)vPos.size();jj++)
     //printf("vPos[%d]:%d\tvESTM[%d]:%d\n",jj,vPos[jj]+1,jj,vESTMatch[jj]);
 }
@@ -304,7 +305,19 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             d->contents[DATA::IntronR] += estP;
             d->contents[DATA::IntronUTRR] += estP;
         }
-
+        // Hit forward: boost the cds region on strand forward
+        if (cESTMatch & HitForward)
+	{
+	  for(int i=0; i<3; i++)
+             d->contents[i] += cdsBoost;  
+	}
+	// Hit reverse: boost the cds region on strand reverse
+        if (cESTMatch & HitReverse)
+	{
+	  for(int i=3; i<6; i++)
+             d->contents[i] += cdsBoost;  
+	}
+	
         // Intergenique: tout le temps si on a un match
         d->contents[DATA::InterG] += ((cESTMatch & (Gap|Hit)) != 0)*estP;
 
