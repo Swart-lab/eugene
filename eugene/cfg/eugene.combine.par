@@ -246,6 +246,7 @@ Est.estP*[0]	-0.4
 Est.estM[0]	6
 Est.utrP*[0]	0.35
 Est.utrM[0]	5
+Est.CdsBoost*[0] 0.0
 Est.SpliceBoost*[0] 0.0
 Est.SpliceNonCanP[0] 1.0
 Est.StrongDonor[0] 0.95
@@ -263,6 +264,7 @@ Est.estP*[1]	-0.4
 Est.estM[1]	6
 Est.utrP*[1]	0.35
 Est.utrM[1]	5
+Est.CdsBoost*[1] 0.0
 Est.SpliceBoost*[1] 0.0
 Est.SpliceNonCanP[1] 1.0
 Est.StrongDonor[1] 0.95

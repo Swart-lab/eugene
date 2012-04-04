@@ -211,6 +211,7 @@ Est.estP*	-0.19
 Est.estM	6
 Est.utrP*	0.35
 Est.utrM	5
+Est.CdsBoost* 0.0
 Est.SpliceBoost* 0.0
 Est.SpliceNonCanP 1.0
 Est.StrongDonor 0.95
