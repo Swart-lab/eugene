@@ -109,7 +109,10 @@ void SensorNStretch :: GiveInfo (DNASeq *X, int pos, DATA *d)
         d->contents[DATA::UTR3R] -= stretchPenalty;
         d->contents[DATA::IntronUTRF] -= stretchPenalty;
         d->contents[DATA::IntronUTRR] -= stretchPenalty;
-
+	d->contents[DATA::RNAF] -= stretchPenalty;
+	d->contents[DATA::RNAR] -= stretchPenalty;
+	d->contents[DATA::UIRF] -= stretchPenalty;
+	d->contents[DATA::UIRR] -= stretchPenalty;
     }
 }
 // ----------------------------
