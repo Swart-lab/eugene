@@ -238,8 +238,12 @@ void Signals :: PrintS ()
   case DATA::Stop      : strcpy(t, "Stop     "); break;
   case DATA::Don       : strcpy(t, "Acc      "); break;
   case DATA::Acc       : strcpy(t, "Don      "); break;
-  case DATA::Ins       : strcpy(t, "Ins      "); break;
-  case DATA::Del       : strcpy(t, "Del      "); break;
+  case DATA::Del1     : strcpy(t, "Del      "); break;
+  case DATA::Del2     : strcpy(t, "Del      "); break;
+  case DATA::Del3     : strcpy(t, "Del      "); break;
+  case DATA::Ins1     : strcpy(t, "Ins      "); break;
+  case DATA::Ins2     : strcpy(t, "Ins      "); break;
+  case DATA::Ins3     : strcpy(t, "Ins      "); break;
   case DATA::tStartNpc : strcpy(t, "tStartNpc"); break;
   case DATA::tStopNpc  : strcpy(t, "tStopNpc "); break;
   }
