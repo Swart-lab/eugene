@@ -109,6 +109,14 @@ EuStop.stopP*           4.0
 FrameShift.Ins*		1e999.0
 FrameShift.Del*		1e999.0
 #
+##### RibosomalFrameShift sensor (uniform penalties) #####
+RibosomalFrameShift.type[0]	deletion   # Possible types: deletion1 deletion2 deletion3 insertion1 insertion2 insertion3
+RibosomalFrameShift.pat[0]		AAAAAAG	
+RibosomalFrameShift.newStatePos[0] 4	# Position of the new state in the pattern
+RibosomalFrameShift.patP*[0]	-10
+RibosomalFrameShift.patPNo*[0]	0
+RibosomalFrameShift.requiredEstSupport[0]	1 # 1 if an EST support is required
+#
 ##### GeneSplicer parameters #####
 GSplicer.coefAcc*	1
 GSplicer.penAcc*	0
@@ -456,6 +464,7 @@ Sensor.NG2.use		0
 Sensor.NStart.use	0
 Sensor.PatConst.use	0
 Sensor.PepSignal.use	0
+Sensor.RibosomalFrameShift.use     0
 Sensor.SpliceWAM.use 	0
 Sensor.SPred.use	0
 Sensor.StartWAM.use	0
@@ -497,6 +506,7 @@ Sensor.NG2 		10
 Sensor.NStart 		10
 Sensor.PatConst 	10
 Sensor.PepSignal 	10
+Sensor.RibosomalFrameShift 30
 Sensor.SMachine 	10
 Sensor.SpliceWAM 	10
 Sensor.SPred 		10
