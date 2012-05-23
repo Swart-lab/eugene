@@ -36,28 +36,61 @@ SensorPatConst :: SensorPatConst (int n) : Sensor(n)
   patType     = PAR.getC("PatConst.type",        GetNumber());
   pattern     = PAR.getC("PatConst.pat",         GetNumber());
   patLen      = strlen(pattern);
+  sigTypeNb   = 1; // by default only one type of signal
+  
   for(int i=0; i<patLen; i++)
     pattern[i] = tolower(pattern[i]);
   
   // Type initialisation
 
-  if(!strcmp(patType, "start")) {
-    sigTypeIndex = DATA::Start;   type = Type_Start;  }
-  else if(!strcmp(patType, "insertion")) {
-    sigTypeIndex = DATA::Ins;     type = Type_FS; }
-  else if(!strcmp(patType, "deletion"))  {
-    sigTypeIndex = DATA::Del;     type = Type_FS; }
-  else if(!strcmp(patType, "transstart")) {
-    sigTypeIndex = DATA::tStart;  type = Type_TStart; }
-  else if(!strcmp(patType, "transstop")) {
-    sigTypeIndex = DATA::tStop;   type = Type_TStop; }
-  else if(!strcmp(patType, "donor")) {
-    sigTypeIndex = DATA::Don;     type = Type_Don; }
-  else if(!strcmp(patType, "acceptor")) {
-    sigTypeIndex = DATA::Acc;     type = Type_Acc; }
-  else if(!strcmp(patType, "stop")) {
-    sigTypeIndex = DATA::Stop;     type = Type_Stop;}
-  else {
+  if(!strcmp(patType, "start")) 
+  {
+    vSigTypeIndex.push_back(DATA::Start);
+    type = Type_Start;  
+  }
+  else if(!strcmp(patType, "insertion")) 
+  {
+    vSigTypeIndex.push_back(DATA::Ins1);
+    vSigTypeIndex.push_back(DATA::Ins2);
+    vSigTypeIndex.push_back(DATA::Ins3);
+    sigTypeNb = 3;
+    type = Type_FS; 
+  }
+  else if(!strcmp(patType, "deletion"))  
+  {
+    vSigTypeIndex.push_back(DATA::Del1);
+    vSigTypeIndex.push_back(DATA::Del2);
+    vSigTypeIndex.push_back(DATA::Del3);
+    sigTypeNb = 3;
+    type = Type_FS; 
+  }
+  else if(!strcmp(patType, "transstart")) 
+  {
+    vSigTypeIndex.push_back(DATA::tStart);
+    type = Type_TStart; 
+  }
+  else if(!strcmp(patType, "transstop")) 
+  {
+    vSigTypeIndex.push_back(DATA::tStop);
+    type = Type_TStop; 
+  }
+  else if(!strcmp(patType, "donor")) 
+  {
+    vSigTypeIndex.push_back(DATA::Don);
+    type = Type_Don; 
+  }
+  else if(!strcmp(patType, "acceptor")) 
+  {
+    vSigTypeIndex.push_back(DATA::Acc);     
+    type = Type_Acc; 
+  }
+  else if(!strcmp(patType, "stop")) 
+  {
+    vSigTypeIndex.push_back(DATA::Stop);     
+    type = Type_Stop;
+  }
+  else 
+  {
     fprintf(stderr, "Error \"%s\" undefined type in the parameter file"
 	    " for PatConst.pat[%d]\n", patType, GetNumber());
     fprintf(stderr, "Type must be : start, insertion, deletion, "
@@ -104,13 +137,22 @@ void SensorPatConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
       break;
     }
   
-  if(isSigF) {
-    d->sig[sigTypeIndex].weight[Signal::Forward]   += patP;
-    d->sig[sigTypeIndex].weight[Signal::ForwardNo] += patPNo;
+  if(isSigF) 
+  {
+    for (int j=0; j < sigTypeNb; j++)
+    {
+      d->sig[vSigTypeIndex[j]].weight[Signal::Forward]   += patP;
+      d->sig[vSigTypeIndex[j]].weight[Signal::ForwardNo] += patPNo;
+    }
   }
-  if(isSigR) {
-    d->sig[sigTypeIndex].weight[Signal::Reverse]   += patP;
-    d->sig[sigTypeIndex].weight[Signal::ReverseNo] += patPNo;
+  
+  if(isSigR) 
+  {
+    for (int j=0; j < sigTypeNb; j++)
+    {
+      d->sig[vSigTypeIndex[j]].weight[Signal::Reverse]   += patP;
+      d->sig[vSigTypeIndex[j]].weight[Signal::ReverseNo] += patPNo;
+    }
   }
 }
 
@@ -141,26 +183,34 @@ void SensorPatConst :: Plot(DNASeq *X)
 	break;
       }
     
-    if (isSigF) {
-      if (sigTypeIndex == DATA::Start)
-	PlotStart(l,(l%3)+1,0.5);
-      else if (sigTypeIndex == DATA::Don)
-	PlotDon(l,1,0.5);
-      else if(sigTypeIndex == DATA::Acc)
-	PlotAcc(l,1,0.5);
-      else if(sigTypeIndex == DATA::Stop)
-	PlotStop(l,(l%3)+1,1);
+    if (isSigF) 
+    {
+      for (int j=0; j < sigTypeNb; j++)
+      {	
+	if (vSigTypeIndex[j] == DATA::Start)
+	  PlotStart(l,(l%3)+1,0.5);
+	else if (vSigTypeIndex[j] == DATA::Don)
+	  PlotDon(l,1,0.5);
+	else if(vSigTypeIndex[j] == DATA::Acc)
+	  PlotAcc(l,1,0.5);
+	else if(vSigTypeIndex[j] == DATA::Stop)
+	  PlotStop(l,(l%3)+1,1);
+      }
     }
 
-    if(isSigR) {
-      if (sigTypeIndex == DATA::Start)
-	PlotStart(l,-((X->SeqLen-l)%3)-1,0.5);
-      else if (sigTypeIndex == DATA::Don)
-	PlotDon(l,-1,0.5);
-      else if(sigTypeIndex == DATA::Acc)
-	PlotAcc(l,-1,0.5);
-      else if(sigTypeIndex == DATA::Stop)
-	PlotStop(l,-((X->SeqLen-l)%3)-1,1);
+    if(isSigR) 
+    {
+      for (int j=0; j < sigTypeNb; j++)
+      {
+	if (vSigTypeIndex[j] == DATA::Start)
+	  PlotStart(l,-((X->SeqLen-l)%3)-1,0.5);
+	else if (vSigTypeIndex[j] == DATA::Don)
+	  PlotDon(l,-1,0.5);
+	else if(vSigTypeIndex[j] == DATA::Acc)
+	  PlotAcc(l,-1,0.5);
+	else if(vSigTypeIndex[j] == DATA::Stop)
+	  PlotStop(l,-((X->SeqLen-l)%3)-1,1);
+      }
     }
   }
 }

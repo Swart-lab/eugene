@@ -33,7 +33,8 @@ class SensorPatConst : public Sensor
   char*  pattern;
   char*  patType;
   int    newStatePos;
-  int    sigTypeIndex;
+  std::vector<int>  vSigTypeIndex;
+  int    sigTypeNb;
   int    patLen;
   
  public:

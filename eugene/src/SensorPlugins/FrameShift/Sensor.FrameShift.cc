@@ -32,7 +32,7 @@ extern Parameters PAR;
 // ----------------------
 SensorFrameShift :: SensorFrameShift (int n, DNASeq *X) : Sensor(n)
 {
-    type = Type_Start;
+    type = Type_FS;
 }
 
 // ----------------------
@@ -57,11 +57,20 @@ void SensorFrameShift :: Init (DNASeq *X)
 //  GiveInfo frameshift
 // -----------------------
 void SensorFrameShift :: GiveInfo (DNASeq *X, int pos, DATA *d)
-{
-    d->sig[DATA::Ins].weight[Signal::Forward] = insProb;
-    d->sig[DATA::Ins].weight[Signal::Reverse] = insProb;
-    d->sig[DATA::Del].weight[Signal::Forward] = delProb;
-    d->sig[DATA::Del].weight[Signal::Reverse] = delProb;
+{   
+    d->sig[DATA::Ins1].weight[Signal::Forward] = insProb;
+    d->sig[DATA::Ins2].weight[Signal::Forward] = insProb;
+    d->sig[DATA::Ins3].weight[Signal::Forward] = insProb;
+    d->sig[DATA::Ins1].weight[Signal::Reverse] = insProb;
+    d->sig[DATA::Ins2].weight[Signal::Reverse] = insProb;
+    d->sig[DATA::Ins3].weight[Signal::Reverse] = insProb;
+    
+    d->sig[DATA::Del1].weight[Signal::Forward] = delProb;
+    d->sig[DATA::Del2].weight[Signal::Forward] = delProb;
+    d->sig[DATA::Del3].weight[Signal::Forward] = delProb;
+    d->sig[DATA::Del1].weight[Signal::Reverse] = delProb;
+    d->sig[DATA::Del2].weight[Signal::Reverse] = delProb;
+    d->sig[DATA::Del3].weight[Signal::Reverse] = delProb;
 }
 
 // ----------------------------

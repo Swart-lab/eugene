@@ -416,9 +416,17 @@ void SensorAnnotaStruct :: ReadAnnotaStruct(char name[FILENAME_MAX+1], int len)
 	else if(!strcmp(feature, "don"))
 	  vSig.push_back(new Signals(startS-1, DATA::Don,    edge, CharCopy(scoreC)));
 	else if(!strcmp(feature, "ins"))
-	  vSig.push_back(new Signals(startS,   DATA::Ins,    edge, CharCopy(scoreC)));
+	{
+	  vSig.push_back(new Signals(startS,   DATA::Ins1, edge, CharCopy(scoreC)));
+	  vSig.push_back(new Signals(startS,   DATA::Ins2, edge, CharCopy(scoreC)));
+	  vSig.push_back(new Signals(startS,   DATA::Ins3, edge, CharCopy(scoreC)));
+	}
 	else if(!strcmp(feature, "del"))
-	  vSig.push_back(new Signals(startS,   DATA::Del,    edge, CharCopy(scoreC)));
+	{
+          vSig.push_back(new Signals(startS,   DATA::Del1,    edge, CharCopy(scoreC)));
+	  vSig.push_back(new Signals(startS,   DATA::Del2,    edge, CharCopy(scoreC)));
+	  vSig.push_back(new Signals(startS,   DATA::Del3,    edge, CharCopy(scoreC)));
+	}
 	else if(!strcmp(feature, "trStartNpc"))
 	  vSig.push_back(new Signals(startS-1, DATA::tStartNpc, edge, CharCopy(scoreC)));
         else if(!strcmp(feature, "trStopNpc"))
@@ -707,11 +715,17 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
         vSig.push_back(new Signals(startS-1, DATA::Don,    edge, GetScoreC(DATA::Don,scF, true)));
 
     else if ( idSo == "SO:0000366") //ins : insertion_site
-      vSig.push_back(new Signals(startS,   DATA::Ins,    edge, CharCopy(scoreC)));
-
+    {
+      vSig.push_back(new Signals(startS,   DATA::Ins1,    edge, CharCopy(scoreC)));
+      vSig.push_back(new Signals(startS,   DATA::Ins2,    edge, CharCopy(scoreC)));
+      vSig.push_back(new Signals(startS,   DATA::Ins3,    edge, CharCopy(scoreC)));
+    }
     else if ( idSo == "SO:0000687") //del : deletion_junction
-      vSig.push_back(new Signals(startS,   DATA::Del,    edge, CharCopy(scoreC)));
-
+    {
+      vSig.push_back(new Signals(startS,   DATA::Del1,    edge, CharCopy(scoreC)));
+      vSig.push_back(new Signals(startS,   DATA::Del2,    edge, CharCopy(scoreC)));
+      vSig.push_back(new Signals(startS,   DATA::Del3,    edge, CharCopy(scoreC)));
+    }
     // High level (contents OR/AND signals)
 
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000196")  
