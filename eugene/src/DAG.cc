@@ -511,8 +511,8 @@ void DAG::ApplyScore ( int position, DATA Data, int NoContentsUpdate )
 inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int position)
 {
   int Data_Len = TheSeq->SeqLen;
-  int PhaseF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
-  int PhaseR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
+  int FrameF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
+  int FrameR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
 
   enum Signal::Edge FStrand = (Strand ? Signal::Reverse : Signal::Forward);
   enum Signal::Edge RStrand = (Strand ? Signal::Forward : Signal::Reverse);
@@ -543,7 +543,8 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonsR (from frameshift)
   // ---------------------------
-  if (ISPOSSIBLE(Ins,RStrand) || ISPOSSIBLE(Del,RStrand)) {
+    if (ISPOSSIBLE(Ins1,RStrand) || ISPOSSIBLE(Ins2,RStrand) || ISPOSSIBLE(Ins3,RStrand) || 
+        ISPOSSIBLE(Del1,RStrand) || ISPOSSIBLE(Del2,RStrand) || ISPOSSIBLE(Del3,RStrand) ) {
     INEED(InitR1); INEED(InitR2); INEED(InitR3);
     INEED(IntrR1); INEED(IntrR2); INEED(IntrR3);
     INEED(TermR1); INEED(TermR2); INEED(TermR3); 
@@ -562,8 +563,8 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // UTR5R (from Init/SnglR) - check or UIRR (from SnglR)
   // ---------------------------
   if (ISPOSSIBLE(Start,RStrand)) {
-    INEED(InitR1+PhaseR);
-    INEED(SnglR1+PhaseR); 
+    INEED(InitR1+FrameR);
+    INEED(SnglR1+FrameR); 
   }
 
   // ---------------------------
@@ -679,8 +680,8 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // UTR3F (from ExonF) or UIRF (from SnglF)
   // ---------------------------
   if (ISPOSSIBLE(Stop,FStrand)) {
-    INEED(TermF1+PhaseF);
-    INEED(SnglF1+PhaseF); 
+    INEED(TermF1+FrameF);
+    INEED(SnglF1+FrameF); 
   }
 
   // ---------------------------
@@ -704,34 +705,34 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // ---------------------------
   // ExonF (from frameshift)
   // ---------------------------
-  if (ISPOSSIBLE(Ins,FStrand) || 
-      ISPOSSIBLE(Del,FStrand)) {
+   if (ISPOSSIBLE(Ins1,FStrand) || ISPOSSIBLE(Ins2,FStrand) || ISPOSSIBLE(Ins3,FStrand) || 
+       ISPOSSIBLE(Del1,FStrand) || ISPOSSIBLE(Del2,FStrand) || ISPOSSIBLE(Del3,FStrand)) {
     INEED(InitF1); INEED(InitF2); INEED(InitF3);
     INEED(IntrF1); INEED(IntrF2); INEED(IntrF3);
     INEED(TermF1); INEED(TermF2); INEED(TermF3); 
     INEED(SnglF1); INEED(SnglF2); INEED(SnglF3); 
   }
- 
+  
   // ---------------------------
   // SnglRR (from SnglR)
   //----------------------------
   if (ISPOSSIBLE(Stop,RStrand)) {
-	if (PhaseR != 0) 
+	if (FrameR != 0) 
 	INEED(SnglR1); 
-        if (PhaseR != 1)
+        if (FrameR != 1)
 	INEED(SnglR2);
-        if (PhaseR != 2)
+        if (FrameR != 2)
 	INEED(SnglR3);
  }
   // ---------------------------
   // SnglFF (from SnglF)
   // ---------------------------
   if (ISPOSSIBLE(Start,FStrand)) {
-    if (PhaseF != 0) 
+    if (FrameF != 0) 
 	INEED(SnglF1); 
-    if (PhaseF != 1)
+    if (FrameF != 1)
 	INEED(SnglF2);
-    if (PhaseF != 2)
+    if (FrameF != 2)
 	INEED(SnglF3);
   }
   // ---------------------------
@@ -760,11 +761,11 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // SnglF (from SnglFF)
   //----------------------------
   if (ISPOSSIBLE(Stop,FStrand)) {
-	if (PhaseF == 0 || (PhaseF == 1)) 
+	if (FrameF == 0 || (FrameF == 1)) 
 		INEED(SnglF1F2);
-	if (PhaseF == 0 || (PhaseF == 2))
+	if (FrameF == 0 || (FrameF == 2))
 		INEED(SnglF1F3);
-    if (PhaseF == 1 || (PhaseF == 2))
+    if (FrameF == 1 || (FrameF == 2))
 		INEED(SnglF2F3);
  }
 
@@ -772,11 +773,11 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // SnglR (from SnglRR)
   // ---------------------------
   if (ISPOSSIBLE(Start,RStrand)) {
-    if (PhaseR == 0 || (PhaseR == 1)) 
+    if (FrameR == 0 || (FrameR == 1)) 
 		INEED(SnglR1R2);
-	if (PhaseR == 0 || (PhaseR == 2))
+	if (FrameR == 0 || (FrameR == 2))
 		INEED(SnglR1R3);
-    if (PhaseR == 1 || (PhaseR == 2))
+    if (FrameR == 1 || (FrameR == 2))
 		INEED(SnglR2R3);
   }
 
@@ -784,19 +785,19 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // SnglF (from SnglFR)
   //----------------------------
   if (ISPOSSIBLE(Start,RStrand)) {
-	if (PhaseR == 0)
+	if (FrameR == 0)
 	{
 		INEED(SnglF1R1);
 		INEED(SnglF2R1);
 		INEED(SnglF3R1);
 	}
-	else if (PhaseR == 1)
+	else if (FrameR == 1)
 	{ 
 		INEED(SnglF1R2);
 		INEED(SnglF2R2);
 		INEED(SnglF3R2);
 	}
-	else if (PhaseR == 2)
+	else if (FrameR == 2)
 	{
 		INEED(SnglF1R3);
 		INEED(SnglF2R3);
@@ -808,19 +809,19 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
   // SnglR (from SnglFR)
   //----------------------------
   if (ISPOSSIBLE(Stop, FStrand)) {
-    if (PhaseF == 0)
+    if (FrameF == 0)
 	{
 		INEED(SnglF1R1);
 		INEED(SnglF1R2);
 		INEED(SnglF1R3);
  	}
-	else if (PhaseF == 1)
+	else if (FrameF == 1)
 	{
 		INEED(SnglF2R1);
 		INEED(SnglF2R2);
 		INEED(SnglF2R3);
 	}
-	else if (PhaseF == 2)
+	else if (FrameF == 2)
 	{
 		INEED(SnglF3R1);
 		INEED(SnglF3R2);
@@ -926,13 +927,17 @@ inline bool spliceStopPostTxx(int StopStop, enum Signal::Edge Strand)  //x(GA|A(
 
 // ----------------------------------------------------------------
 // Perform DP itself: one recursive level through possible signals
+// 'position' parameter is the index (start at 0)
+// 'position' can be equal to the sequence length! (to manage the final signals)
 // ----------------------------------------------------------------
 inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int position)
 {
   int k;
   int Data_Len = TheSeq->SeqLen;
-  int PhaseF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
-  int PhaseR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
+  
+  /* Note: FrameF of the first position is 0, whereas FrameR of the last position is 1 */
+  int FrameF = (Strand ? ((Data_Len-position+3) % 3) : (position % 3));
+  int FrameR = (Strand ? (position % 3) : ((Data_Len-position+3) % 3));
 
   enum Signal::Edge FStrand = (Strand ? Signal::Reverse : Signal::Forward);
   enum Signal::Edge RStrand = (Strand ? Signal::Forward : Signal::Reverse);
@@ -952,21 +957,27 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   for (k = 0; k < 3; k++) {
     maxi = NINFINITY; best = -1;     
     
-    // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
-    PICOMP((PhaseF == k),Start,FStrand,UTR5F);
-    // Il y a une insertion (frameshift). Saut de position de nucl�otide ignor�.
-    PICOMP(true,Ins,FStrand,InitF1+(k+1)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,FStrand,InitF1+(k+2)%3);
+    // On commence a coder (Start), si en phase ca vient d'une UTR 5' forward
+    PICOMP((FrameF == k),Start,FStrand,UTR5F);
+    
+    // frameshifts
+    PICOMP((FrameF == (k+1)%3), Del1, FStrand, InitF1+(k+1)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameF == (k+2)%3), Del2, FStrand, InitF1+(k+1)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameF ==  k     ), Del3, FStrand, InitF1+(k+1)%3); // deletion which remove the 3rd nucl of a codon 
+    PICOMP((FrameF == (k+2)%3), Ins1, FStrand, InitF1+(k+2)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameF ==  k     ), Ins2, FStrand, InitF1+(k+2)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameF == (k+1)%3), Ins3, FStrand, InitF1+(k+2)%3); // insertion before the 3rd nucl of a codon
+
     
     // On va tout droit.
       // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseF == k)
+    if (FrameF == k)
       LBP[Strand ? ReverseIt[InitF1+k]: InitF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
     LBP[Strand ? ReverseIt[InitF1+k]: InitF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
     INSERT(InitF1+k);
   }
+  
   // ----------------------------------------------------------------
   // ------------------------- Inits en reverse ---------------------
   // ----------------------------------------------------------------
@@ -974,27 +985,31 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-    PICOMPEN(true,Don,RStrand,IntronR1+((PhaseR+3-k) % 3),
-	     ((PhaseR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
+    PICOMPEN(true,Don,RStrand,IntronR1+((FrameR+3-k) % 3),
+	     ((FrameR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
-    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,RStrand,IntronR3G,
+    PICOMPEN((FrameR+3-k) % 3 == 2,Don,RStrand,IntronR3G,
 	     (spliceStopPreTAx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterA
-    PICOMPEN((PhaseR+3-k) % 3 == 2,Don,RStrand,IntronR3A ,
+    PICOMPEN((FrameR+3-k) % 3 == 2,Don,RStrand,IntronR3A ,
 	     (spliceStopPrexxA(StartStop,RStrand)  ? SplicedStopPen : 0.0));
     // Not AfterAG
-    PICOMPEN((PhaseR+3-k) % 3 == 1,Don,RStrand,IntronR2AG,
+    PICOMPEN((FrameR+3-k) % 3 == 1,Don,RStrand,IntronR2AG,
 	     (spliceStopPreTxx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,RStrand, InitR1+(k+2)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,RStrand, InitR1+(k+1)%3);
+    // frameshifts
+    PICOMP((FrameR ==  k     ), Del1, RStrand, InitR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Del2, RStrand, InitR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Del3, RStrand, InitR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, InitR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, InitR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins3, RStrand, InitR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if ((PhaseR % 3 == k)) 
+    if ((FrameR % 3 == k)) 
       LBP[Strand ? ReverseIt[InitR1+k]: InitR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
     LBP[Strand ? ReverseIt[InitR1+k]: InitR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
@@ -1007,33 +1022,38 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
 
     // On commence a coder (Start),si en phase ca vient d'une UTR 5' forward
-    PICOMP((PhaseF == k),Start,FStrand,UTR5F);
-    // Il y a une insertion (frameshift).
-    PICOMP(true,Ins,FStrand,SnglF1+(k+1)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,FStrand,SnglF1+(k+2)%3);
+    PICOMP((FrameF == k),Start,FStrand,UTR5F); 
+        
+    // frameshifts
+    PICOMP((FrameF == (k+1)%3), Del1, FStrand, SnglF1+(k+1)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameF == (k+2)%3), Del2, FStrand, SnglF1+(k+1)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameF ==  k     ), Del3, FStrand, SnglF1+(k+1)%3); // deletion which remove the 3rd nucl of a codon 
+    PICOMP((FrameF == (k+2)%3), Ins1, FStrand, SnglF1+(k+2)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameF ==  k     ), Ins2, FStrand, SnglF1+(k+2)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameF == (k+1)%3), Ins3, FStrand, SnglF1+(k+2)%3); // insertion before the 3rd nucl of a codon
+
 
     // ----------------------------- Prokaryote ---------------------------------------------
     // Start en phase : on peut venir d'un UIRF
-    PICOMP((PhaseF == k),Start, FStrand, UIRF);
+    PICOMP((FrameF == k),Start, FStrand, UIRF);
 
     // Il ya un stop en forward, on peut venir d'une région bicodante
     // NB: pour les 6 cas suivants, inutile de tester si il y a un stop consecutif : c'est impossible, 
-    PICOMP((PhaseF == 1 && k == 0), Stop, FStrand, SnglF1F2); // SnglF1F2 - Stop en +2 - SnglF1
-    PICOMP((PhaseF == 2 && k == 0), Stop, FStrand, SnglF1F3); // SnglF1F3 - Stop en +3 - SnglF1
-    PICOMP((PhaseF == 0 && k == 1), Stop, FStrand, SnglF1F2); // SnglF1F2 - Stop en +1 - SnglF2
-    PICOMP((PhaseF == 2 && k == 1), Stop, FStrand, SnglF2F3); // SnglF2F3 - Stop en +3 - SnglF2
-    PICOMP((PhaseF == 0 && k == 2), Stop, FStrand, SnglF1F3); // SnglF1F3 - Stop en +1 - SnglF3
-    PICOMP((PhaseF == 1 && k == 2), Stop, FStrand, SnglF2F3); // SnglF2F3 - Stop en +2 - SnglF3
+    PICOMP((FrameF == 1 && k == 0), Stop, FStrand, SnglF1F2); // SnglF1F2 - Stop en +2 - SnglF1
+    PICOMP((FrameF == 2 && k == 0), Stop, FStrand, SnglF1F3); // SnglF1F3 - Stop en +3 - SnglF1
+    PICOMP((FrameF == 0 && k == 1), Stop, FStrand, SnglF1F2); // SnglF1F2 - Stop en +1 - SnglF2
+    PICOMP((FrameF == 2 && k == 1), Stop, FStrand, SnglF2F3); // SnglF2F3 - Stop en +3 - SnglF2
+    PICOMP((FrameF == 0 && k == 2), Stop, FStrand, SnglF1F3); // SnglF1F3 - Stop en +1 - SnglF3
+    PICOMP((FrameF == 1 && k == 2), Stop, FStrand, SnglF2F3); // SnglF2F3 - Stop en +2 - SnglF3
 
     // Il ya un start en reverse, on peut venir d'une région bicodante
     for (int p = 0; p < 3; p++) {
         // Si il y a un start en -p, et pas de stop en +1 si on est en phase, alors on peut venir du bicoding F1R(1+p)
-        PICOMP((k == 0 && PhaseR == p && !(PhaseF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF1R1+p); 
+        PICOMP((k == 0 && FrameR == p && !(FrameF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF1R1+p); 
         // Si il y a un start en -p, et pas de stop en +2 si on est en phase, alors on peut venir du bicoding F2R(1+p)
-        PICOMP((k == 1 && PhaseR == p && !(PhaseF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF2R1+p); 
+        PICOMP((k == 1 && FrameR == p && !(FrameF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF2R1+p); 
         // Si il y a un start en -p, et pas de stop en +3 si on est en phase, alors on peut venir du bicoding F3R(1+p)
-        PICOMP((k == 2 && PhaseR == p && !(PhaseF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF3R1+p); 
+        PICOMP((k == 2 && FrameR == p && !(FrameF == k && ISPOSSIBLE(Stop, FStrand)) ), Start, RStrand, SnglF3R1+p); 
     }
 
     // genes strictement adjacents
@@ -1044,15 +1064,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     if (isProkaryote)
     {
         // Un  stop en forward, suivi d'un start en forward en phase. On vient de SnglF1+k
-        PICOMP((PhaseF == k && ISPOSSIBLE(Stop, FStrand)), Start, FStrand, SnglF1+k);
-        // un start en reverse, suivi d'un start en forward. On vient de SnglR1+PhaseR
-        PICOMP((PhaseF == k && ISPOSSIBLE(Start, RStrand)), Start, FStrand, SnglR1+PhaseR);
+        PICOMP((FrameF == k && ISPOSSIBLE(Stop, FStrand)), Start, FStrand, SnglF1+k);
+        // un start en reverse, suivi d'un start en forward. On vient de SnglR1+FrameR
+        PICOMP((FrameF == k && ISPOSSIBLE(Start, RStrand)), Start, FStrand, SnglR1+FrameR);
     }
     // -------------------------------------------------------------------------------------
 
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if ((PhaseF == k))
+    if ((FrameF == k))
       LBP[Strand ? ReverseIt[SnglF1+k]: SnglF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
     LBP[Strand ? ReverseIt[SnglF1+k]: SnglF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
@@ -1065,31 +1085,35 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
 
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
-    PICOMP((PhaseR == k),Stop,RStrand,UTR3R);
-   // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,RStrand, SnglR1+(k+2)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,RStrand, SnglR1+(k+1)%3);
+    PICOMP((FrameR == k),Stop,RStrand,UTR3R);
+
+    // frameshifts
+    PICOMP((FrameR ==  k     ), Del1, RStrand, SnglR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Del2, RStrand, SnglR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Del3, RStrand, SnglR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, SnglR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, SnglR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins3, RStrand, SnglR1+(k+1)%3); // insertion before the 3rd nucl of a codon
 
     // ----------------------------- Prokaryote ---------------------------------------------
     // Stop en phase : on peut venir d'un UIRR
-    PICOMP((PhaseR == k),Stop,RStrand,UIRR);
+    PICOMP((FrameR == k),Stop,RStrand,UIRR);
 
     // NB: pour les 6 cas suivants, inutile de tester si il y a un stop en reverse en phase : c'est impossible, 
     // puisqu'il y a un start en reverse et que les deux etats consecutifs sont dans des frames différentes.
-    PICOMP((k == 0 && PhaseR == 1),Start, RStrand, SnglR1R2); // SnglR1R2, start en phase -2, SnglR1
-    PICOMP((k == 0 && PhaseR == 2),Start, RStrand, SnglR1R3); // SnglR1R3, start en phase -3, SnglR1
-    PICOMP((k == 1 && PhaseR == 0),Start, RStrand, SnglR1R2); // SnglR1R2, start en phase -1, SnglR2
-    PICOMP((k == 1 && PhaseR == 2),Start, RStrand, SnglR2R3); // SnglR3R2, start en phase -3, SnglR2
-    PICOMP((k == 2 && PhaseR == 0),Start, RStrand, SnglR1R3); // SnglR1R3, start en phase -1, SnglR3
-    PICOMP((k == 2 && PhaseR == 1),Start, RStrand, SnglR2R3); // SnglR2R3, start en phase -2, SnglR3
+    PICOMP((k == 0 && FrameR == 1),Start, RStrand, SnglR1R2); // SnglR1R2, start en phase -2, SnglR1
+    PICOMP((k == 0 && FrameR == 2),Start, RStrand, SnglR1R3); // SnglR1R3, start en phase -3, SnglR1
+    PICOMP((k == 1 && FrameR == 0),Start, RStrand, SnglR1R2); // SnglR1R2, start en phase -1, SnglR2
+    PICOMP((k == 1 && FrameR == 2),Start, RStrand, SnglR2R3); // SnglR3R2, start en phase -3, SnglR2
+    PICOMP((k == 2 && FrameR == 0),Start, RStrand, SnglR1R3); // SnglR1R3, start en phase -1, SnglR3
+    PICOMP((k == 2 && FrameR == 1),Start, RStrand, SnglR2R3); // SnglR2R3, start en phase -2, SnglR3
 
     // Si il y a un stop en +1, et pas de stop en -k si on est en phase, alors on peut venir du bicoding F1R(1+k)
-    PICOMP((PhaseF == 0 && !((PhaseR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF1R1+k);
+    PICOMP((FrameF == 0 && !((FrameR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF1R1+k);
     // Si il y a un stop en +2, et pas de stop en -k si on est en phase, alors un peut venir du bicoding F2R(1+k)
-    PICOMP((PhaseF == 1 && !((PhaseR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF2R1+k);
+    PICOMP((FrameF == 1 && !((FrameR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF2R1+k);
     // Si il y a un stop en +3, et pas de stop en -k si on est en phase, alors un peut venir du bicoding F3R(1+k)
-    PICOMP((PhaseF == 2 && !((PhaseR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF3R1+k);
+    PICOMP((FrameF == 2 && !((FrameR == k) && ISPOSSIBLE(Stop, RStrand))),Stop, FStrand, SnglF3R1+k);
 
     // genes strictement adjacents
     // Note : besoin de tester si on est dans le mode procaryote. Ce n'est pas nécessaire pour les précédents cas, 
@@ -1100,15 +1124,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     if (isProkaryote)
     {
         // un start en reverse suivi d'un stop en reverse. On peut venir de SnglR1+k
-        PICOMP((PhaseR == k && ISPOSSIBLE(Start, RStrand)),Stop, RStrand, SnglR1+k);
-        // un stop en forward, suivi d'un stop en reverse, On peut venir de SnglF1+PhaseF
-        PICOMP((PhaseR == k && ISPOSSIBLE(Stop, FStrand)),Stop, RStrand, SnglF1+PhaseF);
+        PICOMP((FrameR == k && ISPOSSIBLE(Start, RStrand)),Stop, RStrand, SnglR1+k);
+        // un stop en forward, suivi d'un stop en reverse, On peut venir de SnglF1+FrameF
+        PICOMP((FrameR == k && ISPOSSIBLE(Stop, FStrand)),Stop, RStrand, SnglF1+FrameF);
     }	
     // -------------------------------------------------------------------------------------
 
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseR == k)
+    if (FrameR == k)
       LBP[Strand ? ReverseIt[SnglR1+k]: SnglR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
     LBP[Strand ? ReverseIt[SnglR1+k]: SnglR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
@@ -1121,26 +1145,29 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On recommence a coder (Accepteur). Ca vient d'un intron (no spliceable stop)
-    PICOMP(true,Acc,FStrand,IntronF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Acc,FStrand,IntronF1+((FrameF-k+3) % 3));
     
     // Not AfterT
-    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
+    PICOMPEN(((FrameF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
 	     (spliceStopPostTxx(StopStop,FStrand)  ? SplicedStopPen : 0.0));
     // Not AfterTG
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
+    PICOMPEN(((FrameF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
 	     (spliceStopPostxxA(StopStop,FStrand) ? SplicedStopPen : 0.0));
     // Not AfterTA
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
+    PICOMPEN(((FrameF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
 	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift). Saut de position de nucl�otide ignor�.
-    PICOMP(true,Ins,FStrand,IntrF1+(k+1)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,FStrand,IntrF1+(k+2)%3);
+    // frameshifts
+    PICOMP((FrameF == (k+1)%3), Del1, FStrand, IntrF1+(k+1)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameF == (k+2)%3), Del2, FStrand, IntrF1+(k+1)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameF ==  k     ), Del3, FStrand, IntrF1+(k+1)%3); // deletion which remove the 3rd nucl of a codon 
+    PICOMP((FrameF == (k+2)%3), Ins1, FStrand, IntrF1+(k+2)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameF ==  k     ), Ins2, FStrand, IntrF1+(k+2)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameF == (k+1)%3), Ins3, FStrand, IntrF1+(k+2)%3); // insertion before the 3rd nucl of a codon
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseF == k)
+    if (FrameF == k)
       LBP[Strand ? ReverseIt[IntrF1+k]: IntrF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
     LBP[Strand ? ReverseIt[IntrF1+k]: IntrF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
@@ -1153,26 +1180,29 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // - on recommence a coder (Donneur) Ca vient d'un intron (no spliceable stop)
-    PICOMPEN(true,Don,RStrand,IntronR1+((PhaseR+3-k) % 3),((PhaseR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
+    PICOMPEN(true,Don,RStrand,IntronR1+((FrameR+3-k) % 3),((FrameR == k) ? Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand] : 0.0));
     
     // Not AfterG
-    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,RStrand,IntronR3G ,
+    PICOMPEN(((FrameR+3-k) % 3) == 2,Don,RStrand,IntronR3G ,
 	     (spliceStopPreTAx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterA
-    PICOMPEN(((PhaseR+3-k) % 3) == 2,Don,RStrand,IntronR3A ,
+    PICOMPEN(((FrameR+3-k) % 3) == 2,Don,RStrand,IntronR3A ,
 	     (spliceStopPrexxA(StartStop,RStrand) ? SplicedStopPen : 0.0));
     // Not AfterAG
-    PICOMPEN(((PhaseR+3-k) % 3) == 1,Don,RStrand,IntronR2AG,
+    PICOMPEN(((FrameR+3-k) % 3) == 1,Don,RStrand,IntronR2AG,
 	     (spliceStopPreTxx(StartStop,RStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,RStrand, IntrR1+(k+2)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,RStrand, IntrR1+(k+1)%3);
+    // frameshifts
+    PICOMP((FrameR ==  k     ), Del1, RStrand, IntrR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Del2, RStrand, IntrR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Del3, RStrand, IntrR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, IntrR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, IntrR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins3, RStrand, IntrR1+(k+1)%3); // insertion before the 3rd nucl of a codon
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseR == k) 
+    if (FrameR == k) 
       LBP[Strand ? ReverseIt[IntrR1+k]: IntrR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
     LBP[Strand ? ReverseIt[IntrR1+k]: IntrR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
@@ -1185,26 +1215,29 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;     
     
     // On recommence a coder (Accepteur). Ca vient d'un intron
-    PICOMP(true,Acc,FStrand,IntronF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Acc,FStrand,IntronF1+((FrameF-k+3) % 3));
     
     // Not AfterT
-    PICOMPEN(((PhaseF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
+    PICOMPEN(((FrameF-k+3) % 3) == 1,Acc,FStrand,IntronF2T ,
 	     (spliceStopPostTxx(StopStop,FStrand)  ? SplicedStopPen :0.0));
     // Not AfterTG
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
+    PICOMPEN(((FrameF-k+3) % 3) == 2,Acc,FStrand,IntronF3TG,
 	     (spliceStopPostxxA(StopStop,FStrand) ? SplicedStopPen : 0.0));
     // Not AfterTA
-    PICOMPEN(((PhaseF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
+    PICOMPEN(((FrameF-k+3) % 3) == 2,Acc,FStrand,IntronF3TA,
 	     (spliceStopPostTAx(StopStop,FStrand) ? SplicedStopPen : 0.0));
     
-    // Il y a une insertion (frameshift). Saut de positionl�otide ignore.
-    PICOMP(true,Ins,FStrand,TermF1+(k+1)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,FStrand,TermF1+(k+2)%3);
+    // frameshifts
+    PICOMP((FrameF == (k+1)%3), Del1, FStrand, TermF1+(k+1)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameF == (k+2)%3), Del2, FStrand, TermF1+(k+1)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameF ==  k     ), Del3, FStrand, TermF1+(k+1)%3); // deletion which remove the 3rd nucl of a codon 
+    PICOMP((FrameF == (k+2)%3), Ins1, FStrand, TermF1+(k+2)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameF ==  k     ), Ins2, FStrand, TermF1+(k+2)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameF == (k+1)%3), Ins3, FStrand, TermF1+(k+2)%3); // insertion before the 3rd nucl of a codon
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseF == k)
+    if (FrameF == k)
       LBP[Strand ? ReverseIt[TermF1+k]: TermF1+k].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
     LBP[Strand ? ReverseIt[TermF1+k]: TermF1+k].Update(Data.sig[DATA::Don].weight[Signal::ForwardNo+Strand]);
     
@@ -1217,15 +1250,19 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     maxi = NINFINITY; best = -1;
     
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
-    PICOMP((PhaseR == k),Stop,RStrand,UTR3R);
-    // Il y a une insertion (frameshift)
-    PICOMP(true,Ins,RStrand, TermR1+(k+2)%3);
-    // Il y a une deletion (frameshift)
-    PICOMP(true,Del,RStrand, TermR1+(k+1)%3);
+    PICOMP((FrameR == k),Stop,RStrand,UTR3R);
+    
+    // frameshifts
+    PICOMP((FrameR ==  k     ), Del1, RStrand, TermR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Del2, RStrand, TermR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Del3, RStrand, TermR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, TermR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, TermR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins3, RStrand, TermR1+(k+1)%3); // insertion before the 3rd nucl of a codon
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
-    if ((PhaseR == k)) 
+    if ((FrameR == k)) 
       LBP[Strand ? ReverseIt[TermR1+k]: TermR1+k].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
     LBP[Strand ? ReverseIt[TermR1+k]: TermR1+k].Update(Data.sig[DATA::Don].weight[Signal::ReverseNo-Strand]);
     
@@ -1323,8 +1360,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // Ca vient d'un Term ou d'un Sngl direct + STOP
-  PICOMP(true,Stop,FStrand, TermF1+PhaseF);
-  PICOMP(true,Stop,FStrand, SnglF1+PhaseF);
+  PICOMP(true,Stop,FStrand, TermF1+FrameF);
+  PICOMP(true,Stop,FStrand, SnglF1+FrameF);
   // On peut venir aussi d'un intron d'UTR.
   PICOMP((Data.EstMatch),Acc,FStrand, IntronU3F);
   
@@ -1337,8 +1374,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // Ca vient d'un Sngl ou Init reverse + START
-  PICOMP(true,Start,RStrand, InitR1+PhaseR);
-  PICOMP(true,Start,RStrand, SnglR1+PhaseR);
+  PICOMP(true,Start,RStrand, InitR1+FrameR);
+  PICOMP(true,Start,RStrand, SnglR1+FrameR);
   // On peut venir aussi d'un intron d'UTR.
   PICOMP((Data.EstMatch),Don,RStrand, IntronU5R);
   
@@ -1394,9 +1431,9 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     if (!((spliceStopPreTxx(StartStop,FStrand) && k == 1) ||
 	  (spliceStopPrexxA(StartStop,FStrand) && k == 2) ||
 	  (spliceStopPreTAx(StartStop,FStrand) && k == 2))) {
-      PICOMPEN(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3),
+      PICOMPEN(true,Don,FStrand, InitF1+((FrameF-k+3) % 3),
 	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
-      PICOMPEN(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3),
+      PICOMPEN(true,Don,FStrand, IntrF1+((FrameF-k+3) % 3),
 	       (k == 0 ? Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand] : 0.0));
     }
     
@@ -1415,8 +1452,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 1;
   if (spliceStopPreTxx(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((FrameF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((FrameF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF2T]: IntronF2T].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -1429,8 +1466,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 2;
   if (spliceStopPrexxA(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((FrameF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((FrameF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF3TG]: IntronF3TG].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -1443,8 +1480,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 2;
   if (spliceStopPreTAx(StartStop,FStrand)) {
     // - on quitte un Init ou un Intr
-    PICOMP(true,Don,FStrand, InitF1+((PhaseF-k+3) % 3));
-    PICOMP(true,Don,FStrand, IntrF1+((PhaseF-k+3) % 3));
+    PICOMP(true,Don,FStrand, InitF1+((FrameF-k+3) % 3));
+    PICOMP(true,Don,FStrand, IntrF1+((FrameF-k+3) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronF3TA]: IntronF3TA].Update(Data.sig[DATA::Acc].weight[Signal::ForwardNo+Strand]);
@@ -1460,8 +1497,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     if (!(((k == 2) && spliceStopPostTAx(StopStop,RStrand)) ||
 	  ((k == 2) && spliceStopPostxxA(StopStop,RStrand)) ||
 	  ((k == 1) && spliceStopPostTxx(StopStop,RStrand))))  {
-      PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
-      PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
+      PICOMP(true,Acc,RStrand, IntrR1+((FrameR+3-k) % 3));
+      PICOMP(true,Acc,RStrand, TermR1+((FrameR+3-k) % 3));
     }
     
     // On reste intronique
@@ -1479,8 +1516,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 2;
   if (spliceStopPostTAx(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((FrameR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((FrameR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR3G]: IntronR3G].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -1493,8 +1530,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 2;
   if (spliceStopPostxxA(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((FrameR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((FrameR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR3A]: IntronR3A].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -1507,8 +1544,8 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   k = 1;
   if (spliceStopPostTxx(StopStop,RStrand)) {
     // - on quitte un Intr ou un Term
-    PICOMP(true,Acc,RStrand, IntrR1+((PhaseR+3-k) % 3));
-    PICOMP(true,Acc,RStrand, TermR1+((PhaseR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, IntrR1+((FrameR+3-k) % 3));
+    PICOMP(true,Acc,RStrand, TermR1+((FrameR+3-k) % 3));
   }
   // On reste intronique
   LBP[Strand ? ReverseIt[IntronR2AG]: IntronR2AG].Update(Data.sig[DATA::Acc].weight[Signal::ReverseNo-Strand]);
@@ -1518,13 +1555,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF1F2 ------------------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseF == 1), Start, FStrand, SnglF1); // je suis en phase 2, je viens de phase1
-  PICOMP( (PhaseF == 0), Start, FStrand, SnglF2); // je suis en phase 1, je viens de phase2
+  PICOMP( (FrameF == 1), Start, FStrand, SnglF1); // je suis en phase 2, je viens de phase1
+  PICOMP( (FrameF == 0), Start, FStrand, SnglF2); // je suis en phase 1, je viens de phase2
   // FrameShift??
 
     // On va tout droit.
 	// S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseF == 0 || PhaseF == 1)
+    if (FrameF == 0 || FrameF == 1)
       LBP[Strand ? ReverseIt[SnglF1F2]: SnglF1F2].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
 
   INSERT(SnglF1F2);
@@ -1532,13 +1569,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF1F3 ------------------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseF == 2), Start, FStrand, SnglF1); // je suis en phase 3, je viens de phase1
-  PICOMP( (PhaseF == 0), Start, FStrand, SnglF3); // je suis en phase 1, je viens de phase2
+  PICOMP( (FrameF == 2), Start, FStrand, SnglF1); // je suis en phase 3, je viens de phase1
+  PICOMP( (FrameF == 0), Start, FStrand, SnglF3); // je suis en phase 1, je viens de phase2
   // FrameShift??
 
     // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 0 || PhaseF == 2)
+  if (FrameF == 0 || FrameF == 2)
       LBP[Strand ? ReverseIt[SnglF1F3]: SnglF1F3].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
 
   INSERT(SnglF1F3);
@@ -1546,13 +1583,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF2F3 ------- ----------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseF == 2), Start, FStrand, SnglF2); // je suis en phase 3, je viens de phase2
-  PICOMP( (PhaseF == 1), Start, FStrand, SnglF3); // je suis en phase 2, je viens de phase3
+  PICOMP( (FrameF == 2), Start, FStrand, SnglF2); // je suis en phase 3, je viens de phase2
+  PICOMP( (FrameF == 1), Start, FStrand, SnglF3); // je suis en phase 2, je viens de phase3
   // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 1 || PhaseF == 2)
+  if (FrameF == 1 || FrameF == 2)
       LBP[Strand ? ReverseIt[SnglF2F3]: SnglF2F3].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
 
   INSERT(SnglF2F3);
@@ -1560,13 +1597,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglR1R2 ------------------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseR == 0), Stop, RStrand, SnglR2); // je suis en phase 1, je viens de phase2
-  PICOMP( (PhaseR == 1), Stop, RStrand, SnglR1); // je suis en phase 2, je viens de phase1
+  PICOMP( (FrameR == 0), Stop, RStrand, SnglR2); // je suis en phase 1, je viens de phase2
+  PICOMP( (FrameR == 1), Stop, RStrand, SnglR1); // je suis en phase 2, je viens de phase1
   // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseR == 0 || PhaseR == 1)
+  if (FrameR == 0 || FrameR == 1)
 	LBP[Strand ? ReverseIt[SnglR1R2]: SnglR1R2].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglR1R2);
@@ -1574,13 +1611,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglR1R3 ------------------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseR == 0), Stop, RStrand, SnglR3); // je suis en phase 1, je viens de phase3
-  PICOMP( (PhaseR == 2), Stop, RStrand, SnglR1); // je suis en phase 3, je viens de phase1
+  PICOMP( (FrameR == 0), Stop, RStrand, SnglR3); // je suis en phase 1, je viens de phase3
+  PICOMP( (FrameR == 2), Stop, RStrand, SnglR1); // je suis en phase 3, je viens de phase1
   // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-   if (PhaseR == 0 || PhaseR == 2)
+   if (FrameR == 0 || FrameR == 2)
 	LBP[Strand ? ReverseIt[SnglR1R3]: SnglR1R3].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglR1R3);
@@ -1588,13 +1625,13 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglR2R3 ------------------------------------
   // ----------------------------------------------------------------
   maxi = NINFINITY; best = -1;
-  PICOMP( (PhaseR == 1), Stop, RStrand, SnglR3); // je suis en phase 2, je viens de phase3
-  PICOMP( (PhaseR == 2), Stop, RStrand, SnglR2); // je suis en phase 3, je viens de phase2
+  PICOMP( (FrameR == 1), Stop, RStrand, SnglR3); // je suis en phase 2, je viens de phase3
+  PICOMP( (FrameR == 2), Stop, RStrand, SnglR2); // je suis en phase 3, je viens de phase2
   // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseR == 1 || PhaseR == 2)
+  if (FrameR == 1 || FrameR == 2)
 	LBP[Strand ? ReverseIt[SnglR2R3]: SnglR2R3].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglR2R3);
@@ -1603,15 +1640,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF1R1  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1; 
-   PICOMP(( (!( (PhaseF == 0) && ISPOSSIBLE(Stop, FStrand))) && (PhaseR == 0) ), Stop,  RStrand, SnglF1);
-   PICOMP(( (!( (PhaseR == 0) && ISPOSSIBLE(Stop, RStrand))) && (PhaseF == 0) ), Start, FStrand, SnglR1);
+   PICOMP(( (!( (FrameF == 0) && ISPOSSIBLE(Stop, FStrand))) && (FrameR == 0) ), Stop,  RStrand, SnglF1);
+   PICOMP(( (!( (FrameR == 0) && ISPOSSIBLE(Stop, RStrand))) && (FrameF == 0) ), Start, FStrand, SnglR1);
    // FrameShift??
 
     // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 0)
+  if (FrameF == 0)
     LBP[Strand ? ReverseIt[SnglF1R1]: SnglF1R1].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 0)
+  if (FrameR == 0)
 	LBP[Strand ? ReverseIt[SnglF1R1]: SnglF1R1].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF1R1);
@@ -1620,15 +1657,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF1R2  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(( (!( (PhaseF == 0) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 1), Stop,  RStrand, SnglF1);
-   PICOMP(( (!( (PhaseR == 1) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 0), Start, FStrand, SnglR2);
+   PICOMP(( (!( (FrameF == 0) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 1), Stop,  RStrand, SnglF1);
+   PICOMP(( (!( (FrameR == 1) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 0), Start, FStrand, SnglR2);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 0)
+  if (FrameF == 0)
     LBP[Strand ? ReverseIt[SnglF1R2]: SnglF1R2].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 1)
+  if (FrameR == 1)
 	LBP[Strand ? ReverseIt[SnglF1R2]: SnglF1R2].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF1R2);
@@ -1637,15 +1674,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF1R3  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(( (!( (PhaseF == 0) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 2), Stop,  RStrand, SnglF1);
-   PICOMP(( (!( (PhaseR == 2) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 0), Start, FStrand, SnglR3);
+   PICOMP(( (!( (FrameF == 0) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 2), Stop,  RStrand, SnglF1);
+   PICOMP(( (!( (FrameR == 2) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 0), Start, FStrand, SnglR3);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 0)
+  if (FrameF == 0)
     LBP[Strand ? ReverseIt[SnglF1R3]: SnglF1R3].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 2)
+  if (FrameR == 2)
 	LBP[Strand ? ReverseIt[SnglF1R3]: SnglF1R3].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF1R3);
@@ -1655,15 +1692,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF2R1  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(((!( (PhaseF == 1) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 0), Stop,  RStrand, SnglF2);
-   PICOMP(((!( (PhaseR == 0) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 1), Start, FStrand, SnglR1);
+   PICOMP(((!( (FrameF == 1) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 0), Stop,  RStrand, SnglF2);
+   PICOMP(((!( (FrameR == 0) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 1), Start, FStrand, SnglR1);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 1)
+  if (FrameF == 1)
     LBP[Strand ? ReverseIt[SnglF2R1]: SnglF2R1].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 0)
+  if (FrameR == 0)
 	LBP[Strand ? ReverseIt[SnglF2R1]: SnglF2R1].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF2R1);
@@ -1672,14 +1709,14 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF2R2  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(( (!( (PhaseF == 1) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 1), Stop,  RStrand, SnglF2);
-   PICOMP(( (!( (PhaseR == 1) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 1), Start, FStrand, SnglR2);
+   PICOMP(( (!( (FrameF == 1) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 1), Stop,  RStrand, SnglF2);
+   PICOMP(( (!( (FrameR == 1) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 1), Start, FStrand, SnglR2);
    // FrameShift??
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 1)
+  if (FrameF == 1)
     LBP[Strand ? ReverseIt[SnglF2R2]: SnglF2R2].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 1)
+  if (FrameR == 1)
 	LBP[Strand ? ReverseIt[SnglF2R2]: SnglF2R2].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF2R2);
@@ -1688,17 +1725,17 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF2R3  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(((!( (PhaseF == 1) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 2), Stop,  RStrand, SnglF2);
-   PICOMP(((!( (PhaseR == 2) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 1), Start, FStrand, SnglR3);
+   PICOMP(((!( (FrameF == 1) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 2), Stop,  RStrand, SnglF2);
+   PICOMP(((!( (FrameR == 2) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 1), Start, FStrand, SnglR3);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-    if (PhaseF == 1)
+    if (FrameF == 1)
     {
     LBP[Strand ? ReverseIt[SnglF2R3]: SnglF2R3].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
     }
-    if (PhaseR == 2)
+    if (FrameR == 2)
 		LBP[Strand ? ReverseIt[SnglF2R3]: SnglF2R3].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF2R3);
@@ -1708,15 +1745,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF3R1  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP( ((!( (PhaseF == 2) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 0), Stop,  RStrand, SnglF3);
-   PICOMP( ((!( (PhaseR == 0) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 2), Start, FStrand, SnglR1);
+   PICOMP( ((!( (FrameF == 2) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 0), Stop,  RStrand, SnglF3);
+   PICOMP( ((!( (FrameR == 0) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 2), Start, FStrand, SnglR1);
    // FrameShift??
   // On va tout droit.
 
     // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 2)
+  if (FrameF == 2)
     LBP[Strand ? ReverseIt[SnglF3R1]: SnglF3R1].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 0)
+  if (FrameR == 0)
 	LBP[Strand ? ReverseIt[SnglF3R1]: SnglF3R1].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF3R1);
@@ -1725,15 +1762,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF3R2  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(((!( (PhaseF == 2) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 1), Stop,  RStrand, SnglF3);
-   PICOMP(((!( (PhaseR == 1) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 2), Start, FStrand, SnglR2);
+   PICOMP(((!( (FrameF == 2) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 1), Stop,  RStrand, SnglF3);
+   PICOMP(((!( (FrameR == 1) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 2), Start, FStrand, SnglR2);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-  if (PhaseF == 2)
+  if (FrameF == 2)
     LBP[Strand ? ReverseIt[SnglF3R2]: SnglF3R2].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 1)
+  if (FrameR == 1)
 	LBP[Strand ? ReverseIt[SnglF3R2]: SnglF3R2].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
   INSERT(SnglF3R2);
@@ -1743,15 +1780,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   // ------------------ SnglF3R3  -----------------------------------
   // ----------------------------------------------------------------
    maxi = NINFINITY; best = -1;
-   PICOMP(((!( (PhaseF == 2) && ISPOSSIBLE(Stop, FStrand))) && PhaseR == 2), Stop,  RStrand, SnglF3);
-   PICOMP(((!( (PhaseR == 2) && ISPOSSIBLE(Stop, RStrand))) && PhaseF == 2), Start, FStrand, SnglR3);
+   PICOMP(((!( (FrameF == 2) && ISPOSSIBLE(Stop, FStrand))) && FrameR == 2), Stop,  RStrand, SnglF3);
+   PICOMP(((!( (FrameR == 2) && ISPOSSIBLE(Stop, RStrand))) && FrameF == 2), Start, FStrand, SnglR3);
    // FrameShift??
 
   // On va tout droit.
   // S'il y  a un STOP en phase on ne peut continuer
-   if (PhaseF == 2)
+   if (FrameF == 2)
     LBP[Strand ? ReverseIt[SnglF3R3]: SnglF3R3].Update(Data.sig[DATA::Stop].weight[Signal::ForwardNo+Strand]);
-  if (PhaseR == 2)
+  if (FrameR == 2)
 	LBP[Strand ? ReverseIt[SnglF3R3]: SnglF3R3].Update(Data.sig[DATA::Stop].weight[Signal::ReverseNo-Strand]);
 
 
@@ -1763,7 +1800,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // From a Sngl
-  PICOMP(true,Stop,FStrand, SnglF1+PhaseF);
+  PICOMP(true,Stop,FStrand, SnglF1+FrameF);
   // From a RnaF
   PICOMP(true,tStopNpc, FStrand, RnaF);
 
@@ -1775,7 +1812,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
   maxi = NINFINITY; best = -1;
   
   // Ca vient d'un Sngl + START
-  PICOMP(true, Start, RStrand, SnglR1+PhaseR);
+  PICOMP(true, Start, RStrand, SnglR1+FrameR);
   // From a RNAR
   PICOMP(true, tStartNpc, RStrand, RnaR);
 
