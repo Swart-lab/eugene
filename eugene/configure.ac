@@ -116,6 +116,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/Plotter/Makefile
 	src/SensorPlugins/QualData/Makefile
 	src/SensorPlugins/Repeat/Makefile
+	src/SensorPlugins/RibosomalFrameShift/Makefile
 	src/SensorPlugins/Riken/Makefile
 	src/SensorPlugins/SMachine/Makefile
 	src/SensorPlugins/SPred/Makefile
