@@ -32,7 +32,7 @@ public:
     State(char state);
     char GetState();
     char GetStrand();
-    short int GetFrame(); /* Return the frame - See the definition on the EuGene Trac */
+    short int GetFrame() const; /* Return the frame - See the definition on the EuGene Trac */
     bool IsIntergenic(void);
     bool IsForward(void);
     bool IsReverse(void);

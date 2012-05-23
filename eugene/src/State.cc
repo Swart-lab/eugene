@@ -278,7 +278,7 @@ bool State::InStartStopRegion(void)
 // ------------------------
 //  Return the frame - See the definition on the EuGene trac
 // ------------------------
-short int State::GetFrame()
+short int State::GetFrame() const
 {
     return State2Frame[this->state];
 }
