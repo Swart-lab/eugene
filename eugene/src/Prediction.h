@@ -57,6 +57,8 @@ class Feature
   int    phase;
   int    frame;
   State* featureState;
+  int    cds_start; // if feature is a cds, cds start position (can be different from start if there is a FS)
+  int    cds_end;   // if feature is a cds, cds end position (can be different from end if there is a FS)
   
   Feature  ();
   Feature  (signed char, int, int);
@@ -89,6 +91,8 @@ class Gene
   char strand;
   bool isNpcRna;   // true if it is a non protein coding rna
   int  operonNb; // operon number
+  //std::vector<int> vFrameShift; TODO: save the positions of the frameshift in a array
+  int hasFrameShift;
   void Update   (int);
   void clear    ();
  public:
@@ -118,6 +122,7 @@ class Gene
   void Print();
   std::string GetVariantCode(void) const;
   bool IsNpcRna();
+  void ManageFrameShift (int );
 
 };
 

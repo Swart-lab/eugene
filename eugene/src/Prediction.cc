@@ -22,6 +22,7 @@
 #include "Prediction.h"
 #include "MSensor.h"
 #include "DNASeq.h"
+#include <sys/stat.h>
 
 extern Parameters   PAR;
 
@@ -154,6 +155,8 @@ Feature :: Feature ()
 	number   = 0;
 	start    = -1;
 	end      = -1;
+	cds_start = -1;
+	cds_end = -1;
 	strand   = '.';
 	phase    = 9;
 	frame    = 9;
@@ -168,6 +171,8 @@ Feature::Feature ( signed char n, int s, int e )
 	number   = 0;
 	featureState = new State ( n );
 	start    = s;
+	cds_start = s;
+	cds_end = e;
 	end      = e;
 	strand   = featureState->GetStrand();
 	frame    = featureState->GetFrame();
@@ -267,13 +272,14 @@ void Feature::ComputePhase ( int seqLength )
 {
 	if ( this->featureState->InStartStopRegion() )
 	{
-		int startFeat = ( this->strand == '+' ) ? this->start : ( seqLength - this->end + 1 );
+		int startFeat = ( this->strand == '+' ) ? this->cds_start : ( seqLength - this->cds_end + 1 );
 		this->phase   = ( abs ( this->frame ) - ( startFeat%3 ) + 3 ) %3;
 	}
 	else
 	{
 		std::cerr << "Careful: you try to compute the phase of a feature which is not an exon or an intron!\n";
 	}
+	//cout << "State " <<  (int)this->featureState->GetState() << " pos " << this->start << "-" << this->end << "\n";
 }
 
 
@@ -289,6 +295,7 @@ Gene :: Gene ()
 	isvariant  = false;
 	isNpcRna   = false;
 	hasvariant = 0;
+	hasFrameShift = 0;
 	tuStart    = 0;
 	tuEnd      = 0;
 	operonNb   = 0;
@@ -307,6 +314,7 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 	isvariant  = false;
 	isNpcRna   = false;
 	hasvariant = 0;
+	hasFrameShift = 0;
 	tuStart    = 0;
 	tuEnd      = 0;
 	operonNb   = 0;
@@ -608,7 +616,6 @@ bool Gene :: HasSameExons ( const Gene& o )
 	}
 	return true;
 }
-
 
 // ------------------------
 //  Add Feature.
@@ -1073,22 +1080,33 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
 			vGene[nbGene-1]->AddFeature ( vState[i], start, vPos[i] );
 		}
 
+		if ( i == 0 ) continue;
+		prevState = State (vState[i-1]);
+		
+		// ---------------------------------------------------------------------------
+		// section to manage frameshift
+		// ---------------------------------------------------------------------------
+		if ( !strcmp(PAR.getC ("EuGene.mode"), "Eukaryote") && prevState.IsCodingExon() && 
+		     currentState.IsCodingExon() && prevState.GetStrand() == currentState.GetStrand() && vState[i-1] != vState[i])
+		{
+		  vGene[nbGene-1]->ManageFrameShift(vGene[nbGene-1]->nbFea()-1);
+		}
+
 		// ---------------------------------------------------------------------------
 		// Section to manage operon
 		// Put genes separated by UIR in the same operon
 		// Put two strictly consecutive sngl genes on the same strand in the same operon
-        // Put two consecutive genes, on the same strand whose distance is <= to operon_max_distance, in the same operon
+		// Put two consecutive genes, on the same strand whose distance is <= to operon_max_distance, in the same operon
 		// ---------------------------------------------------------------------------
-		if ( i == 0 ) continue;
-		prevState = State (vState[i-1]);
-
-		if ( currentState.IsUIR() || 
+		if ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2"))
+		{
+		  if ( currentState.IsUIR() || 
 			 (currentState.IsSnglExon() && prevState.IsSnglExon() && currentState.GetStrand() == prevState.GetStrand() ) ||
 			 ( (i > 1) && prevState.IsIntergenic() && State(vState[i-2]).GetStrand() == currentState.GetStrand() && 
              (vPos[i-1]-vPos[i-2]) <= operon_max_distance )
            )
 			
-		{
+		  {
 			assert(nbGene >= 2);
 			if ( vGene[nbGene-2]->GetOperonNb() == 0 ) // new operon
 				operon_nb++;
@@ -1096,8 +1114,55 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
 				assert(vGene[nbGene-2]->GetOperonNb() == operon_nb); // check the operon of the previous gene is equal to the current operon counter
 			vGene[nbGene-2]->SetOperonNb(operon_nb);
 			vGene[nbGene-1]->SetOperonNb(operon_nb);
+		  }
 		}
 	}
+}
+
+// ------------------------
+//  Prerequisite: the features i and i-1 are coding and on the same strand
+// 
+// ------------------------
+void Gene :: ManageFrameShift (int i)
+{
+    assert(i > 0); // has to have a previous feature
+    Feature* currentFeat  = this->vFea[i];
+    Feature* previousFeat = this->vFea[i-1];
+    
+    assert (currentFeat->featureState->GetStrand() == previousFeat->featureState->GetStrand() );
+    assert(currentFeat->IsCodingExon());
+    assert(previousFeat->IsCodingExon());
+    
+
+    short int currentFrame  = currentFeat ->featureState->GetFrame();
+    short int previousFrame = previousFeat->featureState->GetFrame();
+    int val = (currentFrame-previousFrame+3) % 3;
+   
+    if (currentFeat->featureState->IsForward())
+    {   
+      if (val == 2) // frameshift -1
+      {
+	currentFeat->cds_start -= 1;
+      }
+      else if (val == 1) //frameshift +1
+      {
+	currentFeat->cds_start += 1;
+      }
+    }
+    else // strand minus
+    {
+      if (val == 2) // frameshift -1
+      {
+	previousFeat->cds_end += 1; 
+      } 
+      else if (val == 1) //frameshift +1
+      {
+	previousFeat->cds_end -= 1; 
+      }
+    }
+    
+    this->hasFrameShift = 1;
+      
 }
 
 // --------------------------
@@ -1542,292 +1607,299 @@ void Prediction :: PrintGff ( FILE *OUT, char *seqName )
 // ------------------------
 void Prediction :: PrintGff3 ( std::ofstream& out, char *seqName, char append)
 {
-	int offset = PAR.getI ( "Output.offset" );
-	int initid = PAR.getI ( "Output.initid" );
-	int stepid = PAR.getI ( "Output.stepid" );
-	int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
-	vector<int> printedOperon;
-	int start, end;
-	State* featState;
-	int incons = 0, cons = 0;
- 	bool isProkaryote   = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
-	bool showOperon = ( isProkaryote && !append) ;
+    int offset = PAR.getI ( "Output.offset" );
+    int initid = PAR.getI ( "Output.initid" );
+    int stepid = PAR.getI ( "Output.stepid" );
+    int estopt = PAR.getI ( "Sensor.Est.use", 0, PAR.getI ( "EuGene.sloppy" ) );
+    vector<int> printedOperon;
+    int start, end;
+    State* featState;
+    int incons = 0, cons = 0;
+    bool isProkaryote = ( !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote") || 
+			  !strcmp(PAR.getC ("EuGene.mode"), "Prokaryote2")) ;
+    bool showOperon   = ( isProkaryote && !append) ;
 
 
-	/* name source feature start end score strand frame */
-	for ( int i=0; i<nbGene; i++ )
-	{
-		Gff3Line gene_line ( seqName );
-		std::string gene_name = to_string ( seqName ) +'.'+to_string ( ( (initid + vGene[i]->geneNumber)*stepid+1 ) );
-		// done also on variants to have a corrrect strand on variant mRNA
-		if ( vGene[i]->nbFea() > 0 )
-			gene_line.setStrand ( vGene[i]->strand );
-		
-		//  --  --  la ligne du gene  --  --
-		std::string gene_id = Sofa::getName ( SOFA_GENE ) + ":" + gene_name;
-		if ( append &&  ! vGene[i]->isvariant )
-		{
-			fprintf ( stderr,"Warning: in append mode, only variant can be printed out gene=%d\n",i );
-			// je laisse l'erreur dans .gff1 pour aider au debugage
-			//continue;
-		}
+    /* name source feature start end score strand frame */
+    for ( int i=0; i<nbGene; i++ )
+    {
+        Gff3Line gene_line ( seqName );
+        std::string gene_name = to_string ( seqName ) +'.'+to_string ( ( (initid + vGene[i]->geneNumber)*stepid+1 ) );
+        // done also on variants to have a corrrect strand on variant mRNA
+        if ( vGene[i]->nbFea() > 0 )
+            gene_line.setStrand ( vGene[i]->strand );
 
-		// Print the operon of the gene if its not already done
-		if (showOperon && vGene[i]->GetOperonNb() > 0 )
-		{
-			int geneOpNb          = vGene[i]->GetOperonNb();
-			bool OpAlreadyDisplay = false;
-			for (int i=0; i < printedOperon.size(); i++)
-			{
-				if (printedOperon[i] == geneOpNb)
-				{
-					OpAlreadyDisplay = true;
-					break;
-				}
-			}
-	
-			if (OpAlreadyDisplay == false)
-			{
-				printedOperon.push_back(geneOpNb);
-				Operon* op = this->GetOperon(geneOpNb);
-			
-				// ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
-				gene_line.setType (SOFA_OPERON);
-				gene_line.setStart ( op->GetStart());
-				gene_line.setEnd ( op->GetEnd() );
-				std::string op_id = Sofa::getName ( SOFA_OPERON ) + ":" + to_string (op->GetNumber());
-				gene_line.setAttribute ( "ID=" + op_id );
-				gene_line.addAttribute ( "Name=operon." + to_string(op->GetNumber()) );
-				gene_line.print ( out );
-				//ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
-			}
-		}
+        //  --  --  gene line --  --
+        std::string gene_id = Sofa::getName ( SOFA_GENE ) + ":" + gene_name;
+        if ( append &&  ! vGene[i]->isvariant )
+        {
+            fprintf ( stderr,"Warning: in append mode, only variant can be printed out gene=%d\n",i );
+            // je laisse l'erreur dans .gff1 pour aider au debugage
+            //continue;
+        }
 
-		if ( ! vGene[i]->isvariant ) // only for the optimal prediction
-		{
-			int tr_min = ( vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
-			int tr_max = ( vGene[i]->tuEnd )   ?  vGene[i]->tuEnd   : vGene[i]->trEnd;
+	//---------------------------------------------------------------------------
+        // Print the operon of the gene if its not already done
+        if (showOperon && vGene[i]->GetOperonNb() > 0 )
+        {
+            int geneOpNb          = vGene[i]->GetOperonNb();
+            bool OpAlreadyDisplay = false;
+            for (int i=0; i < printedOperon.size(); i++)
+            {
+                if (printedOperon[i] == geneOpNb)
+                {
+                    OpAlreadyDisplay = true;
+                    break;
+                }
+            }
 
-			//la ligne decrivant le gene
-			gene_line.setType ( SOFA_GENE );
-			gene_line.setStart ( tr_min+1+offset );
-			gene_line.setEnd ( tr_max+1+offset );
-			//l'identifiant du gene = type_sofa:nom_eugene
-			gene_line.setAttribute ( "ID=" + gene_id );
-			gene_line.addAttribute ( "Name=" + gene_name );
-			gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
-			if ( showOperon && vGene[i]->GetOperonNb() > 0 ) gene_line.addAttribute (  "operon_parent="+ Sofa::getName ( SOFA_OPERON ) + ":" + to_string (vGene[i]->GetOperonNb()));
-			gene_line.print ( out );
-		}
-		//  ----  fin de la ligne du gene  ----
+            if (OpAlreadyDisplay == false)
+            {
+                printedOperon.push_back(geneOpNb);
+                Operon* op = this->GetOperon(geneOpNb);
 
-		if (vGene[i]->IsNpcRna() )
-		{
-			// -- -- la ligne de l'ARNnc -- -- 
-			gene_line.setStart ( vGene[i]->trStart+1+offset );
-			gene_line.setEnd ( vGene[i]->trEnd+1+offset );
-			std::string ncrna_name = gene_name;
-			if ( vGene[i]->hasvariant )
-			{
-				ncrna_name += vGene[i]->GetVariantCode();
-			}
+                // ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+                gene_line.setType (SOFA_OPERON);
+                gene_line.setStart ( op->GetStart());
+                gene_line.setEnd ( op->GetEnd() );
+                std::string op_id = Sofa::getName ( SOFA_OPERON ) + ":" + to_string (op->GetNumber());
+                gene_line.setAttribute ( "ID=" + op_id );
+                gene_line.addAttribute ( "Name=operon." + to_string(op->GetNumber()) );
+                gene_line.print ( out );
+                //ChrX  . operon   XXXX YYYY  .  +  . ID=operon01;name=my_operon
+            }
+        }
+        //---------------------------------------------------------------------------
 
-			gene_line.setType ( SOFA_NCRNA );
-			std::string ncrna_id = Sofa::getName ( SOFA_NCRNA ) + ":"+ ncrna_name;
-			gene_line.setAttribute ( "ID=" + ncrna_id );
-			gene_line.addAttribute ( "Name=" + ncrna_name );
-			gene_line.addAttribute ( "Parent=" + gene_id );
-			gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
-			gene_line.print ( out );
-		}
-		else
-		{
-			//  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
-			//En fait je me contente d'ecraser ce que je ne veux plus
+        if ( ! vGene[i]->isvariant ) // only for the optimal prediction
+        {
+            int tr_min = ( vGene[i]->tuStart ) ?  vGene[i]->tuStart : vGene[i]->trStart;
+            int tr_max = ( vGene[i]->tuEnd )   ?  vGene[i]->tuEnd   : vGene[i]->trEnd;
 
-			gene_line.setStart ( vGene[i]->trStart+1+offset );
-			gene_line.setEnd ( vGene[i]->trEnd+1+offset );
-			std::string mrna_name = gene_name;
-			if ( vGene[i]->hasvariant )
-			{
-				mrna_name += vGene[i]->GetVariantCode() ;
-			}
+            //la ligne decrivant le gene
+            gene_line.setType ( SOFA_GENE );
+            gene_line.setStart ( tr_min+1+offset );
+            gene_line.setEnd ( tr_max+1+offset );
+            //l'identifiant du gene = type_sofa:nom_eugene
+            gene_line.setAttribute ( "ID=" + gene_id );
+            gene_line.addAttribute ( "Name=" + gene_name );
+            gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
+            if ( showOperon && vGene[i]->GetOperonNb() > 0 ) gene_line.addAttribute (  "operon_parent="+ Sofa::getName ( SOFA_OPERON ) + ":" + to_string (vGene[i]->GetOperonNb()));
+	    
+            gene_line.print ( out );
+        }
+        //  ----  fin de la ligne du gene  ----
 
-			gene_line.setType ( SOFA_MRNA );
-			std::string rna_id = Sofa::getName ( SOFA_MRNA ) + ":"+ mrna_name;
-			gene_line.setAttribute ( "ID=" + rna_id );
-			gene_line.addAttribute ( "Name=" + mrna_name );
-			gene_line.addAttribute ( "Parent=" + gene_id );
-			gene_line.addAttribute ( "nb_exon=" + to_string ( vGene[i]->exNumber ) );
+        if (vGene[i]->IsNpcRna() )
+        {
+            // -- -- la ligne de l'ARNnc -- --
+            gene_line.setStart ( vGene[i]->trStart+1+offset );
+            gene_line.setEnd ( vGene[i]->trEnd+1+offset );
+            std::string ncrna_name = gene_name;
+            if ( vGene[i]->hasvariant )
+            {
+                ncrna_name += vGene[i]->GetVariantCode();
+            }
 
-//----- fin de la ligne du mRNA
+            gene_line.setType ( SOFA_NCRNA );
+            std::string ncrna_id = Sofa::getName ( SOFA_NCRNA ) + ":"+ ncrna_name;
+            gene_line.setAttribute ( "ID=" + ncrna_id );
+            gene_line.addAttribute ( "Name=" + ncrna_name );
+            gene_line.addAttribute ( "Parent=" + gene_id );
+            gene_line.addAttribute ( "length=" + to_string ( vGene[i]->geneLength ) );
+            gene_line.print ( out );
+        }
+        else
+        {
+            //  --  --  la ligne de l'ARNm  -- <=> basee sur le gene --
+            //En fait je me contente d'ecraser ce que je ne veux plus
 
-			Gff3Line *pre_arn_line, *arn_line;
-			std::vector<Gff3Line*> pre_arn_lines, arn_lines;
-			std::string fea_name ( gene_name + "." );
-			std::string fea_id;
-			//postulat : ici on a un seul ARNm par gene // JER je change de postulat.
-			int taille_mRNA = 0;
+            gene_line.setStart ( vGene[i]->trStart+1+offset );
+            gene_line.setEnd ( vGene[i]->trEnd+1+offset );
+            std::string mrna_name = gene_name;
+            if ( vGene[i]->hasvariant )
+            {
+                mrna_name += vGene[i]->GetVariantCode() ;
+            }
 
-			for ( int j=0; j<vGene[i]->nbFea(); j++ )
-			{
-				featState = vGene[i]->vFea[j]->featureState;
-				// Print introns ?
-//             if ( (PAR.getI("Output.intron") == 0) &&
-//                     (state >= IntronF1 && state <= InterGen) ||
-//                     (state >= IntronU5F) )
-				if ( ( PAR.getI ( "Output.intron" ) == 0 && featState->IsIntronInStartStopRegion() ) ||
-				        featState->IsUTRIntron() || featState->IsUIR() )
-					continue;
+            gene_line.setType ( SOFA_MRNA );
+            std::string rna_id = Sofa::getName ( SOFA_MRNA ) + ":"+ mrna_name;
+            gene_line.setAttribute ( "ID=" + rna_id );
+            gene_line.addAttribute ( "Name=" + mrna_name );
+            gene_line.addAttribute ( "Parent=" + gene_id );
+            gene_line.addAttribute ( "nb_exon=" + to_string ( vGene[i]->exNumber ) );
+            //----- fin de la ligne du mRNA
 
-				start = vGene[i]->vFea[j]->start;
-				end   = vGene[i]->vFea[j]->end;
-				std::string code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : "";
-				if ( estopt ) CheckConsistency ( start, end, featState->GetState(), &cons, &incons );
+            Gff3Line *pre_arn_line, *arn_line;
+            std::vector<Gff3Line*> pre_arn_lines, arn_lines;
+            std::string fea_name ( gene_name + "." );
+            std::string fea_id;
+            //postulat : ici on a un seul ARNm par gene // JER je change de postulat.
+            int taille_mRNA = 0;
 
-				int type_sofa_cds = featState->getTypeSofa ( true ); // CDS
-				int type_sofa     = featState->getTypeSofa ( false ); // exon
-				//selon le type on renseigne une ligne existante ou nouvelle
-				// d'arn, de cds ou des 2
-				switch ( type_sofa )
-				{
-						//cas d'une region intergenique, ou d'un intron
-						//on ne le signale que dans le pre_arn
-					case SOFA_INTERGEN  :
-					case SOFA_INTRON    :
-					case SO_UTR_INTRON  :
-						pre_arn_line = fillGff3Line ( type_sofa, start+offset, end+offset,
-						                              vGene[i]->vFea[j]->strand,
-						                              vGene[i]->vFea[j]->phase );
-						//les attributs
-						setGff3Attributes ( pre_arn_line, featState, type_sofa, fea_name, j,code_variant, rna_id, false );
-						//on l'ajoute au vecteur
-						pre_arn_lines.push_back ( pre_arn_line );
-						break;
-						//cas d'un UTR 3' ou 5'
-						//c'est [la fin d']un exon du pre_arn, et un utr de l'arn
-					case SOFA_5_UTR :
-					case SOFA_3_UTR :
-						if ( ( !pre_arn_lines.empty() ) &&
-						        ( previousExonMustBeUpdated ( pre_arn_lines.back(), start+offset ) ) )
-							//fusion des exons
-							pre_arn_lines.back()->setEnd ( end+offset );
-						else
-						{
-							pre_arn_line = fillGff3Line ( SOFA_EXON, start+offset, end+offset,
-							                              vGene[i]->vFea[j]->strand,
-							                              vGene[i]->vFea[j]->phase );
-							//attributs
-							setGff3Attributes ( pre_arn_line, featState, SOFA_EXON,
-							                    fea_name+"utr", j, code_variant, rna_id, false );
-							pre_arn_lines.push_back ( pre_arn_line );
-						}
+            for ( int j=0; j<vGene[i]->nbFea(); j++ )
+            {
+                featState = vGene[i]->vFea[j]->featureState;
+                // Print introns ?
+                if ( ( PAR.getI ( "Output.intron" ) == 0 && featState->IsIntronInStartStopRegion() ) ||
+                        featState->IsUTRIntron() || featState->IsUIR() )
+                    continue;
 
-						arn_line = fillGff3Line ( type_sofa_cds, start+offset, end+offset,
-						                          vGene[i]->vFea[j]->strand,
-						                          vGene[i]->vFea[j]->phase );
-						//attributs
-						setGff3Attributes ( arn_line, featState, type_sofa_cds,
-						                    fea_name, j, code_variant, rna_id, true );
-						arn_lines.push_back ( arn_line );
-						//je mets � jour la taille de l'ARNm
-						taille_mRNA += ( end-start+1 );
-						break;
-						//cas d'un exon
-						//il est peut etre la fin du precedent
-					case SOFA_EXON :
+                start = vGene[i]->vFea[j]->start;
+                end   = vGene[i]->vFea[j]->end;
+                std::string code_variant = ( vGene[i]->hasvariant ) ? vGene[i]->GetVariantCode() : "";
+                if ( estopt ) CheckConsistency ( start, end, featState->GetState(), &cons, &incons );
+
+                int type_sofa_cds = featState->getTypeSofa ( true );  // CDS
+                int type_sofa     = featState->getTypeSofa ( false ); // exon
+                //selon le type on renseigne une ligne existante ou nouvelle
+                // d'arn, de cds ou des 2
+                switch ( type_sofa )
+                {
+                    //cas d'une region intergenique, ou d'un intron
+                    //on ne le signale que dans le pre_arn
+                case SOFA_INTERGEN  :
+                case SOFA_INTRON    :
+                case SO_UTR_INTRON  :
+                    pre_arn_line = fillGff3Line ( type_sofa, start+offset, end+offset,
+                                                  vGene[i]->vFea[j]->strand,
+                                                  vGene[i]->vFea[j]->phase );
+                    //les attributs
+                    setGff3Attributes ( pre_arn_line, featState, type_sofa, fea_name, j,code_variant, rna_id, false );
+                    //on l'ajoute au vecteur
+                    pre_arn_lines.push_back ( pre_arn_line );
+                    break;
+                    //cas d'un UTR 3' ou 5'
+                    //c'est [la fin d']un exon du pre_arn, et un utr de l'arn
+                case SOFA_5_UTR :
+                case SOFA_3_UTR :
+                    if ( ( !pre_arn_lines.empty() ) &&
+                            ( previousExonMustBeUpdated ( pre_arn_lines.back(), start+offset ) ) )
+                        //fusion des exons
+                        pre_arn_lines.back()->setEnd ( end+offset );
+                    else
+                    {
+                        pre_arn_line = fillGff3Line ( SOFA_EXON, start+offset, end+offset,
+                                                      vGene[i]->vFea[j]->strand,
+                                                      vGene[i]->vFea[j]->phase );
+                        //attributs
+                        setGff3Attributes ( pre_arn_line, featState, SOFA_EXON,
+                                            fea_name+"utr", j, code_variant, rna_id, false );
+                        pre_arn_lines.push_back ( pre_arn_line );
+                    }
+
+                    arn_line = fillGff3Line ( type_sofa_cds, start+offset, end+offset,
+                                              vGene[i]->vFea[j]->strand,
+                                              vGene[i]->vFea[j]->phase );
+                    //attributs
+                    setGff3Attributes ( arn_line, featState, type_sofa_cds,
+                                        fea_name, j, code_variant, rna_id, true );
+                    arn_lines.push_back ( arn_line );
+                    //je mets � jour la taille de l'ARNm
+                    taille_mRNA += ( end-start+1 );
+                    break;
+                    //cas d'un exon
+                    //il est peut etre la fin du precedent
+                case SOFA_EXON :
 //               fin = -99999;
-						if ( ( !pre_arn_lines.empty() ) &&//c'est le premier
-						        ( previousExonMustBeUpdated ( pre_arn_lines.back(), start+offset ) ) )
-							//fusion des exons
-							pre_arn_lines.back()->setEnd ( end+offset );
-						else
-						{
-							pre_arn_line = fillGff3Line ( SOFA_EXON, start+offset, end+offset,
-							                              vGene[i]->vFea[j]->strand,
-							                              vGene[i]->vFea[j]->phase );
-							pre_arn_lines.push_back ( pre_arn_line );
-						}
-						//les attributs
+                    if ( ( !pre_arn_lines.empty() ) &&//c'est le premier
+                            ( previousExonMustBeUpdated ( pre_arn_lines.back(), start+offset ) ) )
+                        //fusion des exons
+                        pre_arn_lines.back()->setEnd ( end+offset );
+                    else
+                    {
+                        pre_arn_line = fillGff3Line ( SOFA_EXON, start+offset, end+offset,
+                                                      vGene[i]->vFea[j]->strand,
+                                                      vGene[i]->vFea[j]->phase );
+                        pre_arn_lines.push_back ( pre_arn_line );
+                    }
+                    //les attributs
 //               je le mets ici pour permettre la MAJ d'ontology term.
 //               Pour bien faire il faudrait une fonction SetOntologyTerm()
 //                 que l'on placerait au niveau de la MAJ
 //                 et le setAttributes resterait dans le else
-						//si je suis sur un single exon, le code de l'ontology doit etre SOFA_EXON
-						if ( featState->IsSnglExon() )
-							//je passe nbTracks pour etre sur d'etre hors zone
-							setGff3Attributes ( pre_arn_lines.back(), new State ( -1 ), type_sofa, fea_name,
-							                    vGene[i]->vFea[j]->number, code_variant, rna_id, false );
-						else
-							setGff3Attributes ( pre_arn_lines.back(), featState, type_sofa, fea_name,
-							                    vGene[i]->vFea[j]->number, code_variant, rna_id, false );
+                    //si je suis sur un single exon, le code de l'ontology doit etre SOFA_EXON
+                    if ( featState->IsSnglExon() )
+                        //je passe nbTracks pour etre sur d'etre hors zone
+                        setGff3Attributes ( pre_arn_lines.back(), new State ( -1 ), type_sofa, fea_name,
+                                            vGene[i]->vFea[j]->number, code_variant, rna_id, false );
+                    else
+                        setGff3Attributes ( pre_arn_lines.back(), featState, type_sofa, fea_name,
+                                            vGene[i]->vFea[j]->number, code_variant, rna_id, false );
 
-						arn_line = fillGff3Line ( SOFA_CDS, start+offset, end+offset,
-						                          vGene[i]->vFea[j]->strand,
-						                          vGene[i]->vFea[j]->phase );
-						//les attributs
-						setGff3Attributes ( arn_line, featState, SOFA_CDS,
-						                    fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id, true );
-						arn_lines.push_back ( arn_line );
-						//je mets � jour la taille de l'ARNm
-						taille_mRNA += ( end-start+1 );
-						break;
-						//par defaut je n'ajoute que dans le pre-arn
-					default :
-						pre_arn_line = fillGff3Line ( type_sofa, start+offset, end+offset,
-						                              vGene[i]->vFea[j]->strand,
-						                              vGene[i]->vFea[j]->phase );
-						//les attributs
-						setGff3Attributes ( pre_arn_line, featState, SOFA_CDS, fea_name, j, code_variant, rna_id, false );
-						pre_arn_lines.push_back ( pre_arn_line );
-				}//fin switch
-				//si on vient d'ajouter une ligne dans les ARNs
-				//Je lui ajoute le score
-				if ( estopt )
-				{
-					if ( ( type_sofa==SOFA_5_UTR ) ||
-					        ( type_sofa==SOFA_3_UTR ) ||
-					        ( type_sofa==SOFA_EXON ) )
-					{
-						double score = 100.0* ( double ) cons/ ( end-start+1 );
-						char buff[6];
-						snprintf ( buff, 6, "%.1f", score );
-						arn_lines.back()->addAttribute ( "est_cons=" + std::string ( buff ) );
-						score  = 100.0* ( double ) incons/ ( end-start+1 );
-						snprintf ( buff, 6, "%.1f", score );
-						arn_lines.back()->addAttribute ( "est_incons=" + to_string ( buff ) );
-					}
-				}
-			}//fin des structures du gene
+                    arn_line = fillGff3Line ( SOFA_CDS, 
+					      vGene[i]->vFea[j]->cds_start+offset, 
+					      vGene[i]->vFea[j]->cds_end+offset,
+                                              vGene[i]->vFea[j]->strand,
+                                              vGene[i]->vFea[j]->phase );
+                    //les attributs
+                    setGff3Attributes ( arn_line, featState, SOFA_CDS,
+                                        fea_name, vGene[i]->vFea[j]->number, code_variant, rna_id, true );
+                    arn_lines.push_back ( arn_line );
+                    //je mets � jour la taille de l'ARNm
+                    taille_mRNA += ( end-start+1 );
+                    break;
+                    //par defaut je n'ajoute que dans le pre-arn
+                default :
+                    pre_arn_line = fillGff3Line ( type_sofa, start+offset, end+offset,
+                                                  vGene[i]->vFea[j]->strand,
+                                                  vGene[i]->vFea[j]->phase );
+                    //les attributs
+                    setGff3Attributes ( pre_arn_line, featState, SOFA_CDS, fea_name, j, code_variant, rna_id, false );
+                    pre_arn_lines.push_back ( pre_arn_line );
+                }//fin switch
+                //si on vient d'ajouter une ligne dans les ARNs
+                //Je lui ajoute le score
+                if ( estopt )
+                {
+                    if ( ( type_sofa==SOFA_5_UTR ) ||
+                            ( type_sofa==SOFA_3_UTR ) ||
+                            ( type_sofa==SOFA_EXON ) )
+                    {
+                        double score = 100.0* ( double ) cons/ ( end-start+1 );
+                        char buff[6];
+                        snprintf ( buff, 6, "%.1f", score );
+                        arn_lines.back()->addAttribute ( "est_cons=" + std::string ( buff ) );
+                        score  = 100.0* ( double ) incons/ ( end-start+1 );
+                        snprintf ( buff, 6, "%.1f", score );
+                        arn_lines.back()->addAttribute ( "est_incons=" + to_string ( buff ) );
+                    }
+                }
+            }//fin des structures du gene
 
-			//J'ajoute la taille du mRNA � sa ligne
-			gene_line.addAttribute ( "length=" + to_string ( taille_mRNA ) );
-			//j'affiche la ligne du mRNA juste avant les UTRs et CDS
-			gene_line.print ( out );
+            //J'ajoute la taille du mRNA � sa ligne
+            gene_line.addAttribute ( "length=" + to_string ( taille_mRNA ) );
+            //j'affiche la ligne du mRNA juste avant les UTRs et CDS
+            if (vGene[i]->hasFrameShift > 0)
+            {
+                gene_line.addAttribute ( "frame_shift=true"); //
+		// TODO: save the position of the frameshift 
+            }
+            gene_line.print ( out );
 
-			//on affiche les lignes, j'en profite pour liberer les pointeurs
-			std::vector<Gff3Line*>::iterator itr;
-			//le pre-arn
-			for ( itr = pre_arn_lines.begin();
-			        itr != pre_arn_lines.end();
-			        ++itr )
-			{
-				( *itr )->print ( out );
-				delete ( *itr );
-			}
-			//l'arn
-			for ( itr = arn_lines.begin();
-			        itr != arn_lines.end();
-			        ++itr )
-			{
-				( *itr )->print ( out );
-				delete ( *itr );
-			}
-		} // end of else (not ncrna)
-		// fin du gene
-		out << Gff3Line::endComplexFeature();
+            //on affiche les lignes, j'en profite pour liberer les pointeurs
+            std::vector<Gff3Line*>::iterator itr;
+            //le pre-arn
+            for ( itr = pre_arn_lines.begin();
+                    itr != pre_arn_lines.end();
+                    ++itr )
+            {
+                ( *itr )->print ( out );
+                delete ( *itr );
+            }
+            //l'arn
+            for ( itr = arn_lines.begin();
+                    itr != arn_lines.end();
+                    ++itr )
+            {
+                ( *itr )->print ( out );
+                delete ( *itr );
+            }
+        } // end of else (not ncrna)
+        // fin du gene
+        out << Gff3Line::endComplexFeature();
 
-	}//fin des genes
+    }//fin des genes
 }
 //SEB
 // ----------------------------
@@ -1961,13 +2033,14 @@ void Prediction :: PrintEgnD ( FILE *OUT )
 {
 	DATA Data;
 
-	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR     RF    RR   UIRF  UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
+	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR     RF    RR   UIRF  UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp\n" );
 	for ( int i=0; i<X->SeqLen; i++ )
 	{
 		MS->GetInfoAt ( X, i, &Data );
 		MS->PrintDataAt ( X, i, &Data, OUT );
 	}
-	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR   RF   RR   UIRF UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
+	fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR     RF    RR   UIRF  UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins1  Ins2  Ins3  Del1  Del2  Del3   tStaNcp   tStopNcp\n" );
+	//fprintf ( OUT, "   pos nt  EF1   EF2   EF3   ER1   ER2   ER3    IF    IR    IG   U5F   U5R   U3F   U3R   IUF   IUR   RF   RR   UIRF UIRR FWD tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp REV tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noF tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp noR tSta  tSto   Sta   Sto   Acc   Don   Ins   Del   tStaNcp   tStopNcp\n" );
 }
 
 // --------------------------
@@ -2608,8 +2681,7 @@ bool Prediction :: IsState ( DATA::SigType sig_type, int pos, char strand )
 	return is_state;
 }
 
-//SEB--  --  --  --  --  --  --
-//  --  --  delocalisation pour eclaircir le code
+
 Gff3Line*
 Prediction::fillGff3Line ( int type_sofa, int start, int end,
                            char strand, int phasegff )
