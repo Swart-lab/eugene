@@ -104,10 +104,20 @@ void SensorQualData :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	/* FIXME : offset pos by -1, actual behaviour should DEFINITELY be spec'd and fixed */
 	/*assert(pos>0);*/
 	double w = -qualPerPos[pos];
-	d->sig[DATA::Ins].weight[Signal::Forward] += w;
-	d->sig[DATA::Ins].weight[Signal::Reverse] += w;
-	d->sig[DATA::Del].weight[Signal::Forward] += w;
-	d->sig[DATA::Del].weight[Signal::Reverse] += w;
+
+	d->sig[DATA::Ins1].weight[Signal::Forward] += w;
+	d->sig[DATA::Ins2].weight[Signal::Forward] += w;
+	d->sig[DATA::Ins3].weight[Signal::Forward] += w;
+	d->sig[DATA::Ins1].weight[Signal::Reverse] += w;
+	d->sig[DATA::Ins2].weight[Signal::Reverse] += w;
+	d->sig[DATA::Ins3].weight[Signal::Reverse] += w;
+	
+	d->sig[DATA::Del1].weight[Signal::Forward] += w;
+	d->sig[DATA::Del2].weight[Signal::Forward] += w;
+	d->sig[DATA::Del3].weight[Signal::Forward] += w;
+	d->sig[DATA::Del1].weight[Signal::Reverse] += w;
+	d->sig[DATA::Del2].weight[Signal::Reverse] += w;
+	d->sig[DATA::Del3].weight[Signal::Reverse] += w;
 }
 
 // ----------------------------
