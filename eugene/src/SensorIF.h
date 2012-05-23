@@ -40,9 +40,11 @@ class DATA
  public:
   // Signal scores
   enum SigType {tStart = 0, tStop = 1, Start = 2, Stop = 3,
-		Acc = 4, Don = 5, Ins = 6, Del = 7, 
-		tStartNpc = 8, tStopNpc = 9, // translation start and stop for non protein coding RNA
-		LastSigType = 10}; // 
+		Acc = 4, Don = 5, 
+		Ins1 = 6, Ins2 = 7, Ins3 = 8,
+		Del1 = 9, Del2 = 10, Del3 = 11,
+		tStartNpc = 12, tStopNpc = 13, // translation start and stop for non protein coding RNA
+		LastSigType = 14}; 
   
   Signal sig[LastSigType];
 
