@@ -110,8 +110,8 @@ FrameShift.Ins*		1e999.0
 FrameShift.Del*		1e999.0
 #
 ##### RibosomalFrameShift sensor (uniform penalties) #####
-RibosomalFrameShift.type[0]	deletion   # Possible types: deletion1 deletion2 deletion3 insertion1 insertion2 insertion3
-RibosomalFrameShift.pat[0]		AAAAAAG	
+RibosomalFrameShift.type[0]	deletion3   # Possible types: deletion1 deletion2 deletion3 insertion1 insertion2 insertion3
+RibosomalFrameShift.pat[0]		AAAAAAC	
 RibosomalFrameShift.newStatePos[0] 4	# Position of the new state in the pattern
 RibosomalFrameShift.patP*[0]	-10
 RibosomalFrameShift.patPNo*[0]	0
