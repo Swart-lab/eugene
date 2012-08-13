@@ -227,7 +227,7 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
                     d->sig[DATA::Acc].weight[Signal::Reverse] == 0.0 && 
                     ( (pos+1) <= X->SeqLen) && X->IsNonCanAcc(pos+1, -1) )
             {
-                d->sig[DATA::Acc].weight[Signal::Reverse] = -spliceNonCanP;
+                d->sig[DATA::Acc].weight[Signal::Reverse] = -spliceNonCanP;	
             }
             // check noncanonical acceptor site on strand +
             if ( (pESTMatch & Gap) && (cESTMatch & HitForward) &&
@@ -499,17 +499,32 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                     }
                 }
                 
-                // Check if there is a noncanonical site
-		k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+1));
-		if ( DonF == NINFINITY && X->IsNonCanDon(k, 1) )
-		    DonF = 1;
-		if ( AccR == NINFINITY && X->IsNonCanAcc(k+1, -1) )
-		   AccR = 1;
-		k = Min(X->SeqLen,Max(0,ThisBlock->Start));
-		if ( AccF == NINFINITY && X->IsNonCanAcc(k-2, 1) )
-		   AccF = 1;
-		if ( DonR == NINFINITY && X->IsNonCanDon(k-1, -1) )
-		    DonR = 1;
+                // Check if there is a noncanonical site on the 5'end only if there is no canonical site
+                k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+1));
+                if ( DonF == NINFINITY && AccR == NINFINITY)
+                {
+                  if (X->IsNonCanDon(k, 1) )
+                  {
+                    DonF = 1;
+                  }
+                  if (X->IsNonCanAcc(k+1, -1) )
+                  {
+                    AccR = 1;
+                  }
+                }	
+                // Check if there is a noncanonical site on the 3' end only if there is no canonical site
+                k = Min(X->SeqLen,Max(0,ThisBlock->Start));
+                if ( AccF == NINFINITY && DonR == NINFINITY)
+                {
+                  if (X->IsNonCanAcc(k-2, 1) )
+                  {
+                    AccF = 1;
+                  }
+                  if ( X->IsNonCanDon(k-1, -1) )
+                  {
+                    DonR = 1;
+                  }
+                }
 
                 WorstSpliceF = Min(WorstSpliceF,DonF);
                 WorstSpliceF = Min(WorstSpliceF,AccF);
