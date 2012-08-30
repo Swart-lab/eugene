@@ -696,31 +696,31 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     endC--;
     
     // Low level signals : use inline values
-    if      ( idSo =="SO:0000315" ) //trStart : transcription_start_site 
+    if      ( idSo =="SO:0000315" ) // TSS 
 	vSig.push_back(new Signals(startS-1, DATA::tStart, edge, GetScoreC(DATA::tStart,scF,true)));
 
-    else if ( idSo =="SO:0000616" ) //trStop : transcription_end_site
+    else if ( idSo =="SO:0000616" ) // transcription_end_site
        	vSig.push_back(new Signals(startS,   DATA::tStop,  edge, GetScoreC(DATA::tStop,scF, true)));
 
-    else if ( idSo =="SO:0000318" ) //start : start_codon
+    else if ( idSo =="SO:0000318" ) // start_codon
         vSig.push_back(new Signals(startS-1, DATA::Start,  edge, GetScoreC(DATA::Start,scF, true)));
 
-    else if ( idSo =="SO:0000319" ) //stop : stop_codon
+    else if ( idSo =="SO:0000319" ) // stop_codon
         vSig.push_back(new Signals(startS,   DATA::Stop,   edge, GetScoreC(DATA::Stop,scF, true)));
     
-    else if ( idSo == "SO:0000164") //acc : three_prime_splice_site
+    else if ( idSo == "SO:0000164") //three_prime_cis_splice_site (acc)
         vSig.push_back(new Signals(startS,   DATA::Acc,    edge, GetScoreC(DATA::Acc,scF, true)));
     
-    else if ( idSo == "SO:0000163") //don : five_prime_splice_site
+    else if ( idSo == "SO:0000163") // five_prime_cis_splice_site (don)
         vSig.push_back(new Signals(startS-1, DATA::Don,    edge, GetScoreC(DATA::Don,scF, true)));
 
-    else if ( idSo == "SO:0000366") //ins : insertion_site
+    else if ( idSo == "SO:0000366") // insertion_site
     {
       vSig.push_back(new Signals(startS,   DATA::Ins1,    edge, CharCopy(scoreC)));
       vSig.push_back(new Signals(startS,   DATA::Ins2,    edge, CharCopy(scoreC)));
       vSig.push_back(new Signals(startS,   DATA::Ins3,    edge, CharCopy(scoreC)));
     }
-    else if ( idSo == "SO:0000687") //del : deletion_junction
+    else if ( idSo == "SO:0000687") // deletion_junction
     {
       vSig.push_back(new Signals(startS,   DATA::Del1,    edge, CharCopy(scoreC)));
       vSig.push_back(new Signals(startS,   DATA::Del2,    edge, CharCopy(scoreC)));
@@ -745,7 +745,7 @@ void SensorAnnotaStruct ::ReadAnnotaStructGff3(GeneFeatureSet & geneFeatureSet ,
     }
 
     else if ( idSo == "SO:0000316" && onthology_term == "SO:0000197") 
-	//CDS && Ontology_term=SO:0000197 (three_prime_coding_exon_region)
+	//CDS && Ontology_term=SO:0000197 (three_prime_coding_exon_coding_region)
     {
       vSig.push_back(new Signals(startS-1, DATA::Acc,   edge, GetScoreC(DATA::Acc,scF, accInline)));
       vSig.push_back(new Signals(endS,     DATA::Stop,  edge, GetScoreC(DATA::Stop,scF, stopInline)));
