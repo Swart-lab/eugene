@@ -233,92 +233,95 @@ name and an extension \texttt{AnnotaStruct.FileExtension} followed by
 natif mode.
 
 If you want to read scores or probabilities from file you have to set
-parameters score to "i" in the parameter file.  Content data will
+parameters score to "i" (for "inline") in the parameter file. Content data will
 always be interpreted as score.
 \begin{Verbatim}[fontsize=\small]
-AnnotaStruct.Exon*            i
-AnnotaStruct.Intron*          i
-AnnotaStruct.CDS*             i
-AnnotaStruct.npcRNA*          i
-AnnotaStruct.Intergenic*      i	
-AnnotaStruct.StartType        p 
+AnnotaStruct.Exon*            i  # interpreted as score
+AnnotaStruct.Intron*          i  # interpreted as score
+AnnotaStruct.CDS*             i  # interpreted as score
+AnnotaStruct.npcRNA*          i  # interpreted as score
+AnnotaStruct.Intergenic*      i	 # interpreted as score
+AnnotaStruct.StartType        p  # p: probability  s: score 
 AnnotaStruct.Start*           i
-AnnotaStruct.StopType         p 
+AnnotaStruct.StopType         p  # p: probability  s: score 
 AnnotaStruct.Stop*            i
-AnnotaStruct.AccType          p 
+AnnotaStruct.AccType          p  # p: probability  s: score 
 AnnotaStruct.Acc*             i
-AnnotaStruct.DonType          p 
+AnnotaStruct.DonType          p  # p: probability  s: score 
 AnnotaStruct.Don*             i
-AnnotaStruct.TrStartType      p 
+AnnotaStruct.TrStartType      p  # p: probability  s: score 
 AnnotaStruct.TrStart*         i
-AnnotaStruct.TrStopType       p 
+AnnotaStruct.TrStopType       p  # p: probability  s: score 
 AnnotaStruct.TrStop*          i
-AnnotaStruct.TrStartNpcType   p
+AnnotaStruct.TrStartNpcType   p # p: probability  s: score 
 AnnotaStruct.TrStartNpc*      i
-AnnotaStruct.TrStopNpcType    p  
+AnnotaStruct.TrStopNpcType    p # p: probability  s: score   
 AnnotaStruct.TrStopNpc*       i
 \end{Verbatim}
 
 Here is the correspondance beetween GFF native AnnotaStruct features
-and gff3 features. A direct translation between the two formats is not
+and GFF3 features. A direct translation between the two formats is not
 always possible (for example, low-level content information cannot be
 given directly in GFF3, but can be indirectly achieved by setting
 signal at zero, and using the transcribed sequence feature).
 
-Each GFF feature is translated in a GFF3 feature and some may
-require an additional ontology term given below.
+Each GFF feature is translated in a GFF3 feature (column 3 in the GFF3 file). 
+Some may require an additional ontology term (specified in the column 9 with the key Ontology\_term). 
+The expected value in the column 3 and if an Ontology\_term is required, the expected value in the column 9, are given below.
 
 Low-level information:
 \begin{itemize}
-\item \texttt{trStart}: 	SO:0000315 (transcription\_start\_site)
-\item \texttt{trStop}: 	SO:0000616 (transcription\_end\_site)
-\item \texttt{start}: 	SO:0000318 (start\_codon).
-\item \texttt{stop}: 	SO:0000319 (stop\_codon)
-\item \texttt{acc}: 	SO:0000164 (acceptor)
-\item \texttt{don}: 	SO:0000163 (donor)
-\item \texttt{ins}: 	SO:0000366 (insertion\_site)
-\item \texttt{del}: 	SO:0000687 (deletion\_junction)
+\item \texttt{trStart}: 	SO:0000315 (or TSS)
+\item \texttt{trStop}: 	SO:0000616 (or transcription\_end\_site)
+\item \texttt{start}: 	SO:0000318 (or start\_codon).
+\item \texttt{stop}: 	SO:0000319 (or stop\_codon)
+\item \texttt{acc}: 	SO:0000164 (or three\_prime\_cis\_splice\_site)
+\item \texttt{don}: 	SO:0000163 (or five\_prime\_cis\_splice\_site)
+\item \texttt{ins}: 	SO:0000366 (or insertion\_site)
+\item \texttt{del}: 	SO:0000687 (or deletion\_junction)
 \item \texttt{trStartNpc} and \texttt{trStopNpc} : no corresponding feature
 \end{itemize}
+
 High-level information:
 
 Translated regions information
 \begin{itemize}
-\item \texttt{E.Init}: SO:0000316 (CDS) Ontology term :	SO:0000196 (five\_prime\_coding\_exon\_region)
-\item \texttt{E.Intr}: SO:0000316 (CDS) Ontology term :	SO:0000004 (interior\_coding\_exon)
-\item \texttt{E.Term}: SO:0000316 (CDS) Ontology term :	SO:0000197 (three\_prime\_coding\_exon\_region)
-\item \texttt{E.Sngl}: SO:0000316 (CDS) Ontology term :	SO:0005845 (single\_exon)
-\item \texttt{UTR5}:   SO:0000204 (five\_prime\_UTR)
-\item \texttt{UTR3}:   SO:0000205 (three\_prime\_UTR)
-\item \texttt{UTR}:    SO:0000203 (UTR)
-\item \texttt{Intron}: SO:0000188 (intron) Ontology term : SO:0000191	(interior\_intron)
+\item \texttt{E.Init}: CDS (or SO:0000316)                + Ontology\_term=SO:0000196 (five\_prime\_coding\_exon\_region)
+\item \texttt{E.Intr}: CDS (or SO:0000316)                + Ontology\_term=SO:0000004 (interior\_coding\_exon)
+\item \texttt{E.Term}: CDS (or SO:0000316)                + Ontology\_term=SO:0000197 (three\_prime\_coding\_exon\_region)
+\item \texttt{E.Sngl}: CDS (or SO:0000316)                + Ontology\_term=SO:0005845 (single\_exon)
+\item \texttt{UTR5}:   five\_prime\_UTR  (or SO:0000204)
+\item \texttt{UTR3}:   three\_prime\_UTR (or SO:0000205)
+\item \texttt{UTR}:    UTR (or SO:0000203)
+\item \texttt{Intron}: intron (or SO:0000188)             + Ontology\_term=SO:0000191 (interior\_intron)
 \end{itemize}
 
 Transcribed region information
 \begin{itemize}
-\item \texttt{E.Any}: 		SO:0000147 (exon)
-\item \texttt{E.First}: 	SO:0000147 (exon)	Ontology term :	SO:0000200 (five\_prime\_coding\_exon)
-\item \texttt{E.Last}: 		SO:0000147 (exon)	Ontology term :	SO:0000202 (three\_prime\_coding\_exon)
-\item \texttt{E.Extreme}: 	SO:0000147 (exon)	Ontology term :	SO:0000200,SO:0000202
-\item \texttt{Intron.Any}: 	SO:0000188 (intron)
-\item \texttt{ncRNA}: 	        SO:0000655 (ncRNA) or other SO terms derived from ncRNA, for instance SO:0000252 (rRNA) or SO:0000253 (tRNA). 
+\item \texttt{E.Any}: 		exon (or SO:0000147)
+\item \texttt{E.First}: 	exon (or SO:0000147)	  + Ontology\_term=SO:0000200 (five\_prime\_coding\_exon)
+\item \texttt{E.Last}: 		exon (or SO:0000147)	  + Ontology\_term=SO:0000202 (three\_prime\_coding\_exon)
+\item \texttt{E.Extreme}: 	exon (or SO:0000147)	  + Ontology\_term=SO:0000200,SO:0000202
+\item \texttt{Intron.Any}: 	intron (or SO:0000188)
+\item \texttt{transcript}: transcript\_region (or SO:0000833)
+\item \texttt{ncRNA}: 	        ncRNA (or SO:0000655 or other SO terms derived from ncRNA, for instance rRNA (SO:0000252) or tRNA (SO:0000253). 
 See  \texttt{http://www.sequenceontology.org/wiki/index.php/} \texttt{Category:SO:0000655\_!\_ncRNA} for details.
-
 \end{itemize}
 
 Intergenic information
 \begin{itemize}
-\item \texttt{interg}: SO:0000605 (intergenic\_region)
+\item \texttt{interg}: intergenic\_region (or SO:0000605)
 \end{itemize}
 
-Figure of Ontology terms
+
 
 \begin{figure}[h]
 \includegraphics[width=17cm]{SO.png} 
 \end{figure}
+
 Here an extract of : seq14ac002535g4g5.tfa.gff.gff3
 \begin{Verbatim}[fontsize=\tiny]
-seq25	EuGene	five_prime_UTR	1	2787	0	+	.	ID=five_prime_UTR:seq25.0;Ontology_term=SO:0000204
+seq25	EuGene	five_prime_UTR	1	2787	0	+	.	ID=five_prime_UTR:seq25.0;
 seq25	EuGene	CDS	2788	2836	0	+	0	ID=CDS:seq25.1;Ontology_term=SO:0000196
 seq25	EuGene	CDS	8356	8471	0	+	2	ID=CDS:seq25.2;Ontology_term=SO:0000004
 seq25	EuGene	CDS	8576	8667	0	+	1	ID=CDS:seq25.3;Ontology_term=SO:0000004
@@ -328,7 +331,7 @@ seq25	EuGene	CDS	10520	10535	0	+	1	ID=CDS:seq25.6;Ontology_term=SO:0000004
 seq25	EuGene	CDS	10896	11134	0	+	1	ID=CDS:seq25.7;Ontology_term=SO:0000004
 seq25	EuGene	CDS	11544	12005	0	+	2	ID=CDS:seq25.8;Ontology_term=SO:0000004
 seq25	EuGene	CDS	12088	12900	0	+	0	ID=CDS:seq25.9;Ontology_term=SO:0000197
-seq25	EuGene	three_prime_UTR	12901	14900	0	+	.	ID=three_prime_UTR:seq25.10;Ontology_term=SO:0000205
+seq25	EuGene	three_prime_UTR	12901	14900	0	+	.	ID=three_prime_UTR:seq25.10;
 \end{Verbatim}
 
 For complete gene, ontology terms for CDS can be added on the fly by the plugin if the GFF3 includes Parent information to a transcript level feature. This feature is typically called "mRNA" or "transcript" in gene finders GFF3 output.
