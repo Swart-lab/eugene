@@ -59,6 +59,7 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/doc/graph.* \
 	     $(srcdir)/doc/Doc_*.tex \
 	     $(srcdir)/doc/SO.png \
+	     $(srcdir)/doc/ExampleFS.png \
 	     $(srcdir)/doc/ParaOptimization.pdf \
 	     $(srcdir)/doc/ParaOptimization.fig \
 	     $(srcdir)/doc/Sequences/SYNO_ARATH.fasta* \
