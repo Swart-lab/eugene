@@ -360,9 +360,7 @@ D     <-   1354           acgGTtaag   0.036  0.000  0.000   3 (1 1 1)  AEDAEED-I
 A ->       1323 gtattgctgatccAGgc     0.077  0.000  0.000   3 (1 1 1)  ADAEEDI-I-IADIAED
 A ->       1308 gcaatccttgtggAGgt     0.001  0.000  0.000   3 (1 1 1)  DAEEDII-I-ADIAEDI
 A ->       1284 cttcttcatcctcAGgc     0.005  0.000  0.004   3 (1 1 1)  AEEDIII-A-DIAEDII
-D     <-   1248           caaGTatat   0.016  0.000  0.020   4 (1 1 2)  AEDIIIA-D-IAEDIII
 A ->       1233 tatatattcacatAGat     0.001  0.000  0.000   3 (1 1 1)  EDIIIAD-I-AEDIIIA
-A ->       1128 aatgtgaggggacAGac     0.004  0.000  0.000   3 (1 1 1)  DIIIADI-A-EDIIIIA
 A ->       1107 tgaataactgctcAGgc     0.003  0.000  0.000   3 (1 1 1)  IAEEDIA-E-DIIIIAD
 D     <-   1063           tcgGTtaga   0.032  0.000  0.036   4 (1 1 2)  AEEDIAE-D-IIIIADI
 A ->       1026 cggtgtttgcattAGaa     0.001  0.000  0.000   3 (1 1 1)  IADIAED-I-IIIADIA
