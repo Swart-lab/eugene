@@ -69,6 +69,7 @@ set NewValueProOverlapGene(Transcript.Start*)	   4.6644
 set NewValueProOverlapGene(Transcript.Stop*)	   4.6644
 set NewValueProOverlapGene(Transcript.StartNpc*)   4.6644
 set NewValueProOverlapGene(Transcript.StopNpc*)    4.6644
+set NewValueProOverlapGene(Transcript.AffectedStrand) 0
 set NewValueProOverlapGene(BlastX.levels)	   01
 set NewValueProOverlapGene(BlastX.level0*)	0.7756
 set NewValueProOverlapGene(BlastX.level1*)	0.0506
@@ -100,6 +101,7 @@ set FILE_REF(SeqHom) Output_SeqHom
 set OPTIONS(SeqHom) "-po -g"
 set NewValueSeqHom(Transcript.Start*) 1e-9
 set NewValueSeqHom(Transcript.Stop*)  1e-9
+set NewValueSeqHom(Transcript.AffectedStrand) 0
 set NewValueSeqHom(EuStop.stopP*)     3.1439
 
 ##################### SeqRest test variables #################################

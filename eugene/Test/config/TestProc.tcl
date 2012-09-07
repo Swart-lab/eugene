@@ -238,6 +238,7 @@ set NewValue1(Transcript.Start*)	4.155
 set NewValue1(Transcript.Stop*)		4.155
 set NewValue1(Transcript.StartNpc*)		30
 set NewValue1(Transcript.StopNpc*)		30
+set NewValue1(Transcript.AffectedStrand)		0
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
 #################################################################

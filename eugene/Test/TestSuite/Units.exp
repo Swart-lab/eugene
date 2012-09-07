@@ -25,6 +25,9 @@ foreach TEST $AllSensorsList {
     # To follow execution
     puts "Performing $TEST unit test"
 
+	 if {$TEST == "Transcript"} {
+		 catch { exec cp $EUGENE_DIR/$EUGENE_TEST_PAR eugene.par.trancript}
+	 }
     # Run eugene
     if {$TEST == "Est"} {
 	catch { eval exec $EUGENE_DIR/$EUGENE -A $EUGENE_DIR/$EUGENE_TEST_PAR $OPTIONS(Sensor) -D Sensor.${TEST}.use=2 -D Sensor.NG2.use=1 $SEQ_DIR/$SEQ(Sensor).tfa 2> tmp%std } 
