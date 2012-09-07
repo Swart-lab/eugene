@@ -40,6 +40,14 @@ int HitsCompare(const void *A, const void *B)
         return -1;
     if ((*UA)->NGaps < (*UB)->NGaps)
         return  1;
+    // select the largest region coverage
+    int regionLgA = (*UA)->End - (*UA)->Start + 1;
+    int regionLgB = (*UB)->End - (*UB)->Start + 1;
+    if (regionLgA > regionLgB)
+        return -1;
+    if (regionLgA < regionLgB)
+        return 1;
+
     if ((*UA)->Length > (*UB)->Length)
         return -1;
     if ((*UA)->Length < (*UB)->Length)
