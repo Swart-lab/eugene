@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.1
+EuGene.version		4.1a
 EuGene.organism		Arabidopsis
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0
@@ -222,6 +222,7 @@ Transcript.Start*	4.155
 Transcript.Stop*	4.155
 Transcript.StartNpc* 30
 Transcript.StopNpc* 30
+Transcript.AffectedStrand  0 #  0 (both) or -1 (strand minus) or 1 (strand plus)
 #
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################

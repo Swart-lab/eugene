@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.1
+EuGene.version		4.1a
 EuGene.organism		Meliloti
 EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Porkaryote2
 EuGene.sloppy		0
@@ -222,6 +222,7 @@ Transcript.Start*	   4.155
 Transcript.Stop*	   4.155
 Transcript.StartNpc*   30
 Transcript.StopNpc*    30
+Transcript.AffectedStrand 0
 #
 #################################################################
 ################# CONTENT SENSORS PARAMETERS ####################
