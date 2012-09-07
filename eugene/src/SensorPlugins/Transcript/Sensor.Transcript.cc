@@ -47,10 +47,11 @@ SensorTranscript :: ~SensorTranscript ()
 // ----------------------
 void SensorTranscript :: Init (DNASeq *X)
 {
-  transStart    = PAR.getD("Transcript.Start*");
-  transStop     = PAR.getD("Transcript.Stop*");
-  transStartNpc = PAR.getD("Transcript.StartNpc*");
-  transStopNpc  = PAR.getD("Transcript.StopNpc*");
+  transStart     = PAR.getD("Transcript.Start*",         GetNumber());
+  transStop      = PAR.getD("Transcript.Stop*",          GetNumber());
+  transStartNpc  = PAR.getD("Transcript.StartNpc*",      GetNumber());
+  transStopNpc   = PAR.getD("Transcript.StopNpc*",       GetNumber());
+  affectedStrand = PAR.getI("Transcript.AffectedStrand", GetNumber());
 
   if (PAR.getI("Output.graph")) Plot(X);
 }
@@ -60,11 +61,21 @@ void SensorTranscript :: Init (DNASeq *X)
 // -----------------------
 void SensorTranscript :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
-  for (int i = Signal::Forward; i <= Signal::Reverse; i++) {
-    d->sig[DATA::tStart].weight[i]    -= transStart;
-    d->sig[DATA::tStop].weight[i]     -= transStop;	
-    d->sig[DATA::tStartNpc].weight[i] -= transStartNpc;
-    d->sig[DATA::tStopNpc].weight[i]  -= transStopNpc;
+  // Strand +
+  if (affectedStrand != -1)
+  {
+	d->sig[DATA::tStart].weight[Signal::Forward]    -= transStart;
+    d->sig[DATA::tStop].weight[Signal::Forward]     -= transStop;	
+    d->sig[DATA::tStartNpc].weight[Signal::Forward] -= transStartNpc;
+    d->sig[DATA::tStopNpc].weight[Signal::Forward]  -= transStopNpc;
+  }
+  // Strand -
+  if (affectedStrand != 1)
+  {
+	d->sig[DATA::tStart].weight[Signal::Reverse]    -= transStart;
+    d->sig[DATA::tStop].weight[Signal::Reverse]     -= transStop;	
+    d->sig[DATA::tStartNpc].weight[Signal::Reverse] -= transStartNpc;
+    d->sig[DATA::tStopNpc].weight[Signal::Reverse]  -= transStopNpc;
   }
 }
 

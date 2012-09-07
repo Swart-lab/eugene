@@ -34,6 +34,7 @@ class SensorTranscript : public Sensor
   // proba. of transcription Start/Stop of npcRNA
   double transStartNpc;
   double transStopNpc;
+  int    affectedStrand;
 
  public:
   SensorTranscript  (int n, DNASeq *X);
