@@ -68,7 +68,7 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
     if ((X->Markov0[BitG] + X->Markov0[BitC]) > minGC &&
             (X->Markov0[BitG] + X->Markov0[BitC]) <= maxGC)
     {
-        if (affectedStrand != -1)
+        if (affectedStrand != -1) // strand forward or both
         {
             for (int i=0; i<3; i++)
                 d->contents[i] += log(transCodant); //Exon
@@ -79,7 +79,7 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             d->contents[DATA::RNAF]       += log(transRNA);
             d->contents[DATA::UIRF]       += log(transUIR);
         }
-        if (affectedStrand != 1)
+        if (affectedStrand != 1) // strand reverse or both
         {
             for (int i=3; i<6 ; i++)
                 d->contents[i] += log(transCodant); //Exon
@@ -91,6 +91,29 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             d->contents[DATA::UIRR]       += log(transUIR);
         }
         d->contents[DATA::InterG] += log(transInter);
+	
+	if (affectedStrand == -1)
+	{
+	    for (int i=0; i<3; i++)
+                d->contents[i] = NINFINITY; 
+            d->contents[DATA::IntronF]    = NINFINITY;
+            d->contents[DATA::UTR5F]      = NINFINITY;
+            d->contents[DATA::UTR3F]      = NINFINITY;
+            d->contents[DATA::IntronUTRF] = NINFINITY;
+            d->contents[DATA::RNAF]       = NINFINITY;
+            d->contents[DATA::UIRF]       = NINFINITY;
+	}
+	else if (affectedStrand == 1)
+	{
+	  for (int i=3; i<6 ; i++)
+                d->contents[i] += log(transCodant); //Exon
+            d->contents[DATA::IntronR]    = NINFINITY;
+            d->contents[DATA::UTR5R]      = NINFINITY;
+            d->contents[DATA::UTR3R]      = NINFINITY;
+            d->contents[DATA::IntronUTRR] = NINFINITY;
+            d->contents[DATA::RNAR]       = NINFINITY;
+            d->contents[DATA::UIRR]       = NINFINITY;
+	}
     }
 }
 
