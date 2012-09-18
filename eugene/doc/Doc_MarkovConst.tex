@@ -51,9 +51,9 @@ the logarithm of the corresponding parameter:
 \texttt{MarkovConst.UTR3*}, \texttt{MarkovConst.UIR*}, 
 \texttt{MarkovConst.RNA*} and \texttt{MarkovConst.Inter*}.
 
-To penalize only the forward strand set 
-\texttt{MarkovConst.affectedStrand} parameter value to 1;
-to penalize only the reverse one set it to -1, and to penalize both strands let the value to 0.
+The \texttt{MarkovConst.affectedStrand} parameter allows to specify the affected strand and thus to turn off the prediction on the opposite strand.
+To predict only on forward strand set \texttt{MarkovConst.affectedStrand} parameter value to 1;
+to predict only one reverse one set it to -1, and to predict on both strands let the value to 0.
 
 \paragraph{Post analyse}
 
