@@ -294,7 +294,7 @@ Hits* Hits::ReadFromGeneFeatureSet(GeneFeatureSet & HitSet , int *NumHits, int l
             HSPDeb = (*it)->getAttributes()->getTarget()->getLocus()->getStart();
             HSPFin = (*it)->getAttributes()->getTarget()->getLocus()->getEnd();
 
-            if ( idSo == "SO:0000668" ) //EST_match
+            if ( idSo == "SO:0000668" || idSo == "SO:0000039") //EST_match
             {
                 phase  = (strand == '+' ? 0 : 1);
             }
