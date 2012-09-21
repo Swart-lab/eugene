@@ -1,4 +1,4 @@
 seq14	gth	EST_match	7317	7441	.	-	.	ID=EST_match:seq14.1;
-seq14	gth	EST_match	7317	7441	0	-	.	ID=EST_match:seq14.1.1;Target=FFFFFR 1 125 +;Gap=M146;score_hit=146;Parent=EST_match:seq14.1;
+seq14	gth	match_part	7317	7441	0	-	.	ID=EST_match:seq14.1.1;Target=FFFFFR 1 125 +;Gap=M146;score_hit=146;Parent=EST_match:seq14.1;
 seq14	gth	EST_match	6910	7008	.	-	.	ID=EST_match:seq14.2;
-seq14	gth	EST_match	6910	7008	0	-	.	ID=EST_match:seq14.2.1;Target=AAAAAA 10 108 +;Gap=M146;score_hit=146;Parent=EST_match:seq14.2;
+seq14	gth	match_part	6910	7008	0	-	.	ID=EST_match:seq14.2.1;Target=AAAAAA 10 108 +;Gap=M146;score_hit=146;Parent=EST_match:seq14.2;
