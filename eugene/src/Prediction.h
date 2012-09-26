@@ -73,6 +73,7 @@ class Feature
   bool      IsNpcRna();
   bool      IsBicoding();
   void      ComputePhase(int);
+  void      SetState(char);
 };
 
 
@@ -122,7 +123,8 @@ class Gene
   void Print();
   std::string GetVariantCode(void) const;
   bool IsNpcRna();
-  void ManageFrameShift (int );
+  void ManageFrameShift(int);
+  void ConvertToNpcRNA(int);
 
 };
 
