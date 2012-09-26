@@ -370,7 +370,13 @@ bool State::IsBicoding()
    else return false;
 }
 
-
+// ------------------------
+//  Set state
+// ------------------------
+void State::SetState(char state)
+{
+   this->state = state;
+}
 
 // -----------------------------------------
 //  Convert the state in string
@@ -443,11 +449,15 @@ int State::getTypeSofa(bool coding, bool sofa)
 //    if(state_egn >= IntronU5F)
     if(this->state <= IntronU3R)
       return SO_UTR_INTRON;    //"Intron";
-    if (this->state >= SnglF1F2 && this->state <= SnglF3R3)   // TODO!!!!!!!!! Voir ca!
-        return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;            // EK
+    if (this->state == RnaF || this->state == RnaR)
+      return SOFA_NCRNA;
+    if (this->state >= SnglF1F2 && this->state <= SnglF3R3)   
+      return (sofa) ? SOFA_EXON : SO_SINGLE_EXON;          
+      
 //     si ce n'est rien de tout ca, je renvoies SOFA_EXON
 //     a cause des attributs,
 //     je dois pouvoir recuperer un SOFA_EXON avec un sofa a false
 //     a changer quand la fonction setOntology sera ecrite
+
     return SOFA_EXON;
 }
