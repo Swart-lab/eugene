@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.1a
+EuGene.version		4.1b
 EuGene.organism		Arabidopsis
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0
@@ -45,6 +45,7 @@ Gff3.SoTerms		cfg/sofa.obo
 Output.RemoveFrags	0
 Output.UTRtrim		0
 Output.MinCDSLen	60
+Output.ConvertShortCDS  0  # 0 = remove, 1 = convert to npcRNA
 Output.truncate		5
 Output.initid		0
 Output.stepid		1
