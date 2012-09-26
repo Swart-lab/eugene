@@ -127,6 +127,7 @@ set NewValue1(EuGene.CodonTable)    euk.codontable
 set NewValue1(Output.RemoveFrags)	0
 set NewValue1(Output.UTRtrim) 0
 set NewValue1(Output.MinCDSLen)		60
+set NewValue1(Output.ConvertShortCDS)		0
 set NewValue1(Output.truncate)		5
 set NewValue1(Output.stepid)		1
 set NewValue1(Output.graph)		0	
