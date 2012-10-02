@@ -106,7 +106,7 @@ void SensorMarkovConst :: GiveInfo (DNASeq *X, int pos, DATA *d)
 	else if (affectedStrand == 1)
 	{
 	  for (int i=3; i<6 ; i++)
-                d->contents[i] += log(transCodant); //Exon
+                d->contents[i] = NINFINITY; 
             d->contents[DATA::IntronR]    = NINFINITY;
             d->contents[DATA::UTR5R]      = NINFINITY;
             d->contents[DATA::UTR3R]      = NINFINITY;
