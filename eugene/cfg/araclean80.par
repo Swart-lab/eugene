@@ -39,6 +39,7 @@ Gff3.SoTerms		cfg/sofa.obo
 Output.RemoveFrags	0
 Output.UTRtrim		0
 Output.MinCDSLen	60
+Output.MinRescueTranscriptLen  100000
 Output.truncate		5
 Output.stepid		1
 Output.graph		0		# Don't produce a graphical output

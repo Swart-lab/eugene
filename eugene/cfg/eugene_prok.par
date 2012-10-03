@@ -45,7 +45,7 @@ Gff3.SoTerms		cfg/sofa.obo
 Output.RemoveFrags	0
 Output.UTRtrim		0
 Output.MinCDSLen	20
-Output.ConvertShortCDS  0  # 0 = remove, 1 = convert to npcRNA
+Output.MinRescueTranscriptLen  100000
 Output.truncate		5
 Output.initid		0
 Output.stepid		1

@@ -1423,8 +1423,8 @@ void Prediction :: TrimAndUpdate ( DNASeq* x )
 void Prediction :: UpdateAndDelete()
 {
 	std::vector <Gene*>::iterator geneindex;
-	int MinCDSLen       = PAR.getI ( "Output.MinCDSLen" );
-	int ConvertShortCDS = PAR.getI ( "Output.ConvertShortCDS" );
+	int MinCDSLen              = PAR.getI ( "Output.MinCDSLen" );
+	int MinRescueTranscriptLen = PAR.getI ( "Output.MinRescueTranscriptLen" );
 	int RemoveFrags     = PAR.getI ( "Output.RemoveFrags" );
 	int gIdx            = 0;
 
@@ -1436,7 +1436,7 @@ void Prediction :: UpdateAndDelete()
 		if ( ( *geneindex )->IsNpcRna() == false &&
 		        ( empty_gene                                            || 
 			  ( RemoveFrags && ( ( *geneindex )->complete != 3 ) )  ||
-			  ( ( *geneindex )->exLength <= MinCDSLen && ConvertShortCDS == 0 ) ))
+			  ( ( *geneindex )->exLength <= MinCDSLen && ( *geneindex )->mrnaLength <= MinRescueTranscriptLen ) ))
 		{
 			nbGene--;
 			geneindex = vGene.erase ( geneindex );
@@ -1445,7 +1445,7 @@ void Prediction :: UpdateAndDelete()
 		{
 			if (( *geneindex )->IsNpcRna() == false   && 
 			    ( *geneindex )->exLength <= MinCDSLen && 
-			    ConvertShortCDS == 1 )   
+			    ( *geneindex )->mrnaLength > MinRescueTranscriptLen) 
 			{
 			  // convert in ncRNA
 			 ( *geneindex )->ConvertToNpcRNA(X->SeqLen);
