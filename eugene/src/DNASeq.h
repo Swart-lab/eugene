@@ -97,7 +97,7 @@ class  DNASeq
   static const int isGf  = 1;
   static const int isGAf = 2;
   static const int isAf  = 4;
-  static const int isARf = 8;
+  static const int isARf = 8; // A or G
   static const int isGr  = 16;
   static const int isGAr = 32;
   static const int isAr  = 64;
@@ -121,6 +121,7 @@ class  DNASeq
   double IsStart(int pos,int strand);
   double IsProStart(int i,int sens);
 
+  bool IsAStop(std::string triplet);
 
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);
