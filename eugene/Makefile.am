@@ -23,6 +23,7 @@ export sensors_ldflags = -shared
 export eugene_cxxflags = -rdynamic -fPIC
 export eugene_cflags = -fPIC
 
+
 if SOLARIS_OS
 export sensors_ldflags = -shared -mimpure-text
 export eugene_cxxflags = 
@@ -33,6 +34,10 @@ if MACOS_OS
 export sensors_ldflags = -bundle -flat_namespace -undefined suppress
 export eugene_cxxflags = 
 export eugene_cflags = 
+endif
+
+if TRANSL_TABLE_6
+export eugene_cxxflags +=  -DTRANSL_TABLE_6
 endif
 
 

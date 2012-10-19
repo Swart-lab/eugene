@@ -81,6 +81,15 @@ AC_CHECK_FUNCS([floor pow sqrt strchr strspn uname getopt])
 AM_CONDITIONAL(SOLARIS_OS, test "$OSTYPE" = solaris)
 AM_CONDITIONAL(MACOS_OS, test "$OSTYPE" = darwin)
 
+AC_ARG_ENABLE([transl_table_6],
+     [  --enable-transl_table_6    Use codon translation table number 6],
+     [case "${enableval}" in
+       yes) transl_table_6=true ;;
+       no)  transl_table_6=false ;;
+       *) AC_MSG_ERROR([bad value ${enableval} for --enable-transl_table_6]) ;;
+     esac],[transl_table_6=false])
+     AM_CONDITIONAL([TRANSL_TABLE_6], [test x$transl_table_6 = xtrue])
+
 
 AC_CONFIG_FILES([ 
 	Makefile
