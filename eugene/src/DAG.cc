@@ -865,6 +865,7 @@ inline void DAG::ComputeRequired(enum Signal::Edge Strand, DATA Data, int positi
 // ----------------------------------------------------------------
 // Spliceable stops... there is probably a nice small automata for this
 // ----------------------------------------------------------------
+#ifndef TRANSL_TABLE_6
 inline bool spliceStopPreTAx(int StartStop, enum Signal::Edge Strand)  //TAx
 {
   if (Strand == Signal::Forward) 
@@ -912,6 +913,56 @@ inline bool spliceStopPostTxx(int StopStop, enum Signal::Edge Strand)  //x(GA|A(
   else
     return (StopStop & (DNASeq::isGAr | DNASeq::isARr));
 }
+#endif
+
+#ifdef TRANSL_TABLE_6
+// ----------------------------------------------------------------
+// Only one stop codon TGA
+// ----------------------------------------------------------------
+inline bool spliceStopPreTAx(int StartStop, enum Signal::Edge Strand)  //TAx --> not a stop codon
+{
+	return false;
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostTAx(int StopStop, enum Signal::Edge Strand)  //xx(G|A) xxG --> not a stop codon
+{
+  return false;
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPrexxA(int StartStop, enum Signal::Edge Strand)  //TGx (TG)x
+{
+  if (Strand == Signal::Forward) 
+    return (StartStop & DNASeq::isTGf);
+  else
+    return (StartStop & DNASeq::isTGr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostxxA(int StopStop, enum Signal::Edge Strand)  //xxA
+{
+  if (Strand == Signal::Forward) 
+    return (StopStop & DNASeq::isAf);
+  else
+    return (StopStop & DNASeq::isAr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPreTxx(int StartStop, enum Signal::Edge Strand)  //Txx
+{
+  if (Strand == Signal::Forward) 
+    return (StartStop & DNASeq::isTf);
+  else
+    return (StartStop & DNASeq::isTr);
+}
+// ----------------------------------------------------------------
+inline bool spliceStopPostTxx(int StopStop, enum Signal::Edge Strand)  //x(GA)
+{
+  if (Strand == Signal::Forward) 
+    return (StopStop & DNASeq::isGAf);
+  else
+    return (StopStop & DNASeq::isGAr);
+}
+#endif
+
+
 // ----------------------------------------------------------------
 // A second set of macros
 // ----------------------------------------------------------------
