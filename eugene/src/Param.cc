@@ -90,7 +90,11 @@ void Parameters :: initParam (int argc, char * argv[])
 
   iter = m.begin();  // Cf. : getUseSensor
   
-  fprintf(stderr,"- %s - mode %s -\n",getC("EuGene.organism"), getC("EuGene.mode"));
+  fprintf(stderr,"- %s - mode %s -",getC("EuGene.organism"), getC("EuGene.mode"));
+  #ifdef TRANSL_TABLE_6
+  fprintf(stderr, " transl_table=6 -");
+  #endif
+  fprintf(stderr,"\n");
   fprintf(stderr,"Parameters file %s loaded.\n", getC("parameters_file"));
 
   if (getI("EuGene.sloppy")) fprintf(stderr,"WARNING: Sloppy mode selected.\n");
