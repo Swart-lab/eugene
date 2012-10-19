@@ -876,18 +876,6 @@ int DNASeq :: IsStartStop(int i)
 
   return stop;
 }
-
-// Return true if triplet is a stop codon
-bool DNASeq :: IsAStop(std::string triplet)
-{
-  for (int j = 0; j < vStop.size(); j++)
-  {
-      if (vStop[j].compare(triplet) == 0)
-	  return true;
-  }
-  return false; 
-}
-
 // ---------------------------------------------------------------------
 // test if a spliced Stop Codon may stop just after position i. 
 // Sets specific bits depending on the occurrence.
@@ -905,72 +893,35 @@ bool DNASeq :: IsAStop(std::string triplet)
 int DNASeq :: IsStopStop(int i)
 {
   int stop = 0;
-  int initi = i;
 
-  if (this->IsAStop("tag"))
-  {
-	if ( ((*this)(i,0)) & CodeG ) {
-    	stop |= isGf; // StopAfterTA [TA?]G 
-   	}
-	if ( ( ((*this)(i,0))   & CodeA ) && 
-	     ( ((*this)(i+1,0)) & CodeG ) )
-	{
-		stop |= isARf; // StopAfterT [T?]AG
-	}
-    // strand minus
-	i = SeqLen -i -1;
-	if (((*this)(i+1,2)) & CodeG) {
-		stop |= isGr; //StopAfterG  [TA?]G	
-	}
-	if ( ( ((*this)(i+1,2)) & CodeA ) &&
-	     ( ((*this)(i+2,2)) & CodeG ) ) {
-	  stop |= isARr; //StopAfterAG    [T?]AG
-	}
+  if (((*this)(i,0)) & CodeG) {
+    stop |= isGf; //StopAfterTA
+    if (((*this)(i+1,0)) & CodeA)
+      stop |= isGAf; //StopAfterT
   }
 
-  if (this->IsAStop("tga"))
-  {
-	i = initi;
-	if (((*this)(i,0)) & CodeA) {
-	  stop |= isAf; // StopAfterTG [TG?]A
-	}
-	if ( ( ((*this)(i,0))   & CodeG ) &&
-	     ( ((*this)(i+1,0)) & CodeA ) ) {
-	  stop |= isGAf; // StopAfterT [T?]GA
-	}
-
-	// strand minus
-	i = SeqLen -i -1;
-	if (((*this)(i+1,2)) & CodeA) {
-	  stop |= isAr; //StopAfterA  [TG?]A
-	}
-	if ( ( ((*this)(i+1,2)) & CodeG ) &&
-	     ( ((*this)(i+2,2)) & CodeA ) ) {
-	  stop |= isGAr;// StopAfterAG  --> [T?]GA  	
-	}
+  if (((*this)(i,0)) & CodeA) {
+    stop |= isAf; //StopAfterTA+StopAfterTG
+    if (((*this)(i+1,0)) & (CodeA|CodeG))
+      stop |= isARf; //StopAfterT
   }
-	
-  if (this->IsAStop("taa") == true )
-  {
-	i = initi;
-	if (((*this)(i,0)) & CodeA) {
-	  stop |= isAf; // StopAfterTA [TA?]A
-	  if ( ((*this)(i+1,0)) & (CodeA) ) {
-	    stop |= isARf; // StopAfterT  [T?]AA
-	  }
-	}
-	i = SeqLen -i -1;
-	if (((*this)(i+1,2)) & CodeA) {
-	  stop |= isAr; //  [TA?]A
-	  if (((*this)(i+2,2)) & (CodeA)) {
-	    stop |= isARr ; // [T?]AA
-	  }
-	}
-  }	
+
+  i = SeqLen -i -1;
+
+  if (((*this)(i+1,2)) & CodeG) {
+    stop |= isGr; //StopAfterG
+    if (((*this)(i+2,2)) & CodeA)
+      stop |= isGAr;// StopAfterAG
+  }
+  
+  if (((*this)(i+1,2)) & CodeA) {
+    stop |= isAr; //StopAfterA
+    if (((*this)(i+2,2)) & (CodeA|CodeG))
+      stop |= isARr; //StopAfterAG
+  }
 
   return stop;
 }
-
 // ---------------------------------------------------------------------
 // Returns simply A,T,C,G or N depending on the nucleotide at position i
 // ---------------------------------------------------------------------

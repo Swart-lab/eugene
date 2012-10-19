@@ -121,8 +121,6 @@ class  DNASeq
   double IsStart(int pos,int strand);
   double IsProStart(int i,int sens);
 
-  bool IsAStop(std::string triplet);
-
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);
   // same for the reverse strand.
