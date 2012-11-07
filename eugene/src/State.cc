@@ -126,7 +126,7 @@ bool State::IsIntron(void)
 // ----------------------
 bool State::IsIntronInStartStopRegion(void)
 {
-	if (this->state >= IntronF1 && this->state <= IntronR2AG)
+	if (this->state >= IntronF1 && this->state <= IntronR2GG)
 		return true;
 	return false;	
 }
@@ -387,7 +387,7 @@ const char* State::State2EGNString()
     if (this->state <= SnglR3)                  return "Sngl";
     if (this->state <= IntrR3)                  return "Intr";
     if (this->state <= TermR3)                  return "Term";
-    if (this->state <= IntronR2AG)              return "Intron";
+    if (this->state <= IntronR2GG)              return "Intron";
     if (this->state == InterGen)                return "InterG";
     if (this->state == UTR5F || state == UTR5R) return "Utr5";
     if (this->state == UTR3F || state == UTR3R) return "Utr3";
@@ -407,7 +407,7 @@ const char* State :: State2GFFString ()
     if (this->state <= SnglR3)                  return "E.Sngl";
     if (this->state <= IntrR3)                  return "E.Intr";
     if (this->state <= TermR3)                  return "E.Term";
-    if (this->state <= IntronR2AG)              return "Intron";
+    if (this->state <= IntronR2GG)              return "Intron";
     if (this->state == InterGen)                return "InterG";
     if (this->state == UTR5F || state == UTR5R) return "UTR5";
     if (this->state == UTR3F || state == UTR3R) return "UTR3";
@@ -438,7 +438,7 @@ int State::getTypeSofa(bool coding, bool sofa)
     if(this->state <= TermR3)
 //        str = "three_prime_coding_exon";//"E.Term";
       return (sofa) ? SOFA_EXON : (coding ? SO_3_CODING_EXON : SO_3_EXON);
-    if(this->state <= IntronR2AG)
+    if(this->state <= IntronR2GG)
       return SOFA_INTRON;    //"Intron";
     if(this->state == InterGen)
       return SOFA_INTERGEN;  //"InterG";

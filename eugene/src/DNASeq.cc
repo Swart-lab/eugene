@@ -236,7 +236,15 @@ void DNASeq :: InitCodonTable()
 		// If it's a stop codon
 		if ( !AA.compare("*") )
 		{
+		    if (! IsAllowedStop(codon) )
+		    {
+			cerr << "\nProblem during the reading of EuGene.CodonTable file: '" << codon << "' is not an accepted stop codon\n";
+			exit(2); 
+		    }
+		    else
+		    {
 			vStop.push_back(codon);
+		    }
 		} 
   	}
 
@@ -839,89 +847,133 @@ double DNASeq :: IsStop(int i, int sens)
 // ---------------------------------------------------------------------
 // test if a spliced Stop Codon may start just before position i. 
 // Sets specific bits depending on the occurrence:
-//   - bit values 1,2,4 are used to report if the current pos is just 
+//   - bit values 1,2,4,8,16,32 are used to report if the current pos is just 
 //     after (FORWARD strand)
-//     - 1: a T  
-//     - 2: a TG 
-//     - 4: a TA 
-//   - bit values 8,16,32 are used to report if the seq at hand can generate 
+//     - 1   Txx -->
+//     - 2   Axx
+//     - 4   TGx 
+//     - 8   TAx
+//     - 16  AGx
+//     - 32  TCx
+//   - bit values 64, 128, 256, 521, 1024, 2048 are used to report if the seq at hand can generate 
 //     a STOP if it appears (REVERSE)
-//     - 8 : after G (AT)
-//     - 16: after A (GT|AT)
-//     - 32: after AG|AA|GA (T) 
+//     -  64   xxT <--
+//     - 128   xxA
+//     - 256   xGT
+//     - 512   xAT
+//     - 1024  xGA
+//     - 2048  xCT
 // ---------------------------------------------------------------------
 int DNASeq :: IsStartStop(int i)
 {
   int stop = 0;
 
   // le T
-  if (((*this)(i-1,0)) & CodeT) stop |= isTf; //StopAfterT;
+  if (((*this)(i-1,0)) & CodeT) stop |= startTf; // Txx
+  if (((*this)(i-1,0)) & CodeA) stop |= startAf; // Axx
 
-  // le cas du TG/TA
-  if (((*this)(i-2,0)) & CodeT) {
-    if (((*this)(i-1,0)) & CodeG) stop |= isTGf; //StopAfterTG
-    if (((*this)(i-1,0)) & CodeA) stop |= isTAf; //StopAfterTA
+  if (((*this)(i-2,0)) & CodeT) 
+  {
+    if (((*this)(i-1,0)) & CodeG) stop |= startTGf; // TGx
+    if (((*this)(i-1,0)) & CodeA) stop |= startTAf; // TAx
+    if (((*this)(i-1,0)) & CodeC) stop |= startTCf; // TCx
   }
+
+  if ( (((*this)(i-2,0)) & CodeA) && (((*this)(i-1,0)) & CodeG) )  stop |= startAGf; // AGx
 
   i = SeqLen -i -1;
 
   // le T
-  if (((*this)(i,2)) & CodeT) stop |= isTr; //StopAfterAG
+  if (((*this)(i,2)) & CodeT) stop |= startTr; // Txx
+  if (((*this)(i,2)) & CodeA) stop |= startAr; // Axx
 
-  // le cas du GT/AT
-  if (((*this)(i-1,2)) & CodeT) {
-    if (((*this)(i,2)) & CodeG) stop |= isTGr; //StopAfterA
-    if (((*this)(i,2)) & CodeA) stop |= isTAr; // StopAfterG+StopAfterA
+  if (((*this)(i-1,2)) & CodeT) 
+  {
+    if (((*this)(i,2)) & CodeG) stop |= startTGr; // TGx
+    if (((*this)(i,2)) & CodeA) stop |= startTAr; // TAx
+    if (((*this)(i,2)) & CodeC) stop |= startTCr; // TCx
   }
+  
+  if ( (((*this)(i-1,2)) & CodeA)  && (((*this)(i,2)) & CodeG) )  stop |= startAGr; // AGx
+  
 
   return stop;
 }
+
 // ---------------------------------------------------------------------
 // test if a spliced Stop Codon may stop just after position i. 
 // Sets specific bits depending on the occurrence.
-//   - bit values 1/2/4  are used to report if the seq at hand can generate 
+//   - bit values 1/2/4/8/16/32/64  are used to report if the seq at hand can generate 
 //     a STOP if it appears (FORWARD):
-//     - 1:  after T (GA|AG|AA)
-//     - 2:  after TG (A)
-//     - 4:  after TA (G|A)
-//   - bit values 8/16/32 
+//     -  1; xxA -->
+//     -  2: xxG
+//     -  4: xGA
+//     -  8: xAG
+//     - 16: xAA
+//     - 32: xGG
+//     - 64: xCA
+//   - bit values 128/256/512/1024/2048/4096/8192
 // REVERSE (RC) are used to report if the current pos is just (C BACKWARD):
-//     - 8:  after G (AT)
-//     - 16: after A (GT|AT)
-//     - 32: after AG|AA|GA (T) 
+//     -  128: Axx <--
+//     -  256: Gxx
+//     -  512: AGx
+//     - 1024: GAx
+//     - 2048: AAx
+//     - 4096: GGx
+//     - 8192: ACx
 // ---------------------------------------------------------------------
 int DNASeq :: IsStopStop(int i)
 {
   int stop = 0;
 
-  if (((*this)(i,0)) & CodeG) {
-    stop |= isGf; //StopAfterTA
+  if (((*this)(i,0)) & CodeG) 
+  {
+    stop |= stopGf; // xxG
     if (((*this)(i+1,0)) & CodeA)
-      stop |= isGAf; //StopAfterT
+      stop |= stopGAf; // xGA
+    else if (((*this)(i+1,0)) & CodeG)
+      stop |= stopGGf; // xGG
   }
 
-  if (((*this)(i,0)) & CodeA) {
-    stop |= isAf; //StopAfterTA+StopAfterTG
-    if (((*this)(i+1,0)) & (CodeA|CodeG))
-      stop |= isARf; //StopAfterT
+  if (((*this)(i,0)) & CodeA) 
+  {
+    stop |= stopAf; 
+    if (((*this)(i+1,0)) & CodeG)
+      stop |= stopAGf; // xAG
+    else if (((*this)(i+1,0)) & CodeA)
+      stop |= stopAAf; // xAA
   }
+  if ( (((*this)(i,0)) & CodeC) && ((*this)(i+1,0)) & CodeA) 
+    stop |= stopCAf;  // xCA
 
   i = SeqLen -i -1;
 
-  if (((*this)(i+1,2)) & CodeG) {
-    stop |= isGr; //StopAfterG
+  
+  if (((*this)(i+1,2)) & CodeG) 
+  {
+    stop |= stopGr; // xxG
     if (((*this)(i+2,2)) & CodeA)
-      stop |= isGAr;// StopAfterAG
+      stop |= stopGAr;//  xGA
+    else if (((*this)(i+2,2)) & CodeG)
+      stop |= stopGGr; // xGG
   }
   
-  if (((*this)(i+1,2)) & CodeA) {
-    stop |= isAr; //StopAfterA
-    if (((*this)(i+2,2)) & (CodeA|CodeG))
-      stop |= isARr; //StopAfterAG
+  if (((*this)(i+1,2)) & CodeA) 
+  {
+    stop |= stopAr; // xxA
+    if (((*this)(i+2,2)) & (CodeG))
+      stop |= stopAGr; // xAG
+    else if (((*this)(i+2,2)) & (CodeA))
+      stop |= stopAAr; // xAA
   }
+  
+  if ( ( ((*this)(i+1,2)) & CodeC) && (((*this)(i+2,2) & CodeA)))
+    stop |= stopCAr;  // xCA
 
   return stop;
 }
+
+
 // ---------------------------------------------------------------------
 // Returns simply A,T,C,G or N depending on the nucleotide at position i
 // ---------------------------------------------------------------------
@@ -1073,3 +1125,26 @@ int DNASeq :: Pos2Frame(int pos, char strand)
   }
   return frame;
 }
+
+// Return true if triplet is an allowed stop codon
+bool DNASeq :: IsAllowedStop(std::string triplet)
+{
+  for (int i = 0; i < AllowedStopNb; i++) 
+  {
+      if (triplet.compare(AllowedStop[i]) == 0)
+	 return true;
+  }
+  
+  return false;
+}
+
+ // Return true if triplet is a stop codon 	 
+ bool DNASeq :: IsAStop(std::string triplet) 	 
+ { 	 
+	   for (int j = 0; j < vStop.size(); j++) 	 
+	   { 	 
+	       if (vStop[j].compare(triplet) == 0) 	 
+	           return true; 	 
+	   } 	 
+	   return false; 	 
+ }

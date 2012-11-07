@@ -28,7 +28,7 @@
 #include <map>
 
 
-const unsigned short MASKSEQ = 0x000F;
+const unsigned short MASKSEQ = 0x000F; // 0000 0000 0000 1111 
 
 const unsigned short BitT = 3;
 const unsigned short BitG = 2;
@@ -36,10 +36,10 @@ const unsigned short BitC = 1;
 const unsigned short BitA = 0;
 
 
-const unsigned short CodeT = (1 << BitT);
-const unsigned short CodeG = (1 << BitG);
-const unsigned short CodeC = (1 << BitC);
-const unsigned short CodeA = (1 << BitA);
+const unsigned short CodeT = (1 << BitT); // 000 000 000 1000
+const unsigned short CodeG = (1 << BitG); // 000 000 000 0100
+const unsigned short CodeC = (1 << BitC); // 000 000 000 0010
+const unsigned short CodeA = (1 << BitA); // 000 000 000 0001
 
 struct my_tolower
 { 
@@ -87,7 +87,7 @@ class  DNASeq
   double StartPenalty(int i, int sens);
 
   // bit vector values for spliced stop detection
-  static const int isTf  = 1;
+  /*static const int isTf  = 1;
   static const int isTGf = 2;
   static const int isTAf = 4;
   static const int isTr  = 8;
@@ -101,7 +101,36 @@ class  DNASeq
   static const int isGr  = 16;
   static const int isGAr = 32;
   static const int isAr  = 64;
-  static const int isARr = 128;
+  static const int isARr = 128;*/
+
+  // bit vector values for spliced stop detection
+  static const int startTf  = 1;
+  static const int startAf  = 2;
+  static const int startTGf = 4;
+  static const int startTAf = 8;
+  static const int startAGf = 16;
+  static const int startTCf = 32;
+  static const int startTr  = 64;
+  static const int startAr  = 128;
+  static const int startTGr = 256;
+  static const int startTAr = 512;
+  static const int startAGr = 1024;
+  static const int startTCr = 2048;
+  
+  static const int stopAf  = 1;
+  static const int stopGf  = 2;
+  static const int stopGAf = 4;
+  static const int stopAGf = 8;
+  static const int stopAAf = 16;
+  static const int stopGGf = 32;
+  static const int stopCAf = 64;
+  static const int stopAr  = 128;
+  static const int stopGr  = 256;
+  static const int stopGAr = 512;
+  static const int stopAGr = 1024;
+  static const int stopAAr = 2048;
+  static const int stopGGr = 4096;
+  static const int stopCAr = 8192;
 
   // see comments in .cc, used to detect possible spliced stops
   // returns a bit vector inside an int.
@@ -120,6 +149,9 @@ class  DNASeq
   double IsStop(int pos,int strand);
   double IsStart(int pos,int strand);
   double IsProStart(int i,int sens);
+  
+  bool IsAllowedStop(std::string triplet);
+  bool IsAStop(std::string triplet) ;
 
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);

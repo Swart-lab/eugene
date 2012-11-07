@@ -380,12 +380,15 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 					else if ( rest_codon_lg == 2 )
 					{
 						if ( seq[intrLPos-2] == 't' ) state = IntronF2T;
+						else if ( seq[intrLPos-2] == 'a' ) state = IntronF2A;
 						else                        state = IntronF2;
 					}
 					else
 					{
-						if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'g' ) state = IntronF3TG;
+						if (      seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'g' ) state = IntronF3TG;
 						else if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'a' ) state = IntronF3TA;
+						else if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'c' ) state = IntronF3TC;
+						else if ( seq[intrLPos-3] == 'a' && seq[intrLPos-2] == 'g' ) state = IntronF3AG;
 						else  state = IntronF3;
 					}
 					this->AddFeature ( state, intrLPos, intrRPos );
@@ -405,7 +408,7 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 				rpos = abs ( exons[i] );
 				// Compute the nature of the exons
 				if ( exons.size() == 2 )        state = SnglR1; // Case single exon
-				else if ( ( i-1 ) == 0 )          state = TermR1; // Case last exon
+				else if ( ( i-1 ) == 0 )        state = TermR1; // Case last exon
 				else if ( i == exons.size()-1 ) state = InitR1; // Case first exon
 				else                            state = IntrR1; // Case internal exon
 				// Compute the frame
@@ -426,18 +429,22 @@ Gene :: Gene ( std::string line, DNASeq& seq )
 					if ( rest_codon_lg == 0 )       state = IntronR1;
 					else if ( rest_codon_lg == 2 )
 					{
-						if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'c' ) state = IntronR2AG;
-						else                                                  state = IntronR2;
+						if (      seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'c' ) state = IntronR2GA;
+						else if ( seq[intrLPos-3] == 'c' && seq[intrLPos-2] == 't' ) state = IntronR2AG;
+						else if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 't' ) state = IntronR2AA;
+						else if ( seq[intrLPos-3] == 't' && seq[intrLPos-2] == 'g' ) state = IntronR2CA;
+						else if ( seq[intrLPos-3] == 'c' && seq[intrLPos-2] == 'c' ) state = IntronR2GG;
+						else                                                         state = IntronR2;
 					}
 					else
 					{
-						if ( seq[intrLPos-2] == 'c' )  state = IntronR3G;
+						if (      seq[intrLPos-2] == 'c' ) state = IntronR3G;
 						else if ( seq[intrLPos-2] == 't' ) state = IntronR3A;
-						else                        state = IntronR3;
+						else                               state = IntronR3;
 					}
 					vStates.push_back ( state );
-					vStart.push_back ( intrLPos );
-					vStop.push_back ( intrRPos );
+					vStart.push_back  ( intrLPos );
+					vStop.push_back   ( intrRPos );
 				}
 			}
 			// Add the features
@@ -1020,7 +1027,7 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
 	for ( int i=0; i< nb_feat; i++ )
 	{
 		if ( i != 0 ) start = vPos[i-1] + 1;
-		/*cout << "pos : " << start << "-" << vPos[i] << " " << State(vState[i]).State2EGNString() << " " << State(vState[i]).GetStrand();
+		/*cout << "pos : " << start << "-" << vPos[i] << " state " << (int)vState[i] << " " << State(vState[i]).State2EGNString() << " " << State(vState[i]).GetStrand();
 		if (State(vState[i]).IsUIR()) cout << " => UIR ";
 		cout << "\n";*/
 		// Si state=intergenique OU start > seqlen on passe
@@ -2296,18 +2303,20 @@ void Prediction :: CheckConsistency ( int debut, int fin, int etat,
 	// les valeurs qui sont coherentes avec chaque etat
 	const unsigned char Consistent[NbTracks] =
 	{
-		HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
+		HitForward|MForward,    HitForward|MForward,    HitForward|MForward, // exon
 		HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
 		HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
 		HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
 		HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
 		HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
 		HitForward|MForward,    HitForward|MForward,    HitForward|MForward,
-		HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse,
-		GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
+		HitReverse|MReverse,    HitReverse|MReverse,    HitReverse|MReverse, 
+		GapForward|MForward,    GapForward|MForward,    GapForward|MForward, //introns
 		GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
 		GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
+		GapForward|MForward,    GapForward|MForward,    GapForward|MForward,
 		GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse,
+		GapReverse|MReverse,    GapReverse|MReverse,    GapReverse|MReverse, GapReverse|MReverse,
 		0,
 		HitForward|MForward, HitForward|MForward, // UTR
 		HitReverse|MReverse, HitReverse|MReverse, // UTR
@@ -2324,6 +2333,7 @@ void Prediction :: CheckConsistency ( int debut, int fin, int etat,
 
 	const unsigned char MaskConsistent[NbTracks] =
 	{
+		Hit|Margin,    Hit|Margin,    Hit|Margin, // exon
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
@@ -2331,11 +2341,12 @@ void Prediction :: CheckConsistency ( int debut, int fin, int etat,
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
 		Hit|Margin,    Hit|Margin,    Hit|Margin,
-		Hit|Margin,    Hit|Margin,    Hit|Margin,
+		Gap|Margin,    Gap|Margin,    Gap|Margin, // intron
 		Gap|Margin,    Gap|Margin,    Gap|Margin,
+		Gap|Margin,    Gap|Margin,    Gap|Margin, // special introns forward
 		Gap|Margin,    Gap|Margin,    Gap|Margin,
-		Gap|Margin,    Gap|Margin,    Gap|Margin,
-		Gap|Margin,    Gap|Margin,    Gap|Margin,
+		Gap|Margin,    Gap|Margin,    Gap|Margin, // special introns forward
+		Gap|Margin,    Gap|Margin,    Gap|Margin,  Gap|Margin,
 		0,
 		Hit|Margin,    Hit|Margin, // UTR
 		Hit|Margin,    Hit|Margin, // UTR 

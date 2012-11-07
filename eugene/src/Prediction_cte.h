@@ -5,6 +5,7 @@
 #ifndef  __PREDICTION_CTE_H__
 #define  __PREDICTION_CTE_H__
 
+#define DEV
 
 enum Tracks
 {
@@ -18,21 +19,23 @@ enum Tracks
     TermR1    = 21, TermR2     = 22, TermR3     = 23,
     IntronF1  = 24, IntronF2   = 25, IntronF3   = 26,
     IntronR1  = 27, IntronR2   = 28, IntronR3   = 29,
-    IntronF2T = 30, IntronF3TG = 31, IntronF3TA = 32,
-    IntronR3G = 33, IntronR3A  = 34, IntronR2AG = 35,
-    InterGen  = 36,
-    UTR5F     = 37, UTR3F      = 38,
-    UTR5R     = 39, UTR3R      = 40,
-    IntronU5F = 41, IntronU5R  = 42,
-    IntronU3F = 43, IntronU3R  = 44,
-    RnaF      = 45, RnaR       = 46,
-    SnglF1F2  = 47, SnglF1F3   = 48, SnglF2F3  = 49,
-    SnglR1R2  = 50, SnglR1R3   = 51, SnglR2R3  = 52,
-    SnglF1R1  = 53, SnglF1R2   = 54, SnglF1R3  = 55,
-    SnglF2R1  = 56, SnglF2R2   = 57, SnglF2R3  = 58, 
-    SnglF3R1  = 59, SnglF3R2   = 60, SnglF3R3  = 61,
-    UIRF      = 62, UIRR = 63,
-    NbTracks  = 64
+    IntronF2T = 30, IntronF2A  = 31, IntronF3TG = 32,                   // Txx,   Axx,   TG[A]
+    IntronF3TA = 33, IntronF3TC = 34, IntronF3AG = 35,                  // TA[GA],TC[A], AG[AG]
+    IntronR3G  = 36, IntronR3A  = 37, IntronR2GA = 38,                  // xxG,   xxA,   [TA]GA
+    IntronR2AG = 39, IntronR2AA = 40, IntronR2CA = 41, IntronR2GG = 42, // [T]AG, [T]AA, [T]CA, [A]GG
+    InterGen  = 43,
+    UTR5F     = 44, UTR3F      = 45,
+    UTR5R     = 46, UTR3R      = 47,
+    IntronU5F = 48, IntronU5R  = 49,
+    IntronU3F = 50, IntronU3R  = 51,
+    RnaF      = 52, RnaR       = 53,
+    SnglF1F2  = 54, SnglF1F3   = 55, SnglF2F3  = 56,
+    SnglR1R2  = 57, SnglR1R3   = 58, SnglR2R3  = 59,
+    SnglF1R1  = 60, SnglF1R2   = 61, SnglF1R3  = 62,
+    SnglF2R1  = 63, SnglF2R2   = 64, SnglF2R3  = 65, 
+    SnglF3R1  = 66, SnglF3R2   = 67, SnglF3R3  = 68,
+    UIRF      = 69, UIRR = 70,
+    NbTracks  =  71 
 };
 
 const int proActiveTracksNb= 30;
@@ -71,7 +74,7 @@ SnglR1R2, SnglR1R3, SnglR2R3,
 UIRR
 };
 
-const int eukActiveTracksNb= 47;
+const int eukActiveTracksNb= 54;
 const short int eukActiveTracks[eukActiveTracksNb]={
     InitF1,  InitF2,  InitF3 ,
     InitR1, InitR2,InitR3,
@@ -81,10 +84,12 @@ const short int eukActiveTracks[eukActiveTracksNb]={
     IntrR1 ,IntrR2,IntrR3 ,
     TermF1,TermF2,TermF3,
     TermR1 ,TermR2,TermR3,
-    IntronF1 , IntronF2 , IntronF3,
-    IntronR1 , IntronR2 , IntronR3,
-    IntronF2T , IntronF3TG, IntronF3TA,
-    IntronR3G ,IntronR3A ,IntronR2AG,
+    IntronF1, IntronF2 , IntronF3,
+    IntronR1, IntronR2, IntronR3,
+    IntronF2T,  IntronF2A,  IntronF3TG,                   // Txx,   Axx,   TG[A]
+    IntronF3TA, IntronF3TC, IntronF3AG,                 // TA[GA],TC[A], AG[AG]
+    IntronR3G,  IntronR3A,  IntronR2GA,                  // xxG,   xxA,   [TA]GA
+    IntronR2AG, IntronR2AA, IntronR2CA, IntronR2GG,
     InterGen,
     UTR5F, UTR3F,
     UTR5R , UTR3R ,
@@ -108,8 +113,10 @@ const enum Tracks ReverseIt[NbTracks] =
     TermF1, TermF2, TermF3,
     IntronR1, IntronR2, IntronR3,
     IntronF1,IntronF2, IntronF3,
-    IntronR2AG, IntronR3A, IntronR3G,
-    IntronF3TA, IntronF3TG, IntronF2T,
+    IntronR2AG, IntronR2GA,  IntronR3A,                   // Txx,   Axx,   TG[A]
+    IntronR3G,  IntronR3A,   IntronR3G,                 // TA[GA],TC[A], AG[AG]
+    IntronF3TA, IntronF3TA,  IntronF2T,                  // xxG,   xxA,   [TA]GA
+    IntronF2T,  IntronF2T,   IntronF2T, IntronF2A,
     InterGen,
     UTR5R,UTR3R,
     UTR5F, UTR3F,
@@ -126,28 +133,30 @@ const enum Tracks ReverseIt[NbTracks] =
 
 const short int UnorientedTracks[1] = {InterGen};
 
-const short int ForwardTracks[(NbTracks-1)/2] =
+const short int ForwardTracks[30] =
 {
     InitF1,InitF2,InitF3,
     SnglF1,SnglF2,SnglF3,
     IntrF1,IntrF2,IntrF3,
     TermF1,TermF2,TermF3,
     IntronF1,IntronF2,IntronF3,
-    IntronF2T,IntronF3TG,IntronF3TA,
+    IntronF2T,  IntronF2A,  IntronF3TG,
+    IntronF3TA, IntronF3TC, IntronF3AG,  
     UTR5F,UTR3F,
     IntronU5F,IntronU3F, RnaF,
     SnglF1F2, SnglF1F3, SnglF2F3,
     UIRF
 };
 
-const short int ReverseTracks[(NbTracks-1)/2] =
+const short int ReverseTracks[31] =
 {
     InitR1,InitR2,InitR3,
     SnglR1,SnglR2,SnglR3,
     IntrR1,IntrR2,IntrR3,
     TermR1,TermR2,TermR3,
     IntronR1,IntronR2,IntronR3,
-    IntronR3G,IntronR3A,IntronR2AG,
+    IntronR3G,IntronR3A,IntronR2GA,             
+    IntronR2AG,IntronR2AA,IntronR2CA,IntronR2GG,
     UTR5R,UTR3R,
     IntronU5R,IntronU3R, RnaR,
     SnglR1R2, SnglR1R3, SnglR2R3,
@@ -178,10 +187,12 @@ const short int State2Status[NbTracks] =
     TRANSLATED,TRANSLATED,TRANSLATED,
     TRANSLATED,TRANSLATED,TRANSLATED,
     TRANSLATED,TRANSLATED,TRANSLATED,
+    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED, //introns
+    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
+    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED, // special introns
     SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
     SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
-    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
-    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
+    SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,SPLICED_TRANSCRIBED,
     UNTRANSCRIBED,
     UNTRANSLATED,UNTRANSLATED,
     UNTRANSLATED,UNTRANSLATED,
@@ -221,8 +232,10 @@ const short int State2Frame[NbTracks] =
     Frame1R, Frame2R, Frame3R,
     FrameIntronF, FrameIntronF, FrameIntronF,
     FrameIntronR, FrameIntronR, FrameIntronR,
+    FrameIntronF, FrameIntronF, FrameIntronF, //special introns
     FrameIntronF, FrameIntronF, FrameIntronF,
     FrameIntronR, FrameIntronR, FrameIntronR,
+    FrameIntronR, FrameIntronR, FrameIntronR, FrameIntronR,
     FrameIG,
     FrameIG, FrameIG,
     FrameIG, FrameIG,
@@ -253,10 +266,12 @@ const short int State2Strand[NbTracks] =
     Reverse, Reverse, Reverse,
     Forward, Forward, Forward,
     Reverse, Reverse, Reverse,   // Exons
-    Forward, Forward, Forward,
+    Forward, Forward, Forward,  // introns
     Reverse, Reverse, Reverse,
+    Forward, Forward, Forward,   // special introns
     Forward, Forward, Forward,
-    Reverse, Reverse, Reverse,   // Introns
+    Reverse, Reverse, Reverse,   
+    Reverse, Reverse, Reverse, Reverse,
     No_Strand,                   // IG
     Forward, Forward,
     Reverse, Reverse,            // UTR
@@ -271,5 +286,7 @@ const short int State2Strand[NbTracks] =
     Forward, Reverse,
 };
 
+const int AllowedStopNb = 6;
+const char* const AllowedStop[AllowedStopNb] = {"tag", "tga", "taa", "aga", "agg", "tca"};
 
 #endif  //__PREDICTION_CTE_H__
