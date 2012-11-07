@@ -144,6 +144,8 @@ SHELL = @SHELL@
 SOLARIS_OS_FALSE = @SOLARIS_OS_FALSE@
 SOLARIS_OS_TRUE = @SOLARIS_OS_TRUE@
 STRIP = @STRIP@
+TRANSL_TABLE_6_FALSE = @TRANSL_TABLE_6_FALSE@
+TRANSL_TABLE_6_TRUE = @TRANSL_TABLE_6_TRUE@
 VERSION = @VERSION@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
@@ -737,6 +739,8 @@ export eugene_cflags = -fPIC
 @MACOS_OS_TRUE@export sensors_ldflags = -bundle -flat_namespace -undefined suppress
 @MACOS_OS_TRUE@export eugene_cxxflags = 
 @MACOS_OS_TRUE@export eugene_cflags = 
+
+@TRANSL_TABLE_6_TRUE@export eugene_cxxflags +=  -DTRANSL_TABLE_6
 
 export host_alias = @host@
 

@@ -591,6 +591,8 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
+TRANSL_TABLE_6_FALSE
+TRANSL_TABLE_6_TRUE
 MACOS_OS_FALSE
 MACOS_OS_TRUE
 SOLARIS_OS_FALSE
@@ -686,6 +688,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_dependency_tracking
+enable_transl_table_6
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1315,6 +1318,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
+  --enable-transl_table_6    Use codon translation table number 6
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2519,7 +2523,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=eugene
- VERSION=4.1a
+ VERSION=4.1b
 
 
 cat >>confdefs.h <<_ACEOF
@@ -5245,6 +5249,28 @@ else
 fi
 
 
+# Check whether --enable-transl_table_6 was given.
+if test "${enable_transl_table_6+set}" = set; then :
+  enableval=$enable_transl_table_6; case "${enableval}" in
+       yes) transl_table_6=true ;;
+       no)  transl_table_6=false ;;
+       *) as_fn_error $? "bad value ${enableval} for --enable-transl_table_6" "$LINENO" 5  ;;
+     esac
+else
+  transl_table_6=false
+fi
+
+
+
+if test x$transl_table_6 = xtrue; then
+  TRANSL_TABLE_6_TRUE=
+  TRANSL_TABLE_6_FALSE='#'
+else
+  TRANSL_TABLE_6_TRUE='#'
+  TRANSL_TABLE_6_FALSE=
+fi
+
+
 
 ac_config_files="$ac_config_files Makefile README src/Makefile src/GDIF/Makefile src/Parametrization/Makefile src/SensorPlugins/Makefile src/SensorPlugins/0_SensorTk/Makefile src/SensorPlugins/0_SensorTk/GetData/Makefile src/SensorPlugins/AnnotaStruct/Makefile src/SensorPlugins/BlastX/Makefile src/SensorPlugins/Est/Makefile src/SensorPlugins/EuStop/Makefile src/SensorPlugins/FrameShift/Makefile src/SensorPlugins/GCPlot/Makefile src/SensorPlugins/GFF/Makefile src/SensorPlugins/GSplicer/Makefile src/SensorPlugins/Homology/Makefile src/SensorPlugins/IfElse/Makefile src/SensorPlugins/MarkovConst/Makefile src/SensorPlugins/MarkovIMM/Makefile src/SensorPlugins/MarkovIMM/GetData/Makefile src/SensorPlugins/MarkovProt/Makefile src/SensorPlugins/MarkovProt/GetData/Makefile src/SensorPlugins/NcRNA/Makefile src/SensorPlugins/NG2/Makefile src/SensorPlugins/NStart/Makefile src/SensorPlugins/NStretch/Makefile src/SensorPlugins/PatConst/Makefile src/SensorPlugins/PepSignal/Makefile src/SensorPlugins/ProStart/Makefile src/SensorPlugins/Plotter/Makefile src/SensorPlugins/QualData/Makefile src/SensorPlugins/Repeat/Makefile src/SensorPlugins/RibosomalFrameShift/Makefile src/SensorPlugins/Riken/Makefile src/SensorPlugins/SMachine/Makefile src/SensorPlugins/SPred/Makefile src/SensorPlugins/SpliceWAM/Makefile src/SensorPlugins/StartWAM/Makefile src/SensorPlugins/Tester/Makefile src/SensorPlugins/Transcript/Makefile plugins/Makefile doc/Makefile"
 
@@ -5365,6 +5391,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MACOS_OS_TRUE}" && test -z "${MACOS_OS_FALSE}"; then
   as_fn_error $? "conditional \"MACOS_OS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${TRANSL_TABLE_6_TRUE}" && test -z "${TRANSL_TABLE_6_FALSE}"; then
+  as_fn_error $? "conditional \"TRANSL_TABLE_6\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
