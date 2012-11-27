@@ -244,7 +244,7 @@ Hits* Hits::ReadFromGeneFeatureSet(GeneFeatureSet & HitSet , int *NumHits, int l
     int maxPos = X->SeqLen;
     int    deb, fin, phase, HSPDeb, HSPFin, poids;
     double hitEvalue;
-    string idSo;
+    string parentSo;
     char   HitId[512], strand, hitStrand;
     Block *ThisBlock = NULL;
     Hits  *OneHit    = NULL, *ThisHit = this, *AllHit = this;
@@ -266,35 +266,38 @@ Hits* Hits::ReadFromGeneFeatureSet(GeneFeatureSet & HitSet , int *NumHits, int l
     {
         vBlocks.clear();
         if (itParent->first == "") continue;
-
+	
+	parentSo = HitSet.getGeneFeature(itParent->first)->getType();
+	
+	//Get SO code if feature correspond to the name or the synonym.
+        if ( parentSo.find("SO:") == string::npos )
+        {
+            string tmp=GeneFeatureSet::soTerms_->getIdFromName(parentSo);
+            parentSo=tmp;
+        }
+        
         vector<GeneFeature *>::iterator it = itParent->second.begin();
         int nbGeneFeature = itParent->second.size();
         int i=0;
         // Create one block per child
         for ( i = 0 ; i < nbGeneFeature ; i++, it++ )
-        {
+        {    
             if ( ! (*it)->hasTarget() ) continue;
 
             deb    = (*it)->getLocus()->getStart();
             fin    = (*it)->getLocus()->getEnd();
             poids  = (*it)->getAttributes()->getTarget()->getScoreHit();
             strand = (*it)->getLocus()->getStrand();
-            idSo   = (*it)->getType();
             if ( poids <= 0)
             {
                 poids=(*it)->getLength();
             }
-            //Get SO code if feature correspond to the name or the synonym.
-            if ( idSo.find("SO:") == string::npos )
-            {
-                string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
-                idSo=tmp;
-            }
+
             strcpy (HitId, (*it)->getAttributes()->getTarget()->getName().c_str());
             HSPDeb = (*it)->getAttributes()->getTarget()->getLocus()->getStart();
             HSPFin = (*it)->getAttributes()->getTarget()->getLocus()->getEnd();
 
-            if ( idSo == "SO:0000668" || idSo == "SO:0000039") //EST_match
+            if (parentSo == "SO:0000668") // EST_match 
             {
                 phase  = (strand == '+' ? 0 : 1);
             }
