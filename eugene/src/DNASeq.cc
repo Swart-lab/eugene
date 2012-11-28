@@ -1148,3 +1148,49 @@ bool DNASeq :: IsAllowedStop(std::string triplet)
 	   } 	 
 	   return false; 	 
  }
+ 
+// i1 position before the splicing
+// i2 position after the splicing
+// splicePos == 1 -->  A   TG  (i1 is the position of the A, i2 of the T)
+// splicePos == 2 --> AT   G   (i1 is the position of the T, i2 of the G)
+double DNASeq ::  IsSpliceStart(int i1, int i2, int strand, int splicePos)
+{
+   int   c1, c2, c3;
+   short start1, start2, start3;
+   int   mode  = 0;
+   
+   if (strand < 0) 
+   {
+     i1   = SeqLen -i1 -1;
+     i2   = SeqLen -i2 -1;
+     mode = 2;
+   }
+   
+   if (splicePos == 1)
+   {
+     c1 = (*this)(i1,   mode);
+     c2 = (*this)(i2,   mode);
+     c3 = (*this)(i2+1, mode);
+   }
+   else
+   {
+     c1 = (*this)(i1-1, mode);
+     c2 = (*this)(i1,   mode);
+     c3 = (*this)(i2,   mode);
+   }
+  
+   // compare with each start codon
+  for (int i=0; i < vStart.size(); i++)
+  {
+ 	char* startCodon = (char*)vStart[i].c_str();
+    	start1 = Nuc2Code(startCodon[0]);
+    	start2 = Nuc2Code(startCodon[1]);
+    	start3 = Nuc2Code(startCodon[2]);
+       // The codon is a start!
+    	if ( (c1 & start1) != 0 && (c2 & start2) != 0 && (c3 & start3) != 0 )
+	{
+	  return true;
+	}
+  }
+  return false;
+}
