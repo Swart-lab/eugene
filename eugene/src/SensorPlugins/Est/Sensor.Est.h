@@ -32,6 +32,9 @@ class SensorEst : public Sensor
   std::vector<int>           vPos;
   std::vector<unsigned char> vESTMatch;
   std::vector<int>::iterator iter;
+  std::vector<char>   vSplicedStartF; // vSplicedStartF[i] = true if a spliced start codon begins at pos i on forward
+  std::vector<char>   vSplicedStartR; // vSplicedStartR[i] = true if a spliced start codon begins at pos i on reverse
+  
   int    index;
   unsigned char *ESTMatch;
   Hits   **HitTable;
@@ -41,6 +44,7 @@ class SensorEst : public Sensor
   double cdsBoost;
   double spliceBoost;
   double spliceNonCanP; // penalty if there is a non canonical splice site
+  double spliceStartP;  // penalty if there is a spliced start
   int    estM, utrM;
   int    ppNumber;
   int    initid;

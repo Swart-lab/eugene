@@ -106,6 +106,8 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
 
     vPos.clear();
     vESTMatch.clear();
+    vSplicedStartR.clear();
+    vSplicedStartF.clear();
     fileExt        = PAR.getC("Est.FileExtension", N);
     estM           = PAR.getI("Est.estM",N);
     utrM           = PAR.getI("Est.utrM",N);
@@ -119,12 +121,18 @@ SensorEst :: SensorEst (int n, DNASeq *X) : Sensor(n)
     DonorThreshold = PAR.getD("Est.StrongDonor",N);
     DonorThreshold = log(DonorThreshold/(1-DonorThreshold));
     spliceNonCanP  = PAR.getD("Est.SpliceNonCanP", N);
+    spliceStartP   = PAR.getD("Est.SpliceStartP", N);
 
     index = 0;
 
     ESTMatch = new unsigned char[X->SeqLen+1];
+
     for (i = 0; i <= X->SeqLen; i++)
-        ESTMatch[i] = 0;
+    {
+        ESTMatch[i]      = 0;
+	vSplicedStartF.push_back(0);
+	vSplicedStartR.push_back(0);
+    }
 
     fprintf(stderr,"Reading cDNA hits............");
     fflush(stderr);
@@ -174,6 +182,8 @@ SensorEst :: ~SensorEst ()
 {
     vPos.clear();
     vESTMatch.clear();
+    vSplicedStartR.clear();
+    vSplicedStartF.clear();
 
     if(HitTable != NULL)
         delete [] HitTable;
@@ -187,10 +197,12 @@ SensorEst :: ~SensorEst ()
 // --------------------------------
 void SensorEst :: Init (DNASeq *X)
 {
+    
     estP = PAR.getD("Est.estP*",N);
     utrP = PAR.getD("Est.utrP*",N);
     spliceBoost    = PAR.getD("Est.SpliceBoost*",N);
     cdsBoost       = PAR.getD("Est.CdsBoost*", N);
+   
     //for(int jj=0;jj<(int)vPos.size();jj++)
     //printf("vPos[%d]:%d\tvESTM[%d]:%d\n",jj,vPos[jj]+1,jj,vESTMatch[jj]);
 }
@@ -380,6 +392,15 @@ void SensorEst :: GiveInfo (DNASeq *X, int pos, DATA *d)
             }
         }
     }
+    if ( d->sig[DATA::Start].weight[Signal::Forward] == 0.0 && vSplicedStartF[pos] == 1)
+    {
+       d->sig[DATA::Start].weight[Signal::Forward] = -spliceStartP;
+    }
+    if ( d->sig[DATA::Start].weight[Signal::Reverse] == 0.0 && vSplicedStartR[pos] == 1)
+    {
+       d->sig[DATA::Start].weight[Signal::Reverse] = -spliceStartP;
+    }
+    
 }
 
 // -----------------------
@@ -717,6 +738,7 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                         else
                             ESTMatch[i] |= TheStrand << HitToMLeft;
 
+		    // In the intron
                     if (abs(ThisBlock->Prev->End - ThisBlock->Start) < MaxIntIntron)
                     {
 
@@ -725,8 +747,34 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                                 ESTMatch[i] |= (Info & (TheStrand << HitToGap));
                             else
                                 ESTMatch[i] |= TheStrand << HitToGap;
+			    
+                        // strand +, potentially the first exon: search for a spliced start
+                        if (TheStrand & HitForward && ThisBlock->Prev->Prev == NULL)
+                        {
+                          if (X->IsSpliceStart(ThisBlock->Prev->End, ThisBlock->Start, 1, 1))
+                          {
+                            vSplicedStartF[ThisBlock->Prev->End] = 1;
+                          }
+                          if (X->IsSpliceStart(ThisBlock->Prev->End, ThisBlock->Start, 1, 2))
+                          {
+                            vSplicedStartF[ThisBlock->Prev->End-1] = 1;
+                          }
+                        }
+                          
+                        // strand -, potentially the first exon: search for a spliced start
+                        if (TheStrand & HitReverse && ThisBlock->Next == NULL)
+                        {
+                          if (X->IsSpliceStart(ThisBlock->Start, ThisBlock->Prev->End, -1, 1))
+                          {
+                            vSplicedStartR[ThisBlock->Start+1] = 1;
+                          }
+                          if (X->IsSpliceStart(ThisBlock->Start, ThisBlock->Prev->End, -1, 2))
+                          {
+                            vSplicedStartR[ThisBlock->Start+2] = 1;
+                          }
+                        } 
                     }
-                    else
+                    else // intron too long
                         fprintf(stderr, "   [%s]: long intron ignored (%d bases)\n",
                                 ThisEST->Name,abs(ThisBlock->Prev->End - ThisBlock->Start));
 
