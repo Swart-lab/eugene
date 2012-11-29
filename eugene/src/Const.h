@@ -42,10 +42,10 @@ const int MAX_GFF_LINE  = 2048;
 const double NINFINITY   = log(0.0);
 
 // Les Hits EST
-const unsigned char HitForward    = 0x1;
-const unsigned char MLeftForward  = 0x2;
-const unsigned char GapForward    = 0x4;
-const unsigned char MRightForward = 0x8; 
+const unsigned char HitForward    = 0x1; // 00000001
+const unsigned char MLeftForward  = 0x2; // 00000010
+const unsigned char GapForward    = 0x4; // 00000100
+const unsigned char MRightForward = 0x8; // 00001000
 
 // Left shift to go from Hits to ...
 const  unsigned int HitToMLeft  = 1;
@@ -55,10 +55,10 @@ const  unsigned int HitToMRight = 3;
 // Right shift to go from Reverse to Forward
 const unsigned int  ReverseToForward = 4; 
 
-const unsigned char HitReverse    = 0x10;
-const unsigned char MLeftReverse  = 0x20;
-const unsigned char GapReverse    = 0x40;
-const unsigned char MRightReverse = 0x80; 
+const unsigned char HitReverse    = 0x10; // 00010000
+const unsigned char MLeftReverse  = 0x20; // 00100000
+const unsigned char GapReverse    = 0x40; // 01000000
+const unsigned char MRightReverse = 0x80; // 10000000
 
 const unsigned char Hit           = HitForward    | HitReverse;
 const unsigned char MLeft         = MLeftForward  | MLeftReverse;
