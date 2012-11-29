@@ -269,6 +269,7 @@ set NewValue1(Est.utrM\[0\])	        5
 set NewValue1(Est.CdsBoost*\[0\])   0.0
 set NewValue1(Est.SpliceBoost*\[0\]) 0.0
 set NewValue1(Est.SpliceNonCanP\[0\]) 1.0
+set NewValue1(Est.SpliceStartP\[0\])   100.0 
 set NewValue1(Est.StrongDonor\[0\])	0.95
 set NewValue1(Est.MinDangling\[0\])  10
 set NewValue1(Est.MaxIntron\[0\])    15000
@@ -284,6 +285,7 @@ set NewValue1(Est.utrM\[1\])	        5
 set NewValue1(Est.CdsBoost*\[1\]) 0.0
 set NewValue1(Est.SpliceBoost*\[1\]) 0.0
 set NewValue1(Est.SpliceNonCanP\[1\]) 1.0
+set NewValue1(Est.SpliceStartP\[1\])   100.0 
 set NewValue1(Est.StrongDonor\[1\])	0.95
 set NewValue1(Est.MinDangling\[1\])  10
 set NewValue1(Est.MaxIntron\[1\])    15000
