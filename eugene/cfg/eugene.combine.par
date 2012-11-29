@@ -259,6 +259,7 @@ Est.utrM[0]	5
 Est.CdsBoost*[0] 0.0
 Est.SpliceBoost*[0] 0.0
 Est.SpliceNonCanP[0] 1.0
+Est.SpliceStartP[0] 100.0
 Est.StrongDonor[0] 0.95
 Est.MinDangling[0] 10
 Est.MaxIntron[0]   15000
