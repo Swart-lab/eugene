@@ -535,14 +535,13 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
   string idSo, ontology_term;
   std::vector <int>         vPos;
   std::vector <signed char> vState;
-
+  bool first = true;
  
   vector<GeneFeature *>::iterator it = geneFeatureSet.getIterator();
   int nbGeneFeature=geneFeatureSet.getNbFeature();
   
   for ( int j=0 ; j < nbGeneFeature ; j++, it++ )
   {
-     cout << (*it)->getString() <<endl;	
      strcpy (feature, (*it)->getType().c_str());
      start = (*it)->getLocus()->getStart();
      end = (*it)->getLocus()->getEnd();
@@ -559,7 +558,8 @@ void SensorTester :: ReadGFF3Annotation(GeneFeatureSet & geneFeatureSet , DNASeq
      {
 	continue;
      }
-     if (j==0) {
+     if (first == true) {
+	  first = false;
 	  vPos.push_back  ( start-1  );
 	  vState.push_back( InterGen );
 	  if (idSo=="SO:0000204" || idSo=="SO:0000205") { //if UTR
