@@ -37,11 +37,11 @@ The behavior of the plugin is controlled by the following parameters:
   splice site is detected on the border of transcribed evidence. Note that 
   non canonical splice sites are researched only if \texttt{EuGene.NonCanAcc} 
   and/or \texttt{EuGene.NonCanDon} are defined.
-\item \texttt{Est.SpliceStartP} is the penalty affected if a spliced start 
-codon is detected on the frontier of the first and the second match region 
-in a genomic spliced alignment. Note that the minimum length of the first 
-coding exon has to be 1 nt to allow the detection of spliced start. (check 
-the value in \texttt{EuGene.InitExDist} file)
+\item \texttt{Est.SpliceStartP} is the penalty for all predictions that
+go through a spliced start at the frontier of the first and the second 
+match region in a genomic spliced alignment. Note that the minimum 
+length of the first coding exon has to be 1 nt to allow the detection 
+of spliced start. (check the value in \texttt{EuGene.InitExDist} file)
 \item \texttt{Est.estM} gives the amount of ``fuzzyness'' allowed in
   interpreting a hit/gap border. The nucleotides which are less than
   \texttt{Est.estM} nucleotides away from this border are considered
@@ -57,7 +57,8 @@ the value in \texttt{EuGene.InitExDist} file)
 \item \texttt{Est.StrongDonor} gives a threshold $T$ on donor strength
   inside intronless EST. If a given Donor with scores $a|b$ such that
   $\log(\frac{a}{b}) >T$ then the intronless EST is rejected because
-  it goes through a very strong donor site.
+  it goes through a very strong donor site. \texttt{Est.StrongDonor} 
+  value is included in ]0;1[.
 \item \texttt{Est.MinDangling} gives the minimum length of the first
   and last match region in a genomic spliced alignment. If the length
   is below this, then it is assumed to be a false match and it is
