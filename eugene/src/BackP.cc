@@ -311,7 +311,7 @@ Prediction* Track :: BackTrace (int From, int To, int Forward)
   pos  = It->StartPos;
   etat = It->State;
   It   = It->Origin;
-  if (pos >= From) {
+  if (pos > From) {
     vPos.push_back  ( pos  );
     vState.push_back( etat );
   }
@@ -328,8 +328,10 @@ Prediction* Track :: BackTrace (int From, int To, int Forward)
     It   = It->Origin;
 
     //    printf("pos %d etat %d CDSlen %d prevpos %d\n", pos,etat,CDSlen,prevpos);
-
-    if (pos >= From) {
+    
+    // Ignore case where pos=From to not display an initial feature with a length = 0
+    // NOTE: if we want to detect incomplete genes, we will need this information!
+    if (pos > From) {   
       vPos.push_back  ( pos  );
       vState.push_back( etat );
     }
@@ -343,7 +345,6 @@ Prediction* Track :: BackTrace (int From, int To, int Forward)
     reverse(vState.begin(), vState.end());
     reverse(vPos.begin(),   vPos.end());
   }
-  
   pred = new Prediction(From, To, vPos, vState);
   vPos.clear();
   vState.clear();
