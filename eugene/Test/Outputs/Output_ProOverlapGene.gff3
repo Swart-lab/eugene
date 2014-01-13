@@ -1,37 +1,37 @@
 ##gff-version 3
 ##sequence-region SMc 1 11501
-SMc	EuGene	gene	1	93	.	+	.	ID=gene:SMc.1;Name=SMc.1;length=93	
-SMc	EuGene	mRNA	1	93	.	+	.	ID=mRNA:SMc.1;Name=SMc.1;Parent=gene:SMc.1;nb_exon=1;length=93	
-SMc	EuGene	exon	1	93	.	+	1	ID=exon:SMc.1.1;Parent=mRNA:SMc.1;Ontology_term=SO:0000147	
+SMc	EuGene	gene	1	92	.	+	.	ID=gene:SMc.1;Name=SMc.1;length=92	
+SMc	EuGene	mRNA	1	92	.	+	.	ID=mRNA:SMc.1;Name=SMc.1;Parent=gene:SMc.1;nb_exon=1;length=92	
+SMc	EuGene	exon	1	92	.	+	1	ID=exon:SMc.1.1;Parent=mRNA:SMc.1;Ontology_term=SO:0000147	
 SMc	EuGene	CDS	1	91	.	+	1	ID=CDS:SMc.1.1;Parent=mRNA:SMc.1;Ontology_term=SO:0005845	
-SMc	EuGene	three_prime_UTR	92	93	.	+	.	ID=three_prime_UTR:SMc.1.1;Parent=mRNA:SMc.1;Ontology_term=SO:0000205	
+SMc	EuGene	three_prime_UTR	92	92	.	+	.	ID=three_prime_UTR:SMc.1.1;Parent=mRNA:SMc.1;Ontology_term=SO:0000205	
 ###
-SMc	EuGene	gene	96	539	.	-	.	ID=gene:SMc.2;Name=SMc.2;length=444	
-SMc	EuGene	mRNA	96	539	.	-	.	ID=mRNA:SMc.2;Name=SMc.2;Parent=gene:SMc.2;nb_exon=1;length=444	
-SMc	EuGene	exon	96	539	.	-	.	ID=exon:SMc.2.1;Parent=mRNA:SMc.2;Ontology_term=SO:0000147	
-SMc	EuGene	three_prime_UTR	96	106	.	-	.	ID=three_prime_UTR:SMc.2.0;Parent=mRNA:SMc.2;Ontology_term=SO:0000205	
+SMc	EuGene	gene	106	539	.	-	.	ID=gene:SMc.2;Name=SMc.2;length=434	
+SMc	EuGene	mRNA	106	539	.	-	.	ID=mRNA:SMc.2;Name=SMc.2;Parent=gene:SMc.2;nb_exon=1;length=434	
+SMc	EuGene	exon	106	539	.	-	.	ID=exon:SMc.2.1;Parent=mRNA:SMc.2;Ontology_term=SO:0000147	
+SMc	EuGene	three_prime_UTR	106	106	.	-	.	ID=three_prime_UTR:SMc.2.0;Parent=mRNA:SMc.2;Ontology_term=SO:0000205	
 SMc	EuGene	CDS	107	538	.	-	0	ID=CDS:SMc.2.1;Parent=mRNA:SMc.2;Ontology_term=SO:0005845	
 SMc	EuGene	five_prime_UTR	539	539	.	-	.	ID=five_prime_UTR:SMc.2.2;Parent=mRNA:SMc.2;Ontology_term=SO:0000204	
 ###
-SMc	EuGene	gene	751	1236	.	+	.	ID=gene:SMc.3;Name=SMc.3;length=486	
-SMc	EuGene	mRNA	751	1236	.	+	.	ID=mRNA:SMc.3;Name=SMc.3;Parent=gene:SMc.3;nb_exon=1;length=486	
-SMc	EuGene	exon	751	1236	.	+	.	ID=exon:SMc.3.1;Parent=mRNA:SMc.3;Ontology_term=SO:0000147	
-SMc	EuGene	five_prime_UTR	751	764	.	+	.	ID=five_prime_UTR:SMc.3.0;Parent=mRNA:SMc.3;Ontology_term=SO:0000204	
+SMc	EuGene	gene	764	1236	.	+	.	ID=gene:SMc.3;Name=SMc.3;length=473	
+SMc	EuGene	mRNA	764	1236	.	+	.	ID=mRNA:SMc.3;Name=SMc.3;Parent=gene:SMc.3;nb_exon=1;length=473	
+SMc	EuGene	exon	764	1236	.	+	.	ID=exon:SMc.3.1;Parent=mRNA:SMc.3;Ontology_term=SO:0000147	
+SMc	EuGene	five_prime_UTR	764	764	.	+	.	ID=five_prime_UTR:SMc.3.0;Parent=mRNA:SMc.3;Ontology_term=SO:0000204	
 SMc	EuGene	CDS	765	1235	.	+	0	ID=CDS:SMc.3.1;Parent=mRNA:SMc.3;Ontology_term=SO:0005845	
 SMc	EuGene	three_prime_UTR	1236	1236	.	+	.	ID=three_prime_UTR:SMc.3.2;Parent=mRNA:SMc.3;Ontology_term=SO:0000205	
 ###
-SMc	EuGene	gene	1238	3313	.	-	.	ID=gene:SMc.4;Name=SMc.4;length=2076	
-SMc	EuGene	mRNA	1238	3313	.	-	.	ID=mRNA:SMc.4;Name=SMc.4;Parent=gene:SMc.4;nb_exon=1;length=2076	
-SMc	EuGene	exon	1238	3313	.	-	.	ID=exon:SMc.4.1;Parent=mRNA:SMc.4;Ontology_term=SO:0000147	
-SMc	EuGene	three_prime_UTR	1238	1251	.	-	.	ID=three_prime_UTR:SMc.4.0;Parent=mRNA:SMc.4;Ontology_term=SO:0000205	
+SMc	EuGene	gene	1251	3313	.	-	.	ID=gene:SMc.4;Name=SMc.4;length=2063	
+SMc	EuGene	mRNA	1251	3313	.	-	.	ID=mRNA:SMc.4;Name=SMc.4;Parent=gene:SMc.4;nb_exon=1;length=2063	
+SMc	EuGene	exon	1251	3313	.	-	.	ID=exon:SMc.4.1;Parent=mRNA:SMc.4;Ontology_term=SO:0000147	
+SMc	EuGene	three_prime_UTR	1251	1251	.	-	.	ID=three_prime_UTR:SMc.4.0;Parent=mRNA:SMc.4;Ontology_term=SO:0000205	
 SMc	EuGene	CDS	1252	3312	.	-	0	ID=CDS:SMc.4.1;Parent=mRNA:SMc.4;Ontology_term=SO:0005845	
 SMc	EuGene	five_prime_UTR	3313	3313	.	-	.	ID=five_prime_UTR:SMc.4.2;Parent=mRNA:SMc.4;Ontology_term=SO:0000204	
 ###
-SMc	EuGene	operon	3505	5794	.	+	.	ID=operon:1;Name=operon.1	
-SMc	EuGene	gene	3505	4440	.	+	.	ID=gene:SMc.5;Name=SMc.5;length=936;operon_parent=operon:1	
-SMc	EuGene	mRNA	3505	4440	.	+	.	ID=mRNA:SMc.5;Name=SMc.5;Parent=gene:SMc.5;nb_exon=1;length=936	
-SMc	EuGene	exon	3505	4440	.	+	.	ID=exon:SMc.5.1;Parent=mRNA:SMc.5;Ontology_term=SO:0000147	
-SMc	EuGene	five_prime_UTR	3505	3519	.	+	.	ID=five_prime_UTR:SMc.5.0;Parent=mRNA:SMc.5;Ontology_term=SO:0000204	
+SMc	EuGene	operon	3519	5794	.	+	.	ID=operon:1;Name=operon.1	
+SMc	EuGene	gene	3519	4440	.	+	.	ID=gene:SMc.5;Name=SMc.5;length=922;operon_parent=operon:1	
+SMc	EuGene	mRNA	3519	4440	.	+	.	ID=mRNA:SMc.5;Name=SMc.5;Parent=gene:SMc.5;nb_exon=1;length=922	
+SMc	EuGene	exon	3519	4440	.	+	.	ID=exon:SMc.5.1;Parent=mRNA:SMc.5;Ontology_term=SO:0000147	
+SMc	EuGene	five_prime_UTR	3519	3519	.	+	.	ID=five_prime_UTR:SMc.5.0;Parent=mRNA:SMc.5;Ontology_term=SO:0000204	
 SMc	EuGene	CDS	3520	4440	.	+	0	ID=CDS:SMc.5.1;Parent=mRNA:SMc.5;Ontology_term=SO:0005845	
 ###
 SMc	EuGene	gene	4469	5794	.	+	.	ID=gene:SMc.6;Name=SMc.6;length=1326;operon_parent=operon:1	
@@ -51,11 +51,11 @@ SMc	EuGene	exon	6393	7020	.	-	0	ID=exon:SMc.8.1;Parent=mRNA:SMc.8;Ontology_term=
 SMc	EuGene	CDS	6393	7019	.	-	0	ID=CDS:SMc.8.1;Parent=mRNA:SMc.8;Ontology_term=SO:0005845	
 SMc	EuGene	five_prime_UTR	7020	7020	.	-	.	ID=five_prime_UTR:SMc.8.1;Parent=mRNA:SMc.8;Ontology_term=SO:0000204	
 ###
-SMc	EuGene	operon	7241	11501	.	+	.	ID=operon:3;Name=operon.3	
-SMc	EuGene	gene	7241	8048	.	+	.	ID=gene:SMc.9;Name=SMc.9;length=808;operon_parent=operon:3	
-SMc	EuGene	mRNA	7241	8048	.	+	.	ID=mRNA:SMc.9;Name=SMc.9;Parent=gene:SMc.9;nb_exon=1;length=808	
-SMc	EuGene	exon	7241	8048	.	+	.	ID=exon:SMc.9.1;Parent=mRNA:SMc.9;Ontology_term=SO:0000147	
-SMc	EuGene	five_prime_UTR	7241	7277	.	+	.	ID=five_prime_UTR:SMc.9.0;Parent=mRNA:SMc.9;Ontology_term=SO:0000204	
+SMc	EuGene	operon	7277	10555	.	+	.	ID=operon:3;Name=operon.3	
+SMc	EuGene	gene	7277	8048	.	+	.	ID=gene:SMc.9;Name=SMc.9;length=772;operon_parent=operon:3	
+SMc	EuGene	mRNA	7277	8048	.	+	.	ID=mRNA:SMc.9;Name=SMc.9;Parent=gene:SMc.9;nb_exon=1;length=772	
+SMc	EuGene	exon	7277	8048	.	+	.	ID=exon:SMc.9.1;Parent=mRNA:SMc.9;Ontology_term=SO:0000147	
+SMc	EuGene	five_prime_UTR	7277	7277	.	+	.	ID=five_prime_UTR:SMc.9.0;Parent=mRNA:SMc.9;Ontology_term=SO:0000204	
 SMc	EuGene	CDS	7278	8048	.	+	0	ID=CDS:SMc.9.1;Parent=mRNA:SMc.9;Ontology_term=SO:0005845	
 ###
 SMc	EuGene	gene	8171	8656	.	+	.	ID=gene:SMc.10;Name=SMc.10;length=486;operon_parent=operon:3	
@@ -63,19 +63,20 @@ SMc	EuGene	mRNA	8171	8656	.	+	.	ID=mRNA:SMc.10;Name=SMc.10;Parent=gene:SMc.10;nb
 SMc	EuGene	exon	8171	8656	.	+	0	ID=exon:SMc.10.1;Parent=mRNA:SMc.10;Ontology_term=SO:0000147	
 SMc	EuGene	CDS	8171	8656	.	+	0	ID=CDS:SMc.10.1;Parent=mRNA:SMc.10;Ontology_term=SO:0005845	
 ###
-SMc	EuGene	gene	8800	10564	.	+	.	ID=gene:SMc.11;Name=SMc.11;length=1765;operon_parent=operon:3	
-SMc	EuGene	mRNA	8800	10564	.	+	.	ID=mRNA:SMc.11;Name=SMc.11;Parent=gene:SMc.11;nb_exon=1;length=1765	
-SMc	EuGene	exon	8800	10564	.	+	0	ID=exon:SMc.11.1;Parent=mRNA:SMc.11;Ontology_term=SO:0000147	
+SMc	EuGene	gene	8800	10555	.	+	.	ID=gene:SMc.11;Name=SMc.11;length=1756;operon_parent=operon:3	
+SMc	EuGene	mRNA	8800	10555	.	+	.	ID=mRNA:SMc.11;Name=SMc.11;Parent=gene:SMc.11;nb_exon=1;length=1756	
+SMc	EuGene	exon	8800	10555	.	+	0	ID=exon:SMc.11.1;Parent=mRNA:SMc.11;Ontology_term=SO:0000147	
 SMc	EuGene	CDS	8800	10428	.	+	0	ID=CDS:SMc.11.1;Parent=mRNA:SMc.11;Ontology_term=SO:0005845	
-SMc	EuGene	three_prime_UTR	10429	10564	.	+	.	ID=three_prime_UTR:SMc.11.1;Parent=mRNA:SMc.11;Ontology_term=SO:0000205	
+SMc	EuGene	three_prime_UTR	10429	10555	.	+	.	ID=three_prime_UTR:SMc.11.1;Parent=mRNA:SMc.11;Ontology_term=SO:0000205	
 ###
-SMc	EuGene	gene	10568	11471	.	+	.	ID=gene:SMc.12;Name=SMc.12;length=904;operon_parent=operon:3	
-SMc	EuGene	mRNA	10568	11471	.	+	.	ID=mRNA:SMc.12;Name=SMc.12;Parent=gene:SMc.12;nb_exon=1;length=904	
-SMc	EuGene	exon	10568	11471	.	+	.	ID=exon:SMc.12.1;Parent=mRNA:SMc.12;Ontology_term=SO:0000147	
-SMc	EuGene	five_prime_UTR	10568	10580	.	+	.	ID=five_prime_UTR:SMc.12.0;Parent=mRNA:SMc.12;Ontology_term=SO:0000204	
+SMc	EuGene	operon	10580	11501	.	+	.	ID=operon:4;Name=operon.4	
+SMc	EuGene	gene	10580	11471	.	+	.	ID=gene:SMc.12;Name=SMc.12;length=892;operon_parent=operon:4	
+SMc	EuGene	mRNA	10580	11471	.	+	.	ID=mRNA:SMc.12;Name=SMc.12;Parent=gene:SMc.12;nb_exon=1;length=892	
+SMc	EuGene	exon	10580	11471	.	+	.	ID=exon:SMc.12.1;Parent=mRNA:SMc.12;Ontology_term=SO:0000147	
+SMc	EuGene	five_prime_UTR	10580	10580	.	+	.	ID=five_prime_UTR:SMc.12.0;Parent=mRNA:SMc.12;Ontology_term=SO:0000204	
 SMc	EuGene	CDS	10581	11471	.	+	0	ID=CDS:SMc.12.1;Parent=mRNA:SMc.12;Ontology_term=SO:0005845	
 ###
-SMc	EuGene	gene	11471	11501	.	+	.	ID=gene:SMc.13;Name=SMc.13;length=31;operon_parent=operon:3	
+SMc	EuGene	gene	11471	11501	.	+	.	ID=gene:SMc.13;Name=SMc.13;length=31;operon_parent=operon:4	
 SMc	EuGene	mRNA	11471	11501	.	+	.	ID=mRNA:SMc.13;Name=SMc.13;Parent=gene:SMc.13;nb_exon=1;length=31	
 SMc	EuGene	exon	11471	11501	.	+	0	ID=exon:SMc.13.1;Parent=mRNA:SMc.13;Ontology_term=SO:0000147	
 SMc	EuGene	CDS	11471	11501	.	+	0	ID=CDS:SMc.13.1;Parent=mRNA:SMc.13;Ontology_term=SO:0005845	
