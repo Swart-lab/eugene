@@ -86,7 +86,8 @@ void
   tab[PHASE] = (phase_==INDEFINI) ? "." : to_string(phase_);
   tab[ATTRIBUTES] = (attr_==0) ? "." : attr_->str();
   //ecriture
-  for(short i = 0; i< NB_ELEMENTS_GFF3; ++i)
+  for(short i = 0; i< NB_ELEMENTS_GFF3-1; ++i)
     out << tab[i] << "\t";
+  out << tab[NB_ELEMENTS_GFF3-1];
   out << std::endl;
 }
