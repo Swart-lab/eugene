@@ -45,6 +45,7 @@ class SensorMarkovIMM : public Sensor
   int IMMatrix_index;
   double minGC;
   double maxGC;
+  double CodingPot;
   int maxOrder;
   int IntergenicModel;
   char* npcRNAModel;
@@ -68,3 +69,4 @@ std::vector <std::string>                    SensorMarkovIMM::matrixNameList;
 std::vector <int>                            SensorMarkovIMM::refCount;
 
 #endif
+

@@ -90,14 +90,17 @@ SensorMarkovIMM :: SensorMarkovIMM (int n, DNASeq *X) : Sensor(n)
   type    = Type_Content;
   UTRasIG = false;
 
-
   IntergenicModel = (PAR.getI("MarkovIMM.IntergenicModel",GetNumber()));
   npcRNAModel     = PAR.getC("MarkovIMM.npcRNAModel", GetNumber());
 
-	
   maxOrder = PAR.getI("MarkovIMM.maxOrder",GetNumber());  
   minGC = PAR.getD("MarkovIMM.minGC",GetNumber())/100;
   maxGC = PAR.getD("MarkovIMM.maxGC",GetNumber())/100;
+  CodingPot = PAR.getD("MarkovIMM.CodingPot",GetNumber())/100;
+  if ((CodingPot > 1.0) || (CodingPot <= 0.0)) {
+    CodingPot = 1.0;
+    fprintf(stderr,"MarkovIMM.CodingPot must be between 1 and 100. Resetting to 100\n");
+  }
 
   matrixName = PAR.getC("MarkovIMM.matname",GetNumber());
 
@@ -244,22 +247,41 @@ void SensorMarkovIMM :: GiveInfo(DNASeq *X, int pos, DATA *d)
   indexF = (*IMMatrix[0]).AntiString_To_Sub(X,pos,fModelLen);
   indexR = (*IMMatrix[0]).String_To_Sub(X,pos-rModelLen+1,rModelLen);
 
+  double probacondIF;
+  double probacondIR;
+
+  // Introns F/R
+  probacondIF = (double)(*IMMatrix[3])[indexF]/65535.0;
+  d->contents[DATA::IntronF] += log(probacondIF);
+  probacondIR = (double)(*IMMatrix[3])[indexR]/65535.0;
+  d->contents[DATA::IntronR] += log(probacondIR);
+  d->contents[DATA::IntronUTRF] += log(probacondIF);
+  d->contents[DATA::IntronUTRR] += log(probacondIR);
+
+  double probacond;
+
   // Exons F
-  d->contents[DATA::ExonF1] += log((double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0);
-  d->contents[DATA::ExonF2] += log((double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0);
-  d->contents[DATA::ExonF3] += log((double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0);
+  probacond = (double)(*IMMatrix[2-((pos+2)%3)])[indexF]/65535.0;
+  probacond = probacond*CodingPot + probacondIF*(1-CodingPot);
+  d->contents[DATA::ExonF1] += log(probacond);
+  probacond = (double)(*IMMatrix[2-((pos+1)%3)])[indexF]/65535.0;
+  probacond = probacond*CodingPot + probacondIF*(1-CodingPot);
+  d->contents[DATA::ExonF2] += log(probacond);
+  probacond = (double)(*IMMatrix[2-(pos%3)])[indexF]/65535.0;
+  probacond = probacond*CodingPot + probacondIF*(1-CodingPot);
+  d->contents[DATA::ExonF3] += log(probacond);
   
   // Exons R
-  d->contents[DATA::ExonR1] += log((double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0);
-  d->contents[DATA::ExonR2] += log((double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0);
-  d->contents[DATA::ExonR3] += log((double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0);
-  
-  // Introns F/R
-  d->contents[DATA::IntronF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
-  d->contents[DATA::IntronR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
-  d->contents[DATA::IntronUTRF] += log((double)(*IMMatrix[3])[indexF]/65535.0);
-  d->contents[DATA::IntronUTRR] += log((double)(*IMMatrix[3])[indexR]/65535.0);
-  
+  probacond = (double)(*IMMatrix[2-((Rev+1)%3)])[indexR]/65535.0;
+  probacond = probacond*CodingPot + probacondIR*(1-CodingPot);
+  d->contents[DATA::ExonR1] += log(probacond);
+  probacond = (double)(*IMMatrix[2-(Rev%3)])[indexR]/65535.0;
+  probacond = probacond*CodingPot + probacondIR*(1-CodingPot);
+  d->contents[DATA::ExonR2] += log(probacond);
+  probacond = (double)(*IMMatrix[2-((Rev+2)%3)])[indexR]/65535.0;
+  probacond = probacond*CodingPot + probacondIR*(1-CodingPot);
+  d->contents[DATA::ExonR3] += log(probacond);
+    
   // InterG
   switch (IntergenicModel)
   {
@@ -406,3 +428,4 @@ void SensorMarkovIMM :: Plot(DNASeq *TheSeq)
 void SensorMarkovIMM :: PostAnalyse(Prediction *pred, FILE *MINFO)
 {
 }
+
