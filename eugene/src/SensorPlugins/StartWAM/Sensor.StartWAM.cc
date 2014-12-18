@@ -18,6 +18,14 @@
 // Definition of a start codon detection sensor based on a Weight Array Model
 // ------------------------------------------------------------------
 
+
+//-------------------------------------------------------------------
+// 18 dec 2014
+// BUG : Ne pas utiliser!!!!!!!!!!!!!!!!!!
+// A Supprimer --> Utiliser SingalWAM
+// 
+//-------------------------------------------------------------------
+
 #include <ctype.h>
 #include "Sensor.StartWAM.h"
 
