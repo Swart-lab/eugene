@@ -131,6 +131,7 @@ AC_CONFIG_FILES([
 	src/SensorPlugins/SPred/Makefile
 	src/SensorPlugins/SpliceWAM/Makefile
 	src/SensorPlugins/StartWAM/Makefile
+        src/SensorPlugins/SignalWAM/Makefile
 	src/SensorPlugins/Tester/Makefile
 	src/SensorPlugins/Transcript/Makefile
 
