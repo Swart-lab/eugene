@@ -99,6 +99,32 @@ around the signal. Save results in binary files. \n\
         WAMMOD.push_back(new TabChaine<ChaineADN, unsigned short int>(markovOrder, ADN));
     }
 
+    // check the length od the motif sequences
+    file = fopen(motifFile, "rt");
+
+    if (file == NULL)
+    {
+        printf("Cannot open consensus sequence file %s\n", motifFile);
+        exit(1);
+    }
+    char* Sequence=NULL;
+
+    while (WAMCOUNT[0]->fichier2seq(file, Sequence))
+    {
+        int seqLen = strlen(Sequence);
+
+        if (seqLen != motifLen)
+        {
+            printf("Error reading %s: sequence \"%s\" length is different to expected length (%d nt)\n", motifFile, Sequence, motifLen);
+            exit(1);
+        }
+
+        free(Sequence);
+        Sequence = NULL;
+    };
+
+    fclose(file);
+	
     //----------------------------------------------------------------//
     // COUNT words occurences for each position
     fprintf(stderr, " - counting words occurences (order %d)  ... position...", markovOrder);
