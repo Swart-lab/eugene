@@ -358,9 +358,16 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
   }
 }
 
+
+// Compte les mots de longeur lgrmax dans la chaine seq, des indices debut à fin.
+// les indices sont les indices de la FIN des mots lus. Par exemple, 
+// seq = [ATGC], debut=1, fin=1, lgrmax=2 (wam d ordre 1) => dans ce cas on lit "T", et "AT"
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* seq, int debut, int fin, int parcodon)
 {
   int i,j;
+  
+  //fprintf(stdout,"seq2compte seq %s debut %d fin %d\n", seq, debut, fin); 
+  
   if ((seq!=NULL)&&(strlen(seq)>lgrmax)) {
     for (i=debut; ((i<lgrmax-1)&&(i<=fin))  ; i++) {  
       // the amount context is not sufficient for the order
@@ -370,7 +377,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: seq2compte(char* 
     for(i= ((debut >= lgrmax-1)? debut : lgrmax-1); i<= fin ; i++) {
       for(j=0;j<lgrmax;j++) {
 	incremente(mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
-	//	fprintf(stdout,"incremente2 %d\n",mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
+	//fprintf(stdout,"-->incremente i=%d j=%d mot2indice (%s, %d, %d) => %d\n", i, j, seq, (lgrmax-j), (i-(lgrmax-j-1)), mot2indice(seq,(lgrmax-j),i-(lgrmax-j-1)));
       }
     }
   }
@@ -498,10 +505,12 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: fichier2compte (F
   };
 }
 
+
 template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: fichier2compte (FILE *fp, int debut, int fin, int parcodon)
 {
   char* Sequence=NULL;
   while (fichier2seq(fp,Sequence)) {
+    //fprintf(stdout, "\seq2compte avec sequence %s\n", Sequence);
     seq2compte(Sequence,debut,fin,parcodon);
     free(Sequence);
     Sequence=NULL;
@@ -610,41 +619,55 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
 {
   int i,j,cumul,indicedeclinant;
   char* mot= new char[lgrmax];
-  if (nbrevaleurs == comptage->nbrevaleurs) {
+  
+  if (nbrevaleurs == comptage->nbrevaleurs) 
+  {
     if ((typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) ) VAL[0] = 1;
     else VAL[0] = 1.0;
-    for(i=1;i<nbrevaleurs;i++) {
-      cumul=0;
-      mot= indice2mot(i);
-      indicedeclinant=indiceprefixe(indice2mot(i),indice2lgrmot(i),0,indice2lgrmot(i)-2);
-      for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) {
-	cumul+= comptage->VAL[j];
+    
+    for(i=1;i<nbrevaleurs;i++) 
+    {
+      cumul = 0;
+      mot   = indice2mot(i);
+      indicedeclinant = indiceprefixe(indice2mot(i),indice2lgrmot(i),0,indice2lgrmot(i)-2);
+      for(j=indicedeclinant; j< indicedeclinant+alphabet->taille; j++) 
+      {
+	cumul += comptage->VAL[j];
 	// Ex. avec adn: Si mot(i)=CG, cumule N(CA),N(CC),N(CG) et N(CT)
       }
+      
       //      if (indice2lgrmot(i) == lgrmax) {
       //	fprintf(stdout,"Proba de %s = ( N(%s)=%d / Somme de n(%s) a n(%s)= %d )= %f\n",indice2mot(i),indice2mot(i),comptage->VAL[i],indice2mot(indicedeclinant),indice2mot(indicedeclinant+alphabet->taille-1),cumul,(double)comptage->VAL[i] / (double)cumul);
       //	fflush(stdout);
       //    }
-      if (cumul < occurence_min) { // pas assez d'info pour calculer une proba
-	if (indice2lgrmot(i)==1) { // et en plus on n'est qu'a l'ordre 0
-	  fprintf(stderr,"WARNING!! Not enough information to compute P(%s) AT ORDER ZERO!\n",mot);
+      
+      if (cumul < occurence_min)  // pas assez d'info pour calculer une proba
+      { 
+	if (indice2lgrmot(i) == 1) 
+	{ // et en plus on n'est qu'a l'ordre 0
+	  fprintf(stderr,"WARNING!! Cumul = %d, not enough information to compute P(%s) AT ORDER ZERO! --> P(%s)=0\n", cumul, mot, mot);
+	  VAL[i] = 0;
 	}
-	else {
-	  VAL[i]= VAL[mot2indice(mot,indice2lgrmot(i)-1,1)];
-	  //fprintf(stderr,"Warning : not enough information to compute P(%s), taking P(%s)\n",mot,indice2mot(mot2indice(mot,indice2lgrmot(i)-1,1)));
+	else 
+	{
+	  VAL[i] = VAL[mot2indice(mot,indice2lgrmot(i)-1,1)];
+	  fprintf(stderr,"Warning : cumul = %d, not enough information to compute P(%s) --> taking P(%s)\n", cumul, mot,indice2mot(mot2indice(mot,indice2lgrmot(i)-1,1)));
 	}
       }
-      else {
+      else 
+      {
 	if ( (typeid(T) == typeid(unsigned short int)) || (typeid(T) == typeid(int)) )
-	  VAL[i]= ((cumul==0) ? 0 : real2usi( (double)comptage->VAL[i] / (double)cumul) );
+	  VAL[i] = ((cumul==0) ? 0 : real2usi( (double)comptage->VAL[i] / (double)cumul) );
 	else
-	  VAL[i]=((cumul==0) ? 0 : (double)comptage->VAL[i] / (double)cumul ) ;
+	  VAL[i] = ((cumul==0) ? 0 : (double)comptage->VAL[i] / (double)cumul ) ;
       }
     }
   }
-  else{
+  else
+  {
     fprintf(stderr,"\n\n\nERROR !!\n\n\nError in markov.cc (method compte2probas)\n\n\nERROR !!\n\n\n");
   }
+  
   delete [] mot;
 }
 
