@@ -49,16 +49,10 @@ SensorSpliceWAM :: SensorSpliceWAM (int n, DNASeq *X) : Sensor(n)
     NbNtAfterAG = PAR.getI("SpliceWAM.NbNtAfterAG");
     AcceptorSiteLength= NbNtBeforeAG + 2 + NbNtAfterAG;
     
-    strcpy(donmodelfilename,PAR.getC("eugene_dir"));
-    strcat(donmodelfilename,MODELS_DIR);
-    strcat(donmodelfilename,"/");
-    strcat(donmodelfilename,PAR.getC("SpliceWAM.donmodelfilename"));
-    strcpy(accmodelfilename,PAR.getC("eugene_dir"));
-    strcat(accmodelfilename,MODELS_DIR);
-    strcat(accmodelfilename,"/");
-    strcat(accmodelfilename,PAR.getC("SpliceWAM.accmodelfilename"));
+    strcpy(donmodelfilename,PAR.getC("SpliceWAM.donmodelfilename"));
+    strcpy(accmodelfilename,PAR.getC("SpliceWAM.accmodelfilename"));
     
-    DonWAModel= new WAM(MarkovianOrder, DonorSiteLength,"ACGT", donmodelfilename);
+    DonWAModel= new WAM(MarkovianOrder, DonorSiteLength,    "ACGT", donmodelfilename);
     AccWAModel= new WAM(MarkovianOrder, AcceptorSiteLength, "ACGT", accmodelfilename);
     IsInitialized = true;
   }
@@ -93,63 +87,64 @@ void SensorSpliceWAM :: GiveInfo (DNASeq *X, int pos, DATA *d)
 {
   int i, j;
   double score;
-  char* DonSite = new char[DonorSiteLength+MarkovianOrder+2];
-  DonSite[DonorSiteLength+MarkovianOrder+1]= '\0';
-  char* AccSite = new char[AcceptorSiteLength+MarkovianOrder+2];
-  AccSite[AcceptorSiteLength+MarkovianOrder+1]= '\0';
+  char* DonSite = new char[DonorSiteLength+1];
+  DonSite[DonorSiteLength]= '\0';
+  char* AccSite = new char[AcceptorSiteLength+1];
+  AccSite[AcceptorSiteLength]= '\0';
 
   ////////// ACCEPTOR Forward (need enough context) //////////////
   if ( (((*X)[pos-2] == 'a') && ((*X)[pos-1] == 'g')) &&
-       (pos-2-NbNtBeforeAG-MarkovianOrder > 0) && 
+       (pos-2-NbNtBeforeAG > 0) && 
        (pos-1+NbNtAfterAG < X->SeqLen) ) {
     score=0.0;
     j=0;
-    for (i= pos-2-NbNtBeforeAG-MarkovianOrder; i<= pos-1+NbNtAfterAG; i++) {
+    for (i= pos-2-NbNtBeforeAG; i<= pos-1+NbNtAfterAG; i++) {
       AccSite[j] = toupper((*X)[i]);
       j++;
     }
-
+    fprintf(stdout, "POSITION ACC SITE = %d : score = %f\n", pos, AccWAModel->ScoreTheMotif(AccSite));
     d->sig[DATA::Acc].weight[Signal::Forward] +=  (AccScaleCoef * AccWAModel->ScoreTheMotif(AccSite)) + AccScalePenalty;
   }
 
   ////////// ACCEPTOR Reverse (need enough context)   //////////////
   if ( (((*X)(pos) == 'g') && ((*X)(pos+1) == 'a')) &&
-       (pos+1+NbNtBeforeAG+MarkovianOrder < X->SeqLen) &&
+       (pos+1+NbNtBeforeAG < X->SeqLen) &&
        (pos-NbNtAfterAG > 0) ) {
     score=0.0;
     j=0;
-    for (i= pos+1+NbNtBeforeAG+MarkovianOrder; i >= pos-NbNtAfterAG; i--) {
+    for (i= pos+1+NbNtBeforeAG; i >= pos-NbNtAfterAG; i--) {
       AccSite[j] = toupper((*X)(i));
       j++;
       }
-
+    fprintf(stdout, "POSITION ACC REV SITE = %d : score = %f\n", pos, AccWAModel->ScoreTheMotif(AccSite));
     d->sig[DATA::Acc].weight[Signal::Reverse] += (AccScaleCoef * AccWAModel->ScoreTheMotif(AccSite)) + AccScalePenalty;
   }
 
   ////////// DONOR Forward (need enough context) //////////////
   if ( (((*X)[pos] == 'g') && ((*X)[pos+1] == 't')) &&
-       (pos-NbNtBeforeGT-MarkovianOrder > 0) && 
+       (pos-NbNtBeforeGT > 0) && 
        (pos+1+NbNtAfterGT < X->SeqLen) ) {
     score=0.0;
     j=0;
-    for (i= pos-NbNtBeforeGT-MarkovianOrder; i<= pos+1+NbNtAfterGT; i++) {
+    for (i= pos-NbNtBeforeGT; i<= pos+1+NbNtAfterGT; i++) {
       DonSite[j] = toupper((*X)[i]);
       j++;
     }
-
+fprintf(stdout, "POSITION DON SITE = %d : score = %f\n", pos, DonWAModel->ScoreTheMotif(DonSite));
     d->sig[DATA::Don].weight[Signal::Forward] += (DonScaleCoef * DonWAModel->ScoreTheMotif(DonSite)) + DonScalePenalty;
   }
 
   ////////// DONOR Reverse (need enough context)   //////////////
   if ( (((*X)(pos-2) == 't') && ((*X)(pos-1) == 'g')) &&
-       (pos-1+NbNtBeforeGT+MarkovianOrder < X->SeqLen) &&
+       (pos-1+NbNtBeforeGT < X->SeqLen) &&
        (pos-2-NbNtAfterGT > 0) ) {
     score=0.0;
     j=0;
-    for (i= pos-1+NbNtBeforeGT+MarkovianOrder; i >= pos-2-NbNtAfterGT; i--) {
+    for (i= pos-1+NbNtBeforeGT; i >= pos-2-NbNtAfterGT; i--) {
       DonSite[j] = toupper((*X)(i));
       j++;
     }
+    fprintf(stdout, "POSITION DON REV SITE = %d : score = %f\n", pos, DonWAModel->ScoreTheMotif(DonSite));
     d->sig[DATA::Don].weight[Signal::Reverse] += (DonScaleCoef * DonWAModel->ScoreTheMotif(DonSite)) + DonScalePenalty;
   }
   delete [] DonSite; delete [] AccSite;
