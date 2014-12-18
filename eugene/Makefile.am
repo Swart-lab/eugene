@@ -101,7 +101,6 @@ EXTRA_DIST = reconf configure $(srcdir)/config/install-sh \
 	     $(srcdir)/models/*.mat \
 	     $(srcdir)/models/*.bin \
 	     $(srcdir)/models/BLOSUM* \
-	     $(srcdir)/models/WAM/WAM* \
 	     $(srcdir)/models/*.codontable \
 	     $(srcdir)/models/*.dat \
              $(srcdir)/web/Style/eugene.css \
