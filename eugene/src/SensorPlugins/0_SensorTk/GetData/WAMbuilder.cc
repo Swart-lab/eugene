@@ -51,16 +51,16 @@ int main(int argc, char *argv[])
     if (argc != 7)
     {
         fprintf(stderr, "\
-This program build a Weight Array Model (WAM) for a WAM eugene sensor. \n\
-The goal is to model a signal in a genomic sequence (splice site, start) \n\
+This program builds a Weight Array Model (WAM) for a WAM eugene sensor. \n\
+The goal is to model a signal in a genomic sequence (splice site, start).\n\
 Build the model from a multifasta file containing sequences around the \n\
-around the signal. Save results in binary files. \n\
+signal. Save results in binary files. \n\
 \nUSAGE: %s motifFile pat uc dc markovOrder outfilePrefix \n\
   motifFile     multifasta file of the motifs, \n\
   pat           signal pattern, (example: GT)\n\
   uc            upstream sequence length, \n\
-  dc            downstream length, \n\
-  markovOrder   markovian order (start at 0), \n\
+  dc            downstream sequence length, \n\
+  markovOrder   markovian order (starts at 0), \n\
   outfilePrefix prefix of the result binary files.\
 \n\nEXAMPLES: \
 \n%s ARA.don.TP.fa GT 4 4 0 WAM.don.order0.TP. \
@@ -73,7 +73,7 @@ around the signal. Save results in binary files. \n\
 	int   i;
 	FILE* file;
 	
-    char* motifFile  = argv[1];       // mutfifasta file
+    char* motifFile  = argv[1];       // multifasta file
     char* signal     = argv[2];       // GC or GC or AT or ATG, etc
     int uc           = atoi(argv[3]); // upstream region length
     int dc           = atoi(argv[4]); // downstream region length
@@ -201,13 +201,15 @@ around the signal. Save results in binary files. \n\
     //----------------------------------------------------------------//
     // SAVE data in the matrix file
     fprintf(stderr, " - saving data in matrix files... %s...", outname);
-
+    
+    int digitnb = (int) (1 + log10(WAMlen-1)); // nombre de chiffres de l'entier (WAMlen-1)
+    
     for (i = 0; i < WAMlen; i++)
     {
-        char* name = new char[basenamelen + 4];
-        name[basenamelen + 3] = '\0';
+        char* name = new char[basenamelen + digitnb + 2];
+        name[basenamelen + digitnb +1 ] = '\0';
         sprintf(name, "%s", outname);
-		sprintf(name + basenamelen, "%02d", i);
+		sprintf(name + basenamelen, "%0*d", digitnb, i);
 
         file = fopen(name, "wb");
 
