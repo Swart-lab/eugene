@@ -29,7 +29,7 @@
 #endif
 
 #define TPFILESUFFIX ".TP."
-#define FPFILESUFFIX ".FP."
+#define TNFILESUFFIX ".TN."
 #define SUFFIXLENGTH 4
 
 /*************************************************************
@@ -45,7 +45,7 @@ class WAM
 
   // two vectors of markovian models  
   std::vector<TabChaine<Chaine, unsigned short int>*> TPMOD; 
-  std::vector<TabChaine<Chaine, unsigned short int>*> FPMOD;
+  std::vector<TabChaine<Chaine, unsigned short int>*> TNMOD;
 
  public:
   WAM();
