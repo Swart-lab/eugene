@@ -38,7 +38,7 @@ WAM :: WAM ()
   
   for (int i=0; i< MotifLength-MarkovianOrder; i++) {
     TPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
-    FPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+    TNMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
   }
 }
 
@@ -52,61 +52,77 @@ WAM :: WAM (int order, int length, const char* alphabet, char* prefixfilename)
   char* filename;
   FILE* fp;
   char TPfile[FILENAME_MAX+1];
-  char FPfile[FILENAME_MAX+1];
+  char TNfile[FILENAME_MAX+1];
+  
   MarkovianOrder = order;
   MotifLength    = length;
   Alphabet       = new Chaine(alphabet);
   
-  for (int i=0; i<MotifLength-MarkovianOrder; i++) {
+  int WAMLength = MotifLength-MarkovianOrder;
+  
+  for (int i=0; i< WAMLength; i++) 
+  {
     TPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
-    FPMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
+    TNMOD.push_back( new TabChaine<Chaine,unsigned short int>(MarkovianOrder,Alphabet) );
   }
 
   prefixnamelength = strlen(prefixfilename);
-  strcpy(TPfile,prefixfilename);
-  strcpy(FPfile,prefixfilename);
-  strcat(TPfile,TPFILESUFFIX);
-  strcat(FPfile,FPFILESUFFIX);
+  strcpy(TPfile, prefixfilename);
+  strcpy(TNfile, prefixfilename);
+  strcat(TPfile, TPFILESUFFIX);
+  strcat(TNfile, TNFILESUFFIX);
 
 // Loading models
 // (=binary matrix files containing a markov model, one per position of each motif)
   fprintf (stderr,"Reading WAM models...  ");
   fflush (stderr);
-  for (i=0; i< MotifLength-MarkovianOrder ;i++) {
+  
+  int digitnb = (int) (1 + log10(WAMLength-1)) ; // nombre de chiffres dans l'entier (WAMLength-1)
+  
+  for (i=0; i< WAMLength ;i++) 
+  {
     fprintf (stderr,"%d ",i);
     fflush (stderr);
-    filename= new char[FILENAME_MAX+1];
-    sprintf(filename,"%s",TPfile);
-    if (i<10) sprintf(filename+prefixnamelength+SUFFIXLENGTH,"0%d",i);
-    else sprintf(filename+prefixnamelength+SUFFIXLENGTH,"%d",i);
-    fp=fopen(filename,"rb");
-    if  (!fp) {
+    filename = new char[FILENAME_MAX+1];
+    sprintf(filename, "%s", TPfile);
+    sprintf(filename + prefixnamelength + SUFFIXLENGTH, "%0*d", digitnb, i);
+    
+    fp = fopen(filename,"rb");
+    if  (!fp) 
+    {
       fprintf (stderr, "ERROR:  in WAM.cc : could not open file %s \n", filename);
       exit (1);
     }
-    if (TPMOD[i]->chargefichier(fp)) {
+    
+    if (TPMOD[i]->chargefichier(fp)) 
+    {
       fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
     fclose (fp);
     delete[] filename;
     
-    filename= new char[FILENAME_MAX+1];
-    sprintf(filename,"%s",FPfile);
-    if (i<10) sprintf(filename+prefixnamelength+SUFFIXLENGTH,"0%d",i);
-    else sprintf(filename+prefixnamelength+SUFFIXLENGTH,"%d",i);
-    fp=fopen(filename,"rb");
-    if  (!fp) {
+    filename = new char[FILENAME_MAX+1];
+    sprintf(filename, "%s", TNfile);
+    sprintf(filename + prefixnamelength + SUFFIXLENGTH, "%0*d", digitnb, i);
+
+    fp = fopen(filename,"rb");
+    if  (!fp) 
+    {
       fprintf (stderr, "ERROR:  in WAM.cc : could not open file %s \n", filename);
       exit (1);
     }
-    if (FPMOD[i]->chargefichier(fp)) {
+    if (TNMOD[i]->chargefichier(fp)) 
+    {
       fprintf(stderr,"Error when reading model file %s\n",filename);
       exit(2);
     }
+    
     fclose (fp);
+    
     delete[] filename;
   }
+  
   fprintf (stderr,"... done\n");
   
   /*
@@ -133,7 +149,7 @@ WAM :: ~WAM ()
   delete Alphabet;
   for (unsigned int i=0; i<TPMOD.size(); i++) {
     delete TPMOD[i];
-    delete FPMOD[i];
+    delete TNMOD[i];
   }
 }
 
@@ -142,32 +158,39 @@ double WAM :: ScoreTheMotif (char* motif)
 {
   bool debug = false;
   int i, j;
-  int outofalphabet=0;
-  double score=0.0;
+  int    outofalphabet = 0;
+  double score         = 0.0;
   if (debug) fprintf(stdout, "motif %s\n", motif);
   
   char* word = new char[MarkovianOrder+2];
   word[MarkovianOrder+1] = '\0'; // word stores a short word for asking markovian probs
 
   //  at each position of the motif
-  for (i=0 ; i< MotifLength-MarkovianOrder ; i++) {
-    for (j=0;j<=MarkovianOrder;j++) { // Read a word of MarkovianOrder length 
-      word[j] = toupper(motif[i+j]);
-      // test if an unknown letter is present, out of the alphabet (like "n" for nucleotid)
-      if ((unsigned)Alphabet->operator[](word[j]) == Alphabet->taille) {
-	outofalphabet=1;
-      }
+  for (i=0 ; i< MotifLength-MarkovianOrder ; i++) 
+  {
+    for (j=0; j <= MarkovianOrder; j++) 
+    { 
+        // Read a word of MarkovianOrder length 
+        word[j] = toupper(motif[i+j]);
+        // test if an unknown letter is present, out of the alphabet (like "n" for nucleotid)
+        if ((unsigned)Alphabet->operator[](word[j]) == Alphabet->taille) 
+        {
+            outofalphabet=1;
+        }
     }
+    
     if (debug) fprintf(stdout, "--> i=%d, word=%s\t", i, word);
-    if (outofalphabet == 0) {
+    if (outofalphabet == 0) 
+    {
       // likelihood ratio: log ( proba(nt with true model)/proba(nt with false model) )
-        if (debug) fprintf(stdout, "score+= (%f - %f)", TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)), FPMOD[i]->usi2real(FPMOD[i]->proba(word,MarkovianOrder)));
+        if (debug) fprintf(stdout, "score+= (%f - %f)", TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)), TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder)));
       score += 
 	log (TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)))  -
-	log (FPMOD[i]->usi2real(FPMOD[i]->proba(word,MarkovianOrder)))  ;
+	log (TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder)))  ;
     }
+    
     if (debug) fprintf(stdout, "\n");
-    outofalphabet=0; 
+    outofalphabet = 0; 
   }
 
   delete []  word;
