@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.1d
+EuGene.version		4.2
 EuGene.organism		Arabidopsis
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -164,6 +164,36 @@ SpliceWAM.NbNtBeforeAG		2
 SpliceWAM.NbNtAfterAG		3
 SpliceWAM.AccScaleCoef*		2.9004
 SpliceWAM.AccScalePenalty*	-7.5877
+#
+#
+#### SignalWAM instances #####
+#
+SignalWAM.type[0]      donor       # allowed values: start, donor, acceptor
+SignalWAM.pat[0]       gt          
+SignalWAM.markovOrder[0]    0
+SignalWAM.filePrefix[0] /home/EUGENE/models/WAM.donor.50
+SignalWAM.uc[0]                 50
+SignalWAM.dc[0]                 50
+SignalWAM.scaleCoef*[0]     2.9004
+SignalWAM.scalePenalty*[0]  -7.5877
+#
+SignalWAM.type[1]   acceptor  # allowed values: start, donor, acceptor
+SignalWAM.pat[1]        AG
+SignalWAM.markovOrder[1] 0
+SignalWAM.filePrefix[1]         /home/EUGENE/models/WAM.acceptor.50
+SignalWAM.uc[1]                 50
+SignalWAM.dc[1] 50
+SignalWAM.scaleCoef*[1]     2.9004
+SignalWAM.scalePenalty*[1]  -7.5877
+#
+SignalWAM.type[2]   start  # allowed values: start, donor, acceptor
+SignalWAM.pat[2]        ATG
+SignalWAM.markovOrder[2] 0
+SignalWAM.filePrefix[2]         /home/EUGENE/models/WAM.start.50
+SignalWAM.uc[2]                 50
+SignalWAM.dc[2] 50
+SignalWAM.scaleCoef*[2]     2.9004
+SignalWAM.scalePenalty*[2]  -7.5877
 #
 ##### SplicePredictor parameters #####
 SPred.accP*[0]	0.181
@@ -352,6 +382,7 @@ Sensor.NStart.use	1
 Sensor.PatConst.use	0
 Sensor.PepSignal.use	0
 Sensor.RibosomalFrameShift.use 0
+Sensor.SignalWAM.use    0
 Sensor.SpliceWAM.use 	0
 Sensor.SPred.use	0
 Sensor.StartWAM.use	0
@@ -389,6 +420,7 @@ Sensor.NStart 		10
 Sensor.PatConst 	10
 Sensor.PepSignal 	10
 Sensor.RibosomalFrameShift 30
+Sensor.SignalWAM    10
 Sensor.SMachine 	10
 Sensor.SpliceWAM 	10
 Sensor.SPred 		10
