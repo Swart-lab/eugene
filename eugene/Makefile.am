@@ -139,7 +139,6 @@ install-data-hook:
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/plugins
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/cfg
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/models
-	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/models/WAM
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures/Eval
 	$(INSTALL) -d $(DESTDIR)/$(pkgdatadir)/Procedures/Get
@@ -153,7 +152,6 @@ install-data-hook:
 	$(INSTALL) -m 644 $(srcdir)/models/BLOSUM* $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/*.codontable $(DESTDIR)/$(pkgdatadir)/models
 	$(INSTALL) -m 644 $(srcdir)/models/*.dat $(DESTDIR)/$(pkgdatadir)/models
-	$(INSTALL) -m 644 $(srcdir)/models/WAM/WAM* $(DESTDIR)/$(pkgdatadir)/models/WAM
 	$(INSTALL) -m 644 $(srcdir)/web/Style/eugene.css $(DESTDIR)/$(pkgdatadir)/web/Style
 	$(INSTALL) -m 644 $(srcdir)/web/Javascripts/diap.js $(DESTDIR)/$(pkgdatadir)/web/Javascripts
 	$(INSTALL) -m 644 $(srcdir)/web/Images/*jpg $(DESTDIR)/$(pkgdatadir)/web/Images
