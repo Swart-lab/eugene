@@ -40,8 +40,8 @@ class SensorSignalWAM : public Sensor
   double scaleCoef;     // coef for the WAM score
   double scalePenalty;  //  penalty for the WAM score (score= ScaleCoef * WAMscore - ScalePenalty
   
- int motifLength;
- int sigLength;         // length of the signal
+ int motifLength;       // length of the motif (signal+ flanking regions)
+ int sigLength;         // length of the signal (ex 2 if signal=GT)
  int newStatePos;
  
  void AssertPatternLength(char*, int, int, char*);

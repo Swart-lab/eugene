@@ -120,8 +120,8 @@ void SensorSignalWAM :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
     int i, j;
     double score;
-    char* Site = new char[sigLength + 1];
-    Site[sigLength] = '\0';
+    char* Site = new char[motifLength + 1];
+    Site[motifLength] = '\0';
 
     int sigStartPos;
     int sigStopPos;
@@ -179,7 +179,7 @@ void SensorSignalWAM :: GiveInfo(DNASeq *X, int pos, DATA *d)
     {
         score = 0.0;
         j     = 0;
-
+        
         for (i = sigStartPos + upstreamLen; i >= sigStopPos - downstreamLen; i--)
         {
             Site[j] = toupper((*X)(i));
