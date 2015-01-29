@@ -1,0 +1,15 @@
+Create a Virtual Machine where eugene is installed
+---------------------------------------------------
+
+Rename the Dockerfile.yourdist Dockerfile.
+Then in the current directory, create a new image:
+>docker build -t yourname/eugene:version .
+Then you can create a new container with this image:
+>docker run -t -i yourname/eugene:version /bin/bash
+
+
+Example to test eugene on centOS:
+>mv  Dockerfile.centos Dockerfile
+>docker build -t sallet/eugene:centos .
+>docker run -t -i sallet/eugene:centos /bin/bash
+>cd /home/egn/

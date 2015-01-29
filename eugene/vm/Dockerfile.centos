@@ -1,0 +1,22 @@
+FROM centos
+
+ENV EGNRELEASE eugene-4.1c
+
+MAINTAINER Erika Sallet <erika.sallet@toulouse.inra.fr>
+# Prerequisite
+RUN yum -y install wget.x86_64 
+RUN yum -y install tar.x86_64 
+RUN yum -y install autoconf 
+RUN yum -y install automake 
+RUN yum -y install gcc-c++.x86_64 
+RUN yum -y install gd.x86_64 
+RUN yum -y install gd-devel.x86_64 
+RUN yum -y install make.x86_64 
+RUN yum -y install expectk.x86_64 
+# Download eugene
+RUN mkdir /home/egn
+RUN cd /home/egn;wget eugene.toulouse.inra.fr/Downloads/${EGNRELEASE}\.tar.gz
+RUN cd /home/egn; tar -xvzf ${EGNRELEASE}.tar.gz
+# Installation
+RUN export EUGENEDIR=/home/egn/${EGNRELEASE};cd $EUGENEDIR;./reconf;./configure --prefix=$EUGENEDIR;make -i;make -i install
+
