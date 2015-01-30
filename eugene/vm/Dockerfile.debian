@@ -1,0 +1,20 @@
+FROM debian
+
+ENV EGNRELEASE eugene-4.1c
+
+MAINTAINER Erika Sallet <erika.sallet@toulouse.inra.fr>
+# Prerequisite
+RUN apt-get -y update
+RUN apt-get -y install wget
+RUN apt-get -y install autoconf
+RUN apt-get -y install g++
+RUN apt-get -y install libgd2-xpm libgd2-xpm-dev
+RUN apt-get -y install make   
+
+# Download eugene
+RUN mkdir /home/egn
+RUN cd /home/egn;wget eugene.toulouse.inra.fr/Downloads/${EGNRELEASE}\.tar.gz
+RUN cd /home/egn; tar -xvzf ${EGNRELEASE}.tar.gz
+# Installation
+RUN export EUGENEDIR=/home/egn/${EGNRELEASE};cd $EUGENEDIR;./reconf;./configure --prefix=$EUGENEDIR;make -i;make -i install
+
