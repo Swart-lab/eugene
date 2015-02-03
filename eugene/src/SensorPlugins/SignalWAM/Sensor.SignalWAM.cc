@@ -38,17 +38,23 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     char* signalType;
     signalType       = PAR.getC("SignalWAM.type",          GetNumber()); // start, acc or don
     pattern          = PAR.getC("SignalWAM.pat",           GetNumber()); // 'ATG' for instance
-    markovianOrder   = PAR.getI("SignalWAM.markovOrder",   GetNumber()); // 0 1 2
+    
     upstreamLen      = PAR.getI("SignalWAM.uc",            GetNumber());
     downstreamLen    = PAR.getI("SignalWAM.dc",            GetNumber());
     scoringMode      = PAR.getI("SignalWAM.scoringMode",   GetNumber());
     
+    // tolower
+    for(int i=0; i<strlen(pattern); i++)
+        pattern[i] = tolower(pattern[i]);
+    
+    
+    // Order of the markov models in the Weight Array Model
+    int markovianOrder   = PAR.getI("SignalWAM.markovOrder",   GetNumber()); // 0 1 2
     
     char modelfilename[FILENAME_MAX + 1];
     strcpy(modelfilename, PAR.getC("SignalWAM.filePrefix", GetNumber()));
-    sigLength    = strlen(pattern);
-    motifLength  = upstreamLen + sigLength + downstreamLen;
-    
+
+    motifLength       = upstreamLen + strlen(pattern) + downstreamLen;    
     scoringMotifStart = 1;
     scoringMotifEnd   = motifLength;
 
@@ -99,6 +105,8 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     }
 
     WAModel = new WAM(markovianOrder, motifLength, "ACGT", modelfilename);
+    
+    SearchSignal(X);
 }
 
 // ----------------------
@@ -107,6 +115,10 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
 SensorSignalWAM :: ~SensorSignalWAM()
 {
     delete [] WAModel;
+    vPosF.clear();
+    vPosR.clear();
+    vScoreF.clear();
+    vScoreR.clear();
 }
 
 // ---------------------
@@ -117,9 +129,98 @@ void SensorSignalWAM :: Init(DNASeq *X)
     scaleCoef    = PAR.getD("SignalWAM.scaleCoef*", GetNumber());
     scalePenalty = PAR.getD("SignalWAM.scalePenalty*", GetNumber());
 
+    positionGiveInfo = -1;
+    indexR = indexF = 0;
+    
     if (PAR.getI("Output.graph"))
         Plot(X);
 }
+
+
+
+void SensorSignalWAM :: SearchSignal(DNASeq *X)
+{
+    int i, j;
+    char* Site = new char[motifLength + 1];
+    Site[motifLength] = '\0';
+    
+    int sigStartPos;
+    int sigStopPos;
+    bool isSigF, isSigR;
+    int sigLength = strlen(pattern);
+    
+    for (int pos = 0; pos <= X->SeqLen; pos++)
+    {
+        //  ------------------------------------------------------------
+        // Forward strand
+        // -----------------------------------------------------------------
+        isSigF      = true;
+        sigStartPos = pos - newStatePos + 1;
+        sigStopPos  = sigStartPos + sigLength - 1;
+        
+        // check there is a signal at the current position on forward strand
+        for (i = 0; i < sigLength; i++)
+        {
+            if ( (*X)[sigStartPos + i] != pattern[i] )
+            {
+                isSigF = false;
+                break;
+            }
+        }
+        
+        // If signal detects, extract the context sequence and compute the score
+        if ((isSigF) && (sigStartPos - upstreamLen > 0) && (sigStopPos + downstreamLen < X->SeqLen))
+        {
+            j = 0;
+            // extract motif around the signal
+            for (i = sigStartPos - upstreamLen; i <= sigStopPos + downstreamLen; i++)
+            {
+                Site[j] = (*X)[i];
+                j++;
+            }
+
+            vPosF.push_back(pos);
+            vScoreF.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
+        }
+        
+        // -----------------------------------------------------------------
+        // Reverse strand
+        // ------------------------------------------------------------------
+        isSigR      = true;
+        sigStartPos = pos + newStatePos - 2;
+        sigStopPos  = sigStartPos - sigLength + 1;
+        
+        // check there is a signal at the current position on reverse strand
+        for (i = sigLength - 1; i > -1; i--)
+        {
+            if ( (*X)(sigStartPos - i) != pattern[i] )
+            {
+                isSigR = false;
+                break;
+            }
+        }
+
+        
+        // If signal detects, extract the context sequence and compute the score
+        if ((isSigR) && (sigStartPos + upstreamLen < X->SeqLen) && (sigStopPos - downstreamLen > 0))
+        {
+            j = 0;           
+            for (i = sigStartPos + upstreamLen; i >= sigStopPos - downstreamLen; i--)
+            {
+                Site[j] = (*X)(i);
+                j++;
+            }       
+            //if (scoringMode == 2) score = WAModel->ScoreTheSubMotif(Site, 1, upstreamLen) * WAModel->ScoreTheSubMotif(Site, upstreamLen+sigLength+1, motifLength);
+            
+            vPosR.push_back(pos);
+            vScoreR.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
+        }
+    }
+    
+    delete [] Site;     
+}
+
+
 
 // ---------------------
 //  AssertPatternLength
@@ -140,89 +241,33 @@ void SensorSignalWAM :: AssertPatternLength(char* pattern, int expectedlength, i
 // -----------------------
 void SensorSignalWAM :: GiveInfo(DNASeq *X, int pos, DATA *d)
 {
-    int i, j;
-    double score;
-    char* Site = new char[motifLength + 1];
-    Site[motifLength] = '\0';
-
-    int sigStartPos;
-    int sigStopPos;
-
-    // -----------------------------------------------------------------
-    // Forward strand
-    // -----------------------------------------------------------------
-    bool isSigF = true;
-    sigStartPos = pos - newStatePos + 1;
-    sigStopPos  = sigStartPos + sigLength - 1;
-
-    // check there is a signal at the current position on forward strand
-    for (i = 0; i < sigLength; i++)
+    bool update = false;
+    if ( (positionGiveInfo == -1) || (pos != positionGiveInfo+1) ) update = true; // update indexes on vectors
+    positionGiveInfo = pos;
+    
+    if ( !vPosF.empty() ) 
     {
-        if ((*X)[sigStartPos + i] != tolower(pattern[i]))
-        {
-            isSigF = false;
-            break;
-        }
-    }
-
-    // If signal detects, extract the context sequence and compute the score
-    if ((isSigF) && (sigStartPos - upstreamLen > 0) && (sigStopPos + downstreamLen < X->SeqLen))
-    {
-        score = 0.0;
-        j     = 0;
-
-        for (i = sigStartPos - upstreamLen; i <= sigStopPos + downstreamLen; i++)
-        {
-            Site[j] = toupper((*X)[i]);
-            j++;
-        }
-        //if (scoringMode == 2)
-        //       score = WAModel->ScoreTheSubMotif(Site, 1, upstreamLen) * WAModel->ScoreTheSubMotif(Site, upstreamLen+sigLength+1, motifLength);
-
-        score = WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd);
-       
-        //fprintf(stdout, "SITE POSITION = %d : mode=%d, [%d-%d], site=%s, score = %f\n", pos, scoringMode, scoringMotifStart, scoringMotifEnd, Site, score);
-        d->sig[sigType].weight[Signal::Forward] += (scaleCoef * score) + scalePenalty;
-    }
-
-    // -----------------------------------------------------------------
-    // Reverse strand
-    // ------------------------------------------------------------------
-    bool isSigR = true;
-    sigStartPos = pos + newStatePos - 2;
-    sigStopPos  = sigStartPos - sigLength + 1;
-
-    // check there is a signal at the current position on forward strand
-    for (i = sigLength - 1; i > -1; i--)
-    {
-        if ((*X)(sigStartPos - i) != tolower(pattern[i]))
-        {
-            isSigR = false;
-            break;
-        }
-    }
-
-    // If signal detects, extract the context sequence and compute the score
-    if ((isSigR) && (sigStartPos + upstreamLen < X->SeqLen) && (sigStopPos - downstreamLen > 0))
-    {
-        score = 0.0;
-        j     = 0;
+        if (update) 
+            indexF = lower_bound(vPosF.begin(), vPosF.end(), pos) - vPosF.begin();
         
-        for (i = sigStartPos + upstreamLen; i >= sigStopPos - downstreamLen; i--)
+        if ( indexF < (int)vPosF.size() && vPosF[indexF] == pos ) 
         {
-            Site[j] = toupper((*X)(i));
-            j++;
+            d->sig[sigType].weight[Signal::Forward] += (scaleCoef * vScoreF[indexF]) + scalePenalty;
+            indexF++;
         }
-
-        //if (scoringMode == 2)
-        //score = WAModel->ScoreTheSubMotif(Site, 1, upstreamLen) * WAModel->ScoreTheSubMotif(Site, upstreamLen+sigLength+1, motifLength);
-        score = WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd);
-                
-        //fprintf(stdout, "REV SITE POSITION = %d : mode=%i, [%d-%d], site=%s, score = %f\n", pos, scoringMode, scoringMotifStart, scoringMotifEnd, Site, score);
-        d->sig[sigType].weight[Signal::Reverse] += (scaleCoef * score) + scalePenalty;
     }
-
-    delete [] Site;
+    
+    if ( !vPosR.empty() ) 
+    {
+        if (update) 
+            indexR = lower_bound(vPosR.begin(), vPosR.end(), pos) - vPosR.begin();
+        
+        if( indexR < (int)vPosR.size() && vPosR[indexR] == pos ) 
+        {
+            d->sig[sigType].weight[Signal::Reverse] += (scaleCoef * vScoreR[indexR]) + scalePenalty;
+            indexR++;
+        }
+    }
 }
 
 
