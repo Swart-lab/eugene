@@ -43,7 +43,11 @@ class SensorSignalWAM : public Sensor
  int motifLength;       // length of the motif (signal+ flanking regions)
  int sigLength;         // length of the signal (ex 2 if signal=GT)
  int newStatePos;
- 
+ int scoringMode;       // if mode=0, score the full motif
+                        // if mode=1, score the coding site of the motif only
+ int scoringMotifStart; // start position in the motif to compute the score
+ int scoringMotifEnd;   // end position in the motif to compute the score
+                        
  void AssertPatternLength(char*, int, int, char*);
  
  public:
