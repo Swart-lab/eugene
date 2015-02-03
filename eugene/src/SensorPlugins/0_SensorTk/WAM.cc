@@ -218,7 +218,6 @@ double WAM :: ScoreTheMotif (char* motif, int start, int end)
     int istart = start-1;
     int iend   = end-MarkovianOrder;
 
-        printf("score = \n");
     for (i=istart ; i< iend ; i++) 
     {
         for (j=0; j <= MarkovianOrder; j++) 
