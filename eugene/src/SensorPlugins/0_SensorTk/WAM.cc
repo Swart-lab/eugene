@@ -153,7 +153,7 @@ WAM :: ~WAM ()
   }
 }
 
-double WAM :: ScoreTheMotif (char* motif) 
+/*double WAM :: ScoreTheMotif (char* motif) 
 // motif must include an amount context of MarkovianOrder length
 {
   bool debug = false;
@@ -195,4 +195,62 @@ double WAM :: ScoreTheMotif (char* motif)
 
   delete []  word;
   return score;
+}*/
+
+double WAM :: ScoreTheMotif (char* motif) 
+{
+    return this->ScoreTheMotif(motif, 1, MotifLength);
 }
+
+
+double WAM :: ScoreTheMotif (char* motif, int start, int end)
+{
+    bool debug = false;
+    int i, j;
+    int    outofalphabet = 0;
+    double score         = 0.0;
+    if (debug) fprintf(stdout, "motif %s\n", motif);
+    
+    char* word = new char[MarkovianOrder+2];
+    word[MarkovianOrder+1] = '\0'; // word stores a short word for asking markovian probs
+    
+    //  at each position of the motif
+    int istart = start-1;
+    int iend   = end-MarkovianOrder;
+
+        printf("score = \n");
+    for (i=istart ; i< iend ; i++) 
+    {
+        for (j=0; j <= MarkovianOrder; j++) 
+        { 
+            // Read a word of MarkovianOrder length 
+            word[j] = toupper(motif[i+j]);
+            // test if an unknown letter is present, out of the alphabet (like "n" for nucleotid)
+            if ((unsigned)Alphabet->operator[](word[j]) == Alphabet->taille) 
+            {
+                outofalphabet=1;
+            }
+        }
+        
+        if (debug) fprintf(stdout, "--> i=%d, word=%s\t", i, word);
+        if (outofalphabet == 0) 
+        {
+            // likelihood ratio: log ( proba(nt with true model)/proba(nt with false model) )
+            if (debug) fprintf(stdout, "score+= (%f - %f)", TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)), TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder)));
+            score += 
+            log (TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)))  -
+            log (TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder)))  ;
+            //if (debug) printf ("    + log(%f) (= %f) - log(%f) (=%f) => ",TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)), log(TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder))),
+            //                               TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder)), log(TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder))));
+            //if (debug) printf (" += %f\n", log (TPMOD[i]->usi2real(TPMOD[i]->proba(word,MarkovianOrder)))  - log (TNMOD[i]->usi2real(TNMOD[i]->proba(word,MarkovianOrder))) );
+        }
+        
+        if (debug) fprintf(stdout, "\n");
+        outofalphabet = 0; 
+    }
+    
+    delete []  word;
+    return score;
+    
+}
+
