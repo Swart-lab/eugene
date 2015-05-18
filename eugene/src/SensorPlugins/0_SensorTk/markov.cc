@@ -651,7 +651,7 @@ template<class CHAINE, typename T> void TabChaine<CHAINE,T> :: compte2probas (co
 	else 
 	{
 	  VAL[i] = VAL[mot2indice(mot,indice2lgrmot(i)-1,1)];
-	  fprintf(stderr,"Warning : cumul = %d, not enough information to compute P(%s) --> taking P(%s)\n", cumul, mot,indice2mot(mot2indice(mot,indice2lgrmot(i)-1,1)));
+      fprintf(stderr,"Warning : cumul = %d (min required %d), not enough information to compute P(%s) --> taking P(%s)\n", cumul, occurence_min, mot,indice2mot(mot2indice(mot,indice2lgrmot(i)-1,1)));
 	}
       }
       else 

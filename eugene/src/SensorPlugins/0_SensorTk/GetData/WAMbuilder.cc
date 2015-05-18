@@ -19,18 +19,23 @@
 // The goal is to model a signal in a genomic sequence (splice site, start)
 // Build the model from a multifasta file containing sequences around the
 // around the signal. Save results in binary files.
-//
-// USAGE: egn_WAMBuilder motifFile pat uc dc markovOrder outfilePrefix
-//  motifFile     multifasta file of the motifs,
-//  pat           signal pattern,
-//  uc            upstream sequence length,
-//  dc            downstream length, 
-//  markovOrder   markovian order (start at 0),
-//  outfilePrefix prefix of the results binary files.
+// Usage: %s motifFile species site pat seqType uc dc markovOrder [wamDir]
+// motifFile                            Multifasta file of the motifs,
+// species                              Species
+// site          [donor|acceptor|start] Signal type
+// pat                                  Signal pattern
+// seqType       [TP|TN]                True positive or true negative sequences
+// uc                                   Upstream sequence length
+// dc                                   Downstream sequence length
+// markovOrder                          Markovian order (starts at 0)
+// 
+// Options:
+// wamDir                               Directory where save the wam models. (Default $EUGENEDIR/models/WAM)
 // EXAMPLES: 
-// egn_WAMBuilder ARA.don.TP.fa GT 4 4 0 WAM.don.order0.TP.
-// egn_WAMBuilder ARA.don.TP.fa GT 4 4 1 WAM.don.order1.TP.
-// egn_WAMBuilder ARA.acc.TN.fa AG 4 4 0 WAM.acc.order0.TN.
+// egn_WAMbuilder ARA.don.TP.fa arath donor    GT TP 60 60 0
+// egn_WAMbuilder ARA.don.TP.fa arath donor    GT TP 60 60 1
+// egn_WAMbuilder ARA.acc.TN.fa arath acceptor AG TN 60 60 0 
+
 //
 // ------------------------------------------------------------------
 
@@ -39,48 +44,164 @@
 #include <math.h>
 #include <string.h>
 #include <vector>
+#include <dirent.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "../markov.h"
 #include "../markov.cc"
+
+
+
+int CreateDirectory(const char* path)
+{
+    DIR *dir;
+    dir = opendir(path);
+    if (!dir)
+    {
+        int statusMkdir = mkdir (path, 0711);
+        if (statusMkdir != 0)
+        {
+            printf ("ERROR: cant create the directory %s.\n", path);
+            return (-1); 
+        }
+        else
+        {
+            printf ("Directory %s created.\n", path);
+        }  
+    }
+    else
+    {
+        printf ("Directory %s already exists.\n", path);
+        closedir(dir);
+    }
+    
+    return 0;
+}
+
+void PrintHelp (char* pg)
+{
+    fprintf(stderr, "\
+    This program builds a Weight Array Model (WAM) for a WAM eugene sensor. \n\
+    The goal is to model a signal in a genomic sequence (splice site, start).\n\
+    Build the model from a multifasta file containing sequences around the \n\
+    signal. Save results in binary files. \n\
+    \nUsage: %s motifFile species site pat seqType uc dc markovOrder [wamDir] \n\
+    motifFile                            Multifasta file of the motifs, \n\
+    species                              Species\n\
+    site          [donor|acceptor|start] Signal type\n\
+    pat                                  Signal pattern\n\
+    seqType       [TP|TN]                True positive or true negative sequences\n\
+    uc                                   Upstream sequence length\n\
+    dc                                   Downstream sequence length\n\
+    markovOrder                          Markovian order (starts at 0)\n\
+    \nOptions: \n\
+    wamDir                               Directory where save the wam models. (Default $EUGENEDIR/models/WAM)\n\
+    \n\nEXAMPLES: \
+    \n%s ARA.don.TP.fa arath donor    GT TP 60 60 0\
+    \n%s ARA.don.TP.fa arath donor    GT TP 60 60 1\
+    \n%s ARA.acc.TN.fa arath acceptor AG TN 60 60 0\n", pg, pg, pg, pg);
+    
+    exit(1); 
+}
+
 
 // -------------------------------------------------------------------------
 //            MAIN
 // -------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-    if (argc != 7)
+    
+    int DEBUG = 0;
+    int   i;
+    FILE* file;
+    
+    
+    if (argc < 9)
     {
-        fprintf(stderr, "\
-This program builds a Weight Array Model (WAM) for a WAM eugene sensor. \n\
-The goal is to model a signal in a genomic sequence (splice site, start).\n\
-Build the model from a multifasta file containing sequences around the \n\
-signal. Save results in binary files. \n\
-\nUSAGE: %s motifFile pat uc dc markovOrder outfilePrefix \n\
-  motifFile     multifasta file of the motifs, \n\
-  pat           signal pattern, (example: GT)\n\
-  uc            upstream sequence length, \n\
-  dc            downstream sequence length, \n\
-  markovOrder   markovian order (starts at 0), \n\
-  outfilePrefix prefix of the result binary files.\
-\n\nEXAMPLES: \
-\n%s ARA.don.TP.fa GT 4 4 0 WAM.don.order0.TP. \
-\n%s ARA.don.TP.fa GT 4 4 1 WAM.don.order1.TP. \
-\n%s ARA.acc.TN.fa AG 4 4 0 WAM.acc.order0.TN.\n", argv[0], argv[0], argv[0], argv[0]);
-        exit(1);
+        PrintHelp(argv[0]);
+    }
+    
+    char* outRoot = new char[FILENAME_MAX+1];
+    if (argc == 9)
+    {
+        char* eugenedir = getenv("EUGENEDIR");
+        if (eugenedir == NULL) 
+        {
+            fprintf(stderr, ">ERROR: the parameter 'wamDir' should be defined<\n");
+            PrintHelp(argv[0]);
+        }
+        sprintf(outRoot, "%s/models/WAM", eugenedir);
+    }
+    else
+    {
+        sprintf(outRoot, argv[9]);
     }
 
-    int DEBUG = 0;
-	int   i;
-	FILE* file;
 	
     char* motifFile  = argv[1];       // multifasta file
-    char* signal     = argv[2];       // GC or GC or AT or ATG, etc
-    int uc           = atoi(argv[3]); // upstream region length
-    int dc           = atoi(argv[4]); // downstream region length
-    int markovOrder  = atoi(argv[5]); // 0, 1, etc
-    char* outname    = argv[6];
-
-
+    char* species    = argv[2];       // species
+    char* site       = argv[3];       // acceptor donor or start
+    char* signal     = argv[4];       // GC or GC or AT or ATG, etc
+    char* seqType    = argv[5];       // TP or TN
+    int uc           = atoi(argv[6]); // upstream region length
+    int dc           = atoi(argv[7]); // downstream region length
+    int markovOrder  = atoi(argv[8]); // 0, 1, etc
+   
+    
+    if ( strcmp(seqType, "TP") != 0 && strcmp(seqType, "TN") != 0 )
+    {
+        fprintf (stderr, ">ERROR: allowed values for seqType are TP and TN<\n\n");
+        PrintHelp(argv[0]);  
+    }
+    
+    if ( strcmp(site, "donor") != 0 && strcmp(site, "acceptor") != 0 && strcmp(site, "start") != 0 )
+    {
+        fprintf (stderr, ">ERROR: allowed values for site are: donor, acceptor and start<\n\n");
+        PrintHelp(argv[0]);
+  
+    }
+    if (markovOrder < 0)
+    {    
+        fprintf (stderr, ">ERROR: markovOrder has to be equal or greater than 0<\n\n");
+        PrintHelp(argv[0]);
+            
+    }
+    assert(uc > 0);
+    assert(dc > 0);
+    
+    // Check that output directory exists
+    DIR *rootDir = opendir(outRoot);
+    if (!rootDir)
+    {
+        fprintf (stderr, ">ERROR: %s is not an existing directory<\n", outRoot);
+        exit(1);
+    }
+    closedir(rootDir);
+    
+    // Create the species directory
+    char* speciesPath = new char[FILENAME_MAX+1];
+    sprintf(speciesPath, "%s/%s/", outRoot, species);
+    int statusMkdir = CreateDirectory(speciesPath);
+    if (statusMkdir != 0)
+    {
+        exit(1); 
+    }
+    
+    // Create the site directory
+    char* sitePath = new char[FILENAME_MAX+1];
+    sprintf(sitePath, "%s/%s/", speciesPath, site);
+    statusMkdir = CreateDirectory(sitePath);
+    if (statusMkdir != 0)
+    {
+        exit(1); 
+    }
+    // build outfile root name
+    // Example: EUGENEDIR/models/WAM/plants/acceptor/WAM.o04.uc60.dc60.AG.TP.
+    char *outname = new char[FILENAME_MAX+1];
+    sprintf(outname, "%s/WAM.o%02d.uc%03d.dc%03d.%s.%s.", sitePath, markovOrder, uc, dc, signal, seqType);
+    
+    
     int signalLen   = strlen(signal);
     int motifLen    = uc + signalLen + dc;
     int WAMlen      = motifLen - markovOrder;
@@ -115,10 +236,18 @@ signal. Save results in binary files. \n\
 
         if (seqLen != motifLen)
         {
-            printf("Error reading %s: sequence \"%s\" length is different to expected length (%d nt)\n", motifFile, Sequence, motifLen);
+            printf("Error reading >%s<: sequence \"%s\" length is different to expected length (%d nt)\n", motifFile, Sequence, motifLen);
             exit(1);
         }
 
+        // check that the sequence includes the signal
+        std::string SequenceString = Sequence;
+        if (SequenceString.compare(uc, signalLen, signal) != 0)
+        {
+            printf("Error reading >%s<: the sequence \"%s\" does not contain \"%s\" at the position %d.\n", motifFile, Sequence, signal, (uc+1));
+            exit(1);
+        }
+        
         free(Sequence);
         Sequence = NULL;
     };
@@ -236,3 +365,5 @@ signal. Save results in binary files. \n\
     delete ADN;
 
 }
+
+
