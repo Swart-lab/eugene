@@ -32,6 +32,7 @@
 #define DEFAULT_PARA_PROK_FILE "cfg/eugene_prok.par"
 #define PLUGINS_DIR "plugins"
 #define MODELS_DIR "models"
+#define WAM_DIR "models/WAM"
 #define WEB_DIR "web"
 
 #define POSSIBLE_ARGUMENTS "FGREBP::adrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:"
