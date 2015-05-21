@@ -260,6 +260,8 @@ void DNASeq :: InitCodonTable()
 	cerr << "Can't open codon file 'EuGene.CodonTable' " <<  CodonFile << "\n";
 	exit(1);
   }
+  
+  delete[] CodonFile;
 }
 
 
