@@ -244,8 +244,9 @@ int main(int argc, char *argv[])
         std::string SequenceString = Sequence;
         if (SequenceString.compare(uc, signalLen, signal) != 0)
         {
-            printf("Error reading >%s<: the sequence \"%s\" does not contain \"%s\" at the position %d.\n", motifFile, Sequence, signal, (uc+1));
-            exit(1);
+            printf("warning reading >%s<: \"%s\" found (\"%s\" expected) at the position %d of the sequence \"%s\".\n", 
+                   motifFile, SequenceString.substr(uc,signalLen).c_str(), signal, (uc+1), Sequence);
+                   //exit(1);
         }
         
         free(Sequence);
