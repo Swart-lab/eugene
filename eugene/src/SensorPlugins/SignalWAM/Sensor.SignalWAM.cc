@@ -19,6 +19,8 @@
 // ------------------------------------------------------------------
 
 #include <ctype.h>
+# include <dirent.h>
+# include <sys/types.h>
 #include "Sensor.SignalWAM.h"
 
 extern Parameters PAR;
@@ -35,32 +37,96 @@ extern Parameters PAR;
 // ----------------------
 SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
 {
-    char* signalType;
-    signalType       = PAR.getC("SignalWAM.type",          GetNumber()); // start, acc or don
-    pattern          = PAR.getC("SignalWAM.pat",           GetNumber()); // 'ATG' for instance
-    
-    upstreamLen      = PAR.getI("SignalWAM.uc",            GetNumber());
-    downstreamLen    = PAR.getI("SignalWAM.dc",            GetNumber());
+    char* signalType = PAR.getC("SignalWAM.type",          GetNumber()); // start, acceptor or donor
+    char* species    = PAR.getC("SignalWAM.species",       GetNumber()); // species dir models/WAM/species has to exist
     scoringMode      = PAR.getI("SignalWAM.scoringMode",   GetNumber());
     
-    // tolower
+    /////////////////////////////////////////////////////////////////////////////////////
+    // Assert signalType = donor, acceptor or start
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    int signalLen;   
+    if (strcmp(signalType, "donor") == 0 || strcmp(signalType, "acceptor") == 0)
+    {
+        signalLen = 2;
+    }
+    else if (strcmp(signalType, "start") == 0)
+    {
+        // start
+        signalLen = 3;
+    }
+    else
+    {
+        fprintf(stderr, "Error \"%s\" undefined type in the parameter file"
+        " for SignalWAM.type[%d]\n", signalType, GetNumber());
+        fprintf(stderr, "Type must be : start, acceptor or donor.\n");
+        exit(2);  
+    }
+    
+    /////////////////////////////////////////////////////////////////////////////////////
+    // In the wam directory  $EUGENEDIR/models/wam/species/signalType
+    // Search the best available wam models (max order)
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    char *wamdir = new char[FILENAME_MAX+1];
+    sprintf(wamdir, "%s/%s/%s/%s/", PAR.getC("eugene_dir"), WAM_DIR, species, signalType); 
+    DIR *dir = opendir(wamdir);
+    if (!dir)
+    {
+        fprintf(stderr, "Cannot open wam model directory %s\n", wamdir);
+        exit(2);
+    }
+    
+    // Search wam models of highest order:
+    // Sort files in descending, then get the first file name (file of highest order) 
+    struct dirent *entry = NULL;
+    std::vector<string> vFiles;
+    while ( (entry = readdir(dir)) != NULL )
+    {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+        {           
+            vFiles.push_back(entry->d_name);
+        }
+    }
+    if (vFiles.size() <= 0)
+    {
+        fprintf(stderr, "No wam models found.\n");
+        exit(2); 
+    }
+    sort(vFiles.rbegin(), vFiles.rend());
+    string wamFileName = vFiles.at(0); // WAM.o02.uc020.dc020.AG.TP.39
+    
+    
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Extract information from the file named WAM.o02.uc020.dc020.AG.TP.39 :
+    // wam order, upstream and downstream lengths  and site nucleotides
+    /////////////////////////////////////////////////////////////////////////////////////
+      
+    int markovianOrder = atoi(wamFileName.substr(5,2).c_str());  //  02
+    upstreamLen        = atoi(wamFileName.substr(10,3).c_str()); // 020
+    downstreamLen      = atoi(wamFileName.substr(16,3).c_str()); // 020
+    pattern            = new char[4];
+    strcpy(pattern, wamFileName.substr(20,signalLen).c_str());   // AG
     for(int i=0; i<strlen(pattern); i++)
         pattern[i] = tolower(pattern[i]);
     
-    
-    // Order of the markov models in the Weight Array Model
-    int markovianOrder   = PAR.getI("SignalWAM.markovOrder",   GetNumber()); // 0 1 2
-    
-    char modelfilename[FILENAME_MAX + 1];
-    strcpy(modelfilename, PAR.getC("SignalWAM.filePrefix", GetNumber()));
+    char *modelfilename = new char[FILENAME_MAX+1];
+    strcat(modelfilename, wamdir);
+    strcat(modelfilename, wamFileName.substr(0,20+signalLen).c_str());
+    //printf ("Fichier: %s =>Order: %i, uc %i, dc %i, patt %s, model file %s\n", wamFileName.c_str(), 
+    //           markovianOrder,upstreamLen, downstreamLen, pattern, modelfilename ) ;
 
-    motifLength       = upstreamLen + strlen(pattern) + downstreamLen;    
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Initialization according to the signaltype and the scoringMode
+    // codingside = 1: score only the coding side around the site
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    motifLength       = upstreamLen + signalLen + downstreamLen;    
     scoringMotifStart = 1;
     scoringMotifEnd   = motifLength;
 
     if (!strcmp(signalType, "start"))
     {
-        AssertPatternLength(pattern, 3, GetNumber(), "start");
         sigType     = DATA::Start;
         type        = Type_Start;
         newStatePos = 1;
@@ -73,7 +139,6 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     }
     else if (!strcmp(signalType, "donor"))
     {
-        AssertPatternLength(pattern, 2, GetNumber(), "donor");
         sigType     = DATA::Don;
         type        = Type_Don;
         newStatePos = 1;
@@ -86,7 +151,6 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     }
     else if (!strcmp(signalType, "acceptor"))
     {
-        AssertPatternLength(pattern, 2, GetNumber(), "acceptor");
         sigType     = DATA::Acc;
         type        = Type_Acc;
         newStatePos = 3;
@@ -96,17 +160,20 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
             scoringMotifEnd   = motifLength;
         }
     }
-    else
-    {
-        fprintf(stderr, "Error \"%s\" undefined type in the parameter file"
-                        " for SignalWAM.type[%d]\n", signalType, GetNumber());
-        fprintf(stderr, "Type must be : start, acceptor or donor.\n");
-        exit(2);  
-    }
-
+    
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Build WAM object and launch signal search
+    /////////////////////////////////////////////////////////////////////////////////////
+    
     WAModel = new WAM(markovianOrder, motifLength, "ACGT", modelfilename);
     
     SearchSignal(X);
+    
+    
+    delete[] wamdir;
+    delete[] modelfilename;
+    delete dir;
+    
 }
 
 // ----------------------
@@ -115,6 +182,7 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
 SensorSignalWAM :: ~SensorSignalWAM()
 {
     delete [] WAModel;
+    delete [] pattern;
     vPosF.clear();
     vPosR.clear();
     vScoreF.clear();
