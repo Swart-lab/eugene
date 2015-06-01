@@ -152,6 +152,7 @@ class  DNASeq
   double IsSpliceStart(int pos1, int pos2, int strand, int splicePos);
   bool IsAllowedStop(std::string triplet);
   bool IsAStop(std::string triplet);
+  bool IsPattern(const char* site, int pos, int strand);
 
   // Computes the markov probability of emission of the nuc. at position pos
   double Markov(int pos);

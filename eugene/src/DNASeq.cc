@@ -184,7 +184,7 @@ DNASeq :: DNASeq (char *filename)
 void DNASeq :: InitCodonTable()
 {
     // Init the codon table
-  char *CodonFile = new char[FILENAME_MAX+1];
+  char* CodonFile = new char[FILENAME_MAX+1];
   strcpy(CodonFile, PAR.getC("eugene_dir")); 
   strcat(CodonFile, MODELS_DIR);
   strcat(CodonFile, "/");
@@ -793,6 +793,38 @@ int DNASeq :: IsSite(const std::vector<std::string> &vSite, int pos, int strand)
 
     // not found
     return 0;
+}
+
+
+// ---------------------------------------------------------------------
+// Test if the pattern is present at the position pos on the strand. 
+// Important : 
+// on strand +, pos has to be the left start of the site
+// on strand -, pos has to be the right start of the site
+// ---------------------------------------------------------------------
+bool DNASeq :: IsPattern(const char* pattern, int pos, int strand)
+{
+    int mode = 0;
+    // strand minus
+    if (strand < 0)
+    {
+        pos = SeqLen - pos -1;
+        mode = 2;
+    }
+    
+    assert(pos >= 0 && pos <= this->Size);
+    
+    int sitelength = strlen(pattern);
+    
+    for (int i=0; i < sitelength; i++)
+    {
+        int c = (*this)(pos+i, mode);
+        if ( !( c & Nuc2Code(pattern[0+i]) ) )
+            return false;
+    }
+    
+    // found
+    return true;
 }
 
 // ---------------------------------------------------------------------
