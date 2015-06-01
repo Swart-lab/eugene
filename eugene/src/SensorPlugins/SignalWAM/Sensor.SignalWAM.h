@@ -51,6 +51,8 @@ class SensorSignalWAM : public Sensor
                         // if mode=1, score the coding site of the motif only
  int scoringMotifStart; // start position in the motif to compute the score
  int scoringMotifEnd;   // end position in the motif to compute the score
+ 
+ bool allowedNonCanSite; // true to search non canonic spliced site
                         
  void AssertPatternLength(char*, int, int, char*);
  void SearchSignal(DNASeq *X);

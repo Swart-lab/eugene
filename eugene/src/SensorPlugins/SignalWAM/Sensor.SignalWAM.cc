@@ -37,9 +37,24 @@ extern Parameters PAR;
 // ----------------------
 SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
 {
-    char* signalType = PAR.getC("SignalWAM.type",          GetNumber()); // start, acceptor or donor
-    char* species    = PAR.getC("SignalWAM.species",       GetNumber()); // species dir models/WAM/species has to exist
-    scoringMode      = PAR.getI("SignalWAM.scoringMode",   GetNumber());
+    char* signalType  = PAR.getC("SignalWAM.type",          GetNumber()); // start, acceptor or donor
+    char* species     = PAR.getC("SignalWAM.species",       GetNumber()); // species dir models/WAM/species has to exist
+    scoringMode       = PAR.getI("SignalWAM.scoringMode",   GetNumber());
+    allowedNonCanSite = false;
+    
+    if (PAR.getI("SignalWAM.spliceNonCan",  GetNumber()) == 1)
+    {
+        if ( strcmp(signalType, "donor") != 0 && strcmp(signalType, "acceptor") != 0 )
+        {
+            fprintf(stderr, "Warning: SignalWAM.spliceNonCan[%d] only makes sense if SignalWAM.type[%d]=\"acceptor\" or \"donor\".\n", 
+                    GetNumber(),  GetNumber());
+        }
+        else
+        {
+            allowedNonCanSite = true;
+        }
+    }
+    
     
     /////////////////////////////////////////////////////////////////////////////////////
     // Assert signalType = donor, acceptor or start
@@ -110,8 +125,8 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     for(int i=0; i<strlen(pattern); i++)
         pattern[i] = tolower(pattern[i]);
     
-    char *modelfilename = new char[FILENAME_MAX+1];
-    strcat(modelfilename, wamdir);
+    char* modelfilename = new char[FILENAME_MAX+1];
+    strcpy(modelfilename, wamdir);
     strcat(modelfilename, wamFileName.substr(0,20+signalLen).c_str());
     //printf ("Fichier: %s =>Order: %i, uc %i, dc %i, patt %s, model file %s\n", wamFileName.c_str(), 
     //           markovianOrder,upstreamLen, downstreamLen, pattern, modelfilename ) ;
@@ -172,7 +187,7 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     
     delete[] wamdir;
     delete[] modelfilename;
-    delete dir;
+    //delete dir;
     
 }
 
@@ -215,6 +230,7 @@ void SensorSignalWAM :: SearchSignal(DNASeq *X)
     int sigStartPos;
     int sigStopPos;
     bool isSigF, isSigR;
+    bool isNonCanSite;
     int sigLength = strlen(pattern);
     
     for (int pos = 0; pos <= X->SeqLen; pos++)
@@ -222,68 +238,93 @@ void SensorSignalWAM :: SearchSignal(DNASeq *X)
         //  ------------------------------------------------------------
         // Forward strand
         // -----------------------------------------------------------------
-        isSigF      = true;
-        sigStartPos = pos - newStatePos + 1;
-        sigStopPos  = sigStartPos + sigLength - 1;
-        
-        // check there is a signal at the current position on forward strand
-        for (i = 0; i < sigLength; i++)
-        {
-            if ( (*X)[sigStartPos + i] != pattern[i] )
-            {
-                isSigF = false;
-                break;
-            }
-        }
-        
-        // If signal detects, extract the context sequence and compute the score
-        if ((isSigF) && (sigStartPos - upstreamLen > 0) && (sigStopPos + downstreamLen < X->SeqLen))
-        {
-            j = 0;
-            // extract motif around the signal
-            for (i = sigStartPos - upstreamLen; i <= sigStopPos + downstreamLen; i++)
-            {
-                Site[j] = (*X)[i];
-                j++;
-            }
+        isNonCanSite = false;
+        sigStartPos  = pos - newStatePos + 1;
+        sigStopPos   = sigStartPos + sigLength - 1;
 
-            vPosF.push_back(pos);
-            vScoreF.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
+        // if enough context
+        if ( (sigStartPos - upstreamLen > 0)  && (sigStopPos + downstreamLen < X->SeqLen) )
+        {
+            // check there is a signal at the current position on forward strand
+            isSigF = X->IsPattern(pattern, sigStartPos, 1);
+            // check if there is a non canonic site
+            if ( isSigF            == false  && 
+                 allowedNonCanSite == true   && 
+                 (( sigType == DATA::Acc && X->IsNonCanAcc(sigStartPos, 1) ) ||
+                  ( sigType == DATA::Don && X->IsNonCanDon(sigStartPos, 1) )
+                 ))
+            {
+                isSigF       = true;
+                isNonCanSite = true;
+            }
+        
+            // If signal detects, extract the context sequence and compute the score
+            if (isSigF) 
+            {
+                j = 0;
+                // extract motif around the signal
+                for (i = sigStartPos - upstreamLen; i <= sigStopPos + downstreamLen; i++)
+                {
+                    Site[j] = (*X)[i];
+                    j++;
+                }
+            
+                if (isNonCanSite)
+                {
+                    for (i = 0; i < sigLength; i++)
+                        Site[upstreamLen + i] = pattern[i];
+                }
+            
+                vPosF.push_back(pos);
+                vScoreF.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
+            }
         }
         
         // -----------------------------------------------------------------
         // Reverse strand
         // ------------------------------------------------------------------
-        isSigR      = true;
-        sigStartPos = pos + newStatePos - 2;
-        sigStopPos  = sigStartPos - sigLength + 1;
+        isNonCanSite = false;
+        sigStartPos  = pos + newStatePos - 2;
+        sigStopPos   = sigStartPos - sigLength + 1;
         
-        // check there is a signal at the current position on reverse strand
-        for (i = sigLength - 1; i > -1; i--)
+        // if enough context
+        if ( (sigStartPos + upstreamLen < X->SeqLen) && (sigStopPos - downstreamLen > 0) )
         {
-            if ( (*X)(sigStartPos - i) != pattern[i] )
+            // check there is a signal at the current position on reverse strand
+            isSigR = X->IsPattern(pattern, sigStartPos, -1);
+            // check if there is a non canonic site
+            if ( isSigR            == false && 
+                 allowedNonCanSite == true  &&
+                 ( (sigType == DATA::Acc && X->IsNonCanAcc(sigStartPos, -1) ) ||
+                   (sigType == DATA::Don && X->IsNonCanDon(sigStartPos, -1) ) )
+               )
             {
-                isSigR = false;
-                break;
+                isSigR       = true;
+                isNonCanSite = true;
+            }
+
+            // If signal detects, extract the context sequence and compute the score
+            if (isSigR) 
+            {
+                j = 0;           
+                for (i = sigStartPos + upstreamLen; i >= sigStopPos - downstreamLen; i--)
+                {
+                    Site[j] = (*X)(i);
+                    j++;
+                }    
+            
+                if (isNonCanSite)
+                {
+                    for (i = 0; i < sigLength; i++)
+                        Site[upstreamLen + i] = pattern[i];
+                }
+
+                vPosR.push_back(pos);
+                vScoreR.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
             }
         }
-
-        
-        // If signal detects, extract the context sequence and compute the score
-        if ((isSigR) && (sigStartPos + upstreamLen < X->SeqLen) && (sigStopPos - downstreamLen > 0))
-        {
-            j = 0;           
-            for (i = sigStartPos + upstreamLen; i >= sigStopPos - downstreamLen; i--)
-            {
-                Site[j] = (*X)(i);
-                j++;
-            }       
-            //if (scoringMode == 2) score = WAModel->ScoreTheSubMotif(Site, 1, upstreamLen) * WAModel->ScoreTheSubMotif(Site, upstreamLen+sigLength+1, motifLength);
+    } // end for
             
-            vPosR.push_back(pos);
-            vScoreR.push_back(WAModel->ScoreTheMotif(Site, scoringMotifStart, scoringMotifEnd));
-        }
-    }
     
     delete [] Site;     
 }
