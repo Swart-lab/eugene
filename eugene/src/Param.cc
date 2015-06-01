@@ -356,6 +356,7 @@ void Parameters :: ReadArg(int argc, char * argv[])
       m["ParaOptimization.Use"] = "1";
       if (optarg) m["ParaOptimization.TrueCoordFile"] = optarg;
       break;
+      
     case 'P':   /* procaryote mode */
       m["EuGene.mode"] = "Prokaryote";
       if (optarg)
@@ -366,6 +367,10 @@ void Parameters :: ReadArg(int argc, char * argv[])
           m["EuGene.mode"] = "Prokaryote2";
       }
       break;
+      
+    case 'W':   /* wam models root directory */
+        m["SignalWAM.wamdir"] = optarg;
+        break;
 
     case '?':           /* bad option */
       errflag++;
@@ -426,7 +431,8 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -M AA  Markov matrix    Activates the MarkovProt plugin\n");
   fprintf(stderr, "    -r                      Activates the Repeat plugin\n");
   fprintf(stderr, "    -R                      Activates the Riken (FL cDNA) plugin\n");
-  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n\n");
+  fprintf(stderr, "    -t AA similarity matrix Activates the Homology plugin\n");
+  fprintf(stderr, "    -W                      Changes the WAM directory in SignalWAM plugin\n\n");
 	
   exit(1);
 }

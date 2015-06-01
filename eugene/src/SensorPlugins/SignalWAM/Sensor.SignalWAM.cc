@@ -82,9 +82,21 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     // In the wam directory  $EUGENEDIR/models/wam/species/signalType
     // Search the best available wam models (max order)
     /////////////////////////////////////////////////////////////////////////////////////
+    char* rootwamdir    = new char[FILENAME_MAX+1];
+    char* rootwamdir_key = (char*)"SignalWAM.wamdir";
+    if ( PAR.probeKey(rootwamdir_key) == false)
+    {
+        strcpy(rootwamdir, PAR.getC("eugene_dir"));
+        strcat(rootwamdir, "/");
+        strcat(rootwamdir, DEFAULT_WAM_DIR);
+    }
+    else
+    {
+        strcpy(rootwamdir, PAR.getC(rootwamdir_key));
+    }
     
     char *wamdir = new char[FILENAME_MAX+1];
-    sprintf(wamdir, "%s/%s/%s/%s/", PAR.getC("eugene_dir"), WAM_DIR, species, signalType); 
+    sprintf(wamdir, "%s/%s/%s/", rootwamdir, species, signalType); 
     DIR *dir = opendir(wamdir);
     if (!dir)
     {
@@ -184,8 +196,9 @@ SensorSignalWAM :: SensorSignalWAM(int n, DNASeq *X) : Sensor(n)
     
     SearchSignal(X);
     
-    
+    delete[] rootwamdir;
     delete[] wamdir;
+
     delete[] modelfilename;
     //delete dir;
     
