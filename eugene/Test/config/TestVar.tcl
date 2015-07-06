@@ -40,7 +40,7 @@ if {$action=="Test"} {
 ############################################################################
 set AllSensorsList {AnnotaStruct BlastX Est EuStop FrameShift GCPlot GFF GSplicer \
 		    Homology IfElse MarkovConst MarkovIMM MarkovProt NG2 NStart PatConst  \
-		    PepSignal Plotter Repeat Riken SMachine SPred SpliceWAM StartWAM  \
+		    PepSignal Plotter Repeat Riken SMachine SPred  \
 		    Tester Transcript NcRNA ProStart}
 
 ############################################################################
@@ -54,7 +54,7 @@ set SEQ(Sensor) {seq14ac002535g4g5}
 set OPTIONS(Sensor) "-pd"
 
 ############################################################################# 
-set FunctionalTestList {SeqAra SeqDoc SeqHom SeqAlt SeqRest SeqNcRNA ProOverlapGene EstNonCanSite}
+set FunctionalTestList {SeqAra SeqDoc SeqAlt SeqRest SeqNcRNA ProOverlapGene EstNonCanSite}
 
 ##################### ProOverlapGene test variables #########################
 set SensorsList(ProOverlapGene) {MarkovIMM ProStart EuStop Transcript BlastX}
