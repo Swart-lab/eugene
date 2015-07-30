@@ -89,7 +89,7 @@ void InitActiveTracks(int strand)
 {
     char* mode = PAR.getC ("EuGene.mode");
 
-	assert(!strcmp(mode, "Prokaryote") || !strcmp(mode, "Eukaryote") || !strcmp(mode, "Prokaryote2"));
+    assert(!strcmp(mode, "Prokaryote") || !strcmp(mode, "Eukaryote") || !strcmp(mode, "Prokaryote2") || !strcmp(mode, "Eukaryote2"));
 
 	// Init active track vectors
 	activeTracks.clear();
@@ -112,7 +112,7 @@ void InitActiveTracks(int strand)
             isActiveTrack[eukActiveTracks[i]] = true;
         }
     }
-	else // "Prokaryote2"
+    else if (!strcmp(mode, "Prokaryote2")) // "Prokaryote2"
     {	
 		assert ( (strand == 1) || (strand == -1) );
 		if (strand == 1)
@@ -132,6 +132,26 @@ void InitActiveTracks(int strand)
         	}
 		}
 	}
+	else if (!strcmp(mode, "Eukaryote2"))
+    {
+        assert ( (strand == 1) || (strand == -1) );
+        if (strand == 1)
+        {
+            for (int  i = 0; i < eukForwardActiveTracksNb; i++)
+            {
+                activeTracks.push_back(eukForwardActiveTracks[i]);
+                isActiveTrack[eukForwardActiveTracks[i]] = true;
+            }
+        }
+        else
+        {
+            for (int  i = 0; i < eukReverseActiveTracksNb; i++)
+            {
+                activeTracks.push_back(eukReverseActiveTracks[i]);
+                isActiveTrack[eukReverseActiveTracks[i]] = true;
+            }
+        }
+    }
 }
 
 // -------------------------------------------------------------------------
@@ -459,20 +479,19 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
 			char* mode = PAR.getC ("EuGene.mode");
 
-		    if ( strcmp(mode, "Prokaryote2") ) // if its no the special mode two independant prediction on prokaryote mode
-    		{
-            	pred = Predict(TheSeq, fromPos, toPos, MS);
-            	fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
-			}
-			else
-			{
-				// predict on the forward strand
-				Prediction* pred2 = Predict(TheSeq, fromPos, toPos, MS,  1);
-				// predict on the reverse strand
-				pred = Predict(TheSeq, fromPos, toPos, MS, -1);
-				pred->AppendPred(pred2);
-			}	
-
+            if (!strcmp(mode, "Prokaryote2") || !strcmp(mode, "Eukaryote2") )
+            {
+                // predict on the forward strand
+                Prediction* pred2 = Predict(TheSeq, fromPos, toPos, MS,  1);
+                // predict on the reverse strand
+                pred = Predict(TheSeq, fromPos, toPos, MS, -1);
+                pred->AppendPred(pred2);
+            }
+            else
+            {
+                pred = Predict(TheSeq, fromPos, toPos, MS);
+                fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
+            }
 
             // --------------------------------------------------------------------
             // Textual and graphical output

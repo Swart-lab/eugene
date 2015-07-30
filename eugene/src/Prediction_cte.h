@@ -98,7 +98,37 @@ const short int eukActiveTracks[eukActiveTracksNb]={
     RnaF, RnaR
 };
 
+const int eukForwardActiveTracksNb= 27;
+const short int eukForwardActiveTracks[eukForwardActiveTracksNb]={
+    InitF1,  InitF2,  InitF3,
+    SnglF1, SnglF2,SnglF3,
+    IntrF1 ,IntrF2,IntrF3,
+    TermF1,TermF2,TermF3,
+    IntronF1, IntronF2 , IntronF3,
+    IntronF2T,  IntronF2A,  IntronF3TG,                   // Txx,   Axx,   TG[A]
+    IntronF3TA, IntronF3TC, IntronF3AG,                 // TA[GA],TC[A], AG[AG]
+    InterGen,
+    UTR5F, UTR3F,
+    IntronU5F,
+    IntronU3F,
+    RnaF
+};
 
+const int eukReverseActiveTracksNb= 28;
+const short int eukReverseActiveTracks[eukReverseActiveTracksNb]={
+    InitR1, InitR2,InitR3,
+    SnglR1, SnglR2,SnglR3,
+    IntrR1 ,IntrR2,IntrR3,
+    TermR1 ,TermR2,TermR3,
+    IntronR1, IntronR2, IntronR3,               // TA[GA],TC[A], AG[AG]
+    IntronR3G,  IntronR3A,  IntronR2GA,                  // xxG,   xxA,   [TA]GA
+    IntronR2AG, IntronR2AA, IntronR2CA, IntronR2GG,
+    InterGen,
+    UTR5R , UTR3R,
+    IntronU5R,
+    IntronU3R,
+    RnaR
+};
 
 // Reverse the tracks
 const enum Tracks ReverseIt[NbTracks] =

@@ -81,10 +81,10 @@ void Parameters :: initParam (int argc, char * argv[])
 
   // check the EuGene mode
   char* mode = this->getC ("EuGene.mode");
-  if (strcmp(mode, "Eukaryote") && strcmp(mode, "Prokaryote") && strcmp(mode, "Prokaryote2"))
+  if (strcmp(mode, "Eukaryote") && strcmp(mode, "Prokaryote") && strcmp(mode, "Prokaryote2") && strcmp(mode, "Eukaryote2"))
   {
     fprintf(stderr, "\nError: \"%s\" is not a correct value for EuGene.mode parameter.\n", mode);
-    fprintf(stderr, "EuGene.mode must be: 'Eukaryote' or 'Prokaryote'.\n");
+    fprintf(stderr, "EuGene.mode must be: 'Eukaryote', 'Prokaryote', Eukaryote2' or 'Prokaryote2'.\n");
     exit(2);
   }
 
