@@ -4,8 +4,8 @@ Reading splice site file (NetGene2)...........forward, reverse done
 Loading Sensor.Est............done
 Reading cDNA hits............18 sequences read
    [AV533768]: inconsistent hit [3571-3657]
-   [AI992875]: no matching splice site
    [AI100480]: inconsistent hit [4201-4301]
+   [AI992875]: no matching splice site
 A total of 3/18 sequences rejected
 Reading cDNA hits............2 sequences read
 Optimal path length = 614.2795

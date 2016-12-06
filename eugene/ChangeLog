@@ -1,9 +1,16 @@
 -------------------------------------------------------------------------------
+v4.2a released Dec. 2016
+-------------------------------------------------------------------------------
+
+- new plugin 'SignalWAM' to predict spliced|start signals with weight-array matrix
+- In the Est plugin, change the sorting function: for the same number of gaps, select first the smallest covered region.
+
+-------------------------------------------------------------------------------
 v4.1c released Sept. 2014
 -------------------------------------------------------------------------------
 
 Improve GFF3 output format: remove ending tab.
-	
+
 -------------------------------------------------------------------------------
 v4.1c released Janv. 2014
 -------------------------------------------------------------------------------
