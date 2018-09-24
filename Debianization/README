@@ -1,0 +1,56 @@
+=======================
+Debianization of eugene
+=======================
+
+Content of the directory
+------------------------
+Binary and source files of the debian package inra-eugene:
+inra-eugene_3.2-1.diff.gz
+inra-eugene_3.2-1.dsc
+inra-eugene_3.2-1_i386.build
+inra-eugene_3.2-1_i386.changes
+inra-eugene_3.2-1_i386.deb
+inra-eugene_3.2.orig.tar.gz
+Memory of the original debian directory:
+debian
+
+
+How to build the package inra-eugene
+------------------------------------
+
+1. Copy a eugene-<no>.tar.gz distribution of eugene and extract it
+2. Move eugene-<no> in inra-eugene-<no> directory
+   (be sure to have the last Makefile.am and .in that 
+    does not provide execute permision when no necessary,
+    this avoid a lintian warning)
+4. Go in the inra-eugene-<no> directory and execute:
+    dh_make  --copyright artistic -e cros@ossau.toulouse.inra.fr -s
+5. Update the inra-eugene-<no>/debian directory 
+    If minor modifications were done, remove the created debian directory
+    and copy Debianization/debian directory at the same place.
+    Note that updating the files changelog and copyrigth (if <no> has changed) 
+    may be sufficient.
+6. Empty environnement variables: CFLAGS, CXXFLAGS, CPPFLAGS
+7. debuild -rfakeroot --preserve-env
+
+Note that the following packages need to be installed:
+* dh-make (for dh_make)
+* devscript (for debuild)
+* lintian 
+* fakeroot
+* gnupg (generation of a key with gpg --gen-key)
+
+It is possible to test the installation with:
+  dpkg -i inra-eugene_<no>-1_i386.deb
+  eugene doc/Sequences/SYNO_ARATH.fasta
+  dpkg -r inra-eugene
+
+What remains
+------------
+1. Check of the Build-Depends defined in the debian/control file
+2. Improve of the man documentation
+
+3. Remove of the warning "Compatibility levels before 3 are deprecated." 
+    appeared with the 3.3 packaging.
+
+

@@ -1,0 +1,22 @@
+This package was debianized by Marie-Josee Cros <cros@ossau.toulouse.inra.fr> on
+Fri,  2 Sep 2005 11:45:49 +0200.
+
+It was downloaded from this web page http://mulcyber.toulouse.inra.fr/project/showfiles.php?group_id=10
+
+Copyright:
+
+Upstream Authors: EuGene Team (see the web site for the description)
+
+
+License:
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the "Artistic License" which comes with Debian.
+
+    THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED 
+    WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES 
+    OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+On Debian systems, the complete text of the Artistic License 
+can be found in `/usr/share/common-licenses/Artistic'.
+

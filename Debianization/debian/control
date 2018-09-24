@@ -1,0 +1,17 @@
+Source: inra-eugene
+Section: science
+Priority: optional
+Maintainer: Marie-Josee Cros <cros@ossau.toulouse.inra.fr>
+Build-Depends: debhelper (>= 4.0.0), libstdc++5 (>= 1 ), libc6 (>= 2.3.2.ds1-20 ), libgd2 (>= 2.0.33-1.1 )
+Standards-Version: 3.6.1
+
+Package: inra-eugene
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: [Biology] A gene finder for Eukaryotics
+ eugene is an open gene finder for eukaryotic organisms. 
+ Compared to most existing gene finders, it is characterized by 
+ its ability to simply integrate arbitrary sources of information 
+ in its prediction process.
+ .
+ Contact: eugene@ossau.toulouse.inra.fr
