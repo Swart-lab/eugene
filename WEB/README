@@ -1,0 +1,32 @@
+########################################################################
+# EuGene web site - Oct. 2004
+########################################################################
+# Le site est hébergé à Jouy : http://www.inra.fr/bia/T/EuGene/
+# Mises à jour tous les deux jours à partir d'Ossau : /home/w3/T/EuGene/
+########################################################################
+
+This directory : web pages
+--------------------------
+index.html		home
+links.html		links-contacts
+orga_ara.html		organisms: evaluation of EuGène on Arabidopsis 
+organisms.html		organisms
+plugins.html		plugins
+sensorUser.html		plugins: user ("infobulle")
+
+Style directory
+---------------
+eugene.css
+
+Javascripts directory
+-----------------------------
+cm_addins.js	|
+coolmenus4.js	| -> menu
+euG_menu.js	|
+bulle.js
+diap.js
+
+Images directory
+----------------
+*.jpg ... the images used
+
