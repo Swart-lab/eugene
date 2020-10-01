@@ -1,13 +1,19 @@
 EuGene -- History of visible changes.
 
-Copyright (C) 2011, EuGene Team <eugene-help@lists.mulcyber.toulouse.inra.fr>
+Copyright (C) 2020, EuGene Team <eugene-help@groupes.renater.fr>
 See the end for copying conditions.
 
-Please send eugene bug reports to eugene-help@lists.mulcyber.toulouse.inra.fr.
+Please send eugene bug reports to eugene-help@groupes.renater.fr
+
+Version 4.2b
+
+*  Current EuGène version
+*  The plugin 'SignalWAM' allows to predict spliced|start signals with weight-array matrix
+*  Improve the way to integrate ESTs: 1) for the same number of gaps, prefer the Ests with 
+   the smallest covered region, 2) reduce the number of ejected Ests
 
 Version 4.0a
 
-*  Current EuGène version
 *  EuGène is able to predict genes for prokaryotic organisms. (more information in doc/EuGeneDoc.pdf generating after compilation)
 
 Version 3.6 
