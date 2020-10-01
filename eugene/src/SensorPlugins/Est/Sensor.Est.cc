@@ -11,7 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-// $Id$
+// $Id: Sensor.Est.cc,v 1.70 2016-12-06 14:39:09 sallet Exp $
 // ------------------------------------------------------------------
 // File:     Sensor.Est.cc
 // Contents: Sensor
@@ -441,7 +441,7 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
         TheStrand = HitForward | HitReverse;
         Inc = 0;
         ExonInc = 0;
-        WorstSpliceF = WorstSpliceR = -NINFINITY;
+        //WorstSpliceF = WorstSpliceR = -NINFINITY;
 
         // Look for each match in the current Hit
         ThisBlock = ThisEST->Match;
@@ -463,10 +463,9 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
             ThisBlock = ThisEST->Match;
         }
 
-        // First Step: tries to determine strandedness
+        // Loop only to clean last short dangling
         while (ThisBlock)
         {
-
             // Last block: delete short dangling
             if ((ThisBlock->Next == NULL) && (ThisBlock->Prev != NULL) &&
                     ((abs(ThisBlock->Start-ThisBlock->End) <= MinDangling) ||
@@ -482,8 +481,16 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                 ThisEST->NGaps--;
                 break;
             }
-
-            // si on a un gap ?
+            ThisBlock = ThisBlock->Next;
+        }
+        
+        // First Step: tries to determine strandedness
+        int forwardNbSite = 0;
+        int reverseNbSite = 0;
+        
+        ThisBlock = ThisEST->Match;
+        while (ThisBlock)
+        {
             if (ThisBlock->Prev != NULL)
 //             {cerr << "coord hsp" << ThisBlock->Prev->Start << "-" <<ThisBlock->Prev->End <<" , " << ThisBlock->Start << "-" << ThisBlock->End << "\n";
 //             cerr << "gen  hsp" << ThisBlock->Prev->LStart << "-" <<ThisBlock->Prev->LEnd <<" , " << ThisBlock->LStart << "-" << ThisBlock->LEnd << "\n";}
@@ -499,77 +506,116 @@ Hits** SensorEst :: ESTAnalyzer(Hits *AllEST, unsigned char *ESTMatch,
                 DonR = NINFINITY;
                 AccF = NINFINITY;
                 AccR = NINFINITY;
-
-                //	printf("[%d %d]\n",ThisBlock->Start,ThisBlock->End);
-
-                for (j = -EstM; j <= EstM; j++)
-                {
-                    k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
-                    MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
-
-                    DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
+                
+                //--------- LEFT SIDE (ThisBlock->Prev->End)
+                
+                // 1 Look for a canonical site
+                k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+1));
+                MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
+                
+                DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
                                dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
-                    AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]-
+                AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]-
                                dTmp.sig[DATA::Acc].weight[Signal::ReverseNo]);
+                
+                if (DonF == NINFINITY && AccR == NINFINITY)
+                {
+                 // 2 Check if there is a noncanonical site
+                  if (X->IsNonCanDon(k, 1) )    DonF = 1;
+                  if (X->IsNonCanAcc(k+1, -1) ) AccR = 1;
+                  
+                  if (DonF == NINFINITY && AccR == NINFINITY)
+                  {
+                      // 3 else look for a canonical site in the region +/- EstM
+                    for (j = -EstM; j <= EstM; j++)
+                    {
+                        k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+j+1));
+                        MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
 
-                    k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
-                    if(MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp))
-                    {
-                        DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
-                                   dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
-                        AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
-                                   dTmp.sig[DATA::Acc].weight[Signal::ForwardNo]);
+                        DonF = Max(DonF, dTmp.sig[DATA::Don].weight[Signal::Forward]-
+                               dTmp.sig[DATA::Don].weight[Signal::ForwardNo]);
+                        AccR = Max(AccR, dTmp.sig[DATA::Acc].weight[Signal::Reverse]-
+                               dTmp.sig[DATA::Acc].weight[Signal::ReverseNo]);
                     }
-                    else
-                    {
-                        fprintf(stderr,"   WARNING: cDNA hits ignored."
-                                " No splices sites predicted !\n");
-                        exit(2);
-                    }
+                  }
                 }
                 
-                // Check if there is a noncanonical site on the 5'end only if there is no canonical site
-                k = Min(X->SeqLen,Max(0,ThisBlock->Prev->End+1));
-                if ( DonF == NINFINITY && AccR == NINFINITY)
-                {
-                  if (X->IsNonCanDon(k, 1) )
-                  {
-                    DonF = 1;
-                  }
-                  if (X->IsNonCanAcc(k+1, -1) )
-                  {
-                    AccR = 1;
-                  }
-                }	
-                // Check if there is a noncanonical site on the 3' end only if there is no canonical site
+                //--------- RIGHT SIDE (ThisBlock->Start)
+                
+                // 1 Look for a canonical site
                 k = Min(X->SeqLen,Max(0,ThisBlock->Start));
+                MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp);
+                
+                DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
+                          dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
+                AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
+                          dTmp.sig[DATA::Acc].weight[Signal::ForwardNo]);
+                
                 if ( AccF == NINFINITY && DonR == NINFINITY)
                 {
-                  if (X->IsNonCanAcc(k-2, 1) )
-                  {
-                    AccF = 1;
-                  }
-                  if ( X->IsNonCanDon(k-1, -1) )
-                  {
-                    DonR = 1;
-                  }
-                }
+                    // 2 Check if there is a noncanonical site
+                    if (X->IsNonCanAcc(k-2, 1) )   AccF = 1;
+                    if (X->IsNonCanDon(k-1, -1) )  DonR = 1;
 
-                WorstSpliceF = Min(WorstSpliceF,DonF);
-                WorstSpliceF = Min(WorstSpliceF,AccF);
-                WorstSpliceR = Min(WorstSpliceR,DonR);
-                WorstSpliceR = Min(WorstSpliceR,AccR);
+                    // 3 else look for a canonical site in the region +/- EstM
+                    if ( AccF == NINFINITY && DonR == NINFINITY)
+                    {
+                        for (j = -EstM; j <= EstM; j++)
+                        {
+                            k = Min(X->SeqLen,Max(0,ThisBlock->Start+j));
+                            if(MS->GetInfoSpAt(Type_Acc|Type_Don, X, k, &dTmp))
+                            {
+                                DonR = Max(DonR, dTmp.sig[DATA::Don].weight[Signal::Reverse]-
+                                   dTmp.sig[DATA::Don].weight[Signal::ReverseNo]);
+                                AccF = Max(AccF, dTmp.sig[DATA::Acc].weight[Signal::Forward]-
+                                   dTmp.sig[DATA::Acc].weight[Signal::ForwardNo]);
+                            }
+                            else
+                            {
+                                fprintf(stderr,"   WARNING: cDNA hits ignored."
+                                " No splices sites predicted !\n");
+                                exit(2);
+                            }
+                        }
+                    }
+                }
+                if (AccF != NINFINITY) forwardNbSite += 1 ;
+                if (DonF != NINFINITY) forwardNbSite += 1 ;
+                if (AccR != NINFINITY) reverseNbSite += 1 ;
+                if (DonR != NINFINITY) reverseNbSite += 1 ;
+                    
+    
+                //WorstSpliceF = Min(WorstSpliceF,DonF);
+                //WorstSpliceF = Min(WorstSpliceF,AccF);
+                //WorstSpliceR = Min(WorstSpliceR,DonR);
+                //WorstSpliceR = Min(WorstSpliceR,AccR);
             }
             ThisBlock = ThisBlock->Next;
         }
+        
+        //fprintf(stderr, ">> %s ; site brin plus %i, site brin moins %i\n", ThisEST->Name, forwardNbSite, reverseNbSite);
 
         //    printf("Extreme splices: %e %e\n",WorstSpliceF,WorstSpliceR);
 
         // Tous les blocs ont ete traites
-        if (WorstSpliceF == NINFINITY)
-            TheStrand &= (~HitForward);
-        if (WorstSpliceR == NINFINITY)
+        //if (WorstSpliceF == NINFINITY)
+        //    TheStrand &= (~HitForward);
+        //if (WorstSpliceR == NINFINITY)
+        //    TheStrand &= (~HitReverse);
+        
+        if (forwardNbSite > reverseNbSite)
+        {
             TheStrand &= (~HitReverse);
+        }
+        else if (reverseNbSite > forwardNbSite)
+        {
+            TheStrand  &= (~HitForward);
+        }
+        // We can't determine the strand : reverseNbSite = forwardNbSite > 0
+        else if (reverseNbSite > 0) 
+        {
+            TheStrand = 0;
+        }
 
         // next iteration on the same EST
         ThisBlock = ThisEST->Match;
