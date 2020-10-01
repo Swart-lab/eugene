@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.2a
+EuGene.version		4.2b
 EuGene.organism		Arabidopsis
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0

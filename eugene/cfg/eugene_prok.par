@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.2a
+EuGene.version		4.2b
 EuGene.organism		Meliloti
 EuGene.mode			Prokaryote	# Eukaryote or Prokaryote or Porkaryote2
 EuGene.sloppy		0
