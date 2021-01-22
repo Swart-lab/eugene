@@ -1014,6 +1014,11 @@ Prediction :: Prediction ( int From, int To, std::vector <int> vPos,
                            std::vector <signed char> vState )
 {
 	clear();
+	this->Init(From, To, vPos, vState);
+}
+
+void Prediction :: Init (int From, int To, const std::vector <int>& vPos,const std::vector <signed char>& vState)
+{
 
 	State currentState;
 	State prevState;
@@ -1249,6 +1254,334 @@ Prediction :: Prediction ( const std::string & desc, DNASeq* sequence )
 	}
 }
 
+void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector <int>& vPos, std::vector <signed char>& vState,  DNASeq* seq  )
+{
+	char *feature = new char[FILENAME_MAX];
+	int  start,  end;
+	char strand, frame;
+	char geneStrand;
+	string idSo, ontology_term;
+
+	int k = 0;
+	int state;
+	int rest_codon_lg = 0;  // number of nt in the exon belonging to the previous codon
+	int exon_length   = 0;
+
+	// Add Intergenic State a voir
+	GeneFeature* first = vGeneFeatures.front();
+	start = first->getLocus()->getStart();
+	geneStrand = first->getLocus()->getStrand();
+
+	vPos.push_back  ( start-1  );
+	vState.push_back( InterGen );
+
+	if (geneStrand ==  '+')
+	{
+		for (std::vector<GeneFeature*>::iterator it = vGeneFeatures.begin() ; it != vGeneFeatures.end(); ++it)
+		{
+			strcpy (feature, (*it)->getType().c_str());
+			start         = (*it)->getLocus()->getStart();
+			end           = (*it)->getLocus()->getEnd();
+			strand        = (*it)->getLocus()->getStrand();
+			frame         = (*it)->getPhase();
+			idSo          = (*it)->getType();
+			ontology_term = (*it)->getAttributes()->getOntologyTerm();
+
+
+			if ( idSo.find("SO:") == string::npos )
+			{
+				string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+				idSo=tmp;
+			}
+
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			{
+				continue;
+			}
+			//cout << "voila : " << (*it)->getLocus()->getStart()<< "\n";
+
+			// E.Intr ou E.Term => Add an intron
+			if ( idSo=="SO:0000316" && (ontology_term=="SO:0000004" || ontology_term=="SO:0000197"))
+			{
+				state = IntronF1;
+				if (rest_codon_lg > 0 && vPos.size()>0)
+				{
+					int intron_start = vPos.back()+1; // intron start position
+					if ( rest_codon_lg == 2 )
+					{
+						if ( (*seq)[intron_start-2] == 't' )  state = IntronF2T;
+						else if ( (*seq)[intron_start-2] == 'a' ) state = IntronF2A;
+						else                        state = IntronF2;
+					}
+
+					else if (rest_codon_lg == 1)
+					{
+						if (      (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 'g' ) state = IntronF3TG;
+						else if ( (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 'a' ) state = IntronF3TA;
+						else if ( (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 'c' ) state = IntronF3TC;
+						else if ( (*seq)[intron_start-3] == 'a' && (*seq)[intron_start-2] == 'g' ) state = IntronF3AG;
+						else  state = IntronF3;
+					}
+				}
+				vPos.push_back  ( start-1  );
+				vState.push_back( state);
+			}
+			// Intron UTR 5'
+			else if (idSo=="SO:0000204" &&  State2Status[vState.back()] == UNTRANSLATED)
+			{
+				vPos.push_back  ( start-1  );
+				vState.push_back( IntronU5F);
+			}
+			// Intron UTR3'
+			else if (idSo=="SO:0000205" && State2Status[vState.back()] == UNTRANSLATED )
+			{
+				vPos.push_back  ( start-1  );
+				vState.push_back( IntronU3F);
+			}
+
+			// coding exon
+			if ( idSo=="SO:0000316")
+			{
+				// Compute the frame (k = [012]
+				k = ( start + rest_codon_lg + 2 ) % 3; // [Init|Term|Intr]F[1|2|3]]
+				// Use to compute the frame of the intron and of the next exon
+				exon_length   = end - start + 1 - rest_codon_lg;
+				rest_codon_lg = ( 3 - exon_length%3 ) %3;
+			}
+
+			if (idSo=="SO:0000204") { //if UTR5
+				vPos.push_back  ( end   );
+				vState.push_back( UTR5F );
+			}
+			else if (idSo=="SO:0000205") { //if UTR3
+				vPos.push_back  ( end   );
+				vState.push_back( UTR3F );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000196") { //E.Init
+				vPos.push_back  ( end    );
+				vState.push_back( InitF1+k );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000197") { //E.Term
+				vPos.push_back  ( end    );
+				vState.push_back( TermF1+k );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0005845")  { //E.Sngl
+				vPos.push_back  ( end    );
+				vState.push_back( SnglF1+k );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000004")  { //E.Intr
+				vPos.push_back  ( end      );
+				vState.push_back( IntrF1+k   );
+			}
+			else if (idSo=="SO:0000655")  { // ncRNA
+				vPos.push_back  ( end      );
+				vState.push_back( RnaF   );
+			}
+			else {
+				std::cerr <<"\n Error in gff file : SOFA : "<< idSo<< ";ontology_term : "<<ontology_term <<
+						".\nWARNING: Feature must be SO:0000204, SO:0000205 or SO:0000316 with ontology term :"
+						<< "SO:0000196, SO:0000197, SO:0005845.\n";
+				exit(2);
+			}
+
+		}
+	}
+	else
+	{
+		// strand -
+		//  have to process from 5'UTR to 3'UTR to be able to know the current codon position
+		//  
+		int seqLength = seq->SeqLen;
+		std::vector <int>         vtmpPos;
+		std::vector <signed char> vtmpState;
+		int intron_end_pos = -1;
+		int intronU5_end_pos = -1;
+		int intronU3_end_pos = -1;
+
+		for (std::vector<GeneFeature*>::reverse_iterator it = vGeneFeatures.rbegin() ; it != vGeneFeatures.rend(); ++it)
+		{
+			strcpy (feature, (*it)->getType().c_str());
+			start         = (*it)->getLocus()->getStart();
+			end           = (*it)->getLocus()->getEnd();
+			strand        = (*it)->getLocus()->getStrand();
+			frame         = (*it)->getPhase();
+			idSo          = (*it)->getType();
+			ontology_term = (*it)->getAttributes()->getOntologyTerm();
+
+			if ( idSo.find("SO:") == string::npos )
+			{
+				string tmp=GeneFeatureSet::soTerms_->getIdFromName(idSo);
+				idSo=tmp;
+			}
+
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			{
+				continue;
+			}
+
+			// intron_end_pos  >=0 ==> Have to add an Intron on right side
+			if (intron_end_pos >= 0)
+			{
+				int state = IntronR1;
+				int intron_start = end +1;
+				
+				if ( rest_codon_lg == 2 )
+				{
+					if (      (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 'c' ) state = IntronR2GA;
+						else if ( (*seq)[intron_start-3] == 'c' && (*seq)[intron_start-2] == 't' ) state = IntronR2AG;
+						else if ( (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 't' ) state = IntronR2AA;
+						else if ( (*seq)[intron_start-3] == 't' && (*seq)[intron_start-2] == 'g' ) state = IntronR2CA;
+						else if ( (*seq)[intron_start-3] == 'c' && (*seq)[intron_start-2] == 'c' ) state = IntronR2GG;
+					else                                                         state = IntronR2;
+				}
+				else if (rest_codon_lg == 1 )
+				{
+					if (      (*seq)[intron_start-2] == 'c' ) state = IntronR3G;
+						else if ( (*seq)[intron_start-2] == 't' ) state = IntronR3A;
+						else                               state = IntronR3;
+				}
+				vtmpPos.push_back  ( intron_end_pos );
+				vtmpState.push_back( state );
+				intron_end_pos = -1;
+			}
+			
+			//  A coding state: update 'k' and 'rest_codon_lg'
+			if (idSo=="SO:0000316" )
+			{
+				k = (seqLength - end + rest_codon_lg) % 3;
+				// Update 'rest_codon_lg' value: will be use to compute the frame of the next exon
+				exon_length   = end - start + 1 - rest_codon_lg;
+				rest_codon_lg = ( 3 - exon_length%3 ) %3;
+			}
+			
+			if (idSo=="SO:0000204" ) {  //if UTR5'
+				//  add an UTR5 intron if necessary
+				if (intronU5_end_pos >= 0)
+				{
+					vtmpPos.push_back  ( intronU5_end_pos   );
+					vtmpState.push_back( IntronU5R );
+				}
+				
+				vtmpPos.push_back  ( end   );
+				vtmpState.push_back( UTR5R );
+				
+				//  Save the left next position if need to create an UTR5 intron
+				intronU5_end_pos = start-1;
+			}
+			else if (idSo=="SO:0000205") {  //if UTR3'
+				//  add an UTR3 intron if necessary
+				if (intronU3_end_pos >= 0)
+				{
+					vtmpPos.push_back  ( intronU3_end_pos   );
+					vtmpState.push_back( IntronU3R );
+				}
+				
+				vtmpPos.push_back  ( end   );
+				vtmpState.push_back( UTR3R );
+				
+				// Save the left next position if need to create an UTR3 intron
+				intronU3_end_pos = start-1;
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000196") { //E.Init
+				vtmpPos.push_back  ( end    );
+				vtmpState.push_back( InitR1+k );
+				intron_end_pos = start-1; //  to add an intron on next step
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000197") { //E.Term
+				vtmpPos.push_back  ( end    );
+				vtmpState.push_back( TermR1+k );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0005845")  { //E.Sngl
+				vtmpPos.push_back  ( end    );
+				vtmpState.push_back( SnglR1+k );
+			}
+			else if (idSo=="SO:0000316" && ontology_term=="SO:0000004")  { //E.Intr
+				vtmpPos.push_back  ( end      );
+				vtmpState.push_back( IntrR1+k );
+				intron_end_pos = start-1; //  to add an intron on next step
+			}
+			else if (idSo=="SO:0000655")  { // ncRNA
+				vtmpPos.push_back  ( end      );
+				vtmpState.push_back( RnaR   );
+			}
+			else {
+				std::cerr <<"\n Error in gff3 file "
+						<<" "<<feature<<"("<< idSo<<")"<<
+						": unknown gff3 feature (SO:0000204, SO:0000205 or SO:0000316 with ontology term :"
+						<<" SO:0000196, SO:0000197, SO:0005845.\n";
+				exit(2);
+			}
+		}
+		
+		while (vtmpPos.size() > 0)
+		{
+			vState.push_back(vtmpState.back());
+			vPos.push_back(vtmpPos.back());
+			vtmpState.pop_back();
+			vtmpPos.pop_back();
+		}
+		
+		vtmpPos.clear();
+		vtmpPos.clear();
+	}
+	
+	delete [] feature;
+}
+
+
+Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
+{
+	std::vector <int>         vPos;
+	std::vector <signed char> vState;
+
+	vector <GeneFeature*> vGeneFeatures;
+
+	// Init defaut values of the prediction
+	clear();
+	fflush ( stderr );
+
+
+	// if First GeneFeatureSet instanciation => Initalization of class variable
+	if ( GeneFeatureSet::soTerms_->size() == 0 )
+	{
+		GeneFeatureSet::soTerms_->loadSoFile();
+	}
+
+	// load the gff3 file
+	FILE *fp;
+	fp = FileOpen ( NULL, name, "r", PAR.getI ( "EuGene.sloppy" ) );
+	if ( fp )
+	{
+		int i = 0;
+		char line[MAX_GFF_LINE];
+		while ( fp  &&  fgets ( line, 1500, fp ) != NULL )
+		{
+			i++;
+			if ( line[0] != '#' )
+			{
+				GeneFeature * tempGeneFeature = new GeneFeature ( line,i );
+				vGeneFeatures.push_back(tempGeneFeature);
+			}
+			else // line = #
+			{
+				if (vGeneFeatures.size() > 0)
+				{
+					this->LoadGene(vGeneFeatures, vPos, vState, seq);
+					vGeneFeatures.clear();
+				}
+			}
+		}
+		fclose ( fp );
+	}
+
+	this->Init(0, seq->SeqLen, vPos, vState);
+	this->TrimAndUpdate(seq);
+
+	vPos.clear();
+	vState.clear();
+
+	//this->Print();
+}
 
 // ------------------------
 //  Default destructor.

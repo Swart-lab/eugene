@@ -11,7 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-// $Id$
+// $Id: Prediction.h,v 1.49 2012-11-07 09:44:47 sallet Exp $
 // ------------------------------------------------------------------
 // File:     Prediction.h
 // Contents: class Prediction
@@ -209,7 +209,11 @@ class Prediction
   Prediction  (int From, int To, std::vector <int> vPos,
          std::vector <signed char> vState);
   Prediction  (const std::string & desc, DNASeq*);
+  Prediction  (char [FILENAME_MAX+1], DNASeq *);
   ~Prediction ();
+  
+  void LoadGene(std::vector<GeneFeature*>&, std::vector<int>&, std::vector<signed char>&, DNASeq*); 
+  void Init (int From, int To, const std::vector <int>& , const std::vector <signed char>&);
   bool IsOriginal(Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil);
   void  TrimAndUpdate (DNASeq*);
   void  SanityCheck();
