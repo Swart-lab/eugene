@@ -11,7 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-// $Id$
+// $Id: Const.h,v 1.31 2015-06-01 09:42:31 sallet Exp $
 // ------------------------------------------------------------------
 // File:     Const.h
 // Contents: global variables
@@ -35,7 +35,7 @@
 #define DEFAULT_WAM_DIR "models/WAM"
 #define WEB_DIR "web"
 
-#define POSSIBLE_ARGUMENTS "FGREBP::adrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:W:"
+#define POSSIBLE_ARGUMENTS "FGREBP::adrsghm:w:f:n:o:p:x:y:c:u:v:U:V:b::l:O:D:t::M:Z::A:W:k:"
 
 const int FASTA_Len = 50;
 const int MAX_LINE  = 300;
