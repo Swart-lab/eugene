@@ -11,7 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-// $Id: Param.cc,v 1.60 2015-07-30 14:19:36 sallet Exp $
+// $Id$
 // ------------------------------------------------------------------
 // File:     Param.cc
 // Contents: class Parameters
@@ -371,11 +371,6 @@ void Parameters :: ReadArg(int argc, char * argv[])
     case 'W':   /* wam models root directory */
         m["SignalWAM.wamdir"] = optarg;
         break;
-        
-    case 'k':
-        m["AltEst.use"]       = "1";
-        m["AltEst.reference"] = optarg;
-        break;
 
     case '?':           /* bad option */
       errflag++;
@@ -409,7 +404,6 @@ void Parameters :: ShowUsage (void)
   fprintf(stderr, "    -U                      Predict only from this nucleotide position\n");
   fprintf(stderr, "    -V                      Predict only up to this nucleotide position\n");
   fprintf(stderr, "    -Z                      Select the parameters optimization mode\n");
-  fprintf(stderr, "    -k GFF3file             Activates the alternative splicing prediction compared with this reference annotation.\n");
   fprintf(stderr, "    -h                      Print this help\n\n");
 
   fprintf(stderr, "  Output control:\n");
