@@ -11,7 +11,7 @@
 // You should have received a copy of Artistic License along with
 // this program; if not, please see http://www.opensource.org
 //
-// $Id$
+// $Id: EuGene.cc,v 1.109 2015-07-30 14:19:36 sallet Exp $
 // ------------------------------------------------------------------
 // File:     EuGene.cc
 // Contents: This program finds exons/introns and intergenic regions
@@ -234,6 +234,9 @@ Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
     DAG* Dag;
     Prediction *prediction;
 
+        // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
+    InitActiveTracks(0);
+    
     // DynaProg end at the lastpos + 1 to account for final signals.
     int	FirstNuc = (Forward ? From : To+1);
     int   LastNuc  = (Forward ? To+1 : From);
@@ -477,20 +480,34 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
             // Predict: 1st main prediction
             // --------------------------------------------------------------------
-			char* mode = PAR.getC ("EuGene.mode");
-
-            if (!strcmp(mode, "Prokaryote2") || !strcmp(mode, "Eukaryote2") )
+            if (PAR.count("AltEst.reference") > 0)
             {
-                // predict on the forward strand
-                Prediction* pred2 = Predict(TheSeq, fromPos, toPos, MS,  1);
-                // predict on the reverse strand
-                pred = Predict(TheSeq, fromPos, toPos, MS, -1);
-                pred->AppendPred(pred2);
+                fprintf(stderr, "alt mode\n");
+                char reffile[FILENAME_MAX+1];
+                strcpy(reffile, PAR.getC("AltEst.reference"));
+                pred = new Prediction(reffile, TheSeq);
+                pred->Print();
             }
             else
             {
-                pred = Predict(TheSeq, fromPos, toPos, MS);
-                fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
+                
+                char* mode = PAR.getC ("EuGene.mode");
+
+                if (!strcmp(mode, "Prokaryote2") || !strcmp(mode, "Eukaryote2") )
+                {
+                    // predict on the forward strand
+                    Prediction* pred2 = Predict(TheSeq, fromPos, toPos, MS,  1);
+                    // predict on the reverse strand
+                    pred = Predict(TheSeq, fromPos, toPos, MS, -1);
+                    pred->AppendPred(pred2);
+                }
+                else
+                {
+                    pred = Predict(TheSeq, fromPos, toPos, MS);
+                    //pred->Print();
+                    fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
+                }
+                pred->Print();
             }
 
             // --------------------------------------------------------------------
