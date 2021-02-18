@@ -21,7 +21,7 @@ src/SensorPlugins/*/*/Makefile
 src/SensorPlugins/*/*/Makefile.in
 
 
-
+models/WAM/plant/
 **/.deps/
 
 src/GDIF/Makefile.in
