@@ -1580,7 +1580,7 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 	vPos.clear();
 	vState.clear();
 
-	this->Print();
+	//this->Print();
 }
 
 // ------------------------

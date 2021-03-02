@@ -382,6 +382,7 @@ int main  (int argc, char * argv [])
     char       grname[FILENAME_MAX+1];
     char       miname[FILENAME_MAX+1];
     int        graph;
+	bool debugAltest = true;
 
     fprintf(stderr,"-------------------------------------"
             "--------------------------------\n");
@@ -482,11 +483,11 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
             if (PAR.count("AltEst.reference") > 0)
             {
-                fprintf(stderr, "alt mode\n");
+                fprintf(stderr, "Alt mode\n");
                 char reffile[FILENAME_MAX+1];
                 strcpy(reffile, PAR.getC("AltEst.reference"));
                 pred = new Prediction(reffile, TheSeq);
-                pred->Print();
+                //pred->Print();
             }
             else
             {
@@ -507,7 +508,7 @@ int main  (int argc, char * argv [])
                     //pred->Print();
                     fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
                 }
-                pred->Print();
+                //pred->Print();
             }
 
             // --------------------------------------------------------------------
@@ -540,17 +541,36 @@ int main  (int argc, char * argv [])
             {
                 int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
                 int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+				time_t depart, arrivee, d2, a2;
+				time_t globaldepart, globalarrivee;
+	
                 int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+                time(&d2);
                 AltEst *AltEstDB = new AltEst(TheSeq);
-
+				time(&a2);
+				
+				if (debugAltest) fprintf(stderr, "[ALT EST] Time to build AltEstDB: %.f seconds\n", difftime(a2, d2));
+				if (debugAltest) fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->totalAltEstNumber);
                 std::vector <Prediction*> vPred;
                 Prediction*               AltPred;
                 Gene*                     baseGene;
-
+				
+				time(&globaldepart);
+				
                 for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                 {
                     int localFrom,localTo;
-
+					
+					if (altidx%10 == 0)
+					{
+						if (altidx > 0) 
+						{
+							time(&arrivee);
+							if (debugAltest) fprintf(stderr, "[ALT EST] Time to perform 10 AltPredict (index=%d) %.f seconds\n", altidx, difftime(arrivee, depart));
+						}
+						time(&depart);
+					}
+					
                     localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
                     localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
 
@@ -591,6 +611,10 @@ int main  (int argc, char * argv [])
                         else delete AltPred;
                     }
                 }
+                
+                time(&globalarrivee);
+				
+				if (debugAltest) fprintf(stderr, "[ALT EST] Total AltPredict duration %.f seconds\n", difftime(globalarrivee, globaldepart));
                 pred->Print(TheSeq, MS);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
