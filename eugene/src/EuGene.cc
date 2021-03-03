@@ -547,10 +547,15 @@ int main  (int argc, char * argv [])
                 int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
                 time(&d2);
                 AltEst *AltEstDB = new AltEst(TheSeq);
-				time(&a2);
 				
-				if (debugAltest) fprintf(stderr, "[ALT EST] Time to build AltEstDB: %.f seconds\n", difftime(a2, d2));
-				if (debugAltest) fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->totalAltEstNumber);
+				
+				if (debugAltest) 
+				{
+					time(&a2);
+					double dd= difftime(a2, d2);
+					fprintf(stderr, "[ALT EST] Time to build AltEstDB: %.f seconds (%d minutes)\n", dd, int (dd/60));
+					fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->totalAltEstNumber);
+				}
                 std::vector <Prediction*> vPred;
                 Prediction*               AltPred;
                 Gene*                     baseGene;
@@ -561,12 +566,13 @@ int main  (int argc, char * argv [])
                 {
                     int localFrom,localTo;
 					
-					if (altidx%10 == 0)
+					if (altidx%1000 == 0)
 					{
 						if (altidx > 0) 
 						{
 							time(&arrivee);
-							if (debugAltest) fprintf(stderr, "[ALT EST] Time to perform 10 AltPredict (index=%d) %.f seconds\n", altidx, difftime(arrivee, depart));
+							double diff = difftime(arrivee, depart);
+							if (debugAltest) fprintf(stderr, "[ALT EST] Time to perform 1000 AltPredict (index=%d) %.f seconds (%d minutes)\n", altidx, diff, int(diff/60));
 						}
 						time(&depart);
 					}
@@ -614,7 +620,11 @@ int main  (int argc, char * argv [])
                 
                 time(&globalarrivee);
 				
-				if (debugAltest) fprintf(stderr, "[ALT EST] Total AltPredict duration %.f seconds\n", difftime(globalarrivee, globaldepart));
+				if (debugAltest) 
+				{
+					double d = difftime(globalarrivee, globaldepart);
+					fprintf(stderr, "[ALT EST] Total AltPredict duration %.f seconds (%d minutes)\n", d, int(d/60));
+				}
                 pred->Print(TheSeq, MS);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
