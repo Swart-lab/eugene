@@ -383,6 +383,8 @@ int main  (int argc, char * argv [])
     char       miname[FILENAME_MAX+1];
     int        graph;
 	bool debugAltest = true;
+	time_t d1, a1, i1;
+	time(&d1);
 
     fprintf(stderr,"-------------------------------------"
             "--------------------------------\n");
@@ -487,6 +489,13 @@ int main  (int argc, char * argv [])
                 char reffile[FILENAME_MAX+1];
                 strcpy(reffile, PAR.getC("AltEst.reference"));
                 pred = new Prediction(reffile, TheSeq);
+				
+				if (debugAltest) 
+				{
+					time(&i1);
+					double dd= difftime(i1, d1);
+					fprintf(stderr, "[ALT EST] Time from beginning to the build of pred object: %.f seconds (%d minutes)\n", dd, int (dd/60));
+				}
                 //pred->Print();
             }
             else
@@ -646,4 +655,11 @@ int main  (int argc, char * argv [])
 
         return  0;
     }
+    if (debugAltest) 
+	{
+		time(&a1);
+		double eugenetotalduration = difftime(a1, d1);
+		fprintf(stderr, "[ALT EST] Total EuGene duration %.f seconds (%d minutes)\n", eugenetotalduration, int(eugenetotalduration/60));
+	}
+	
 }
