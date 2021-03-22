@@ -382,9 +382,8 @@ int main  (int argc, char * argv [])
     char       grname[FILENAME_MAX+1];
     char       miname[FILENAME_MAX+1];
     int        graph;
-	bool debugAltest = true;
-	time_t d1, a1, i1;
-	time(&d1);
+	bool       debugAltest = true;
+	
 
     fprintf(stderr,"-------------------------------------"
             "--------------------------------\n");
@@ -405,6 +404,9 @@ int main  (int argc, char * argv [])
         int sequence;
         for (sequence = optind; sequence < argc ; sequence++)
         {
+			time_t t1, t2, t3, t4, t5, t6, t7;
+			time(&t1); // start analayse the sequence
+	
 
             PAR.set("fstname", argv[sequence]);
 
@@ -479,6 +481,7 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
             MS = new MasterSensor();
             MS->InitMaster(TheSeq);
+			time(&t2); // end of Init the sensor
 
             // --------------------------------------------------------------------
             // Predict: 1st main prediction
@@ -490,12 +493,8 @@ int main  (int argc, char * argv [])
                 strcpy(reffile, PAR.getC("AltEst.reference"));
                 pred = new Prediction(reffile, TheSeq);
 				
-				if (debugAltest) 
-				{
-					time(&i1);
-					double dd= difftime(i1, d1);
-					fprintf(stderr, "[ALT EST] Time from beginning to the build of pred object: %.f seconds (%d minutes)\n", dd, int (dd/60));
-				}
+				time(&t3); // end of create the Prediction object from the reference GFF3
+				
                 //pred->Print();
             }
             else
@@ -535,6 +534,7 @@ int main  (int argc, char * argv [])
             MS->PostAnalyse(pred, MISC_INFO);
             fclose(MISC_INFO);
 
+
             if (graph)
             {
                 fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
@@ -543,6 +543,7 @@ int main  (int argc, char * argv [])
                 fprintf(stderr, "done\n");
             }
 
+			time(&t4); // end of MS PostAnalyse
             // --------------------------------------------------------------------
             // Load Alternative EST data (if any)
             // --------------------------------------------------------------------
@@ -550,38 +551,29 @@ int main  (int argc, char * argv [])
             {
                 int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
                 int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
-				time_t depart, arrivee, d2, a2;
-				time_t globaldepart, globalarrivee;
 	
                 int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
-                time(&d2);
+                
+
                 AltEst *AltEstDB = new AltEst(TheSeq);
+				time(&t5); // end of AltEst build
 				
-				
-				if (debugAltest) 
-				{
-					time(&a2);
-					double dd= difftime(a2, d2);
-					fprintf(stderr, "[ALT EST] Time to build AltEstDB: %.f seconds (%d minutes)\n", dd, int (dd/60));
-					fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->totalAltEstNumber);
-				}
                 std::vector <Prediction*> vPred;
                 Prediction*               AltPred;
                 Gene*                     baseGene;
 				
-				time(&globaldepart);
-				
+				time_t depart, arrivee;
+				time(&depart);
                 for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                 {
                     int localFrom,localTo;
-					
-					if (altidx%1000 == 0)
+					if (debugAltest && altidx%10000 == 0)
 					{
 						if (altidx > 0) 
 						{
 							time(&arrivee);
 							double diff = difftime(arrivee, depart);
-							if (debugAltest) fprintf(stderr, "[ALT EST] Time to perform 1000 AltPredict (index=%d) %.f seconds (%d minutes)\n", altidx, diff, int(diff/60));
+							fprintf(stderr, "[ALT EST] Time to perform 10000 AltPredict (index=%d) %.f seconds (%d minutes)\n", altidx, diff, int(diff/60));
 						}
 						time(&depart);
 					}
@@ -625,21 +617,34 @@ int main  (int argc, char * argv [])
                         }
                         else delete AltPred;
                     }
-                }
+                } 
                 
-                time(&globalarrivee);
-				
-				if (debugAltest) 
-				{
-					double d = difftime(globalarrivee, globaldepart);
-					fprintf(stderr, "[ALT EST] Total AltPredict duration %.f seconds (%d minutes)\n", d, int(d/60));
-				}
+                time(&t6); // end of analyse of all altEst
                 pred->Print(TheSeq, MS);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
                     vPred[idx]->Print(TheSeq, MS,NULL,1);
                 }
+                time(&t7); // end of print all the predictions
                 //delete AltPred;
+				if (debugAltest)
+				{
+					double part1= difftime(t2, t1);
+					fprintf(stderr, "[ALT EST] Duration of start until the init sensor: %.f seconds (%d minutes)\n", part1, int (part1/60));
+					double part2 = difftime(t3, t2);
+					fprintf(stderr, "[ALT EST] Duration of Prediction object creation from the reference GFF3: %.f seconds (%d minutes)\n", part2, int (part2/60));
+					double part3 = difftime(t4, t3);
+					fprintf(stderr, "[ALT EST] Duration of the MasterSensor Post analyse: %.f seconds (%d minutes)\n", part3, int (part3/60));
+					double part4= difftime(t5, t4);
+					fprintf(stderr, "[ALT EST] Duration of the AltEstDB building: %.f seconds (%d minutes)\n", part4, int (part4/60));
+					fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->totalAltEstNumber);
+					double part5= difftime(t6, t5);
+					fprintf(stderr, "[ALT EST] Duration of AltPredict:  %.f seconds (%d minutes)\n", part5, int(part5/60));
+					double part6= difftime(t7, t6);
+					fprintf(stderr, "[ALT EST] Duration of printing of all predictions: %.f seconds (%d minutes)\n", part6, int(part6/60));
+					double allparts = difftime(t7, t1);
+					fprintf(stderr, "[ALT EST] Total duration : %.f seconds (%d minutes)\n", allparts, int(allparts/60));
+				}
             }
 
             // Free used memory
@@ -655,11 +660,5 @@ int main  (int argc, char * argv [])
 
         return  0;
     }
-    if (debugAltest) 
-	{
-		time(&a1);
-		double eugenetotalduration = difftime(a1, d1);
-		fprintf(stderr, "[ALT EST] Total EuGene duration %.f seconds (%d minutes)\n", eugenetotalduration, int(eugenetotalduration/60));
-	}
 	
 }
