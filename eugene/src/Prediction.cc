@@ -52,7 +52,8 @@ bool OperonSortFunction(Operon* o1, Operon* o2)
 bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil )
 {
 	Gene *thisGene = this->vGene[0];
-	Gene *otherGene;
+	int thisGeneTrStart = thisGene->trStart;
+	int thisGeneTrEnd   = thisGene->trEnd;
 
 	int mismatch;
 
@@ -61,6 +62,10 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 
 	for ( idx = 0; idx < optPred->vGene.size(); idx++ )
 	{
+		//fprintf(stderr, "Vpred idx start %d\n", optPred->vGene[idx]->trStart);
+		if (thisGeneTrStart - optPred->vGene[idx]->trEnd > 1000) continue;
+		if (optPred->vGene[idx]->trStart - thisGeneTrEnd > 1000) break;
+		
 		mismatch = thisGene->isDifferent ( * ( optPred->vGene[idx] ), seuil ); // -1 if the two genes have different structure
 		if ( ( mismatch >= 0 ) && ( mismatch <= seuil ) )
 			return false;
