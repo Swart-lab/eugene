@@ -75,7 +75,7 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 	for ( idx = 0; idx < altPreds.size(); idx++ )
 	{
 		if ( (thisGeneTrStart - altPreds[idx]->vGene[0]->trEnd) > 1000) continue;
-		if (altPreds[idx]->vGene[0]->trStart - thisGeneTrEnd > 1000) break;
+		if (altPreds[idx]->vGene[0]->trStart - thisGeneTrEnd > 1000) continue;
 		mismatch = thisGene->isDifferent ( * ( altPreds[idx]->vGene[0] ), seuil );
 		if ( ( mismatch >= 0 ) && ( mismatch <= seuil ) )
 			return false;

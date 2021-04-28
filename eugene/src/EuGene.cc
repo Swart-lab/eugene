@@ -224,8 +224,6 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
                         AltEst *AltEstDB, Prediction *optpred, int idx)
 {
-    int   j, k;
-    int   Data_Len = TheSeq->SeqLen;
     DATA	Data;
     int   Forward =  1;//PAR.getI("Sense");
     int   Dir = (Forward ? 1 : -1);

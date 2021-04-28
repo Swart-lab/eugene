@@ -675,25 +675,23 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
 // -----------------------------------------------------------------
 void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
 {
-    int i, j, k = 0;
+    int i, j = 0;
     // Until now, only one cluster is considered (time max)
     // test all pairwise est comparisons in the cluster
     // NxN comparisons could be tested, but it has been reduced to
     // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
 
-    for (i=0; i<totalAltEstNumber; i++)
+	if (compatibleEstFilter || includedEstFilter)
     {
-        if (compatibleEstFilter || includedEstFilter)
-        {
+		for (i=0; i<totalAltEstNumber; i++)
+		{
             // Compare this est with the others to check incompatibility or inclusion
-            for (j=1+k; j<totalAltEstNumber; j++)
+            for (j=1+i; j<totalAltEstNumber; j++)
             {
-                char *iID = voae_AltEst[i].GetId();
-                char *jID = voae_AltEst[j].GetId();
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
-                    if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", jID, iID);
+                    if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
                     voae_AltEst[i].PutAltSplE(true);
                     voae_AltEst[j].PutAltSplE(true);
                     nbIncomp++;
@@ -707,7 +705,7 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                     	if ( (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd() ) &&
                     		 ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
                     	{
-                    		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
+                    		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
                     		voae_AltEst.erase(voae_AltEst.begin() + j);
                     		totalAltEstNumber--;
                     		j--;
@@ -716,7 +714,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                     }
                 }
             }
-            k++;
         }
     }
 
