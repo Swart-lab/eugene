@@ -46,6 +46,7 @@ class OneAltEst
   char strand;
   int  exonsNumber, totalLength;
   bool altSplicingEvidence;
+  bool toRemove;
   std::vector <int> vi_ExonStart;
   std::vector <int> vi_ExonEnd;
   void Penalize(int pos, DATA *Data, double altPenalty);
@@ -71,6 +72,8 @@ class OneAltEst
   inline char GetStrand()         {return strand; }
   inline int   GetAltSplE()       { return altSplicingEvidence; };
   inline void  PutAltSplE(bool b) { altSplicingEvidence = b;    };
+  inline void  FlagToRemove(bool b) { toRemove = b; };
+  inline int   IsToRemove()       { return toRemove; };
   inline void PutIndex(int i) { index = i;};
 };
 

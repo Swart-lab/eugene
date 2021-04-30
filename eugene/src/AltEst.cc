@@ -34,6 +34,7 @@ OneAltEst :: OneAltEst()
     strand = 0;
     start = end = index = exonsNumber = 0;
     totalLength = altSplicingEvidence = 0;
+    toRemove = false;
 }
 
 
@@ -45,6 +46,7 @@ OneAltEst :: OneAltEst(char *ID, int i, int j, char s)
     this->strand              = s;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
+    this->toRemove = false;
     this->totalLength         = 0;
     this->AddExon(i, j);
 }
@@ -68,6 +70,7 @@ void OneAltEst :: Reset ()
     this->index               = -1;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
+    this->toRemove            = false;
     this->totalLength         = 0;
     vi_ExonStart.clear();
     vi_ExonEnd.clear();
@@ -697,14 +700,16 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     {
         for (i=0; i<totalAltEstNumber; i++)
         {
-            fprintf(stderr, "\nEST i %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd());
+			if (voae_AltEst[i].IsToRemove()) continue;
+			
+            //fprintf(stderr, "\nEST i %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd());
             // Compare this est with the others to check incompatibility or inclusion
             for (j=1+i; j<totalAltEstNumber; j++)
             {
                 // all the next Est have a higher position  than the current one
                 if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
-
-                //if (voae_AltEst[j].GetStart() == voae_AltEst[i].GetStart()) fprintf(stderr, "\n  EST j %d - %d", voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd()) ;
+				
+				if (voae_AltEst[j].IsToRemove()) continue;
                 
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
@@ -722,16 +727,33 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                     		 ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
                     	{
                     		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
-                    		voae_AltEst.erase(voae_AltEst.begin() + j);
-                    		totalAltEstNumber--;
-                    		j--;
-                    		nbIncluded++;
+							voae_AltEst[j].FlagToRemove(true);
+							
+                    		//voae_AltEst.erase(voae_AltEst.begin() + j);
+                    		//totalAltEstNumber--;
+                    		//j--;
+                    		//nbIncluded++;
                     	}
                     }
                 }
             }
         }
-    }
+
+		if (includedEstFilter)
+		{
+			for (i=0; i<totalAltEstNumber; i++)
+			{
+				if (voae_AltEst[i].IsToRemove())
+				{
+					voae_AltEst.erase(voae_AltEst.begin() + i);
+					totalAltEstNumber--;
+					i--;
+					nbIncluded++;
+				}
+			}
+		}
+	}
+	
 
     if (compatibleEstFilter)
     {
