@@ -427,6 +427,15 @@ bool StartAtLeft( OneAltEst A,  OneAltEst B)
 {
     return (A.GetStart() < B.GetStart());
 };
+bool StartAtLeftElseEndAtLeft ( OneAltEst A,  OneAltEst B)
+{
+    return ( (A.GetStart() < B.GetStart()) ? true : (A.GetStart() ==  B.GetStart() && A.GetEnd() <= B.GetEnd()));
+};
+bool StartAtLeftElseEndAtRight ( OneAltEst A,  OneAltEst B)
+{
+    return ( (A.GetStart() < B.GetStart()) ? true : (A.GetStart() ==  B.GetStart() && A.GetEnd() > B.GetEnd()));
+};
+
 bool EndAtRight( OneAltEst A,  OneAltEst B)
 {
     return (A.GetEnd() > B.GetEnd());
@@ -502,8 +511,8 @@ AltEst :: AltEst(DNASeq *X)
     fflush(stderr);
 
     // sort all Est by their begin coordinates
-    sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
-
+    sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeftElseEndAtRight);
+	//sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
     Compare(nbIncomp, nbNoevidence, nbIncluded);
     fprintf(stderr,"%d removed (%d incl., %d unsp., %d no alt.spl., %d len.), %d inc. pairs, ",
             nbIncluded+nbNoevidence+nbUnspliced+nbExtremLen,
@@ -682,13 +691,21 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
 
-	if (compatibleEstFilter || includedEstFilter)
+    int strandSpecific = PAR.getI("AltEst.strandSpecific");	
+
+    if (compatibleEstFilter || includedEstFilter)
     {
-		for (i=0; i<totalAltEstNumber; i++)
-		{
+        for (i=0; i<totalAltEstNumber; i++)
+        {
+            fprintf(stderr, "\nEST i %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd());
             // Compare this est with the others to check incompatibility or inclusion
             for (j=1+i; j<totalAltEstNumber; j++)
             {
+                // all the next Est have a higher position  than the current one
+                if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
+
+                //if (voae_AltEst[j].GetStart() == voae_AltEst[i].GetStart()) fprintf(stderr, "\n  EST j %d - %d", voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd()) ;
+                
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
                     if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
@@ -696,12 +713,11 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                     voae_AltEst[j].PutAltSplE(true);
                     nbIncomp++;
                 }
-                else   // no inconsistency
+                else   // consistency
                 {
                     // j strictly included in i
                     if (includedEstFilter) 
                     {
-                    	int strandSpecific = PAR.getI("AltEst.strandSpecific");	
                     	if ( (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd() ) &&
                     		 ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
                     	{
