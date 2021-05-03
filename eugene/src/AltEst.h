@@ -99,6 +99,7 @@ class AltEst
 
  public:
   int  totalAltEstNumber;
+  int  keptAltEstNumber;
   std::vector<OneAltEst> voae_AltEst;
 
   AltEst  (DNASeq *X);
