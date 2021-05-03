@@ -763,9 +763,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                 {
                     if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
                     voae_AltEst[i].FlagToRemove(true);
-                    //voae_AltEst.erase(voae_AltEst.begin() + i);
-                    //totalAltEstNumber--;
-                    //i--;
                     nbNoevidence++;
                 }
             }

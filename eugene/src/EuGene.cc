@@ -587,7 +587,7 @@ int main  (int argc, char * argv [])
                     {
                         if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
                         {
-                            delete AltPred;
+                           // delete AltPred;
                             continue;
                         }
                         // Delete the gene of the alt prediction which doesn't overlap the EST
@@ -615,7 +615,7 @@ int main  (int argc, char * argv [])
                             }
                             vPred.push_back(AltPred);
                         }
-                        else delete AltPred;
+                        //else delete AltPred;
                     }
                 } 
                 
