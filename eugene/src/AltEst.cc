@@ -694,6 +694,8 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
 
+	int debug = 1;
+	int nbComparison = 0;
     int strandSpecific = PAR.getI("AltEst.strandSpecific");	
 
     if (compatibleEstFilter || includedEstFilter)
@@ -710,6 +712,11 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                 if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
 				
 				if (voae_AltEst[j].IsToRemove()) continue;
+				
+				if (debug) {
+					fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
+					nbComparison++;
+				}
                 
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
@@ -728,16 +735,19 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                     	{
                     		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
 							voae_AltEst[j].FlagToRemove(true);
-							
-                    		//voae_AltEst.erase(voae_AltEst.begin() + j);
-                    		//totalAltEstNumber--;
-                    		//j--;
-                    		//nbIncluded++;
                     	}
                     }
                 }
+                if (debug) {
+					fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d END", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
+				}
             }
         }
+        
+        if (debug)
+		{
+			fprintf(stderr,"\nNombre de comparaisons effectues : %d\n", nbComparison);
+		}
 
 		if (includedEstFilter)
 		{
