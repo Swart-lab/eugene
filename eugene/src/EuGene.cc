@@ -275,6 +275,110 @@ Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
 }
 
 // -------------------------------------------------------------------------
+// Compute alternative Predictions based on EST
+// -------------------------------------------------------------------------
+std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, MasterSensor* MSensor,
+                        AltEst *AltEstDB, Prediction *pred)
+{
+    int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+    int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+    DATA	Data;
+    int   Forward =  1;//PAR.getI("Sense");
+    int   Dir = (Forward ? 1 : -1);
+    int   GCVerbose = PAR.getI("EuGene.VerboseGC");
+    int   GCLatency = PAR.getI("EuGene.GCLatency");
+    DAG* Dag;
+    
+    int localFrom,localTo;
+    std::vector <Prediction*> vPred;
+    Prediction*               AltPred;
+    Gene*                     baseGene;
+    int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+    
+    // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
+    InitActiveTracks(0);
+                
+    for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
+    {
+        if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
+        
+        localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
+        localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
+        // =================================================================
+        //AltPred = AltPredict(TheSeq, localFrom, localTo, MS, AltEstDB, pred, altidx);
+        // AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
+         //             AltEst *AltEstDB, Prediction *optpred, int idx)
+         
+        // DynaProg end at the lastpos + 1 to account for final signals.
+        int FirstNuc = (Forward ? localFrom : localTo+1);
+        int LastNuc  = (Forward ? localTo+1 : localFrom);
+        if (!AltEstDB->voae_AltEst[altidx].CompatibleWith(pred))
+        {
+            Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR,TheSeq);
+            Dag->LoadDistLength();
+            Dag->WeightThePrior();
+            for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
+            {
+                // recuperation des infos
+                MSensor->GetInfoAt(TheSeq, nuc, &Data);
+                AltEstDB->Penalize(altidx,nuc,&Data);
+                if (Forward)
+                    Dag->ShortestPathAlgoForward(nuc,Data);
+                else
+                    Dag->ShortestPathAlgoBackward(nuc,Data);
+                if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+            }
+            Dag->WeightThePrior();
+            Dag->BuildPrediction(localFrom, localTo, Forward);
+            Dag->pred->TrimAndUpdate(TheSeq);
+            AltPred = Dag->pred;
+            delete Dag;
+        }
+        else {
+            AltPred = NULL;
+        }
+        // ====================================================================
+        
+        if (AltPred)
+        {
+            if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+            {
+                delete AltPred;
+                continue;
+            }
+            // Delete the gene of the alt prediction which doesn't overlap the EST
+            AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+            // If genes overlapping the EST was found and if the prediction is original
+            if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+            {
+                fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+                baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
+                if (baseGene)
+                {
+                    baseGene->hasvariant++;
+                    AltPred->vGene[0]->isvariant = true;
+                    AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
+                    AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
+                    baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart)
+                                        : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
+                    baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)
+                                        : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
+                }
+                else
+                {
+                    fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
+                    AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
+                }
+                vPred.push_back(AltPred);
+            }
+            else delete AltPred;
+        }
+    }
+    return vPred;
+}
+
+
+// -------------------------------------------------------------------------
 // Read a fasta file
 // -------------------------------------------------------------------------
 DNASeq* ReadSequence (char* sequence_name)
@@ -561,6 +665,9 @@ int main  (int argc, char * argv [])
                 time_t depart, arrivee;
                 time(&depart);
                 
+                vPred = AllAltPredict (TheSeq, fromPos, toPos, MS, AltEstDB, pred);
+                
+                /*
                 for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                 {
                     if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
@@ -591,7 +698,7 @@ int main  (int argc, char * argv [])
                             continue;
                         }
                         // Delete the gene of the alt prediction which doesn't overlap the EST
-                        //AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+                        AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
                         // If genes overlapping the EST was found and if the prediction is original
                         if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
                         {
@@ -615,11 +722,13 @@ int main  (int argc, char * argv [])
                             }
                             vPred.push_back(AltPred);
                         }
-                        //else delete AltPred;
+                        else delete AltPred;
                     }
-                } 
+                } */
                 
                 time(&t6); // end of analyse of all altEst
+                
+                
                 pred->Print(TheSeq, MS);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
