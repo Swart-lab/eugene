@@ -587,11 +587,11 @@ int main  (int argc, char * argv [])
                     {
                         if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
                         {
-                           // delete AltPred;
+                            delete AltPred;
                             continue;
                         }
                         // Delete the gene of the alt prediction which doesn't overlap the EST
-                        AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+                        //AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
                         // If genes overlapping the EST was found and if the prediction is original
                         if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
                         {
@@ -626,7 +626,7 @@ int main  (int argc, char * argv [])
                     vPred[idx]->Print(TheSeq, MS,NULL,1);
                 }
                 time(&t7); // end of print all the predictions
-                //delete AltPred;
+                delete AltPred;
                 if (debugAltest)
                 {
                     double part1= difftime(t2, t1);
