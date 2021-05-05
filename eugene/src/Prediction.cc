@@ -2858,6 +2858,8 @@ Gene *Prediction :: FindGene ( int start, int end, const char strand )
 	for ( int i=0; i<nbGene; i++ )
 	{
 		if (strand && vGene[i]->GetStrand() != strand) continue;
+        if (vGene[i]->trStart > end) break;
+
 		left =  Max ( start, vGene[i]->trStart );
 		right = Min ( end, vGene[i]->trEnd );
 
