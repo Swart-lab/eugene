@@ -297,10 +297,10 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
     
     // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
     InitActiveTracks(0);
+    // Create a dag which would be reinitialze for each altEst
     DAG* Dag = new DAG(TheSeq, PAR);
     Dag->LoadDistLength();
     
-                
     for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
     {
         if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
@@ -313,9 +313,8 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
         int LastNuc  = (Forward ? localTo+1 : localFrom);
         
         Dag->Init(FirstNuc-Dir, LastNuc+Dir);
-        //Dag = new DAG(FirstNuc-Dir, LastNuc+Dir, PAR, TheSeq);
-        //Dag->LoadDistLength();
         Dag->WeightThePrior();
+        
         for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
         {
             // recuperation des infos
@@ -331,14 +330,12 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
         Dag->BuildPrediction(localFrom, localTo, Forward);
         Dag->pred->TrimAndUpdate(TheSeq);
         AltPred = Dag->pred;
-
-        //delete Dag;
         
         if (AltPred)
         {
             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
             {
-                delete AltPred;
+                Dag->Clean();
                 continue;
             }
             // Delete the gene of the alt prediction which doesn't overlap the EST
@@ -366,7 +363,6 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
                 }
                 vPred.push_back(AltPred);
             }
-            else delete AltPred;
         }
         Dag->Clean();
     }
