@@ -80,6 +80,9 @@ void BackPoint :: Clean  ()
     StartPos = 0;
     Cost = 0.0;
     Additional = 0.0;
+    delete Next;
+    delete Prev;
+    delete Origin;
     Next = Prev = this;
     Origin = NULL;
     Status = 0;
