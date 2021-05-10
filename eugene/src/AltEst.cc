@@ -34,6 +34,7 @@ OneAltEst :: OneAltEst()
     strand = 0;
     start = end = index = exonsNumber = 0;
     totalLength = altSplicingEvidence = 0;
+    toRemove = false;
 }
 
 
@@ -45,6 +46,7 @@ OneAltEst :: OneAltEst(char *ID, int i, int j, char s)
     this->strand              = s;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
+    this->toRemove = false;
     this->totalLength         = 0;
     this->AddExon(i, j);
 }
@@ -68,6 +70,7 @@ void OneAltEst :: Reset ()
     this->index               = -1;
     this->exonsNumber         = 0;
     this->altSplicingEvidence = 0;
+    this->toRemove            = false;
     this->totalLength         = 0;
     vi_ExonStart.clear();
     vi_ExonEnd.clear();
@@ -427,6 +430,15 @@ bool StartAtLeft( OneAltEst A,  OneAltEst B)
 {
     return (A.GetStart() < B.GetStart());
 };
+bool StartAtLeftElseEndAtLeft ( OneAltEst A,  OneAltEst B)
+{
+    return ( (A.GetStart() < B.GetStart()) ? true : (A.GetStart() ==  B.GetStart() && A.GetEnd() <= B.GetEnd()));
+};
+bool StartAtLeftElseEndAtRight ( OneAltEst A,  OneAltEst B)
+{
+    return ( (A.GetStart() < B.GetStart()) ? true : (A.GetStart() ==  B.GetStart() && A.GetEnd() > B.GetEnd()));
+};
+
 bool EndAtRight( OneAltEst A,  OneAltEst B)
 {
     return (A.GetEnd() > B.GetEnd());
@@ -458,6 +470,7 @@ AltEst :: AltEst(DNASeq *X)
     altEstDisplay= PAR.getI("AltEst.altEstDisplay");
     verbose= PAR.getI("AltEst.verbose");
     totalAltEstNumber = 0;
+    keptAltEstNumber  = 0;
 
     std::string inputFormat = to_string(PAR.getC("AltEst.format",0,1));	
     strcpy(tempname, PAR.getC("fstname"));
@@ -502,14 +515,15 @@ AltEst :: AltEst(DNASeq *X)
     fflush(stderr);
 
     // sort all Est by their begin coordinates
-    sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
+    sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeftElseEndAtRight);
+	//sort(voae_AltEst.begin(), voae_AltEst.end(), StartAtLeft);
 
     Compare(nbIncomp, nbNoevidence, nbIncluded);
     fprintf(stderr,"%d removed (%d incl., %d unsp., %d no alt.spl., %d len.), %d inc. pairs, ",
             nbIncluded+nbNoevidence+nbUnspliced+nbExtremLen,
             nbIncluded,nbUnspliced,nbNoevidence,nbExtremLen,nbIncomp);
 
-    fprintf(stderr, "%d kept ...",totalAltEstNumber);
+    fprintf(stderr, "%d kept ...",keptAltEstNumber);
     fprintf(stderr, " done\n");
     fflush(stderr);
 
@@ -675,66 +689,91 @@ int AltEst :: ReadAltFile (char name[FILENAME_MAX+1], int &nbUnspliced, int &nbE
 // -----------------------------------------------------------------
 void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
 {
-    int i, j, k = 0;
+    int i, j = 0;
     // Until now, only one cluster is considered (time max)
     // test all pairwise est comparisons in the cluster
     // NxN comparisons could be tested, but it has been reduced to
     // ((NxN)-N)/2 , only one comparison per pair, without the diag. (cf. k)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
+	
+    keptAltEstNumber = totalAltEstNumber;
+    int debug = 1;
+    int nbComparison = 0;
+    int strandSpecific = PAR.getI("AltEst.strandSpecific");	
 
-    for (i=0; i<totalAltEstNumber; i++)
+    if (compatibleEstFilter || includedEstFilter)
     {
-        if (compatibleEstFilter || includedEstFilter)
+        for (i=0; i<totalAltEstNumber; i++)
         {
+			if (voae_AltEst[i].IsToRemove()) continue;
+			
+            //fprintf(stderr, "\nEST i %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd());
             // Compare this est with the others to check incompatibility or inclusion
-            for (j=1+k; j<totalAltEstNumber; j++)
+            for (j=1+i; j<totalAltEstNumber; j++)
             {
-                char *iID = voae_AltEst[i].GetId();
-                char *jID = voae_AltEst[j].GetId();
+                // all the next Est have a higher position  than the current one
+                if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
+                if (voae_AltEst[j].IsToRemove()) continue;
+                /*if (debug) {
+                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
+                    nbComparison++;
+                }*/
+                
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
-                    if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", jID, iID);
+                    if (verbose) fprintf(stderr,"\nincompatibility: %s vs. %s ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
                     voae_AltEst[i].PutAltSplE(true);
                     voae_AltEst[j].PutAltSplE(true);
                     nbIncomp++;
                 }
-                else   // no inconsistency
+                else   // consistency
                 {
                     // j strictly included in i
                     if (includedEstFilter) 
                     {
-                    	int strandSpecific = PAR.getI("AltEst.strandSpecific");	
-                    	if ( (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd() ) &&
-                    		 ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
-                    	{
-                    		if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", jID, iID);
-                    		voae_AltEst.erase(voae_AltEst.begin() + j);
-                    		totalAltEstNumber--;
-                    		j--;
-                    		nbIncluded++;
-                    	}
+                        if ( (voae_AltEst[j].GetEnd() <= voae_AltEst[i].GetEnd() ) &&
+                            ( !strandSpecific || (strandSpecific && (voae_AltEst[j].GetStrand() == voae_AltEst[i].GetStrand()) ) ) )	
+                        {
+                            if (verbose) fprintf(stderr,"\n%s removed (included in %s) ...", voae_AltEst[j].GetId(), voae_AltEst[i].GetId());
+                            voae_AltEst[j].FlagToRemove(true);
+                            nbIncluded++;
+                        }
                     }
                 }
+                /*if (debug) {
+                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d END", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
+                    
+                }*/
             }
-            k++;
         }
-    }
-
-    if (compatibleEstFilter)
-    {
-        for (i=0; i<totalAltEstNumber; i++)
+        
+        /*if (debug)
         {
-            if  (! voae_AltEst[i].GetAltSplE())
+            fprintf(stderr,"\nNombre de comparaisons effectues : %d\n", nbComparison);
+            
+        }*/
+	
+
+        if (compatibleEstFilter)
+        {
+            for (i=0; i<totalAltEstNumber; i++)
             {
-                if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
-                voae_AltEst.erase(voae_AltEst.begin() + i);
-                totalAltEstNumber--;
-                i--;
-                nbNoevidence++;
+                if  (! voae_AltEst[i].GetAltSplE())
+                {
+                    if (verbose) fprintf(stderr,"\n%s removed (no alt.spl. evidence) ...", voae_AltEst[i].GetId());
+                    voae_AltEst[i].FlagToRemove(true);
+                    nbNoevidence++;
+                }
             }
         }
-    }
+        
+        for (int i=0; i<totalAltEstNumber; i++)
+        {
+            if (voae_AltEst[i].IsToRemove()) keptAltEstNumber--;
+        }
+    }    
 }
+
 // -----------------------------------------------------------------
 // Penalize according to EST number i
 // -----------------------------------------------------------------

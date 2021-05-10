@@ -52,7 +52,8 @@ bool OperonSortFunction(Operon* o1, Operon* o2)
 bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& altPreds, int seuil )
 {
 	Gene *thisGene = this->vGene[0];
-	Gene *otherGene;
+	int thisGeneTrStart = thisGene->trStart;
+	int thisGeneTrEnd   = thisGene->trEnd;
 
 	int mismatch;
 
@@ -61,6 +62,10 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 
 	for ( idx = 0; idx < optPred->vGene.size(); idx++ )
 	{
+		//fprintf(stderr, "Vpred idx start %d\n", optPred->vGene[idx]->trStart);
+		if (thisGeneTrStart - optPred->vGene[idx]->trEnd > 1000) continue;
+		if (optPred->vGene[idx]->trStart - thisGeneTrEnd > 1000) break;
+		
 		mismatch = thisGene->isDifferent ( * ( optPred->vGene[idx] ), seuil ); // -1 if the two genes have different structure
 		if ( ( mismatch >= 0 ) && ( mismatch <= seuil ) )
 			return false;
@@ -69,6 +74,8 @@ bool Prediction :: IsOriginal ( Prediction* optPred, std::vector <Prediction*>& 
 
 	for ( idx = 0; idx < altPreds.size(); idx++ )
 	{
+		if ( (thisGeneTrStart - altPreds[idx]->vGene[0]->trEnd) > 1000) continue;
+		if (altPreds[idx]->vGene[0]->trStart - thisGeneTrEnd > 1000) continue;
 		mismatch = thisGene->isDifferent ( * ( altPreds[idx]->vGene[0] ), seuil );
 		if ( ( mismatch >= 0 ) && ( mismatch <= seuil ) )
 			return false;
@@ -1580,7 +1587,7 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 	vPos.clear();
 	vState.clear();
 
-	this->Print();
+	//this->Print();
 }
 
 // ------------------------
@@ -2851,6 +2858,8 @@ Gene *Prediction :: FindGene ( int start, int end, const char strand )
 	for ( int i=0; i<nbGene; i++ )
 	{
 		if (strand && vGene[i]->GetStrand() != strand) continue;
+        if (vGene[i]->trStart > end) break;
+
 		left =  Max ( start, vGene[i]->trStart );
 		right = Min ( end, vGene[i]->trEnd );
 

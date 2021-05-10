@@ -72,6 +72,24 @@ BackPoint :: ~BackPoint  ()
 }
 
 // ----------------------------------------------------------------
+//  Reinit Backpoint
+//   NOT USED
+// ----------------------------------------------------------------
+void BackPoint :: Clean  ()
+{
+    State = -1;
+    StartPos = 0;
+    Cost = 0.0;
+    Additional = 0.0;
+    delete Next;
+    delete Prev;
+    delete Origin;
+    Next = Prev = this;
+    Origin = NULL;
+    Status = 0;
+}
+
+// ----------------------------------------------------------------
 // Prints the BackPoint contents
 // ----------------------------------------------------------------
 void BackPoint :: Print()
@@ -126,6 +144,18 @@ void Track :: Zap()
     Dead = Skip;
   }
 }
+
+// ----------------------------------------------------------------
+// Reinit the track
+// NOT USED
+// ----------------------------------------------------------------
+void Track :: Clean()
+{
+    Path.Clean();
+    Optimal = 0.0;
+    OptPos  = 0;
+}
+
 // ----------------------------------------------------------------
 // Clear Mark of all BP in a whole track
 // ----------------------------------------------------------------

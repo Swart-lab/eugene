@@ -55,6 +55,7 @@ class BackPoint
   BackPoint ();
   BackPoint  (char state, int pos, double cost);
   ~BackPoint();
+  void Clean();
 
   inline void InitState(int state, int start) { State = state; StartPos = start;};
   void Print();
@@ -86,6 +87,7 @@ class Track
   void ClearMark(int);
   void Mark(int);
   void Sweep(int);
+  void Clean();
 
   Track ();
   Track(Track *other);

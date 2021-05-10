@@ -224,8 +224,6 @@ Prediction* Predict (DNASeq* TheSeq, MasterSensor* MSensor)
 Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
                         AltEst *AltEstDB, Prediction *optpred, int idx)
 {
-    int   j, k;
-    int   Data_Len = TheSeq->SeqLen;
     DATA	Data;
     int   Forward =  1;//PAR.getI("Sense");
     int   Dir = (Forward ? 1 : -1);
@@ -275,6 +273,103 @@ Prediction* AltPredict (DNASeq* TheSeq, int From, int To, MasterSensor* MSensor,
     return NULL;
 
 }
+
+// // -------------------------------------------------------------------------
+// // Compute alternative Predictions based on EST
+// // NOT USED
+// // -------------------------------------------------------------------------
+// std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, MasterSensor* MSensor,
+//                         AltEst *AltEstDB, Prediction *pred)
+// {
+//     int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+//     int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+//     int GCVerbose                = PAR.getI("EuGene.VerboseGC");
+//     int GCLatency                = PAR.getI("EuGene.GCLatency");
+//     DATA  Data;
+//     int   Forward =  1;//PAR.getI("Sense");
+//     int   Dir = (Forward ? 1 : -1);
+//     
+//     
+//     int localFrom,localTo;
+//     std::vector <Prediction*> vPred;
+//     Prediction*               AltPred;
+//     Gene*                     baseGene;
+//     int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+//     
+//     // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
+//     InitActiveTracks(0);
+//     // Create a dag which would be reinitialze for each altEst
+//     DAG* Dag = new DAG(TheSeq, PAR);
+//     Dag->LoadDistLength();
+//     
+//     for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
+//     {
+//         if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
+//         if (AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) continue;
+//         
+//         localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
+//         localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
+//         // DynaProg end at the lastpos + 1 to account for final signals.
+//         int FirstNuc = (Forward ? localFrom : localTo+1);
+//         int LastNuc  = (Forward ? localTo+1 : localFrom);
+//         
+//         Dag->Init(FirstNuc-Dir, LastNuc+Dir);
+//         Dag->WeightThePrior();
+//         
+//         for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
+//         {
+//             // recuperation des infos
+//             MSensor->GetInfoAt(TheSeq, nuc, &Data);
+//             AltEstDB->Penalize(altidx,nuc,&Data);
+//             if (Forward)
+//                 Dag->ShortestPathAlgoForward(nuc,Data);
+//             else
+//                 Dag->ShortestPathAlgoBackward(nuc,Data);
+//             if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+//         }
+//         Dag->WeightThePrior();
+//         Dag->BuildPrediction(localFrom, localTo, Forward);
+//         Dag->pred->TrimAndUpdate(TheSeq);
+//         AltPred = Dag->pred;
+//         
+//         if (AltPred)
+//         {
+//             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+//             {
+//                 Dag->Clean();
+//                 continue;
+//             }
+//             // Delete the gene of the alt prediction which doesn't overlap the EST
+//             AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+//             // If genes overlapping the EST was found and if the prediction is original
+//             if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+//             {
+//                 fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+//                 baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
+//                 if (baseGene)
+//                 {
+//                     baseGene->hasvariant++;
+//                     AltPred->vGene[0]->isvariant = true;
+//                     AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
+//                     AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
+//                     baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart)
+//                                         : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
+//                     baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)
+//                                         : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
+//                 }
+//                 else
+//                 {
+//                     fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
+//                     AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
+//                 }
+//                 vPred.push_back(AltPred);
+//             }
+//         }
+//         Dag->Clean();
+//     }
+//     return vPred;
+// }
+// 
 
 // -------------------------------------------------------------------------
 // Read a fasta file
@@ -402,7 +497,6 @@ int main  (int argc, char * argv [])
         int sequence;
         for (sequence = optind; sequence < argc ; sequence++)
         {
-
             PAR.set("fstname", argv[sequence]);
 
             // --------------------------------------------------------------------
@@ -482,11 +576,12 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
             if (PAR.count("AltEst.reference") > 0)
             {
-                fprintf(stderr, "alt mode\n");
+                fprintf(stderr, "Alt mode\n");
                 char reffile[FILENAME_MAX+1];
                 strcpy(reffile, PAR.getC("AltEst.reference"));
                 pred = new Prediction(reffile, TheSeq);
-                pred->Print();
+                
+                //pred->Print();
             }
             else
             {
@@ -507,7 +602,7 @@ int main  (int argc, char * argv [])
                     //pred->Print();
                     fprintf(stderr,"Optimal path length = %.4f\n",- pred->optimalPath);
                 }
-                pred->Print();
+                //pred->Print();
             }
 
             // --------------------------------------------------------------------
@@ -525,6 +620,7 @@ int main  (int argc, char * argv [])
             MS->PostAnalyse(pred, MISC_INFO);
             fclose(MISC_INFO);
 
+
             if (graph)
             {
                 fprintf(stderr,"Dumping images (\"%s.---.png\")...", grname);
@@ -538,22 +634,26 @@ int main  (int argc, char * argv [])
             // --------------------------------------------------------------------
             if (PAR.getI("AltEst.use"))
             {
-                int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
-                int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
-                int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+                
                 AltEst *AltEstDB = new AltEst(TheSeq);
 
                 std::vector <Prediction*> vPred;
+                
+                int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+                int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+                
+                int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+                
                 Prediction*               AltPred;
                 Gene*                     baseGene;
-
                 for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                 {
+                    if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
                     int localFrom,localTo;
-
+                    
                     localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
                     localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
-
+                    
                     AltPred = AltPredict(TheSeq,localFrom,localTo,MS,AltEstDB,pred,altidx);
 
                     if (AltPred)
@@ -591,12 +691,12 @@ int main  (int argc, char * argv [])
                         else delete AltPred;
                     }
                 }
+                
                 pred->Print(TheSeq, MS);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
                     vPred[idx]->Print(TheSeq, MS,NULL,1);
                 }
-                //delete AltPred;
             }
 
             // Free used memory
@@ -612,4 +712,5 @@ int main  (int argc, char * argv [])
 
         return  0;
     }
+	
 }

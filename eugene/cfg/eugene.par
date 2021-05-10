@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.2b
+EuGene.version		4.2c
 EuGene.organism		Arabidopsis
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0
@@ -83,7 +83,8 @@ AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
 AltEst.strandSpecific	0 
 AltEst.verbose			0
-#AltEst.format  		GFF3
+#AltEst.reference       /path/of/gff3/reference/annotation        
+AltEst.format  		GFF3
 #
 ##### Evaluation mode ######
 #Eval.offset   50

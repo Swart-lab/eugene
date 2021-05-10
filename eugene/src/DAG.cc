@@ -63,6 +63,37 @@ DAG :: DAG ()
 }
 
 // ----------------------------------------------------------------
+// Constructor for AltPredicton
+// Cond: Used only once for Main DAG
+// NOT USED
+// ----------------------------------------------------------------
+DAG :: DAG (DNASeq* Seq, Parameters &PAR) 
+{
+    StartPosition   = 0;
+    EndPosition     = 0;
+    EvidenceName[0] = 0;
+    pred            = NULL;
+
+    for (int i=0; i < activeTracks.size(); i++) 
+    {
+        LBP[activeTracks[i]].Path.InitState(activeTracks[i], StartPosition);
+    }
+    DAG::TheSeq = Seq;
+    DAG::SplicedStopPen = -PAR.getD("EuGene.SplicedStopPen");
+    DAG::ExPrior        = PAR.getD("EuGene.ExonPrior");
+    DAG::InPrior        = PAR.getD("EuGene.IntronPrior");
+    DAG::IGPrior        = PAR.getD("EuGene.InterPrior"); 
+    DAG::FivePrior      = PAR.getD("EuGene.FivePrimePrior");
+    DAG::ThreePrior     = PAR.getD("EuGene.ThreePrimePrior");
+    DAG::RnaPrior       = PAR.getD("EuGene.RnaPrior");
+    DAG::BiCodingPrior  = PAR.getD("EuGene.BiCodingPrior");
+    DAG::UIRPrior       = PAR.getD("EuGene.UIRPrior");
+    DAG::estuse         = PAR.getI("Sensor.Est.use");
+    DAG::IntronFivePrior = InPrior;
+    DAG::NormalizingPath = 0.0;
+}
+
+// ----------------------------------------------------------------
 // Default constructor. 
 // Cond: Used only once for Main DAG !
 // ----------------------------------------------------------------
@@ -121,6 +152,31 @@ DAG :: DAG (int start, int end, DAG *RefDag,char* name)
 DAG :: ~DAG ()
 {
   for  (int i = 0;  i < activeTracks.size();  i ++) LBP[activeTracks[i]].Zap();
+}
+
+// ----------------------------------------------------------------
+//  Clean the activeTracks
+//  NOT USED
+// ----------------------------------------------------------------
+void DAG :: Clean() 
+{
+    pred = NULL;
+    for  (int i = 0;  i < activeTracks.size();  i ++) LBP[activeTracks[i]].Clean();
+    DAG::NormalizingPath = 0.0;
+}
+
+// ----------------------------------------------------------------
+//  Init the DAG at the start position
+//  NOT USED
+// ----------------------------------------------------------------
+void DAG :: Init(int start, int end) 
+{
+    StartPosition = start;
+    EndPosition   = end;
+    // Init all the active tracks
+    for (int i = 0; i < activeTracks.size(); i++) { 
+        LBP[activeTracks[i]].Path.InitState(activeTracks[i],StartPosition);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -453,6 +509,7 @@ inline void DAG::Normalize()
   double BestU,maxi = -NINFINITY;
 
   for (int k = 0 ; k < activeTracks.size(); k++) {
+    //fprintf(stderr, "Optimal : %f\n", LBP[activeTracks[k]].Optimal);
     BestU = LBP[activeTracks[k]].Optimal;
     if ((BestU > NINFINITY) && (BestU < maxi)) 
       maxi = BestU;
@@ -2136,6 +2193,7 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
 // ----------------------------------------------------------------
 void DAG :: ShortestPathAlgoForward (int position, DATA Data)
 {
+  //fprintf(stderr, "POSITION: %d\n", position);
   // Avoid rounding errors on long sequences
   Normalize();
   // Precompute required track values

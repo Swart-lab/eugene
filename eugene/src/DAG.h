@@ -51,9 +51,12 @@ private:
   Prediction *pred; //   **
 
   DAG();
+  DAG(DNASeq* Seq, Parameters& PAR);
   DAG (int start, int end, Parameters &PAR, DNASeq *Seq);
   DAG (int start, int end, DAG *RefDag,char* name);
   ~DAG ();
+  void Clean();
+  void Init(int start, int end);
   void WeightThePrior();
   void LoadDistLength();
   void ShortestPathAlgoForward (int position, DATA Data);

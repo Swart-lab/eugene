@@ -4,10 +4,13 @@ Copyright (C) 2020, EuGene Team <eugene-help@groupes.renater.fr>
 See the end for copying conditions.
 
 Please send eugene bug reports to eugene-help@groupes.renater.fr
+Version 4.2c
+
+* Improve performance of splicing variant prediction
+* Allow to predict only variant from a reference annotation
 
 Version 4.2b
 
-*  Current EuGène version
 *  The plugin 'SignalWAM' allows to predict spliced|start signals with weight-array matrix
 *  Improve the way to integrate ESTs: 1) for the same number of gaps, prefer the Ests with 
    the smallest covered region, 2) reduce the number of ejected Ests
