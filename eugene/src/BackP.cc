@@ -81,9 +81,9 @@ void BackPoint :: Clean  ()
     StartPos = 0;
     Cost = 0.0;
     Additional = 0.0;
-    if (Next != NULL) delete Next;
-    if (Prev != NULL) delete Prev;
-    if (Prev != NULL) delete Origin;
+    //if (Next != NULL) delete Next;
+    //if (Prev != NULL) delete Prev;
+    //if (Prev != NULL) delete Origin;
     Next = Prev = this;
     Origin = NULL;
     Status = 0;
