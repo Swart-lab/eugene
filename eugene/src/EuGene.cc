@@ -335,6 +335,7 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
         {
             if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
             {
+                delete Dag->pred;
                 Dag->Clean();
                 continue;
             }
@@ -362,6 +363,10 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
                     AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
                 }
                 vPred.push_back(AltPred);
+            }
+            else 
+            {
+                delete Dag->pred;
             }
         }
         Dag->Clean();
