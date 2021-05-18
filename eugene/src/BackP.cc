@@ -210,8 +210,9 @@ void Track :: Mark(int pos)
 void Track :: Sweep(int pos) {
 
   BackPoint *It = Path.Next;
-
+  BackPoint *NextIt;
   while ( (It != &Path)){// && (It->StartPos >= pos)) {
+    NextIt = It->Next;
     if (!It->IsMarked()) {
       It->Next->Additional += It->Additional;
       It->Next->Prev = It->Prev;
@@ -219,8 +220,7 @@ void Track :: Sweep(int pos) {
       delete It;
       NumBPCollect++;
     }
-
-    It = It->Next;
+    It = NextIt;
   }
 }
 // ----------------------------------------------------------------
