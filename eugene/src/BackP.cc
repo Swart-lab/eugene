@@ -151,6 +151,7 @@ void Track :: Zap()
 // ----------------------------------------------------------------
 void Track :: Clean()
 {
+    Zap();
     Path.Clean();
     Optimal = 0.0;
     OptPos  = 0;
