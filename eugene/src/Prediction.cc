@@ -2867,7 +2867,10 @@ Gene *Prediction :: FindGene ( int start, int end, const char strand )
 		if ( ( right - left ) > overlap )
 		{
 			idx = i;
-			overlap = right-end;
+			// bug!!!
+			// overlap = right-end;
+			overlap = right - left;
+            
 		}
 	}
 	if ( idx == -1 ) return NULL;
