@@ -331,6 +331,106 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     return false;
 }
 
+Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
+{
+    int idxf, idxe=0;
+    Gene *g;
+
+    bool UncompatibleGeneFound;
+    
+    //locate overlapping gene
+    if (PAR.getI("AltEst.strandSpecific"))
+    	g = pred->FindGene(start,end, strand);
+    else
+    	g = pred->FindGene(start,end);
+    
+    // no overlapping gene
+    if (g == NULL) 
+    {
+        UncompatibleGeneFound = false;
+        // return false;
+        return NULL;
+    }
+    else 
+    {
+        fprintf(stdout, "J'ai trouve un gene ! \n ");
+        g->Print();
+        // stugy g to be sure it is incompatible
+        // check first exon start is in transcribed matured region
+        int  nbFeature = g->nbFea();
+
+        for (idxf = 0; idxf < nbFeature; idxf++)
+        {
+            if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
+                (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
+            {
+                if (! g->vFea[idxf]->IsTranscribedAndUnspliced() )
+                {
+                    UncompatibleGeneFound = true;
+                    return g;
+                }
+                else break;
+            }
+        }
+    
+
+        idxf++;
+        bool firstOk = false;
+        // test des frontieres suivantes
+        while ((idxe < exonsNumber-1) && (idxf < nbFeature))
+        {
+            if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
+                firstOk = true;
+            if (!firstOk && ( ! g->vFea[idxf]->IsTranscribedAndUnspliced()) ) // IG or intron: broken
+            {
+                UncompatibleGeneFound = true;
+                return g;
+                //return false;
+            }
+
+            if (firstOk && (g->vFea[idxf]->end == vi_ExonStart[idxe+1]))
+            {
+                if ( !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
+                {
+                    idxe++;
+                    idxf++;
+                    firstOk = false;
+                    continue;
+                }
+                else
+                {
+                    UncompatibleGeneFound = true;
+                    return g;
+                    //return false;
+                }
+            }
+            idxf++;
+        }
+
+        // test de la fin
+        for (; idxf < nbFeature; idxf++)
+        {
+            if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &&
+                (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
+            {
+                //return  (g->vFea[idxf]->IsTranscribedAndUnspliced());
+                if (!g->vFea[idxf]->IsTranscribedAndUnspliced())
+                {
+                    return g;
+                }
+                else 
+                {
+                    return NULL;
+                }
+            }
+        }
+    }
+    
+    //return false;
+    fprintf(stdout, "je suis a la fin\n");
+    return NULL;
+}
+
 // --------------------------------------
 //  Penalize according to the EST
 // --------------------------------------
