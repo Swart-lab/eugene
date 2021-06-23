@@ -391,7 +391,7 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
     int   Dir = (Forward ? 1 : -1);
     
     
-    int localFrom,localTo;
+    int localFrom,localTo, altLocalFrom, altLocalTo;
     std::vector <Prediction*> vPred;
     Prediction*               AltPred;
     Gene*                     baseGene;
@@ -405,26 +405,50 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
     
     for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
     {
+        // Skip the altEst if needed
         if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
-        fprintf (stdout, "\nAltEst %i - %i %c CompatibleWith : %i", AltEstDB->voae_AltEst[altidx].GetStart(), 
+        
+        // Look for an overlapping an inconsistent gene
+        Gene* uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
+        
+        // FOR DEBUGGING --> TOREMOVE
+        if ( (uncompatibleGene != NULL &&  AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) ||
+             (uncompatibleGene == NULL && !AltEstDB->voae_AltEst[altidx].CompatibleWith(pred))) 
+        {
+            fprintf (stdout, "INCOHERENCE:\n");
+            fprintf (stdout, "-AltEst %i - %i %c CompatibleWith : %i\n", AltEstDB->voae_AltEst[altidx].GetStart(), 
                  AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand(), AltEstDB->voae_AltEst[altidx].CompatibleWith(pred));
         
-        fprintf (stdout, "GetUncompatibleGene :\n");
-        Gene* ggg= AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
-        if (ggg) 
-        {
-            ggg->Print();
-        }
-        else {
             
-            fprintf (stdout, "NULL\n");
+            if (uncompatibleGene != NULL) {
+                uncompatibleGene->Print();
+                fprintf (stdout, "-GetUncompatibleGene :\n");
+            }
         }
+        // ENDFOR DEBUGGING
         
-        if (AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) continue;
+        if (uncompatibleGene == NULL) continue;
+        
+        
+        //fprintf (stdout, "New predition with the altEst %s %i - %i %c\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
+        //         AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+        
+        
+        //if (AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) continue;
         
         // positions around the AltEst hit
+        /*
         localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
         localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
+        */
+        // largest positions between altEst hit ones and gene ones
+        
+        altLocalFrom = Min(uncompatibleGene->trStart, AltEstDB->voae_AltEst[altidx].GetStart());
+        altLocalTo   = Max(uncompatibleGene->trEnd,   AltEstDB->voae_AltEst[altidx].GetEnd());
+        
+        // positions with a margin
+        localFrom = Max(fromPos, altLocalFrom - RepredictMargin);
+        localTo   = Min(toPos,   altLocalTo + RepredictMargin);
         
         // DynaProg end at the lastpos + 1 to account for final signals.
         int FirstNuc = (Forward ? localFrom : localTo+1);
@@ -464,8 +488,19 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
             {
                 fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
                 baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
+                
                 if (baseGene)
                 {
+                    if (baseGene != uncompatibleGene)
+                    {
+                        fprintf (stderr, "Difficulty to get the good original gene for The altEst %s %i - %i %c:\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
+                 AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+                        
+                        fprintf(stderr, "UncompatibleGene:\n");
+                        uncompatibleGene->Print();
+                        fprintf(stderr, "BaseGene:\n");
+                        baseGene->Print();
+                    }
                     baseGene->hasvariant++;
                     AltPred->vGene[0]->isvariant = true;
                     AltPred->vGene[0]->hasvariant = baseGene->hasvariant;

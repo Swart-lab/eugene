@@ -335,6 +335,7 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
 {
     int idxf, idxe=0;
     Gene *g;
+    bool VERBOSE = false;
 
     bool UncompatibleGeneFound;
     
@@ -347,14 +348,17 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
     // no overlapping gene
     if (g == NULL) 
     {
+         if (VERBOSE) fprintf(stdout, "Pas de gène chevauchat l'altEst ! \n ") ;
         UncompatibleGeneFound = false;
         // return false;
         return NULL;
     }
     else 
     {
-        fprintf(stdout, "J'ai trouve un gene ! \n ");
-        g->Print();
+        if (VERBOSE) {
+            fprintf(stdout, "J'ai trouve un gene chevauchant l'altest! \n ");
+            g->Print();
+        }
         // stugy g to be sure it is incompatible
         // check first exon start is in transcribed matured region
         int  nbFeature = g->nbFea();
@@ -427,8 +431,11 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
     }
     
     //return false;
-    fprintf(stdout, "je suis a la fin\n");
-    return NULL;
+    if (VERBOSE) {
+        fprintf(stdout, "je suis a la fin. Je retourne le gene trouve..\n");
+    }
+    
+    return g;
 }
 
 // --------------------------------------
