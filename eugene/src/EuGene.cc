@@ -382,6 +382,8 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
 std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos, MasterSensor* MSensor,
                         AltEst *AltEstDB, Prediction *pred)
 {
+    bool debug = 1;
+    
     int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
     int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
     int GCVerbose                = PAR.getI("EuGene.VerboseGC");
@@ -412,17 +414,20 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
         Gene* uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
         
         // FOR DEBUGGING --> TOREMOVE
-        if ( (uncompatibleGene != NULL &&  AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) ||
-             (uncompatibleGene == NULL && !AltEstDB->voae_AltEst[altidx].CompatibleWith(pred))) 
+        if (debug)
         {
-            fprintf (stdout, "INCOHERENCE:\n");
-            fprintf (stdout, "-AltEst %i - %i %c CompatibleWith : %i\n", AltEstDB->voae_AltEst[altidx].GetStart(), 
+            if ( (uncompatibleGene != NULL &&  AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) ||
+             (uncompatibleGene == NULL && !AltEstDB->voae_AltEst[altidx].CompatibleWith(pred))) 
+            {
+                fprintf (stdout, "INCOHERENCE:\n");
+                fprintf (stdout, "-AltEst %i - %i %c CompatibleWith : %i\n", AltEstDB->voae_AltEst[altidx].GetStart(), 
                  AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand(), AltEstDB->voae_AltEst[altidx].CompatibleWith(pred));
         
             
-            if (uncompatibleGene != NULL) {
-                uncompatibleGene->Print();
-                fprintf (stdout, "-GetUncompatibleGene :\n");
+                if (uncompatibleGene != NULL) {
+                    uncompatibleGene->Print();
+                    fprintf (stdout, "-GetUncompatibleGene :\n");
+                }
             }
         }
         // ENDFOR DEBUGGING
@@ -449,7 +454,6 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
         // positions with a margin
         localFrom = Max(fromPos, altLocalFrom - RepredictMargin);
         localTo   = Min(toPos,   altLocalTo + RepredictMargin);
-        
         // DynaProg end at the lastpos + 1 to account for final signals.
         int FirstNuc = (Forward ? localFrom : localTo+1);
         int LastNuc  = (Forward ? localTo+1 : localFrom);
@@ -483,38 +487,44 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
             }
             // Delete the gene of the alt prediction which doesn't overlap the EST
             AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+            
+            // Delete 
             // If genes overlapping the EST was found and if the prediction is original
             if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
             {
                 fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+                // TODO :  A supprimer! Je le garde pour les tests de cohérence
                 baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
                 
                 if (baseGene)
                 {
-                    if (baseGene != uncompatibleGene)
+                    if (debug && baseGene != uncompatibleGene)
                     {
-                        fprintf (stderr, "Difficulty to get the good original gene for The altEst %s %i - %i %c:\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
-                 AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
-                        
-                        fprintf(stderr, "UncompatibleGene:\n");
+                        fprintf (stdout, "Difficulty to get the good original gene for The altEst %s %i - %i %c:\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
+                        AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+                        fprintf(stdout, "-->Predict altGene: %i %i %c\n", AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
+                        fprintf(stdout, "--> UncompatibleGene:\n");
                         uncompatibleGene->Print();
-                        fprintf(stderr, "BaseGene:\n");
+                        fprintf(stdout, "-->BaseGene:\n");
                         baseGene->Print();
                     }
-                    baseGene->hasvariant++;
-                    AltPred->vGene[0]->isvariant = true;
-                    AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
-                    AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
-                    baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart)
-                                        : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
-                    baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)
-                                        : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
                 }
-                else
-                {
-                    fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
-                    AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
-                }
+                    
+                uncompatibleGene->hasvariant++;
+                AltPred->vGene[0]->isvariant = true;
+                AltPred->vGene[0]->hasvariant = uncompatibleGene->hasvariant;
+                AltPred->vGene[0]->geneNumber = uncompatibleGene->geneNumber;
+                uncompatibleGene->tuStart = ( uncompatibleGene->tuStart ) ? Min(uncompatibleGene->tuStart,AltPred->vGene[0]->trStart)
+                                        : Min(uncompatibleGene->trStart,AltPred->vGene[0]->trStart);
+                uncompatibleGene->tuEnd   = ( uncompatibleGene->tuEnd )   ? Max(uncompatibleGene->tuEnd,AltPred->vGene[0]->trEnd)
+                                        : Max(uncompatibleGene->trEnd,AltPred->vGene[0]->trEnd);
+                                        
+                //}
+                //else
+                //{
+                //    fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
+                //    AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
+                //}
                 vPred.push_back(AltPred);
             }
             else 
