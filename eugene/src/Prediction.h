@@ -113,6 +113,7 @@ class Gene
   bool operator== (const Gene& o);
   bool HasSameExons(const Gene& o);
   bool Overlap (const Gene& o);
+  float GetOverlapWith ( const Gene& g) ;
   inline int nbFea() {return vFea.size();};
   int  GetExonNumber();
   char GetStrand();
