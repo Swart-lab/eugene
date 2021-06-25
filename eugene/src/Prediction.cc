@@ -1579,6 +1579,12 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 			}
 		}
 		fclose ( fp );
+        
+        if (vGeneFeatures.size() > 0)
+        {
+            this->LoadGene(vGeneFeatures, vPos, vState, seq);
+			vGeneFeatures.clear();
+        }
 	}
 
 	this->Init(0, seq->SeqLen, vPos, vState);
@@ -1586,8 +1592,6 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 
 	vPos.clear();
 	vState.clear();
-
-	//this->Print();
 }
 
 // ------------------------
@@ -3245,6 +3249,18 @@ std::vector<int> Prediction :: Eval ( Prediction * ref, int offset, bool onlyCod
 bool Gene :: Overlap ( const Gene& g )
 {
 	return ( ( this->cdsStart <= g.cdsEnd ) && ( this->cdsEnd >= g.cdsStart ) );
+}
+
+// ------------------------
+//  Return the percentage of the gene which overlaps g
+// ------------------------
+float Gene :: GetOverlapWith ( const Gene& g) 
+{
+    int overlapLength = Min(g.trEnd, this->trEnd) - Max(g.trStart, this->trStart);
+    float length = this->trEnd - this->trStart + 1;
+    float overlapPercentage = overlapLength/length*100;
+    
+    return overlapPercentage;
 }
 
 // ------------------------
