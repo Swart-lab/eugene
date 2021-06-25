@@ -755,7 +755,8 @@ int main  (int argc, char * argv [])
                 time(&t5); // end of AltEst build
                 std::vector <Prediction*> vPred;
                 
-                if (true) 
+                // Solution 2: One DAG (better solution but memory problem not already solved)
+                if (false) 
                 {
                     //vPred= AllAltPredict2 (TheSeq, fromPos, toPos, MS, AltEstDB, pred);
                     int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
@@ -853,35 +854,29 @@ int main  (int argc, char * argv [])
                 }
                 else 
                 {
-                    time_t depart, arrivee;
-                    time(&depart);
                     int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
                     int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
                 
-                    int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
-                
                     Prediction*               AltPred;
-                    Gene*                     baseGene;
+                    Gene*                     uncompatibleGene;
+                    int localFrom,localTo, altLocalFrom,altLocalTo ;
+                                            
                     for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                     {
                         if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
-                        int localFrom,localTo;
-                        if (debugAltest && altidx%10000 == 0)
-                        {
-                        if (altidx > 0) 
-                        {
-                            time(&arrivee);
-                            double diff = difftime(arrivee, depart);
-                            fprintf(stderr, "[ALT EST] Time to perform 10000 AltPredict (index=%d) %.f seconds (%d minutes)\n", altidx, diff, int(diff/60));
-                            
-                        }
-                        time(&depart);
                         
-                        }
-                    
-                        localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
-                        localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
-
+                        // Look for an overlapping with an inconsistent gene
+                        uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
+                        // skip because not reference gene found
+                        if (uncompatibleGene == NULL) continue;
+                        
+                        // largest positions between altEst hit ones and gene ones
+                        altLocalFrom = Min(uncompatibleGene->trStart, AltEstDB->voae_AltEst[altidx].GetStart());
+                        altLocalTo   = Max(uncompatibleGene->trEnd,   AltEstDB->voae_AltEst[altidx].GetEnd());
+                        // positions with a margin
+                        localFrom = Max(fromPos, altLocalFrom - RepredictMargin);
+                        localTo   = Min(toPos,   altLocalTo + RepredictMargin);
+                        
                         AltPred = AltPredict(TheSeq,localFrom,localTo,MS,AltEstDB,pred,altidx);
 
                         if (AltPred)
@@ -893,34 +888,26 @@ int main  (int argc, char * argv [])
                         }
                         // Delete the gene of the alt prediction which doesn't overlap the EST
                         AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
-                        // If genes overlapping the EST was found and if the prediction is original
-                        if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+                        
+                        // If genes overlapping the EST was found, if more than 80% of the variant overlaps the reference gene
+                        // and if the prediction is original
+                        if ( (AltPred->nbGene > 0) && (AltPred->vGene[0]->GetOverlapWith(*uncompatibleGene) >= MIN_PERCENTAGE_OVERLAP_ALTEST) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
                         {
                             fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
-                            baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
-                            if (baseGene)
-                            {
-                                baseGene->hasvariant++;
-                                AltPred->vGene[0]->isvariant = true;
-                                AltPred->vGene[0]->hasvariant = baseGene->hasvariant;
-                                AltPred->vGene[0]->geneNumber = baseGene->geneNumber;
-                                baseGene->tuStart = ( baseGene->tuStart ) ? Min(baseGene->tuStart,AltPred->vGene[0]->trStart)
-                                                    : Min(baseGene->trStart,AltPred->vGene[0]->trStart);
-                                baseGene->tuEnd   = ( baseGene->tuEnd )   ? Max(baseGene->tuEnd,AltPred->vGene[0]->trEnd)
-                                                    : Max(baseGene->trEnd,AltPred->vGene[0]->trEnd);
-                            }
-                            else
-                            {
-                                fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
-                                AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
-                            }
+                            uncompatibleGene->hasvariant++;
+                            AltPred->vGene[0]->isvariant = true;
+                            AltPred->vGene[0]->hasvariant = uncompatibleGene->hasvariant;
+                            AltPred->vGene[0]->geneNumber = uncompatibleGene->geneNumber;
+                            uncompatibleGene->tuStart = ( uncompatibleGene->tuStart ) ? Min(uncompatibleGene->tuStart,AltPred->vGene[0]->trStart)
+                                                    : Min(uncompatibleGene->trStart,AltPred->vGene[0]->trStart);
+                            uncompatibleGene->tuEnd   = ( uncompatibleGene->tuEnd )   ? Max(uncompatibleGene->tuEnd,AltPred->vGene[0]->trEnd)
+                                                    : Max(uncompatibleGene->trEnd,AltPred->vGene[0]->trEnd);
                             vPred.push_back(AltPred);
                         }
                         else delete AltPred;
                         }
                     }
                 }
-                
                 
                 time(&t6); // end of analyse of all altEst
                 
