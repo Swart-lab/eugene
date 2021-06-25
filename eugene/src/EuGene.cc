@@ -382,8 +382,6 @@ std::vector<Prediction*> AllAltPredict (DNASeq* TheSeq, int fromPos, int toPos, 
 std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos, MasterSensor* MSensor,
                         AltEst *AltEstDB, Prediction *pred)
 {
-    bool debug = 1;
-    
     int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
     int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
     int GCVerbose                = PAR.getI("EuGene.VerboseGC");
@@ -391,13 +389,11 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
     DATA  Data;
     int   Forward =  1;//PAR.getI("Sense");
     int   Dir = (Forward ? 1 : -1);
-    
-    
+//         
     int localFrom,localTo, altLocalFrom, altLocalTo;
     std::vector <Prediction*> vPred;
     Prediction*               AltPred;
-    Gene*                     baseGene;
-    int newGene = 0; // if a splice variant has no base gene, it is a "new" gene. counter needed for gene number
+    Gene*                     uncompatibleGene;
     
     // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
     InitActiveTracks(0);
@@ -411,43 +407,11 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
         if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
         
         // Look for an overlapping an inconsistent gene
-        Gene* uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
-        
-        // FOR DEBUGGING --> TOREMOVE
-        if (debug)
-        {
-            if ( (uncompatibleGene != NULL &&  AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) ||
-             (uncompatibleGene == NULL && !AltEstDB->voae_AltEst[altidx].CompatibleWith(pred))) 
-            {
-                fprintf (stdout, "INCOHERENCE:\n");
-                fprintf (stdout, "-AltEst %i - %i %c CompatibleWith : %i\n", AltEstDB->voae_AltEst[altidx].GetStart(), 
-                 AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand(), AltEstDB->voae_AltEst[altidx].CompatibleWith(pred));
-        
-            
-                if (uncompatibleGene != NULL) {
-                    uncompatibleGene->Print();
-                    fprintf (stdout, "-GetUncompatibleGene :\n");
-                }
-            }
-        }
-        // ENDFOR DEBUGGING
+        uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
         
         if (uncompatibleGene == NULL) continue;
         
-        
-        //fprintf (stdout, "New predition with the altEst %s %i - %i %c\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
-        //         AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
-        
-        
-        //if (AltEstDB->voae_AltEst[altidx].CompatibleWith(pred)) continue;
-        
-        // positions around the AltEst hit
-        /*
-        localFrom = Max(fromPos, AltEstDB->voae_AltEst[altidx].GetStart()-RepredictMargin);
-        localTo   = Min(toPos,   AltEstDB->voae_AltEst[altidx].GetEnd()+RepredictMargin);
-        */
         // largest positions between altEst hit ones and gene ones
-        
         altLocalFrom = Min(uncompatibleGene->trStart, AltEstDB->voae_AltEst[altidx].GetStart());
         altLocalTo   = Max(uncompatibleGene->trEnd,   AltEstDB->voae_AltEst[altidx].GetEnd());
         
@@ -488,28 +452,11 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
             // Delete the gene of the alt prediction which doesn't overlap the EST
             AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
             
-            // Delete 
-            // If genes overlapping the EST was found and if the prediction is original
-            if ( (AltPred->nbGene > 0) && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+            // If genes overlapping the EST was found, if more than 80% of the variant overlaps the reference gene
+            // and if the prediction is original
+            if ( (AltPred->nbGene > 0) && AltPred->vGene[0]->GetOverlapWith(*uncompatibleGene) >= 80 && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
             {
                 fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
-                // TODO :  A supprimer! Je le garde pour les tests de cohérence
-                baseGene = pred->FindGene(AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
-                
-                if (baseGene)
-                {
-                    if (debug && baseGene != uncompatibleGene)
-                    {
-                        fprintf (stdout, "Difficulty to get the good original gene for The altEst %s %i - %i %c:\n", AltEstDB->voae_AltEst[altidx].GetId(), AltEstDB->voae_AltEst[altidx].GetStart(), 
-                        AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
-                        fprintf(stdout, "-->Predict altGene: %i %i %c\n", AltPred->vGene[0]->trStart,AltPred->vGene[0]->trEnd, AltPred->vGene[0]->GetStrand());
-                        fprintf(stdout, "--> UncompatibleGene:\n");
-                        uncompatibleGene->Print();
-                        fprintf(stdout, "-->BaseGene:\n");
-                        baseGene->Print();
-                    }
-                }
-                    
                 uncompatibleGene->hasvariant++;
                 AltPred->vGene[0]->isvariant = true;
                 AltPred->vGene[0]->hasvariant = uncompatibleGene->hasvariant;
@@ -518,13 +465,6 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
                                         : Min(uncompatibleGene->trStart,AltPred->vGene[0]->trStart);
                 uncompatibleGene->tuEnd   = ( uncompatibleGene->tuEnd )   ? Max(uncompatibleGene->tuEnd,AltPred->vGene[0]->trEnd)
                                         : Max(uncompatibleGene->trEnd,AltPred->vGene[0]->trEnd);
-                                        
-                //}
-                //else
-                //{
-                //    fprintf(stderr,"New gene predicted by alternative spliced gene prediction.\n");
-                //    AltPred->vGene[0]->geneNumber = pred->nbGene + newGene++;
-                //}
                 vPred.push_back(AltPred);
             }
             else 
@@ -534,6 +474,7 @@ std::vector<Prediction*> AllAltPredict2 (DNASeq* TheSeq, int fromPos, int toPos,
         }
         Dag->Clean();
     }
+    delete Dag;
     return vPred;
 }
 
@@ -816,7 +757,99 @@ int main  (int argc, char * argv [])
                 
                 if (true) 
                 {
-                    vPred = AllAltPredict2 (TheSeq, fromPos, toPos, MS, AltEstDB, pred);
+                    //vPred= AllAltPredict2 (TheSeq, fromPos, toPos, MS, AltEstDB, pred);
+                    int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
+                    int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+                    int GCVerbose                = PAR.getI("EuGene.VerboseGC");
+                    int GCLatency                = PAR.getI("EuGene.GCLatency");
+                    DATA  Data;
+                    int   Forward =  1;//PAR.getI("Sense");
+                    int   Dir = (Forward ? 1 : -1);
+//         
+                    int localFrom,localTo, altLocalFrom, altLocalTo;
+                    Prediction*               AltPred;
+                    Gene*                     uncompatibleGene;
+    
+                    // Active the appropriated tracks according to the eugene mode Prokaryote or Eukaryote
+                    InitActiveTracks(0);
+                    // Create a dag which would be reinitialze for each altEst
+                    DAG* Dag = new DAG(TheSeq, PAR);
+                    Dag->LoadDistLength();
+    
+                    for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
+                    {   
+                        // Skip the altEst if needed
+                        if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
+        
+                        // Look for an overlapping an inconsistent gene
+                        uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
+        
+                        if (uncompatibleGene == NULL) continue;
+        
+                        // largest positions between altEst hit ones and gene ones
+                        altLocalFrom = Min(uncompatibleGene->trStart, AltEstDB->voae_AltEst[altidx].GetStart());
+                        altLocalTo   = Max(uncompatibleGene->trEnd,   AltEstDB->voae_AltEst[altidx].GetEnd());
+        
+                        // positions with a margin
+                        localFrom = Max(fromPos, altLocalFrom - RepredictMargin);
+                        localTo   = Min(toPos,   altLocalTo + RepredictMargin);
+                        // DynaProg end at the lastpos + 1 to account for final signals.
+                        int FirstNuc = (Forward ? localFrom : localTo+1);
+                        int LastNuc  = (Forward ? localTo+1 : localFrom);
+        
+                        Dag->Init(FirstNuc-Dir, LastNuc+Dir);
+                        Dag->WeightThePrior();
+        
+                        for (int nuc = FirstNuc; nuc != LastNuc+Dir; nuc += Dir)
+                        {
+                            // recuperation des infos
+                            MS->GetInfoAt(TheSeq, nuc, &Data);
+                            AltEstDB->Penalize(altidx,nuc,&Data);
+                            if (Forward)
+                                Dag->ShortestPathAlgoForward(nuc,Data);
+                            else
+                                Dag->ShortestPathAlgoBackward(nuc,Data);
+                            if (nuc && (nuc % GCLatency == 0)) Dag->MarkAndSweep(nuc,GCVerbose,GCLatency);
+                        }
+                        Dag->WeightThePrior();
+                        Dag->BuildPrediction(localFrom, localTo, Forward);
+                        Dag->pred->TrimAndUpdate(TheSeq);
+                        AltPred = Dag->pred;
+        
+                        if (AltPred)
+                        {   
+                            if ( (AltPred->vGene[0]->cdsStart == -1) || (AltPred->vGene[0]->cdsEnd == -1))
+                            {
+                                delete Dag->pred;
+                                Dag->Clean();
+                                continue;
+                            }
+                            // Delete the gene of the alt prediction which doesn't overlap the EST
+                            AltPred->DeleteOutOfRange(AltEstDB->voae_AltEst[altidx].GetStart(),AltEstDB->voae_AltEst[altidx].GetEnd(), AltEstDB->voae_AltEst[altidx].GetStrand());
+            
+                            // If genes overlapping the EST was found, if more than 80% of the variant overlaps the reference gene
+                            // and if the prediction is original
+                            if ( (AltPred->nbGene > 0) && AltPred->vGene[0]->GetOverlapWith(*uncompatibleGene) >= MIN_PERCENTAGE_OVERLAP_ALTEST && (AltPred->IsOriginal(pred,vPred,ExonBorderMatchThreshold)) )
+                            {
+                                fprintf(stderr,"Optimal path length = %.4f\n",- AltPred->optimalPath);
+                                uncompatibleGene->hasvariant++;
+                                AltPred->vGene[0]->isvariant = true;
+                                AltPred->vGene[0]->hasvariant = uncompatibleGene->hasvariant;
+                                AltPred->vGene[0]->geneNumber = uncompatibleGene->geneNumber;
+                                uncompatibleGene->tuStart = ( uncompatibleGene->tuStart ) ? Min(uncompatibleGene->tuStart,AltPred->vGene[0]->trStart)
+                                        : Min(uncompatibleGene->trStart,AltPred->vGene[0]->trStart);
+                                uncompatibleGene->tuEnd   = ( uncompatibleGene->tuEnd )   ? Max(uncompatibleGene->tuEnd,AltPred->vGene[0]->trEnd)
+                                        : Max(uncompatibleGene->trEnd,AltPred->vGene[0]->trEnd);
+                                vPred.push_back(AltPred);
+                            }
+                            else 
+                            {
+                                delete Dag->pred;
+                            }
+                        }
+                        Dag->Clean();
+                    }
+                    delete Dag;
                 }
                 else 
                 {
@@ -896,6 +929,11 @@ int main  (int argc, char * argv [])
                 {
                     vPred[idx]->Print(TheSeq, MS,NULL,1);
                 }
+                for (int idx = 0; idx < vPred.size(); idx++)
+                {
+                    delete (vPred[idx]);
+                }
+                
                 time(&t7); // end of print all the predictions
                 
                 if (debugAltest)
@@ -927,7 +965,8 @@ int main  (int argc, char * argv [])
             fflush(stdout);
         } // fin de traitement de chaque séquence....
 
-        fprintf(stderr,"-------------------------------------"	      "--------------------------------\n");
+        fprintf(stderr,"-------------------------------------"	      
+                        "--------------------------------\n");
 
         return  0;
     }
