@@ -804,8 +804,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
 	
     keptAltEstNumber = totalAltEstNumber;
-    int debug = 1;
-    int nbComparison = 0;
     int strandSpecific = PAR.getI("AltEst.strandSpecific");	
 
     if (compatibleEstFilter || includedEstFilter)
@@ -821,10 +819,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                 // all the next Est have a higher position  than the current one
                 if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
                 if (voae_AltEst[j].IsToRemove()) continue;
-                /*if (debug) {
-                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
-                    nbComparison++;
-                }*/
                 
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
@@ -847,19 +841,8 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                         }
                     }
                 }
-                /*if (debug) {
-                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d END", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
-                    
-                }*/
             }
         }
-        
-        /*if (debug)
-        {
-            fprintf(stderr,"\nNombre de comparaisons effectues : %d\n", nbComparison);
-            
-        }*/
-	
 
         if (compatibleEstFilter)
         {
