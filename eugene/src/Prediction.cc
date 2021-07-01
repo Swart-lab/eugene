@@ -1092,7 +1092,7 @@ void Prediction :: Init (int From, int To, const std::vector <int>& vPos,const s
 					vGene.push_back ( new Gene() );
 				}
 				else 
-					cerr << "Warning: case not catch !\n"; // EK: a voir
+					cerr << "Warning: case not catch !\n"; 
 			}
 			else if ( i == nb_feat-1 ) // The prediction stops in bicoding
 			{
@@ -1115,7 +1115,6 @@ void Prediction :: Init (int From, int To, const std::vector <int>& vPos,const s
 			{
 				// create a new gene, save it in the vector (to the position nbGene-2) 
 				// and put the gene in building to the position nbGene-1
-				// EK : a checker!!!!!!!!!!!
 				nbGene++;
 				vGene.push_back ( vGene[nbGene-2] ); 
 				vGene[nbGene-2] = new Gene();
@@ -3365,7 +3364,6 @@ std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end)
 		Feature* predExon; // first predicted exon
 
 		// Compute the number of predicted coding nt (PredNtNb)
-		// A Ameliorer!!! EK
 		for ( int i = 0; i < PredExonNb; i++ )
 		{
 			predExon = vPredExons[i];
