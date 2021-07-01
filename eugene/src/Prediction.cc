@@ -1867,7 +1867,7 @@ void Prediction :: DeleteOutOfRange ( int s,int e, char strand )
 // --------------------------
 //  print prediction (master)
 // --------------------------
-void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const char append )
+void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const char append, const char variant )
 {
 
 	MS = ms;
@@ -1906,7 +1906,9 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 		for ( int i=0; i<strlen ( outputFormat ); i++ )
 		{
 			char filename[FILENAME_MAX];
-			strcpy ( filename,PAR.getC ( "prefixName" ) );
+			strcpy ( filename, PAR.getC ( "prefixName" ) );
+            if ( variant ) strcat ( filename, ".variants" );
+            
 			switch ( outputFormat[i] )
 			{
 				case 'a':
@@ -1925,6 +1927,7 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 					fclose ( OUT );
 					{
 						std::string filename_gff3 ( PAR.getC ( "prefixName" ) );
+                        if ( variant ) filename_gff3 += ".variants";
 						filename_gff3 += ".gff3";
 						std::ofstream out ( filename_gff3.c_str(),ccmode );
 						//  , std::ios_base::binary);

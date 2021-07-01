@@ -219,7 +219,7 @@ class Prediction
   void  TrimAndUpdate (DNASeq*);
   void  SanityCheck();
   void  DeleteOutOfRange(int s,int e, char strand);
-  void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0);
+  void  Print         (DNASeq*, MasterSensor*, FILE *OTP_OUT=NULL, char append = 0, char variant = 0);
   void  PrintGeneInfo (FILE*);
   void  PlotPred      ();
   State* GetStateAtPos(int); 
