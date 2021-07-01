@@ -4,7 +4,9 @@ Copyright (C) 2020, EuGene Team <eugene-help@groupes.renater.fr>
 See the end for copying conditions.
 
 Please send eugene bug reports to eugene-help@groupes.renater.fr
-Version 4.2c
+
+
+Version 4.3
 
 * Improve performance of splicing variant prediction
 * Allow to predict only variant from a reference annotation
@@ -48,7 +50,7 @@ Version 2.0
 -------------------------------------------------------
 Copying information:
 
-Copyright (C) 2011, EuGene Team <eugene-help@lists.mulcyber.toulouse.inra.fr>
+Copyright (C) 2011, EuGene Team <eugene-help@groupes.renater.fr>
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the
