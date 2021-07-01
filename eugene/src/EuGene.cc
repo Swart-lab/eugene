@@ -520,7 +520,8 @@ int main  (int argc, char * argv [])
             if (graph)
                 pred->PlotPred();
 
-            if ( ! PAR.getI("AltEst.use") )
+            // Print the prediction in the classical mode or in the AltEst mode (without ref prediction preloading)
+            if ( ! PAR.getI("AltEst.use") || (PAR.getI("AltEst.use") && PAR.count("AltEst.reference") <= 0 ))
                 pred->Print(TheSeq, MS);
 
             strcpy(miname, prefixName);
@@ -605,10 +606,11 @@ int main  (int argc, char * argv [])
                 
                 time(&t6); // end of analyse of all altEst
                 
-                pred->Print(TheSeq, MS);
+                // print the prediction and variants
+                pred->Print(TheSeq, MS, NULL, 0, 1);
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
-                    vPred[idx]->Print(TheSeq, MS,NULL,1);
+                    vPred[idx]->Print(TheSeq, MS,NULL,1, 1);
                 }
                 for (int idx = 0; idx < vPred.size(); idx++)
                 {
