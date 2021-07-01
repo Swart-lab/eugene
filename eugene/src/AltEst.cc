@@ -331,7 +331,7 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     return false;
 }
 
-Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
+Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
 {
     int idxf, idxe=0;
     Gene *g;
@@ -368,7 +368,8 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
             if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
                 (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
             {
-                if (! g->vFea[idxf]->IsTranscribedAndUnspliced() )
+                if (! g->vFea[idxf]->IsTranscribedAndUnspliced() && 
+                     ((g->vFea[idxf]->end-1) - vi_ExonStart[idxe]) >= margin)
                 {
                     UncompatibleGeneFound = true;
                     return g;
@@ -383,7 +384,7 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
         // test des frontieres suivantes
         while ((idxe < exonsNumber-1) && (idxf < nbFeature))
         {
-            if (!firstOk && (g->vFea[idxf]->start-1 == vi_ExonEnd[idxe]+1))
+            if (!firstOk && (abs ((vi_ExonEnd[idxe]+1) - (g->vFea[idxf]->start-1)) <= margin)) 
                 firstOk = true;
             if (!firstOk && ( ! g->vFea[idxf]->IsTranscribedAndUnspliced()) ) // IG or intron: broken
             {
@@ -392,7 +393,7 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
                 //return false;
             }
 
-            if (firstOk && (g->vFea[idxf]->end == vi_ExonStart[idxe+1]))
+            if (firstOk && (abs(vi_ExonStart[idxe+1] - g->vFea[idxf]->end) <= margin)) 
             {
                 if ( !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
                 {
@@ -418,7 +419,7 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred)
                 (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
             {
                 //return  (g->vFea[idxf]->IsTranscribedAndUnspliced());
-                if (!g->vFea[idxf]->IsTranscribedAndUnspliced())
+                if (!g->vFea[idxf]->IsTranscribedAndUnspliced() && ( vi_ExonEnd[idxe] - (g->vFea[idxf]->start-1)) >= margin )
                 {
                     return g;
                 }
