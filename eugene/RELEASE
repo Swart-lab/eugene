@@ -17,7 +17,7 @@ Procedure to create a new Eugene release.
 4) To check the new release is OK, compile and launch tests:
 	make clean
 	./reconf 
-	./configure
+	./configure --prefix=$EUGENEDIR
 	make
 	make check
 
