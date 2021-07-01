@@ -66,6 +66,7 @@ Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
 ##### Alternative splicing predictor control
 AltEst.use			0
+AltEst.IncompatibilityExonBorderMatchThreshold 20
 AltEst.ExonBorderMatchThreshold 0
 AltEst.Penalty			1000
 AltEst.includedEstFilter		1
@@ -81,7 +82,7 @@ AltEst.minEx				3
 AltEst.exonucleasicLength	10
 AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
-AltEst.strandSpecific	0 
+AltEst.strandSpecific	1 
 AltEst.verbose			0
 #AltEst.reference       /path/of/gff3/reference/annotation        
 AltEst.format  		GFF3
