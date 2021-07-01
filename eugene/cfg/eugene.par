@@ -1,7 +1,7 @@
 #################################################################
 ###################### GENERAL PARAMETERS #######################
 #################################################################
-EuGene.version		4.2c
+EuGene.version		4.3
 EuGene.organism		Arabidopsis
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0
@@ -66,13 +66,13 @@ Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
 ##### Alternative splicing predictor control
 AltEst.use			0
-AltEst.IncompatibilityExonBorderMatchThreshold 20
+AltEst.IncompatibilityExonBorderMatchThreshold 100
 AltEst.ExonBorderMatchThreshold 0
 AltEst.Penalty			1000
 AltEst.includedEstFilter		1
-AltEst.compatibleEstFilter	1
-AltEst.unsplicedEstFilter		1
-AltEst.extremeLengthFilter	1
+AltEst.compatibleEstFilter	0
+AltEst.unsplicedEstFilter		0
+AltEst.extremeLengthFilter	0
 AltEst.maxEstLength		10000
 AltEst.minEstLength		100
 AltEst.maxIn				10000
@@ -80,7 +80,7 @@ AltEst.minIn				40
 AltEst.maxEx				10000
 AltEst.minEx				3
 AltEst.exonucleasicLength	10
-AltEst.RepredictMargin		16000
+AltEst.RepredictMargin		1000
 AltEst.altEstDisplay		0
 AltEst.strandSpecific	1 
 AltEst.verbose			0
