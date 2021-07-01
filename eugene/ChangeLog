@@ -1,6 +1,6 @@
 
 -------------------------------------------------------------------------------
-v4.2c released May, 2021
+v4.3 released June, 2021
 -------------------------------------------------------------------------------
 
 Use -k flag or AltEst.Reference to load a reference annotation and predict splicing variants. Improve performance to perform variant prediction.
