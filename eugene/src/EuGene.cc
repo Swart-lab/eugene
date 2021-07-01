@@ -550,6 +550,7 @@ int main  (int argc, char * argv [])
                 std::vector <Prediction*> vPred;
                 int ExonBorderMatchThreshold = PAR.getI("AltEst.ExonBorderMatchThreshold");
                 int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
+                int ExonBorderMatchThreshold2 = PAR.getI("AltEst.IncompatibilityExonBorderMatchThreshold");
                 
                 Prediction*               AltPred;
                 Gene*                     uncompatibleGene;
@@ -560,7 +561,7 @@ int main  (int argc, char * argv [])
                     if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
                     
                     // Look for an overlapping with an inconsistent gene
-                    uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred);
+                    uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred, ExonBorderMatchThreshold2);
                     // skip if not reference gene found
                     if (uncompatibleGene == NULL) continue;
                         
