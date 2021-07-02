@@ -1304,7 +1304,6 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 			{
 				continue;
 			}
-			//cout << "voila : " << (*it)->getLocus()->getStart()<< "\n";
 
 			// E.Intr ou E.Term => Add an intron
 			if ( idSo=="SO:0000316" && (ontology_term=="SO:0000004" || ontology_term=="SO:0000197"))
@@ -1379,7 +1378,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				vPos.push_back  ( end      );
 				vState.push_back( IntrF1+k   );
 			}
-			else if (idSo=="SO:0000655")  { // ncRNA
+			else if (idSo=="SO:0000655" || idSo=="SO:0000253" || idSo=="SO:0000252")  { // ncRNA/tRNA or rRNA
 				vPos.push_back  ( end      );
 				vState.push_back( RnaF   );
 			}
@@ -1420,7 +1419,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				idSo=tmp;
 			}
 
-			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655" && idSo != "SO:0000253" && idSo != "SO:0000252")
 			{
 				continue;
 			}
@@ -1506,7 +1505,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				vtmpState.push_back( IntrR1+k );
 				intron_end_pos = start-1; //  to add an intron on next step
 			}
-			else if (idSo=="SO:0000655")  { // ncRNA
+			else if (idSo=="SO:0000655" || idSo=="SO:0000253" || idSo=="SO:0000252")  { // ncRNA or tRNA or rRNA
 				vtmpPos.push_back  ( end      );
 				vtmpState.push_back( RnaR   );
 			}
