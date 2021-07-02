@@ -1300,7 +1300,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				idSo=tmp;
 			}
 
-			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655"  && idSo != "SO:0000253" && idSo != "SO:0000252")
 			{
 				continue;
 			}
