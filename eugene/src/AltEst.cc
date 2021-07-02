@@ -337,8 +337,11 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
     Gene *g;
     bool VERBOSE = false;
 
-    bool UncompatibleGeneFound;
-    
+    if (VERBOSE)
+    {
+        fprintf(stdout, "Recherche un gène incompatible pour l'AltEst suivante :\n ") ;
+        this->Print();
+    }
     //locate overlapping gene
     if (PAR.getI("AltEst.strandSpecific"))
     	g = pred->FindGene(start,end, strand);
@@ -348,18 +351,12 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
     // no overlapping gene
     if (g == NULL) 
     {
-         if (VERBOSE) fprintf(stdout, "Pas de gène chevauchat l'altEst ! \n ") ;
-        UncompatibleGeneFound = false;
-        // return false;
+        if (VERBOSE) fprintf(stdout, "Pas de gène chevauchat l'altEst (1) ! \n ") ;
         return NULL;
     }
     else 
     {
-        if (VERBOSE) {
-            fprintf(stdout, "J'ai trouve un gene chevauchant l'altest! \n ");
-            g->Print();
-        }
-        // stugy g to be sure it is incompatible
+        // study g to be sure it is incompatible
         // check first exon start is in transcribed matured region
         int  nbFeature = g->nbFea();
 
@@ -369,9 +366,12 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
                 (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
             {
                 if (! g->vFea[idxf]->IsTranscribedAndUnspliced() && 
-                     ((g->vFea[idxf]->end-1) - vi_ExonStart[idxe]) >= margin)
+                     abs((g->vFea[idxf]->end-1) - vi_ExonStart[idxe]) >= margin)
                 {
-                    UncompatibleGeneFound = true;
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve : EST debute dans intron ! \n ") ;
+                        g->Print(); 
+                    }
                     return g;
                 }
                 else break;
@@ -386,13 +386,27 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
         {
             if (!firstOk && (abs ((vi_ExonEnd[idxe]+1) - (g->vFea[idxf]->start-1)) <= margin)) 
                 firstOk = true;
+            // Test if the left border of an intron of the gen is incoherent with the EST
             if (!firstOk && ( ! g->vFea[idxf]->IsTranscribedAndUnspliced()) ) // IG or intron: broken
             {
-                UncompatibleGeneFound = true;
+                if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve: AltEst incoherente avec un intron du gene de reference (left position) ! \n ") ;
+                        g->Print(); 
+                    }
                 return g;
-                //return false;
             }
-
+            
+            // Test if the right border of an intron of the gene is incoehrent with the EST
+            if ( (abs(vi_ExonStart[idxe+1] - g->vFea[idxf]->end) > margin) && 
+                !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
+            {
+                if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve: AltEst incoherente avec un intron du gene de reference (right position) ! \n ") ;
+                        g->Print(); 
+                }
+                return g;
+            }
+            
             if (firstOk && (abs(vi_ExonStart[idxe+1] - g->vFea[idxf]->end) <= margin)) 
             {
                 if ( !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
@@ -401,12 +415,6 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
                     idxf++;
                     firstOk = false;
                     continue;
-                }
-                else
-                {
-                    UncompatibleGeneFound = true;
-                    return g;
-                    //return false;
                 }
             }
             idxf++;
@@ -419,12 +427,19 @@ Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
                 (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
             {
                 //return  (g->vFea[idxf]->IsTranscribedAndUnspliced());
-                if (!g->vFea[idxf]->IsTranscribedAndUnspliced() && ( vi_ExonEnd[idxe] - (g->vFea[idxf]->start-1)) >= margin )
+                if (!g->vFea[idxf]->IsTranscribedAndUnspliced() && abs( vi_ExonEnd[idxe] - (g->vFea[idxf]->start-1)) >= margin )
                 {
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve (4) ! \n ") ;
+                        g->Print(); 
+                    }
                     return g;
                 }
                 else 
                 {
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Pas de gene incompatible ! \n ") ;
+                    }
                     return NULL;
                 }
             }
