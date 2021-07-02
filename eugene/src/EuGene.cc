@@ -553,10 +553,12 @@ int main  (int argc, char * argv [])
                 int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
                 int ExonBorderMatchThreshold2 = PAR.getI("AltEst.IncompatibilityExonBorderMatchThreshold");
                 
+                printf ("ExonBorderMatchThreshold2 %i\n", ExonBorderMatchThreshold2);
                 Prediction*               AltPred;
                 Gene*                     uncompatibleGene;
                 int localFrom,localTo, altLocalFrom,altLocalTo ;
-                                            
+                int NumberLaunchedPred = 0;
+                                                            
                 for (int altidx = 0; altidx < AltEstDB->totalAltEstNumber; altidx++)
                 {
                     if (AltEstDB->voae_AltEst[altidx].IsToRemove()) continue;
@@ -565,6 +567,7 @@ int main  (int argc, char * argv [])
                     uncompatibleGene = AltEstDB->voae_AltEst[altidx].GetUncompatibleGene(pred, ExonBorderMatchThreshold2);
                     // skip if not reference gene found
                     if (uncompatibleGene == NULL) continue;
+                    NumberLaunchedPred++;
                         
                     // largest positions between altEst hit ones and gene ones
                     altLocalFrom = Min(uncompatibleGene->trStart, AltEstDB->voae_AltEst[altidx].GetStart());
@@ -629,6 +632,7 @@ int main  (int argc, char * argv [])
                     double part4= difftime(t5, t4);
                     fprintf(stderr, "[ALT EST] Duration of the AltEstDB building: %.f seconds (%d minutes)\n", part4, int (part4/60));
                     fprintf(stderr, "[ALT EST] Keep %d AltEst\n", AltEstDB->keptAltEstNumber);
+                    fprintf(stderr, "[ALT EST] NumberLaunchedPred %d\n", NumberLaunchedPred);
                     double part5= difftime(t6, t5);
                     fprintf(stderr, "[ALT EST] Duration of AltPredict:  %.f seconds (%d minutes)\n", part5, int(part5/60));
                     double part6= difftime(t7, t6);
