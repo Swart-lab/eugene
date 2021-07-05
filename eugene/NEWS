@@ -8,12 +8,14 @@ Please send eugene bug reports to eugene-help@groupes.renater.fr
 
 Version 4.3
 
+* If AltEst plugin is activate, EuGene creates two files: one for the initial prediction 
+  (.gff3) and one including the variant prediction (.variants.gff3)
+* The -k option (equivalent to AltEst.reference=1) allows to predict splicing variants 
+  from a reference annotation.
+* New parameter 'AltEst.IncompatibilityExonBorderMatchThreshold'. EuGene will perform a
+  variant search only for the AltEst where one of the exons shows at one of its borders
+  a difference of at least x nucleotides with a reference gene.
 * Improve performance of splicing variant prediction
-* Allow to predict only variant from a reference annotation with the -k option
-* If AltEst plugin is activate, create two files: one for the initial prediction and one for the variant prediction. (File with the suffix ".variants")
-* New parameter 'AltEst.IncompatibilityExonBorderMatchThreshold'. Only AltEst with an exon showing 
-...his is the margin used to select the AtEst for which an alternative prediction would be launched.
-  An EST is considered a potential variant if one of its exon show a difference with a length upper or equals to that value with a reference gene.
 
 Version 4.2b
 
