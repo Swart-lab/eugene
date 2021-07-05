@@ -2,6 +2,8 @@ Procedure to create a new Eugene release.
 
 0) Prerequise: 'EUGENEDIR' environment variable has to be defined.
 
+1) Describe the release news in ChangeLog file.
+
 
 1) To update the git eugene directory, move to $EUGENEDIR and
    type `git pull'.
@@ -15,12 +17,12 @@ Procedure to create a new Eugene release.
 4) To check the new release is OK, compile and launch tests:
 	make clean
 	./reconf 
-	./configure
+	./configure --prefix=$EUGENEDIR
 	make
 	make check
 
 5) Commit modified files:
-   	git commit cfg/eugene.par configure.ac Makefile.in
+   	git commit cfg/eugene.par configure.ac Makefile.in ChangeLog
    	git push
 
 6) Create the new release:
@@ -28,4 +30,4 @@ Procedure to create a new Eugene release.
 
 7) Type `make dist' to create a new tarball file in the 
    $EUGENEDIR directory, named for instance eugene-4.2b.tar.gz.
-    Put the tarball in the CVS repository. (Section 'Files')
+    Put the tarball in the Download section of eugene.toulouse.inrae.fr

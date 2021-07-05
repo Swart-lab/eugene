@@ -4,10 +4,18 @@ Copyright (C) 2020, EuGene Team <eugene-help@groupes.renater.fr>
 See the end for copying conditions.
 
 Please send eugene bug reports to eugene-help@groupes.renater.fr
-Version 4.2c
 
+
+Version 4.3
+
+* If AltEst plugin is activate, EuGene creates two files: one for the initial prediction 
+  (.gff3) and one including the variant prediction (.variants.gff3)
+* The -k option (equivalent to AltEst.reference=1) allows to predict splicing variants 
+  from a reference annotation.
+* New parameter 'AltEst.IncompatibilityExonBorderMatchThreshold'. EuGene will perform a
+  variant search only for the AltEst where one of the exons shows at one of its borders
+  a difference of at least x nucleotides with a reference gene.
 * Improve performance of splicing variant prediction
-* Allow to predict only variant from a reference annotation
 
 Version 4.2b
 
@@ -48,7 +56,7 @@ Version 2.0
 -------------------------------------------------------
 Copying information:
 
-Copyright (C) 2011, EuGene Team <eugene-help@lists.mulcyber.toulouse.inra.fr>
+Copyright (C) 2011, EuGene Team <eugene-help@groupes.renater.fr>
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the

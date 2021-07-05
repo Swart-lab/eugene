@@ -331,6 +331,129 @@ bool OneAltEst :: CompatibleWith(Prediction *pred)
     return false;
 }
 
+Gene* OneAltEst :: GetUncompatibleGene(Prediction *pred, int margin)
+{
+    int idxf, idxe=0;
+    Gene *g;
+    bool VERBOSE = false;
+
+    if (VERBOSE)
+    {
+        fprintf(stdout, "Recherche un gène incompatible pour l'AltEst suivante :\n ") ;
+        this->Print();
+    }
+    //locate overlapping gene
+    if (PAR.getI("AltEst.strandSpecific"))
+    	g = pred->FindGene(start,end, strand);
+    else
+    	g = pred->FindGene(start,end);
+    
+    // no overlapping gene
+    if (g == NULL) 
+    {
+        if (VERBOSE) fprintf(stdout, "Pas de gène chevauchat l'altEst (1) ! \n ") ;
+        return NULL;
+    }
+    else 
+    {
+        // study g to be sure it is incompatible
+        // check first exon start is in transcribed matured region
+        int  nbFeature = g->nbFea();
+
+        for (idxf = 0; idxf < nbFeature; idxf++)
+        {
+            if ((g->vFea[idxf]->start-1 <= vi_ExonStart[idxe]) &&
+                (g->vFea[idxf]->end-1   >= vi_ExonStart[idxe]))
+            {
+                if (! g->vFea[idxf]->IsTranscribedAndUnspliced() && 
+                     abs((g->vFea[idxf]->end-1) - vi_ExonStart[idxe]) >= margin)
+                {
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve : EST debute dans intron ! \n ") ;
+                        g->Print(); 
+                    }
+                    return g;
+                }
+                else break;
+            }
+        }
+    
+
+        idxf++;
+        bool firstOk = false;
+        // test des frontieres suivantes
+        while ((idxe < exonsNumber-1) && (idxf < nbFeature))
+        {
+            if (!firstOk && (abs ((vi_ExonEnd[idxe]+1) - (g->vFea[idxf]->start-1)) <= margin)) 
+                firstOk = true;
+            // Test if the left border of an intron of the gen is incoherent with the EST
+            if (!firstOk && ( ! g->vFea[idxf]->IsTranscribedAndUnspliced()) ) // IG or intron: broken
+            {
+                if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve: AltEst incoherente avec un intron du gene de reference (left position) ! \n ") ;
+                        g->Print(); 
+                    }
+                return g;
+            }
+            
+            // Test if the right border of an intron of the gene is incoehrent with the EST
+            if ( (abs(vi_ExonStart[idxe+1] - g->vFea[idxf]->end) > margin) && 
+                !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
+            {
+                if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve: AltEst incoherente avec un intron du gene de reference (right position) ! \n ") ;
+                        g->Print(); 
+                }
+                return g;
+            }
+            
+            if (firstOk && (abs(vi_ExonStart[idxe+1] - g->vFea[idxf]->end) <= margin)) 
+            {
+                if ( !g->vFea[idxf]->IsTranscribedAndUnspliced() ) // IF or intron
+                {
+                    idxe++;
+                    idxf++;
+                    firstOk = false;
+                    continue;
+                }
+            }
+            idxf++;
+        }
+
+        // test de la fin
+        for (; idxf < nbFeature; idxf++)
+        {
+            if ((g->vFea[idxf]->start-1 <= vi_ExonEnd[idxe]) &&
+                (g->vFea[idxf]->end-1   >= vi_ExonEnd[idxe]))
+            {
+                //return  (g->vFea[idxf]->IsTranscribedAndUnspliced());
+                if (!g->vFea[idxf]->IsTranscribedAndUnspliced() && abs( vi_ExonEnd[idxe] - (g->vFea[idxf]->start-1)) >= margin )
+                {
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Gene incompatible trouve (4) ! \n ") ;
+                        g->Print(); 
+                    }
+                    return g;
+                }
+                else 
+                {
+                    if (VERBOSE) { 
+                        fprintf(stdout, "Pas de gene incompatible ! \n ") ;
+                    }
+                    return NULL;
+                }
+            }
+        }
+    }
+    
+    //return false;
+    if (VERBOSE) {
+        fprintf(stdout, "je suis a la fin. Je retourne le gene trouve..\n");
+    }
+    
+    return g;
+}
+
 // --------------------------------------
 //  Penalize according to the EST
 // --------------------------------------
@@ -697,8 +820,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
     // WARNING : voae_AltEst[0] is the special INIT (counted in totalAltEstNumber)
 	
     keptAltEstNumber = totalAltEstNumber;
-    int debug = 1;
-    int nbComparison = 0;
     int strandSpecific = PAR.getI("AltEst.strandSpecific");	
 
     if (compatibleEstFilter || includedEstFilter)
@@ -714,10 +835,6 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                 // all the next Est have a higher position  than the current one
                 if (voae_AltEst[j].GetStart() >  voae_AltEst[i].GetEnd()) break;
                 if (voae_AltEst[j].IsToRemove()) continue;
-                /*if (debug) {
-                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
-                    nbComparison++;
-                }*/
                 
                 if (voae_AltEst[i].IsInconsistentWith(&voae_AltEst[j]))
                 {
@@ -740,19 +857,8 @@ void AltEst :: Compare(int &nbIncomp, int &nbNoevidence, int &nbIncluded)
                         }
                     }
                 }
-                /*if (debug) {
-                    fprintf(stderr, "\n  COMP EST i %d - %d / EST j %d - %d END", voae_AltEst[i].GetStart(), voae_AltEst[i].GetEnd(), voae_AltEst[j].GetStart(), voae_AltEst[j].GetEnd());
-                    
-                }*/
             }
         }
-        
-        /*if (debug)
-        {
-            fprintf(stderr,"\nNombre de comparaisons effectues : %d\n", nbComparison);
-            
-        }*/
-	
 
         if (compatibleEstFilter)
         {

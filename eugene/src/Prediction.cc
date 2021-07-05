@@ -1092,7 +1092,7 @@ void Prediction :: Init (int From, int To, const std::vector <int>& vPos,const s
 					vGene.push_back ( new Gene() );
 				}
 				else 
-					cerr << "Warning: case not catch !\n"; // EK: a voir
+					cerr << "Warning: case not catch !\n"; 
 			}
 			else if ( i == nb_feat-1 ) // The prediction stops in bicoding
 			{
@@ -1115,7 +1115,6 @@ void Prediction :: Init (int From, int To, const std::vector <int>& vPos,const s
 			{
 				// create a new gene, save it in the vector (to the position nbGene-2) 
 				// and put the gene in building to the position nbGene-1
-				// EK : a checker!!!!!!!!!!!
 				nbGene++;
 				vGene.push_back ( vGene[nbGene-2] ); 
 				vGene[nbGene-2] = new Gene();
@@ -1301,11 +1300,10 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				idSo=tmp;
 			}
 
-			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655"  && idSo != "SO:0000253" && idSo != "SO:0000252")
 			{
 				continue;
 			}
-			//cout << "voila : " << (*it)->getLocus()->getStart()<< "\n";
 
 			// E.Intr ou E.Term => Add an intron
 			if ( idSo=="SO:0000316" && (ontology_term=="SO:0000004" || ontology_term=="SO:0000197"))
@@ -1380,7 +1378,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				vPos.push_back  ( end      );
 				vState.push_back( IntrF1+k   );
 			}
-			else if (idSo=="SO:0000655")  { // ncRNA
+			else if (idSo=="SO:0000655" || idSo=="SO:0000253" || idSo=="SO:0000252")  { // ncRNA/tRNA or rRNA
 				vPos.push_back  ( end      );
 				vState.push_back( RnaF   );
 			}
@@ -1421,7 +1419,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				idSo=tmp;
 			}
 
-			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655")
+			if ( idSo!="SO:0000316" && idSo!="SO:0000204" && idSo!="SO:0000205" && idSo !="SO:0000655" && idSo != "SO:0000253" && idSo != "SO:0000252")
 			{
 				continue;
 			}
@@ -1507,7 +1505,7 @@ void Prediction::LoadGene(std::vector <GeneFeature*>& vGeneFeatures, std::vector
 				vtmpState.push_back( IntrR1+k );
 				intron_end_pos = start-1; //  to add an intron on next step
 			}
-			else if (idSo=="SO:0000655")  { // ncRNA
+			else if (idSo=="SO:0000655" || idSo=="SO:0000253" || idSo=="SO:0000252")  { // ncRNA or tRNA or rRNA
 				vtmpPos.push_back  ( end      );
 				vtmpState.push_back( RnaR   );
 			}
@@ -1579,6 +1577,12 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 			}
 		}
 		fclose ( fp );
+        
+        if (vGeneFeatures.size() > 0)
+        {
+            this->LoadGene(vGeneFeatures, vPos, vState, seq);
+			vGeneFeatures.clear();
+        }
 	}
 
 	this->Init(0, seq->SeqLen, vPos, vState);
@@ -1586,8 +1590,6 @@ Prediction::Prediction(char name[FILENAME_MAX+1], DNASeq* seq)
 
 	vPos.clear();
 	vState.clear();
-
-	//this->Print();
 }
 
 // ------------------------
@@ -1864,7 +1866,7 @@ void Prediction :: DeleteOutOfRange ( int s,int e, char strand )
 // --------------------------
 //  print prediction (master)
 // --------------------------
-void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const char append )
+void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const char append, const char variant )
 {
 
 	MS = ms;
@@ -1903,7 +1905,9 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 		for ( int i=0; i<strlen ( outputFormat ); i++ )
 		{
 			char filename[FILENAME_MAX];
-			strcpy ( filename,PAR.getC ( "prefixName" ) );
+			strcpy ( filename, PAR.getC ( "prefixName" ) );
+            if ( variant ) strcat ( filename, ".variants" );
+            
 			switch ( outputFormat[i] )
 			{
 				case 'a':
@@ -1922,6 +1926,7 @@ void Prediction :: Print ( DNASeq* x, MasterSensor *ms, FILE *OPTIM_OUT, const c
 					fclose ( OUT );
 					{
 						std::string filename_gff3 ( PAR.getC ( "prefixName" ) );
+                        if ( variant ) filename_gff3 += ".variants";
 						filename_gff3 += ".gff3";
 						std::ofstream out ( filename_gff3.c_str(),ccmode );
 						//  , std::ios_base::binary);
@@ -2867,7 +2872,10 @@ Gene *Prediction :: FindGene ( int start, int end, const char strand )
 		if ( ( right - left ) > overlap )
 		{
 			idx = i;
-			overlap = right-end;
+			// bug!!!
+			// overlap = right-end;
+			overlap = right - left;
+            
 		}
 	}
 	if ( idx == -1 ) return NULL;
@@ -3245,6 +3253,18 @@ bool Gene :: Overlap ( const Gene& g )
 }
 
 // ------------------------
+//  Return the percentage of the gene which overlaps g
+// ------------------------
+float Gene :: GetOverlapWith ( const Gene& g) 
+{
+    int overlapLength = Min(g.trEnd, this->trEnd) - Max(g.trStart, this->trStart);
+    float length = this->trEnd - this->trStart + 1;
+    float overlapPercentage = overlapLength/length*100;
+    
+    return overlapPercentage;
+}
+
+// ------------------------
 // Eval the predicted genes in comparaison with the reference genes
 // If onlycodingGene is true, ignore ncrna prediction in the comparison
 // Return a vector of 3 int:
@@ -3346,7 +3366,6 @@ std::vector<int>  Prediction :: EvalExon ( Prediction * ref, int start, int end)
 		Feature* predExon; // first predicted exon
 
 		// Compute the number of predicted coding nt (PredNtNb)
-		// A Ameliorer!!! EK
 		for ( int i = 0; i < PredExonNb; i++ )
 		{
 			predExon = vPredExons[i];

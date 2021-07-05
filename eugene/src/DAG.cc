@@ -156,11 +156,11 @@ DAG :: ~DAG ()
 
 // ----------------------------------------------------------------
 //  Clean the activeTracks
-//  NOT USED
 // ----------------------------------------------------------------
 void DAG :: Clean() 
 {
     pred = NULL;
+    
     for  (int i = 0;  i < activeTracks.size();  i ++) LBP[activeTracks[i]].Clean();
     DAG::NormalizingPath = 0.0;
 }

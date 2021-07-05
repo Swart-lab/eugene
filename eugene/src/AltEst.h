@@ -64,6 +64,7 @@ class OneAltEst
 			  int  minEstLen, int  maxEstLen);
   bool IsInconsistentWith(OneAltEst*);
   bool CompatibleWith(Prediction *pred);
+  Gene* GetUncompatibleGene(Prediction *pred, int margin=0);
   void Print           ();
   inline void  UpdateBoundaries() { start = vi_ExonStart[0]; end = vi_ExonEnd[vi_ExonEnd.size()-1]; };
   inline char* GetId()            { return id;  };

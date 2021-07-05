@@ -1,9 +1,15 @@
 
 -------------------------------------------------------------------------------
-v4.2c released May, 2021
+v4.3 released July, 2021
 -------------------------------------------------------------------------------
 
-Use -k flag or AltEst.Reference to load a reference annotation and predict splicing variants. Improve performance to perform variant prediction.
+ - Use -k flag or AltEst.Reference to load a reference annotation and predict the splicing variants. 
+ - Improve performance to perform the variant prediction.
+ - In the AltEst plugin, add the parameter 'AltEst.IncompatibilityExonBorderMatchThreshold'. EuGene will perform a 
+   variant search only for the AltEst where one of the exons shows at one of its borders a difference of at least 
+   x nucleotides with a reference gene.
+ - If AltEst is activated, create two files: one for the initial prediction (.gff3) and one also including the variants
+   (.variants.gff3)
 
 -------------------------------------------------------------------------------
 v4.2b released Sep. 2020

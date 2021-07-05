@@ -81,9 +81,9 @@ void BackPoint :: Clean  ()
     StartPos = 0;
     Cost = 0.0;
     Additional = 0.0;
-    delete Next;
-    delete Prev;
-    delete Origin;
+    //if (Next != NULL) delete Next;
+    //if (Prev != NULL) delete Prev;
+    //if (Prev != NULL) delete Origin;
     Next = Prev = this;
     Origin = NULL;
     Status = 0;
@@ -151,6 +151,7 @@ void Track :: Zap()
 // ----------------------------------------------------------------
 void Track :: Clean()
 {
+    Zap();
     Path.Clean();
     Optimal = 0.0;
     OptPos  = 0;
@@ -210,8 +211,9 @@ void Track :: Mark(int pos)
 void Track :: Sweep(int pos) {
 
   BackPoint *It = Path.Next;
-
+  BackPoint *NextIt;
   while ( (It != &Path)){// && (It->StartPos >= pos)) {
+    NextIt = It->Next;
     if (!It->IsMarked()) {
       It->Next->Additional += It->Additional;
       It->Next->Prev = It->Prev;
@@ -219,8 +221,7 @@ void Track :: Sweep(int pos) {
       delete It;
       NumBPCollect++;
     }
-
-    It = It->Next;
+    It = NextIt;
   }
 }
 // ----------------------------------------------------------------

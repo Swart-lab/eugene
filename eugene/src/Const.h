@@ -41,6 +41,7 @@ const int FASTA_Len = 50;
 const int MAX_LINE  = 300;
 const int MAX_GFF_LINE  = 2048;
 const double NINFINITY   = log(0.0);
+const int MIN_PERCENTAGE_OVERLAP_ALTEST = 80;
 
 // Les Hits EST
 const unsigned char HitForward    = 0x1; // 00000001
