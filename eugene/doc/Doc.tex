@@ -577,49 +577,69 @@ are automatically consider as members of the same operon.
 \section{Splice variant prediction}
 
 Since version 3.4, \EuGene\ allows to predict splice variants based purely on
-experimental data (alternative transcripts observed through EST or RNAseq data). 
-The feature is still experimental and is activated using the \texttt{-a} flag or 
+experimental data (alternative transcripts observed through EST, RNAseq or IsoSeq data). 
+The feature is activated using the \texttt{-a} flag or 
 equivalently by setting the parameter \texttt{AltEst.use} to 1 or 
 TRUE.\index{CmdFlags}{[splice isoform prediction] a}
+
 
 In this case, \EuGene\ will look for a file with the same name as the sequence
 file and with a suffix '\texttt{.alt.est}'. This file has the same format as
 the '\texttt{.est}' used by the Est pugin (see later) and contains information
-about genomic region with high quality similarity with EST. GFF3 format is 
-allowed, by setting \texttt{AltEst.format} value to GFF3. The spliced 
-alignment algorithm used to create this file should be of high quality, 
-with clear exon-intron frontiers associated with splice sites (use for example
-GeneSeqer or faster GenomeThreader).
+about genomic region with high quality similarity with EST. GFF3 format is
+allowed, by setting \texttt{AltEst.format} value to GFF3. The spliced
+alignment algorithm used to create this file should be of high quality,
+with clear exon-intron frontiers associated with splice sites.
 
-\EuGene\ will analyze these EST and look for pairs of EST which are inconsistent
-one with the other (there is one nucleotide mapped to an exon by one which is 
-mapped to an intron/gap by the other). Each element of such a pair will be used 
-to try to produce a prediction that follows the EST structure. If the prediction
-is different from the optimal prediction, the gene variant structure will be
-also output.
+Eugene only analyzes the EST alignments showing an inconsistency with a gene from the original prediction.
+That is to say the alignments where one of the exons shows at one of its borders a difference of
+at least \texttt{AltEst.IncompatibilityExonBorderMatchThreshold} nucleotides with an original gene.
 
-This feature is controlled by a number of parameters with the '\texttt{AltEst}'
-prefix in the parameter file. The only parameters that you could change are the
-parameters regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength}, 
-\texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn}, 
-\texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves
+\EuGene\ will analyze the kept EST and try to produce a prediction that follows the EST structure.
+This prediction is performed in the region around the EST overlapping gene (+/- \texttt{AltEst.RepredictMargin} nucleotides).
+If the prediction is different from the optimal prediction (that is where one of its exons shows 
+at one of its borders a difference of at least \texttt{AltEst.ExonBorderMatchThreshold} nucleotides
+with an original gene), the gene variant structure will be also output. 
+Two files are created: one for the initial prediction (.gff3) and one also including
+the variants (.variants.gff3)
+
+This feature is controlled by a number of other parameters with the '\texttt{AltEst}' prefix in the parameter file. 
+The parameters that you could change are the
+parameters regarding length thresholds, used for filtering (\texttt{AltEst.maxEstLength},
+\texttt{AltEst.minEstLength}, \texttt{AltEst.maxIn}, \texttt{AltEst.minIn},
+\texttt{AltEst.maxEx} and \texttt{AltEst.minEx} which speak for themselves. 
+These filters are applied if AltEst.extremeLengthFilter is activated.
+
 If the ESTs are oriented, you can activate the parameter \texttt{AltEst.strandSpecific} to take into account the strand.
 
+If \texttt{AltEst.includedEstFilter} is activated, \EuGene\ will remove the EST alignments
+included in another. (Recommended use)
+
+If \texttt{AltEst.compatibleEstFilter} is activated, \EuGene\ will look for pairs of EST
+which are inconsistent one with the other (there is one nucleotide mapped to an exon by one which is
+mapped to an intron/gap by the other). Only EST of such a pair will be analyzed.
+
+If \texttt{AltEst.unsplicedEstFilter} is activated, \EuGene\ will remove the unspliced EST alignments.
+
+
 Every alignment is also "trimmed" by an amount of \texttt{AltEst.exonucleasicLength} 
-on the first and last hit to account for possible spurious short matches. 
+on the first and last hit to account for possible spurious short matches.
 If these hits are shorter than this amount, they are removed from the available data.
 
-Using the sequence \texttt{At5g18830.fasta.genomicAJ011613.fasta} and
-the associated information found in the \texttt{doc/Sequences/}
-directory, we can test this as follows:
+\texttt{AltEst.Penalty} is the penalty applied to each region incompatible with the EST alignment.
 
-\begin{Verbatim}[fontsize=\scriptsize]
-EXECUTION_TRACE6
-\end{Verbatim}
 
-We can see that two predictions are produced for the same region. In
-this case, it is just one alternative splice site that has been used
-for the exon number 8 in the gene.
+\section{Splice variant prediction from a reference annotation}
+
+Since version 4.3, \EuGene\ allows to predict variants from a reference annotation. Only splice variants of the 
+reference genes would be predicted. 
+
+The expected format is GFF3 similar to the output of 
+the egnep annotation pipeline. Note it only works if the egnep annotation was performed with \texttt{independent\_strand\_annotation}=0. 
+
+To load the reference annotation, fill in the GFF3 file using the \texttt{-k} parameter or equivalently by setting the parameter 
+\texttt{AltEst.reference}. EuGene works as described in the section above and only the '.variants.gff3' file is created.
+
 
 \section{Plugins}
 \label{plug}

@@ -40,9 +40,9 @@ set Flag(2) EXECUTION_TRACE2; set Cmd_begin(2) ""; set Cmd(2) "$EUGENE -s -po -d
 set Flag(3) EXECUTION_TRACE3; set Cmd_begin(3) ""; set Cmd(3) "$EUGENE -s -po -d -E $SEQ"
 set Flag(4) EXECUTION_TRACE4; set Cmd_begin(4) ""; set Cmd(4) "$EUGENE -s -po -d -b012 -B $SEQ"
 set Flag(5) EXECUTION_TRACE5; set Cmd_begin(5) ""; set Cmd(5) "$EUGENE -P -pog -b01 $SEQPROK"
-set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) ""; set Cmd(6) "$EUGENE -s -a -po $SEQALT"
+#set Flag(6) EXECUTION_TRACE6; set Cmd_begin(6) ""; set Cmd(6) "$EUGENE -s -a -po $SEQALT"
 
-set nbflags 6
+set nbflags 5
 #===========================================================================
 
 
@@ -96,7 +96,6 @@ close $f
 # clean directory (beware except image .png)
 exec rm  $FIC_TMP
 exec rm  SYNO_ARATH.misc_info
-exec rm At5g18830.fasta.genomicAJ011613.misc_info
 exec rm SMc.1541000-1552500.misc_info
 # ask for compilation
 exec pdflatex -interaction=nonstopmode $FIC_TEX_TMP.tex
