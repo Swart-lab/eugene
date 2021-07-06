@@ -383,7 +383,7 @@ int main  (int argc, char * argv [])
     char       grname[FILENAME_MAX+1];
     char       miname[FILENAME_MAX+1];
     int        graph;
-    bool       debugAltest = true;
+    bool       debugAltest = false;
 
     fprintf(stderr,"-------------------------------------"
             "--------------------------------\n");
@@ -553,7 +553,6 @@ int main  (int argc, char * argv [])
                 int RepredictMargin          = PAR.getI("AltEst.RepredictMargin");
                 int ExonBorderMatchThreshold2 = PAR.getI("AltEst.IncompatibilityExonBorderMatchThreshold");
                 
-                printf ("ExonBorderMatchThreshold2 %i\n", ExonBorderMatchThreshold2);
                 Prediction*               AltPred;
                 Gene*                     uncompatibleGene;
                 int localFrom,localTo, altLocalFrom,altLocalTo ;
