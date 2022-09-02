@@ -1289,15 +1289,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
      PICOMPEN(true,Don,RStrand,IntronR2GG,(beginSpliceStopR2(StartStop,IntronR2GG, TheSeq) ? SplicedStopPen : 0.0));
    }
     
+   
     // frameshifts
     PICOMP((FrameR ==  k     ), Del1, RStrand, InitR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
     PICOMP((FrameR == (k+1)%3), Del2, RStrand, InitR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
     PICOMP((FrameR == (k+2)%3), Del3, RStrand, InitR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
-    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, InitR1+(k+1)%3); // insertion before the 1st nucl of a codon
-    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, InitR1+(k+1)%3); // insertion before the 2nd nucl of a codon
-    PICOMP((FrameR ==  k     ), Ins3, RStrand, InitR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins1, RStrand, InitR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins2, RStrand, InitR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins3, RStrand, InitR1+(k+1)%3); // insertion before the 3rd nucl of a codon
 
-    
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
     if ((FrameR % 3 == k)) 
@@ -1378,13 +1378,15 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
     PICOMP((FrameR == k),Stop,RStrand,UTR3R);
 
+
     // frameshifts
     PICOMP((FrameR ==  k     ), Del1, RStrand, SnglR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
     PICOMP((FrameR == (k+1)%3), Del2, RStrand, SnglR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
     PICOMP((FrameR == (k+2)%3), Del3, RStrand, SnglR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
-    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, SnglR1+(k+1)%3); // insertion before the 1st nucl of a codon
-    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, SnglR1+(k+1)%3); // insertion before the 2nd nucl of a codon
-    PICOMP((FrameR ==  k     ), Ins3, RStrand, SnglR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins1, RStrand, SnglR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins2, RStrand, SnglR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins3, RStrand, SnglR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+
 
     // ----------------------------- Prokaryote ---------------------------------------------
     // Stop en phase : on peut venir d'un UIRR
@@ -1491,14 +1493,16 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
      PICOMPEN(true,Don,RStrand,IntronR2CA,(beginSpliceStopR2(StartStop,IntronR2CA, TheSeq) ? SplicedStopPen : 0.0));
      PICOMPEN(true,Don,RStrand,IntronR2GG,(beginSpliceStopR2(StartStop,IntronR2GG, TheSeq) ? SplicedStopPen : 0.0));
    }
-    
+   
+
     // frameshifts
     PICOMP((FrameR ==  k     ), Del1, RStrand, IntrR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
     PICOMP((FrameR == (k+1)%3), Del2, RStrand, IntrR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
     PICOMP((FrameR == (k+2)%3), Del3, RStrand, IntrR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
-    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, IntrR1+(k+1)%3); // insertion before the 1st nucl of a codon
-    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, IntrR1+(k+1)%3); // insertion before the 2nd nucl of a codon
-    PICOMP((FrameR ==  k     ), Ins3, RStrand, IntrR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins1, RStrand, IntrR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins2, RStrand, IntrR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins3, RStrand, IntrR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+ 
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
@@ -1554,14 +1558,16 @@ inline void DAG::ComputeSigShifts(enum Signal::Edge Strand, DATA Data, int posit
     
     // On commence a coder (Stop). Ca vient d'une UTR 3' reverse
     PICOMP((FrameR == k),Stop,RStrand,UTR3R);
-    
+   
+
     // frameshifts
     PICOMP((FrameR ==  k     ), Del1, RStrand, TermR1+(k+2)%3); // deletion which remove the 1st nucl of a codon
     PICOMP((FrameR == (k+1)%3), Del2, RStrand, TermR1+(k+2)%3); // deletion which remove the 2nd nucl of a codon
     PICOMP((FrameR == (k+2)%3), Del3, RStrand, TermR1+(k+2)%3); // deletion which remove the 3rd nucl of a codon
-    PICOMP((FrameR == (k+1)%3), Ins1, RStrand, TermR1+(k+1)%3); // insertion before the 1st nucl of a codon
-    PICOMP((FrameR == (k+2)%3), Ins2, RStrand, TermR1+(k+1)%3); // insertion before the 2nd nucl of a codon
-    PICOMP((FrameR ==  k     ), Ins3, RStrand, TermR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+    PICOMP((FrameR ==  k     ), Ins1, RStrand, TermR1+(k+1)%3); // insertion before the 1st nucl of a codon
+    PICOMP((FrameR == (k+1)%3), Ins2, RStrand, TermR1+(k+1)%3); // insertion before the 2nd nucl of a codon
+    PICOMP((FrameR == (k+2)%3), Ins3, RStrand, TermR1+(k+1)%3); // insertion before the 3rd nucl of a codon
+ 
     
     // On va tout droit.
     // S'il y  a un STOP en phase on ne peut continuer
