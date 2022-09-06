@@ -4,6 +4,8 @@
 This version of EuGene was forked from the [source repository](https://github.com/tschiex/eugene). 
 It includes small fixes to correct frameshift gene prediction.
 
+## Licensing
+
 This software is OSI Certified  Open Source Software. OSI Certified is
 a  certification  mark  of  the  Open Source  Initiative.   eugene  is
 governed by the ARTISTIC  LICENSE (see www.opensource.org). Please see
