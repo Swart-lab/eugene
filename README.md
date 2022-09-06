@@ -1,5 +1,8 @@
-# Welcome to eugene
+# Welcome to EuGene
 ## An integrative gene finder for eukaryotic and prokaryotic genomes
+
+This version of EuGene was forked from the [source repository](https://github.com/tschiex/eugene). 
+It includes small fixes to correct frameshift gene prediction.
 
 This software is OSI Certified  Open Source Software. OSI Certified is
 a  certification  mark  of  the  Open Source  Initiative.   eugene  is
@@ -11,4 +14,4 @@ see the RELEASE file.
 
 ## For more information
 
-Visit eugene's web site at [INRAE](http://eugene.toulouse.inrae.fr).
+Visit EuGene's web site at [INRAE](http://eugene.toulouse.inrae.fr).
