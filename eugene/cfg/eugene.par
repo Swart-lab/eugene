@@ -2,7 +2,7 @@
 ###################### GENERAL PARAMETERS #######################
 #################################################################
 EuGene.version		4.3
-EuGene.organism		Arabidopsis
+EuGene.organism		ECrassus	
 EuGene.mode		Eukaryote  # Eukaryote or Prokaryote
 EuGene.sloppy		0
 EuGene.VerboseGC	0
@@ -34,7 +34,7 @@ EuGene.BiCodingPrior    0.00
 EuGene.UIRPrior         0.00
 #
 ##### Codon table #####
-EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable
+EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable, adjusted to euplotes
 #EuGene.NonCanDon     GC
 #EuGene.NonCanAcc     AC
 #
@@ -66,13 +66,12 @@ Output.webdir		LOCAL # or URL: http://www.inra.fr/bia/T/EuGene/
 #
 ##### Alternative splicing predictor control
 AltEst.use			0
-AltEst.IncompatibilityExonBorderMatchThreshold 100
 AltEst.ExonBorderMatchThreshold 0
 AltEst.Penalty			1000
 AltEst.includedEstFilter		1
-AltEst.compatibleEstFilter	0
-AltEst.unsplicedEstFilter		0
-AltEst.extremeLengthFilter	0
+AltEst.compatibleEstFilter	1
+AltEst.unsplicedEstFilter		1
+AltEst.extremeLengthFilter	1
 AltEst.maxEstLength		10000
 AltEst.minEstLength		100
 AltEst.maxIn				10000
@@ -80,12 +79,11 @@ AltEst.minIn				40
 AltEst.maxEx				10000
 AltEst.minEx				3
 AltEst.exonucleasicLength	10
-AltEst.RepredictMargin		1000
+AltEst.RepredictMargin		16000
 AltEst.altEstDisplay		0
-AltEst.strandSpecific	1 
+AltEst.strandSpecific	0 
 AltEst.verbose			0
-#AltEst.reference       /path/of/gff3/reference/annotation        
-AltEst.format  		GFF3
+#AltEst.format  		GFF3
 #
 ##### Evaluation mode ######
 #Eval.offset   50
@@ -113,12 +111,12 @@ FrameShift.Ins*		1e999.0
 FrameShift.Del*		1e999.0
 #
 ##### RibosomalFrameShift sensor (uniform penalties) #####
-RibosomalFrameShift.type[0]	deletion3   # Possible types: deletion1 deletion2 deletion3 insertion1 insertion2 insertion3
-RibosomalFrameShift.pat[0]		AAAAAAC	
+RibosomalFrameShift.type[0]	insertion2   # or is it insertion1? Possible types: deletion1 deletion2 deletion3 insertion1 insertion2 insertion3
+RibosomalFrameShift.pat[0]		AAATAA	
 RibosomalFrameShift.newStatePos[0] 4	# Position of the new state in the pattern
 RibosomalFrameShift.patP*[0]	-10
 RibosomalFrameShift.patPNo*[0]	0
-RibosomalFrameShift.requiredEstSupport[0]	1 # 1 if an EST support is required
+RibosomalFrameShift.requiredEstSupport[0]	0 # 1 if an EST support is required
 #
 ##### GeneSplicer parameters #####
 GSplicer.coefAcc*	1
@@ -461,14 +459,14 @@ Tester.SPSN.Eval        STOP    # START, STOP, SPLICE
 ##### Sensors activation #####
 # SIGNAL SENSORS
 Sensor.EuStop.use	1
-Sensor.FrameShift.use	0
+Sensor.FrameShift.use	1	
 Sensor.GSplicer.use	0
 Sensor.SMachine.use	0
 Sensor.NG2.use		0
-Sensor.NStart.use	1
+Sensor.NStart.use	0
 Sensor.PatConst.use	0
 Sensor.PepSignal.use	0
-Sensor.RibosomalFrameShift.use     0
+Sensor.RibosomalFrameShift.use     1
 Sensor.SignalWAM.use    0
 Sensor.SPred.use	0
 Sensor.Transcript.use	1
@@ -476,7 +474,7 @@ Sensor.ProStart.use	0
 #
 # CONTENT SENSORS
 Sensor.BlastX.use	0
-Sensor.Est.use		0	
+Sensor.Est.use		1	
 Sensor.Homology.use	0	
 Sensor.MarkovConst.use	1
 Sensor.MarkovIMM.use	1
@@ -488,7 +486,7 @@ Sensor.NcRNA.use        0
 #
 # SIGNAL/CONTENT SENSORS
 Sensor.AnnotaStruct.use 0
-Sensor.IfElse.use	1
+Sensor.IfElse.use	0
 Sensor.Riken.use	0
 Sensor.QualData.use     0
 #
