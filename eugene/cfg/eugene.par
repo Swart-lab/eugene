@@ -13,7 +13,7 @@ EuGene.InitExDist	init.dist
 EuGene.IntrExDist	intr.dist
 EuGene.TermExDist	term.dist
 EuGene.SnglExDist	sngl.dist
-EuGene.IntronDist	intron.dist
+EuGene.IntronDist	intron_euplotes.dist
 EuGene.InterGDist	intergenic.dist
 EuGene.5PrimeDist	utr.dist
 EuGene.3PrimeDist	utr.dist
@@ -34,7 +34,7 @@ EuGene.BiCodingPrior    0.00
 EuGene.UIRPrior         0.00
 #
 ##### Codon table #####
-EuGene.CodonTable	euk.codontable # pro.codontable or euk.codontable, adjusted to euplotes
+EuGene.CodonTable	eupl.codontable # pro.codontable or euk.codontable, adjusted to euplotes
 #EuGene.NonCanDon     GC
 #EuGene.NonCanAcc     AC
 #
